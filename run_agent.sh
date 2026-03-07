@@ -7,16 +7,20 @@
 
 set -e
 
+# Deploy Key設定（read-only・push不可）
+export GIT_SSH_COMMAND="ssh -i /root/.ssh/deploy_key -o StrictHostKeyChecking=no -o IdentitiesOnly=yes"
+
 echo "============================================"
 echo " PigeonCloud テストエージェント起動"
 echo " $(date '+%Y-%m-%d %H:%M:%S')"
 echo "============================================"
 
-# ソースコードの最新化（gitignore対象ディレクトリ）
+# ソースコードを最新化（Deploy Keyでpullのみ）
 if [ -d "/app/src/pigeon_cloud/.git" ]; then
-    echo ">> PigeonCloudソースを最新化..."
+    echo ">> PigeonCloudソースを最新化（read-only pull）..."
     cd /app/src/pigeon_cloud
     git pull --quiet
+    echo "   最新コミット: $(git log -1 --format='%h %s')"
     cd /app
 fi
 
@@ -40,7 +44,6 @@ if [ "$FAILED" -gt "0" ]; then
     echo ""
     echo ">> Phase 2: Claude による失敗調査"
 
-    # Claudeに調査を依頼
     claude --dangerously-skip-permissions "
 あなたはPigeonCloudのQAエージェントです。
 agent_instructions.md の指示に従って作業してください。

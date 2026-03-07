@@ -16,6 +16,6 @@ services:
       - ./reports:/app/reports
       # PigeonCloudソースコード（読み取り専用）
       - ./src/pigeon_cloud:/app/src/pigeon_cloud:ro
-      # SSH鍵（git cloneのため）
-      - ~/.ssh:/root/.ssh:ro
+      # Deploy Key（read-only・pull専用）
+      - ~/.ssh/pigeon_test_deploy_key:/root/.ssh/deploy_key:ro
     restart: "no"
