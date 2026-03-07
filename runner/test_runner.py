@@ -36,7 +36,7 @@ TEST_TIMEOUT_SEC = int(os.environ.get("TEST_TIMEOUT_SEC", "60"))
 # 連続失敗でアラートを上げる件数
 MAX_CONSECUTIVE_FAILS = int(os.environ.get("MAX_CONSECUTIVE_FAILS", "20"))
 # 何件ごとに進捗通知するか
-PROGRESS_NOTIFY_EVERY = int(os.environ.get("PROGRESS_NOTIFY_EVERY", "200"))
+PROGRESS_NOTIFY_EVERY = int(os.environ.get("PROGRESS_NOTIFY_EVERY", "10"))
 
 
 def slack_notify(text: str) -> None:
