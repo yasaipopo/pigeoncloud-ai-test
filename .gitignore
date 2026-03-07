@@ -1,5 +1,6 @@
 # 認証情報・環境設定（絶対にコミットしない）
 .env
+secrets/
 
 # PigeonCloudソースコード（別途clone）
 src/
