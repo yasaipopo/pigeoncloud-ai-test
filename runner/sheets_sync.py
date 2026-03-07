@@ -191,7 +191,12 @@ def pull_scenarios():
 
 
 def push_results():
-    """テスト結果をSheetsの新しい列に書き戻す"""
+    """テスト結果をSheetsの右端に新しい列として追加する。
+
+    シートA: 右端に「チェック結果(YYYY/M)」列を追加（既存パターンに合わせる）
+    シートB: 右端に「実施日」「結果」ペア列を追加（既存パターンに合わせる）
+             ただしテスト実施者・備考・フラグ列より左に挿入する
+    """
     results_path = REPORTS_DIR / "results.json"
     if not results_path.exists():
         print("results.jsonが見つかりません")
@@ -204,9 +209,9 @@ def push_results():
     ss = client.open_by_key(SPREADSHEET_ID)
 
     now_label = datetime.now().strftime("%Y/%m")
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    now_date  = datetime.now().strftime("%Y/%m/%d")
 
-    # GIDごとにシートを取得してまとめて更新
+    # GIDごとに結果を集める
     sheets_cache = {}
     updates_by_gid = {}
 
@@ -217,51 +222,98 @@ def push_results():
         with open(yaml_file, encoding="utf-8") as f:
             sc = yaml.safe_load(f)
 
-        gid      = sc.get("_sheet_gid")
-        row_num  = sc.get("_sheet_row")
+        gid     = sc.get("_sheet_gid")
+        row_num = sc.get("_sheet_row")
         if not gid or not row_num:
             continue
 
         if gid not in sheets_cache:
             for sd in SHEETS:
                 if sd["gid"] == gid:
-                    sheets_cache[gid] = ss.worksheet(sd["name"])
+                    sheets_cache[gid] = {"ws": ss.worksheet(sd["name"]), "def": sd}
                     updates_by_gid[gid] = []
                     break
 
         status = "OK" if result["status"] == "passed" else "NG"
-        error_note = result["errors"][0]["message"][:100] if result.get("errors") else ""
-        updates_by_gid[gid].append((row_num, status, error_note))
+        note   = result["errors"][0]["message"][:100] if result.get("errors") else ""
+        updates_by_gid[gid].append((row_num, status, note))
 
-    # 各シートに結果列を追加して書き込み
     for gid, update_list in updates_by_gid.items():
         if not update_list:
             continue
-        ws = sheets_cache[gid]
-        headers = ws.row_values(1)
 
-        # 末尾に新しい結果列を追加（なければ）
-        result_header = f"Claude結果({now_label})"
-        if result_header not in headers:
-            next_col = len(headers) + 1
-            ws.update_cell(1, next_col, result_header)
-            result_col = next_col
-        else:
-            result_col = headers.index(result_header) + 1
+        ws       = sheets_cache[gid]["ws"]
+        sheet_def = sheets_cache[gid]["def"]
+        hr        = sheet_def["header_row"]
+        headers   = ws.row_values(hr)
 
-        # バッチ更新
-        cell_updates = []
-        for row_num, status, note in update_list:
-            cell_updates.append({
-                "range": f"{col_letter(result_col - 1)}{row_num}",
-                "values": [[status]]
-            })
+        if gid == 46306531:
+            # ===== シートA =====
+            # 既存パターン: 右端に「チェック結果(YYYY/M)」を追加
+            header_label = f"チェック結果({now_label})"
+            if header_label in headers:
+                result_col = headers.index(header_label) + 1  # 1-indexed
+            else:
+                result_col = len(headers) + 1
+                ws.update_cell(hr, result_col, header_label)
 
-        ss.values_batch_update({
-            "valueInputOption": "USER_ENTERED",
-            "data": cell_updates
-        })
-        print(f">> シート[{gid}]: {len(cell_updates)}件の結果を書き戻しました（列: {result_header}）")
+            cell_updates = [
+                {"range": f"{col_letter(result_col - 1)}{row_num}", "values": [[status]]}
+                for row_num, status, _ in update_list
+            ]
+            ss.values_batch_update({"valueInputOption": "USER_ENTERED", "data": cell_updates})
+            print(f">> シートA: {len(cell_updates)}件 → 列「{header_label}」に書き込み")
+
+        elif gid == 1775435119:
+            # ===== シートB =====
+            # 既存パターン: 「テスト実施者」列の手前に「実施日」「結果」ペアを挿入
+            # テスト実施者列を特定（保護列）
+            preserve_cols = ["テスト実施者", "備考", "再テスト\nフラグ", "修正", "再テスト完了フラグ"]
+            insert_before = None
+            for i, h in enumerate(headers):
+                if h in preserve_cols:
+                    insert_before = i  # 0-indexed
+                    break
+
+            date_label   = "実施日"
+            result_label = "結果"
+            date_header  = f"実施日({now_label})"
+            result_header = f"結果({now_label})"
+
+            if result_header in headers:
+                date_col   = headers.index(date_header) + 1 if date_header in headers else None
+                result_col = headers.index(result_header) + 1
+            else:
+                if insert_before is not None:
+                    # テスト実施者列の手前に2列挿入
+                    ws.spreadsheet.batch_update({"requests": [{
+                        "insertDimension": {
+                            "range": {
+                                "sheetId": gid,
+                                "dimension": "COLUMNS",
+                                "startIndex": insert_before,
+                                "endIndex": insert_before + 2
+                            },
+                            "inheritFromBefore": True
+                        }
+                    }]})
+                    date_col   = insert_before + 1      # 1-indexed
+                    result_col = insert_before + 2
+                else:
+                    # 末尾に追加
+                    date_col   = len(headers) + 1
+                    result_col = len(headers) + 2
+
+                ws.update_cell(hr, date_col,   date_label)
+                ws.update_cell(hr, result_col, result_label)
+
+            cell_updates = []
+            for row_num, status, _ in update_list:
+                cell_updates.append({"range": f"{col_letter(date_col - 1)}{row_num}",   "values": [[now_date]]})
+                cell_updates.append({"range": f"{col_letter(result_col - 1)}{row_num}", "values": [[status]]})
+
+            ss.values_batch_update({"valueInputOption": "USER_ENTERED", "data": cell_updates})
+            print(f">> シートB: {len(update_list)}件 → 列「{date_label}」「{result_label}」に書き込み")
 
 
 def push_scenarios():

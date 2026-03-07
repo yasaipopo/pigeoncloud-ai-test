@@ -1,0 +1,295 @@
+# PigeonCloud テストエージェント 指示書
+
+このDockerコンテナはPigeonCloudのQAテストを自律的に実行するClaudeエージェントです。
+以下の指示に従って作業してください。
+
+---
+
+## あなたの役割
+
+1. **Google Sheetsからテストシナリオを取得**してYAMLに変換
+2. **PlaywrightでE2Eテストを実行**する
+3. **失敗したテストを画面を見ながら調査**して原因を判断する
+4. **仕様変更ならYAMLを更新、不具合ならSlack通知**する
+5. **テスト結果をGoogle Sheetsに書き戻す**（右端に新しい列として追加）
+
+---
+
+## 環境情報
+
+| 変数 | 内容 |
+|---|---|
+| `TEST_BASE_URL` | テスト対象URL（例: https://ai-test.pigeon-demo.com） |
+| `TEST_EMAIL` | テスト用ログインID（admin等） |
+| `TEST_PASSWORD` | テスト用パスワード |
+| `ANTHROPIC_API_KEY` | Claude API キー |
+| `SLACK_WEBHOOK_URL` | Slack通知用WebhookURL |
+| `SLACK_NOTIFY_USER_ID` | 通知先SlackユーザーID |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Google認証ファイルパス（/app/secrets/service_account.json） |
+| `SPREADSHEET_ID` | テストシート ID（1h_gwuCGUAdj5fKPRZu438TKFkFkYUNUKz2K_vtEFlmI） |
+| `PIGEON_SOURCE_PATH` | ソースコードパス（/app/src/pigeon_cloud） |
+
+---
+
+## ディレクトリ構成
+
+```
+/app/
+├── CLAUDE.md                  ← この指示書
+├── run_agent.sh               ← エントリーポイント（通常はこれが自動実行）
+├── agent_instructions.md      ← 調査時の補足指示
+├── runner/
+│   ├── test_runner.py         ← YAMLを読んでPlaywrightテスト実行
+│   ├── sheets_sync.py         ← Google Sheets同期
+│   └── reporter.py            ← Slack通知
+├── scenarios/                 ← YAMLシナリオ（Sheetsから生成・gitignore）
+├── reports/                   ← テスト結果・スクリーンショット（gitignore）
+├── secrets/
+│   └── service_account.json  ← Google認証（gitignore）
+└── src/
+    └── pigeon_cloud/          ← PigeonCloudソースコード（gitignore・read-only）
+```
+
+---
+
+## Google Sheets構成
+
+スプレッドシート名: **ピジョンクラウド_テストケース一覧 v2 AI**
+URL: https://docs.google.com/spreadsheets/d/1h_gwuCGUAdj5fKPRZu438TKFkFkYUNUKz2K_vtEFlmI
+
+### シートA: (佐藤)テスト区分A_テスト仕様書2
+- ヘッダー: **1行目**
+- E列: テストケースNo / F列: 機能名 / G列: カテゴリ
+- H列: 手順 / I列: 予想結果
+- J列以降: チェック結果（右に追加していく）
+
+### シートB: (邊見)テスト区分B_テスト仕様書
+- ヘッダー: **4行目**（1〜3行目はタイトル等）
+- E列: テストケースNo / F列: 機能名 / G列: カテゴリ
+- H列: 手順 / I列: 予想結果
+- J列以降: 実施日/結果ペア（右に追加していく）
+- 末尾固定列: テスト実施者・備考・再テストフラグ・修正・再テスト完了フラグ
+
+### チェック結果の書き込みルール
+- **毎回必ず右端に新しい列として追加**する（既存の結果は絶対に上書きしない）
+- シートA: 列ヘッダー = `チェック結果(YYYY/M)`（例: チェック結果(2026/3)）
+- シートB: `実施日` + `結果` のペアで追加（テスト実施者列の手前に挿入）
+- 結果値: `OK`（テスト通過）/ `NG`（失敗）
+
+---
+
+## 実行フロー
+
+### 通常実行（run_agent.sh が自動実行）
+
+```bash
+# 1. PigeonCloudソースを最新化（read-only pull）
+# 2. Google Sheets → YAMLシナリオ同期
+python runner/sheets_sync.py --pull
+
+# 3. Playwrightテスト実行
+python runner/test_runner.py
+# → reports/results.json に結果が保存される
+
+# 4. 失敗があればClaudeが調査（後述）
+
+# 5. テスト結果をSheetsに書き戻し（右端に新列追加）
+python runner/sheets_sync.py --push
+
+# 6. Slack通知
+python runner/reporter.py
+```
+
+### 手動でコマンドを実行する場合
+
+```bash
+# シート構成確認
+python runner/sheets_sync.py --inspect
+
+# Sheetsからシナリオ取得
+python runner/sheets_sync.py --pull
+
+# テスト実行
+python runner/test_runner.py
+
+# 結果をSheetsに書き戻し
+python runner/sheets_sync.py --push
+
+# ClaudeがYAMLを追加・更新した場合、Sheetsにも反映
+python runner/sheets_sync.py --push-scenarios
+
+# Slack通知
+python runner/reporter.py
+```
+
+---
+
+## テスト失敗時の調査手順
+
+### Step 1: 結果確認
+
+```bash
+cat reports/results.json
+```
+
+失敗した各テストについて `errors` と `screenshot` を確認する。
+
+### Step 2: スクリーンショットを見る
+
+`reports/screenshot_*.png` をVisionで確認し、画面の状態を把握する。
+
+### Step 3: Playwrightで実際に操作して確認
+
+```python
+from playwright.sync_api import sync_playwright
+import os
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
+    page = browser.new_page()
+    page.set_viewport_size({"width": 1280, "height": 800})
+    page.goto(os.environ["TEST_BASE_URL"] + "/admin/login")
+    # ...調査したい操作...
+    page.screenshot(path="reports/investigation.png", full_page=True)
+    browser.close()
+```
+
+### Step 4: ソースコードで仕様確認
+
+`/app/src/pigeon_cloud/` にステージングと同じブランチのソースコードがある。
+Angularのテンプレート: `html_angular4/src/app/`
+PHPバックエンド: `Application/`
+
+不具合か仕様変更かを確認する際にソースコードを参照する。
+
+---
+
+## 判断基準
+
+### 仕様変更（YAMLを更新）
+
+以下の場合は仕様変更と判断し、該当の `scenarios/*.yaml` を修正する：
+
+- HTMLのselectorが変わった（id/class名の変更）
+- URLのパスが変わった
+- テキスト・ボタンの文言が変わった
+- UIレイアウトが変わったが機能は正常
+- 手順の順序が変わった
+
+対応:
+1. `scenarios/*.yaml` の steps/assertions を修正
+2. `python runner/sheets_sync.py --push-scenarios` でSheetsにも反映
+
+### 不具合（Slack通知）
+
+以下の場合は不具合と判断し、Slack通知する：
+
+- 500エラー・エラーページが表示されている
+- ログインできない
+- データが保存・取得できない
+- レイアウトが大きく崩れている
+- 本来表示されるべき要素が消えている
+- 日本語文字化け
+- 機能自体が動作しない
+
+対応:
+1. `reports/claude_report.md` に詳細を記録
+2. `python runner/reporter.py` でSlack通知
+
+---
+
+## YAMLシナリオの形式
+
+```yaml
+name: シナリオ名
+sheet: A          # A or B
+case_no: "1-1"    # テストケースNo
+feature: ログイン  # 機能名
+category: '-'     # カテゴリ
+description: |    # 手順（Sheetsから取得）
+  ユーザータイプが「マスター」のユーザーでログイン
+expected: |       # 予想結果
+  エラーなくログインが完了すること
+_sheet_row: 2     # Sheets上の行番号（書き戻し用・変更禁止）
+_sheet_gid: 46306531  # シートGID（変更禁止）
+steps:
+  - action: navigate
+    value: /admin/login
+  - action: fill
+    selector: "#id"
+    value: "{{ TEST_EMAIL }}"
+  - action: fill
+    selector: "#password"
+    value: "{{ TEST_PASSWORD }}"
+  - action: click
+    selector: "button[type=submit].btn-primary"
+  - action: wait_for
+    selector: ".navbar"
+assertions:
+  - type: url_contains
+    value: /admin/dashboard
+  - type: element_visible
+    selector: "nav"
+screenshot: true
+```
+
+### 利用可能なaction
+
+| action | 説明 | 必須パラメータ |
+|---|---|---|
+| `navigate` | URLに遷移 | `value`: パス or URL |
+| `fill` | テキスト入力 | `selector`, `value` |
+| `click` | クリック | `selector` |
+| `wait_for` | 要素が現れるまで待機 | `selector` |
+| `wait` | 秒数待機 | `value`: 秒数 |
+| `select` | ドロップダウン選択 | `selector`, `value` |
+| `comment` | コメント（スキップ） | `value` |
+
+`{{ TEST_EMAIL }}`, `{{ TEST_PASSWORD }}` は環境変数に自動展開される。
+
+### 利用可能なassertion type
+
+| type | 説明 | パラメータ |
+|---|---|---|
+| `url_contains` | URLに文字列が含まれる | `value` |
+| `element_visible` | 要素が表示されている | `selector` |
+| `element_not_visible` | 要素が非表示 | `selector` |
+| `text_contains` | 要素のテキストを確認 | `selector`, `value` |
+| `title_contains` | ページタイトルを確認 | `value` |
+| `comment` | コメント（スキップ） | `value` |
+
+---
+
+## ログイン情報
+
+- ログインURL: `{TEST_BASE_URL}/admin/login`
+- IDフィールド: `#id`
+- パスワードフィールド: `#password`
+- ログインボタン: `button[type=submit].btn-primary`
+- ログイン後リダイレクト: `/admin/dashboard`
+
+---
+
+## Slack通知の送り方
+
+```bash
+# reporter.py経由（推奨）
+python runner/reporter.py
+
+# 直接curlで緊急通知
+curl -s -X POST -H 'Content-type: application/json' \
+  --data "{\"text\":\"<@${SLACK_NOTIFY_USER_ID}> 【PigeonCloud】メッセージ\"}" \
+  "${SLACK_WEBHOOK_URL}"
+```
+
+---
+
+## 重要な注意事項
+
+- **`_sheet_row` と `_sheet_gid` は変更禁止**（Sheetsへの書き戻しに使用）
+- **Sheetsへの結果書き込みは必ず右端の新しい列に追加**（既存列は上書きしない）
+- **ソースコード（/app/src/pigeon_cloud/）は読み取り専用**（変更禁止）
+- **テスト対象はai-test.pigeon-demo.comのテスト専用テナントのみ**
+- git操作はpullのみ可能（pushは権限なし）
+- `reports/` への書き込みは自由（スクリーンショット、レポート等）
+- `scenarios/` への書き込みは自由（シナリオの追加・更新）
