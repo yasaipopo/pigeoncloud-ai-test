@@ -14,8 +14,10 @@ services:
       - ./scenarios:/app/scenarios
       # テストレポート出力先
       - ./reports:/app/reports
-      # PigeonCloudソースコード（読み取り専用）
-      - ./src/pigeon_cloud:/app/src/pigeon_cloud:ro
+      # PigeonCloudソースコード（git pullのため書き込み権限が必要）
+      - ./src/pigeon_cloud:/app/src/pigeon_cloud
+      # Google Service Account認証（read-only）
+      - ./secrets:/app/secrets:ro
       # Deploy Key（read-only・pull専用）
       - ~/.ssh/pigeon_test_deploy_key:/root/.ssh/deploy_key:ro
     restart: "no"

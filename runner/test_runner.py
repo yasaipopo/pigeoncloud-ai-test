@@ -54,6 +54,8 @@ def run_step(page: Page, step: dict) -> None:
         page.wait_for_selector(selector)
     elif action == "select":
         page.select_option(selector, value)
+    elif action == "comment":
+        pass  # コメントはスキップ
     else:
         raise ValueError(f"不明なアクション: {action}")
 
@@ -71,6 +73,8 @@ def run_assertion(page: Page, assertion: dict) -> tuple[bool, str]:
             expect(page.locator(assertion["selector"])).to_contain_text(assertion["value"])
         elif atype == "title_contains":
             assert assertion["value"] in page.title(), f"タイトル '{page.title()}' に '{assertion['value']}' が含まれない"
+        elif atype == "comment":
+            pass  # コメントはスキップ
         return True, ""
     except Exception as e:
         return False, str(e)
