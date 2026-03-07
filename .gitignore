@@ -5,7 +5,8 @@ secrets/
 # PigeonCloudソースコード（別途clone）
 src/
 
-# テストレポート（生成物）
+# 生成物（Sheetsから都度生成）
+scenarios/
 reports/
 
 # Python
