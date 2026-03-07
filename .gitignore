@@ -1,0 +1,24 @@
+# 認証情報・環境設定（絶対にコミットしない）
+.env
+
+# PigeonCloudソースコード（別途clone）
+src/
+
+# テストレポート（生成物）
+reports/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.playwright/
+
+# Node
+node_modules/
+
+# Claude スレッドファイル
+.claude/thread-*.md
+
+# OS
+.DS_Store

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  claude-test-agent:
+    build: .
+    container_name: pigeon_test_agent
+    env_file:
+      - .env
+    environment:
+      # Playwright headlessモード強制
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+    volumes:
+      # テストシナリオ（Claudeが読み書き）
+      - ./scenarios:/app/scenarios
+      # テストレポート出力先
+      - ./reports:/app/reports
+      # PigeonCloudソースコード（読み取り専用）
+      - ./src/pigeon_cloud:/app/src/pigeon_cloud:ro
+      # SSH鍵（git cloneのため）
+      - ~/.ssh:/root/.ssh:ro
+    restart: "no"
