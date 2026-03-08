@@ -45,8 +45,6 @@ services:
     profiles:
       - parallel
 
-volumes:
-  npm-cache:  # Playwright MCP用のChromeキャッシュ（コンテナ削除後も保持）
   # エージェント3（並列実行時）
   agent-3:
     <<: *agent-base
@@ -59,3 +57,6 @@ volumes:
       - TOTAL_AGENTS=${TOTAL_AGENTS:-1}
     profiles:
       - parallel
+
+volumes:
+  npm-cache:  # Playwright MCP用のChromeキャッシュ（コンテナ削除後も保持）
