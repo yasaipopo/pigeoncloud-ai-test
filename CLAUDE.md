@@ -284,6 +284,71 @@ curl -s -X POST -H 'Content-type: application/json' \
 
 ---
 
+## テスト環境とソースコードについて
+
+- **テスト対象URL**: `https://ai-test.pigeon-demo.com`（テスト専用テナント）
+- **ソースコード**: `/app/src/pigeon_cloud/` はstagingブランチの最新コードと同期
+  - Angularフロントエンド: `html_angular4/src/app/`
+  - PHPバックエンド: `Application/`
+- **仕様確認はstagingのソースコードを参照**（テスト環境はstagingと同じコード）
+- `pigeon-demo.com` はテスト環境。`pigeon-dev.com` は開発環境
+
+---
+
+## Debug Tools（テストデータ準備に活用）
+
+テスト環境専用のデバッグAPI（`/admin/debug/*`）を積極的に活用すること。
+
+### APIエンドポイント一覧
+
+| エンドポイント | メソッド | 用途 |
+|---|---|---|
+| `/admin/debug/status` | GET | 環境ステータス確認（テーブル数・テストユーザー数） |
+| `/admin/debug/create-all-type-table` | POST | 全フィールドタイプ網羅のテストテーブル作成 |
+| `/admin/debug/create-all-type-data` | POST | テストデータ投入（count: 件数, pattern: random/max/min/fixed） |
+| `/admin/debug/delete-all-type-tables` | POST | ALLテスト系テーブル全削除 |
+| `/admin/debug/create-user` | POST | テストユーザー作成（ishikawa+N@loftal.jp / password: admin） |
+| `/admin/debug/reset-all` | POST | 全DB・ユーザーリセット（使用は慎重に） |
+
+### YAMLでのsetup/teardown活用例
+
+```yaml
+name: レコード一覧表示テスト
+setup:
+  - action: api_post
+    path: /admin/debug/create-all-type-table
+  - action: api_post
+    path: /admin/debug/create-all-type-data
+    body:
+      count: 5
+      pattern: fixed
+teardown:
+  - action: api_post
+    path: /admin/debug/delete-all-type-tables
+steps:
+  - action: login
+  - action: navigate
+    value: /admin/dataset
+  ...
+```
+
+### ポイント
+- **setup** はテスト前にAPIを叩いてデータ準備（自動でログインしてから実行）
+- **teardown** はテスト後のクリーンアップ（失敗しても無視される）
+- **ALLテストテーブル** は全フィールドタイプ（テキスト・数値・日付・選択・チェック等）を網羅
+- レコード操作・フィールド設定・表示系テストには必ずsetupでテーブル作成してから行う
+- テストユーザーが必要な場合は `api_post /admin/debug/create-user` で作成
+
+### 利用可能な追加action
+
+| action | 説明 | パラメータ |
+|---|---|---|
+| `login` | ログインショートカット | `email`/`password`（省略時は環境変数使用） |
+| `api_post` | APIのPOST呼び出し | `path`: APIパス、`body`: リクエストボディ |
+| `api_get` | APIのGET呼び出し | `path`: APIパス |
+
+---
+
 ## 重要な注意事項
 
 - **`_sheet_row` と `_sheet_gid` は変更禁止**（Sheetsへの書き戻しに使用）

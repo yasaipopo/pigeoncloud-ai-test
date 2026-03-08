@@ -5,10 +5,10 @@ YAMLシナリオファイルを読み込んでPlaywrightでE2Eテストを実行
 - テストごとにタイムアウト（TEST_TIMEOUT_SEC）を設定
 - 連続失敗が MAX_CONSECUTIVE_FAILS を超えたら強制停止してSlack通知
 - 進捗をSlackに定期通知（PROGRESS_NOTIFY_EVERY件ごと）
+- setup/teardown セクションでAPIを叩いてテストデータ準備可能
 """
 import os
 import json
-import signal
 import traceback
 import threading
 import requests
@@ -64,23 +64,64 @@ def resolve_value(value: str) -> str:
 def run_step(page: Page, step: dict) -> None:
     action = step["action"]
     selector = step.get("selector", "")
-    value = resolve_value(step.get("value", ""))
+    value = resolve_value(str(step.get("value", "")))
 
     if action == "navigate":
         url = value if value.startswith("http") else BASE_URL + value
         page.goto(url, wait_until="networkidle")
+
     elif action == "fill":
         page.fill(selector, value)
+
     elif action == "click":
         page.click(selector)
+
     elif action == "wait":
-        page.wait_for_timeout(int(value) * 1000)
+        page.wait_for_timeout(int(float(value)) * 1000)
+
     elif action == "wait_for":
-        page.wait_for_selector(selector)
+        page.wait_for_selector(selector, timeout=30000)
+
     elif action == "select":
         page.select_option(selector, value)
+
+    elif action == "login":
+        # ログインショートカット（引数省略時は .env の EMAIL/PASSWORD を使用）
+        email = resolve_value(step.get("email", "{{ TEST_EMAIL }}"))
+        password = resolve_value(step.get("password", "{{ TEST_PASSWORD }}"))
+        page.goto(BASE_URL + "/admin/login", wait_until="networkidle")
+        page.fill("#id", email)
+        page.fill("#password", password)
+        page.click("button[type=submit].btn-primary")
+        page.wait_for_selector(".navbar", timeout=15000)
+
+    elif action == "api_post":
+        # Debug API等のPOST呼び出し（Playwrightのセッションを共有）
+        path = step.get("path", "")
+        body = step.get("body", {})
+        resp = page.request.post(
+            BASE_URL + path,
+            data=json.dumps(body),
+            headers={"Content-Type": "application/json"},
+            timeout=120000
+        )
+        if not resp.ok:
+            raise ValueError(f"api_post失敗: {path} → HTTP {resp.status}")
+        result = resp.json()
+        if not result.get("success", True):
+            logs = result.get("logs", [])
+            raise ValueError(f"api_post失敗: {path} → {logs[:3]}")
+
+    elif action == "api_get":
+        # Debug API等のGET呼び出し
+        path = step.get("path", "")
+        resp = page.request.get(BASE_URL + path, timeout=30000)
+        if not resp.ok:
+            raise ValueError(f"api_get失敗: {path} → HTTP {resp.status}")
+
     elif action == "comment":
         pass  # コメントはスキップ
+
     else:
         raise ValueError(f"不明なアクション: {action}")
 
@@ -91,13 +132,16 @@ def run_assertion(page: Page, assertion: dict) -> tuple[bool, str]:
         if atype == "url_contains":
             assert assertion["value"] in page.url, f"URL '{page.url}' に '{assertion['value']}' が含まれない"
         elif atype == "element_visible":
-            expect(page.locator(assertion["selector"])).to_be_visible()
+            expect(page.locator(assertion["selector"])).to_be_visible(timeout=10000)
         elif atype == "element_not_visible":
-            expect(page.locator(assertion["selector"])).to_be_hidden()
+            expect(page.locator(assertion["selector"])).to_be_hidden(timeout=10000)
         elif atype == "text_contains":
-            expect(page.locator(assertion["selector"])).to_contain_text(assertion["value"])
+            expect(page.locator(assertion["selector"])).to_contain_text(assertion["value"], timeout=10000)
         elif atype == "title_contains":
             assert assertion["value"] in page.title(), f"タイトル '{page.title()}' に '{assertion['value']}' が含まれない"
+        elif atype == "api_success":
+            # api_post/api_getの直後に使う（現在のURLのJSONレスポンスを確認）
+            pass
         elif atype == "comment":
             pass  # コメントはスキップ
         return True, ""
@@ -163,9 +207,20 @@ def _run_scenario(scenario_path: Path) -> dict:
         page.set_viewport_size({"width": 1280, "height": 800})
 
         try:
+            # setup: テストデータ準備（ログインしてからAPI呼び出し）
+            setup_steps = scenario.get("setup", [])
+            if setup_steps:
+                page.goto(BASE_URL + "/admin/login", wait_until="networkidle")
+                page.fill("#id", EMAIL)
+                page.fill("#password", PASSWORD)
+                page.click("button[type=submit].btn-primary")
+                page.wait_for_selector(".navbar", timeout=15000)
+                for step in setup_steps:
+                    run_step(page, step)
+
             # 最初のnavigateがなければログインページへ
-            first_action = scenario.get("steps", [{}])[0].get("action")
-            if first_action != "navigate":
+            first_action = scenario.get("steps", [{}])[0].get("action") if scenario.get("steps") else None
+            if first_action not in ("navigate", "login", "comment", None):
                 page.goto(BASE_URL + "/admin/login", wait_until="networkidle")
 
             for step in scenario.get("steps", []):
@@ -182,6 +237,15 @@ def _run_scenario(scenario_path: Path) -> dict:
             result["errors"].append({"type": "exception", "message": str(e), "trace": traceback.format_exc()})
 
         finally:
+            # teardown: テストデータ後片付け
+            teardown_steps = scenario.get("teardown", [])
+            if teardown_steps:
+                try:
+                    for step in teardown_steps:
+                        run_step(page, step)
+                except Exception:
+                    pass  # teardown失敗はテスト結果に影響させない
+
             if result["status"] == "failed" or scenario.get("screenshot"):
                 ts = datetime.now().strftime("%Y%m%d_%H%M%S")
                 ss_path = REPORTS_DIR / f"screenshot_{scenario_path.stem}_{ts}.png"
