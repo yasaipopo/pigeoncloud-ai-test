@@ -13,10 +13,17 @@ RUN apt-get update && apt-get install -y \
 # Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
+# @playwright/mcp のChrome事前インストール（ビルド時に済ませて毎回DL不要に）
+RUN mkdir -p /home/agent && \
+    HOME=/home/agent npx -y @playwright/mcp@latest &MCP_PID=$! && \
+    sleep 180 && \
+    kill $MCP_PID 2>/dev/null || true
+
 # 非rootユーザー作成（--dangerously-skip-permissions はroot不可のため）
 RUN useradd -m -s /bin/bash agent && \
     mkdir -p /app && \
-    chown -R agent:agent /app
+    chown -R agent:agent /app && \
+    chown -R agent:agent /home/agent/.npm 2>/dev/null || true
 
 WORKDIR /app
 
