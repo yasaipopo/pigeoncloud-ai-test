@@ -13,6 +13,9 @@ set -e
 
 export GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/deploy_key -o StrictHostKeyChecking=no -o IdentitiesOnly=yes"
 
+# ボリュームマウントしたディレクトリのgit safe.directory設定
+git config --global --add safe.directory /app/src/pigeon_cloud 2>/dev/null || true
+
 MODE=${MODE:-run_tests}
 AGENT_NUM=${AGENT_NUM:-1}
 TARGET_SPEC=${TARGET_SPEC:-}
