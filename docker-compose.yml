@@ -17,6 +17,7 @@ x-agent-base: &agent-base
     - ~/.ssh/pigeon_test_deploy_key:/home/agent/.ssh/deploy_key:ro
     - ~/.claude:/home/agent/.claude  # Claude Code Max認証をホストから共有
     - ~/.claude.json:/home/agent/.claude.json:ro  # Claude Code設定ファイル
+    - npm-cache:/home/agent/.npm  # npmキャッシュ永続化（Chromeを毎回DLしない）
   restart: "no"
 
 services:
@@ -44,6 +45,8 @@ services:
     profiles:
       - parallel
 
+volumes:
+  npm-cache:  # Playwright MCP用のChromeキャッシュ（コンテナ削除後も保持）
   # エージェント3（並列実行時）
   agent-3:
     <<: *agent-base
