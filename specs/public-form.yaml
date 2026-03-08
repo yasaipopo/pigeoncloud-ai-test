@@ -1,0 +1,27 @@
+group: 公開フォーム・公開メールリンク
+spec_file: tests/public-form.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: '135'
+  sheet: B
+  feature: 公開フォーム
+  category: 公開フォームをメール配信
+  description: '・登録されてるユーザーのメールアドレス宛てに回答用URLを送信。
+
+    　URLは個別で、回答はユーザーに紐づく。（配信メールアドレスのテーブルがユーザーではない場合は、作成者はゲストです）
+
+    ・回答は一人一回のみ。
+
+    ・送信前に「送信してよろしですか？」のポップアップ表示'
+  expected: 左記が全て想定通りの動作となっていること。
+- case_no: '170'
+  sheet: B
+  feature: 公開フォーム
+  category: 公開フォームURL
+  description: '公開フォームURLが変更されたことを確認。
+
+
+    ＜変更内容＞
+
+    ・URLのアドレス長'
+  expected: ''

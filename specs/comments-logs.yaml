@@ -1,0 +1,103 @@
+group: コメント・ログ管理
+spec_file: tests/comments-logs.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: 13-1
+  sheet: A
+  feature: ログ管理
+  category: '-'
+  description: 左ペインより「ログ」⇒「ログ」を選択する。
+  expected: 各ユーザー毎の操作ログの確認ができること。
+- case_no: 13-2
+  sheet: A
+  feature: ログ管理
+  category: '-'
+  description: 左ペインより「ログ」⇒「CSV UP/DL履歴」を選択する。
+  expected: CSVのダウンロード／アップロード履歴の確認ができること。
+- case_no: 69-1
+  sheet: A
+  feature: コメントメンション
+  category: 1ユーザーへのメンション
+  description: '①該当のテーブルのコメント欄を開く
+
+    ②@ユーザー名で1ユーザー指定をして、コメントし保存。'
+  expected: メンション指定されたユーザーに対し、コメント通知が届いていること。
+- case_no: 69-2
+  sheet: A
+  feature: コメントメンション
+  category: 複数ユーザーへのメンション
+  description: '①該当のテーブルのコメント欄を開く
+
+    ②@ユーザー名で複数のユーザー指定をして、コメントし保存。'
+  expected: メンション指定されたユーザーに対し、コメント通知が届いていること。
+- case_no: 69-3
+  sheet: A
+  feature: コメントメンション
+  category: 存在しないユーザーでメンション
+  description: '①該当のテーブルのコメント欄を開く
+
+    ②@ユーザー名で実在しないユーザー指定をして、コメントし保存。'
+  expected: 誰にもメンションされず、コメント保存されること。
+- case_no: 69-4
+  sheet: A
+  feature: コメントメンション
+  category: 組織へのメンション
+  description: '①該当のテーブルのコメント欄を開く
+
+    ②@組織名を指定して、コメントし保存。'
+  expected: メンション指定された組織内のメンバーに対し、コメント通知が届いていること。
+- case_no: 13-1
+  sheet: B
+  feature: ログ管理
+  category: '-'
+  description: 左ペインより「ログ」⇒「ログ」を選択する。
+  expected: 各ユーザー毎の操作ログの確認ができること。
+- case_no: 13-2
+  sheet: B
+  feature: ログ管理
+  category: '-'
+  description: 左ペインより「ログ」⇒「CSV UP/DL履歴」を選択する。
+  expected: CSVのダウンロード／アップロード履歴の確認ができること。
+- case_no: '196'
+  sheet: B
+  feature: ログ
+  category: リクエストログ
+  description: '以下処理を行い、リクエストログを確認
+
+
+    テーブル削除、
+
+    複数データ削除
+
+    帳票出力など'
+  expected: 処理ステータスが、正常終了していれば「成功」となること。
+- case_no: '242'
+  sheet: B
+  feature: コメント
+  category: ''
+  description: 「ログとコメントをまとめて表示する」が有効の時にメンションがでること
+  expected: 想定通りの結果となること。
+- case_no: 69-1
+  sheet: B
+  feature: コメントメンション
+  category: 1ユーザーへのメンション
+  description: '①該当のテーブルのコメント欄を開く
+
+    ②@ユーザー名で1ユーザー指定をして、コメントし保存。'
+  expected: メンション指定されたユーザーに対し、コメント通知が届いていること。
+- case_no: 69-2
+  sheet: B
+  feature: コメントメンション
+  category: 複数ユーザーへのメンション
+  description: '①該当のテーブルのコメント欄を開く
+
+    ②@ユーザー名で複数のユーザー指定をして、コメントし保存。'
+  expected: メンション指定されたユーザーに対し、コメント通知が届いていること。
+- case_no: 69-3
+  sheet: B
+  feature: コメントメンション
+  category: 存在しないユーザーでメンション
+  description: '①該当のテーブルのコメント欄を開く
+
+    ②@ユーザー名で実在しないユーザー指定をして、コメントし保存。'
+  expected: 誰にもメンションされず、コメント保存されること。

@@ -1,0 +1,13 @@
+{
+  "name": "pigeoncloud-ai-test",
+  "version": "1.0.0",
+  "description": "PigeonCloud E2E テスト（Playwright spec.js）",
+  "scripts": {
+    "test": "playwright test",
+    "test:auth": "playwright test tests/auth.spec.js",
+    "test:report": "playwright show-report"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.44.0"
+  }
+}

@@ -7,11 +7,19 @@
 
 ## あなたの役割
 
+### モードA: spec.js生成モード（メイン作業）
+1. **`specs/*.yaml`（グループ単位のテストケース一覧）を読む**
+2. **Playwrightでブラウザを実際に操作**してテスト対象ページを確認
+3. **`tests/*.spec.js` を生成・更新**する（1グループ = 1 spec.jsファイル）
+4. **`npx playwright test` で spec.js を実行**して動作確認
+5. 失敗したらブラウザで確認・spec.jsを修正する
+
+### モードB: 定期テスト実行モード
 1. **Google Sheetsからテストシナリオを取得**してYAMLに変換
-2. **PlaywrightでE2Eテストを実行**する
-3. **失敗したテストを画面を見ながら調査**して原因を判断する
-4. **仕様変更ならYAMLを更新、不具合ならSlack通知**する
-5. **テスト結果をGoogle Sheetsに書き戻す**（右端に新しい列として追加）
+2. **`npx playwright test` で全spec.jsを実行**
+3. **失敗を調査**して、仕様変更か不具合かを判断
+4. **テスト結果をGoogle Sheetsに書き戻す**
+5. **Slack通知**する
 
 ---
 
@@ -75,6 +83,102 @@ URL: https://docs.google.com/spreadsheets/d/1h_gwuCGUAdj5fKPRZu438TKFkFkYUNUKz2K
 - シートA: 列ヘッダー = `チェック結果(YYYY/M)`（例: チェック結果(2026/3)）
 - シートB: `実施日` + `結果` のペアで追加（テスト実施者列の手前に挿入）
 - 結果値: `OK`（テスト通過）/ `NG`（失敗）
+
+---
+
+## ディレクトリ構成（追加分）
+
+```
+/app/
+├── specs/                     ← グループ単位のテストケース一覧YAML（git管理）
+│   ├── auth.yaml              ← 認証テスト（14件）
+│   ├── table-definition.yaml  ← テーブル定義（194件）
+│   ├── fields.yaml            ← フィールド（365件）
+│   ├── records.yaml           ← レコード操作（12件）
+│   ├── layout-ui.yaml         ← レイアウト・UI（33件）
+│   ├── chart-calendar.yaml    ← チャート・カレンダー（75件）
+│   ├── filters.yaml           ← フィルタ（2件）
+│   ├── csv-export.yaml        ← CSV・インポート（16件）
+│   ├── users-permissions.yaml ← ユーザー・権限（106件）
+│   ├── notifications.yaml     ← 通知・メール（99件）
+│   ├── workflow.yaml          ← ワークフロー（69件）
+│   ├── reports.yaml           ← 帳票（11件）
+│   ├── system-settings.yaml   ← システム設定（55件）
+│   ├── public-form.yaml       ← 公開フォーム（2件）
+│   ├── comments-logs.yaml     ← コメント・ログ（13件）
+│   └── uncategorized.yaml     ← 未分類（580件）
+├── tests/                     ← Playwright spec.js（Claudeが生成・git管理）
+│   ├── auth.spec.js
+│   ├── table-definition.spec.js
+│   └── ...
+└── playwright.config.js       ← Playwright設定
+```
+
+---
+
+## spec.js 生成の作業手順
+
+### Step 1: specs/XXXXX.yaml を読む
+```bash
+cat specs/auth.yaml
+```
+`cases` の各テストケースを把握する（case_no, description, expected）
+
+### Step 2: ブラウザで実際に操作して確認
+Playwrightを使って実際にページを開き、セレクターやURLを確認する：
+```python
+from playwright.sync_api import sync_playwright
+import os
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
+    page = browser.new_page()
+    page.set_viewport_size({"width": 1280, "height": 800})
+    # ログイン
+    page.goto(os.environ["TEST_BASE_URL"] + "/admin/login")
+    page.fill("#id", os.environ["TEST_EMAIL"])
+    page.fill("#password", os.environ["TEST_PASSWORD"])
+    page.click("button[type=submit].btn-primary")
+    page.wait_for_selector(".navbar")
+    # 調査したいページへ
+    page.goto(os.environ["TEST_BASE_URL"] + "/admin/dashboard")
+    page.screenshot(path="reports/investigation.png", full_page=True)
+    browser.close()
+```
+
+### Step 3: tests/XXXXX.spec.js を生成
+確認したセレクターを元に spec.js を書く：
+```javascript
+// @ts-check
+const { test, expect } = require('@playwright/test');
+
+const BASE_URL = process.env.TEST_BASE_URL;
+const EMAIL = process.env.TEST_EMAIL;
+const PASSWORD = process.env.TEST_PASSWORD;
+
+async function login(page) {
+    await page.goto(BASE_URL + '/admin/login');
+    await page.fill('#id', EMAIL);
+    await page.fill('#password', PASSWORD);
+    await page.click('button[type=submit].btn-primary');
+    await page.waitForSelector('.navbar');
+}
+
+test.describe('認証', () => {
+    test('1-1: マスターユーザーでログイン・ログアウト', async ({ page }) => {
+        await login(page);
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
+        // ログアウト
+        await page.click('...');
+        await expect(page).toHaveURL(/\/admin\/login/);
+    });
+});
+```
+
+### Step 4: 実行して確認
+```bash
+npx playwright test tests/auth.spec.js --reporter=list
+```
 
 ---
 

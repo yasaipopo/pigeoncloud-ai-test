@@ -1,0 +1,110 @@
+group: 帳票
+spec_file: tests/reports.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: 144-01
+  sheet: B
+  feature: 帳票
+  category: 関連テーブル出力
+  description: 関連テーブルを帳票出力に入れ込めるように変更
+  expected: 帳票へ関連テーブルが出力されていること。
+- case_no: '198'
+  sheet: B
+  feature: 帳票
+  category: ファイル項目への生成
+  description: ・ファイル項目へExcelおよびPDFのファイル生成を行う
+  expected: Excel／PDFともにファイル生成できること
+- case_no: '205'
+  sheet: B
+  feature: 帳票
+  category: Excel出力
+  description: Excelファイルにて帳票出力
+  expected: エラーなく帳票出力ができ、項目の出力も行えていること。
+- case_no: '206'
+  sheet: B
+  feature: 帳票
+  category: PDF出力
+  description: PDFファイルにて帳票出力
+  expected: エラーなく帳票出力ができ、項目の出力も行えていること。
+- case_no: '207'
+  sheet: B
+  feature: 帳票
+  category: Excel出力(ファイル名変更)
+  description: '・事前に帳票の「出力ファイル名フォーマット」の設定を行う。
+
+    ※出力ファイル名フォーマットの指定は　%m-%d　とする
+
+    ・Excelファイルにて帳票出力'
+  expected: '・エラーなく帳票出力ができ、項目の出力も行えていること。
+
+
+    ・「YYYY-MM.xlsx」のファイル名でローカルPCへダウンロードされること。
+
+    例）2025-03.xlsx
+
+
+    https://henmi021.pigeon-demo.com/admin/dataset__56'
+- case_no: '208'
+  sheet: B
+  feature: 帳票
+  category: PDF出力(ファイル名変更)
+  description: '・事前に帳票の「出力ファイル名フォーマット」の設定を行う。
+
+    ※出力ファイル名フォーマットの指定は　%m-%d　とする
+
+    ・PDFファイルにて帳票出力'
+  expected: '・エラーなく帳票出力ができ、項目の出力も行えていること。
+
+
+    ・「YYYY-MM.pdf」のファイル名でローカルPCへダウンロードされること。
+
+    例）2025-03.pdf
+
+
+    https://henmi021.pigeon-demo.com/admin/dataset__56'
+- case_no: '216'
+  sheet: B
+  feature: 帳票
+  category: アイコン
+  description: 帳票登録後、メニューからの帳票登録のリスト表示した際のアイコン表示を確認する。
+  expected: ・アイコンが歯車アイコンとなっていること。
+- case_no: '230'
+  sheet: B
+  feature: 帳票
+  category: ユーザーテーブルの帳票出力
+  description: 'ユーザーテーブルについては、以下項目は出力されない
+
+    ・通知先メールアドレス
+
+    ・パスワード
+
+    ・アクセス許可IP
+
+    ・状態
+
+    ・組織
+
+    ・役職'
+  expected: 想定通りの結果となること
+- case_no: '236'
+  sheet: B
+  feature: 帳票
+  category: 帳票出力
+  description: 子テーブルの設定を行い、帳票にはAA列以降の指定も行う
+  expected: AA列以降も帳票出力されること
+- case_no: '253'
+  sheet: B
+  feature: 帳票ダウンロード
+  category: 'ファイル項目
+
+    画像項目'
+  description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/294
+  expected: '想定通りの結果となること。
+
+    https://henmi022.pigeon-demo.com/admin/dataset__18'
+- case_no: 56-1
+  sheet: B
+  feature: 帳票登録
+  category: 帳票ファイル以外の登録(異常系)
+  description: ①Excelファイル以外のファイル形式のファイルで、帳票アップロードする。
+  expected: 帳票登録エラーが発生すること。

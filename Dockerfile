@@ -15,12 +15,19 @@ RUN npm install -g @anthropic-ai/claude-code
 
 WORKDIR /app
 
+# Playwright JS（npm）の依存だけ先にインストール
+COPY package.json .
+RUN npm install
+
 # Pythonパッケージ
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # アプリケーションファイル
 COPY runner/ ./runner/
+COPY specs/ ./specs/
+COPY tests/ ./tests/
+COPY playwright.config.js .
 COPY CLAUDE.md .
 COPY agent_instructions.md .
 COPY run_agent.sh .

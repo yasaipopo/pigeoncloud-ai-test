@@ -1,0 +1,170 @@
+group: CSV・Excel・JSON・ZIPダウンロード・アップロード
+spec_file: tests/csv-export.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: 148-01
+  sheet: B
+  feature: CSVダウンロード
+  category: CSVダウンロード/アップロードに子テーブルも含める
+  description: 子テーブルが設定されているテーブルよりCSVダウンロードを実施する
+  expected: CSVダウンロードがエラーなく完了し、CSVファイルの中に子テーブルの情報が含まれていること
+- case_no: 148-02
+  sheet: B
+  feature: CSVアップロード
+  category: CSVダウンロード/アップロードに子テーブルも含める
+  description: '子テーブルが設定されているテーブルへCSVアップロードを実施する
+
+    ※アップロードするCSVファイルには子テーブルの情報を含める。'
+  expected: CSVアップロードがエラーなく完了し、子テーブルの情報も反映されること。
+- case_no: 148-03
+  sheet: B
+  feature: CSVアップロード
+  category: CSVダウンロード/アップロードに子テーブルも含める
+  description: CSVアップロードを選択し、「CSVダウンロード(空)」を選択。
+  expected: CSVファイル(空)のヘッダーに子テーブルの情報も含まれていること。
+- case_no: '161'
+  sheet: B
+  feature: CSVダウンロード
+  category: 集計後のCSVダウンロードに並び替えを有効に
+  description: 並び替えしてCSVダウンロードする
+  expected: そのままその並び替えが有効になってダウンロードされる
+- case_no: '173'
+  sheet: B
+  feature: Excelインポート
+  category: 項目名の変更
+  description: Excelインポート機能改修(UI上で項目名の変更が可能）
+  expected: ''
+- case_no: '181'
+  sheet: B
+  feature: CSV
+  category: CSVアップロード
+  description: '①既存テーブルに対して、テーブルの項目設定で複数選択項目に対して最低数1と項目設定を行い保存する。
+
+    ②フォームより、①で設定追加したテーブルのデータを複数登録。
+
+    　(テーブルデータの一つは①で追加した項目の最低数をセット)
+
+    ③上記テーブルのCSVダウンロードを実施
+
+    ④③のデータを修正し、CSVアップロード実施。'
+  expected: '・エラーとならないこと
+
+    https://henmi022.pigeon-demo.com/admin/dataset__33'
+- case_no: 193-1
+  sheet: B
+  feature: CSV
+  category: 'アップロード時
+
+    必須項目が空の状態でも許可
+
+    (ON)'
+  description: '①テーブル編集画面より「アップロード時必須項目が空の状態でも許可」にチェックを入れて設定を保存する。
+
+    ②①のテーブル一覧より、CSVファイル(必須項目が空の状態)のものをアップロードする。'
+  expected: 'アップロードが正常に完了すること。
+
+    https://henmi022.pigeon-demo.com/admin/dataset__31'
+- case_no: 193-2
+  sheet: B
+  feature: CSV
+  category: 'アップロード時
+
+    必須項目が空の状態でも許可
+
+    (OFF)'
+  description: '①テーブル編集画面より「アップロード時必須項目が空の状態でも許可」にチェックを外して設定を保存する。
+
+    ②①のテーブル一覧より、CSVファイル(必須項目が空の状態)のものをアップロードする。'
+  expected: 'アップロードエラーになること。
+
+    https://henmi022.pigeon-demo.com/admin/dataset__31'
+- case_no: 194-1
+  sheet: B
+  feature: CSV
+  category: 'アップロード時
+
+    【選択肢】または【選択肢(複数選択)】項目で、項目がない場合自動的に追加する
+
+    (ON)'
+  description: '①テーブル編集画面より「【選択肢】または【選択肢(複数選択)】項目で、項目がない場合自動的に追加する」にチェックを入れて設定を保存する。
+
+    ②①のテーブル一覧より、CSVファイル(選択肢)に存在しないデータをセットしアップロードする。'
+  expected: 'アップロードが正常に完了すること。
+
+    選択肢に存在しなかったデータが選択肢へ自動追加されていること
+
+    https://henmi022.pigeon-demo.com/admin/dataset__31'
+- case_no: 194-2
+  sheet: B
+  feature: CSV
+  category: 'アップロード時
+
+    【選択肢】または【選択肢(複数選択)】項目で、項目がない場合自動的に追加する
+
+    (OFF)'
+  description: '①テーブル編集画面より「【選択肢】または【選択肢(複数選択)】項目で、項目がない場合自動的に追加する」にチェックを外して設定を保存する。
+
+    ①のテーブル一覧より、CSVファイル(選択肢)に存在しないデータをセットしアップロードする。'
+  expected: 'アップロードエラーになること。
+
+    https://henmi022.pigeon-demo.com/admin/dataset__31'
+- case_no: '224'
+  sheet: B
+  feature: JSONエクスポート
+  category: ダウンロードオプション
+  description: '・データを含める
+
+    ・権限設定を含める
+
+    ・フィルタを含める
+
+    ・通知設定を含める'
+  expected: 想定通りの結果となること
+- case_no: '231'
+  sheet: B
+  feature: CSVダウンロード
+  category: '数値・計算項目
+
+    (カンマ区切りのONの場合、CSVダウンロード時も該当データはカンマを付与)'
+  description: いくつかのパターンでカンマ区切りON／OFFにし、CSVダウンロード実施
+  expected: 想定通りの結果となること
+- case_no: '233'
+  sheet: B
+  feature: CSVアップロード
+  category: '-'
+  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/223
+
+
+    以下条件のテーブル定義を行い、CSVアップロードを実施する
+
+
+    他テーブル参照
+
+    かつ
+
+    参照先の項目が数値
+
+    かつ
+
+    単位記号をつけている'
+  expected: 'エラーとならずにCSVアップロードが完了すること。
+
+    https://henmi022.pigeon-demo.com/admin/dataset__23'
+- case_no: '255'
+  sheet: B
+  feature: CSVダウンロード
+  category: ''
+  description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/210
+  expected: 想定通りの結果となること。
+- case_no: 55-1
+  sheet: B
+  feature: CSVアップロード
+  category: CSVヘッダー1行目なしでアップロード(異常系)
+  description: ①アップロードするCSVファイルのヘッダー行なしのCSVファイルをアップロードする。
+  expected: インポートエラーが発生すること。
+- case_no: 55-2
+  sheet: B
+  feature: CSVアップロード
+  category: CSVファイル以外のファイルをアップロードする(異常系)
+  description: ①CSV以外のファイルをアップロードする。
+  expected: インポートエラーが発生すること。

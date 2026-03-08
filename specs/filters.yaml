@@ -1,0 +1,22 @@
+group: フィルタ
+spec_file: tests/filters.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: '234'
+  sheet: B
+  feature: フィルタタイプ
+  category: '・フィルタ
+
+    ・ビュー
+
+    ・混合'
+  description: フィルタ／集計より、全種類のフィルタタイプおよび権限周りの動作確認を行う。
+  expected: ''
+- case_no: '244'
+  sheet: B
+  feature: フィルタ
+  category: 高度な検索
+  description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/191
+  expected: '想定通りの結果となること。
+
+    https://henmi022.pigeon-demo.com/admin/dataset__20'

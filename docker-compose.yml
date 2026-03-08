@@ -10,6 +10,8 @@ services:
       # Playwright headlessモード強制
       - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
     volumes:
+      # runnerスクリプト（ホストから直接マウント・再ビルド不要）
+      - ./runner:/app/runner
       # テストシナリオ（Claudeが読み書き）
       - ./scenarios:/app/scenarios
       # テストレポート出力先
