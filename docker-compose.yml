@@ -1,25 +1,53 @@
 version: '3.8'
 
+x-agent-base: &agent-base
+  build: .
+  env_file:
+    - .env
+  environment:
+    - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+  volumes:
+    - ./runner:/app/runner
+    - ./specs:/app/specs
+    - ./tests:/app/tests
+    - ./scenarios:/app/scenarios
+    - ./reports:/app/reports
+    - ./src/pigeon_cloud:/app/src/pigeon_cloud
+    - ./secrets:/app/secrets:ro
+    - ~/.ssh/pigeon_test_deploy_key:/root/.ssh/deploy_key:ro
+  restart: "no"
+
 services:
-  claude-test-agent:
-    build: .
-    container_name: pigeon_test_agent
-    env_file:
-      - .env
+  # エージェント1（デフォルト・単体実行はこれだけ）
+  agent-1:
+    <<: *agent-base
+    container_name: pigeon_test_agent_1
     environment:
-      # Playwright headlessモード強制
       - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-    volumes:
-      # runnerスクリプト（ホストから直接マウント・再ビルド不要）
-      - ./runner:/app/runner
-      # テストシナリオ（Claudeが読み書き）
-      - ./scenarios:/app/scenarios
-      # テストレポート出力先
-      - ./reports:/app/reports
-      # PigeonCloudソースコード（git pullのため書き込み権限が必要）
-      - ./src/pigeon_cloud:/app/src/pigeon_cloud
-      # Google Service Account認証（read-only）
-      - ./secrets:/app/secrets:ro
-      # Deploy Key（read-only・pull専用）
-      - ~/.ssh/pigeon_test_deploy_key:/root/.ssh/deploy_key:ro
-    restart: "no"
+      - AGENT_NUM=1
+      - MODE=${MODE:-run_tests}
+      - TARGET_SPEC=${TARGET_SPEC:-}
+
+  # エージェント2（並列実行時）
+  agent-2:
+    <<: *agent-base
+    container_name: pigeon_test_agent_2
+    environment:
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      - AGENT_NUM=2
+      - MODE=${MODE:-run_tests}
+      - TARGET_SPEC=${TARGET_SPEC:-}
+    profiles:
+      - parallel
+
+  # エージェント3（並列実行時）
+  agent-3:
+    <<: *agent-base
+    container_name: pigeon_test_agent_3
+    environment:
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      - AGENT_NUM=3
+      - MODE=${MODE:-run_tests}
+      - TARGET_SPEC=${TARGET_SPEC:-}
+    profiles:
+      - parallel

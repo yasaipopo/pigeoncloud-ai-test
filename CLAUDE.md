@@ -27,15 +27,54 @@
 
 | 変数 | 内容 |
 |---|---|
-| `TEST_BASE_URL` | テスト対象URL（例: https://ai-test.pigeon-demo.com） |
-| `TEST_EMAIL` | テスト用ログインID（admin等） |
-| `TEST_PASSWORD` | テスト用パスワード |
+| `ADMIN_BASE_URL` | 管理用URL（テスト環境作成元）例: https://ai-test.pigeon-demo.com |
+| `ADMIN_EMAIL` | 管理用ログインID（admin） |
+| `ADMIN_PASSWORD` | 管理用パスワード |
+| `TEST_BASE_URL` | テスト実行対象URL（起動時に自動生成・上書きされる） |
+| `TEST_EMAIL` | テスト環境ログインID（作成後に設定） |
+| `TEST_PASSWORD` | テスト環境パスワード（作成後に自動取得） |
+| `AGENT_NUM` | エージェント番号（並列実行時に識別、1/2/3...） |
 | `ANTHROPIC_API_KEY` | Claude API キー |
 | `SLACK_WEBHOOK_URL` | Slack通知用WebhookURL |
 | `SLACK_NOTIFY_USER_ID` | 通知先SlackユーザーID |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Google認証ファイルパス（/app/secrets/service_account.json） |
 | `SPREADSHEET_ID` | テストシート ID（1h_gwuCGUAdj5fKPRZu438TKFkFkYUNUKz2K_vtEFlmI） |
 | `PIGEON_SOURCE_PATH` | ソースコードパス（/app/src/pigeon_cloud） |
+
+---
+
+## テスト環境の自動作成
+
+各エージェントは起動時に **自分専用のテスト環境を作成**してからテストを行う。
+
+### 作成ページ
+```
+https://ai-test.pigeon-demo.com/admin/internal/create-client
+```
+
+### ドメイン命名規則
+```
+tmp-testai-{YmdHis}-{AGENT_NUM}
+例: tmp-testai-20260309120000-1
+```
+
+### 作成手順（Playwrightで自動実行）
+1. `ADMIN_BASE_URL` でログイン（ADMIN_EMAIL / ADMIN_PASSWORD）
+2. `/admin/internal/create-client` にアクセス
+3. クライアントドメイン欄に `tmp-testai-{YmdHis}-{AGENT_NUM}` を入力
+4. ログインID欄に `admin` を入力
+5. 「作成完了」ボタンをクリック
+6. 表示された URL と PASSWORD を取得
+7. `TEST_BASE_URL` と `TEST_PASSWORD` を環境変数として設定してテスト実行
+
+### 作成後のテスト環境
+- URL: `https://tmp-testai-{YmdHis}-{AGENT_NUM}.pigeon-demo.com`
+- ID: `admin`
+- PASSWORD: 自動生成（作成完了画面から取得）
+
+### 注意
+- テスト完了後に環境を削除する必要はない（使い捨て）
+- 環境作成に失敗したら Slack通知して終了する
 
 ---
 

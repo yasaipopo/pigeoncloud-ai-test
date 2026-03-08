@@ -4,23 +4,32 @@
 #
 # MODE=generate_specs  → spec.jsを生成・更新（Claude が作業）
 # MODE=run_tests       → spec.jsを実行してSheetsに結果書き戻し（デフォルト）
+#
+# 並列実行時: AGENT_NUM=1,2,3... を指定
+# 各エージェントが自分専用のテスト環境を作成してテストする
 # ============================================================
 
 set -e
 
-# Deploy Key設定（read-only・push不可）
 export GIT_SSH_COMMAND="ssh -i /root/.ssh/deploy_key -o StrictHostKeyChecking=no -o IdentitiesOnly=yes"
 
 MODE=${MODE:-run_tests}
-TARGET_SPEC=${TARGET_SPEC:-}  # 特定specだけ実行する場合（例: auth）
+AGENT_NUM=${AGENT_NUM:-1}
+TARGET_SPEC=${TARGET_SPEC:-}
+
+# 自分専用の環境名（ドメイン）
+DATETIME=$(date '+%Y%m%d%H%M%S')
+MY_DOMAIN="tmp-testai-${DATETIME}-${AGENT_NUM}"
+MY_URL="https://${MY_DOMAIN}.pigeon-demo.com"
 
 echo "============================================"
 echo " PigeonCloud テストエージェント起動"
 echo " $(date '+%Y-%m-%d %H:%M:%S')"
-echo " モード: ${MODE}"
+echo " モード: ${MODE} / エージェント番号: ${AGENT_NUM}"
+echo " テスト環境: ${MY_URL}"
 echo "============================================"
 
-# PigeonCloudソースを最新化（Deploy Keyでpullのみ）
+# PigeonCloudソースを最新化
 if [ -d "/app/src/pigeon_cloud/.git" ]; then
     echo ">> PigeonCloudソースを最新化..."
     cd /app/src/pigeon_cloud
@@ -30,8 +39,92 @@ if [ -d "/app/src/pigeon_cloud/.git" ]; then
 fi
 
 # ============================================================
+# Step 0: テスト専用環境を自動作成
+# ============================================================
+echo ""
+echo ">> テスト環境作成: ${MY_DOMAIN}"
+
+TEST_PASSWORD=$(python3 - <<PYEOF
+from playwright.sync_api import sync_playwright
+import os, sys
+
+admin_url = os.environ.get("ADMIN_BASE_URL", "https://ai-test.pigeon-demo.com")
+admin_email = os.environ.get("ADMIN_EMAIL", os.environ.get("TEST_EMAIL", "admin"))
+admin_password = os.environ.get("ADMIN_PASSWORD", os.environ.get("TEST_PASSWORD", ""))
+domain = "${MY_DOMAIN}"
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
+    page = browser.new_page()
+    page.set_viewport_size({"width": 1280, "height": 800})
+
+    try:
+        # ログイン
+        page.goto(admin_url + "/admin/login", wait_until="networkidle")
+        page.fill("#id", admin_email)
+        page.fill("#password", admin_password)
+        page.click("button[type=submit].btn-primary")
+        page.wait_for_selector(".navbar", timeout=15000)
+
+        # 環境作成ページ
+        page.goto(admin_url + "/admin/internal/create-client", wait_until="networkidle")
+
+        # ドメイン入力（既存の値をクリアして入力）
+        domain_input = page.locator("input").first
+        domain_input.fill(domain)
+
+        # ログインID = admin
+        login_inputs = page.locator("input")
+        for i in range(login_inputs.count()):
+            val = login_inputs.nth(i).input_value()
+            if val == "" or val == "admin":
+                login_inputs.nth(i).fill("admin")
+                break
+
+        # 作成ボタンをクリック
+        page.click("button:has-text('作成')")
+        page.wait_for_timeout(3000)
+
+        # パスワードを取得（作成完了後に表示される）
+        content = page.content()
+        import re
+        m = re.search(r'PASSWORD[:\s]+([A-Za-z0-9]{8,})', content)
+        if m:
+            print(m.group(1))
+        else:
+            # ページ全体からパスワードらしい文字列を探す
+            m2 = re.search(r'(?:password|pw|pass)[^A-Za-z0-9]*([A-Za-z0-9]{8,16})', content, re.IGNORECASE)
+            if m2:
+                print(m2.group(1))
+            else:
+                print("ERROR: パスワード取得失敗", file=sys.stderr)
+                sys.exit(1)
+
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        browser.close()
+PYEOF
+)
+
+if [ $? -ne 0 ] || [ -z "$TEST_PASSWORD" ] || [[ "$TEST_PASSWORD" == ERROR* ]]; then
+    MSG="<@${SLACK_NOTIFY_USER_ID}> 🚨 【PigeonCloud Agent${AGENT_NUM}】テスト環境作成失敗: ${MY_DOMAIN}"
+    curl -s -X POST -H 'Content-type: application/json' \
+        --data "{\"text\":\"${MSG}\"}" "${SLACK_WEBHOOK_URL}" || true
+    echo "テスト環境作成に失敗しました"
+    exit 1
+fi
+
+# 作成したテスト環境の情報を設定
+export TEST_BASE_URL="${MY_URL}"
+export TEST_EMAIL="admin"
+export TEST_PASSWORD="${TEST_PASSWORD}"
+
+echo "   作成完了: ${MY_URL} / admin / ${TEST_PASSWORD}"
+
+# ============================================================
 # モードA: spec.js 生成モード
-# Claude がブラウザを操作してspec.jsを作成・更新する
 # ============================================================
 if [ "$MODE" = "generate_specs" ]; then
     echo ""
@@ -40,7 +133,12 @@ if [ "$MODE" = "generate_specs" ]; then
     SPEC_YAML=${TARGET_SPEC:-auth}
 
     claude --dangerously-skip-permissions "
-あなたはPigeonCloudのQAエージェントです。CLAUDE.mdの指示に従って作業してください。
+あなたはPigeonCloudのQAエージェント（Agent ${AGENT_NUM}）です。CLAUDE.mdの指示に従って作業してください。
+
+## テスト環境（自動作成済み）
+- URL: ${TEST_BASE_URL}
+- ID: admin
+- PASSWORD: ${TEST_PASSWORD}
 
 ## 今回のタスク: spec.js 生成
 
@@ -58,26 +156,27 @@ if [ "$MODE" = "generate_specs" ]; then
    - セレクターは実際に確認したものを使う
 4. npx playwright test tests/${SPEC_YAML}.spec.js --reporter=list で動作確認
 5. 失敗したケースは再調査して修正する
-6. 完了したらSlack通知: SLACK_WEBHOOK_URL に結果を送る
+6. 完了したらSlack通知
 
 ソースコードは /app/src/pigeon_cloud/ で確認できます（staging最新・read-only）。
-テスト環境: ${TEST_BASE_URL}
 "
     exit 0
 fi
 
 # ============================================================
-# モードB: 定期テスト実行モード（デフォルト）
+# モードB: 定期テスト実行モード
 # ============================================================
 
-# Phase 1: Google Sheets → YAMLシナリオ同期
-echo ""
-echo ">> Phase 1: Google Sheets からシナリオを同期"
-python runner/sheets_sync.py --pull
+# Phase 1: Google Sheets → YAMLシナリオ同期（Agent1のみ実行・他は待機）
+if [ "$AGENT_NUM" = "1" ]; then
+    echo ""
+    echo ">> Phase 1: Google Sheets からシナリオを同期"
+    python runner/sheets_sync.py --pull
+fi
 
-# Phase 2: Playwright spec.js 実行
+# Phase 2: spec.js 実行
 echo ""
-echo ">> Phase 2: Playwright spec.js テスト実行"
+echo ">> Phase 2: Playwright spec.js テスト実行（Agent ${AGENT_NUM}）"
 
 if [ -n "$TARGET_SPEC" ]; then
     SPEC_FILES="tests/${TARGET_SPEC}.spec.js"
@@ -85,12 +184,11 @@ else
     SPEC_FILES="tests/"
 fi
 
-# spec.jsが存在するか確認
 SPEC_COUNT=$(find tests/ -name "*.spec.js" 2>/dev/null | wc -l)
 
 if [ "$SPEC_COUNT" -gt "0" ]; then
     npx playwright test $SPEC_FILES --reporter=list,json 2>&1 || true
-    # Playwright結果をreports/results.jsonに変換
+
     python3 -c "
 import json, os
 from pathlib import Path
@@ -112,17 +210,17 @@ if pw_path.exists():
                            if r.get('status') == 'failed'],
                 'screenshot': None,
             })
-    with open('reports/results.json', 'w') as f:
+    out = Path('reports/results.json')
+    with open(out, 'w') as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     passed = sum(1 for r in results if r['status'] == 'passed')
     failed = sum(1 for r in results if r['status'] == 'failed')
     print(f'結果: {passed}件成功 / {failed}件失敗')
 " 2>/dev/null || true
 else
-    echo "spec.jsが見つかりません。先にMODE=generate_specs で生成してください。"
+    echo "spec.jsが見つかりません。MODE=generate_specs で先に生成してください。"
 fi
 
-# 失敗件数をチェック
 FAILED=$(python3 -c "
 import json
 from pathlib import Path
@@ -135,7 +233,6 @@ else:
     print(sum(1 for r in results if r['status'] == 'failed'))
 " 2>/dev/null || echo "0")
 
-echo ""
 echo "失敗件数: $FAILED"
 
 if [ "$FAILED" -gt "0" ]; then
@@ -143,28 +240,33 @@ if [ "$FAILED" -gt "0" ]; then
     echo ">> Phase 3: Claude による失敗調査・spec.js修正"
 
     claude --dangerously-skip-permissions "
-あなたはPigeonCloudのQAエージェントです。CLAUDE.mdの指示に従って作業してください。
+あなたはPigeonCloudのQAエージェント（Agent ${AGENT_NUM}）です。CLAUDE.mdの指示に従って作業してください。
+
+## テスト環境
+- URL: ${TEST_BASE_URL}
+- ID: admin / PASSWORD: ${TEST_PASSWORD}
 
 reports/results.json に失敗したテストが ${FAILED} 件あります。
 各失敗を調査して：
-- セレクター変更・URL変更・文言変更など仕様変更の場合 → tests/*.spec.js を修正
-- 不具合の場合 → reports/claude_report.md にまとめてSlack通知（python runner/reporter.py）
+- セレクター変更・URL変更・文言変更 → tests/*.spec.js を修正
+- 不具合 → reports/claude_report.md にまとめてSlack通知
 
 ソースコードは /app/src/pigeon_cloud/ で確認できます（staging最新）。
 "
 fi
 
-# Phase 4: 結果をGoogle Sheetsに書き戻し
-echo ""
-echo ">> Phase 4: テスト結果をGoogle Sheetsに書き戻し"
-python runner/sheets_sync.py --push
+# Phase 4: 結果書き戻し・通知（Agent1のみ）
+if [ "$AGENT_NUM" = "1" ]; then
+    echo ""
+    echo ">> Phase 4: テスト結果をGoogle Sheetsに書き戻し"
+    python runner/sheets_sync.py --push
 
-# Slack通知
-echo ""
-echo ">> Slack通知..."
-python runner/reporter.py
+    echo ""
+    echo ">> Slack通知..."
+    python runner/reporter.py
+fi
 
 echo ""
 echo "============================================"
-echo " 完了: $(date '+%Y-%m-%d %H:%M:%S')"
+echo " 完了: $(date '+%Y-%m-%d %H:%M:%S') / Agent ${AGENT_NUM}"
 echo "============================================"
