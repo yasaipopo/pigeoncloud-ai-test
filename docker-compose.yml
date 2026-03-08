@@ -27,6 +27,7 @@ services:
       - AGENT_NUM=1
       - MODE=${MODE:-run_tests}
       - TARGET_SPEC=${TARGET_SPEC:-}
+      - TOTAL_AGENTS=${TOTAL_AGENTS:-1}
 
   # エージェント2（並列実行時）
   agent-2:
@@ -36,7 +37,8 @@ services:
       - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
       - AGENT_NUM=2
       - MODE=${MODE:-run_tests}
-      - TARGET_SPEC=${TARGET_SPEC:-}
+      - TARGET_SPEC=${TARGET_SPEC_2:-}
+      - TOTAL_AGENTS=${TOTAL_AGENTS:-1}
     profiles:
       - parallel
 
@@ -48,6 +50,7 @@ services:
       - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
       - AGENT_NUM=3
       - MODE=${MODE:-run_tests}
-      - TARGET_SPEC=${TARGET_SPEC:-}
+      - TARGET_SPEC=${TARGET_SPEC_3:-}
+      - TOTAL_AGENTS=${TOTAL_AGENTS:-1}
     profiles:
       - parallel

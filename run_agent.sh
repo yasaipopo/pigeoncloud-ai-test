@@ -26,6 +26,9 @@ MY_URL="https://${MY_DOMAIN}.pigeon-demo.com"
 AGENT_REPORT_DIR="/app/reports/agent-${AGENT_NUM}"
 mkdir -p "${AGENT_REPORT_DIR}/screenshots"
 
+# 共有ディレクトリ（同期フラグなど）
+mkdir -p /app/reports
+
 # このエージェントの結果パスを環境変数で上書き
 export REPORTS_DIR="${AGENT_REPORT_DIR}"
 
@@ -182,6 +185,21 @@ if [ "$AGENT_NUM" = "1" ]; then
     echo ""
     echo ">> Phase 1: Google Sheets からシナリオを同期"
     python runner/sheets_sync.py --pull
+    # 同期完了フラグ
+    touch /app/reports/sheets_sync_done
+else
+    # Agent1の同期完了を最大3分待つ
+    echo ""
+    echo ">> Agent1のシート同期完了を待機中..."
+    WAIT_SEC=0
+    while [ "$WAIT_SEC" -lt "180" ]; do
+        if [ -f "/app/reports/sheets_sync_done" ]; then
+            echo "   シート同期完了を確認"
+            break
+        fi
+        sleep 5
+        WAIT_SEC=$((WAIT_SEC + 5))
+    done
 fi
 
 # Phase 2: spec.js 実行
@@ -197,13 +215,15 @@ fi
 SPEC_COUNT=$(find tests/ -name "*.spec.js" 2>/dev/null | wc -l)
 
 if [ "$SPEC_COUNT" -gt "0" ]; then
-    npx playwright test $SPEC_FILES --reporter=list,json 2>&1 || true
+    npx playwright test $SPEC_FILES 2>&1 || true
 
     python3 -c "
 import json, os
 from pathlib import Path
 
-pw_path = Path('reports/playwright-results.json')
+# エージェント別ディレクトリに出力
+agent_dir = Path(os.environ.get('REPORTS_DIR', 'reports/agent-1'))
+pw_path = agent_dir / 'playwright-results.json'
 if pw_path.exists():
     with open(pw_path) as f:
         pw = json.load(f)
@@ -220,7 +240,7 @@ if pw_path.exists():
                            if r.get('status') == 'failed'],
                 'screenshot': None,
             })
-    out = Path('reports/results.json')
+    out = agent_dir / 'results.json'
     with open(out, 'w') as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     passed = sum(1 for r in results if r['status'] == 'passed')
@@ -232,9 +252,9 @@ else
 fi
 
 FAILED=$(python3 -c "
-import json
+import json, os
 from pathlib import Path
-p = Path('reports/results.json')
+p = Path(os.environ.get('REPORTS_DIR', 'reports/agent-1')) / 'results.json'
 if not p.exists():
     print(0)
 else:
@@ -256,17 +276,45 @@ if [ "$FAILED" -gt "0" ]; then
 - URL: ${TEST_BASE_URL}
 - ID: admin / PASSWORD: ${TEST_PASSWORD}
 
-reports/results.json に失敗したテストが ${FAILED} 件あります。
+${AGENT_REPORT_DIR}/results.json に失敗したテストが ${FAILED} 件あります。
 各失敗を調査して：
 - セレクター変更・URL変更・文言変更 → tests/*.spec.js を修正
-- 不具合 → reports/claude_report.md にまとめてSlack通知
+- 不具合 → ${AGENT_REPORT_DIR}/claude_report.md にまとめてSlack通知
 
 ソースコードは /app/src/pigeon_cloud/ で確認できます（staging最新）。
 "
 fi
 
+# 完了フラグを書く（他エージェントとの同期用）
+touch "${AGENT_REPORT_DIR}/done"
+echo ">> Agent ${AGENT_NUM} 完了フラグ書き込み: ${AGENT_REPORT_DIR}/done"
+
 # Phase 4: 結果書き戻し・最終レポート（Agent1のみ・全エージェント完了後）
 if [ "$AGENT_NUM" = "1" ]; then
+    # 他エージェントの完了を最大10分待つ
+    TOTAL_AGENTS=${TOTAL_AGENTS:-1}
+    if [ "$TOTAL_AGENTS" -gt "1" ]; then
+        echo ""
+        echo ">> 他エージェントの完了を待機中（最大10分）..."
+        WAIT_SEC=0
+        while [ "$WAIT_SEC" -lt "600" ]; do
+            ALL_DONE=true
+            for i in $(seq 2 $TOTAL_AGENTS); do
+                if [ ! -f "/app/reports/agent-${i}/done" ]; then
+                    ALL_DONE=false
+                    break
+                fi
+            done
+            if [ "$ALL_DONE" = "true" ]; then
+                echo "   全エージェント完了確認"
+                break
+            fi
+            sleep 10
+            WAIT_SEC=$((WAIT_SEC + 10))
+            echo "   待機中... ${WAIT_SEC}秒経過 (Agent1を除く${TOTAL_AGENTS}台のうち未完了あり)"
+        done
+    fi
+
     echo ""
     echo ">> Phase 4: テスト結果をGoogle Sheetsに書き戻し"
     python runner/sheets_sync.py --push

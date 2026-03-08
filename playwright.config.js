@@ -1,6 +1,10 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
 
+// エージェント番号ごとに出力先を分ける（並列実行対応）
+const agentNum = process.env.AGENT_NUM || '1';
+const reportsDir = process.env.REPORTS_DIR || `reports/agent-${agentNum}`;
+
 module.exports = defineConfig({
     testDir: './tests',
     timeout: 60000,
@@ -10,7 +14,7 @@ module.exports = defineConfig({
     workers: 1,
     reporter: [
         ['list'],
-        ['json', { outputFile: 'reports/playwright-results.json' }],
+        ['json', { outputFile: `${reportsDir}/playwright-results.json` }],
     ],
     use: {
         baseURL: process.env.TEST_BASE_URL || 'https://ai-test.pigeon-demo.com',

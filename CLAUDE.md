@@ -272,14 +272,15 @@ python runner/reporter.py
 ### Step 1: 結果確認
 
 ```bash
-cat reports/results.json
+# REPORTS_DIR環境変数で自分のディレクトリが設定されている
+cat ${REPORTS_DIR}/results.json
 ```
 
 失敗した各テストについて `errors` と `screenshot` を確認する。
 
 ### Step 2: スクリーンショットを見る
 
-`reports/screenshot_*.png` をVisionで確認し、画面の状態を把握する。
+`${REPORTS_DIR}/screenshots/` をVisionで確認し、画面の状態を把握する。
 
 ### Step 3: Playwrightで実際に操作して確認
 
@@ -287,13 +288,14 @@ cat reports/results.json
 from playwright.sync_api import sync_playwright
 import os
 
+reports_dir = os.environ.get("REPORTS_DIR", "reports/agent-1")
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
     page = browser.new_page()
     page.set_viewport_size({"width": 1280, "height": 800})
     page.goto(os.environ["TEST_BASE_URL"] + "/admin/login")
     # ...調査したい操作...
-    page.screenshot(path="reports/investigation.png", full_page=True)
+    page.screenshot(path=f"{reports_dir}/investigation.png", full_page=True)
     browser.close()
 ```
 
@@ -501,3 +503,43 @@ steps:
 - git操作はpullのみ可能（pushは権限なし）
 - `reports/` への書き込みは自由（スクリーンショット、レポート等）
 - `scenarios/` への書き込みは自由（シナリオの追加・更新）
+
+---
+
+## 並列エージェント実行時の注意
+
+各エージェントは **自分専用のレポートディレクトリ** `${REPORTS_DIR}` を使う（`/app/reports/agent-{N}/`）。
+
+### ファイル出力先
+
+| ファイル | パス |
+|---|---|
+| テスト結果 | `${REPORTS_DIR}/results.json` |
+| Playwright生JSON | `${REPORTS_DIR}/playwright-results.json` |
+| Claudeレポート | `${REPORTS_DIR}/claude_report.md` |
+| スクリーンショット | `${REPORTS_DIR}/screenshots/` |
+| テスト環境URL | `${REPORTS_DIR}/test_env.txt` |
+| 完了フラグ | `${REPORTS_DIR}/done` |
+
+### 不具合報告
+不具合は必ず `${REPORTS_DIR}/claude_report.md` に書く。`reports/claude_report.md` ではなく。
+
+```bash
+# 自分のレポートディレクトリを確認
+echo $REPORTS_DIR
+# → /app/reports/agent-1
+
+# 不具合レポートの書き先
+${REPORTS_DIR}/claude_report.md
+```
+
+### 並列実行起動コマンド（ホスト側）
+
+```bash
+# 3エージェント並列・各グループを分担
+TOTAL_AGENTS=3 TARGET_SPEC=auth TARGET_SPEC_2=fields TARGET_SPEC_3=records \
+  docker-compose --profile parallel up
+
+# 単体実行（Agent1のみ・デフォルト）
+docker-compose up agent-1
+```
