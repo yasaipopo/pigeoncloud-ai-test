@@ -22,6 +22,13 @@ DATETIME=$(date '+%Y%m%d%H%M%S')
 MY_DOMAIN="tmp-testai-${DATETIME}-${AGENT_NUM}"
 MY_URL="https://${MY_DOMAIN}.pigeon-demo.com"
 
+# エージェントごとのレポートディレクトリ
+AGENT_REPORT_DIR="/app/reports/agent-${AGENT_NUM}"
+mkdir -p "${AGENT_REPORT_DIR}/screenshots"
+
+# このエージェントの結果パスを環境変数で上書き
+export REPORTS_DIR="${AGENT_REPORT_DIR}"
+
 echo "============================================"
 echo " PigeonCloud テストエージェント起動"
 echo " $(date '+%Y-%m-%d %H:%M:%S')"
@@ -122,6 +129,9 @@ export TEST_EMAIL="admin"
 export TEST_PASSWORD="${TEST_PASSWORD}"
 
 echo "   作成完了: ${MY_URL} / admin / ${TEST_PASSWORD}"
+
+# テスト環境情報をファイルに記録
+echo "${MY_URL}" > "${AGENT_REPORT_DIR}/test_env.txt"
 
 # ============================================================
 # モードA: spec.js 生成モード
@@ -255,15 +265,16 @@ reports/results.json に失敗したテストが ${FAILED} 件あります。
 "
 fi
 
-# Phase 4: 結果書き戻し・通知（Agent1のみ）
+# Phase 4: 結果書き戻し・最終レポート（Agent1のみ・全エージェント完了後）
 if [ "$AGENT_NUM" = "1" ]; then
     echo ""
     echo ">> Phase 4: テスト結果をGoogle Sheetsに書き戻し"
     python runner/sheets_sync.py --push
 
     echo ""
-    echo ">> Slack通知..."
-    python runner/reporter.py
+    echo ">> 最終レポート生成..."
+    REPORTS_DIR="/app/reports" python runner/consolidate_reports.py
+    echo "   → reports/final_report.md に出力しました"
 fi
 
 echo ""
