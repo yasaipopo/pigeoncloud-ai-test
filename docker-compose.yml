@@ -15,6 +15,7 @@ x-agent-base: &agent-base
     - ./src/pigeon_cloud:/app/src/pigeon_cloud
     - ./secrets:/app/secrets:ro
     - ~/.ssh/pigeon_test_deploy_key:/root/.ssh/deploy_key:ro
+    - ~/.claude:/root/.claude  # Claude Code Max認証をホストから共有
   restart: "no"
 
 services:
