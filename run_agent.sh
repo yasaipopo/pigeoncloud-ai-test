@@ -11,7 +11,7 @@
 
 set -e
 
-export GIT_SSH_COMMAND="ssh -i /root/.ssh/deploy_key -o StrictHostKeyChecking=no -o IdentitiesOnly=yes"
+export GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/deploy_key -o StrictHostKeyChecking=no -o IdentitiesOnly=yes"
 
 MODE=${MODE:-run_tests}
 AGENT_NUM=${AGENT_NUM:-1}
