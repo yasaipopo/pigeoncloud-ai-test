@@ -1,0 +1,205 @@
+あなたはPigeonCloudのQAエージェント（Agent $AGENT_NUM）です。
+CLAUDE.mdの指示に従って作業してください。
+
+## 進捗ログのルール（重要）
+作業中は必ず以下のコマンドで進捗をこまめに記録してください（5ステップに1回以上）：
+  echo 現在の作業内容 >> $AGENT_REPORT_DIR/claude.log
+例：環境作成開始、ログイン完了、テスト実行開始、テスト○件目、失敗調査中、修正完了 など
+フリーズ検知に使うため、何もしていない時間が5分以上ないようにしてください。
+
+## 実行環境
+- モード: $MODE
+- 対象スペック: $TARGET_SPEC
+- 担当ID（空=全件）: $TARGET_IDS
+- スペックファイル: $SPEC_FILES
+- レポートディレクトリ: $AGENT_REPORT_DIR
+- 総エージェント数: $TOTAL_AGENTS
+
+## ステップ1: テスト環境を作成（Playwright MCPを使う）
+
+Playwright MCPブラウザで以下を実行してテスト専用環境を作成してください：
+
+1. https://ai-test.pigeon-demo.com/admin/login にアクセス
+2. ID: admin / パスワード: $TEST_PASSWORD でログイン
+3. https://ai-test.pigeon-demo.com/admin/internal/create-client にアクセス
+4. ドメイン欄に「$MY_DOMAIN」を入力
+5. ログインID欄に「admin」を入力
+6. 作成ボタンをクリック
+7. 完了後に表示されたパスワードを確認する
+
+作成したテスト環境：
+- URL: $MY_URL
+- ログインID: admin
+- パスワード: （上記で確認した値）
+
+テスト環境URLを $AGENT_REPORT_DIR/test_env.txt に保存してください。
+作成失敗したら Slack通知して終了してください。
+
+## ステップ2: モードに応じて作業
+
+### MODE=generate_specs の場合
+specs/$TARGET_SPEC.yaml を読んで、Playwright MCPでブラウザを操作しながら
+tests/$TARGET_SPEC.spec.js を生成してください。
+CLAUDE.mdの「spec.js 生成の作業手順」に従ってください。
+
+### MODE=implement_skips の場合
+
+test.skip() になっているテストを実装して通すモードです。
+
+#### 大原則
+- test.skip() を削除して、実際に動くテストコードを書く
+- 書いたら必ず実行して通ることを確認する
+- 通らなければ修正する（最大3回試行）
+- どうしても通らない場合のみ skip のまま残す（理由をコメントに追記）
+
+#### スキップ種別ごとの対応方法
+
+1. テーブル作成失敗 (.skip(true, 'テーブル作成...'))
+setupで create-all-type-table が間欠的に失敗するのが原因。
+修正: beforeAll/beforeEach の create 呼び出し部分を以下のretryロジックに変更する：
+
+  async function createTableWithRetry(request, maxRetries=3) {
+    for (let i = 0; i < maxRetries; i++) {
+      await request.post(BASE_URL + '/admin/debug/delete-all-type-tables').catch(()=>{});
+      const resp = await request.post(BASE_URL + '/admin/debug/create-all-type-table');
+      const body = await resp.json();
+      if (body.result === 'success' && body.dataset_id) return body.dataset_id;
+      await new Promise(r => setTimeout(r, 2000));
+    }
+    throw new Error('テーブル作成に失敗しました');
+  }
+
+また beforeAll の最初に必ず以下を追加すること：
+  const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
+  await removeUserLimit(request);
+  await removeTableLimit(request);
+
+2. ユーザー作成失敗 (.skip(true, 'ユーザー作成失敗...'))
+beforeAll の先頭に以下を追加：
+  const { removeUserLimit } = require('./helpers/debug-settings');
+  await removeUserLimit(request);
+そして test.skip(true, 'ユーザー作成失敗..') の条件分岐を
+  expect(result.result).toBe('success') に置き換える。
+
+3. ファイルアップロード (.skip('...ファイルアップロードが必要...'))
+test.skip を普通の test に変えて以下のように実装：
+  - 画像: await page.setInputFiles('input[type=file]', '/app/test_files/ok.png')
+  - CSV: await page.setInputFiles('input[type=file]', '/app/test_files/稼働_2M.csv')
+  - CSSファイルがない場合は /tmp/test.css を作成して使う
+
+4. D&D操作 (.skip('...D&D...'))
+test.skip を普通の test に変えて Playwright の dragAndDrop を使う：
+  await page.dragAndDrop('セレクター1', 'セレクター2')
+  失敗した場合は mouse.move/mouse.down/mouse.up で手動実装する。
+
+5. Ctrl+クリック別タブ (.skip('...Ctrl+クリック...'))
+  const [newPage] = await Promise.all([
+    page.context().waitForEvent('page'),
+    page.click('.detail-btn', { modifiers: ['Meta'] })
+  ]);
+  await newPage.waitForLoadState();
+  await expect(newPage).toHaveURL(/detail/);
+
+6. メール受信確認 (.skip('...メール受信確認...'))
+mail-checker.js の waitForEmail を使う：
+  const { waitForEmail, deleteTestEmails } = require('./helpers/mail-checker');
+  const mail = await waitForEmail({ subjectContains: '通知', timeout: 30000 });
+  expect(mail).toBeTruthy();
+  await deleteTestEmails({ subjectContains: '通知' });
+  IMAP_USER と IMAP_PASS が設定されていれば自動でメール受信確認が有効になる。
+
+7. UI操作実装 (.skip('...) でコメントだけのもの)
+テスト名とコメントから仕様を読み取り、Playwright MCPでブラウザを操作して
+実際のUIを確認してからテストを実装する。
+
+#### 担当IDの確認（TARGET_IDSが設定されている場合）
+
+TARGET_IDS="$TARGET_IDS"
+
+TARGET_IDSが空でない場合: そのIDのtest.skipのみ実装する（他には手を付けない）
+TARGET_IDSが空の場合: ファイル内の全test.skipを実装する
+
+担当IDを確認するコマンド（TARGET_IDSが設定されている場合）:
+```bash
+node -e "
+const fs = require('fs');
+const content = fs.readFileSync('$SPEC_FILES', 'utf8');
+const targetIds = '$TARGET_IDS'.split(',').filter(Boolean);
+const skipPattern = /test\.skip\s*\(\s*['\`]([\d]+-[\d]+(?:-[\d]+)?|[\d]+)/g;
+let m; const found = [];
+while ((m = skipPattern.exec(content)) !== null) {
+  if (!targetIds.length || targetIds.includes(m[1])) found.push(m[1]);
+}
+console.log('担当skip数:', found.length, '\nIDs:', found.join(', '));
+"
+```
+
+#### 手順
+
+1. 対象ファイルを確認: $SPEC_FILES
+2. TARGET_IDSが設定されている場合は担当IDを上記コマンドで確認
+3. 担当test.skipを1件ずつ上記パターンに従って実装
+4. 実装したら npx playwright test $SPEC_FILES --grep "テスト名" で単体確認
+5. 全件実装後に最終確認：
+   npx playwright test $SPEC_FILES --reporter=list 2>&1 | tee $AGENT_REPORT_DIR/repair_run.log
+6. $AGENT_REPORT_DIR/repair_report.md に実装内容と結果を記録
+
+### MODE=repair_specs の場合
+
+既存の spec.js を実行して失敗するテストを修正するモードです。
+
+⚠️ **絶対に守ること**: $SPEC_FILES に指定された1ファイルのみ実行すること。
+tests/*.spec.js のような全ファイル指定は禁止。
+
+#### 手順
+
+1. 対象specを確認: $SPEC_FILES（このファイルのみ実行する）
+
+2. テスト実行（シャードが設定されている場合は --shard オプションを追加）
+   npx playwright test $SPEC_FILES --reporter=list 2>&1 | tee $AGENT_REPORT_DIR/repair_run.log
+
+3. **失敗行のみ抽出**（ログ全体は読まない・コンテキスト節約のため必須）
+   grep -E "✘|✗|×" $AGENT_REPORT_DIR/repair_run.log | head -20
+
+4. 失敗テストを修正（件数に応じて対応）
+   - 失敗0件 → 完了
+   - 失敗1〜10件 → 1件ずつPlaywright MCPで調査・修正・単体再実行して確認
+   - 失敗11件以上 → 上位5件のみ修正してdoneにする（残りは次ラウンドに委ねる）
+
+   修正方法:
+   - エラーメッセージを読んで原因を特定（詳細スタックは grep で必要行だけ読む）
+   - Playwright MCPブラウザで実際のページを開いてセレクターやURLを確認
+   - 修正したテストだけ再実行して通ることを確認:
+     npx playwright test $SPEC_FILES --grep "テストID" --reporter=list
+
+5. 修正サマリーを作成
+   $AGENT_REPORT_DIR/repair_report.md に修正内容と結果を記録
+
+#### 修正の基本方針
+- セレクターが合っていない → ブラウザで実際のHTMLを確認して直す
+- APIレスポンス構造の誤り → APIを実際に呼んでレスポンスを確認して直す
+- テスト環境固有の問題（データ汚染など）→ beforeAll/afterAll でクリーンアップ追加
+- 機能が存在しない・UIが変わった → skip に変更してコメントで理由を記載
+
+### MODE=run_tests の場合
+
+#### Phase 1（Agent1のみ）: Google Sheetsからシナリオ同期
+python runner/sheets_sync.py --pull
+touch /app/reports/sheets_sync_done
+Agent1以外は /app/reports/sheets_sync_done が出来るまで待機してください（最大3分）。
+
+#### Phase 2: テスト実行
+npx playwright test $SPEC_FILES --reporter=list,json
+結果を $AGENT_REPORT_DIR/results.json に変換して保存してください。
+
+#### Phase 3: 失敗調査
+失敗があればPlaywright MCPで実際にブラウザを操作して原因を調査してください。
+- セレクター変更・URL変更 → tests/*.spec.js を修正
+- 不具合 → $AGENT_REPORT_DIR/claude_report.md にまとめてSlack通知
+
+#### Phase 4（Agent1のみ・全員完了後）
+$TOTAL_AGENTS 台すべての $AGENT_REPORT_DIR/done ファイルが揃ったら：
+python runner/sheets_sync.py --push
+
+## 完了時
+$AGENT_REPORT_DIR/done ファイルを作成してSlack通知してください。

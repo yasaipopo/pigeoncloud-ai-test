@@ -70,6 +70,41 @@ assertions:
 screenshot: false
 ```
 
+## Docker イメージのビルド・更新
+
+### 初回ビルド
+
+```bash
+docker build -t pigeon-test_agent-1 .
+```
+
+### Playwright バージョンを上げたとき
+
+`package.json` の `@playwright/test` バージョンを変更したら必ずイメージを再ビルドすること。
+
+```bash
+docker build -t pigeon-test_agent-1 .
+```
+
+**理由:** `Dockerfile` では `npm install` 後に `npx playwright install chromium` を実行して、
+その npm バージョンに対応した Chromium をイメージにベイクしている。
+再ビルドしないと起動のたびに Chromium（約180MB）がダウンロードされる。
+
+```dockerfile
+# Dockerfile の該当箇所
+RUN npm install && ...
+
+# npmバージョンに合わせたChromiumをイメージに焼き込む
+RUN PLAYWRIGHT_BROWSERS_PATH=/ms-playwright npx playwright install chromium --with-deps
+```
+
+### npm バージョンと Chromium の対応
+
+| @playwright/test | Chromium |
+|---|---|
+| 1.44.x | chromium-1117 |
+| 1.58.x | chromium-1208 |
+
 ## 注意事項
 
 - `.env` は絶対にgitにコミットしない

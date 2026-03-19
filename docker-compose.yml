@@ -1,12 +1,13 @@
 version: '3.8'
 
-x-agent-base: &agent-base
-  build: .
-  env_file:
-    - .env
-  environment:
-    - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+x-common-volumes: &common-volumes
   volumes:
+    - ./run_agent.sh:/app/run_agent.sh
+    - ./run_orchestrator.sh:/app/run_orchestrator.sh
+    - ./orchestrator_prompt.txt:/app/orchestrator_prompt.txt
+    - ./agent_prompt_template.txt:/app/agent_prompt_template.txt
+    - ./CLAUDE.md:/app/CLAUDE.md
+    - ./playwright.config.js:/app/playwright.config.js
     - ./runner:/app/runner
     - ./specs:/app/specs
     - ./tests:/app/tests
@@ -15,48 +16,37 @@ x-agent-base: &agent-base
     - ./src/pigeon_cloud:/app/src/pigeon_cloud
     - ./secrets:/app/secrets:ro
     - ~/.ssh/pigeon_test_deploy_key:/home/agent/.ssh/deploy_key:ro
-    - ~/.claude:/home/agent/.claude  # Claude Code Max認証をホストから共有
-    - ~/.claude.json:/home/agent/.claude.json:ro  # Claude Code設定ファイル
-    - npm-cache:/home/agent/.npm  # npmキャッシュ永続化（Chromeを毎回DLしない）
-  restart: "no"
+    - ~/.claude:/home/agent/.claude
+    - ~/.claude.json:/home/agent/.claude.json:ro
+    - npm-cache:/home/agent/.npm
 
 services:
-  # エージェント1（デフォルト・単体実行はこれだけ）
-  agent-1:
-    <<: *agent-base
-    container_name: pigeon_test_agent_1
+  # オーケストレーター（Claude Codeが親・sub-agentで並列実行）
+  orchestrator:
+    build: .
+    <<: *common-volumes
+    container_name: pigeon_test_orchestrator
+    env_file:
+      - .env
     environment:
       - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-      - AGENT_NUM=1
-      - MODE=${MODE:-run_tests}
+      - MODE=orchestrator
+      - MAX_WORKERS=${MAX_WORKERS:-5}
+      - MAX_ROUNDS=${MAX_ROUNDS:-8}
+    restart: "no"
+
+  # 単体エージェント（手動実行・デバッグ用）
+  agent:
+    build: .
+    <<: *common-volumes
+    env_file:
+      - .env
+    environment:
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      - MODE=${MODE:-implement_skips}
       - TARGET_SPEC=${TARGET_SPEC:-}
-      - TOTAL_AGENTS=${TOTAL_AGENTS:-1}
-
-  # エージェント2（並列実行時）
-  agent-2:
-    <<: *agent-base
-    container_name: pigeon_test_agent_2
-    environment:
-      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-      - AGENT_NUM=2
-      - MODE=${MODE:-run_tests}
-      - TARGET_SPEC=${TARGET_SPEC_2:-}
-      - TOTAL_AGENTS=${TOTAL_AGENTS:-1}
-    profiles:
-      - parallel
-
-  # エージェント3（並列実行時）
-  agent-3:
-    <<: *agent-base
-    container_name: pigeon_test_agent_3
-    environment:
-      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-      - AGENT_NUM=3
-      - MODE=${MODE:-run_tests}
-      - TARGET_SPEC=${TARGET_SPEC_3:-}
-      - TOTAL_AGENTS=${TOTAL_AGENTS:-1}
-    profiles:
-      - parallel
+      - AGENT_NUM=${AGENT_NUM:-1}
+    restart: "no"
 
 volumes:
-  npm-cache:  # Playwright MCP用のChromeキャッシュ（コンテナ削除後も保持）
+  npm-cache:
