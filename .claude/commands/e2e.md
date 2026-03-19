@@ -61,62 +61,58 @@ git -C src/pigeon_cloud diff HEAD~5..HEAD --name-only
 spec修正が必要と判断した場合：
 1. 影響を受けるspecファイルを特定して修正
 
-### Step 3: Dockerエージェント起動
+### Step 3: サブエージェント並列起動
 
-以下の分割で並列4台起動（引数でspec指定がある場合はそのspecのみ1台）:
+**Dockerは使わない。Agent toolでサブエージェントを直接ホストで並列起動する。**
+
+以下の5グループを並列起動（引数でspec指定がある場合はそのspecのみ1台）:
 
 ```
-agent-A: layout-ui, system-settings, table-definition, reports, records
-agent-B: notifications, users-permissions, auth
-agent-C: workflow, uncategorized
-agent-D: chart-calendar, fields, filters, comments-logs, csv-export, public-form
+agent-A (AGENT_NUM=30): layout-ui, system-settings, table-definition, reports, records
+agent-B (AGENT_NUM=31): notifications, users-permissions, auth
+agent-C (AGENT_NUM=32): workflow, uncategorized         ← 247件（分割済み）
+agent-C2(AGENT_NUM=34): uncategorized-2                ← 167件（追加実装中）
+agent-C3(AGENT_NUM=35): uncategorized-3                ← 166件（追加実装後）
+agent-D (AGENT_NUM=33): chart-calendar, fields, filters, comments-logs, csv-export, public-form
 ```
 
-起動コマンドテンプレート（AGENT_NUM は 30〜33 など未使用の番号を使う）:
+**uncategorizedは3ファイルに分割済み**: uncategorized.spec.js / uncategorized-2.spec.js / uncategorized-3.spec.js
+aggregate は各ファイルを別specとして認識して自動マージする。
+
+**起動方法**: 1つのメッセージで4つのAgent tool callを並列送信する（`run_in_background: true`）。
+
+各サブエージェントへのプロンプトテンプレート:
+```
+以下のコマンドをそのまま実行してください。
+作業ディレクトリは `/Users/yasaipopo/PycharmProjects/pigeon-test` です。
+
+cd /Users/yasaipopo/PycharmProjects/pigeon-test
+mkdir -p reports/agent-{AGENT_NUM}
+# .envを読み込む（AGENT_NUMは上書きして正しい番号を設定）
+set -a; source .env; set +a
+export AGENT_NUM={AGENT_NUM}
+npx playwright test {SPEC_FILES} \
+  2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
+echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done
+
+完了したら passed/failed/skipped の件数を報告してください。
+```
+
+**注意**: `--reporter=json` はコマンドラインに追加しないこと。config で設定済みの
+JSON reporter（`reports/agent-N/playwright-results.json`）が上書きされる。
+
+SPEC_FILESは `tests/workflow.spec.js tests/uncategorized.spec.js` のように展開する。
+
+### Step 4: 完了待機
+
+サブエージェントは `run_in_background: true` で起動しているため、完了時に自動通知が来る。
+全エージェントの完了通知が揃うまで待機する。
+
+途中経過の確認:
 ```bash
-AGENT_NUM=30
-mkdir -p reports/agent-$AGENT_NUM
-
-docker run -d \
-  --name pigeon_test_agent_$AGENT_NUM \
-  --env-file .env \
-  -e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-  -e AGENT_NUM=$AGENT_NUM \
-  -e MODE=repair_specs \
-  -e TARGET_SPEC="workflow,uncategorized" \
-  -v $(pwd)/run_agent.sh:/app/run_agent.sh \
-  -v $(pwd)/CLAUDE.md:/app/CLAUDE.md \
-  -v $(pwd)/playwright.config.js:/app/playwright.config.js \
-  -v $(pwd)/runner:/app/runner \
-  -v $(pwd)/specs:/app/specs \
-  -v $(pwd)/tests:/app/tests \
-  -v $(pwd)/scenarios:/app/scenarios \
-  -v $(pwd)/reports:/app/reports \
-  -v $(pwd)/src/pigeon_cloud:/app/src/pigeon_cloud \
-  -v $(pwd)/secrets:/app/secrets:ro \
-  -v ~/.ssh/pigeon_test_deploy_key:/home/agent/.ssh/deploy_key:ro \
-  -v ~/.claude:/home/agent/.claude \
-  -v ~/.claude.json:/home/agent/.claude.json:ro \
-  pigeon-test_agent-1
+ls reports/agent-{30..33}/done 2>/dev/null
+tail -5 reports/agent-30/run.log
 ```
-
-**動画設定**: 各エージェントの `playwright.config.js` を確認し、
-`video: 'retain-on-failure'` になっていることを確認（失敗時のみ録画）。
-passed/failed した動画のみ保存する。
-
-### Step 4: 完了監視（ポーリング）
-
-```bash
-# 2分ごとに確認
-docker ps --filter "name=pigeon_test_agent" --format "{{.Names}}\t{{.Status}}"
-# done ファイルで完了判定
-ls reports/agent-*/done 2>/dev/null
-```
-
-全エージェントの `reports/agent-N/done` が揃ったら次へ進む。
-途中で失敗したエージェントがあれば再起動を検討。
-
-完了まで待機する間、2〜3分おきにログを確認して進捗を把握すること。
 
 ### Step 5: 動画の整理
 
@@ -300,37 +296,63 @@ echo "失敗spec: $FAILED_SPECS"
 
 カンマ区切りで出力される（例: `auth,fields,uncategorized,workflow`）
 
-**Step 2: 失敗specのみDockerエージェント起動**
+**Step 2: 失敗specをグループ分割して並列サブエージェント起動**
 
-失敗specを各エージェントに分割して並列実行:
+フルパイプラインと同じ4グループで分割し、失敗specが含まれるグループのみ起動する。
+
+```
+グループA: layout-ui, system-settings, table-definition, reports, records
+グループB: notifications, users-permissions, auth
+グループC: workflow, uncategorized
+グループD: chart-calendar, fields, filters, comments-logs, csv-export, public-form
+```
+
+グループ割り当てを計算してから、該当グループを Agent tool で `run_in_background: true` 並列起動:
 
 ```bash
-# 例: 失敗spec が auth,fields,uncategorized,workflow の場合
-AGENT_NUM=40
-mkdir -p reports/agent-$AGENT_NUM
-
-docker run -d \
-  --name pigeon_test_agent_$AGENT_NUM \
-  --env-file .env \
-  -e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-  -e AGENT_NUM=$AGENT_NUM \
-  -e MODE=run_tests \
-  -e TARGET_SPEC="auth,fields" \
-  -v $(pwd)/run_agent.sh:/app/run_agent.sh \
-  -v $(pwd)/CLAUDE.md:/app/CLAUDE.md \
-  -v $(pwd)/playwright.config.js:/app/playwright.config.js \
-  -v $(pwd)/runner:/app/runner \
-  -v $(pwd)/specs:/app/specs \
-  -v $(pwd)/tests:/app/tests \
-  -v $(pwd)/scenarios:/app/scenarios \
-  -v $(pwd)/reports:/app/reports \
-  -v $(pwd)/src/pigeon_cloud:/app/src/pigeon_cloud \
-  -v $(pwd)/secrets:/app/secrets:ro \
-  -v ~/.ssh/pigeon_test_deploy_key:/home/agent/.ssh/deploy_key:ro \
-  -v ~/.claude:/home/agent/.claude \
-  -v ~/.claude.json:/home/agent/.claude.json:ro \
-  pigeon-test_agent-1
+# グループ割り当て計算
+python3 - <<'EOF'
+import subprocess
+failed = set(subprocess.check_output(
+    ["python3", "runner/e2e_report_sheet.py", "--failed-specs"],
+    stderr=subprocess.DEVNULL).decode().strip().split(","))
+groups = {
+    "A": (50, "layout-ui,system-settings,table-definition,reports,records"),
+    "B": (51, "notifications,users-permissions,auth"),
+    "C": (52, "workflow,uncategorized"),
+    "C2": (54, "uncategorized-2"),
+    "C3": (55, "uncategorized-3"),
+    "D": (53, "chart-calendar,fields,filters,comments-logs,csv-export,public-form"),
+}
+for g, (num, specs) in groups.items():
+    overlap = failed & set(specs.split(","))
+    if overlap:
+        target = ",".join(sorted(overlap))
+        spec_files = " ".join(f"tests/{s}.spec.js" for s in sorted(overlap))
+        print(f"グループ{g}: AGENT_NUM={num} SPEC_FILES={spec_files}")
+    else:
+        print(f"グループ{g}: スキップ（失敗なし）")
+EOF
 ```
+
+各サブエージェントへのプロンプト（`run_in_background: true` で並列起動）:
+```
+以下のコマンドをそのまま実行してください。
+作業ディレクトリは `/Users/yasaipopo/PycharmProjects/pigeon-test` です。
+
+cd /Users/yasaipopo/PycharmProjects/pigeon-test
+mkdir -p reports/agent-{AGENT_NUM}
+set -a; source .env; set +a
+export AGENT_NUM={AGENT_NUM}
+npx playwright test {SPEC_FILES} \
+  2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
+echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done
+
+完了したら passed/failed/skipped の件数を報告してください。
+```
+
+**注意**: `--reporter=json` はコマンドラインに追加しないこと。
+config で設定済みのJSON reporter（`reports/agent-N/playwright-results.json`）が上書きされる。
 
 **Step 3: 完了後に結果を集計**
 

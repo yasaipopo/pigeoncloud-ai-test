@@ -51,6 +51,7 @@ def parse_playwright_json(json_path: Path, spec_name: str) -> dict[str, str]:
     """
     playwright-results.json を解析して {case_no: status} を返す。
     case_no は test title の先頭 "NNN-N:" から抽出。
+    spec_name に対応するファイル（例: fields.spec.js）のテストのみ抽出する。
     """
     try:
         data = json.loads(json_path.read_text())
@@ -59,9 +60,18 @@ def parse_playwright_json(json_path: Path, spec_name: str) -> dict[str, str]:
         return {}
 
     results = {}
+    target_file = f"{spec_name}.spec.js"
 
-    def walk(node):
+    def walk(node, in_target: bool):
+        # suiteレベルでファイル判定（トップレベルsuiteのfileフィールド）
+        file_attr = node.get("file", "")
+        if file_attr:
+            # ファイルパスの末尾でマッチ
+            in_target = file_attr.endswith(target_file)
+
         for spec in node.get("specs", []):
+            if not in_target:
+                continue
             title = spec.get("title", "")
             m = CASE_NO_RE.match(title)
             if not m:
@@ -81,10 +91,10 @@ def parse_playwright_json(json_path: Path, spec_name: str) -> dict[str, str]:
                     results[case_no] = status
 
         for child in node.get("suites", []):
-            walk(child)
+            walk(child, in_target)
 
     for suite in data.get("suites", []):
-        walk(suite)
+        walk(suite, False)
 
     return results
 
@@ -128,35 +138,37 @@ def parse_log_file(log_path: Path) -> dict[str, dict[str, str]]:
     return dict(spec_results)
 
 
-def collect_agent_sources() -> dict[str, dict[int, tuple[str, Path]]]:
+def collect_agent_sources() -> dict[str, list[tuple[float, str, Path]]]:
     """
-    全agentディレクトリを走査して、spec → {agent_num: (source_type, path)} を返す。
+    全agentディレクトリを走査して、spec → [(mtime, source_type, path), ...] を返す。
     source_type: "json" | "log"
+    リストはmtime昇順（古い順）で返す。呼び出し側が古→新の順でマージする。
+    実際のテスト実行（passed/failed > 0）があるjsonのみを登録。
     """
-    # spec → {agent_num: (source_type, path)}
-    spec_agents: dict[str, dict[int, tuple[str, Path]]] = defaultdict(dict)
+    # spec → {path_key: (mtime, source_type, path)}
+    spec_sources: dict[str, dict[str, tuple[float, str, Path]]] = defaultdict(dict)
 
     for agent_dir in sorted(REPORTS_DIR.glob("agent-*")):
-        try:
-            agent_num = int(agent_dir.name.split("-")[1])
-        except (ValueError, IndexError):
-            continue
-
-        # 1) playwright-results.json（優先）
+        # 1) playwright-results.json（優先度高・実データがある場合のみ）
         json_path = agent_dir / "playwright-results.json"
         if json_path.exists():
             try:
                 raw = json_path.read_text()
-                for m in re.finditer(r'"file":\s*"(\w[\w-]*?)\.spec\.js"', raw):
-                    spec_name = m.group(1)
-                    # jsonソースは常にlogより優先
-                    existing = spec_agents[spec_name].get(agent_num)
-                    if existing is None or existing[0] == "log":
-                        spec_agents[spec_name][agent_num] = ("json", json_path)
+                detected_json_specs = set(
+                    m.group(1) for m in re.finditer(r'"file":\s*"(\w[\w-]*?)\.spec\.js"', raw)
+                )
+                json_data = json.loads(raw)
+                json_stats = json_data.get("stats", {})
+                total_actual = json_stats.get("expected", 0) + json_stats.get("unexpected", 0)
+                if total_actual > 0:
+                    mtime = json_path.stat().st_mtime
+                    for spec_name in detected_json_specs:
+                        # 同じパスが既にある場合は上書き、なければ追加
+                        spec_sources[spec_name][str(json_path)] = (mtime, "json", json_path)
             except Exception:
                 pass
 
-        # 2) repair_run.log / initial_run.log（フォールバック）
+        # 2) repair_run.log / initial_run.log（フォールバック・jsonがない場合）
         for log_name in ("repair_run.log", "initial_run.log"):
             log_path = agent_dir / log_name
             if not log_path.exists():
@@ -164,13 +176,20 @@ def collect_agent_sources() -> dict[str, dict[int, tuple[str, Path]]]:
             try:
                 raw = log_path.read_text(errors="replace")
                 detected_specs = set(re.findall(r"tests/(\w[\w-]+)\.spec\.js", raw))
+                mtime = log_path.stat().st_mtime
                 for spec_name in detected_specs:
-                    if agent_num not in spec_agents[spec_name]:
-                        spec_agents[spec_name][agent_num] = ("log", log_path)
+                    # jsonが同じエージェントに存在する場合はlogを使わない
+                    if str(agent_dir / "playwright-results.json") not in spec_sources[spec_name]:
+                        spec_sources[spec_name][str(log_path)] = (mtime, "log", log_path)
             except Exception:
                 pass
 
-    return dict(spec_agents)
+    # mtime昇順のリストに変換（古→新の順でマージするため）
+    result: dict[str, list[tuple[float, str, Path]]] = {}
+    for spec_name, sources in spec_sources.items():
+        sorted_sources = sorted(sources.values(), key=lambda x: x[0])
+        result[spec_name] = [(mtime, src_type, path) for mtime, src_type, path in sorted_sources]
+    return result
 
 
 def aggregate(spec_filter: str | None = None, latest_only: bool = False) -> list[dict]:
@@ -194,17 +213,13 @@ def aggregate(spec_filter: str | None = None, latest_only: bool = False) -> list
     if spec_filter:
         spec_agents = {k: v for k, v in spec_agents.items() if k == spec_filter}
 
-    # 各specについて処理
+    # 各specについて処理（古いソース→新しいソースの順でマージ）
     for spec_name in sorted(spec_agents.keys()):
-        agents = spec_agents[spec_name]
+        sources = spec_agents[spec_name]  # [(mtime, source_type, path), ...] mtime昇順
         if latest_only:
-            agent_num = max(agents.keys())
-            agent_map = {agent_num: agents[agent_num]}
-        else:
-            # 全agent・古い順で処理（新しいものが上書き）
-            agent_map = agents
+            sources = sources[-1:]  # 最新のみ
 
-        for agent_num, (source_type, source_path) in sorted(agent_map.items()):
+        for mtime, source_type, source_path in sources:
             if source_type == "json":
                 case_results = parse_playwright_json(source_path, spec_name)
                 source_label = "playwright-results.json"
@@ -216,21 +231,27 @@ def aggregate(spec_filter: str | None = None, latest_only: bool = False) -> list
             if not case_results:
                 continue
 
-            # 全件skippedの場合は環境失敗とみなしてスキップ（latest_only=Falseのみ）
+            # 全件skippedの場合は環境失敗とみなしてスキップ
             actual_runs = sum(1 for s in case_results.values() if s in ("passed", "failed"))
             if not latest_only and actual_runs == 0:
                 continue
 
+            # ソースエージェント番号（ログ出力用）
+            try:
+                source_agent = int(source_path.parent.name.split("-")[1])
+            except Exception:
+                source_agent = 0
+
             for case_no, status in case_results.items():
                 key = f"{spec_name}/{case_no}"
                 if not latest_only:
-                    # マージモード: passed/failedは常に上書き、skippedは既存がなければセット
+                    # マージモード: 新しいソースが古いソースを上書き（passed/failed優先）
                     prev = all_records.get(key)
                     if status in ("passed", "failed") or prev is None:
                         all_records[key] = {
                             "scenario": key,
                             "status": status,
-                            "agent": agent_num,
+                            "agent": source_agent,
                             "file": f"{spec_name}.spec.js",
                             "errors": [],
                         }
@@ -238,15 +259,23 @@ def aggregate(spec_filter: str | None = None, latest_only: bool = False) -> list
                     all_records[key] = {
                         "scenario": key,
                         "status": status,
-                        "agent": agent_num,
+                        "agent": source_agent,
                         "file": f"{spec_name}.spec.js",
                         "errors": [],
                     }
 
-            p = sum(1 for s in case_results.values() if s == "passed")
-            f = sum(1 for s in case_results.values() if s == "failed")
-            s = sum(1 for s in case_results.values() if s == "skipped")
-            print(f"  {spec_name} (agent-{agent_num}, {source_label}): {len(case_results)}件 "
+        # 最終選択ソースをログ出力
+        if sources:
+            _, final_type, final_path = sources[-1]
+            try:
+                final_agent = int(final_path.parent.name.split("-")[1])
+            except Exception:
+                final_agent = 0
+            spec_cases = {k: v for k, v in all_records.items() if k.startswith(f"{spec_name}/")}
+            p = sum(1 for r in spec_cases.values() if r["status"] == "passed")
+            f = sum(1 for r in spec_cases.values() if r["status"] == "failed")
+            s = sum(1 for r in spec_cases.values() if r["status"] == "skipped")
+            print(f"  {spec_name} (agent-{final_agent}, {final_path.name}): {len(spec_cases)}件 "
                   f"(passed={p} failed={f} skipped={s})")
 
     return list(all_records.values())
