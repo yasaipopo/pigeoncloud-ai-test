@@ -172,6 +172,33 @@ async function getAllTypeTableId(page) {
 // =============================================================================
 
 test.describe('追加実装テスト（314-579系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(360000);
+        const page = await browser.newPage();
+        await login(page);
+        ({ tableId } = await setupAllTypeTable(page));
+        if (!tableId) {
+            await page.close();
+            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
+        }
+        await page.close();
+    });
+
+    test.beforeEach(async ({ page }) => {
+        try {
+            await login(page);
+        } catch (e) {
+            if (e.message && e.message.includes('アカウントロック')) {
+                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
+                process.exit(1);
+            }
+            throw e;
+        }
+        await closeTemplateModal(page);
+    });
+
     test('673: 仕様確認673', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C050ZRN4PNC/p1733205093440009
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__26
