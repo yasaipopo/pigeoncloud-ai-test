@@ -199,7 +199,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await login(page);
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
-                test.skip(true, `アカウントロックのためスキップ: ${e.message}`);
+                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
+                process.exit(1);
                 return;
             }
             throw e;
@@ -229,7 +230,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await login(page, testEmail, testPassword);
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
-                test.skip(true, `テストユーザーがアカウントロック状態: ${e.message}`);
+                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
+                process.exit(1);
                 return;
             }
             throw e;
@@ -255,6 +257,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 215-5: テーブルアイコンタイプ - アイコン指定なし
     // ---------------------------------------------------------------------------
     test('215-5: テーブルアイコンタイプ「アイコン」で未指定の場合デフォルトアイコン表示になること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // テーブル管理画面へ
         await page.goto(BASE_URL + '/admin/dataset');
         await page.waitForLoadState('domcontentloaded');
@@ -268,6 +271,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 78-1(A/B): ダッシュボード - チャートの並び替え（D&D）
     // ---------------------------------------------------------------------------
     test('78-1: ダッシュボードでチャートをドラッグアンドドロップで並び替えができること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         await page.goto(BASE_URL + '/admin/dashboard');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -310,6 +314,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-4(B): ダッシュボード - ユーザー（帳票登録）
     // ---------------------------------------------------------------------------
     test('82-4: ユーザータイプ「ユーザー」でダッシュボードから帳票登録が行えること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
         await page.waitForLoadState('domcontentloaded');
@@ -323,6 +328,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-8(A/B): ダッシュボード - マスター（チャート追加）
     // ---------------------------------------------------------------------------
     test('82-8: マスターユーザーでダッシュボードからチャート追加が行えること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
         await page.waitForLoadState('domcontentloaded');
@@ -336,6 +342,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-9(A/B): ダッシュボード - マスター（帳票登録）
     // ---------------------------------------------------------------------------
     test('82-9: マスターユーザーでダッシュボードから帳票登録が行えること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
         await page.waitForLoadState('domcontentloaded');
@@ -349,6 +356,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 154-1(B): カスタムCSS（適用）
     // ---------------------------------------------------------------------------
     test('154-1: カスタムCSSを適用するとCSSの定義通りにUIが変更されること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // テスト用CSSファイルを一時作成
         const cssContent = '/* PigeonCloud UI test */ .navbar { border-bottom: 3px solid red !important; }';
         const cssFilePath = '/tmp/test_custom.css';
@@ -394,6 +402,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 154-2(B): カスタムCSS（削除）
     // ---------------------------------------------------------------------------
     test('154-2: カスタムCSSを削除するとUIがデフォルトに戻ること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
         await page.waitForLoadState('domcontentloaded');
@@ -454,7 +463,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -468,7 +477,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
                 // アカウントロック時はテストをスキップする
-                test.skip(true, `アカウントロックのためスキップ: ${e.message}`);
+                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
+                process.exit(1);
                 return;
             }
             throw e;
@@ -480,6 +490,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 127-01(A/B): ショートカットキー Ctrl+Space でテーブル検索
     // ---------------------------------------------------------------------------
     test('127-01: Ctrl+Spaceでテーブル検索が行えること', async ({ page }) => {
+        test.setTimeout(120000); // beforeEachのlogin + テスト本体で60秒超えのため延長
 
         // ログイン状態の確認（アカウントロック時はスキップ）
         const currentUrl = page.url();
@@ -521,6 +532,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 215-1: テーブルアイコンタイプ - 画像（画像指定あり）
     // ---------------------------------------------------------------------------
     test('215-1: テーブルアイコンタイプ「画像」で画像をアップロードするとアイコンに表示されること', async ({ page }) => {
+        test.setTimeout(120000); // beforeEachのlogin + テスト本体で60秒超えのため延長
 
         // テーブル編集ページへ
         await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
@@ -586,6 +598,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 215-2: テーブルアイコンタイプ - 画像削除
     // ---------------------------------------------------------------------------
     test('215-2: テーブルアイコンタイプ「画像」で画像削除するとブランク表示になること', async ({ page }) => {
+        test.setTimeout(120000); // beforeEachのlogin + テスト本体で60秒超えのため延長
 
         // テーブル編集ページへ
         await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
@@ -637,6 +650,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 215-3: テーブルアイコンタイプ - 画像（画像指定なし）
     // ---------------------------------------------------------------------------
     test('215-3: テーブルアイコンタイプ「画像」で画像未指定の場合ブランク表示になること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
 
         // テーブル管理画面へ（/settingはルートへリダイレクトのため/admin/datasetを使用）
         await page.goto(BASE_URL + `/admin/dataset`);
@@ -651,6 +665,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 215-4: テーブルアイコンタイプ - アイコン（fa-user-circle-o）指定
     // ---------------------------------------------------------------------------
     test('215-4: テーブルアイコンタイプ「アイコン」でfa-user-circle-oを指定すると指定アイコンが表示されること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
 
         // テーブル管理画面へ
         await page.goto(BASE_URL + '/admin/dataset');
@@ -665,7 +680,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-1(A/B): ダッシュボード - ユーザー（テーブル詳細・CSVダウンロード）
     // ---------------------------------------------------------------------------
     test('82-1: ユーザータイプ「ユーザー」でダッシュボードからテーブル詳細・CSVダウンロードが行えること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
         // テストユーザーを作成
         const userBody = await debugApiPost(page, '/create-user');
@@ -681,7 +696,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await login(page, userBody.email, userBody.password);
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
-                test.skip(true, `テストユーザーがアカウントロック状態: ${e.message}`);
+                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
+                process.exit(1);
                 return;
             }
             throw e;
@@ -706,7 +722,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-2(A/B): ダッシュボード - ユーザー（集計）
     // ---------------------------------------------------------------------------
     test('82-2: ユーザータイプ「ユーザー」でダッシュボードから集計が行えること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
         // テストユーザーを作成
         const userBody = await debugApiPost(page, '/create-user');
@@ -719,7 +735,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await login(page, userBody.email, userBody.password);
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
-                test.skip(true, `テストユーザーがアカウントロック状態: ${e.message}`);
+                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
+                process.exit(1);
                 return;
             }
             throw e;
@@ -742,7 +759,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-3(A/B): ダッシュボード - ユーザー（チャート追加）
     // ---------------------------------------------------------------------------
     test('82-3: ユーザータイプ「ユーザー」でダッシュボードからチャート追加が行えること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
         const userBody = await debugApiPost(page, '/create-user');
         if (userBody.result !== 'success') {
@@ -754,7 +771,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await login(page, userBody.email, userBody.password);
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
-                test.skip(true, `テストユーザーがアカウントロック状態: ${e.message}`);
+                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
+                process.exit(1);
                 return;
             }
             throw e;
@@ -779,7 +797,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-5(A/B): ダッシュボード - ユーザー（通知設定）
     // ---------------------------------------------------------------------------
     test('82-5: ユーザータイプ「ユーザー」でダッシュボードから通知設定が行えること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
         const userBody = await debugApiPost(page, '/create-user');
         if (userBody.result !== 'success') {
@@ -791,7 +809,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await login(page, userBody.email, userBody.password);
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
-                test.skip(true, `テストユーザーがアカウントロック状態: ${e.message}`);
+                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
+                process.exit(1);
                 return;
             }
             throw e;
@@ -815,6 +834,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-6(A/B): ダッシュボード - マスター（CSVダウンロード）
     // ---------------------------------------------------------------------------
     test('82-6: マスターユーザーでダッシュボードからCSVダウンロードが行えること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
 
         // テーブルのレコード一覧へ
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -828,6 +848,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-7(A/B): ダッシュボード - マスター（集計）
     // ---------------------------------------------------------------------------
     test('82-7: マスターユーザーでダッシュボードから集計が行えること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
 
         // テーブルのレコード一覧へ
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -846,6 +867,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // 82-10(A/B): ダッシュボード - マスター（通知設定）
     // ---------------------------------------------------------------------------
     test('82-10: マスターユーザーでダッシュボードからテーブルの通知設定が行えること', async ({ page }) => {
+        test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
 
         // テーブルのレコード一覧へ（/notificationはルートへリダイレクトのため直接レコード一覧を使用）
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);

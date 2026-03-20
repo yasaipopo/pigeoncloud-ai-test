@@ -183,16 +183,21 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
         try {
             await login(page);
             // ユーザー上限・テーブル上限を外す（ユーザー作成失敗スキップを防ぐ）
-            await page.evaluate(async (baseUrl) => {
+            // page.evaluate でブラウザのセッションクッキーを使ってAPIを呼ぶ
+            const result = await page.evaluate(async (baseUrl) => {
                 try {
-                    await fetch(baseUrl + '/admin/debug-tools/settings', {
+                    const r = await fetch(baseUrl + '/api/admin/debug/settings', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                        body: JSON.stringify({ table: 'setting', data: { max_user: 9999, max_table_num: 9999 } }),
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' },
                         credentials: 'include',
+                        body: JSON.stringify({ table: 'setting', data: { max_user: 9999, max_table_num: 9999 } }),
                     });
-                } catch (e) {}
+                    return await r.json();
+                } catch (e) {
+                    return { error: e.message };
+                }
             }, BASE_URL);
+            console.log('[beforeAll] 上限解除結果:', JSON.stringify(result));
         } catch (e) {
             // アカウントロックまたはログイン失敗時はbeforeAllをスキップ（各テストはbeforeEachでスキップされる）
             if (e.message && e.message.includes('ACCOUNT_LOCKED')) {
@@ -245,19 +250,26 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
     // 2-1: マスターユーザー追加（全項目入力）
     test('2-1: ユーザータイプ「マスター」のユーザーを全項目入力で追加できること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded' });
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        // テーブル一覧が表示されるまで待つ（Angularレンダリング完了）
+        await page.waitForSelector('table, .list-table, [class*="table"]', { timeout: 15000 }).catch(() => {});
+        await page.waitForTimeout(1500);
 
-        // ユーザー追加ボタンをクリック
-        const addBtn = page.locator('button, a').filter({ hasText: /ユーザーを追加|新規追加|ユーザー追加|追加/ }).first();
-        const addBtnCount = await addBtn.count();
-        if (addBtnCount > 0) {
-            await addBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+        // ユーザー追加ボタンをクリック（テーブルツールバーの最初のボタン = + アイコン）
+        const addBtn = page.locator('button, a').filter({ hasText: /ユーザーを追加|新規追加|ユーザー追加/ }).first();
+        const addBtnVisible = await addBtn.isVisible().catch(() => false);
+        if (addBtnVisible) {
+            await addBtn.click();
         } else {
-            await page.goto(BASE_URL + '/admin/admin/edit/new', { waitUntil: 'domcontentloaded' });
-            await page.waitForLoadState('domcontentloaded');
+            // テキストなしの+ボタン: main > 最初のボタン（ツールバーの追加ボタン）
+            const mainFirstBtn = page.locator('main button').first();
+            const mainFirstBtnCount = await mainFirstBtn.count();
+            if (mainFirstBtnCount > 0) {
+                await mainFirstBtn.click({ force: true });
+            }
         }
+        // フォームが表示されるまで待つ
+        await page.waitForSelector('input[placeholder*="太郎"], input[type="email"]', { timeout: 10000 }).catch(() => {});
+        await page.waitForTimeout(500);
 
         // ユーザー名入力
         const nameInput = page.locator('input[name="name"], input[placeholder*="名前"], #name').first();
@@ -298,11 +310,11 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
             }
         }
 
-        // 保存ボタンをクリック
-        const saveBtn = page.locator('button[type=submit], button').filter({ hasText: /登録|保存|作成|追加/ }).first();
-        const saveBtnCount = await saveBtn.count();
-        if (saveBtnCount > 0) {
-            await saveBtn.click({ force: true });
+        // 保存ボタンをクリック（フォームの「登録」ボタン）
+        const saveBtn = page.locator('button').filter({ hasText: /^登録$/ }).first();
+        const saveBtnVisible = await saveBtn.isVisible().catch(() => false);
+        if (saveBtnVisible) {
+            await saveBtn.click();
             await page.waitForTimeout(2000);
         }
 
@@ -321,18 +333,26 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
     // 2-2: ユーザータイプ「ユーザー」追加（全項目入力）
     test('2-2: ユーザータイプ「ユーザー」のユーザーを全項目入力で追加できること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded' });
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        // テーブル一覧が表示されるまで待つ（Angularレンダリング完了）
+        await page.waitForSelector('table, .list-table, [class*="table"]', { timeout: 15000 }).catch(() => {});
+        await page.waitForTimeout(1500);
 
-        const addBtn = page.locator('button, a').filter({ hasText: /ユーザーを追加|新規追加|ユーザー追加|追加/ }).first();
-        const addBtnCount = await addBtn.count();
-        if (addBtnCount > 0) {
-            await addBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+        // ユーザー追加ボタンをクリック（テーブルツールバーの最初のボタン = + アイコン）
+        const addBtn = page.locator('button, a').filter({ hasText: /ユーザーを追加|新規追加|ユーザー追加/ }).first();
+        const addBtnVisible = await addBtn.isVisible().catch(() => false);
+        if (addBtnVisible) {
+            await addBtn.click();
         } else {
-            await page.goto(BASE_URL + '/admin/admin/edit/new', { waitUntil: 'domcontentloaded' });
-            await page.waitForLoadState('domcontentloaded');
+            // テキストなしの+ボタン: main > 最初のボタン（ツールバーの追加ボタン）
+            const mainFirstBtn = page.locator('main button').first();
+            const mainFirstBtnCount = await mainFirstBtn.count();
+            if (mainFirstBtnCount > 0) {
+                await mainFirstBtn.click({ force: true });
+            }
         }
+        // フォームが表示されるまで待つ
+        await page.waitForSelector('input[placeholder*="太郎"], input[type="email"]', { timeout: 10000 }).catch(() => {});
+        await page.waitForTimeout(500);
 
         // ユーザー名入力
         const nameInput = page.locator('input[name="name"], input[placeholder*="名前"], #name').first();
@@ -371,10 +391,11 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
             }
         }
 
-        const saveBtn = page.locator('button[type=submit], button').filter({ hasText: /登録|保存|作成|追加/ }).first();
-        const saveBtnCount = await saveBtn.count();
-        if (saveBtnCount > 0) {
-            await saveBtn.click({ force: true });
+        // 保存ボタンをクリック（フォームの「登録」ボタン）
+        const saveBtn = page.locator('button').filter({ hasText: /^登録$/ }).first();
+        const saveBtnVisible = await saveBtn.isVisible().catch(() => false);
+        if (saveBtnVisible) {
+            await saveBtn.click();
             await page.waitForTimeout(2000);
         }
 

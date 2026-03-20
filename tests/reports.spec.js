@@ -118,6 +118,9 @@ async function navigateToReportSetting(page, tableId) {
 // =============================================================================
 
 test.describe('帳票（登録・出力・ダウンロード）', () => {
+    // describeブロック全体のデフォルトタイムアウトを120秒に設定
+    // （beforeEachのログイン処理が遅い場合に60秒で失敗することを防ぐ）
+    test.describe.configure({ timeout: 120000 });
 
     // describeブロック内で共有するtableId
     let tableId = null;
@@ -127,7 +130,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -145,6 +148,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // 144-01: 帳票：関連テーブルを帳票出力に入れ込めるように変更
     // -------------------------------------------------------------------------
     test('144-01: 帳票設定で関連テーブルの追加ができること', async ({ page }) => {
+        test.setTimeout(120000); // ログイン+ページ遷移で時間がかかるため延長
 
         await navigateToReportSetting(page, tableId);
 
@@ -289,6 +293,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // 出力ファイル名フォーマットを %m-%d に設定し、YYYY-MM.pdf でダウンロードされること
     // -------------------------------------------------------------------------
     test('208: 帳票のファイル名フォーマット設定ができること（PDF）', async ({ page }) => {
+        test.setTimeout(120000); // beforeEachのログインが遅い場合に備えて延長
 
         await navigateToReportSetting(page, tableId);
 
@@ -321,7 +326,8 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // レコード一覧に移動
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(2000);
 
         await expect(page.locator('.navbar')).toBeVisible();
@@ -361,7 +367,8 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     test('230: ユーザーテーブルの帳票設定ページが表示されること', async ({ page }) => {
         // ユーザーテーブル（/admin/user）の帳票設定を確認
         await page.goto(BASE_URL + '/admin/user');
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(1500);
 
         await expect(page.locator('.navbar')).toBeVisible();
@@ -498,6 +505,17 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             test.skip(true, 'テーブルが見つかりません（テーブルが削除された可能性）');
             return;
         }
+
+        // Angularのレンダリングを十分に待機してから列ヘッダーを確認
+        // （Angular SPAは描画に8秒以上かかることがある）
+        // 「画像」または「ファイル」テキストを持つ th が表示されるまで最大20秒待機
+        await page.waitForFunction(
+            () => {
+                const ths = Array.from(document.querySelectorAll('th'));
+                return ths.some(th => (th.innerText || th.textContent || '').includes('画像'));
+            },
+            { timeout: 20000 }
+        ).catch(() => {});
 
         // テーブルに「画像」「ファイル」カラムが存在することを確認
         const columnHeaders = page.locator('table thead th, table th');

@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { setupAllTypeTable, createAllTypeData } = require('./helpers/table-setup');
 const fs = require('fs');
 const path = require('path');
 
@@ -238,9 +238,13 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         test.setTimeout(360000);
         await login(page, EMAIL, PASSWORD);
 
-        const tableId = await setupAllTypeTable(page);
+        const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
         saveTestTableId(tableId);
+
+        // テスト224（JSONエクスポート）等でレコードのチェックが必要なためデータを作成する
+        await createAllTypeData(page, 5, 'fixed');
+        await page.waitForTimeout(3000);
     });
 
     // =========================================================================

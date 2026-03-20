@@ -12,7 +12,13 @@
  * 認証情報は .env に記載（IMAP_HOST, IMAP_PORT, IMAP_USER, IMAP_PASS）
  */
 
-const { ImapFlow } = require('imapflow');
+// imapflowが未インストールの場合はスタブを使用
+let ImapFlow;
+try {
+    ImapFlow = require('imapflow').ImapFlow;
+} catch (e) {
+    ImapFlow = null;
+}
 
 // .env から認証情報を読む（Playwrightがdotenvを自動ロードするため不要な場合も多い）
 const IMAP_HOST = process.env.IMAP_HOST || 'www3569.sakura.ne.jp';
@@ -25,6 +31,9 @@ const IMAP_PASS = process.env.IMAP_PASS;
  * @returns {Promise<ImapFlow>}
  */
 async function createClient() {
+    if (!ImapFlow) {
+        throw new Error('imapflowモジュールが未インストールです。npm install imapflowを実行してください');
+    }
     if (!IMAP_USER || !IMAP_PASS) {
         throw new Error('IMAP認証情報が未設定です。.envにIMAP_USER/IMAP_PASSを設定してください');
     }

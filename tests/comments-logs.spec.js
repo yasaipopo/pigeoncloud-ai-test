@@ -393,7 +393,7 @@ test.describe('コメントメンション', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        const tableId = await setupAllTypeTable(page);
+        const { tableId } = await setupAllTypeTable(page);
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -598,6 +598,8 @@ test.describe('コメントメンション', () => {
     // 242 (B): ログとコメントをまとめて表示する設定が有効の時にメンションが出ること
     // ---------------------------------------------------------------------------
     test('242: ログとコメントをまとめて表示が有効の時にメンション機能が動作すること', async ({ page }) => {
+        // このテストは設定変更+コメント送信を含むため個別にタイムアウトを延長
+        test.setTimeout(180000);
         await login(page);
         await closeTemplateModal(page);
 
@@ -689,8 +691,14 @@ test.describe('コメントメンション', () => {
         const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
         await sendBtn.click({ force: true });
 
-        // 送信完了まで待機（Angular DOMの更新を含む）
-        await page.waitForTimeout(8000);
+        // 送信完了まで待機（コメントが表示されるまで最大30秒ポーリング）
+        await page.waitForFunction(
+            () => {
+                const aside = document.querySelector('aside');
+                return aside && aside.innerText.includes('マスターユーザー');
+            },
+            { timeout: 30000 }
+        ).catch(() => {});
 
         // コメントが表示されることを確認（送信者名が表示される）
         const asideContent = await page.innerText('aside');

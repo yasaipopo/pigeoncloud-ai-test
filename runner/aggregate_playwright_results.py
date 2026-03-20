@@ -168,8 +168,8 @@ def collect_agent_sources() -> dict[str, list[tuple[float, str, Path]]]:
             except Exception:
                 pass
 
-        # 2) repair_run.log / initial_run.log（フォールバック・jsonがない場合）
-        for log_name in ("repair_run.log", "initial_run.log"):
+        # 2) repair_run.log / initial_run.log / test_run.log / test_run_full.log（フォールバック・jsonがない場合）
+        for log_name in ("repair_run.log", "initial_run.log", "test_run.log", "test_run_full.log"):
             log_path = agent_dir / log_name
             if not log_path.exists():
                 continue

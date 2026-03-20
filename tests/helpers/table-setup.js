@@ -19,13 +19,13 @@ const BASE_URL = process.env.TEST_BASE_URL;
  * @param {Object} options
  * @param {number} [options.pollIntervalMs=10000] - ポーリング間隔（ms）
  * @param {number} [options.maxPolls=30] - 最大ポーリング回数（30×10秒=300秒）
- * @returns {Promise<string|null>} tableId（成功時）またはnull（失敗時）
+ * @returns {Promise<{result: string, tableId: string|null}>} 成功時 {result: 'success', tableId: string}、失敗時 {result: 'failure', tableId: null}
  */
 async function setupAllTypeTable(page, { pollIntervalMs = 10000, maxPolls = 30 } = {}) {
     // 1. まず既存テーブルを確認（deleteしない）
     const existingId = await getAllTypeTableId(page);
     if (existingId) {
-        return String(existingId);
+        return { result: 'success', tableId: String(existingId) };
     }
 
     // 2. 作成APIを呼ぶ（504が来てもOK、fire-and-forget）
@@ -43,7 +43,7 @@ async function setupAllTypeTable(page, { pollIntervalMs = 10000, maxPolls = 30 }
         await page.waitForTimeout(pollIntervalMs);
         const tableId = await getAllTypeTableId(page);
         if (tableId) {
-            return String(tableId);
+            return { result: 'success', tableId: String(tableId) };
         }
     }
 
@@ -55,11 +55,11 @@ async function setupAllTypeTable(page, { pollIntervalMs = 10000, maxPolls = 30 }
             .getAttribute('href', { timeout: 10000 }).catch(() => null);
         if (href) {
             const match = href.match(/dataset__(\d+)/);
-            if (match) return match[1];
+            if (match) return { result: 'success', tableId: match[1] };
         }
     } catch (e) {}
 
-    return null;
+    return { result: 'failure', tableId: null };
 }
 
 /**

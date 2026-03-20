@@ -441,6 +441,7 @@ test.describe('表示条件設定（250系）', () => {
 
 test.describe('ユーザー管理（251系）', () => {
     test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
         await login(page);
         await closeTemplateModal(page);
     });

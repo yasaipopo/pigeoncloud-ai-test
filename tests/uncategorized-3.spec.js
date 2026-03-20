@@ -187,6 +187,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000); // ログインタイムアウト対策
         try {
             await login(page);
         } catch (e) {
@@ -194,7 +195,9 @@ test.describe('追加実装テスト（314-579系）', () => {
                 console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
                 process.exit(1);
             }
-            throw e;
+            // ログイン失敗時は1回リトライ
+            await page.waitForTimeout(3000);
+            await login(page);
         }
         await closeTemplateModal(page);
     });

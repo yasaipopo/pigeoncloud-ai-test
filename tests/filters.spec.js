@@ -115,7 +115,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');

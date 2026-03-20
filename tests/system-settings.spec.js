@@ -121,15 +121,52 @@ async function login(page, email, password) {
                 await inputs[1].fill(newPw);
                 await page.click('button[type=submit].btn-primary, button.btn-primary');
                 await page.waitForURL('**/admin/dashboard', { timeout: 20000 }).catch(() => {});
+                // pw_change_interval_daysをリセット（89-1テストの副作用除去）
+                await page.evaluate(async (baseUrl) => {
+                    const fd = new FormData();
+                    fd.append('id', '1');
+                    fd.append('pw_change_interval_days', '');
+                    await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
+                        method: 'POST', body: fd, credentials: 'include',
+                    }).catch(() => {});
+                }, BASE_URL).catch(() => {});
             }
         } else if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             // リトライ時も#idが現れるまで待つ
             await page.waitForSelector('#id', { timeout: 10000 }).catch(() => {});
-            await page.fill('#id', email || EMAIL);
-            await page.fill('#password', password || PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            // エラーメッセージを確認（パスワード変更された場合は_new1パスワードも試みる）
+            const loginBodyText = await page.innerText('body').catch(() => '');
+            if (loginBodyText.includes('IDまたはパスワードが正しくありません') && !password) {
+                // 89-1テストによりパスワードが変更されている可能性 → _new1パスワードで試みる
+                const altPw = PASSWORD + '_new1';
+                await page.fill('#id', email || EMAIL);
+                await page.fill('#password', altPw);
+                await page.click('button[type=submit].btn-primary');
+                try {
+                    await page.waitForURL('**/admin/dashboard', { timeout: 20000 });
+                    // _new1パスワードでdashboard到達 → pw_change_interval_daysをAPIでリセット（副作用除去）
+                    await page.evaluate(async (baseUrl) => {
+                        const fd = new FormData();
+                        fd.append('id', '1');
+                        fd.append('pw_change_interval_days', '');
+                        await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
+                            method: 'POST', body: fd, credentials: 'include',
+                        }).catch(() => {});
+                    }, BASE_URL).catch(() => {});
+                } catch (e2) {
+                    // _new1も失敗 → 通常パスワードで再試行
+                    await page.fill('#id', email || EMAIL);
+                    await page.fill('#password', password || PASSWORD);
+                    await page.click('button[type=submit].btn-primary');
+                    await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+                }
+            } else {
+                await page.fill('#id', email || EMAIL);
+                await page.fill('#password', password || PASSWORD);
+                await page.click('button[type=submit].btn-primary');
+                await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            }
         }
     }
     await page.waitForTimeout(2000);
@@ -312,7 +349,7 @@ test.describe('共通設定・システム設定', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -472,12 +509,32 @@ test.describe('共通設定・システム設定', () => {
     // 10-4(A/B): 共通設定 - テーブルの削除
     // ---------------------------------------------------------------------------
     test('10-4: テーブルの削除がエラーなく行えること', async ({ page }) => {
-        test.setTimeout(300000); // create-all-type-tableが60秒以上かかる場合があるためタイムアウト延長
+        test.setTimeout(600000); // beforeAll+create-all-type-table×2で300s超過するため600sに延長
 
-        // 削除用の一時テーブルを作成する（create-all-type-tableはALLテストテーブルを作成）
-        const createResult = await debugApiPost(page, '/create-all-type-table');
+        // 削除用の一時テーブルを作成する
+        // create-all-type-table は 504 で返ることがあるが、バックエンドは処理完了している
+        // AbortControllerで90秒タイムアウトを設定し、504後もテーブル存在確認する
+        const createResult = await page.evaluate(async ({ baseUrl }) => {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 90000);
+            try {
+                const resp = await fetch(baseUrl + '/api/admin/debug/create-all-type-table', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({}),
+                    credentials: 'include',
+                    signal: controller.signal,
+                });
+                clearTimeout(timer);
+                const text = await resp.text();
+                try { return JSON.parse(text); } catch(e) { return { result: 'timeout', status: resp.status }; }
+            } catch (e) {
+                clearTimeout(timer);
+                return { result: 'aborted', message: e.message };
+            }
+        }, { baseUrl: BASE_URL }).catch(e => ({ result: 'error', message: e.message }));
         console.log('一時テーブル作成結果: ' + JSON.stringify(createResult).substring(0, 100));
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(2000).catch(() => {});
 
         // 作成されたテーブル一覧を取得して、共有tableId以外を削除
         const tableList = await page.evaluate(async ({ baseUrl }) => {
@@ -518,19 +575,10 @@ test.describe('共通設定・システム設定', () => {
     // 7-1(A/B): システム利用状況 - ユーザー数増加
     // ---------------------------------------------------------------------------
     test('7-1: ユーザーを増やすとシステム利用状況のユーザー数表示が増えること', async ({ page }) => {
-        // ユーザー上限を解除してからユーザーを作成する
-        const limitResult = await page.evaluate(async (baseUrl) => {
-            const payload = JSON.stringify({ table: 'setting', data: { max_user: 9999 } });
-            const headers = { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
-            for (const path of ['/admin/debug-tools/settings', '/api/admin/debug/settings']) {
-                try {
-                    const resp = await fetch(baseUrl + path, { method: 'POST', headers, body: payload, credentials: 'include' });
-                    if (resp.ok) return { path, ok: true };
-                } catch (e) {}
-            }
-            return { ok: false };
-        }, BASE_URL);
+        // ユーザー上限を解除してからユーザーを作成する（正しいAPIエンドポイントを使用）
+        const limitResult = await debugApiPost(page, '/settings', { table: 'setting', data: { max_user: 9999 } });
         console.log('ユーザー上限解除:', JSON.stringify(limitResult));
+        await page.waitForTimeout(1000);
 
         // その他設定ページへ（Angular router: /admin/admin_setting/edit/1）
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
@@ -561,17 +609,17 @@ test.describe('共通設定・システム設定', () => {
     // 7-2(A/B): システム利用状況 - ユーザー数減少
     // ---------------------------------------------------------------------------
     test('7-2: ユーザーを減らすとシステム利用状況のユーザー数表示が減ること', async ({ page }) => {
-        // ユーザー上限を解除してからユーザーを作成する
-        await page.evaluate(async (baseUrl) => {
-            const payload = JSON.stringify({ table: 'setting', data: { max_user: 9999 } });
-            const headers = { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
-            for (const path of ['/admin/debug-tools/settings', '/api/admin/debug/settings']) {
-                try {
-                    const resp = await fetch(baseUrl + path, { method: 'POST', headers, body: payload, credentials: 'include' });
-                    if (resp.ok) return;
-                } catch (e) {}
-            }
-        }, BASE_URL);
+        // セッションを確立する（ログインページを経由せずダッシュボードへ移動）
+        await page.goto(BASE_URL + '/admin/dashboard');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(1000);
+
+        // ユーザー上限を解除してからユーザーを作成する（正しいAPIエンドポイントを使用）
+        const limitResult2 = await debugApiPost(page, '/settings', { table: 'setting', data: { max_user: 9999 } });
+        console.log('ユーザー上限解除(7-2):', JSON.stringify(limitResult2));
+
+        // 上限解除後に少し待機してDB更新・キャッシュクリアを確実にする
+        await page.waitForTimeout(2000);
 
         // テストユーザーを作成
         const userBody = await debugApiPost(page, '/create-user');
@@ -1219,7 +1267,16 @@ test.describe('共通設定・システム設定', () => {
         // 設定ページが表示されていることを確認（パスワード変更画面でないこと）
         const bodyText = await page.innerText('body');
         if (bodyText.includes('パスワードを変更してください') || bodyText.includes('新しいパスワード')) {
-            // パスワード変更画面が出た場合は設定がリセットされていない→もう一度リセット
+            // パスワード変更画面が出た場合は_new1パスワードに変更し、その後元に戻す
+            const newPw = PASSWORD + '_new1';
+            const inputs = await page.locator('input[type="password"]').all();
+            if (inputs.length >= 2) {
+                await inputs[0].fill(newPw);
+                await inputs[1].fill(newPw);
+                await page.click('button[type=submit].btn-primary, button.btn-primary');
+                await page.waitForURL('**/admin/dashboard', { timeout: 20000 }).catch(() => {});
+            }
+            // pw_change_interval_daysを再リセット
             await page.evaluate(async (baseUrl) => {
                 const fd = new FormData();
                 fd.append('id', '1');
@@ -1228,10 +1285,8 @@ test.describe('共通設定・システム設定', () => {
                     method: 'POST', body: fd, credentials: 'include',
                 }).catch(() => {});
             }, BASE_URL).catch(() => {});
-            // 再ログイン
-            await page.goto(BASE_URL + '/admin/login');
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(1000);
+            console.log('[89-1] パスワード変更画面が出たため_new1に変更・pw_change_interval_daysリセット完了');
+            // パスワードが_new1に変わったことをメモしておく（login関数で対処済み）
         }
 
         const settingContent = page.locator('.content, .main-content, #content, form');

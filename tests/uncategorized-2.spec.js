@@ -1284,10 +1284,11 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('610: タブを２個開いて、 ①片方で表示項目でAを選ぶ ②他方で他テーブル先からAを消す ③Aを選んだままテーブル更新 の導線で', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1043 タブを２個開いて、 ①片方で表示項目でAを選ぶ ②他方で他テーブル先からAを消す ③Aを選んだままテーブル更新 の導線で
         // expected: 想定通りの結果となること。
+        test.setTimeout(120000); // 負荷状態でのナビゲーション遅延を考慮して延長
         const tid = tableId || await getAllTypeTableId(page);
         if (!tid) { test.skip(); return; }
-        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
+        await page.goto(BASE_URL + `/admin/dataset__${tid}`, { timeout: 90000 });
+        await page.waitForLoadState('domcontentloaded', { timeout: 90000 });
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');

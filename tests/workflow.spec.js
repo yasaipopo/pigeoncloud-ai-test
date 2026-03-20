@@ -170,7 +170,7 @@ async function navigateToWorkflowPage(page, tableId) {
     try {
         const workflowTab = page.locator('.nav-tabs .nav-link:has-text("ワークフロー"), .nav-pills .nav-link:has-text("ワークフロー"), ul.nav li a:has-text("ワークフロー")').first();
         if (await workflowTab.count() > 0) {
-            await workflowTab.click();
+            await workflowTab.click({ timeout: 5000 });
             // コンテンツ読み込み完了を待つ（AJAX含む）
             await page.waitForTimeout(2000);
             // 「読み込み中...」が消えるまで最大10秒待機
@@ -197,7 +197,7 @@ test.describe('ワークフロー設定（21系）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -280,7 +280,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -401,10 +401,16 @@ test.describe('引き上げ承認（106系）', () => {
     let tableId = null;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
+        test.setTimeout(600000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        // まず既存テーブルを確認（setupAllTypeTableのfire-and-forgetが360sで間に合わない場合のフォールバック）
+        const result = await createAllTypeTable(page);
+        tableId = result.table_id ? String(result.table_id) : null;
+        if (!tableId) {
+            // リトライ: setupAllTypeTable（より長いポーリング）
+            ({ tableId } = await setupAllTypeTable(page, { maxPolls: 12, pollIntervalMs: 10000 }));
+        }
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -572,7 +578,7 @@ test.describe('一括操作（111系）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -772,7 +778,7 @@ test.describe('役職指定ワークフロー（68系）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -877,7 +883,7 @@ test.describe('承認者削除（28系）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -946,7 +952,7 @@ test.describe('申請取り下げ・一つ戻す機能（64, 296系）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -1000,7 +1006,7 @@ test.describe('ワークフロー通知（36系）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -1051,7 +1057,7 @@ test.describe('自分自身を承認者に設定した場合（166）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
@@ -1093,7 +1099,7 @@ test.describe('ワークフロー高度設定（395系）', () => {
         test.setTimeout(360000);
         const page = await browser.newPage();
         await login(page);
-        tableId = await setupAllTypeTable(page);
+        ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
