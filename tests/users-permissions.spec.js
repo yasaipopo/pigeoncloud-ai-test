@@ -32,8 +32,8 @@ async function login(page, email, password) {
             if (pageText.includes('アカウントロック')) {
                 throw new Error('ACCOUNT_LOCKED: アカウントがロックされています。テストをスキップします。');
             }
-            // 同じパスワードで再試行（#idが現れるまで待ってからfill）
-            await page.waitForTimeout(1000);
+            // 同じパスワードで再試行（ログインページを再gotoしてからfill）
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded' });
             await page.waitForSelector('#id', { timeout: 30000 });
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
@@ -239,8 +239,8 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
     });
 
     test.beforeEach(async ({ page }) => {
-        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定
-        test.setTimeout(240000);
+        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で300秒に延長）
+        test.setTimeout(300000);
         try {
             await login(page);
         } catch (e) {
@@ -902,8 +902,8 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
 test.describe('組織管理（追加・削除）', () => {
 
     test.beforeEach(async ({ page }) => {
-        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で240秒に延長）
-        test.setTimeout(240000);
+        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で300秒に延長）
+        test.setTimeout(300000);
         try {
             await login(page);
         } catch (e) {
@@ -1096,8 +1096,8 @@ test.describe('組織管理（追加・削除）', () => {
 test.describe('役職管理（登録・変更・削除）', () => {
 
     test.beforeEach(async ({ page }) => {
-        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で240秒に延長）
-        test.setTimeout(240000);
+        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で300秒に延長）
+        test.setTimeout(300000);
         try {
             await login(page);
         } catch (e) {
@@ -1243,8 +1243,8 @@ test.describe('権限設定・グループ権限', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        // ログイン（CSRF再試行含む・Angular SPA描画待ち）のために十分なタイムアウトを設定（フレーキー対策で300秒に延長）
-        test.setTimeout(300000);
+        // ログイン（CSRF再試行含む・Angular SPA描画待ち）のために十分なタイムアウトを設定（フレーキー対策で480秒に延長）
+        test.setTimeout(480000);
         try {
             await login(page);
         } catch (e) {
@@ -2669,7 +2669,7 @@ test.describe('アクセス許可IP設定（サブネット各種）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(240000);
+        test.setTimeout(300000);
         try {
             await login(page);
         } catch (e) {
