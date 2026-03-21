@@ -48,7 +48,7 @@ module.exports = async function globalSetup() {
         pad(now.getHours()), pad(now.getMinutes()), pad(now.getSeconds()),
     ].join('');
 
-    const domain   = `tmp-testai-base-${dateStr}-${agentNum}`;
+    const domain   = `tmp-testai-${dateStr}-${agentNum}`;
     const newUrl   = `https://${domain}.pigeon-demo.com`;
 
     console.log(`[global-setup] テスト環境を作成中: ${newUrl}`);
