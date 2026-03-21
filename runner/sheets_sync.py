@@ -43,6 +43,9 @@ SCENARIOS_DIR = Path(os.environ.get("SCENARIOS_DIR", str(Path(__file__).parent.p
 REPORTS_DIR = Path(os.environ.get("REPORTS_DIR", str(Path(__file__).parent.parent / "reports")))
 REPORTS_DIR.mkdir(exist_ok=True)
 
+# staging (デフォルト) or production — 結果書き込み先シートタブを切り替える
+ENV_TYPE = os.environ.get("ENV_TYPE", "staging")  # staging / production
+
 # シート定義
 SHEETS = [
     {
@@ -75,6 +78,24 @@ SHEETS = [
 def get_client():
     creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_PATH, scopes=SCOPES)
     return gspread.authorize(creds)
+
+
+def get_or_create_sheet(ss, sheet_name, template_sheet=None):
+    """シートタブを取得。存在しない場合は新規作成（本番用タブ等）。"""
+    try:
+        return ss.worksheet(sheet_name)
+    except gspread.exceptions.WorksheetNotFound:
+        ws = ss.add_worksheet(title=sheet_name, rows=2000, cols=100)
+        print(f">> シートタブ「{sheet_name}」を新規作成しました")
+        # テンプレートシートのヘッダー行をコピー
+        if template_sheet is not None:
+            try:
+                header_row = template_sheet.row_values(1)
+                if header_row:
+                    ws.append_row(header_row, value_input_option="USER_ENTERED")
+            except Exception:
+                pass
+        return ws
 
 
 def col_to_index(col: str) -> int:
@@ -210,6 +231,7 @@ def push_results():
 
     now_label = datetime.now().strftime("%Y/%m")
     now_date  = datetime.now().strftime("%Y/%m/%d")
+    env_label = "" if ENV_TYPE == "staging" else "[本番]"
 
     # GIDごとに結果を集める
     sheets_cache = {}
@@ -230,7 +252,15 @@ def push_results():
         if gid not in sheets_cache:
             for sd in SHEETS:
                 if sd["gid"] == gid:
-                    sheets_cache[gid] = {"ws": ss.worksheet(sd["name"]), "def": sd}
+                    base_name = sd["name"]
+                    if ENV_TYPE == "production":
+                        # 本番結果は「<シート名>_本番」タブに書き込む（なければ作成）
+                        staging_ws = ss.worksheet(base_name)
+                        target_name = base_name + "_本番"
+                        target_ws = get_or_create_sheet(ss, target_name, template_sheet=staging_ws)
+                    else:
+                        target_ws = ss.worksheet(base_name)
+                    sheets_cache[gid] = {"ws": target_ws, "def": sd}
                     updates_by_gid[gid] = []
                     break
 
@@ -250,7 +280,7 @@ def push_results():
         if gid == 46306531:
             # ===== シートA =====
             # 既存パターン: 右端に「チェック結果(YYYY/M)」を追加
-            header_label = f"チェック結果({now_label})"
+            header_label = f"チェック結果{env_label}({now_label})"
             if header_label in headers:
                 result_col = headers.index(header_label) + 1  # 1-indexed
             else:
@@ -277,19 +307,20 @@ def push_results():
 
             date_label   = "実施日"
             result_label = "結果"
-            date_header  = f"実施日({now_label})"
-            result_header = f"結果({now_label})"
+            date_header  = f"実施日{env_label}({now_label})"
+            result_header = f"結果{env_label}({now_label})"
 
             if result_header in headers:
                 date_col   = headers.index(date_header) + 1 if date_header in headers else None
                 result_col = headers.index(result_header) + 1
             else:
                 if insert_before is not None:
-                    # テスト実施者列の手前に2列挿入
+                    # テスト実施者列の手前に2列挿入（実際のシートIDを使用）
+                    actual_sheet_id = ws.id
                     ws.spreadsheet.batch_update({"requests": [{
                         "insertDimension": {
                             "range": {
-                                "sheetId": gid,
+                                "sheetId": actual_sheet_id,
                                 "dimension": "COLUMNS",
                                 "startIndex": insert_before,
                                 "endIndex": insert_before + 2

@@ -49,7 +49,9 @@ module.exports = async function globalSetup() {
     ].join('');
 
     const domain   = `tmp-testai-${dateStr}-${agentNum}`;
-    const newUrl   = `https://${domain}.pigeon-demo.com`;
+    // ADMIN_BASE_URL から base ドメインを抽出（pigeon-demo.com or pigeon-cloud.com）
+    const adminHost = adminBaseUrl.replace(/^https?:\/\/[^.]+\./, '');
+    const newUrl    = `https://${domain}.${adminHost}`;
 
     console.log(`[global-setup] テスト環境を作成中: ${newUrl}`);
 

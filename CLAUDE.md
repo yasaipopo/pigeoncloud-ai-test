@@ -27,9 +27,10 @@
 
 | 変数 | 内容 |
 |---|---|
-| `ADMIN_BASE_URL` | 管理用URL（テスト環境作成元）例: https://ai-test.pigeon-demo.com |
+| `ADMIN_BASE_URL` | 管理用URL（テスト環境作成元）staging: https://ai-test.pigeon-demo.com / 本番: https://ai-test.pigeon-cloud.com |
 | `ADMIN_EMAIL` | 管理用ログインID（admin） |
 | `ADMIN_PASSWORD` | 管理用パスワード |
+| `ENV_TYPE` | テスト環境種別: `staging`（デフォルト）/ `production` — Sheetsの結果書き込み先タブを切り替える |
 | `TEST_BASE_URL` | テスト実行対象URL（起動時に自動生成・上書きされる） |
 | `TEST_EMAIL` | テスト環境ログインID（作成後に設定） |
 | `TEST_PASSWORD` | テスト環境パスワード（作成後に自動取得） |
@@ -40,6 +41,18 @@
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Google認証ファイルパス（/app/secrets/service_account.json） |
 | `SPREADSHEET_ID` | テストシート ID（1h_gwuCGUAdj5fKPRZu438TKFkFkYUNUKz2K_vtEFlmI） |
 | `PIGEON_SOURCE_PATH` | ソースコードパス（/app/src/pigeon_cloud） |
+
+### 環境別の接続情報
+
+| 環境 | ADMIN_BASE_URL | ADMIN_EMAIL | ADMIN_PASSWORD | ENV_TYPE |
+|---|---|---|---|---|
+| **Staging** | `https://ai-test.pigeon-demo.com` | `admin` | （環境変数参照） | `staging` |
+| **本番** | `https://ai-test.pigeon-cloud.com` | `admin` | `BBjqqjSMxT4K` | `production` |
+
+### テスト環境ドメイン命名規則（共通）
+- Staging: `tmp-testai-{YmdHis}-{AGENT_NUM}.pigeon-demo.com`
+- 本番: `tmp-testai-{YmdHis}-{AGENT_NUM}.pigeon-cloud.com`
+  → `ADMIN_BASE_URL` からベースドメインを自動抽出（`global-setup.js` が動的に生成）
 
 ---
 
