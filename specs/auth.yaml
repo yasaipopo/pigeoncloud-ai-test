@@ -26,12 +26,6 @@ cases:
   category: パスワード入力(異常系)
   description: ①ログイン画面にて、該当のユーザーで誤ったパスワードを入力すること。
   expected: ログインエラーが発生すること。
-- case_no: 144-01
-  sheet: B
-  feature: 推奨ブラウザ
-  category: 警告出力
-  description: 推奨ブラウザ以外で、PigeonCloudを開く。
-  expected: 警告メッセージが出力されること
 - case_no: '176'
   sheet: B
   feature: ログイン
@@ -45,18 +39,6 @@ cases:
 
     password: 2IiPK9Yg'
   expected: Googleログインできること。
-- case_no: 1-1
-  sheet: B
-  feature: ログイン／ログアウト
-  category: '-'
-  description: ユーザータイプが「マスター」のユーザーでログイン、ログアウトを行う。
-  expected: エラーなくログインログアウトが完了すること。
-- case_no: 1-2
-  sheet: B
-  feature: ログイン／ログアウト
-  category: '-'
-  description: ユーザータイプが「ユーザー」のユーザーでログイン、ログアウトを行う。
-  expected: エラーなくログインログアウトが完了すること。
 - case_no: 212-1
   sheet: B
   feature: 同時ログインプラン
@@ -138,9 +120,130 @@ cases:
   description: "https://loftal.pigeon-cloud.com/admin/dataset__90/view/265\n\n※注意事項\n\
     ・設定ＯＮで有効になるのは、自分自身のパスワード変更時のみ\r\n・マスターユーザーが一般ユーザーのパスワード変更する際は、本機能は対象外となる"
   expected: 想定通りの結果となること。
+actual_steps:
+- case_no: 1-1
+  status: passed
+  steps: '1. /admin/login にアクセス
+
+    2. #id に TEST_EMAIL を入力
+
+    3. #password に TEST_PASSWORD を入力
+
+    4. button[type=submit].btn-primary をクリック
+
+    5. /admin/dashboard への遷移を確認
+
+    6. テンプレートモーダルを閉じる（.modal.show があれば）
+
+    7. /api/admin/logout をGET呼び出しでログアウト
+
+    8. /admin/login へ遷移して確認
+
+    '
+  assertions: '- URLが /admin/dashboard を含む
+
+    - .navbar が表示されている
+
+    - ログアウト後URLが /admin/login を含む
+
+    '
+  gaps: なし
+- case_no: 1-2
+  status: passed（ユーザー作成失敗時はskip）
+  steps: '1. マスターユーザーでログイン
+
+    2. /api/admin/debug/create-user APIでテストユーザーを自動生成（メール・パスワードは自動）
+
+    3. マスターユーザーをログアウト
+
+    4. 生成したユーザーのメール・パスワードでログイン
+
+    5. /admin/dashboard への遷移を確認
+
+    6. ログアウト・/admin/login 遷移確認
+
+    '
+  assertions: '- URLが /admin/dashboard を含む
+
+    - .navbar が表示されている
+
+    - ログアウト後URLが /admin/login を含む
+
+    '
+  gaps: '- ユーザー作成失敗（上限など）の場合は test.skip になる。本来は必ず実行されるべきテスト
+
+    - ユーザー削除（teardown）が存在しないため、繰り返し実行でユーザー数が増加し続ける
+
+    '
 - case_no: 38-1
-  sheet: B
-  feature: ログイン
-  category: パスワード入力(異常系)
-  description: ①ログイン画面にて、該当のユーザーで誤ったパスワードを入力すること。
-  expected: ログインエラーが発生すること。
+  status: passed
+  steps: '1. /admin/login にアクセス
+
+    2. #id に TEST_EMAIL を入力
+
+    3. #password に ''wrong_password_12345''（固定値）を入力
+
+    4. button[type=submit].btn-primary をクリック
+
+    '
+  assertions: '- URLが /admin/login を含む（ログインページに留まる）
+
+    - .toast-message が表示される
+
+    - .toast-message が ''IDまたはパスワードが正しくありません'' を含む
+
+    '
+  gaps: なし
+- case_no: 144-01
+  status: passed
+  steps: '1. Firefox の UserAgent でブラウザコンテキストを新規作成
+
+    2. /admin/login にアクセスしてログイン
+
+    3. /admin/dashboard 遷移後 3秒待機
+
+    '
+  assertions: '- .warning が表示される
+
+    - .warning が ''推奨されているブラウザ'' を含む
+
+    '
+  gaps: なし
+- case_no: '176'
+  status: skip
+  steps: なし（skip）
+  assertions: なし
+  gaps: '- Google OAuthフローが必要なため自動化困難としてskip
+
+    - YAMLには手順・期待値が記載されているが未テスト
+
+    '
+- case_no: 212-1
+  status: skip
+  steps: なし（skip）
+  assertions: なし
+  gaps: 専用環境（demo-user-num）が必要なためskip。未テスト
+- case_no: 212-2
+  status: skip
+  steps: なし（skip）
+  assertions: なし
+  gaps: 専用環境（demo-user-num）が必要なためskip。未テスト
+- case_no: 212-3
+  status: skip
+  steps: なし（skip）
+  assertions: なし
+  gaps: 1時間後の自動ログアウトは自動テスト非対象。未テスト
+- case_no: 212-4
+  status: skip
+  steps: なし（skip）
+  assertions: なし
+  gaps: 専用環境（demo-user-num）が必要なためskip。未テスト
+- case_no: '295'
+  status: skip
+  steps: なし（skip）
+  assertions: なし
+  gaps: '- 特定URL（loftal.pigeon-cloud.com）での確認が必要なためskip
+
+    - YAMLには手順・期待値が記載されているが未テスト
+
+    '

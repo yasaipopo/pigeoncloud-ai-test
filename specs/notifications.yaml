@@ -1529,3 +1529,478 @@ cases:
 
     ②  該当の「メール配信」を選択し削除する。'
   expected: エラーなく削除が行えること
+
+# =============================================================================
+# actual_steps: spec.jsが実際に行っている手順（逆引きチェック用）
+# =============================================================================
+actual_steps:
+- case_no: 54-1
+  status: partial
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
+    2. beforeAll: create-all-type-data API呼び出し (count:1, pattern:'fixed')
+    3. テーブルIDをAPIリスト取得から設定
+    4. 通知設定ページ（/admin/dataset__{tableId}/notification）に遷移
+    5. 「追加」ボタンが存在する場合はクリック
+    6. アクション未入力で「登録」ボタンをクリック
+    7. エラーメッセージの存在を確認（console.log）
+    8. afterAll: delete-all-type-tables API呼び出し
+  assertions: |
+    - エラーメッセージ数をconsole.logするのみ（アサートなし）
+  gaps: |
+    ⚠️ YAMLでは「必須項目未入力のエラーが発生すること」が期待されるが、エラーの発生をアサートしていない
+    ⚠️ エラーメッセージの内容確認なし
+    ⚠️ 追加ボタン・送信ボタンが存在しない場合でもパスする（条件付き）
+
+- case_no: 54-2
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLが /admin/ を含むことを確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ リマインドテキスト未入力でのエラー確認なし
+
+- case_no: 54-3
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLが /admin/ を含むことを確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ タイミング未入力でのエラー確認なし
+
+- case_no: 6-1
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページが表示されることを確認
+  assertions: |
+    - expect(pageContent.first()).toBeVisible()
+  gaps: |
+    ⚠️ 通知設定の実際の作成操作（アクション選択・通知先設定・保存）なし
+    ⚠️ 設定保存後にレコード作成して通知が届くことの確認なし
+
+- case_no: 6-2
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ アクション「更新」設定の確認なし
+
+- case_no: 6-3
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ アクション「削除」設定の確認なし
+
+- case_no: 6-4
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ アクション「ワークフローステータス変更時」設定の確認なし
+
+- case_no: 6-5
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ 組織への通知設定の確認なし
+
+- case_no: 32-1
+  status: partial
+  steps: |
+    1. debugApiPost('/create-user') でユーザー作成
+    2. 通知設定ページに遷移
+    3. ページURLの確認のみ
+  assertions: |
+    - expect(userBody.result).toBe('success')
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ YAMLには「通知先にユーザーを設定→ユーザー削除→他機能に影響なし」の確認が期待されるが、ユーザー削除操作なし
+    ⚠️ 通知設定へのユーザー追加・削除の操作なし
+
+- case_no: 32-2
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ 32-1と同様
+
+- case_no: 57-1
+  status: skip
+  steps: |
+    test.skip('実際のメール通知確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ メール受信確認は手動テストのみ
+
+- case_no: 57-2
+  status: skip
+  steps: |
+    test.skip('実際のメール通知確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ メール受信確認は手動テストのみ
+
+- case_no: 57-3
+  status: skip
+  steps: |
+    test.skip('実際のメール通知確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ メール受信確認は手動テストのみ
+
+- case_no: 57-4
+  status: skip
+  steps: |
+    test.skip('実際のメール通知確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ メール受信確認は手動テストのみ
+
+- case_no: 62-1
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. コンテンツ表示確認
+  assertions: |
+    - expect(pageContent.first()).toBeVisible()
+  gaps: |
+    ⚠️ 通知先メールアドレス追加の実際の操作なし
+
+- case_no: 62-2
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ 通知先メールアドレス更新の操作なし
+
+- case_no: 62-3
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ 通知先メールアドレス削除の操作なし
+
+- case_no: 62-4
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ ワークフロー承認時の通知先メールアドレス確認なし
+
+- case_no: 80-1
+  status: skip
+  steps: |
+    test.skip('時間経過確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ リマインダの分後トリガーは時間依存のため手動確認のみ
+
+- case_no: 80-2
+  status: skip
+  steps: |
+    test.skip('時間経過確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ ワークフロー申請中リマインダは時間依存のため手動確認のみ
+
+- case_no: 81-1
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ 通知の表示項目設定（テーブル名のみ）の操作・メール受信確認なし
+
+- case_no: 81-2
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ 表示項目（URLのみ）の設定確認なし
+
+- case_no: 84-1
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ ワークフロー条件設定の操作確認なし
+
+- case_no: 95-1
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ダッシュボードに遷移
+    3. ベルマークアイコンの確認（console.log）
+  assertions: |
+    - ベルマークアイコン数をconsole.logするのみ
+  gaps: |
+    ⚠️ 長文通知内容が省略されることの確認なし
+
+- case_no: 102-1
+  status: skip
+  steps: |
+    test.skip('ワークフロー操作・メール受信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ ワークフロー通知は実際のワークフロー操作とメール受信が必要のため手動確認
+
+- case_no: 105-01
+  status: skip
+  steps: |
+    test.skip('外部Webhook受信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ Webhook通知は外部サーバー受信確認が必要のため手動確認
+
+- case_no: 105-03
+  status: skip
+  steps: |
+    test.skip('Slack受信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ Slack通知は実際のSlack受信確認が必要のため手動確認
+
+- case_no: '112'
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. コピーボタンの確認（console.log）
+  assertions: |
+    - ページURLが /admin/ を含むことを確認
+  gaps: |
+    ⚠️ 通知設定のコピー操作の実行・結果確認なし
+
+- case_no: 133-01
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. 有効/無効トグルの確認（console.log）
+  assertions: |
+    - ページURLが /admin/ を含むことを確認
+  gaps: |
+    ⚠️ 有効ONにして保存・通知が有効になることの確認なし
+
+- case_no: 133-02
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ 有効OFFにして保存・通知が無効になることの確認なし
+    ⚠️ リマインダも停止することの確認なし（YAMLに注意書きあり：OFFにしてもリマインダが有効になる不具合の過去実績）
+
+- case_no: '142-01'
+  status: skip
+  steps: |
+    test.skip('ファイルアップロード・メール受信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ メール配信の添付ファイル確認は手動テストのみ
+
+- case_no: 150-1
+  status: partial
+  steps: |
+    1. ステップメール設定ページ（/admin/step_mail）に遷移
+    2. コンテンツの表示確認
+  assertions: |
+    - expect(content.first()).toBeVisible()
+  gaps: |
+    ⚠️ 必須項目チェックの実際のフォーム操作なし
+    ⚠️ エラーメッセージの発生確認なし
+
+- case_no: 150-2
+  status: skip
+  steps: |
+    test.skip('実際のメール送信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ ステップメール設定の実際のメール送信確認は手動テストのみ（150-2〜9がスキップ）
+
+- case_no: '168'
+  status: skip
+  steps: |
+    test.skip('時間経過確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 日後リマインダは時間依存のため手動確認のみ
+
+- case_no: '172'
+  status: skip
+  steps: |
+    test.skip('実際のコメント・通知確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ コメント追加時通知は手動確認のみ
+
+- case_no: '178'
+  status: skip
+  steps: |
+    test.skip('メール受信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 公開メールリンク機能は手動確認のみ
+
+- case_no: '184'
+  status: partial
+  steps: |
+    1. debugApiPost('/create-all-type-table') でテーブル作成
+    2. テーブルIDを取得
+    3. 通知設定ページに遷移
+    4. コメント通知チェックボックスの確認（console.log）
+  assertions: |
+    - ページURLが /admin/ を含むことを確認
+  gaps: |
+    ⚠️ コメント通知チェックボックスにチェックを入れて保存する操作なし
+    ⚠️ コメント追加時に通知が届くことの確認なし
+
+- case_no: 188-1
+  status: skip
+  steps: |
+    test.skip('外部メールサーバー接続が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ メール取り込み設定は外部メールサーバー（IMAP/Gmail）接続が必要のため手動確認
+
+- case_no: '190'
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. ページURLの確認のみ
+  assertions: |
+    - expect(url).toContain('/admin/')
+  gaps: |
+    ⚠️ 追加の通知先対象項目の設定・確認なし
+
+- case_no: '209'
+  status: skip
+  steps: |
+    test.skip('メール受信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ フッター設定のメール確認は手動テストのみ
+
+- case_no: 217-1
+  status: skip
+  steps: |
+    test.skip('SMTP/メール受信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ SMTP設定・メール受信確認は手動テストのみ
+
+- case_no: '218'
+  status: partial
+  steps: |
+    1. 配信リストページ（/admin/mail_list）に遷移
+    2. コンテンツの表示確認
+  assertions: |
+    - expect(content.first()).toBeVisible()
+  gaps: |
+    ⚠️ 配信リスト画面下部の配信先一覧表示確認なし（画面下部のスクロール確認なし）
+
+- case_no: '221'
+  status: partial
+  steps: |
+    1. 通知設定ページに遷移
+    2. 有効/無効コントロールの確認（console.log）
+  assertions: |
+    - ページURLが /admin/ を含むことを確認
+  gaps: |
+    ⚠️ 通知設定を無効にして保存・リマインダ通知も停止することの確認なし
+
+- case_no: '235'
+  status: skip
+  steps: |
+    test.skip('メール受信確認が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 特定項目更新時通知は手動確認のみ
+
+- case_no: 99-1
+  status: partial
+  steps: |
+    1. メールテンプレートページ（/admin/mail_template）に遷移
+    2. コンテンツの表示確認
+  assertions: |
+    - expect(content.first()).toBeVisible()
+  gaps: |
+    ⚠️ メールテンプレートの新規作成操作なし
+    ⚠️ テキストタイプTEXTでのテンプレート作成・保存確認なし
+
+- case_no: 99-2
+  status: partial
+  steps: |
+    1. メールテンプレートページに遷移
+    2. コンテンツの表示確認
+  assertions: |
+    - expect(content.first()).toBeVisible()
+  gaps: |
+    ⚠️ テキストタイプHTMLでの作成確認なし
+
+- case_no: 99-8
+  status: partial
+  steps: |
+    1. メール配信ページ（/admin/mail_delivery）に遷移
+    2. コンテンツの表示確認
+  assertions: |
+    - expect(content.first()).toBeVisible()
+  gaps: |
+    ⚠️ メール配信の新規追加操作なし

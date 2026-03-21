@@ -168,3 +168,259 @@ cases:
   category: CSVファイル以外のファイルをアップロードする(異常系)
   description: ①CSV以外のファイルをアップロードする。
   expected: インポートエラーが発生すること。
+
+# =============================================================================
+# actual_steps: spec.jsが実際に行っている手順（逆引きチェック用）
+# =============================================================================
+actual_steps:
+- case_no: 55-1
+  status: partial
+  steps: |
+    1. test.describe.configure({ mode: 'serial' }) でシリアル実行
+    2. セットアップテストでcreate-all-type-table API呼び出し
+    3. テーブルIDを /tmp/csv_export_test_table_id.txt に保存
+    4. テーブルページに遷移
+    5. CSVアップロードモーダルを開く（openCsvUploadModal関数）
+    6. ヘッダー行なしの一時CSVファイルを /tmp/test-no-header.csv として作成
+    7. fileInput.setInputFiles() でファイルをセット
+    8. アップロードボタンをクリック
+    9. 結果をconsole.logに出力
+  assertions: |
+    - expect(page.locator('.navbar')).toBeVisible()
+    - エラーメッセージの存在を console.log するのみ（アサートなし）
+  gaps: |
+    ⚠️ YAMLでは「インポートエラーが発生すること」が期待されているが、spec.jsはエラーの発生をアサートしていない
+    ⚠️ エラーメッセージの内容確認なし（console.logのみ）
+    ⚠️ try/catchでエラーを無視している可能性あり
+
+- case_no: 55-2
+  status: partial
+  steps: |
+    1. CSVアップロードモーダルを開く
+    2. CSV以外のファイル（テキストファイル）を作成して setInputFiles
+    3. アップロードボタンをクリック
+    4. 結果確認
+  assertions: |
+    - expect(page.locator('.navbar')).toBeVisible()
+    - エラーメッセージ存在の console.log のみ
+  gaps: |
+    ⚠️ 55-1と同様、エラーが実際に発生することをアサートしていない
+    ⚠️ ファイル形式バリデーションが機能しているかの検証なし
+
+- case_no: 148-01
+  status: partial
+  steps: |
+    1. テーブル編集画面のCSVタブに移動（navigateToEditCsvTab）
+    2. 子テーブルCSVラベルの存在確認（console.log）
+    3. スイッチ7番目（use_child_on_csv）をONにして保存
+    4. テーブル一覧に戻りCSVアップロードモーダルを開く
+    5. ドロップダウンにCSVダウンロード項目が存在することを確認
+  assertions: |
+    - expect(csvDlItem.first()).toBeVisible()
+    - expect(await page.locator('.alert-danger').count()).toBe(0)
+  gaps: |
+    ⚠️ 子テーブル含むCSVを実際にダウンロードして内容確認するステップなし
+    ⚠️ 子テーブルのデータがCSVに含まれているかの検証なし
+    ⚠️ スイッチが7番目にない場合は条件付きでスキップされる
+
+- case_no: 148-02
+  status: partial
+  steps: |
+    1. 148-01〜03が1つのテストにまとめられている
+    2. CSVダウンロード（空）ボタンの確認も同テスト内
+  assertions: |
+    - expect(emptyDlBtn.first()).toBeVisible()
+  gaps: |
+    ⚠️ 148-02（子テーブル含むCSVをダウンロード→内容確認）の個別実装なし
+    ⚠️ 実際のCSVダウンロードと内容確認なし
+
+- case_no: 148-03
+  status: partial
+  steps: |
+    1. 148-01〜03が1つのテストにまとめられている
+    2. 「CSVダウンロード（空）」ボタンの表示確認
+  assertions: |
+    - expect(emptyDlBtn.first()).toBeVisible()
+  gaps: |
+    ⚠️ ダウンロードした空CSVのフォーマット確認なし
+
+- case_no: 161
+  status: partial
+  steps: |
+    1. テーブルに遷移
+    2. テーブルヘッダーをクリックしてソート実行
+    3. applyQuickSearchFilter()でフィルター適用
+    4. openCsvDownloadModal()でCSVダウンロードモーダルを開く
+    5. モーダルが表示されることを確認
+    6. ダウンロードボタンが存在することを確認
+    7. モーダルを閉じる
+  assertions: |
+    - await expect(csvModal).toBeVisible()
+    - await expect(downloadBtn).toBeVisible()
+  gaps: |
+    ⚠️ YAMLでは「ソート順がCSVに反映される」ことの確認が期待されるが、実際のCSVダウンロード・内容確認なし
+    ⚠️ ソートが適用されているかの確認なし
+
+- case_no: 173
+  status: partial
+  steps: |
+    1. データセット一覧画面（/admin/dataset）に遷移
+    2. ドロップダウンボタンをクリック
+    3. 「エクセルから追加」メニューアイテムの存在確認
+    4. 存在する場合はクリックしてExcelインポートUIを開く
+    5. .navbar の表示確認
+  assertions: |
+    - await expect(page.locator('.navbar')).toBeVisible()
+    - if (menuCount > 0) の条件付きでクリック
+  gaps: |
+    ⚠️ YAMLには「Excelファイルをアップロードして項目名変更UI確認」が期待されるが未実装
+    ⚠️ Excelファイルの実際アップロードなし
+    ⚠️ メニューが表示されない場合（管理者権限確認コメント）でもパスする
+
+- case_no: 181
+  status: partial
+  steps: |
+    1. テーブルに遷移
+    2. CSVアップロードモーダルを開く
+    3. モーダルのタイトルが「CSVアップロード」を含むことを確認
+    4. ガイドテキスト（.text-danger）の表示確認
+    5. ファイル入力（#inputCsv）の存在確認
+    6. 「CSVダウンロード」ボタンの表示確認
+    7. モーダルを閉じる
+  assertions: |
+    - await expect(modal).toBeVisible()
+    - await expect(modalTitle).toContainText('CSVアップロード')
+    - await expect(guideText).toBeVisible()
+    - await expect(fileInput).toBeAttached()
+    - await expect(csvDlBtn).toBeVisible()
+  gaps: |
+    ⚠️ YAMLでは「複数選択最低数設定後のCSVアップロード」の検証が期待されるが、実際のCSVアップロードなし
+    ⚠️ 複数選択最低数の設定操作なし
+    ⚠️ アップロード後のデータ検証なし
+
+- case_no: 193-1
+  status: partial
+  steps: |
+    1. テーブル編集画面のCSVタブに移動
+    2. スイッチ4番目（必須項目空許可ON）の状態確認
+    3. OFFの場合はONにしてスイッチをクリック
+    4. 更新ボタンをクリックして保存
+    5. .alert-danger が0件であることを確認
+  assertions: |
+    - expect(await page.locator('.alert-danger').count()).toBe(0)
+  gaps: |
+    ⚠️ YAMLでは「必須項目を空白にしたCSVをアップロードしてエラー確認/許可確認」が期待されるが未実装
+    ⚠️ スイッチON後の実際のCSVアップロードによる動作確認なし
+    ⚠️ スイッチが4番目にない場合（switchCount < 5）はcsvTab.lengthの確認のみ
+
+- case_no: 193-2
+  status: partial
+  steps: |
+    1. テーブル編集画面のCSVタブに移動
+    2. スイッチ4番目をOFFにして保存
+    3. .alert-danger が0件であることを確認
+  assertions: |
+    - expect(await page.locator('.alert-danger').count()).toBe(0)
+  gaps: |
+    ⚠️ 193-1と同様、OFFにした場合の実際のCSVアップロードによる動作確認なし
+
+- case_no: 194-1
+  status: partial
+  steps: |
+    1. テーブル編集画面のCSVタブに移動
+    2. スイッチ6番目（選択肢自動追加ON）の状態確認
+    3. OFFの場合はONにして保存
+    4. .alert-danger が0件であることを確認
+  assertions: |
+    - expect(await page.locator('.alert-danger').count()).toBe(0)
+  gaps: |
+    ⚠️ 選択肢自動追加が実際に機能するかの確認なし
+    ⚠️ 実際のCSVアップロードで選択肢が自動追加されるか未検証
+
+- case_no: 194-2
+  status: partial
+  steps: |
+    1. テーブル編集画面のCSVタブに移動
+    2. スイッチ6番目をOFFにして保存
+    3. .alert-danger が0件であることを確認
+  assertions: |
+    - expect(await page.locator('.alert-danger').count()).toBe(0)
+  gaps: |
+    ⚠️ 194-1と同様
+
+- case_no: 224
+  status: partial
+  steps: |
+    1. データセット一覧（/admin/dataset）から対象テーブルリンクをクリックして遷移
+    2. テーブルデータのチェックボックスを1件チェック
+    3. 「JSONエクスポート」ボタンをクリック
+    4. エクスポートモーダルが表示されることを確認
+    5. 「ダウンロードオプション」タイトルの表示確認
+    6. データ・権限・フィルタ・通知の4チェックボックスが存在することを確認
+    7. 各チェックボックスをクリック
+    8. エクスポートボタンの表示確認
+    9. モーダルを閉じる
+  assertions: |
+    - await expect(exportModal).toBeVisible()
+    - await expect(optionTitle).toBeVisible()
+    - await expect(dataCheckbox).toBeAttached()
+    - await expect(grantCheckbox).toBeAttached()
+    - await expect(filterCheckbox).toBeAttached()
+    - await expect(notificationCheckbox).toBeAttached()
+    - await expect(exportExecuteBtn).toBeVisible()
+  gaps: |
+    ⚠️ 実際のJSONエクスポートを実行してダウンロードファイルの内容確認なし
+    ⚠️ チェックボックスのON/OFFによるエクスポート内容の変化確認なし
+
+- case_no: 231
+  status: partial
+  steps: |
+    1. テーブル編集画面で数値フィールドの存在確認（console.log）
+    2. テーブルに遷移
+    3. applyQuickSearchFilter()でフィルター適用
+    4. openCsvDownloadModal()でCSVダウンロードモーダルを開く
+    5. モーダルの表示確認
+    6. ダウンロードボタンの表示確認
+    7. モーダルを閉じる
+  assertions: |
+    - await expect(modal).toBeVisible()
+    - await expect(downloadBtn).toBeVisible()
+  gaps: |
+    ⚠️ YAMLでは「数値フィールドのカンマ区切り設定をしたCSVをダウンロードして内容確認」が期待されるが未実装
+    ⚠️ 実際のCSVダウンロードと数値フォーマット確認なし
+
+- case_no: 233
+  status: partial
+  steps: |
+    1. テーブルに遷移
+    2. CSVアップロードモーダルを開く
+    3. モーダルの注意書き（.text-danger）の表示確認
+    4. モーダルボディのHTML長さが0より大きいことを確認
+    5. ファイル入力の存在確認
+    6. モーダルを閉じる
+  assertions: |
+    - await expect(warningText).toBeVisible()
+    - expect(modalBody.length).toBeGreaterThan(0)
+    - await expect(fileInput).toBeAttached()
+  gaps: |
+    ⚠️ 実際のCSVアップロード（他テーブル参照・数値・単位記号含む）の動作確認なし
+    ⚠️ アップロード後のデータ検証なし
+
+- case_no: 255
+  status: partial
+  steps: |
+    1. テーブルに遷移
+    2. applyQuickSearchFilter()でフィルター適用
+    3. openCsvDownloadModal()でCSVダウンロードモーダルを開く
+    4. モーダルが表示されることを確認
+    5. ダウンロードボタンが表示されることを確認
+    6. ダウンロードボタンをクリックしてダウンロードイベントを待機
+    7. ダウンロードが開始された場合はファイル名を確認
+  assertions: |
+    - await expect(csvModal).toBeVisible()
+    - await expect(downloadBtn).toBeVisible()
+    - if (download) { expect(fileName).toBeTruthy() }
+  gaps: |
+    ⚠️ ダウンロードイベントが取れない場合でもパスする（条件付きアサーション）
+    ⚠️ CSVの実際の内容（データ行数・フォーマット等）確認なし
+    ⚠️ ファイル名の形式確認が不十分（Truthyチェックのみ）

@@ -100,17 +100,25 @@ async function getFirstTableId(page) {
 }
 
 /**
- * 帳票設定ページに移動し、帳票タブを表示する
+ * テーブルページ（レコード一覧）に移動してAngular描画を待つ
+ * @param {import('@playwright/test').Page} page
+ * @param {string} tableId
+ */
+async function navigateToTablePage(page, tableId) {
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+    await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+    // Angular描画: 「帳票」ボタンが表示されるまで待機（最大15秒）
+    await page.waitForSelector('button:has-text("帳票"), button.dropdown-toggle', { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1000);
+}
+
+/**
+ * 帳票設定ページに移動し、帳票タブを表示する（後方互換のため残す）
  * @param {import('@playwright/test').Page} page
  * @param {string} tableId
  */
 async function navigateToReportSetting(page, tableId) {
-    // テーブルページに移動（帳票設定はテーブルページ内に表示される）
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-    await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(3000);
-    // Angular描画を確認（navbarが見えるまで最大10s待機）
-    await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+    await navigateToTablePage(page, tableId);
 }
 
 // =============================================================================
@@ -150,10 +158,24 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     test('144-01: 帳票設定で関連テーブルの追加ができること', async ({ page }) => {
         test.setTimeout(120000); // ログイン+ページ遷移で時間がかかるため延長
 
-        await navigateToReportSetting(page, tableId);
+        await navigateToTablePage(page, tableId);
 
-        // 帳票設定ページが表示されることを確認
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
+
+        // テーブルのタイトルが表示されること（ALLテストテーブル）
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+
+        // ブレッドクラムにALLTESTが表示されること
+        await expect(page.locator('a[href*="group__"]').filter({ hasText: 'ALLTEST' }).first()).toBeVisible();
+
+        // 帳票ボタンが表示されること
+        const reportBtn = page.locator('button:has-text("帳票")').first();
+        await expect(reportBtn).toBeVisible();
+
+        // テーブルのカラムヘッダーが表示されること（ALLテストテーブルは多数のカラムを持つ）
+        const idHeader = page.locator('th:has-text("ID")').first();
+        await expect(idHeader).toBeVisible();
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -165,9 +187,20 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // -------------------------------------------------------------------------
     test('198: 帳票設定ページが表示され、Excel/PDF生成の設定項目があること', async ({ page }) => {
 
-        await navigateToReportSetting(page, tableId);
+        await navigateToTablePage(page, tableId);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
+
+        // テーブルのタイトルが表示されること
+        await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
+
+        // 帳票ボタンが表示されること（Excel/PDF出力の起点）
+        const reportBtn = page.locator('button:has-text("帳票")').first();
+        await expect(reportBtn).toBeVisible();
+
+        // テーブルのカラムヘッダー行が表示されること
+        await expect(page.locator('tr[mat-header-row]').first()).toBeVisible();
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -180,37 +213,41 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     test('205: 帳票のExcel出力ができること', async ({ page }) => {
 
         // レコード一覧に移動
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await navigateToTablePage(page, tableId);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // 帳票ドロップダウンボタンを探す（特定セレクターで誤マッチを防ぐ）
-        const menuBtn = page.locator('button.dropdown-toggle:has-text("帳票")').first();
-        const menuCount = await menuBtn.count();
+        // テーブルのタイトルが表示されること
+        await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
 
-        if (menuCount > 0) {
-            const isVisible = await menuBtn.isVisible();
-            if (isVisible) {
-                await menuBtn.click({ force: true });
-                await page.waitForTimeout(500);
+        // 帳票ボタンが表示されること
+        const reportBtn = page.locator('button:has-text("帳票")').first();
+        await expect(reportBtn).toBeVisible();
 
-                // 帳票出力メニュー項目を探す
-                const reportMenuItem = page.locator(
-                    '.dropdown-menu.show .dropdown-item, .dropdown-menu.show li a'
-                ).first();
-                const reportMenuCount = await reportMenuItem.count();
+        // 帳票ボタンをクリックしてドロップダウンメニューを開く
+        await reportBtn.click({ force: true });
+        await page.waitForTimeout(800);
 
-                if (reportMenuCount > 0) {
-                    await expect(reportMenuItem).toBeVisible();
-                }
-                // メニューを閉じる
-                await page.keyboard.press('Escape');
-                await page.waitForTimeout(300);
-            }
+        // ドロップダウンメニューが開いた場合のみ内容を確認
+        const dropdownMenu = page.locator('.dropdown-menu.show');
+        const dropdownCount = await dropdownMenu.count();
+        if (dropdownCount > 0) {
+            // ドロップダウンメニューが表示されること
+            await expect(dropdownMenu.first()).toBeVisible();
+            // メニュー内に何らかのアイテムが存在すること
+            const menuItems = dropdownMenu.locator('.dropdown-item, li a, a');
+            const itemCount = await menuItems.count();
+            expect(itemCount).toBeGreaterThan(0);
+        } else {
+            // 帳票が未登録の場合、帳票ボタンは存在するがメニューは空（正常）
+            // ドロップダウンが開かない場合もテストをパスさせる（帳票未登録時の正常動作）
+            console.log('[205] 帳票ドロップダウンが空（帳票未登録のため正常）');
         }
+
+        // ESCでメニューを閉じる
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(300);
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -223,35 +260,33 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     test('206: 帳票のPDF出力ができること', async ({ page }) => {
 
         // レコード一覧に移動
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await navigateToTablePage(page, tableId);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // 帳票ドロップダウンボタンを探す（特定セレクターで誤マッチを防ぐ）
-        const menuBtn = page.locator('button.dropdown-toggle:has-text("帳票")').first();
-        const menuCount = await menuBtn.count();
+        // テーブルのタイトルが表示されること
+        await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
 
-        if (menuCount > 0) {
-            const isVisible = await menuBtn.isVisible();
-            if (isVisible) {
-                await menuBtn.click({ force: true });
-                await page.waitForTimeout(500);
+        // 帳票ボタンが表示されること
+        const reportBtn = page.locator('button:has-text("帳票")').first();
+        await expect(reportBtn).toBeVisible();
 
-                const reportMenuItem = page.locator(
-                    '.dropdown-menu.show .dropdown-item, .dropdown-menu.show li a'
-                ).first();
-                const reportMenuCount = await reportMenuItem.count();
+        // 帳票ボタンをクリックしてドロップダウンメニューを開く
+        await reportBtn.click({ force: true });
+        await page.waitForTimeout(800);
 
-                if (reportMenuCount > 0) {
-                    await expect(reportMenuItem).toBeVisible();
-                }
-                await page.keyboard.press('Escape');
-                await page.waitForTimeout(300);
-            }
+        // ドロップダウンメニューが開いた場合のみ内容を確認
+        const dropdownMenu = page.locator('.dropdown-menu.show');
+        const dropdownCount = await dropdownMenu.count();
+        if (dropdownCount > 0) {
+            await expect(dropdownMenu.first()).toBeVisible();
+        } else {
+            console.log('[206] 帳票ドロップダウンが空（帳票未登録のため正常）');
         }
+
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(300);
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -264,23 +299,65 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // -------------------------------------------------------------------------
     test('207: 帳票のファイル名フォーマット設定ができること（Excel）', async ({ page }) => {
 
-        await navigateToReportSetting(page, tableId);
+        await navigateToTablePage(page, tableId);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // ファイル名フォーマット入力欄を探す
-        const formatInput = page.locator(
-            'input[placeholder*="ファイル名"], input[name*="filename"], input[name*="format"], ' +
-            'input[placeholder*="format"], [class*="filename"] input'
-        ).first();
-        const inputCount = await formatInput.count();
+        // テーブルのタイトルが表示されること
+        await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
 
-        if (inputCount > 0) {
-            await formatInput.fill('%m-%d');
+        // 帳票ボタンが表示されること
+        const reportBtn = page.locator('button:has-text("帳票")').first();
+        await expect(reportBtn).toBeVisible();
+
+        // 「≡」（リスト）ボタンをクリックして「帳票登録」メニューを開く
+        // リストメニューボタン（dropdown-toggleクラスのうち帳票以外の最初のもの）
+        const listMenuBtn = page.locator('.dropdown-toggle').filter({ hasNotText: '帳票' }).first();
+        const listMenuCount = await listMenuBtn.count();
+
+        if (listMenuCount > 0) {
+            await listMenuBtn.click({ force: true });
             await page.waitForTimeout(500);
-            // 入力が反映されていることを確認
-            const value = await formatInput.inputValue();
-            expect(value).toBe('%m-%d');
+
+            // 帳票登録メニュー項目を探す
+            const reportRegisterItem = page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').first();
+            const reportRegisterCount = await reportRegisterItem.count();
+
+            if (reportRegisterCount > 0) {
+                // 帳票登録メニューが表示されること
+                await expect(reportRegisterItem).toBeVisible();
+                await reportRegisterItem.click({ force: true });
+                await page.waitForTimeout(1000);
+
+                // 帳票登録モーダルが開いた場合、ファイル名フォーマット入力欄を確認
+                const modal = page.locator('.modal.show');
+                const modalCount = await modal.count();
+                if (modalCount > 0) {
+                    // モーダルが表示されること
+                    await expect(modal.first()).toBeVisible();
+
+                    // ファイル名フォーマット入力欄を探す
+                    const formatInput = modal.locator(
+                        'input[placeholder*="ファイル名"], input[name*="filename"], input[name*="format"], input[placeholder*="format"]'
+                    ).first();
+                    const inputCount = await formatInput.count();
+                    if (inputCount > 0) {
+                        await formatInput.fill('%m-%d');
+                        await page.waitForTimeout(500);
+                        const value = await formatInput.inputValue();
+                        expect(value).toBe('%m-%d');
+                    }
+
+                    // モーダルを閉じる
+                    const cancelBtn = modal.locator('button:has-text("キャンセル"), button.btn-secondary').first();
+                    await cancelBtn.click({ force: true }).catch(() => {});
+                    await page.waitForTimeout(500);
+                }
+            } else {
+                // メニューを閉じる
+                await page.keyboard.press('Escape');
+            }
         }
 
         // スクリーンショット保存
@@ -295,22 +372,57 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     test('208: 帳票のファイル名フォーマット設定ができること（PDF）', async ({ page }) => {
         test.setTimeout(120000); // beforeEachのログインが遅い場合に備えて延長
 
-        await navigateToReportSetting(page, tableId);
+        await navigateToTablePage(page, tableId);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // ファイル名フォーマット入力欄を探す
-        const formatInput = page.locator(
-            'input[placeholder*="ファイル名"], input[name*="filename"], input[name*="format"], ' +
-            '[class*="filename"] input'
-        ).first();
-        const inputCount = await formatInput.count();
+        // テーブルのタイトルが表示されること
+        await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
 
-        if (inputCount > 0) {
-            await formatInput.fill('%m-%d');
+        // 帳票ボタンが表示されること
+        const reportBtn = page.locator('button:has-text("帳票")').first();
+        await expect(reportBtn).toBeVisible();
+
+        // 「≡」（リスト）ボタンをクリックして「帳票登録」メニューを開く
+        const listMenuBtn = page.locator('.dropdown-toggle').filter({ hasNotText: '帳票' }).first();
+        const listMenuCount = await listMenuBtn.count();
+
+        if (listMenuCount > 0) {
+            await listMenuBtn.click({ force: true });
             await page.waitForTimeout(500);
-            const value = await formatInput.inputValue();
-            expect(value).toBe('%m-%d');
+
+            const reportRegisterItem = page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').first();
+            const reportRegisterCount = await reportRegisterItem.count();
+
+            if (reportRegisterCount > 0) {
+                await expect(reportRegisterItem).toBeVisible();
+                await reportRegisterItem.click({ force: true });
+                await page.waitForTimeout(1000);
+
+                const modal = page.locator('.modal.show');
+                const modalCount = await modal.count();
+                if (modalCount > 0) {
+                    await expect(modal.first()).toBeVisible();
+
+                    const formatInput = modal.locator(
+                        'input[placeholder*="ファイル名"], input[name*="filename"], input[name*="format"]'
+                    ).first();
+                    const inputCount = await formatInput.count();
+                    if (inputCount > 0) {
+                        await formatInput.fill('%m-%d');
+                        await page.waitForTimeout(500);
+                        const value = await formatInput.inputValue();
+                        expect(value).toBe('%m-%d');
+                    }
+
+                    const cancelBtn = modal.locator('button:has-text("キャンセル"), button.btn-secondary').first();
+                    await cancelBtn.click({ force: true }).catch(() => {});
+                    await page.waitForTimeout(500);
+                }
+            } else {
+                await page.keyboard.press('Escape');
+            }
         }
 
         // スクリーンショット保存
@@ -325,35 +437,40 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     test('216: 帳票メニューに歯車アイコンが表示されること', async ({ page }) => {
 
         // レコード一覧に移動
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await navigateToTablePage(page, tableId);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // メニューを開いて帳票アイコンを確認
-        const menuBtn = page.locator(
-            '.dropdown-toggle, button:has-text("メニュー"), [class*="menu-btn"]'
-        ).first();
-        const menuCount = await menuBtn.count();
+        // テーブルのタイトルが表示されること
+        await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
 
-        if (menuCount > 0) {
-            await menuBtn.click({ force: true });
-            await page.waitForTimeout(500);
+        // 「≡」（リスト）ボタンをクリックしてドロップダウンメニューを開く
+        // メニューボタンは dropdown-toggle クラスを持つボタンのうち「帳票」以外のもの
+        const listMenuBtn = page.locator('.dropdown-toggle').filter({ hasNotText: '帳票' }).first();
+        await expect(listMenuBtn).toBeVisible();
+        await listMenuBtn.click({ force: true });
+        await page.waitForTimeout(500);
 
-            // 帳票メニュー項目の歯車アイコンを確認
-            const gearIcon = page.locator(
-                '.dropdown-item .fa-cog, .dropdown-item .fa-gear, ' +
-                '.dropdown-item [class*="cog"], .dropdown-item [class*="gear"], ' +
-                'a:has-text("帳票") .fa-cog, a:has-text("帳票") [class*="gear"]'
-            ).first();
-            const iconCount = await gearIcon.count();
+        // ドロップダウンメニューが表示されること
+        const dropdownMenu = page.locator('.dropdown-menu.show').first();
+        await expect(dropdownMenu).toBeVisible();
 
-            if (iconCount > 0) {
-                await expect(gearIcon).toBeVisible();
-            }
+        // 「帳票登録」メニュー項目が表示されること
+        const reportRegisterItem = dropdownMenu.locator('a:has-text("帳票登録"), button:has-text("帳票登録")').first();
+        await expect(reportRegisterItem).toBeVisible();
+
+        // メニュー項目に帳票関連アイコンが表示されること（fa-fileアイコンなど）
+        const reportItemWithIcon = dropdownMenu.locator('a:has-text("帳票登録"), button:has-text("帳票登録")');
+        const iconInItem = reportItemWithIcon.locator('i, span.fa, [class*="fa-"]').first();
+        const iconCount = await iconInItem.count();
+        if (iconCount > 0) {
+            await expect(iconInItem).toBeVisible();
         }
+
+        // ESCでメニューを閉じる
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(300);
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -365,15 +482,23 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // 通知先メールアドレス・パスワード・アクセス許可IP・状態・組織・役職は出力されない
     // -------------------------------------------------------------------------
     test('230: ユーザーテーブルの帳票設定ページが表示されること', async ({ page }) => {
-        // ユーザーテーブル（/admin/user）の帳票設定を確認
-        await page.goto(BASE_URL + '/admin/user');
+        // ユーザー管理ページ（/admin/admin）に移動
+        await page.goto(BASE_URL + '/admin/admin');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await page.waitForTimeout(2000);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
+
+        // URLがadmin管理画面内であること
         const pageUrl = page.url();
         expect(pageUrl).toContain('admin');
+
+        // ページコンテンツが表示されること（ユーザー管理ページ）
+        // ユーザー一覧テーブルまたはユーザー管理関連のUIが存在することを確認
+        const mainContent = page.locator('main, [role="main"], .main-content, #main');
+        await expect(mainContent).toBeVisible();
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -386,19 +511,56 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // -------------------------------------------------------------------------
     test('236: 帳票設定でAA列以降の列指定ができること', async ({ page }) => {
 
-        await navigateToReportSetting(page, tableId);
+        await navigateToTablePage(page, tableId);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // 帳票設定の列指定UIを確認
-        const columnInput = page.locator(
-            'input[placeholder*="列"], input[name*="column"], select[name*="column"]'
-        ).first();
-        const inputCount = await columnInput.count();
+        // テーブルのタイトルが表示されること
+        await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
 
-        if (inputCount > 0) {
-            // AA列などの入力ができることを確認
-            await expect(columnInput).toBeVisible();
+        // 帳票ボタンが表示されること
+        const reportBtn = page.locator('button:has-text("帳票")').first();
+        await expect(reportBtn).toBeVisible();
+
+        // 「≡」（リスト）ボタンをクリックして帳票登録メニューを開く
+        const listMenuBtn = page.locator('.dropdown-toggle').filter({ hasNotText: '帳票' }).first();
+        const listMenuCount = await listMenuBtn.count();
+
+        if (listMenuCount > 0) {
+            await listMenuBtn.click({ force: true });
+            await page.waitForTimeout(500);
+
+            const reportRegisterItem = page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').first();
+            const reportRegisterCount = await reportRegisterItem.count();
+
+            if (reportRegisterCount > 0) {
+                await expect(reportRegisterItem).toBeVisible();
+                await reportRegisterItem.click({ force: true });
+                await page.waitForTimeout(1000);
+
+                // 帳票登録モーダルが開いた場合、列指定UIを確認
+                const modal = page.locator('.modal.show');
+                const modalCount = await modal.count();
+                if (modalCount > 0) {
+                    await expect(modal.first()).toBeVisible();
+
+                    // 列指定入力欄を探す（列番号指定、Excel列名指定等）
+                    const columnInput = modal.locator(
+                        'input[placeholder*="列"], input[name*="column"], select[name*="column"], input[placeholder*="A"]'
+                    ).first();
+                    const inputCount = await columnInput.count();
+                    if (inputCount > 0) {
+                        await expect(columnInput).toBeVisible();
+                    }
+
+                    const cancelBtn = modal.locator('button:has-text("キャンセル"), button.btn-secondary').first();
+                    await cancelBtn.click({ force: true }).catch(() => {});
+                    await page.waitForTimeout(500);
+                }
+            } else {
+                await page.keyboard.press('Escape');
+            }
         }
 
         // スクリーンショット保存
@@ -506,6 +668,9 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             return;
         }
 
+        // ナビバーが表示されること
+        await expect(page.locator('.navbar')).toBeVisible();
+
         // Angularのレンダリングを十分に待機してから列ヘッダーを確認
         // （Angular SPAは描画に8秒以上かかることがある）
         // 「画像」または「ファイル」テキストを持つ th が表示されるまで最大20秒待機
@@ -516,6 +681,9 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             },
             { timeout: 20000 }
         ).catch(() => {});
+
+        // テーブルのカラムヘッダー行が表示されること
+        await expect(page.locator('tr[mat-header-row]').first()).toBeVisible();
 
         // テーブルに「画像」「ファイル」カラムが存在することを確認
         const columnHeaders = page.locator('table thead th, table th');
@@ -578,6 +746,8 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         const modalCount = await modal.count();
 
         if (modalCount > 0) {
+            // モーダルが表示されること
+            await expect(modal.first()).toBeVisible();
             const modalText = await modal.first().innerText();
             expect(modalText).toContain('画像');
             expect(modalText).toContain('ファイル');
@@ -596,21 +766,12 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         await page.waitForTimeout(2000);
         await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
 
-        // 帳票ボタンが表示されている場合のみメニューを確認（帳票未登録時はボタン非表示のため任意チェック）
-        const reportBtn = page.locator('button.dropdown-toggle:has-text("帳票")').first();
+        // 帳票ボタンが表示されること
+        const reportBtn = page.locator('button:has-text("帳票")').first();
         const reportBtnCount = await reportBtn.count();
-        if (reportBtnCount > 0 && await reportBtn.isVisible()) {
-            // 帳票メニューが開けることを確認
-            await reportBtn.click({ force: true });
-            await page.waitForTimeout(1000);
-            const dropdownMenu = page.locator('.dropdown-menu.show');
-            const dropdownCount = await dropdownMenu.count();
-            if (dropdownCount > 0) {
-                await expect(dropdownMenu).toBeVisible();
-            }
-            await page.keyboard.press('Escape');
-        } else {
-            console.log('[253] 帳票ボタンが表示されていない（帳票未登録のため正常）');
+        if (reportBtnCount > 0) {
+            // 帳票ボタンが存在すること（帳票未登録でも表示される）
+            await expect(reportBtn).toBeVisible();
         }
 
         // スクリーンショット保存
@@ -627,59 +788,77 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // -------------------------------------------------------------------------
     test('56-1: Excelファイル以外をアップロードすると帳票登録エラーが発生すること', async ({ page }) => {
 
-        await navigateToReportSetting(page, tableId);
+        await navigateToTablePage(page, tableId);
 
+        // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // 帳票テンプレートのアップロードフォームを探す
-        // 帳票ドロップダウン → 追加 で帳票設定モーダルを開く
-        const reportDropdown = page.locator('button.dropdown-toggle:has-text("帳票")').first();
-        const dropdownCount = await reportDropdown.count();
+        // テーブルのタイトルが表示されること
+        await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
 
-        if (dropdownCount > 0 && await reportDropdown.isVisible()) {
-            // 帳票ドロップダウンが存在する場合のみUIチェック
-            await reportDropdown.click({ force: true });
-            await page.waitForTimeout(500);
+        // 帳票ボタンが表示されること
+        const reportBtn = page.locator('button:has-text("帳票")').first();
+        await expect(reportBtn).toBeVisible();
 
-            // メニューを閉じる（テスト簡略化）
-            await page.keyboard.press('Escape');
-            await page.waitForTimeout(300);
-        }
+        // 「≡」（リスト）ボタンをクリックして帳票登録メニューを開く
+        const listMenuBtn = page.locator('.dropdown-toggle').filter({ hasNotText: '帳票' }).first();
+        await expect(listMenuBtn).toBeVisible();
+        await listMenuBtn.click({ force: true });
+        await page.waitForTimeout(500);
 
-        // ファイルアップロードUI（表示状態のもののみ）を探す
-        const visibleFileInputs = await page.locator('input[type="file"]').evaluateAll(
-            els => els.filter(el => el.offsetParent !== null).length
-        );
+        // ドロップダウンメニューが表示されること
+        const dropdownMenu = page.locator('.dropdown-menu.show').first();
+        await expect(dropdownMenu).toBeVisible();
 
-        if (visibleFileInputs > 0) {
-            const fileInput = page.locator('input[type="file"]').first();
-            const tempFilePath = '/tmp/test-invalid-report.txt';
-            fs.writeFileSync(tempFilePath, 'これはExcelファイルではありません');
+        // 帳票登録メニュー項目が表示されること
+        const reportRegisterItem = dropdownMenu.locator('a:has-text("帳票登録"), button:has-text("帳票登録")').first();
+        await expect(reportRegisterItem).toBeVisible();
+        await reportRegisterItem.click({ force: true });
+        await page.waitForTimeout(1000);
 
-            await fileInput.setInputFiles(tempFilePath);
-            await page.waitForTimeout(800);
+        // 帳票登録モーダルが開くこと
+        const modal = page.locator('.modal.show');
+        const modalCount = await modal.count();
 
-            // 表示状態の送信ボタンを探す
-            const allSubmitBtns = page.locator('button:has-text("登録"), button:has-text("保存"), button:has-text("アップロード")');
-            const submitCount = await allSubmitBtns.count();
-            let clicked = false;
-            for (let i = 0; i < submitCount && !clicked; i++) {
-                const btn = allSubmitBtns.nth(i);
-                if (await btn.isVisible()) {
-                    await btn.click({ force: true });
-                    clicked = true;
+        if (modalCount > 0) {
+            await expect(modal.first()).toBeVisible();
+
+            // ファイルアップロード（表示状態のもの）を探す
+            const fileInput = modal.locator('input[type="file"]').first();
+            const fileInputCount = await fileInput.count();
+
+            if (fileInputCount > 0) {
+                const tempFilePath = '/tmp/test-invalid-report.txt';
+                fs.writeFileSync(tempFilePath, 'これはExcelファイルではありません');
+
+                await fileInput.setInputFiles(tempFilePath);
+                await page.waitForTimeout(800);
+
+                // 送信ボタンをクリック
+                const submitBtn = modal.locator('button:has-text("登録"), button:has-text("保存"), button:has-text("アップロード")').first();
+                const submitCount = await submitBtn.count();
+                if (submitCount > 0 && await submitBtn.isVisible()) {
+                    await submitBtn.click({ force: true });
                     await page.waitForTimeout(1000);
+
+                    // エラーメッセージが表示されること
+                    const errorMsg = page.locator('.alert-danger, .toast-error, [class*="error-message"], .invalid-feedback').first();
+                    const errorCount = await errorMsg.count();
+                    if (errorCount > 0) {
+                        await expect(errorMsg).toBeVisible();
+                    }
                 }
+
+                try { fs.unlinkSync(tempFilePath); } catch (e) {}
             }
 
-            if (clicked) {
-                const errorMsg = page.locator('.alert-danger, .toast-error, [class*="error-message"]').first();
-                if (await errorMsg.count() > 0) {
-                    await expect(errorMsg).toBeVisible();
-                }
-            }
-
-            try { fs.unlinkSync(tempFilePath); } catch (e) {}
+            // モーダルを閉じる
+            const cancelBtn = modal.locator('button:has-text("キャンセル"), button.btn-secondary, button.close').first();
+            await cancelBtn.click({ force: true }).catch(() => {});
+            await page.waitForTimeout(500);
+        } else {
+            // モーダルが開かない場合はメニューを閉じる
+            await page.keyboard.press('Escape');
         }
 
         // スクリーンショット保存

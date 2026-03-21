@@ -289,14 +289,14 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         } catch (e) {}
 
         // エラーメッセージが表示されるか、またはモーダルが残っていることを確認
-        const pageContent = await page.content();
-        const hasError = pageContent.includes('エラー') ||
-                         pageContent.includes('error') ||
-                         pageContent.includes('失敗') ||
-                         pageContent.includes('インポート') ||
-                         pageContent.includes('ヘッダー');
-        // エラーか警告が表示されていることを確認（またはモーダルが閉じていない）
-        console.log('55-1: エラー表示確認:', hasError);
+        // ヘッダー行なしCSVのアップロードはエラーになるか、確認モーダルが残っていること
+        const errorAlert = page.locator('.alert-danger, .text-danger, .modal.show .error, [class*="error-message"]');
+        const modalStillOpen = page.locator('.modal.show');
+        const errorCount = await errorAlert.count();
+        const modalCount = await modalStillOpen.count();
+        // エラーアラートが表示されているか、モーダルが残っているかのどちらかであること
+        expect(errorCount + modalCount).toBeGreaterThan(0);
+        console.log('55-1: エラー表示確認 errorCount:', errorCount, 'modalCount:', modalCount);
         // ページが正常に表示されていることを確認（クラッシュしていない）
         await expect(page.locator('.navbar')).toBeVisible();
     });
@@ -337,12 +337,19 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         }
 
         // エラーが発生するかボタンが無効化されることを確認
-        const pageContent = await page.content();
-        const hasError = pageContent.includes('エラー') ||
-                         pageContent.includes('error') ||
-                         pageContent.includes('CSVファイル') ||
-                         isDisabled;
-        console.log('55-2: エラー/無効化確認:', hasError, '(disabled:', isDisabled, ')');
+        // CSV以外のファイル(.txt)をアップロードした場合、ボタンが無効化されるかエラーが表示されること
+        if (isDisabled) {
+            // ボタンが無効化されている場合はOK（フロントエンドバリデーション）
+            console.log('55-2: アップロードボタン無効化確認OK');
+        } else {
+            // ボタンが有効の場合はエラーアラートかモーダルが残っていること
+            const errorAlert = page.locator('.alert-danger, .alert-warning, .text-danger');
+            const modalStillOpen = page.locator('.modal.show');
+            const errorCount = await errorAlert.count();
+            const modalCount = await modalStillOpen.count();
+            expect(errorCount + modalCount).toBeGreaterThan(0);
+            console.log('55-2: エラー表示確認 errorCount:', errorCount, 'modalCount:', modalCount);
+        }
         await expect(page.locator('.navbar')).toBeVisible();
     });
 
@@ -414,11 +421,14 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         const fileInput = page.locator('#inputCsv[accept="text/csv"]');
         await expect(fileInput).toBeAttached();
 
-        // CSVダウンロード（空）ボタンが存在する場合はログに記録
-        const emptyDlBtn = page.locator('.modal.show button:has-text("CSVダウンロード（空）")');
-        const emptyDlCount = await emptyDlBtn.count();
-        console.log('193-1: CSVダウンロード（空）ボタン数:', emptyDlCount);
-        // ボタンが存在しない場合もUI変更として許容する（csv_upload_allow_required_field_emptyの設定確認が目的）
+        // CSVアップロードモーダル内のアップロードボタンが表示されていることを確認
+        const uploadBtn = page.locator('.modal.show button:has-text("アップロード")');
+        await expect(uploadBtn.first()).toBeVisible();
+
+        // CSVダウンロードボタン（CSVひな形ダウンロード）が表示されていることを確認
+        const csvDlBtn = page.locator('.modal.show button:has-text("CSVダウンロード")').first();
+        await expect(csvDlBtn).toBeVisible();
+        console.log('193-1: CSVアップロードモーダルのUI確認OK（必須項目空許可ON設定後）');
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
@@ -694,9 +704,11 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         const csvModal = page.locator('.modal.show');
         await expect(csvModal).toBeVisible();
 
-        // 「CSVに現在のフィルタを反映する」チェックボックスの存在を確認（あれば）
+        // フィルタ反映オプションのチェックボックスが存在することを確認
         const filterCheckbox = page.locator('.modal.show input[type="checkbox"]');
+        await expect(filterCheckbox.first()).toBeAttached({ timeout: 5000 });
         const filterCheckboxCount = await filterCheckbox.count();
+        expect(filterCheckboxCount).toBeGreaterThan(0);
         console.log('161: フィルタチェックボックス数:', filterCheckboxCount);
 
         // ダウンロードボタンが存在することを確認
@@ -812,25 +824,26 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await dropdownBtn.click();
         await page.waitForTimeout(500);
 
-        // 「エクセルから追加」メニューアイテムが表示されているか確認
+        // 「エクセルから追加」メニューアイテムが表示されていることを確認
         const excelMenuItem = page.locator('a.dropdown-item:has-text("エクセルから追加")');
-        const menuCount = await excelMenuItem.count();
-        console.log('173: エクセルから追加メニュー数:', menuCount);
+        await expect(excelMenuItem.first()).toBeVisible({ timeout: 5000 });
+        console.log('173: エクセルから追加メニュー確認OK');
 
-        if (menuCount > 0) {
-            await expect(excelMenuItem.first()).toBeVisible();
-            // クリックしてExcelインポートUIが開くことを確認
-            await excelMenuItem.first().click();
-            await page.waitForTimeout(1000);
+        // クリックしてExcelインポートUIが開くことを確認
+        await excelMenuItem.first().click();
+        await page.waitForTimeout(1000);
 
-            // Excelインポート関連のUIが表示されることを確認
-            const importUI = page.locator('.modal.show, [class*="tsv-import"], [class*="excel"]');
-            const importCount = await importUI.count();
-            console.log('173: Excelインポートモーダル/UI数:', importCount);
-            await page.waitForTimeout(500);
-        } else {
-            console.log('173: エクセルメニューが非表示（管理者権限確認）');
-        }
+        // Excelインポートモーダルが表示されることを確認
+        const importModal = page.locator('.modal.show');
+        await expect(importModal).toBeVisible({ timeout: 5000 });
+        // モーダルタイトルに「エクセル」が含まれることを確認
+        const modalTitle = page.locator('.modal.show .modal-title');
+        await expect(modalTitle).toContainText('エクセル');
+        console.log('173: Excelインポートモーダル確認OK');
+
+        // モーダルを閉じる
+        await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
+        await page.waitForTimeout(500);
 
         // ページが正常に表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible();
@@ -892,17 +905,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         const testTableId = getTestTableId();
         expect(testTableId).toBeTruthy();
 
-        // テーブル編集画面で数値フィールドを確認
-        await page.goto(BASE_URL + '/admin/dataset__' + testTableId + '/edit');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
-
-        // フィールド一覧タブで数値フィールドが存在するか確認
-        const numberField = page.locator('[data-field-type="number"], .field-type-number, td:has-text("数値")');
-        const numberFieldCount = await numberField.count();
-        console.log('231: 数値フィールド数:', numberFieldCount);
-
-        // テーブルに戻ってCSVダウンロードを確認
+        // テーブルに移動してCSVダウンロードを確認
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
@@ -920,6 +923,12 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         // ダウンロードボタンが表示されていることを確認
         const downloadBtn = page.locator('.modal.show button:has-text("ダウンロード")');
         await expect(downloadBtn).toBeVisible();
+
+        // CSVダウンロードモーダルには「現在のフィルタ」または「フィルタ」に関するチェックボックスまたはテキストが表示されること
+        const filterOption = page.locator('.modal.show input[type="checkbox"]');
+        const filterOptionCount = await filterOption.count();
+        expect(filterOptionCount).toBeGreaterThan(0);
+        console.log('231: CSVダウンロードモーダルのフィルタオプション確認OK（チェックボックス数:', filterOptionCount, ')');
         console.log('231: CSVダウンロードモーダル確認完了（数値フィールド含むテーブル）');
 
         // モーダルを閉じる
@@ -945,18 +954,21 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         // CSVアップロードモーダルを開く
         await openCsvUploadModal(page);
 
-        // モーダルの注意書きが表示されていることを確認
+        // モーダルが開いていることを確認
+        const modal = page.locator('.modal.show');
+        await expect(modal).toBeVisible({ timeout: 10000 });
+
+        // モーダルの注意書き（text-danger）が表示されていることを確認
         const warningText = page.locator('.modal.show .text-danger').first();
         await expect(warningText).toBeVisible();
-
-        // 「他テーブル参照のデータを更新する場合...」というガイドテキストを確認
-        const modalBody = await page.locator('.modal.show .modal-body').innerHTML();
-        console.log('233: モーダルボディ確認:', modalBody.length > 0);
-        expect(modalBody.length).toBeGreaterThan(0);
 
         // ファイル入力が利用可能であることを確認
         const fileInput = page.locator('#inputCsv[accept="text/csv"]');
         await expect(fileInput).toBeAttached();
+
+        // アップロードボタンとキャンセルボタンが表示されていることを確認
+        await expect(page.locator('.modal.show button:has-text("アップロード")').first()).toBeVisible();
+        await expect(page.locator('.modal.show button:has-text("キャンセル")').first()).toBeVisible();
         console.log('233: CSVアップロードモーダル（他テーブル参照設定環境）確認完了');
 
         // モーダルを閉じる
@@ -987,14 +999,14 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         const modal = page.locator('.modal.show');
         await expect(modal).toBeVisible();
 
-        // 子テーブルの情報を含むCSVファイルのアップロード（ファイルは存在する場合のみ）
-        const csvFilePath = '/app/test_files/稼働_2M.csv';
+        // CSVアップロードモーダルのUIを確認
+        // ファイル入力が存在することを確認
         const fileInput = page.locator('#inputCsv[accept="text/csv"]');
-        if (await fileInput.count() > 0) {
-            await page.setInputFiles('#inputCsv', csvFilePath).catch(() => {
-                console.log('148-02: CSVファイルの設定をスキップ');
-            });
-        }
+        await expect(fileInput).toBeAttached({ timeout: 5000 });
+
+        // アップロードボタンが表示されていることを確認
+        const uploadBtn = page.locator('.modal.show button:has-text("アップロード")');
+        await expect(uploadBtn.first()).toBeVisible();
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click().catch(() => {});
@@ -1026,14 +1038,11 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         const modal = page.locator('.modal.show');
         await expect(modal).toBeVisible();
 
-        // 「CSVダウンロード(空)」ボタンを探す
-        const emptyDownloadBtn = page.locator('.modal.show button:has-text("CSVダウンロード(空)"), .modal.show a:has-text("CSVダウンロード(空)")').first();
-        if (await emptyDownloadBtn.count() > 0) {
-            console.log('148-03: CSVダウンロード(空)ボタンを発見');
-            // 実際のダウンロードとヘッダー確認は手動が必要なためここでは存在確認のみ
-        } else {
-            console.log('148-03: CSVダウンロード(空)ボタンが見つからず（子テーブル設定なしの可能性）');
-        }
+        // 「CSVダウンロード(空)」ボタンが表示されていることを確認
+        // 148-01〜03テストで子テーブルを含むCSV設定をONにしているため、ボタンが存在すること
+        const emptyDownloadBtn = page.locator('.modal.show button:has-text("CSVダウンロード（空）"), .modal.show button:has-text("CSVダウンロード(空)"), .modal.show a:has-text("CSVダウンロード（空）"), .modal.show a:has-text("CSVダウンロード(空)")').first();
+        await expect(emptyDownloadBtn).toBeVisible({ timeout: 5000 });
+        console.log('148-03: CSVダウンロード(空)ボタン確認OK');
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click().catch(() => {});
@@ -1051,6 +1060,11 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         const result = await debugApiPost(page, '/delete-all-type-tables');
         console.log('クリーンアップ結果:', JSON.stringify(result));
+
+        // 削除APIが成功したことを確認（result: 'success' または timeout(サーバー側処理完了)）
+        expect(result).toBeTruthy();
+        const isSuccess = result.result === 'success' || result.result === 'timeout' || result.success === true;
+        expect(isSuccess).toBe(true);
 
         // ページが正常に表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible();

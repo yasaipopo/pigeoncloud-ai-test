@@ -234,36 +234,91 @@ def create_qa_sheet():
     print(f"URL: https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}")
 
 
+# ステータス別の背景色（RGB 0.0〜1.0）
+STATUS_COLORS = {
+    "passed":  {"red": 0.71, "green": 0.88, "blue": 0.80},  # 薄緑 #b7e1cd
+    "failed":  {"red": 0.96, "green": 0.78, "blue": 0.76},  # 薄赤 #f4c7c3
+    "skip":    {"red": 0.99, "green": 0.91, "blue": 0.70},  # 薄黄 #fce8b2
+    "skipped": {"red": 0.99, "green": 0.91, "blue": 0.70},
+    "todo":    {"red": 0.91, "green": 0.91, "blue": 0.91},  # 薄灰 #e8eaed
+    "":        {"red": 1.0,  "green": 1.0,  "blue": 1.0},   # 白
+}
+
+
+def normalize_status(status: str) -> str:
+    s = status.lower().strip()
+    if "passed" in s:
+        return "passed"
+    if "fail" in s:
+        return "failed"
+    if "todo" in s:
+        return "todo"
+    if "skip" in s:
+        return "skip"
+    return s
+
+
 def push_results_by_id(results_yaml_path: str = None):
-    """テスト結果（specs/*.yamlのactual_steps）を管理番号で引き当ててSheetsに書き込む。
-
-    現在はspecs/*.yamlのactual_stepsからpassedケースを取得してSheetsに反映する。
-    将来的にはreports/results.jsonを使う形に拡張可能。
+    """テスト結果を管理番号で引き当ててSheetsに書き込む。
+    results.json（build_results_v2.py の出力）を優先して使用。
+    ステータスに応じてセルに色付けも行う。
     """
-    # specs/*.yaml から actual_steps を読み込んで結果を収集
-    result_map = {}  # spec_code+sheet+case_no → status
+    import json
 
-    yaml_files = sorted(SPECS_DIR.glob("*.yaml"))
-    for yaml_path in yaml_files:
-        spec_name = yaml_path.stem
-        spec_code = SPEC_CODE_MAP.get(spec_name)
-        if not spec_code:
-            continue
+    RESULTS_JSON = Path(__file__).parent.parent / "reports" / "results.json"
+    result_map = {}  # mgmt_id → normalized status
 
-        with open(yaml_path, encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-
-        actual_steps = data.get("actual_steps", [])
-        for step in actual_steps:
-            case_no = str(step.get("case_no", "")).strip()
-            status  = str(step.get("status", "")).strip()
-            # actual_stepsのsheetはないのでcasesから引き当てる
-            # casesのcase_noと一致するものを全sheet分マッピング
+    if RESULTS_JSON.exists():
+        # results.json を使う（メイン）
+        # 先に YAML から case_no → sheet のマッピングを作る
+        case_sheet_map = {}  # (spec_name, case_no) → sheet
+        yaml_files = sorted(SPECS_DIR.glob("*.yaml"))
+        for yaml_path in yaml_files:
+            spec_name = yaml_path.stem
+            with open(yaml_path, encoding="utf-8") as f:
+                data = yaml.safe_load(f)
             for case in data.get("cases", []):
-                if str(case.get("case_no", "")).strip() == case_no:
-                    sheet = str(case.get("sheet", "")).strip()
-                    mgmt_id = make_management_id(spec_code, sheet, case_no)
-                    result_map[mgmt_id] = status
+                case_no = str(case.get("case_no", "")).strip()
+                sheet   = str(case.get("sheet", "")).strip()
+                if case_no and sheet:
+                    case_sheet_map[(spec_name, case_no)] = sheet
+
+        with open(RESULTS_JSON, encoding="utf-8") as f:
+            results = json.load(f)
+
+        for item in results:
+            scenario = item.get("scenario", "")
+            if "/" not in scenario:
+                continue
+            spec_name, case_no = scenario.split("/", 1)
+            spec_code = SPEC_CODE_MAP.get(spec_name)
+            if not spec_code:
+                continue
+            sheet = case_sheet_map.get((spec_name, case_no), "A")
+            mgmt_id = make_management_id(spec_code, sheet, case_no)
+            result_map[mgmt_id] = normalize_status(str(item.get("status", "")))
+        print(f"results.json から {len(result_map)} 件読み込み")
+
+    else:
+        # フォールバック: specs/*.yaml の actual_steps を使う
+        yaml_files = sorted(SPECS_DIR.glob("*.yaml"))
+        for yaml_path in yaml_files:
+            spec_name = yaml_path.stem
+            spec_code = SPEC_CODE_MAP.get(spec_name)
+            if not spec_code:
+                continue
+            with open(yaml_path, encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            actual_steps = data.get("actual_steps", [])
+            for step in actual_steps:
+                case_no = str(step.get("case_no", "")).strip()
+                status  = normalize_status(str(step.get("status", "")))
+                for case in data.get("cases", []):
+                    if str(case.get("case_no", "")).strip() == case_no:
+                        sheet = str(case.get("sheet", "")).strip()
+                        mgmt_id = make_management_id(spec_code, sheet, case_no)
+                        result_map[mgmt_id] = status
+        print(f"specs YAML から {len(result_map)} 件読み込み")
 
     if not result_map:
         print("actual_stepsが見つかりません")
@@ -274,49 +329,74 @@ def push_results_by_id(results_yaml_path: str = None):
     client = get_client()
     ss = client.open_by_key(SPREADSHEET_ID)
 
-    # QA管理シートを取得
     try:
         ws = ss.worksheet(QA_SHEET_NAME)
     except gspread.WorksheetNotFound:
         print(f"「{QA_SHEET_NAME}」タブが見つかりません。先に --create を実行してください")
         return
 
-    # 全データを取得して管理番号→行インデックスのマッピングを作る
     all_values = ws.get_all_values()
     id_to_row = {}
-    for row_i, row in enumerate(all_values[1:], start=2):  # 1-indexed、2行目から
+    for row_i, row in enumerate(all_values[1:], start=2):
         if row and row[0]:
             id_to_row[row[0]] = row_i
 
-    # 一致するものだけ更新
-    updates = []
+    # 値の更新リストと色フォーマットリストを同時に作成
+    value_updates = []
+    format_requests = []
     not_found = []
     sheet_prefix = f"'{QA_SHEET_NAME}'!"
+
     for mgmt_id, status in result_map.items():
         row_num = id_to_row.get(mgmt_id)
-        if row_num:
-            # ステータスを正規化
-            if "passed" in status.lower():
-                result_val = "passed"
-            elif "skip" in status.lower():
-                result_val = "skip"
-            elif "failed" in status.lower() or "fail" in status.lower():
-                result_val = "failed"
-            else:
-                result_val = status
-            updates.append({
-                "range": f"{sheet_prefix}I{row_num}",
-                "values": [[result_val]],
-            })
-        else:
+        if not row_num:
             not_found.append(mgmt_id)
+            continue
 
-    if updates:
+        display = status if status else ""
+        value_updates.append({
+            "range": f"{sheet_prefix}I{row_num}",
+            "values": [[display]],
+        })
+
+        color = STATUS_COLORS.get(status, STATUS_COLORS[""])
+        format_requests.append({
+            "repeatCell": {
+                "range": {
+                    "sheetId": ws.id,
+                    "startRowIndex": row_num - 1,
+                    "endRowIndex": row_num,
+                    "startColumnIndex": 8,  # I列（0-indexed）
+                    "endColumnIndex": 9,
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "backgroundColor": color,
+                    }
+                },
+                "fields": "userEnteredFormat(backgroundColor)",
+            }
+        })
+
+    # 値を一括書き込み
+    if value_updates:
         ss.values_batch_update({
             "valueInputOption": "USER_ENTERED",
-            "data": updates,
+            "data": value_updates,
         })
-        print(f"{len(updates)}件の結果をSheetsに書き込みました")
+        print(f"{len(value_updates)}件の結果をSheetsに書き込みました")
+
+    # 色を一括適用（50件ずつバッチ）
+    if format_requests:
+        batch_size = 50
+        for i in range(0, len(format_requests), batch_size):
+            ss.batch_update({"requests": format_requests[i:i + batch_size]})
+        print(f"{len(format_requests)}件のセルに色を適用しました")
+        counts = {}
+        for mid, st in result_map.items():
+            counts[st] = counts.get(st, 0) + 1
+        for st, cnt in sorted(counts.items()):
+            print(f"  {st}: {cnt}件")
 
     if not_found:
         print(f"\n{len(not_found)}件はシートに見つかりませんでした（管理番号の差異）:")

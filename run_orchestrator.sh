@@ -32,7 +32,8 @@ sys.stdout.write(result)
 " > "${PROMPT_FILE}"
 
 echo ">> Claude Code Orchestrator 起動..."
-claude --dangerously-skip-permissions -p "$(cat "${PROMPT_FILE}")"
+# stdinを閉じてTTY待ち受けによるハングを防止
+claude --dangerously-skip-permissions -p "$(cat "${PROMPT_FILE}")" < /dev/null
 
 rm -f "${PROMPT_FILE}"
 echo "============================================"

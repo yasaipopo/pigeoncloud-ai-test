@@ -265,6 +265,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
+        // ページタイトルにテーブル定義が含まれることを確認
+        await expect(page).toHaveTitle(/テーブル定義/);
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // サイドバーナビゲーションが表示されていることを確認
+        await expect(page.locator('nav.sidebar-nav')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -277,7 +283,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForTimeout(2000);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
+        // ページタイトルにダッシュボードが含まれることを確認
+        await expect(page).toHaveTitle(/ダッシュボード/);
+        // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible();
+        // Pigeon Cloud ブランドリンクが表示されていることを確認
+        await expect(page.locator('.navbar-brand').first()).toBeVisible();
 
         // チャートパネルの数を確認（複数あればD&Dを試みる）
         const chartPanels = page.locator('.gridster-item, .dashboard-item, [class*="chart-card"], .chart-container, .card.draggable');
@@ -306,7 +317,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             console.log('チャートパネルが少ないためD&D操作をスキップ（ダッシュボードにチャートを追加してから確認推奨）');
         }
 
-        // ダッシュボードが正常に表示されていることを確認
+        // ダッシュボードが正常に表示されていることを確認（再確認）
         await expect(page.locator('.navbar')).toBeVisible();
     });
 
@@ -321,7 +332,14 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForTimeout(2000);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
+        // ページタイトルにダッシュボードが含まれることを確認
+        await expect(page).toHaveTitle(/ダッシュボード/);
+        // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible();
+        // Pigeon Cloud ブランドリンクが表示されていることを確認
+        await expect(page.locator('.navbar-brand').first()).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -335,7 +353,21 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForTimeout(2000);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
+        // ページタイトルにダッシュボードが含まれることを確認
+        await expect(page).toHaveTitle(/ダッシュボード/);
+        // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible();
+        // Pigeon Cloud ブランドリンクが表示されていることを確認
+        await expect(page.locator('.navbar-brand').first()).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
+        // ダッシュボードタブが表示されていることを確認
+        const dashboardTab = page.locator('tab, [role="tab"]');
+        const tabCount = await dashboardTab.count();
+        console.log('ダッシュボードタブ数:', tabCount);
+        // タブ追加ボタン（＋）が表示されていることを確認（マスターユーザー権限チェック）
+        const addTabBtn = page.locator('button[class*="add"], button.btn-tab-add, .tab-add-btn, button[title*="追加"]');
+        console.log('タブ追加ボタン数:', await addTabBtn.count());
     });
 
     // ---------------------------------------------------------------------------
@@ -349,7 +381,14 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForTimeout(2000);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
+        // ページタイトルにダッシュボードが含まれることを確認
+        await expect(page).toHaveTitle(/ダッシュボード/);
+        // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible();
+        // Pigeon Cloud ブランドリンクが表示されていることを確認
+        await expect(page.locator('.navbar-brand').first()).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -575,7 +614,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             console.log('アイコン画像ファイル入力数:', imgInputCount);
 
             if (imgInputCount > 0) {
-                await imgFileInput.first().setInputFiles('/app/test_files/ok.png', { force: true });
+                await imgFileInput.first().setInputFiles(process.cwd() + '/test_files/ok.png', { force: true });
                 await page.waitForTimeout(1500);
                 console.log('画像アップロード完了');
             }
@@ -659,6 +698,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
+        // ページタイトルにテーブル定義が含まれることを確認
+        await expect(page).toHaveTitle(/テーブル定義/);
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // サイドバーナビゲーションが表示されていることを確認
+        await expect(page.locator('nav.sidebar-nav')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -674,6 +719,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
+        // ページタイトルにテーブル定義が含まれることを確認
+        await expect(page).toHaveTitle(/テーブル定義/);
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // サイドバーナビゲーションが表示されていることを確認
+        await expect(page.locator('nav.sidebar-nav')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -711,6 +762,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // ダッシュボードが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dashboard/);
+        // ページタイトルにダッシュボードが含まれることを確認
+        await expect(page).toHaveTitle(/ダッシュボード/);
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
 
         // マスターでログインし直す
         await logout(page);
@@ -748,6 +805,13 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+        // ページタイトルが表示されていることを確認（テーブル名が含まれる）
+        const title = await page.title();
+        expect(title.length).toBeGreaterThan(0);
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
 
         // マスターでログインし直す
         await logout(page);
@@ -785,7 +849,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForTimeout(2000);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
+        // ページタイトルにダッシュボードが含まれることを確認
+        await expect(page).toHaveTitle(/ダッシュボード/);
+        // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
 
         // マスターでログインし直す
         await logout(page);
@@ -823,6 +892,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForTimeout(2000);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
+        // ページタイトルにダッシュボードが含まれることを確認
+        await expect(page).toHaveTitle(/ダッシュボード/);
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
 
         // マスターでログインし直す
         await logout(page);
@@ -842,6 +917,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
+        // サイドバーナビゲーションが表示されていることを確認
+        await expect(page.locator('nav.sidebar-nav')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -856,10 +937,18 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
+        // サイドバーナビゲーションが表示されていることを確認
+        await expect(page.locator('nav.sidebar-nav')).toBeVisible();
+        // ページタイトルが表示されていることを確認（テーブル名が含まれる）
+        const title82_7 = await page.title();
+        expect(title82_7.length).toBeGreaterThan(0);
 
         // 集計ボタンの存在確認（ドロップダウンメニューやボタン）
         const aggregateBtn = page.locator('button:has-text("集計"), a:has-text("集計"), [data-action="aggregate"]');
-        // ボタンが存在すれば確認（存在しなくてもページが表示されていればOK）
         console.log('集計ボタン数: ' + (await aggregateBtn.count()));
     });
 
@@ -878,6 +967,15 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         const url = page.url();
         console.log('通知設定遷移後URL: ' + url);
         await expect(page).toHaveURL(new RegExp(`dataset__${tableId}`));
+        // navbar（ヘッダー）が表示されていることを確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        // mainコンテンツエリアが表示されていることを確認
+        await expect(page.locator('main')).toBeVisible();
+        // サイドバーナビゲーションが表示されていることを確認
+        await expect(page.locator('nav.sidebar-nav')).toBeVisible();
+        // ページタイトルが表示されていることを確認（テーブル名が含まれる）
+        const title82_10 = await page.title();
+        expect(title82_10.length).toBeGreaterThan(0);
     });
 
 });

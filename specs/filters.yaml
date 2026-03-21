@@ -20,3 +20,41 @@ cases:
   expected: '想定通りの結果となること。
 
     https://henmi022.pigeon-demo.com/admin/dataset__20'
+
+# =============================================================================
+# actual_steps: spec.jsが実際に行っている手順（逆引きチェック用）
+# =============================================================================
+actual_steps:
+- case_no: '234'
+  status: partial
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
+    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:'fixed')
+    3. テーブルIDをAPIステータスから取得して保存
+    4. テーブル一覧ページ（/admin/dataset__{tableId}）に遷移
+    5. 「フィルタ」ボタン（button:has-text("フィルタ")）または「絞り込み」ボタンの存在確認
+    6. スクリーンショット保存（reports/agent-1/screenshots/234-filter.png）
+    7. afterAll: delete-all-type-tables API呼び出し
+  assertions: |
+    - expect(page.locator('.navbar')).toBeVisible()
+    - フィルタボタンが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ YAMLには「フィルタタイプ・権限動作確認」の詳細手順が記載されているが、spec.jsはフィルタボタンの存在確認のみ
+    ⚠️ フィルタを実際に設定・適用して絞り込まれた結果を確認するステップなし
+    ⚠️ 権限によるフィルタ動作の違いを確認していない
+    ⚠️ フィルタボタンが存在しない場合でもパスする（条件付きアサーション）
+
+- case_no: '244'
+  status: partial
+  steps: |
+    1. テーブル一覧ページに遷移
+    2. 「高度な検索」ボタン（button:has-text("高度な検索")）または「詳細検索」ボタンの存在確認
+    3. 存在する場合はクリック
+    4. スクリーンショット保存（reports/agent-1/screenshots/244-advanced-search.png）
+  assertions: |
+    - expect(page.locator('.navbar')).toBeVisible()
+    - 高度な検索ボタンが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ YAMLには参考URLのみで詳細手順が記載されていないが、spec.jsも高度な検索UIの確認・操作を全く行っていない
+    ⚠️ 高度な検索の条件設定・適用・結果確認なし
+    ⚠️ ボタンが存在しない場合でもパスする（条件付きアサーション）

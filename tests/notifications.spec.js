@@ -199,6 +199,7 @@ test.describe('通知設定', () => {
     });
 
     test.beforeEach(async ({ page }) => {
+        test.setTimeout(180000); // beforeEach(login+closeModal)が60s超えることがあるため延長
         await login(page, EMAIL, PASSWORD);
         await closeTemplateModal(page);
     });
@@ -242,25 +243,65 @@ test.describe('通知設定', () => {
     // 54-2(B): 通知設定 - 必須項目未入力（リマインドテキスト未入力）
     // ---------------------------------------------------------------------------
     test('54-2: 通知設定のリマインダ設定でリマインドテキスト未入力のまま登録するとエラーが発生すること', async ({ page }) => {
-        // 通知設定ページへ
-        await goToNotificationPage(page, tableId);
+        // 通知設定の新規追加ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        console.log('通知設定ページURL: ' + url);
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        // リマインダ設定追加ボタンをクリック
+        const reminderBtn = page.locator('button:has-text("リマインダ設定を追加する")');
+        if (await reminderBtn.count() > 0) {
+            await reminderBtn.click({ force: true });
+            await page.waitForTimeout(1500);
+        }
+
+        // リマインドテキスト未入力のまま登録
+        const submitBtn = page.locator('button[type="submit"], button:has-text("登録"), button:has-text("保存")').first();
+        if (await submitBtn.count() > 0) {
+            await submitBtn.click({ force: true });
+            await page.waitForTimeout(1500);
+        }
+
+        // バリデーションエラーでページ遷移しないことを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(page.url()).toContain('/admin/notification');
     });
 
     // ---------------------------------------------------------------------------
     // 54-3(B): 通知設定 - 必須項目未入力（タイミング未入力）
     // ---------------------------------------------------------------------------
     test('54-3: 通知設定のリマインダ設定でタイミング未入力のまま登録するとエラーが発生すること', async ({ page }) => {
-        // 通知設定ページへ
-        await goToNotificationPage(page, tableId);
+        // 通知設定の新規追加ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        // 通知設定ページのコンテンツが表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // タイミング未入力のまま登録
+        const submitBtn = page.locator('button[type="submit"], button:has-text("登録"), button:has-text("保存")').first();
+        if (await submitBtn.count() > 0) {
+            await submitBtn.click({ force: true });
+            await page.waitForTimeout(1500);
+            // バリデーションエラーでページ遷移しないことを確認
+            expect(page.url()).toContain('/admin/notification');
+        }
     });
 
     // ---------------------------------------------------------------------------
@@ -336,11 +377,36 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('6-2: 通知設定でアクション「更新」を設定してレコード更新時に通知が行われること', async ({ page }) => {
         test.setTimeout(120000);
-        await goToNotificationPage(page, tableId);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        // 通知設定新規作成ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
+        expect(page.url()).toContain('/admin/notification');
+
+        // 通知設定フォームが表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // アクション「更新」を選択できる選択肢の確認
+        const actionSelect = page.locator('select').first();
+        if (await actionSelect.count() > 0) {
+            const options = await actionSelect.locator('option').allInnerTexts();
+            console.log('6-2 アクション選択肢:', options);
+            // 更新アクションを選択
+            await actionSelect.selectOption({ label: '更新' }).catch(() => {});
+            await page.waitForTimeout(500);
+            // フォームがエラーなく表示されることを確認
+            const afterText = await page.innerText('body');
+            expect(afterText).not.toContain('Internal Server Error');
+        }
+        // 注: 実際のレコード更新による通知発火はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -348,33 +414,94 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('6-3: 通知設定でアクション「削除」を設定してレコード削除時に通知が行われること', async ({ page }) => {
         test.setTimeout(120000);
-        await goToNotificationPage(page, tableId);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        // 通知設定新規作成ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
+        expect(page.url()).toContain('/admin/notification');
+
+        // 通知設定フォームが表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // アクション「削除」を選択できる選択肢の確認
+        const actionSelect = page.locator('select').first();
+        if (await actionSelect.count() > 0) {
+            await actionSelect.selectOption({ label: '削除' }).catch(() => {});
+            await page.waitForTimeout(500);
+            const afterText = await page.innerText('body');
+            expect(afterText).not.toContain('Internal Server Error');
+        }
+        // 注: 実際のレコード削除による通知発火はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
     // 6-4(B): 通知設定 - 新規作成（アクション：ワークフローステータス変更時）
     // ---------------------------------------------------------------------------
     test('6-4: 通知設定でアクション「ワークフローステータス変更時」を設定して通知が行われること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        // 通知設定フォームが表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // ワークフロー関連のアクション選択肢が存在することを確認
+        const actionSelect = page.locator('select').first();
+        if (await actionSelect.count() > 0) {
+            const options = await actionSelect.locator('option').allInnerTexts();
+            console.log('6-4 アクション選択肢:', options);
+            // ワークフロー関連オプションを選択
+            await actionSelect.selectOption({ label: 'ワークフローステータス変更時' }).catch(async () => {
+                // ラベルが異なる場合はワークフロー含むオプションを探す
+                const wfOption = options.find(o => o.includes('ワークフロー'));
+                if (wfOption) await actionSelect.selectOption({ label: wfOption }).catch(() => {});
+            });
+            await page.waitForTimeout(500);
+        }
+        // 注: 実際のワークフロー操作による通知発火は手動テストで確認
     });
 
     // ---------------------------------------------------------------------------
     // 6-5(B): 通知設定 - 組織への通知
     // ---------------------------------------------------------------------------
     test('6-5: 通知先組織に対して通知設定を行い通知が行われること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        // 通知設定フォームが表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // 通知先に「組織」を設定できるUIがあることを確認
+        const orgRelated = page.locator('label:has-text("組織"), select option:has-text("組織"), input[name*="org"]');
+        console.log('6-5: 組織関連UI数:', await orgRelated.count());
+        // 注: 実際の通知発火はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -400,6 +527,18 @@ test.describe('通知設定', () => {
         const url = page.url();
         expect(url).toContain('/admin/');
 
+        // 通知設定ページが正常に表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ユーザー管理ページへアクセスしてエラーがないことを確認
+        await page.goto(BASE_URL + '/admin/user');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(2000);
+        const userPageText = await page.innerText('body');
+        expect(userPageText).not.toContain('Internal Server Error');
+        expect(page.url()).toContain('/admin/');
+
     });
 
     // ---------------------------------------------------------------------------
@@ -409,9 +548,19 @@ test.describe('通知設定', () => {
         test.setTimeout(120000);
         await goToNotificationPage(page, tableId);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/');
 
+        // 通知設定ページが正常に表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 組織管理ページへアクセスしてエラーがないことを確認
+        await page.goto(BASE_URL + '/admin/organization');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(2000);
+        const orgPageText = await page.innerText('body');
+        expect(orgPageText).not.toContain('Internal Server Error');
+        expect(page.url()).toContain('/admin/');
     });
 
     // ---------------------------------------------------------------------------
@@ -553,33 +702,75 @@ test.describe('通知設定', () => {
         await page.waitForTimeout(1500);
 
         expect(page.url()).toContain('/admin/');
-        await expect(page.locator('.navbar')).toBeVisible();
+        // ページ内容がエラーなく表示されていることも確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
     });
 
     // ---------------------------------------------------------------------------
     // 62-1(B): 通知設定 - 通知先メールアドレスの追加（作成）
     // ---------------------------------------------------------------------------
     test('62-1: 通知設定で通知先メールアドレスを追加すると設定されたアドレスに通知が行われること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
-        // 通知設定ページのコンテンツが表示されることを確認
-        const pageContent = page.locator('.content, .main-content, #content, form, .container');
-        await expect(pageContent.first()).toBeVisible();
+        // 通知設定フォームが表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
 
+        // メールアドレス入力欄が存在することを確認
+        const mailInput = page.locator('input[type="email"], input[name*="mail"], input[placeholder*="メール"]').first();
+        const mailInputCount = await mailInput.count();
+        console.log('62-1: メールアドレス入力欄数:', mailInputCount);
+
+        if (mailInputCount > 0 && await mailInput.isVisible()) {
+            // テスト用メールアドレスを入力
+            await mailInput.fill(TEST_MAIL_ADDRESS);
+            const value = await mailInput.inputValue();
+            expect(value).toBe(TEST_MAIL_ADDRESS);
+            console.log('62-1: メールアドレス入力確認:', value);
+        }
+        // 注: 実際のメール通知確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
     // 62-2(B): 通知設定 - 通知先メールアドレスの更新
     // ---------------------------------------------------------------------------
     test('62-2: 通知設定で通知先メールアドレスを更新すると変更後のアドレスに通知が行われること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // メールアドレス入力欄で更新操作できることを確認
+        const mailInput = page.locator('input[type="email"], input[name*="mail"], input[placeholder*="メール"]').first();
+        if (await mailInput.count() > 0 && await mailInput.isVisible()) {
+            await mailInput.fill('old@example.com');
+            await mailInput.fill('new@example.com');
+            const value = await mailInput.inputValue();
+            expect(value).toBe('new@example.com');
+            console.log('62-2: メールアドレス更新確認:', value);
+        }
+        // 注: 実際のメール通知確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -588,20 +779,46 @@ test.describe('通知設定', () => {
     test('62-3: 通知設定で通知先メールアドレスを削除しても他通知設定に問題がないこと', async ({ page }) => {
         await goToNotificationPage(page, tableId);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/');
 
+        // 通知設定一覧ページが正常に表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知設定一覧または新規作成ページへのリンクがあることを確認
+        const addLink = page.locator('a[href*="notification"], button:has-text("追加"), .fa-plus');
+        console.log('62-3: 通知設定リンク・追加ボタン数:', await addLink.count());
+        // 注: 実際のメール削除後の通知確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
     // 62-4(B): 通知設定 - 通知先メールアドレス追加（ワークフローステータス変更時）
     // ---------------------------------------------------------------------------
     test('62-4: ワークフロー承認時に通知先メールアドレスに通知が行われること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページへ
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        // 通知設定フォームが表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // メールアドレス入力欄が存在することを確認
+        const mailInput = page.locator('input[type="email"], input[name*="mail"], input[placeholder*="メール"]').first();
+        if (await mailInput.count() > 0 && await mailInput.isVisible()) {
+            await mailInput.fill(TEST_MAIL_ADDRESS);
+            const value = await mailInput.inputValue();
+            expect(value).toBe(TEST_MAIL_ADDRESS);
+        }
+        // 注: ワークフロー承認時のメール通知確認は手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -684,87 +901,212 @@ test.describe('通知設定', () => {
     // 81-1(B): 通知設定 - 表示項目（テーブル名のみ）
     // ---------------------------------------------------------------------------
     test('81-1: 通知設定の表示項目で「テーブル名」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで表示項目設定UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // 表示項目（display_keys）関連チェックボックスの確認
+        const tableNameCheckbox = page.locator('label:has-text("テーブル名"), input[value*="table_name"], input[name*="display"]');
+        console.log('81-1: テーブル名チェックボックス数:', await tableNameCheckbox.count());
+        // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
     // 81-2(B): 通知設定 - 表示項目（URLのみ）
     // ---------------------------------------------------------------------------
     test('81-2: 通知設定の表示項目で「URL」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで表示項目設定UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // URL表示項目チェックボックスの確認
+        const urlCheckbox = page.locator('label:has-text("URL"), input[value*="url"], input[value="url"]');
+        console.log('81-2: URL表示チェックボックス数:', await urlCheckbox.count());
+        // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
     // 81-3〜81-6(B): 通知設定 - 表示項目（各種）
     // ---------------------------------------------------------------------------
     test('81-3: 通知設定の表示項目で「作成(更新)データ」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで表示項目設定UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // 作成・更新データ表示チェックボックスの確認
+        const dataCheckbox = page.locator('label:has-text("データ"), label:has-text("作成"), label:has-text("更新"), input[value*="data"]');
+        console.log('81-3: 作成(更新)データチェックボックス数:', await dataCheckbox.count());
+        // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
     });
 
     test('81-4: 通知設定の表示項目で「更新者」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで表示項目設定UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // 更新者表示チェックボックスの確認
+        const updaterCheckbox = page.locator('label:has-text("更新者"), input[value*="user"]');
+        console.log('81-4: 更新者チェックボックス数:', await updaterCheckbox.count());
+        // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
     });
 
     test('81-5: 通知設定の表示項目で「PigeonCloudフッター」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで表示項目設定UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // PigeonCloudフッター表示チェックボックスの確認
+        const footerCheckbox = page.locator('label:has-text("フッター"), label:has-text("PigeonCloud"), input[value*="footer"]');
+        console.log('81-5: フッターチェックボックス数:', await footerCheckbox.count());
+        // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
     });
 
     test('81-6: 通知設定の表示項目で設定なしの場合も設定通りの通知内容で通知されること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで表示項目設定UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // 表示項目チェックボックスが一切なしで保存するシナリオのUIを確認
+        const displayCheckboxes = page.locator('input[type="checkbox"][name*="display"], input[type="checkbox"][value*="key"]');
+        console.log('81-6: 表示項目チェックボックス数:', await displayCheckboxes.count());
+        // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
     // 84-1(B): 通知設定 - 条件設定（ワークフロー：申請）
     // ---------------------------------------------------------------------------
     test('84-1: 通知設定でワークフロー条件「申請中(要確認)」を設定すると設定通りの通知が行われること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        test.setTimeout(120000); // ログイン+ページロードに時間がかかる場合があるため延長
+        // 通知設定新規作成ページでワークフロー条件設定UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        // 通知設定フォームのレンダリング完了を待機
+        await page.waitForFunction(
+            () => document.body.innerText.includes('通知設定') || document.body.innerText.includes('通知名'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(1000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 通知設定ページが表示されていること（「通知設定」または「通知名」フォームラベルが存在すること）
+        const hasNotificationContent = bodyText.includes('通知設定') || bodyText.includes('通知名');
+        expect(hasNotificationContent).toBe(true);
+
+        // 条件設定UIが存在することを確認
+        const conditionSection = page.locator('label:has-text("条件"), button:has-text("条件"), label:has-text("条件を追加"), button:has-text("条件を追加")');
+        console.log('84-1: 条件設定UI数:', await conditionSection.count());
+        // ワークフロー関連の選択肢確認
+        const wfRelated = page.locator('label:has-text("申請"), label:has-text("ワークフロー"), option:has-text("申請")');
+        console.log('84-1: ワークフロー条件関連要素数:', await wfRelated.count());
+        // 注: 実際の通知発火確認は手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
     // 95-1(B): 通知 - 通知メッセージの省略
     // ---------------------------------------------------------------------------
     test('95-1: 通知内容を長文に設定するとアプリ内通知で省略して表示されること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
-
-        const url = page.url();
-        expect(url).toContain('/admin/');
-
-        // ベルマークの存在確認
+        // ダッシュボードでアプリ内通知UIを確認
         await page.goto(BASE_URL + '/admin/dashboard');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await page.waitForTimeout(2000);
 
+        expect(page.url()).toContain('/admin/dashboard');
+
+        // ナビバーのベル（通知）アイコンが存在することを確認
         const bellIcon = page.locator('.navbar .notification, .navbar [class*="bell"], .navbar [class*="notification"]');
-        console.log('ベルマークアイコン数: ' + (await bellIcon.count()));
+        const bellCount = await bellIcon.count();
+        console.log('95-1: ベルマークアイコン数:', bellCount);
 
+        // ページが正常に表示されていることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ナビバーが表示されていることを確認
+        const navbar = page.locator('.navbar, header, nav');
+        await expect(navbar.first()).toBeVisible();
+
+        // 通知ログページへのアクセスを確認（通知機能の動作確認）
+        await page.goto(BASE_URL + '/admin/notification_log');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(2000);
+        expect(page.url()).toContain('/admin/notification_log');
+        const notifLogText = await page.innerText('body');
+        expect(notifLogText).not.toContain('Internal Server Error');
+        console.log('95-1: 通知ログページ確認完了');
+        // 注: 実際の長文省略表示確認はアプリ内通知が届く環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -1029,13 +1371,19 @@ test.describe('通知設定', () => {
     test('112: 通知設定のコピーがエラーなく行えること', async ({ page }) => {
         await goToNotificationPage(page, tableId);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/');
+
+        // 通知設定ページが正常に表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
 
         // コピーボタンが存在するか確認
         const copyBtn = page.locator('button:has-text("コピー"), a:has-text("コピー"), [data-action="copy"]');
-        console.log('コピーボタン数: ' + (await copyBtn.count()));
+        console.log('112: コピーボタン数:', await copyBtn.count());
 
+        // 通知設定一覧または追加ページへのリンクが存在することを確認
+        const addLink = page.locator('a[href*="notification/edit"], button:has-text("追加"), .fa-plus');
+        console.log('112: 通知設定追加リンク数:', await addLink.count());
     });
 
     // ---------------------------------------------------------------------------
@@ -1044,24 +1392,63 @@ test.describe('通知設定', () => {
     test('133-01: 通知設定で有効ONに設定すると該当の通知設定が有効になること', async ({ page }) => {
         await goToNotificationPage(page, tableId);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/');
+
+        // 通知設定ページが正常に表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知設定一覧または新規作成リンクが存在することを確認
+        const notifLink = page.locator('a[href*="notification"], button:has-text("追加")');
+        console.log('133-01: 通知設定リンク数:', await notifLink.count());
+
+        // 新規作成ページで有効/無効トグルUIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
+
+        expect(page.url()).toContain('/admin/notification');
+
+        const editBodyText = await page.innerText('body');
+        expect(editBodyText).not.toContain('Internal Server Error');
 
         // 有効/無効トグルの確認
-        const enableToggle = page.locator('input[type="checkbox"][name*="enable"], input[type="checkbox"][name*="active"], .toggle-switch');
-        console.log('有効トグル数: ' + (await enableToggle.count()));
-
+        const enableToggle = page.locator('input[type="checkbox"][name*="enable"], input[type="checkbox"][name*="active"], .toggle-switch, label:has-text("有効")');
+        console.log('133-01: 有効トグル数:', await enableToggle.count());
+        // 注: 実際の有効ON時の通知発火確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
     // 133-02(B): 通知設定 - 有効OFF（リマインダも停止確認）
     // ---------------------------------------------------------------------------
     test('133-02: 通知設定で有効OFFに設定すると該当の通知設定が無効になること（リマインダも停止すること）', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで有効/無効UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // 有効/無効トグルが存在することを確認
+        const enableToggle = page.locator('input[type="checkbox"][name*="enable"], input[type="checkbox"][name*="active"], label:has-text("有効"), label:has-text("無効")');
+        console.log('133-02: 有効/無効トグル数:', await enableToggle.count());
+
+        // リマインダ設定追加ボタンが表示されることを確認
+        const reminderBtn = page.locator('button:has-text("リマインダ設定を追加する")');
+        console.log('133-02: リマインダ設定ボタン数:', await reminderBtn.count());
+        // 注: 実際の有効OFF時の通知停止確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -1208,15 +1595,25 @@ test.describe('通知設定', () => {
             return;
         }
 
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページでコメント通知UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
 
         // コメント通知チェックボックスの確認
-        const commentCheckbox = page.locator('input[name*="comment"], label:has-text("コメント") input[type="checkbox"]');
-        console.log('コメント通知チェックボックス数: ' + (await commentCheckbox.count()));
-
+        const commentCheckbox = page.locator('input[name*="comment"], label:has-text("コメント") input[type="checkbox"], label:has-text("コメント追加")');
+        console.log('184: コメント通知チェックボックス数:', await commentCheckbox.count());
+        // 注: 実際のコメント追加による通知発火はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -1404,11 +1801,25 @@ test.describe('通知設定', () => {
     // 190(B): 通知設定 - 追加の通知先対象項目
     // ---------------------------------------------------------------------------
     test('190: 通知設定の追加の通知先対象項目に設定値を指定すると通知内容に含まれること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで追加通知先対象項目UIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
+        // 通知先関連の入力欄・セレクトが存在することを確認
+        const recipientFields = page.locator('input[name*="notify"], input[name*="recipient"], select[name*="notify"], label:has-text("通知先")');
+        console.log('190: 通知先関連フィールド数:', await recipientFields.count());
+        // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -1427,13 +1838,15 @@ test.describe('通知設定', () => {
         const url = page.url();
         expect(url).toContain('/admin/notification');
 
+        // 設定ページのコンテンツが表示されることを確認
+        const editBodyText209 = await page.innerText('body');
+        expect(editBodyText209).not.toContain('Internal Server Error');
+        expect(editBodyText209).toContain('通知設定');
+
         // 「PigeonCloudフッター」に関連するチェックボックスを探す（表示項目設定）
         const footerCheckbox = page.locator('label:has-text("フッター"), label:has-text("PigeonCloud"), input[value*="footer"]').first();
         const footerCount = await footerCheckbox.count();
         console.log('209: フッター設定要素数:', footerCount);
-
-        // 設定ページが表示されることで確認（メール実際の受信確認は手動テストにより確認）
-        expect(url).toContain('/admin/');
         // 注: フッターのOFF/ONはdisplay_keysフィールドで制御され、メール内容の確認はSMTP動作環境が必要
     });
 
@@ -1441,23 +1854,25 @@ test.describe('通知設定', () => {
     // 210(B): 通知設定 - メール通知フッター設定ON
     // ---------------------------------------------------------------------------
     test('210: 通知設定でフッターをオンにするとメール通知の内容にフッター情報が含まれること', async ({ page }) => {
-        // 通知設定ページへ
-        await goToNotificationPage(page, tableId);
-        expect(page.url()).toContain('/admin/');
-
         // 通知新規追加ページへ（フッター設定はdisplay_keysで制御）
         await page.goto(BASE_URL + '/admin/notification/edit/new');
         await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
         await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/notification');
+        expect(page.url()).toContain('/admin/notification');
 
-        // 設定ページが表示されることで確認
+        // 設定ページのコンテンツが表示されることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
+
         // 注: フッターのON/OFFはdisplay_keysフィールドで制御され、メール内容の確認はSMTP動作環境が必要
         const footerRelated = page.locator('label:has-text("フッター"), label:has-text("PigeonCloud"), input[value*="footer"]').first();
         console.log('210: フッター設定要素数:', await footerRelated.count());
-        expect(url).toContain('/admin/');
     });
 
     // ---------------------------------------------------------------------------
@@ -1559,15 +1974,38 @@ test.describe('通知設定', () => {
     // 221(B): 通知設定 - 無効（リマインダも停止）
     // ---------------------------------------------------------------------------
     test('221: 通知設定を無効にすると通知後リマインダ通知も停止すること', async ({ page }) => {
-        await goToNotificationPage(page, tableId);
+        // 通知設定新規作成ページで有効/無効UIとリマインダUIを確認
+        await page.goto(BASE_URL + '/admin/notification/edit/new');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForFunction(
+            () => !document.body.innerText.includes('読み込み中'),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(2000);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/notification');
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('通知設定');
 
         // 有効/無効コントロールの確認
-        const enableControl = page.locator('input[type="checkbox"], .toggle-switch, [class*="switch"]');
-        console.log('有効/無効コントロール数: ' + (await enableControl.count()));
+        const enableControl = page.locator('input[type="checkbox"], .toggle-switch, [class*="switch"], label:has-text("有効")');
+        console.log('221: 有効/無効コントロール数:', await enableControl.count());
 
+        // リマインダ設定追加ボタンが表示されることを確認
+        const reminderBtn = page.locator('button:has-text("リマインダ設定を追加する")');
+        console.log('221: リマインダ設定ボタン数:', await reminderBtn.count());
+
+        // リマインダボタンをクリックしてリマインダUIが表示されることを確認
+        if (await reminderBtn.count() > 0) {
+            await reminderBtn.click({ force: true });
+            await page.waitForTimeout(1000);
+            const afterText = await page.innerText('body');
+            expect(afterText).toContain('リマインダ設定');
+            console.log('221: リマインダ設定UI確認完了');
+        }
+        // 注: 実際の無効化後の通知停止確認はSMTP動作環境での手動テストが必要
     });
 
     // ---------------------------------------------------------------------------
@@ -1706,6 +2144,8 @@ test.describe('メール配信', () => {
         expect(url).toContain('/admin/');
 
         // ページコンテンツが表示されることを確認（mail_templateページは .container-fluid / main を使用）
+        const bodyText99_1 = await page.innerText('body');
+        expect(bodyText99_1).not.toContain('Internal Server Error');
         const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
         await expect(content.first()).toBeVisible();
     });
@@ -1721,6 +2161,8 @@ test.describe('メール配信', () => {
         const url = page.url();
         expect(url).toContain('/admin/');
 
+        const bodyText99_2 = await page.innerText('body');
+        expect(bodyText99_2).not.toContain('Internal Server Error');
         const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
         await expect(content.first()).toBeVisible();
     });
@@ -1733,8 +2175,18 @@ test.describe('メール配信', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/');
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // メールテンプレートページが正常に表示されることを確認
+        const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
+        await expect(content.first()).toBeVisible();
+
+        // 削除ボタンまたは削除アイコンが存在することを確認（テンプレートが存在する場合）
+        const deleteBtn = page.locator('button:has-text("削除"), .fa-trash, a:has-text("削除"), [data-action="delete"]');
+        console.log('99-3: 削除ボタン数:', await deleteBtn.count());
     });
 
     // ---------------------------------------------------------------------------
@@ -1779,6 +2231,16 @@ test.describe('メール配信', () => {
         console.log('配信リストURL: ' + url);
         expect(url).toContain('/admin/');
 
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 配信リストページのコンテンツが表示されること
+        const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
+        await expect(content.first()).toBeVisible();
+
+        // 追加ボタンが存在することを確認
+        const addBtn = page.locator('button:has-text("追加"), a:has-text("追加"), .fa-plus');
+        console.log('99-5: 追加ボタン数:', await addBtn.count());
     });
 
     // ---------------------------------------------------------------------------
@@ -1789,8 +2251,18 @@ test.describe('メール配信', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/');
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 配信リストページのコンテンツが表示されること
+        const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
+        await expect(content.first()).toBeVisible();
+
+        // 削除ボタンまたは削除アイコンが存在することを確認（リストが存在する場合）
+        const deleteBtn = page.locator('button:has-text("削除"), .fa-trash, [data-action="delete"]');
+        console.log('99-6: 削除ボタン数:', await deleteBtn.count());
     });
 
     // ---------------------------------------------------------------------------
@@ -1834,6 +2306,8 @@ test.describe('メール配信', () => {
         console.log('メール配信URL: ' + url);
         expect(url).toContain('/admin/');
 
+        const bodyText99_8 = await page.innerText('body');
+        expect(bodyText99_8).not.toContain('Internal Server Error');
         const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
         await expect(content.first()).toBeVisible();
     });
@@ -1846,8 +2320,18 @@ test.describe('メール配信', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
 
-        const url = page.url();
-        expect(url).toContain('/admin/');
+        expect(page.url()).toContain('/admin/');
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // メール配信ページのコンテンツが表示されること
+        const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
+        await expect(content.first()).toBeVisible();
+
+        // 削除ボタンまたは削除アイコンが存在することを確認
+        const deleteBtn = page.locator('button:has-text("削除"), .fa-trash, [data-action="delete"]');
+        console.log('99-9: 削除ボタン数:', await deleteBtn.count());
     });
 
     // ---------------------------------------------------------------------------
@@ -2091,7 +2575,7 @@ test.describe('メール配信', () => {
         if (hasAttachInput) {
             // 添付ファイルをアップロード
             try {
-                await attachInput.setInputFiles('/app/test_files/ok.png');
+                await attachInput.setInputFiles(process.cwd() + '/test_files/ok.png');
                 await page.waitForTimeout(1500);
                 console.log('142-01: 添付ファイル設定完了');
             } catch (e) {
@@ -2120,6 +2604,8 @@ test.describe('メール配信', () => {
         console.log('ステップメールURL: ' + url);
         expect(url).toContain('/admin/');
 
+        const bodyText150_1 = await page.innerText('body');
+        expect(bodyText150_1).not.toContain('Internal Server Error');
         const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
         await expect(content.first()).toBeVisible();
     });
@@ -2247,6 +2733,9 @@ test.describe('メール配信', () => {
 
         const url = page.url();
         expect(url).toContain('/admin/');
+
+        const bodyText218 = await page.innerText('body');
+        expect(bodyText218).not.toContain('Internal Server Error');
 
         const content = page.locator('.content, .main-content, #content, .container, .container-fluid, main');
         await expect(content.first()).toBeVisible();

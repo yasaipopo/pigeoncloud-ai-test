@@ -14,18 +14,6 @@ cases:
   category: チェックボックス
   description: ①レコード一覧のレコードの左端にあるチェックボックスをクリックする。
   expected: チェックボックスにチェックが入り、「一括削除」ボタンなども連動して表示されることを確認する。
-- case_no: 143-01
-  sheet: B
-  feature: レコード一覧
-  category: コメント表示
-  description: 一覧にコメントアイコン追加（マウスオーバーで件数と最新投稿時間表示)
-  expected: マウスオーバー時に件数と最新投稿時間が表示されること。
-- case_no: 167-1
-  sheet: B
-  feature: レコード
-  category: チェックボックス
-  description: ①レコード一覧のレコードの左端にあるチェックボックスをクリックする。
-  expected: チェックボックスにチェックが入り、「一括削除」ボタンなども連動して表示されることを確認する。
 - case_no: 180-1
   sheet: B
   feature: 一括編集
@@ -96,3 +84,174 @@ cases:
 
     ②対象テーブルを未入力状態で「追加する」ボタンをクリックする'
   expected: 必須項目未入力のエラーが発生すること。
+actual_steps:
+- case_no: 143-01
+  status: partial
+  steps: '1. beforeAll: create-all-type-table API呼び出し
+
+    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:''fixed'')
+
+    3. テーブルIDをAPIステータスから取得
+
+    4. テーブル一覧（/admin/dataset__{tableId}）に遷移
+
+    5. レコード行の存在確認（table tbody tr）
+
+    6. 最初のレコード行をクリックして詳細画面に遷移
+
+    7. 詳細画面が表示されることを確認
+
+    8. スクリーンショット保存
+
+    9. afterAll: delete-all-type-tables API呼び出し
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    - レコード行が存在すれば詳細画面URLを確認
+
+    '
+  gaps: '⚠️ YAMLには「ロック状態のレコード確認」に関する手順が期待されるが、実際はレコード詳細画面の表示確認のみ
+
+    ⚠️ ロック状態の確認・ロック解除の手順なし
+
+    '
+- case_no: 167-1
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. レコードの存在確認
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ YAMLには「レコードのコピー機能」の確認が期待されるが未実装
+
+    ⚠️ コピーボタンのクリック・コピー結果の確認なし
+
+    '
+- case_no: 180-1
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. レコード行をクリックして詳細画面に遷移
+
+    3. 詳細画面のページ確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ YAMLには「同時編集時のロック確認」が期待されるが、複数ユーザーのシミュレーションなし
+
+    '
+- case_no: 180-2
+  status: skip
+  steps: 'test.skip(true, ''複数ユーザー・ロック状態の再現が必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ test.skip で明示的にスキップ（複数ユーザー同時操作のテストは自動化困難）
+
+    '
+- case_no: 180-3
+  status: skip
+  steps: 'test.skip(true, ''複数ユーザー・ロック状態の再現が必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 180-2と同様
+
+    '
+- case_no: 180-4
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ ロック状態の解除確認なし
+
+    '
+- case_no: '237'
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ YAMLには「日付フィールドによるレコードのフィルタ」確認が期待されるが未実装
+
+    '
+- case_no: 35-1
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. 削除ボタンの存在確認
+
+    3. 存在する場合は削除ボタンをクリック（confirm dialogのハンドリングあり）
+
+    4. 削除後のページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    - 削除ボタンが存在すれば（条件付き）クリック
+
+    '
+  gaps: '⚠️ 削除後にレコード数が減少していることの確認なし
+
+    ⚠️ 削除したレコードが一覧から消えることの確認なし
+
+    ⚠️ 削除操作の確認ダイアログの扱いが不安定（force:true の可能性）
+
+    '
+- case_no: 52-1
+  status: partial
+  steps: '1. テーブルのレコード追加画面（/admin/dataset__{tableId}/new）に遷移
+
+    2. 必須フィールドを空のまま保存ボタンをクリック
+
+    3. エラーメッセージの存在確認
+
+    '
+  assertions: '- if (errorCount > 0) { expect(errorMsg).toBeVisible() }（条件付き）
+
+    '
+  gaps: '⚠️ エラーが表示されない場合でもパスする（条件付きアサーション）
+
+    ⚠️ エラーメッセージの内容確認なし
+
+    ⚠️ 特定のフィールドに対するエラー表示の検証なし
+
+    '
+- case_no: 52-2
+  status: partial
+  steps: '1. レコード追加画面に遷移
+
+    2. 最大文字数を超えるテキストを入力して保存
+
+    3. エラーメッセージの存在確認
+
+    '
+  assertions: '- if (errorCount > 0) { expect(errorMsg).toBeVisible() }（条件付き）
+
+    '
+  gaps: '⚠️ 52-1と同様、エラーが表示されない場合でもパスする
+
+    ⚠️ 文字数制限のバリデーションが実際に機能しているかの確認不十分
+
+    '

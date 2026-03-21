@@ -436,6 +436,9 @@ test.describe('共通設定・システム設定', () => {
 
         await expect(page).toHaveURL(/\/admin\/dataset/);
 
+        // テーブル定義一覧ページのUI要素が表示されていること
+        await expect(page.locator('button:has-text("メニュー並び替え"), button:has-text("全て展開"), button:has-text("全て閉じる")').first()).toBeVisible();
+
         // D&D可能な行を探す（ドラッグハンドル or テーブル行）
         const dragHandle = page.locator('.drag-handle, [class*="drag"], [draggable="true"], table tbody tr').first();
         const handleCount = await dragHandle.count();
@@ -459,9 +462,9 @@ test.describe('共通設定・システム設定', () => {
             }
         }
 
-        // ページが正常に表示されていることを確認
-        const pageContent = page.locator('.main-content, #content, app-admin, [class*="container"]');
-        await expect(pageContent.first()).toBeVisible();
+        // D&D後もテーブル定義一覧ページが表示されていること（エラーページでないこと）
+        await expect(page).toHaveURL(/\/admin\/dataset/);
+        await expect(page.locator('h5:has-text("テーブル定義"), [class*="navbar"] h5').first()).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -472,17 +475,25 @@ test.describe('共通設定・システム設定', () => {
         // テーブル管理ページへ
         await page.goto(BASE_URL + '/admin/dataset');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(3000);
 
         await expect(page).toHaveURL(/\/admin\/dataset/);
 
-        // テーブルが一覧に表示されることを確認（Angular SPA: 様々なセレクタで確認）
+        // テーブル定義一覧ページのUI要素確認: ヘッダー（テーブル定義 N件）、操作ボタン
+        await expect(page.locator('h5').filter({ hasText: /テーブル定義/ }).first()).toBeVisible({ timeout: 15000 });
+        // ボタンのレンダリング完了を待機（Angularの非同期レンダリング対応）
+        await page.waitForFunction(
+            () => document.querySelector('button') && Array.from(document.querySelectorAll('button')).some(b => b.textContent.includes('メニュー並び替え')),
+            { timeout: 20000 }
+        ).catch(() => {});
+        await expect(page.locator('button:has-text("メニュー並び替え")').first()).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('button:has-text("全て展開")').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('button:has-text("全て閉じる")').first()).toBeVisible({ timeout: 10000 });
+
+        // テーブルが一覧に表示されることを確認（テーブル行またはリスト項目が存在すること）
         const tableList = page.locator('table tbody tr, .dataset-list-item, [class*="table-row"], tr[ng-reflect], li[class*="list-group-item"]');
         const count = await tableList.count();
         console.log('テーブル一覧件数: ' + count);
-        // テーブルが一覧ページとして表示されていることを確認（ページ内にコンテンツがあること）
-        const pageContent = page.locator('.main-content, #content, app-admin, [class*="container"]');
-        await expect(pageContent.first()).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -495,14 +506,18 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
 
-        // テーブル設定ページが表示されることを確認
-        const url = page.url();
-        console.log('テーブルURL: ' + url);
-        expect(url).toContain('/admin/');
+        // テーブル一覧ページが表示されることを確認（URL・ナビバーヘッダー）
+        await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
-        // テーブル設定ボタン確認
+        // レコード一覧ページのツールバーが表示されていること
+        await expect(page.locator('textbox[placeholder="簡易検索"], input[placeholder="簡易検索"]').first()).toBeVisible();
+
+        // テーブル設定ボタン（ツールバーのボタン群）が表示されていること
         const settingBtn = page.locator('a:has-text("テーブル設定"), a:has-text("設定"), button:has-text("設定"), a[href*="setting"]');
         console.log('設定ボタン数: ' + (await settingBtn.count()));
+
+        // テーブルのヘッダー行が表示されていること（IDカラムが存在すること）
+        await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -588,9 +603,10 @@ test.describe('共通設定・システム設定', () => {
         // その他設定ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
-        // 現在のユーザー数を取得（ページテキストから）
-        const bodyText = await page.innerText('body');
-        console.log('設定ページ確認: ユーザー数表示あり=' + bodyText.includes('ユーザー'));
+        // その他設定ページに設定フォームが表示されていること
+        await expect(page.locator('form').first()).toBeVisible();
+        // 「二段階認証を有効にする」ラベルが表示されていること（設定ページの固有要素）
+        await expect(page.locator('body')).toContainText('二段階認証を有効にする');
 
         // 新しいユーザーを作成
         const userBody = await debugApiPost(page, '/create-user');
@@ -603,6 +619,8 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
+        // リロード後もフォームが表示されていること
+        await expect(page.locator('form').first()).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -632,6 +650,8 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(/\/admin\/user/);
+        // ユーザー管理ページにテーブルまたはユーザー一覧が表示されていること
+        await expect(page.locator('table, [class*="list"], [class*="user"]').first()).toBeVisible();
 
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
@@ -639,6 +659,9 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
+        // 設定フォームが表示されていること
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('二段階認証を有効にする');
     });
 
     // ---------------------------------------------------------------------------
@@ -652,6 +675,10 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
+        // 設定フォームが表示されていること
+        await expect(page.locator('form').first()).toBeVisible();
+        // その他設定ページの固有要素（設定ラベル）が表示されていること
+        await expect(page.locator('body')).toContainText('ロック自動解除時間');
 
         // ページを再読み込みして確認
         await page.reload();
@@ -659,6 +686,7 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
+        await expect(page.locator('form').first()).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -689,6 +717,9 @@ test.describe('共通設定・システム設定', () => {
         }
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
+        // 設定フォームが表示されていること（テーブル削除後もシステム設定が正常に動作すること）
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('ロック自動解除時間');
     });
 
     // ---------------------------------------------------------------------------
@@ -762,9 +793,9 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
 
-        // ページが正常に表示されていることを確認
-        const settingContent = page.locator('.content, .main-content, #content, form');
-        await expect(settingContent.first()).toBeVisible();
+        // ページが正常に表示されていることを確認（設定フォームの固有要素）
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('通知の送信メールアドレスをSMTPで指定');
 
         // SMTP設定を元に戻す
         await updateAdminSetting(page, { use_smtp: 'false' });
@@ -800,9 +831,9 @@ test.describe('共通設定・システム設定', () => {
             console.log('二段階認証ON設定エラー（仕様上の制限）:', result?.error_message || result?.status);
         }
 
-        // その他設定ページが表示されていることを確認
-        const settingContent = page.locator('.content, .main-content, #content, form');
-        await expect(settingContent.first()).toBeVisible();
+        // その他設定ページが表示されていることを確認（設定フォームの固有要素）
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('二段階認証を有効にする');
     });
 
     // ---------------------------------------------------------------------------
@@ -831,16 +862,52 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
         const isCheckedAfter = await page.locator('#setTwoFactor_1').isChecked();
         console.log('二段階認証OFF反映確認（チェックなし）: ' + !isCheckedAfter);
+        // 二段階認証がOFFになっていること（チェックなし）
+        expect(isCheckedAfter).toBe(false);
 
-        // その他設定ページが表示されていることを確認
-        const settingContent = page.locator('.content, .main-content, #content, form');
-        await expect(settingContent.first()).toBeVisible();
+        // その他設定ページが表示されていることを確認（設定フォームの固有要素）
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('二段階認証を有効にする');
     });
 
     // ---------------------------------------------------------------------------
     // 9-1(A/B): 共通設定 - レコード追加
     // ---------------------------------------------------------------------------
     test('9-1: レコードの追加がエラーなく行えること', async ({ page }) => {
+        test.setTimeout(360000); // setupAllTypeTable(~90s) + beforeEach(~40s) + テスト本体のため延長
+
+        // 7-4テストがdelete-all-type-tablesを呼んだ後に実行されるため、tableIdが無効になっている可能性がある
+        // その場合はsetupAllTypeTableで再作成してtableIdを更新する
+        const statusCheck = await page.evaluate(async (baseUrl) => {
+            try {
+                const res = await fetch(baseUrl + '/api/admin/debug/status', {
+                    credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                return res.json();
+            } catch (e) { return null; }
+        }, BASE_URL).catch(() => null);
+        const tableStillExists = (statusCheck?.all_type_tables || []).some(t => String(t.id) === String(tableId));
+        if (!tableStillExists) {
+            console.log('[9-1] tableIdのテーブルが見つからないため再作成します... (tableId=', tableId, ')');
+            const result = await setupAllTypeTable(page);
+            tableId = result.tableId;
+            console.log('[9-1] 再作成完了 tableId=', tableId);
+
+            // create-all-type-tableは非同期のため、フロントエンドからアクセス可能になるまで待機
+            for (let retry = 0; retry < 12; retry++) {
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+                await page.waitForLoadState('domcontentloaded');
+                await page.waitForTimeout(2000);
+                const bodyText = await page.innerText('body').catch(() => '');
+                if (!bodyText.includes('テーブルが見つかりません')) {
+                    console.log('[9-1] テーブルアクセス確認完了 (retry=', retry, ')');
+                    break;
+                }
+                console.log('[9-1] テーブルまだ準備中... (retry=', retry, ')');
+                await page.waitForTimeout(10000);
+            }
+        }
 
         // レコード一覧ページへ
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -848,6 +915,14 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+
+        // レコード一覧ページのUI要素が表示されていること
+        // ナビバーにテーブル名が表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        // 簡易検索フィールドが表示されていること
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+        // テーブルのIDカラムが表示されていること
+        await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
 
         // 追加ボタンを確認（存在確認のみ）
         const addBtn = page.locator('button:has-text("追加"), a:has-text("追加"), button.btn-add, [data-action="add"]');
@@ -865,6 +940,12 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+        // テーブルのIDカラムが表示されていること（削除後もページは壊れていないこと）
+        await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -879,7 +960,11 @@ test.describe('共通設定・システム設定', () => {
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
-        // 集計ボタンの確認
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+
+        // 集計ボタンの確認（存在確認）
         const aggregateBtn = page.locator('button:has-text("集計"), a:has-text("集計")');
         console.log('集計ボタン数: ' + (await aggregateBtn.count()));
     });
@@ -895,6 +980,11 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+        await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -908,6 +998,11 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        // 帳票ボタンがツールバーに表示されていること
+        await expect(page.locator('button:has-text("帳票")')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -921,6 +1016,12 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        // 簡易検索フィールドが表示されていること
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+        await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
 
         // 検索フィールドが存在することを確認
         const searchInput = page.locator('input[type="search"], input[placeholder*="検索"], .search-input, #search-input');
@@ -939,9 +1040,11 @@ test.describe('共通設定・システム設定', () => {
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
-        // 編集ボタンの確認
-        const editBtn = page.locator('button:has-text("編集"), a:has-text("編集"), [data-action="edit"], .btn-edit');
-        console.log('編集ボタン数: ' + (await editBtn.count()));
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+        // 「編集モード」ボタンがツールバーに表示されていること
+        await expect(page.locator('button:has-text("編集モード")')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -956,9 +1059,15 @@ test.describe('共通設定・システム設定', () => {
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
-        // レコード行が表示されることを確認
-        const rows = page.locator('table tbody tr, .list-item, [class*="record-row"]');
-        console.log('レコード行数: ' + (await rows.count()));
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+        await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
+        // テーブルのヘッダー行が存在すること（複数カラムあること）
+        const headers = page.locator('th, [role="columnheader"]');
+        const headerCount = await headers.count();
+        console.log('カラム数: ' + headerCount);
+        expect(headerCount).toBeGreaterThan(1);
     });
 
     // ---------------------------------------------------------------------------
@@ -972,6 +1081,12 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+        // 「編集モード」ボタンがツールバーに表示されていること
+        await expect(page.locator('button:has-text("編集モード")')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -985,6 +1100,11 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+        await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -998,6 +1118,10 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
+
+        // レコード一覧ページが正常に表示されていること
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
 
         // CSVダウンロードボタンの確認
         const csvBtn = page.locator('button:has-text("CSV"), a:has-text("CSV"), a:has-text("ダウンロード")');
@@ -1034,7 +1158,7 @@ test.describe('共通設定・システム設定', () => {
                 const fileInput = page.locator('.modal.show input[type="file"], input#inputCsv').first();
                 const fileInputCount = await fileInput.count();
                 if (fileInputCount > 0) {
-                    await fileInput.setInputFiles('/app/test_files/稼働_2M.csv');
+                    await fileInput.setInputFiles(process.cwd() + '/test_files/稼働_2M.csv');
                     await page.waitForTimeout(1000);
 
                     // アップロードボタンをクリック
@@ -1049,7 +1173,8 @@ test.describe('共通設定・システム設定', () => {
         }
 
         // ページが正常に表示されることを確認
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
+        await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
     });
 
     // ---------------------------------------------------------------------------
@@ -1083,8 +1208,9 @@ test.describe('共通設定・システム設定', () => {
         // 元に戻す（ONに戻す）
         await updateAdminSetting(page, { ignore_new_pw_input: 'false' });
 
-        // 設定ページが正常に表示されていることを確認
+        // 設定ページが正常に表示されていること（固有ラベルが見えること）
         await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('新規ユーザーのログイン時のパスワードリセットをOFFにする');
     });
 
     // ---------------------------------------------------------------------------
@@ -1114,9 +1240,12 @@ test.describe('共通設定・システム設定', () => {
         const isCheckedAfter = await page.locator('#ignore_new_pw_input_1').isChecked();
         console.log('パスワードリセットON設定反映確認（チェックなし）: ' + !isCheckedAfter);
 
-        // 設定ページが表示されることを確認
-        const settingContent = page.locator('.content, .main-content, #content, form');
-        await expect(settingContent.first()).toBeVisible();
+        // 設定ページが表示されること（固有ラベルが見えること）
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('新規ユーザーのログイン時のパスワードリセットをOFFにする');
+        // パスワードリセットONになっていること（チェックなし = ONがデフォルト）
+        const isCheckedReset = await page.locator('#ignore_new_pw_input_1').isChecked();
+        expect(isCheckedReset).toBe(false);
     });
 
     // ---------------------------------------------------------------------------
@@ -1149,9 +1278,9 @@ test.describe('共通設定・システム設定', () => {
         const offResult = await updateAdminSetting(page, { setTermsAndConditions: 'false' });
         console.log('利用規約表示OFF設定API結果:', JSON.stringify(offResult));
 
-        // その他設定ページが表示されていることを確認
-        const settingContent = page.locator('.content, .main-content, #content, form');
-        await expect(settingContent.first()).toBeVisible();
+        // その他設定ページが表示されていること（固有ラベルが見えること）
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('初回ログイン時に利用規約を表示する');
     });
 
     // ---------------------------------------------------------------------------
@@ -1170,6 +1299,15 @@ test.describe('共通設定・システム設定', () => {
         await updateAdminSetting(page, { setTermsAndConditions: 'true' });
         await page.waitForTimeout(500);
 
+        // ONにするとセッションが「利用規約同意必須」状態になり、以降のAPI呼び出しが400になる
+        // /api/admin/logout でセッションをリセットしてから再ログイン（loginヘルパーが利用規約画面を自動同意）
+        await page.evaluate(async (baseUrl) => {
+            await fetch(baseUrl + '/api/admin/logout', { method: 'GET', credentials: 'include' }).catch(() => {});
+        }, BASE_URL);
+        await page.waitForTimeout(500);
+        await login(page, EMAIL, PASSWORD);
+        await page.waitForTimeout(500);
+
         // 利用規約をOFFにする（API経由で設定変更）
         const offResult = await updateAdminSetting(page, { setTermsAndConditions: 'false' });
         console.log('利用規約表示OFF設定API結果:', JSON.stringify(offResult));
@@ -1185,10 +1323,12 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForTimeout(1500);
         const isCheckedAfter = await page.locator('#setTermsAndConditions_1').isChecked();
         console.log('利用規約表示OFF反映確認（ページ）: ' + !isCheckedAfter);
+        // 利用規約表示がOFFになっていること（チェックなし）
+        expect(isCheckedAfter).toBe(false);
 
-        // 設定ページが表示されることを確認
-        const settingContent = page.locator('.content, .main-content, #content, form');
-        await expect(settingContent.first()).toBeVisible();
+        // 設定ページが表示されること（固有ラベルが見えること）
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('初回ログイン時に利用規約を表示する');
     });
 
     // ---------------------------------------------------------------------------
@@ -1289,8 +1429,9 @@ test.describe('共通設定・システム設定', () => {
             // パスワードが_new1に変わったことをメモしておく（login関数で対処済み）
         }
 
-        const settingContent = page.locator('.content, .main-content, #content, form');
-        await expect(settingContent.first()).toBeVisible();
+        // 設定ページが表示されていること（パスワード変更画面ではないこと）
+        await expect(page.locator('form').first()).toBeVisible();
+        await expect(page.locator('body')).toContainText('パスワード強制変更画面表示の間隔日数');
     });
 
     // ---------------------------------------------------------------------------

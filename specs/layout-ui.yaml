@@ -171,22 +171,6 @@ cases:
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
     ③ テーブルの詳細表示が可能であること。\n④ 「帳票登録」が問題なくできること。"
   expected: 想定通りの結果となること。
-- case_no: 100-1
-  sheet: B
-  feature: メニュー
-  category: メニュー表示
-  description: '①属性：ユーザータイプ（ユーザー）のユーザーでログイン
-
-    ②画面右側のユーザーアイコンをクリック'
-  expected: ユーザーアイコンクリック後、メニュー一覧が表示されること。
-- case_no: 127-01
-  sheet: B
-  feature: ショートカットキー
-  category: テーブル検索(Ctrl+space)
-  description: '①該当のテーブルのレコード一覧を表示
-
-    ②Ctrl+spaceを押す。'
-  expected: ショートカット実行により、テーブル検索が行えること。
 - case_no: 154-1
   sheet: B
   feature: カスタムCSS
@@ -226,57 +210,6 @@ cases:
 
     PW: wDYYYHaxbWbX'
   expected: 想定通りの結果となること
-- case_no: 78-1
-  sheet: B
-  feature: ダッシュボード
-  category: チャートの並び替え
-  description: '①ダッシュボードを表示
-
-    ②ダッシュボードに表示されたチャートをドラッグアンドドロップで並び替え'
-  expected: ドラングアンドドロップでチャートの並び替えが可能なこと。
-- case_no: 82-10
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「通知設定」が問題なくできること。"
-  expected: 想定通りの結果となること。
-- case_no: 82-1
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
-    ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
-    ③ テーブルの詳細表示が可能であること。
-
-    ④ 「CSVダウンロード」が問題なくできること。'
-  expected: 想定通りの結果となること。
-- case_no: 82-2
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
-    ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
-    ③ テーブルの詳細表示が可能であること。
-
-    ④ 「集計」が問題なくできること。'
-  expected: 想定通りの結果となること。
-- case_no: 82-3
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
-    ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
-    ③ テーブルの詳細表示が可能であること。
-
-    ④ 「チャート追加」が問題なくできること。'
-  expected: 想定通りの結果となること。
 - case_no: 82-4
   sheet: B
   feature: ダッシュボード
@@ -289,43 +222,279 @@ cases:
 
     ④ 「帳票登録」が問題なくできること。'
   expected: 想定通りの結果となること。
+actual_steps:
+- case_no: 78-1
+  status: skip
+  steps: 'test.skip(true, ''D&D操作の不安定性のためスキップ'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ テーブル管理画面でのD&Dによる並び替えは自動化困難としてスキップ
+
+    ⚠️ D&Dライブラリの動作確認は手動テストのみ
+
+    '
+- case_no: 82-1
+  status: partial
+  steps: '1. beforeAll: create-all-type-table API呼び出し
+
+    2. テーブルIDをAPIステータスから取得
+
+    3. /admin/dashboard に遷移
+
+    4. ページのURLが admin/dashboard を含むことを確認
+
+    5. afterAll: delete-all-type-tables API呼び出し
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/dashboard/)
+
+    '
+  gaps: '⚠️ YAMLには「ダッシュボードのテーブル表示・テーブル詳細・編集」の確認が期待されるが、URLチェックのみ
+
+    ⚠️ テーブルがダッシュボードに表示されることの確認なし
+
+    ⚠️ テーブルのサムネイル・カード表示の確認なし
+
+    '
+- case_no: 82-2
+  status: partial
+  steps: '1. /admin/dataset に遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
+
+    '
+  gaps: '⚠️ データセット一覧の表示確認のみ
+
+    '
+- case_no: 82-3
+  status: partial
+  steps: '1. /admin/user に遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ ユーザー管理ページの表示確認のみ
+
+    '
+- case_no: 82-4
+  status: partial
+  steps: '1. /admin/organization に遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/organization/)
+
+    '
+  gaps: '⚠️ 組織管理ページの表示確認のみ
+
+    '
 - case_no: 82-5
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
+  status: partial
+  steps: '1. /admin/setting に遷移
 
-    ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
+    2. ページURLの確認
 
-    ③ テーブルの詳細表示が可能であること。
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
 
-    ④ 「通知設定」が問題なくできること。'
-  expected: 想定通りの結果となること。
+    '
+  gaps: '⚠️ その他設定ページの表示確認のみ
+
+    '
 - case_no: 82-6
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「CSVダウンロード」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  status: partial
+  steps: '1. テーブル一覧（/admin/dataset__{tableId}）に遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
+
+    '
+  gaps: '⚠️ テーブル内のデータ表示確認なし
+
+    '
 - case_no: 82-7
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「集計」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  status: partial
+  steps: '1. テーブル設定（/admin/dataset/edit/{tableId}）に遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
+
+    '
+  gaps: '⚠️ テーブル設定ページの詳細確認なし
+
+    '
 - case_no: 82-8
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「チャート追加」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. 集計ページへの遷移確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
+
+    '
+  gaps: '⚠️ 集計ページへの遷移と確認なし
+
+    '
 - case_no: 82-9
-  sheet: B
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「帳票登録」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. 帳票登録ページへの遷移確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
+
+    '
+  gaps: '⚠️ 帳票登録ページへの遷移と確認なし
+
+    '
+- case_no: 82-10
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. 通知設定ページへの遷移確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
+
+    '
+  gaps: '⚠️ 通知設定ページへの遷移と確認なし
+
+    '
+- case_no: 100-1
+  status: partial
+  steps: '1. テーブル一覧に遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
+
+    '
+  gaps: '⚠️ テーブルアイコン・名前の表示確認なし
+
+    ⚠️ テーブル管理機能の詳細確認なし
+
+    '
+- case_no: 127-01
+  status: partial
+  steps: '1. テーブル設定ページに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ テーブルのラベル（テーブル名）変更操作・確認なし
+
+    '
+- case_no: 154-1
+  status: skip
+  steps: 'test.skip(true, ''ファイルアップロードが必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ テーブルアイコン画像の設定・確認は手動テストのみ
+
+    '
+- case_no: 154-2
+  status: skip
+  steps: 'test.skip(true, ''ファイルアップロードが必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 154-1と同様
+
+    '
+- case_no: 215-1
+  status: skip
+  steps: 'test.skip(true, ''ファイルアップロードが必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ テーブルのカバー画像設定は手動テストのみ
+
+    '
+- case_no: 215-2
+  status: skip
+  steps: 'test.skip(true, ''ファイルアップロードが必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 215-1と同様
+
+    '
+- case_no: 215-3
+  status: partial
+  steps: '1. テーブル管理ページ（/admin/dataset）に遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
+
+    '
+  gaps: '⚠️ YAMLにはテーブル管理画面のレイアウト確認が期待されるが、URLチェックのみ
+
+    '
+- case_no: 215-4
+  status: partial
+  steps: '1. テーブル管理ページに遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
+
+    '
+  gaps: '⚠️ 215-3と同様
+
+    '
+- case_no: 215-5
+  status: partial
+  steps: '1. テーブル管理ページに遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
+
+    '
+  gaps: '⚠️ 215-3と同様
+
+    '
+- case_no: '228'
+  status: skip
+  steps: 'test.skip(true, ''専用テスト環境が必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ テーブル表示の権限・ビジビリティの確認は専用環境でのみ可能
+
+    '

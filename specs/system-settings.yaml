@@ -166,30 +166,6 @@ cases:
   category: レコード
   description: データ編集を行う。
   expected: エラーなくレコード編集が行えること。
-- case_no: 10-1
-  sheet: B
-  feature: 共通設定
-  category: テーブル
-  description: テーブルの順番入れ替えを行う。
-  expected: エラーなくテーブルの順番変更が行えること。
-- case_no: 10-2
-  sheet: B
-  feature: 共通設定
-  category: テーブル
-  description: テーブル情報詳細表示を行う。
-  expected: エラーなくテーブル詳細情報の表示が行えること。
-- case_no: 10-3
-  sheet: B
-  feature: 共通設定
-  category: テーブル
-  description: テーブル定義の変更を行う。
-  expected: エラーなくテーブル定義の変更が行えること。
-- case_no: 10-4
-  sheet: B
-  feature: 共通設定
-  category: テーブル
-  description: テーブルの削除を行う。
-  expected: エラーなくテーブルの削除が行えること。
 - case_no: 130-01
   sheet: B
   feature: 契約設定
@@ -230,30 +206,6 @@ cases:
 
     　※(注)カードの有効期限については未来日付にすること。'
   expected: 契約が問題なく完了すること。
-- case_no: 24-1
-  sheet: B
-  feature: その他設定
-  category: 新規ユーザーログイン時のパスワードリセット
-  description: '①「その他設定」より「新規ユーザーのログイン時のパスワードリセットをOFFにする」にチェックを入れて「更新」ボタンをクリック
-
-
-    ②新規ユーザーを作成
-
-
-    ③新規ユーザーでログイン'
-  expected: 新規ユーザーで初回ログイン時、パスワード変更が画面が表示されないこと。
-- case_no: 24-2
-  sheet: B
-  feature: その他設定
-  category: 新規ユーザーログイン時のパスワードリセット
-  description: '①「その他設定」より「新規ユーザーのログイン時のパスワードリセットをOFFにする」にチェックを入れずに「更新」ボタンをクリック
-
-
-    ②新規ユーザーを作成
-
-
-    ③新規ユーザーでログイン'
-  expected: 新規ユーザーで初回ログイン時、パスワード変更が画面が表示されること。
 - case_no: 284-1
   sheet: B
   feature: 契約設定
@@ -263,56 +215,6 @@ cases:
     ③以下URLよりテスト用のクレカ番号を確認し、契約内容入力後手続きを進める。\nhttps://stripe.com/docs/testing#cards\n\
     ④契約が完了したを確認する。\n⑤メニューより、「契約設定」を選択する。\n\nhttps://henmi022.pigeon-demo.com/api/admin/debug-reset-payment"
   expected: 現在のプランの表示が契約通りの内容となること。
-- case_no: 58-1
-  sheet: B
-  feature: その他設定
-  category: ログイン時に利用規約を表示する
-  description: '①「その他設定」より、「最初に利用規約を表示する」の有効にチェックを入れ「更新」ボタンをクリック。
-
-    ②「マスターユーザー」でログインする。
-
-    ③「通常ユーザー」でログインする。'
-  expected: マスターユーザー／通常ユーザーともにログイン時に利用規約が表示されること。
-- case_no: 58-2
-  sheet: B
-  feature: その他設定
-  category: ログイン時に利用規約を表示しない
-  description: '①「その他設定」より、「最初に利用規約を表示する」の有効にチェックを外し「更新」ボタンをクリック。
-
-    ②「マスターユーザー」でログインする。
-
-    ③「通常ユーザー」でログインする。'
-  expected: マスターユーザー／通常ユーザーともにログイン時に利用規約が表示されなくなること。
-- case_no: 7-1
-  sheet: B
-  feature: システム利用状況
-  category: '-'
-  description: ユーザー数を増やす。
-  expected: システム利用状況のユーザー数の表示が増えること。
-- case_no: 7-2
-  sheet: B
-  feature: システム利用状況
-  category: '-'
-  description: ユーザー数を減らす。
-  expected: システム利用状況のユーザー数の表示が減ること。
-- case_no: 7-3
-  sheet: B
-  feature: システム利用状況
-  category: '-'
-  description: テーブル数を増やす。
-  expected: システム利用状況のテーブル数の表示が増えること。
-- case_no: 7-4
-  sheet: B
-  feature: システム利用状況
-  category: '-'
-  description: テーブル数を減らす。
-  expected: システム利用状況のテーブル数の表示が減ること。
-- case_no: 7-5
-  sheet: B
-  feature: システム利用状況
-  category: '-'
-  description: メール通知を実施する。
-  expected: システム利用状況のメール通知数の表示が増えること。
 - case_no: 89-1
   sheet: B
   feature: その他設定
@@ -335,42 +237,6 @@ cases:
   expected: '設定通りの処理となること。
 
     また、他の「その他設定」の設定項目へ無影響であることを確認する。'
-- case_no: 8-1
-  sheet: B
-  feature: その他設定
-  category: 二段階認証
-  description: 二段階認証を有効化する。
-  expected: 2段階認証の設定が行われること。
-- case_no: 8-2
-  sheet: B
-  feature: その他設定
-  category: 二段階認証
-  description: 二段階認証を無効化する。
-  expected: 2段階認証の設定が解除されること。
-- case_no: 9-10
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: レコードの詳細情報表示を行う。
-  expected: エラーなくレコードの詳細情報表示が行えること。
-- case_no: 9-11
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: レコード編集を行う。
-  expected: エラーなくレコードの編集が行えること。
-- case_no: 9-12
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: レコード削除を行う。
-  expected: エラーなくレコードの削除が行えること。
-- case_no: 9-1
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: 追加を選択しレコードの追加を行う。
-  expected: エラーなくレコード追加が可能なこと。
 - case_no: 9-2
   sheet: B
   feature: 共通設定
@@ -383,24 +249,6 @@ cases:
   category: レコード
   description: CSVアップロードを選択する。
   expected: エラーなくCSV形式のファイルでレコード情報へアップロードできること。
-- case_no: 9-4
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: 全てのデータ削除を選択する。
-  expected: エラーなく該当テーブルのレコード情報が全て削除されること。
-- case_no: 9-5
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: 集計を選択しデータ集計を行う。
-  expected: エラーなく設定した情報が集計し表示されること。
-- case_no: 9-6
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: チャート追加を行う。
-  expected: エラーなく設定した内容でチャート追加が行われること。
 - case_no: 9-7
   sheet: B
   feature: 共通設定
@@ -409,15 +257,395 @@ cases:
   expected: 'エラーなく帳票登録が行えること。
 
     帳票登録後、レコード詳細を表示すると「帳票出力」ボタンが表示されること。'
+actual_steps:
+- case_no: 7-1
+  status: partial
+  steps: '1. beforeAll: create-all-type-table API呼び出し
+
+    2. ユーザー管理ページ（/admin/user）に遷移
+
+    3. ユーザー一覧が表示されることを確認
+
+    4. afterAll: delete-all-type-tables API呼び出し
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ YAMLには「ユーザー追加」操作が期待されるが、ユーザー管理ページの表示確認のみ
+
+    ⚠️ ユーザー新規作成操作・確認なし
+
+    '
+- case_no: 7-2
+  status: partial
+  steps: '1. debugApiPost(''/create-user'') でユーザーをAPIで作成
+
+    2. ユーザー管理ページに遷移
+
+    3. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ YAMLには「ユーザー数の表示確認」が期待されるが、ページ表示確認のみ
+
+    ⚠️ 作成したユーザーがリストに表示されることの確認なし
+
+    ⚠️ ユーザー数の変化確認なし（作成前後の比較なし）
+
+    '
+- case_no: 7-3
+  status: partial
+  steps: '1. ユーザー管理ページに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ ユーザー編集操作の確認なし
+
+    '
+- case_no: 7-4
+  status: partial
+  steps: '1. ユーザー管理ページに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ ユーザー削除操作の確認なし
+
+    '
+- case_no: 7-5
+  status: skip
+  steps: 'test.skip(true, ''実際のメール送信が必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ メール送信確認は手動テストのみ
+
+    '
+- case_no: 8-1
+  status: partial
+  steps: '1. その他設定ページ（/admin/setting）に遷移
+
+    2. ページ表示確認
+
+    3. 二段階認証設定フォームの存在確認（console.log）
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
+
+    '
+  gaps: '⚠️ 二段階認証の有効化・無効化の実際の操作なし
+
+    ⚠️ 設定保存後の動作確認なし
+
+    '
+- case_no: 8-2
+  status: partial
+  steps: '1. その他設定ページに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
+
+    '
+  gaps: '⚠️ 8-1と同様
+
+    '
+- case_no: 9-1
+  status: partial
+  steps: '1. テーブル一覧ページ（/admin/dataset__{tableId}/list）に遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ レコード追加操作の確認なし
+
+    '
+- case_no: 9-2
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. CSVダウンロードボタンの確認（console.log）
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際のCSVダウンロード確認なし
+
+    '
+- case_no: 9-3
+  status: skip
+  steps: 'test.skip(''CSVファイルのアップロードが必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ CSVアップロードは手動テストのみ
+
+    '
+- case_no: 9-4
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 全データ削除操作の確認なし
+
+    '
+- case_no: 9-5
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. 集計ボタンの確認（console.log）
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 集計の実際の操作確認なし
+
+    '
+- case_no: 9-6
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ チャート追加操作の確認なし
+
+    '
+- case_no: 9-7
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 帳票登録操作の確認なし
+
+    '
 - case_no: 9-8
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: データ検索を行う。
-  expected: エラーなく検索結果に基づいた内容でレコード検索が行えること。
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. 検索フィールドの確認（console.log）
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際の検索操作・結果確認なし
+
+    '
 - case_no: 9-9
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: データ編集を行う。
-  expected: エラーなくレコード編集が行えること。
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. 編集ボタンの確認（console.log）
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際の編集操作確認なし
+
+    '
+- case_no: 9-10
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. レコード行の確認（console.log）
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ レコード詳細画面への遷移・表示確認なし
+
+    '
+- case_no: 9-11
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際のレコード編集操作確認なし
+
+    '
+- case_no: 9-12
+  status: partial
+  steps: '1. テーブル一覧ページに遷移
+
+    2. ページURLの確認
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際のレコード削除操作確認なし
+
+    '
+- case_no: 10-1
+  status: skip
+  steps: 'test.skip(true, ''D&D操作'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ テーブル並び替えはD&D操作のためスキップ
+
+    '
+- case_no: 10-4
+  status: partial
+  steps: '1. テーブル削除をAPIで試みる
+
+    2. 削除結果の確認（console.log）
+
+    3. ナビバーの表示確認
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
+    '
+  gaps: '⚠️ テーブルが実際に削除されたことの確認なし（一覧から消えることの確認なし）
+
+    '
+- case_no: 24-1
+  status: partial
+  steps: '1. /admin/setting に遷移
+
+    2. パスワードリセットチェックボックスの確認（console.log）
+
+    3. フォームの表示確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
+
+    '
+  gaps: '⚠️ パスワードリセット設定をOFFにして保存する操作なし
+
+    ⚠️ 新規ユーザーログイン時にパスワード変更画面が表示されないことの確認なし
+
+    '
+- case_no: 24-2
+  status: partial
+  steps: '1. /admin/setting に遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(settingContent.first()).toBeVisible()
+
+    '
+  gaps: '⚠️ 24-1と同様
+
+    '
+- case_no: 58-1
+  status: partial
+  steps: '1. /admin/setting に遷移
+
+    2. 利用規約チェックボックスの確認（console.log）
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
+
+    '
+  gaps: '⚠️ 利用規約設定を有効にして保存・確認する操作なし
+
+    ⚠️ 新規ログイン時に利用規約が表示されることの確認なし
+
+    '
+- case_no: 58-2
+  status: partial
+  steps: '1. /admin/setting に遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(settingContent.first()).toBeVisible()
+
+    '
+  gaps: '⚠️ 58-1と同様
+
+    '
+- case_no: 89-1
+  status: partial
+  steps: '1. /admin/setting に遷移
+
+    2. パスワード変更間隔フィールドの確認（console.log）
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(settingContent.first()).toBeVisible()
+
+    '
+  gaps: '⚠️ パスワード変更間隔の設定・保存・動作確認なし
+
+    '
+- case_no: 130-01
+  status: skip
+  steps: 'test.skip(''機能変更に伴い不要・外部サービス連携'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 機能変更に伴い不要とコメントあり
+
+    '
+- case_no: 131-02
+  status: skip
+  steps: 'test.skip(''機能変更に伴い不要・外部サービス連携'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 機能変更に伴い不要とコメントあり
+
+    '
+- case_no: 284-1
+  status: skip
+  steps: 'test.skip(''外部サービス連携（Stripe）'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ Stripe外部サービス連携のため手動確認のみ
+
+    '

@@ -37,11 +37,6 @@ cases:
 
     ⑥⑤のURLより、データ登録 が可能な事を確認する。'
   expected: URLから、問題なく該当データベースへの「登録」が実施可能なこと。
-- case_no: 145-01
-  sheet: B
-  feature: ''
-  description: テーブル項目の「文字列」にて、一覧表示文字数を設定しつつ全ての文字表示を設定した場合に、折り返されて全て表示されるよう修正
-  expected: ''
 - case_no: 146-01
   sheet: B
   feature: ''
@@ -3924,3 +3919,511 @@ cases:
   expected: '想定通りの結果となっていること。
 
     https://henmi027.pigeon-demo.com/admin/dataset__9'
+actual_steps:
+- case_no: 145-01
+  status: partial
+  steps: '1. beforeAll: createAllTypeTable() でALLテストテーブル作成（既存の場合は再利用）
+
+    2. beforeAll: createAllTypeData(page, 5) でテストデータ5件作成
+
+    3. beforeAll: getAllTypeTableId() でテーブルID取得
+
+    4. /admin/dataset__{tableId} に遷移（tableIdがない場合は ''ALL'' で代替）
+
+    5. ページテキストに「Internal Server Error」「404」が含まれないことを確認
+
+    6. afterAll: deleteAllTypeTables()
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    - expect(pageText).not.toContain(''404'')
+
+    '
+  gaps: '⚠️ YAMLには「一覧表示文字数設定超過分が「...」で表示される」が期待されるが、「...」表示の確認なし
+
+    ⚠️ フィールド設定で文字数制限を設定する操作なし
+
+    ⚠️ ページ表示確認のみで機能動作を全く検証していない
+
+    '
+- case_no: 145-01-B
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 「全文字表示設定時に折り返して全表示される」の確認なし
+
+    ⚠️ ページ表示確認のみ
+
+    '
+- case_no: '128'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/setting に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 埋め込みフォーム設定の実際の操作確認なし
+
+    ⚠️ 設定ページへの遷移確認のみ
+
+    '
+- case_no: '129'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/setting に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 公開フォーム設定の実際の操作確認なし
+
+    ⚠️ 設定ページへの遷移確認のみ
+
+    '
+- case_no: '191'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 列幅設定の実際の操作（マウスドラッグによるリサイズ）なし
+
+    ⚠️ ページ表示確認のみ
+
+    '
+- case_no: '211'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移（5件のデータ）
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ YAMLには「大量データでのキャッシュテスト」が期待されるが、テストデータは5件のみ（大量ではない）
+
+    ⚠️ キャッシュ動作（レスポンスタイム改善など）の確認なし
+
+    '
+- case_no: '250'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/field に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 表示条件設定に使用中の項目削除でモーダル警告表示の確認なし
+
+    ⚠️ フィールド削除操作・警告モーダルの表示確認なし
+
+    '
+- case_no: '251'
+  status: partial
+  steps: '1. /admin/user に遷移
+
+    2. ページテキストに「Internal Server Error」「404」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    - expect(pageText).not.toContain(''404'')
+
+    '
+  gaps: '⚠️ ログイン状態列でのソート操作の確認なし
+
+    ⚠️ ページ表示確認のみ
+
+    '
+- case_no: '262'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/permission に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ テーブル権限設定と項目権限設定の組み合わせ操作なし
+
+    ⚠️ 権限ページへの遷移確認のみ
+
+    '
+- case_no: '267'
+  status: partial
+  steps: '1. /admin/system に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ メール形式でないログインIDの場合に2段階認証設定ができないことの確認なし
+
+    ⚠️ システム設定ページへの遷移確認のみ
+
+    '
+- case_no: '270'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. 検索フォームの要素を取得（アサートなし）
+
+    3. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 検索フォームが存在するかの確認なし（locatorのみで count/isVisible の確認なし）
+
+    ⚠️ 複数項目の簡易検索・虫眼鏡検索の実際の操作確認なし
+
+    '
+- case_no: '273'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/field に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 自動採番フォーマット空時のデフォルト採番形式確認なし
+
+    ⚠️ フィールド設定ページへの遷移確認のみ
+
+    '
+- case_no: '274'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/field に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ リッチテキストフィールド選択時に追加オプション設定が開くかの確認なし
+
+    '
+- case_no: '275'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/field に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 日時フォーマット指定チェックを外した後の動作確認なし
+
+    '
+- case_no: '291'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/field に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ A→B→C→A の循環参照設定をするとエラーが出ることの確認なし
+
+    ⚠️ 複数テーブル間の参照設定操作なし
+
+    '
+- case_no: '312'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 一括編集でIDを選択して対象レコードのみ更新されることの確認なし
+
+    ⚠️ 一括編集モーダルの操作なし
+
+    '
+- case_no: '315'
+  status: partial
+  steps: '1. /admin/dashboard に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ ダッシュボード集計で絞り込み条件が考慮されていることの確認なし
+
+    ⚠️ ダッシュボードページへの遷移確認のみ
+
+    '
+- case_no: '349'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/setting に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ テーブルの削除ロック機能の実際の操作確認なし
+
+    ⚠️ 設定ページへの遷移確認のみ
+
+    '
+- case_no: '357'
+  status: partial
+  steps: '1. /admin/system に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ ログイン失敗カウントがメールアドレスベースで行われることの確認なし
+
+    ⚠️ システム設定ページへの遷移確認のみ
+
+    '
+- case_no: '361'
+  status: partial
+  steps: '1. /admin/dataset に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ メニュー並び替え画面で全テーブルが表示されることの確認なし
+
+    ⚠️ 並び替え操作の確認なし
+
+    '
+- case_no: '367'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ CSVアップロード/ダウンロード処理中のキャンセル機能の確認なし
+
+    ⚠️ CSVログページへのアクセスすら行っていない
+
+    '
+- case_no: '370'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移（テストデータ5件）
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ ヘッダー1行目が固定表示されていることのスクロール動作確認なし
+
+    ⚠️ ページ表示確認のみ
+
+    '
+- case_no: '256'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 数値フィールドでカンマ区切りが適用されているかの確認なし
+
+    '
+- case_no: 146-01
+  status: partial
+  steps: '1. ビューポートを 375×812（スマートフォンサイズ）に変更
+
+    2. /admin/dataset__{tableId} に遷移
+
+    3. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 選択肢タップ時にズームされないことの確認なし（viewport-meta content確認なし）
+
+    ⚠️ スマートフォン表示でのUIレイアウト確認なし
+
+    '
+- case_no: '325'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/field に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 子テーブルに子テーブルを設定しようとするとエラーが出ることの確認なし
+
+    ⚠️ フィールド設定ページへの遷移確認のみ
+
+    '
+- case_no: '341'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. 最初のレコードの詳細リンクをクリック（条件付き）
+
+    3. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 子テーブルが設定されていることが前提だが、テスト用テーブルに子テーブルが設定されているかの確認なし
+
+    ⚠️ 詳細画面で子テーブルが表示されているかの確認なし
+
+    '
+- case_no: '324'
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. ページテキストに「Internal Server Error」が含まれないことを確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 一覧編集モードで値を編集して詳細画面で確認する操作なし
+
+    ⚠️ ページ表示確認のみ
+
+    '
+- case_no: '245'
+  status: skip
+  steps: 'test.skip(true, ''todo'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 最終更新者をテーブルに追加する機能の動作確認なし（未実装）
+
+    '
+- case_no: '246'
+  status: skip
+  steps: 'test.skip(true, ''todo'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 内容不明のまま test.skip
+
+    '
+- case_no: '282'
+  status: skip
+  steps: 'test.skip(true, ''todo'') - Slack連携仕様確認
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ Slack連携のテストは外部サービス連携のため未実装
+
+    '
+- case_no: '290'
+  status: skip
+  steps: 'test.skip(true, ''todo'') - 文章複数行でエンターキーを押し続けたときに画面が上がる現象
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ キーボード連続押下による表示不具合の確認は自動化困難のため未実装
+
+    '
+- case_no: '293'
+  status: skip
+  steps: 'test.skip(true, ''todo'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ ダッシュボードを複数作成できることの確認なし
+
+    '
+- case_no: '294'
+  status: skip
+  steps: 'test.skip(true, ''todo'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 同一ユーザーで4端末からログインした場合のセッション管理テストは複数ブラウザセッションが必要のため未実装
+
+    '
+- case_no: '319'
+  status: skip
+  steps: 'test.skip(true, ''todo'') - SMTP認証設定
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ SMTPサーバー設定のテストは外部依存のため未実装
+
+    '
+- case_no: '323'
+  status: skip
+  steps: 'test.skip(true, ''todo'') - フィルターの混合設定
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ フィルター設定の組み合わせテスト未実装
+
+    '

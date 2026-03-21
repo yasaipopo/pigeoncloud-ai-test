@@ -155,6 +155,38 @@ URL: https://docs.google.com/spreadsheets/d/1h_gwuCGUAdj5fKPRZu438TKFkFkYUNUKz2K
 
 ---
 
+## テスト用外部リソース
+
+### Webhookテストサーバー
+- **受信URL**: `http://test.yaspp.net/pigeon/webhook.php?key={KEY}`
+- **確認URL**: `http://test.yaspp.net/pigeon/display.php?key={KEY}`
+- **リセット**: `http://test.yaspp.net/pigeon/webhook.php?key={KEY}&reset`
+- ヘルパー: `tests/helpers/webhook-checker.js` に `webhookUrl(key)`, `waitForWebhook(key)`, `resetWebhook(key)` が実装済み
+- 使い方: テストごとに一意なkeyを使う（例: `'105-01'`, `'105-02'`）
+
+### テスト用ファイル（`/app/test_files/`）
+| ファイル | 用途 |
+|---------|------|
+| `ok.png`, `donmai.png`, `oshii.png`, `gomen.png`, `renshu.png` | 画像アップロードテスト |
+| `cs.pdf`, `general_affairs.pdf`, `hr.pdf`, `sales.pdf` | PDF・帳票テスト |
+| `稼働_2M.csv`, `稼働_10M.csv` | CSVアップロードテスト |
+| `請求書_+関連ユーザー.xlsx` | Excel帳票テスト |
+
+ファイルアップロード: `await page.setInputFiles('input[type=file]', '/app/test_files/ok.png')`
+
+### SMTPメール設定
+beforeAllで `setupSmtp(page)` を呼ぶと自動設定される（notifications.spec.jsに実装済み）
+- ホスト: `SMTP_HOST` (env) / デフォルト: `www3569.sakura.ne.jp`
+- ポート: `SMTP_PORT` (env) / デフォルト: `587`
+- ユーザー: `SMTP_USER` (env) / 同 `IMAP_USER`
+
+### IMAPメール受信確認
+- ヘルパー: `tests/helpers/mail-checker.js` に `waitForEmail()`, `deleteTestEmails()` が実装済み
+- 受信アドレス: `IMAP_USER` (env) = `test@loftal.sakura.ne.jp`
+- `IMAP_USER`/`IMAP_PASS` が設定されていれば自動でメール受信確認が有効になる
+
+---
+
 ## spec.js 生成の作業手順
 
 ### Step 1: specs/XXXXX.yaml を読む
@@ -165,6 +197,11 @@ cat specs/auth.yaml
 
 ### Step 2: ブラウザで実際に操作して確認
 Playwrightを使って実際にページを開き、セレクターやURLを確認する：
+
+> **⚠️ generate_specsモードではスクリーンショットを保存しない**
+> ディスク容量節約のため、`page.screenshot()` は呼ばない。
+> セレクター確認は `page.query_selector_all()` や `page.inner_html()` で行う。
+
 ```python
 from playwright.sync_api import sync_playwright
 import os
@@ -181,7 +218,8 @@ with sync_playwright() as p:
     page.wait_for_selector(".navbar")
     # 調査したいページへ
     page.goto(os.environ["TEST_BASE_URL"] + "/admin/dashboard")
-    page.screenshot(path="reports/investigation.png", full_page=True)
+    # スクリーンショットは撮らない。DOMを直接確認する。
+    # 例: print(page.inner_html("body"))
     browser.close()
 ```
 
@@ -284,6 +322,8 @@ cat ${REPORTS_DIR}/results.json
 
 ### Step 3: Playwrightで実際に操作して確認
 
+> **テスト失敗調査時はスクリーンショットOK**（run_testsモードのみ）
+
 ```python
 from playwright.sync_api import sync_playwright
 import os
@@ -295,6 +335,7 @@ with sync_playwright() as p:
     page.set_viewport_size({"width": 1280, "height": 800})
     page.goto(os.environ["TEST_BASE_URL"] + "/admin/login")
     # ...調査したい操作...
+    # 失敗調査時のみスクリーンショット保存（1テストケース1枚まで）
     page.screenshot(path=f"{reports_dir}/investigation.png", full_page=True)
     browser.close()
 ```

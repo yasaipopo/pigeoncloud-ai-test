@@ -13,6 +13,7 @@ export GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/deploy_key -o StrictHostKeyCheck
 MODE=${MODE:-run_tests}
 AGENT_NUM=${AGENT_NUM:-1}
 TARGET_SPEC=${TARGET_SPEC:-}
+TARGET_IDS=${TARGET_IDS:-}
 TOTAL_AGENTS=${TOTAL_AGENTS:-1}
 
 # テスト環境ドメイン（Claudeが作成する）
@@ -69,124 +70,24 @@ echo "[$(date '+%H:%M:%S')] Claude起動" >> "${CLAUDE_LOG}"
 done) &
 HEARTBEAT_PID=$!
 
-claude --dangerously-skip-permissions "
-あなたはPigeonCloudのQAエージェント（Agent ${AGENT_NUM}）です。
-CLAUDE.mdの指示に従って作業してください。
+# TARGET_SPECをspec.jsファイルリストに事前展開（ネスト引用符回避）
+if [ -n "${TARGET_SPEC}" ]; then
+    SPEC_FILES=$(echo "${TARGET_SPEC}" | tr ',' ' ' | sed 's|[^ ]*|tests/&.spec.js|g')
+else
+    SPEC_FILES=""
+fi
 
-## 進捗ログのルール（重要）
-作業中は **必ず** 以下のコマンドで進捗をこまめに記録してください（5ステップに1回以上）：
-\`\`\`bash
-echo \"[$(date '+%H:%M:%S')] <現在の作業内容>\" >> ${AGENT_REPORT_DIR}/claude.log
-\`\`\`
-例：環境作成開始、ログイン完了、テスト実行開始、テスト○件目、失敗調査中、修正完了 など
-フリーズ検知に使うため、何もしていない時間が5分以上ないようにしてください。
+# プロンプトをtempファイルに生成（Pythonで変数展開）
+PROMPT_FILE="/tmp/claude_prompt_${AGENT_NUM}_$$.txt"
+python3 -c "
+import os, re, sys
+tmpl = open('/app/agent_prompt_template.txt').read()
+result = re.sub(r'\\\$([A-Z_][A-Z0-9_]*)', lambda m: os.environ.get(m.group(1), m.group(0)), tmpl)
+sys.stdout.write(result)
+" > "${PROMPT_FILE}"
 
-## 実行環境
-- モード: ${MODE}
-- 対象スペック: ${TARGET_SPEC:-（全スペック）}
-- レポートディレクトリ: ${AGENT_REPORT_DIR}
-- 総エージェント数: ${TOTAL_AGENTS}
-
-## ステップ1: テスト環境を作成（Playwright MCPを使う）
-
-Playwright MCPブラウザで以下を実行してテスト専用環境を作成してください：
-
-1. https://ai-test.pigeon-demo.com/admin/login にアクセス
-2. ID: admin / パスワード: ${TEST_PASSWORD} でログイン
-3. https://ai-test.pigeon-demo.com/admin/internal/create-client にアクセス
-4. ドメイン欄に「${MY_DOMAIN}」を入力
-5. ログインID欄に「admin」を入力
-6. 作成ボタンをクリック
-7. 完了後に表示されたパスワードを確認する
-
-作成したテスト環境：
-- URL: ${MY_URL}
-- ログインID: admin
-- パスワード: （上記で確認した値）
-
-テスト環境URLを ${AGENT_REPORT_DIR}/test_env.txt に保存してください。
-作成失敗したら Slack通知して終了してください。
-
-## ステップ2: モードに応じて作業
-
-### MODE=generate_specs の場合
-specs/${TARGET_SPEC}.yaml を読んで、Playwright MCPでブラウザを操作しながら
-tests/${TARGET_SPEC}.spec.js を生成してください。
-CLAUDE.mdの「spec.js 生成の作業手順」に従ってください。
-
-### MODE=repair_specs の場合
-
-既存の spec.js を実行して失敗するテストを修正するモードです。
-
-#### 手順
-
-1. **対象specを決定**
-   - TARGET_SPEC が指定されていればそのspec（例: chart-calendar → tests/chart-calendar.spec.js）
-   - 未指定の場合は tests/*.spec.js を全て対象にする
-
-2. **テスト実行して失敗を把握**
-   TARGET_SPEC はカンマ区切りで複数指定可能（例: auth,comments-logs）。
-   カンマ区切りの場合は各specファイルを順番に修正してください。
-   \`\`\`bash
-   # TARGET_SPEC=auth,comments-logs の場合は以下のように展開する
-   # npx playwright test tests/auth.spec.js tests/comments-logs.spec.js --reporter=list
-   npx playwright test ${TARGET_SPEC:+$(echo "${TARGET_SPEC}" | tr ',' ' ' | sed 's|[^ ]*|tests/&.spec.js|g')} --reporter=list 2>&1 | tee ${AGENT_REPORT_DIR}/repair_run.log
-   \`\`\`
-
-3. **失敗したテストを1件ずつ修正**
-   失敗ごとに以下を繰り返す：
-   - エラーメッセージを読んで原因を特定
-   - Playwright MCPブラウザで実際のページを開いてセレクター・URLを確認
-   - tests/*.spec.js を修正
-   - 修正したテストだけ再実行して通ることを確認
-
-4. **全テスト再実行して最終確認**
-   \`\`\`bash
-   npx playwright test ${TARGET_SPEC:+$(echo "${TARGET_SPEC}" | tr ',' ' ' | sed 's|[^ ]*|tests/&.spec.js|g')} --reporter=list
-   \`\`\`
-
-5. **修正サマリーを作成**
-   ${AGENT_REPORT_DIR}/repair_report.md に以下を記録：
-   - 修正したspec.jsと変更内容
-   - 修正前後のテスト結果（Pass/Fail数）
-   - 対応できなかった失敗（仕様確認が必要なものなど）
-
-#### 修正の基本方針
-- セレクターが合っていない → ブラウザで実際のHTMLを確認して直す
-- APIレスポンス構造の誤り → APIを実際に呼んでレスポンスを確認して直す
-- テスト環境固有の問題（データ汚染など）→ beforeAll/afterAll でクリーンアップ追加
-- 機能が存在しない・UIが変わった → skip に変更してコメントで理由を記載
-
-### MODE=run_tests の場合
-
-#### Phase 1（Agent1のみ）: Google Sheetsからシナリオ同期
-\`\`\`bash
-python runner/sheets_sync.py --pull
-touch /app/reports/sheets_sync_done
-\`\`\`
-Agent1以外は /app/reports/sheets_sync_done が出来るまで待機してください（最大3分）。
-
-#### Phase 2: テスト実行
-\`\`\`bash
-npx playwright test ${TARGET_SPEC:+tests/${TARGET_SPEC}.spec.js} --reporter=list,json
-\`\`\`
-結果を ${AGENT_REPORT_DIR}/results.json に変換して保存してください。
-
-#### Phase 3: 失敗調査
-失敗があればPlaywright MCPで実際にブラウザを操作して原因を調査してください。
-- セレクター変更・URL変更 → tests/*.spec.js を修正
-- 不具合 → ${AGENT_REPORT_DIR}/claude_report.md にまとめてSlack通知
-
-#### Phase 4（Agent1のみ・全員完了後）
-${TOTAL_AGENTS}台すべての ${AGENT_REPORT_DIR}/done ファイルが揃ったら：
-\`\`\`bash
-python runner/sheets_sync.py --push
-REPORTS_DIR=/app/reports python runner/consolidate_reports.py
-\`\`\`
-
-## 完了時
-${AGENT_REPORT_DIR}/done ファイルを作成してSlack通知してください。
-"
+claude --dangerously-skip-permissions "$(cat "${PROMPT_FILE}")"
+rm -f "${PROMPT_FILE}"
 
 # Claude終了後にハートビートも停止
 kill $HEARTBEAT_PID 2>/dev/null || true

@@ -103,6 +103,16 @@ async function debugApiPost(page, path, body = {}) {
     }, { baseUrl: BASE_URL, path, body });
 }
 
+/**
+ * フィルタパネルを開く（fa-searchアイコン付きボタンをクリック）
+ */
+async function openFilterPanel(page) {
+    // ツールバー上の検索（フィルタ）ボタンをクリック
+    const searchBtn = page.locator('button.btn-outline-primary i.fa-search').first();
+    await searchBtn.locator('..').click({ force: true });
+    await page.waitForTimeout(1000);
+}
+
 // =============================================================================
 // フィルタテスト
 // =============================================================================
@@ -137,27 +147,61 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(3000);
 
-        // ページが正常に表示されることを確認
+        // ナビゲーションバーが表示されていること
         await expect(page.locator('.navbar')).toBeVisible();
+
+        // URLにtableIdが含まれること
         const pageUrl = page.url();
         expect(pageUrl).toContain(`dataset__${tableId}`);
 
-        // フィルタボタンを探してクリック
-        const filterBtn = page.locator(
-            'button:has-text("フィルタ"), button[title*="フィルタ"], ' +
-            'a:has-text("フィルタ"), button:has-text("絞り込み")'
-        ).first();
-        const filterBtnCount = await filterBtn.count();
+        // ツールバー上に fa-search アイコンのボタン（フィルタ/検索ボタン）が存在すること
+        const filterSearchBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await expect(filterSearchBtn).toBeVisible();
 
-        if (filterBtnCount > 0) {
-            await filterBtn.click({ force: true });
-            await page.waitForTimeout(1000);
+        // ツールバー上に簡易検索テキストボックスが表示されていること
+        const simpleSearchInput = page.locator('input[placeholder*="検索"], input[aria-label*="簡易検索"]').first();
+        // 簡易検索入力欄の存在確認（見えない場合もあるので count チェック）
+        const simpleSearchCount = await simpleSearchInput.count();
+        if (simpleSearchCount > 0) {
+            await expect(simpleSearchInput).toBeVisible();
         }
 
-        // ページが正常表示されていることを確認
-        await expect(page.locator('.navbar')).toBeVisible();
+        // フィルタボタン（fa-search）をクリックしてパネルを開く
+        await filterSearchBtn.click({ force: true });
+        await page.waitForTimeout(1500);
+
+        // フィルタ / 集計パネルが表示されること
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
+
+        // 「絞り込み」タブが存在すること
+        await expect(page.locator('[role="tab"]:has-text("絞り込み")')).toBeVisible();
+
+        // 「集計」タブが存在すること
+        await expect(page.locator('[role="tab"]:has-text("集計")')).toBeVisible();
+
+        // 「条件を追加」ボタンが表示されること
+        await expect(page.locator('button:has-text("条件を追加")')).toBeVisible();
+
+        // 「グループ追加」ボタンが表示されること
+        await expect(page.locator('button:has-text("グループ追加")')).toBeVisible();
+
+        // 「条件を追加」ボタンをクリックして条件行を追加する
+        await page.locator('button:has-text("条件を追加")').click();
+        await page.waitForTimeout(800);
+
+        // 条件行が追加されること（フィールド選択ドロップダウンが表示される）
+        await expect(page.locator('.condition-col-field').first()).toBeVisible();
+
+        // 条件選択ドロップダウンが存在すること（「が次と一致」等）
+        await expect(page.locator('.condition-col-condition').first()).toBeVisible();
+
+        // フィルタパネルのアクションボタンが表示されること（保存して表示は一意なのでそのまま確認）
+        await expect(page.locator('button:has-text("保存して表示")')).toBeVisible();
+        await expect(page.locator('button.btn-success:has-text("表示")')).toBeVisible();
+        // キャンセルはDOM上多数存在するため visible なものに絞る
+        await expect(page.locator('button:has-text("キャンセル")').filter({ visible: true }).first()).toBeVisible();
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -173,25 +217,60 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(5000);
 
-        // ページが正常に表示されることを確認
+        // ナビゲーションバーが表示されていること
         await expect(page.locator('.navbar')).toBeVisible();
+
+        // URLにtableIdが含まれること
         const pageUrl = page.url();
         expect(pageUrl).toContain(`dataset__${tableId}`);
 
-        // 高度な検索/フィルタボタンを探す
-        const advancedSearchBtn = page.locator(
-            'button:has-text("高度な検索"), a:has-text("高度な検索"), ' +
-            'button:has-text("詳細検索"), button:has-text("フィルタ")'
-        ).first();
-        const btnCount = await advancedSearchBtn.count();
+        // フィルタ検索ボタンが存在すること（表示まで最大15秒待機）
+        const filterSearchBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await expect(filterSearchBtn).toBeVisible({ timeout: 15000 });
 
-        if (btnCount > 0) {
-            await advancedSearchBtn.click({ force: true });
-            await page.waitForTimeout(1000);
-            await expect(page.locator('.navbar')).toBeVisible();
-        }
+        // フィルタパネルを開く
+        await filterSearchBtn.click({ force: true });
+        await page.waitForTimeout(1500);
+
+        // フィルタ / 集計パネルが表示されること
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
+
+        // 「絞り込み」タブ（高度な検索条件設定）が選択可能なこと
+        const filterTab = page.locator('[role="tab"]:has-text("絞り込み")');
+        await expect(filterTab).toBeVisible();
+        await filterTab.click();
+        await page.waitForTimeout(500);
+
+        // 「高度な機能（変数設定）」チェックボックスが表示されること
+        await expect(page.locator('text=高度な機能（変数設定）')).toBeVisible();
+
+        // 複数の条件を追加してAND/OR条件（複合条件）が設定できることを確認
+        // 1つ目の条件を追加
+        await page.locator('button:has-text("条件を追加")').click();
+        await page.waitForTimeout(600);
+
+        // 条件行が存在すること
+        await expect(page.locator('.condition-drag-item, .condition-select-row').first()).toBeVisible();
+
+        // 2つ目の条件を追加してグループ化できること
+        await page.locator('button:has-text("条件を追加")').click();
+        await page.waitForTimeout(600);
+
+        // 「グループ追加」ボタンが表示されていること（複合グループ条件）
+        await expect(page.locator('button:has-text("グループ追加")')).toBeVisible();
+
+        // 「集計」タブが存在すること（データ集計機能）
+        const aggTab = page.locator('[role="tab"]:has-text("集計")');
+        await expect(aggTab).toBeVisible();
+
+        // 「集計」タブをクリック
+        await aggTab.click();
+        await page.waitForTimeout(500);
+
+        // 集計タブに「集計を使用する」チェックボックスが表示されること
+        await expect(page.locator('text=集計を使用する')).toBeVisible();
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';

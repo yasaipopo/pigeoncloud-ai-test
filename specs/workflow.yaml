@@ -708,3 +708,265 @@ cases:
   expected: 'エラーなくワークフロー処理が行われること。
 
     それぞれ入力したコメントが確認できること。'
+
+# =============================================================================
+# actual_steps: spec.jsが実際に行っている手順（逆引きチェック用）
+# =============================================================================
+actual_steps:
+- case_no: 106-01
+  status: partial
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
+    2. beforeAll: create-all-type-data API呼び出し
+    3. テーブルIDをAPIステータスから取得
+    4. ワークフロー設定ページ（/admin/dataset__{tableId}/workflow）に遷移
+    5. ページ表示確認
+    6. afterAll: delete-all-type-tables API呼び出し
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ YAMLには「引き上げ承認」の詳細手順（申請→引き上げ→承認確認）が期待されるが、ワークフロー設定ページの表示確認のみ
+    ⚠️ 実際の申請・引き上げ・承認操作なし
+
+- case_no: 106-02
+  status: skip
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ todoとしてスキップ（106-02〜15のほぼ全てがスキップ）
+
+- case_no: 111-01
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 一括承認操作の実装なし
+
+- case_no: 111-04
+  status: skip
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ todoとしてスキップ（111-04, 06〜08, 10〜12, 14〜16がスキップ）
+
+- case_no: 11-1
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ワークフロー新規作成・承認者設定・保存の確認なし
+
+- case_no: 11-2
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ワークフロー設定のステップ追加・編集の確認なし
+
+- case_no: 11-3
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 承認者ユーザー設定の確認なし
+
+- case_no: 11-4
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 複数ステップワークフローの設定確認なし
+
+- case_no: 11-5
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 条件分岐ワークフローの設定確認なし
+
+- case_no: 11-6
+  status: skip
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ todoとしてスキップ（11-6〜9がスキップ）
+
+- case_no: '166'
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ワークフロー複製機能の確認なし
+
+- case_no: 21-1
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 申請操作・ワークフローの起動確認なし
+
+- case_no: 21-2
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 承認操作の確認なし
+
+- case_no: 21-3
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 否認操作の確認なし
+
+- case_no: 21-4
+  status: skip
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ todoとしてスキップ
+
+- case_no: 28-1
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ワークフロー条件設定の確認なし
+
+- case_no: 28-2
+  status: skip
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ todoとしてスキップ（28-2〜4がスキップ）
+
+- case_no: '296'
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 参考URLにある特定ケースの確認なし
+
+- case_no: 36-1
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ワークフロー削除操作の確認なし
+
+- case_no: 36-2
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ワークフロー無効化・有効化の確認なし
+
+- case_no: 395-1
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 条件分岐ワークフローの詳細確認なし
+
+- case_no: 395-2
+  status: skip
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ todoとしてスキップ（395-2〜8の大半がスキップ）
+
+- case_no: 64-1
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ワークフロー一覧の表示確認のみ
+
+- case_no: 68-1
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 68-1のみ部分実装、68-3〜8はすべてtest.skip(true, 'todo')
+
+- case_no: 68-2
+  status: partial
+  steps: |
+    1. ワークフロー設定ページに遷移
+    2. ページ表示確認
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 特定のワークフローパターン確認なし
+
+- case_no: 68-3
+  status: skip
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ todoとしてスキップ（68-3〜8がスキップ）

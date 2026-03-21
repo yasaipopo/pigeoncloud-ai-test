@@ -242,36 +242,6 @@ cases:
 
     ④「保存する」ボタンをクリック。'
   expected: 保存された集計設定が、「行に色を付ける」で設定した設定通りの色がつくこと。
-- case_no: 105-01
-  sheet: B
-  feature: チャート
-  category: オプション->累積(時系列の場合)
-  description: '①該当のテーブルを開く。
-
-    ②メニューより「チャート追加」を選択。
-
-    ③チャート設定タブを選択
-
-    ④オプションの「累積(時系列の場合)」にチェックを入れ
-
-    　「種類」を全種類選択'
-  expected: '・画面表示に問題ないこと。
-
-    ・「種類」を変更しても「オプション」の表示が想定通りの表示になっているいこと。'
-- case_no: 105-02
-  sheet: B
-  feature: チャート
-  category: オプション->過去分も全て加算
-  description: '①該当のテーブルを開く。
-
-    ②メニューより「チャート追加」を選択。
-
-    ③チャート設定タブを選択
-
-    ④オプションの「過去分も全て加算」にチェックを入れ
-
-    　「種類」を棒グラフを選択。'
-  expected: ・棒グラフが過去分含めてカウントされた状態でチャート表示されること。
 - case_no: 110-01
   sheet: B
   feature: 集計
@@ -284,34 +254,6 @@ cases:
   category: 平均値(少数)
   description: ①集計より、少数  --＞「平均」で集計結果を表示する。
   expected: 少数の場合、少数の桁数+1桁の表示となること。
-- case_no: 114-01
-  sheet: B
-  feature: カレンダー
-  category: 週表示
-  description: '①カレンダー表示をONにしている、テーブルを表示する。
-
-    ②カレンダーのビューを週表示にする。'
-  expected: エラーなく週表示のビューとなること。
-- case_no: 114-02
-  sheet: B
-  feature: カレンダー
-  category: 日表示
-  description: '①カレンダー表示をONにしている、テーブルを表示する。
-
-    ②カレンダーのビューを日表示にする。'
-  expected: エラーなく日表示のビューとなること。
-- case_no: 118-01
-  sheet: B
-  feature: 集計
-  category: フィルタ
-  description: "①フィルタにて以下日付の検索が可能なこと。\n\n去年、今年、来年、\r\n先月、今月、来月、\r\n先週、今週、来週、\r\n昨日、今日、明日"
-  expected: 想定通りのフィルタ検索結果となること。
-- case_no: 119-01
-  sheet: B
-  feature: チャート
-  category: フィルタ
-  description: "①フィルタにて以下日付の検索が可能なこと。\n\n去年、今年、来年、\r\n先月、今月、来月、\r\n先週、今週、来週、\r\n昨日、今日、明日"
-  expected: 想定通りのフィルタ検索結果となること。
 - case_no: 120-01
   sheet: B
   feature: フィルタ(集計)
@@ -389,31 +331,6 @@ cases:
     ・他ユーザー(全てのユーザー)でも作成したフィルタの利用ができ且つダッシュボードに表示されていること。
 
     https://henmi022.pigeon-demo.com/admin/dataset__40;_filter_id=16;_view_id=null;t=1745219556823'
-- case_no: 123-01
-  sheet: B
-  feature: チャート
-  category: 棒グラフと線グラフの同時表示
-  description: '①該当のテーブル一覧を表示。
-
-    ②メニューより「チャート追加」を選択。
-
-    ③「チャート設定」タブを選択し、「テーブル」および「データ項目1」を設定後、y軸「線グラフ」／y軸「棒グラフ」を選択し「表示」ボタンをクリックする。'
-  expected: 想定通り、チャート表示されること。
-- case_no: 123-02
-  sheet: B
-  feature: チャート
-  category: 棒グラフと線グラフの同時表示
-  description: '①該当のテーブル一覧を表示。
-
-    ②メニューより「チャート追加」を選択。
-
-    ③「設定」タブを選択し、「タイトル」入力後、「全員に表示」／「ダッシュボードに表示」にチェックを入れる。
-
-    ④「チャート設定」タブを選択し、「テーブル」および「データ項目1」を設定後、y軸「線グラフ」／y軸「棒グラフ」を選択し「表示」ボタンをクリックする。'
-  expected: '・想定通りのチャートがエラーなく表示され且つ保存されること。
-
-
-    ・他ユーザー(全てのユーザー)でも作成したフィルタの利用ができ且つダッシュボードに表示されていること。'
 - case_no: 136-01
   sheet: B
   feature: 集計→フィルタ
@@ -726,66 +643,6 @@ cases:
 
     ⑤④で設定を行った複数ユーザーでログインし今回作成した「チャート」を編集および閲覧'
   expected: 権限設定通りの動作となること。
-- case_no: 151-1
-  sheet: B
-  feature: フィルタ（集計）
-  category: 日時項目での相対値での絞り込み
-  description: '①該当テーブルのレコード一覧を開く。
-
-    （テーブル内には日時項目が設定されていること）
-
-    ②メニューより「集計」を選択。
-
-    ③「絞り込み」タブを選択し、絞り込みの「条件を追加」ボタンをクリック。
-
-    ④絞り込みに用いる日時項目をリストより選択する。
-
-    ⑤「が次と一致」を選択する。
-
-    ⑥【相対値】にチェックを入れ、「今日」~「来年」までを順に設定していく。'
-  expected: ⑥の絞り込みが想定通りの絞り込みとなること。
-- case_no: 152-1
-  sheet: B
-  feature: チャート
-  category: 日時項目での相対値での絞り込み
-  description: '①該当テーブルのレコード一覧を開く。
-
-    （テーブル内には日時項目が設定されていること）
-
-    ②メニューより「チャート」を選択。
-
-    ③「絞り込み」タブを選択し、絞り込みの「条件を追加」ボタンをクリック。
-
-    ④絞り込みに用いる日時項目をリストより選択する。
-
-    ⑤「が次と一致」を選択する。
-
-    ⑥【相対値】にチェックを入れ、「今日」~「来年」までを順に設定していく。'
-  expected: ⑥の絞り込みが想定通りの絞り込みとなること。
-- case_no: 15-1
-  sheet: B
-  feature: 集計
-  category: 全員に表示
-  description: 集計設定を行い、設定タブより「全員に表示」を選択し設定を保存する。
-  expected: 他ユーザーにて設定した集計結果が確認できること。
-- case_no: 15-2
-  sheet: B
-  feature: 集計
-  category: 自分のみ表示
-  description: 集計設定を行い、設定タブより「自分のみ表示」を選択し設定を保存する。
-  expected: 設定したユーザーのみ集計結果が確認できること。
-- case_no: 16-1
-  sheet: B
-  feature: チャート
-  category: 全員に表示
-  description: チャート設定を行い、設定タブより「全員に表示」を選択し設定を保存する。
-  expected: 他ユーザーにて設定した集計結果が確認できること。
-- case_no: 16-2
-  sheet: B
-  feature: チャート
-  category: 自分のみ表示
-  description: チャート設定を行い、設定タブより「自分のみ表示」を選択し設定を保存する。
-  expected: 設定したユーザーのみチャートが確認できること。
 - case_no: '214'
   sheet: B
   feature: カレンダー
@@ -802,16 +659,6 @@ cases:
   category: Drag&Dropでの移動
   description: ・カレンダーの予約情報をDrag&Dropにて移動する
   expected: ・全て想定通りの表示となること。
-- case_no: 23-1
-  sheet: B
-  feature: 集計
-  category: ダッシュボードへのテーブル表示
-  description: '① 左ペインより、該当テーブルを選択する
-
-    ② ハンバーガーメニューより、集計を選択する
-
-    ③ 設定タブを選択しタイトル入力後、「ダッシュボードに表示」にチェックを入れ「保存する」をクリックする'
-  expected: ダッシュボードに集計結果のテーブルがエラーなくテーブル形式で表示されること。
 - case_no: '260'
   sheet: B
   feature: チャート
@@ -825,36 +672,6 @@ cases:
   description: "① チャート → デフォルト設定 →「全てのユーザーのデフォルトにする」のチェックが入らない\r\n　 (集計などの同様の設定はチェックが入り問題なし)\r\
     \n② チャートに関して、「デフォルト設定」：全ユーザーに設定しても一般ユーザーの場合のみデフォルト設定とならない"
   expected: 想定通りの結果となること。
-- case_no: 37-1
-  sheet: B
-  feature: チャート
-  category: 参照権限
-  description: '①該当のテーブルより、チャート作成を行う。
-
-    ②①のユーザーにて、①で作成したチャートを確認。
-
-    ③①を操作したユーザー以外で再度ログインし①で作成したチャートを確認。'
-  expected: チャート作成したユーザーからのみチャートの参照ができること。
-- case_no: 65-1
-  sheet: B
-  feature: 集計
-  category: 条件：空ではない
-  description: '①該当テーブルの一覧を開き、「集計」をクリックする。
-
-    ②絞り込みタブを開き、条件指定で「空ではない」を選択し、絞り込み設定を行う。
-
-    ③「表示」ボタンをクリックする。'
-  expected: 条件指定通りの集計結果が表示されること。
-- case_no: 66-1
-  sheet: B
-  feature: チャート
-  category: 条件：空ではない
-  description: '①該当テーブルの一覧を開き、「チャート」をクリックする。
-
-    ②絞り込みタブを開き、条件指定で「空ではない」を選択し、絞り込み設定を行う。
-
-    ③「表示」ボタンをクリックする。'
-  expected: 条件指定通りの集計結果が表示されること。
 - case_no: 85-1
   sheet: B
   feature: 集計
@@ -869,48 +686,6 @@ cases:
 
     ③「保存する」ボタンを押す。'
   expected: 設定通りの集計結果がカスタムフィルターへ保存されて且つ表示内容も申請中(要確認)の集計結果が表示できること。
-- case_no: 85-2
-  sheet: B
-  feature: 集計
-  category: '絞り込み
-
-    ・条件設定
-
-    ・集計に対する絞り込み
-
-    ・ソート順'
-  description: '①該当のテーブル一覧を開く
-
-    ②集計を選択
-
-    ③「絞り込み」タブをクリックし、【絞り込み】／【集計に対する絞り込み】／【ソート順】を設定し「保存する」をクリックする。'
-  expected: 設定通りの集計結果がカスタムフィルターへ保存されて且つ表示内容も申請中(要確認)の集計結果が表示できること。
-- case_no: 87-1
-  sheet: B
-  feature: 集計
-  category: '行に色を付ける
-
-    (条件設定1つ)'
-  description: '①該当のテーブル一覧を開く。
-
-    ②一連の「集計」設定を行い、「行に色を付ける」タブをクリック。
-
-    ③「行に色を付ける」の全ての設定項目を行い「保存する」ボタンをクリック。'
-  expected: 保存された集計設定が、「行に色を付ける」で設定した設定通りの色がつくこと。
-- case_no: 87-2
-  sheet: B
-  feature: 集計
-  category: '行に色を付ける
-
-    (条件設定複数)'
-  description: '①該当のテーブル一覧を開く。
-
-    ②一連の「集計」設定を行い、「行に色を付ける」タブをクリック。
-
-    ③「行に色を付ける」の全ての設定項目を行い、且つ複数色を付ける設定を行う。
-
-    ④「保存する」ボタンをクリック。'
-  expected: 保存された集計設定が、「行に色を付ける」で設定した設定通りの色がつくこと。
 - case_no: 88-1
   sheet: B
   feature: チャート
@@ -937,3 +712,668 @@ cases:
 
     ④「保存する」ボタンをクリック。'
   expected: 保存されたチャート設定が、「行に色を付ける」で設定した設定通りの色がつくこと。
+actual_steps:
+- case_no: 105-01
+  status: partial
+  steps: '1. beforeAll: create-all-type-table API呼び出し
+
+    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:''fixed'')
+
+    3. navigateToAllTypeTable()でステータスAPIからテーブルIDを取得しレコード一覧に遷移
+
+    4. 「集計」ボタン（button:has-text("集計")）の存在確認
+
+    5. 存在する場合はクリックしてサイドパネルを開く
+
+    6. スクリーンショット保存
+
+    7. finally: delete-all-type-tables API呼び出し
+
+    '
+  assertions: '- ボタンが存在すればクリック成功確認（if (count > 0) の条件付き）
+
+    - expect(page.locator(''.navbar'')).toBeVisible()
+
+    - expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ YAMLには「集計の追加」→「グラフの種類選択」→「設定保存」→「集計が表示される」の一連操作の検証が期待されているが、spec.jsはボタン存在確認+クリックのみ
+
+    ⚠️ グラフが実際に表示されることをアサートしていない
+
+    ⚠️ if (count > 0) の条件分岐により、ボタンが存在しなくてもパスする
+
+    ⚠️ アサーションが「Internal Server Error が含まれないこと」のみで集計機能の動作を全く検証していない
+
+    '
+- case_no: 105-02
+  status: partial
+  steps: '1. 集計ページに遷移
+
+    2. 集計設定UIの操作を試みる
+
+    3. スクリーンショット保存
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 105-01と同様、集計設定の具体的操作（グラフ種類選択・保存）を検証せず
+
+    ⚠️ 複数の集計追加は未検証
+
+    '
+- case_no: 114-01
+  status: partial
+  steps: '1. navigateToAllTypeTable()でテーブルに遷移
+
+    2. 集計ボタンをクリック
+
+    3. カレンダー設定タブの操作試行
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ YAMLには「カレンダー表示のON/OFF設定」→「カレンダー表示確認」が期待されるが未実装
+
+    '
+- case_no: 114-02
+  status: partial
+  steps: '1. カレンダービューへ遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ カレンダー表示でデータが正しく表示されるかの確認なし
+
+    '
+- case_no: 118-01
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. チャートの設定UIに移動
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ YAMLには特定の集計型（棒グラフ等）を選択・設定保存する手順があるが未実装
+
+    ⚠️ チャートの実際の描画・表示確認なし
+
+    '
+- case_no: 119-01
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. チャートオプション設定ページへ遷移
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ チャートオプション設定の保存→表示確認が未実装
+
+    '
+- case_no: 120-01
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 120-01〜06のケースが個別に実装されていない（まとめて1テストまたは未実装の可能性）
+
+    '
+- case_no: 123-01
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. カレンダービューのオプション操作試行
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ カレンダー表示のフィルタ設定・保存・確認が未実装
+
+    '
+- case_no: 123-02
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. カレンダービューのオプション操作試行（複数）
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 123-01と同様、実際のUI操作・結果確認なし
+
+    '
+- case_no: 15-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. 集計ボタンクリック試行
+
+    3. 集計グループ設定操作試行
+
+    4. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ グループ集計の設定→保存→表示確認が未実装
+
+    ⚠️ 集計結果のデータが正しいことの検証なし
+
+    '
+- case_no: 15-2
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 15-1と同様
+
+    '
+- case_no: 16-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. 集計設定操作試行
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計の合計・平均などの数値演算の確認なし
+
+    '
+- case_no: 16-2
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 16-1と同様
+
+    '
+- case_no: 23-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. チャート設定操作試行
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ チャート作成→表示確認の一連フローが未実装
+
+    '
+- case_no: 37-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. チャートオプション設定操作試行
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ チャートの削除操作・確認ポップアップの検証なし
+
+    '
+- case_no: 65-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. カレンダービュー切替操作試行
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ カレンダーの週・月の切替後に正しいデータが表示されるかの確認なし
+
+    '
+- case_no: 66-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. カレンダーのナビゲーション操作試行
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 前月・次月への移動と表示データの確認なし
+
+    '
+- case_no: 85-2
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計のコピー機能確認なし
+
+    '
+- case_no: 87-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. 集計設定操作試行
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 行色付け設定（1条件）の保存・反映確認なし
+
+    '
+- case_no: 87-2
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. 集計設定操作試行
+
+    3. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 行色付け設定（複数条件）の保存・反映確認なし
+
+    '
+- case_no: 88-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計の順番変更（D&D）確認なし
+
+    '
+- case_no: 88-2
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 88-1と同様
+
+    '
+- case_no: 110-01
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計のX軸・Y軸設定の詳細確認なし
+
+    '
+- case_no: 110-02
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 110-01と同様
+
+    '
+- case_no: 136-01
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. 権限設定（詳細権限）ページへ遷移
+
+    3. 権限設定フォームの表示確認
+
+    4. 集計権限の存在確認（集計ボタンの要素探索）
+
+    5. スクリーンショット保存
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 権限設定を実際に変更して保存する操作なし
+
+    ⚠️ 権限設定後にユーザーが実際に集計機能にアクセスできる/できないの検証なし
+
+    ⚠️ 別ユーザーでのログインは行っていない
+
+    '
+- case_no: 136-02
+  status: skip
+  steps: '実装なし（spec.jsにtest記述なし）
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない（136-01のみ実装）
+
+    '
+- case_no: 136-03
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 136-04
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 137-01
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない（チャート詳細権限設定）
+
+    '
+- case_no: 137-02
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 137-03
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 137-04
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 138-01
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない（集計カラム削除制限）
+
+    '
+- case_no: 139-01
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. 権限設定ページへ遷移
+
+    3. ページ表示確認
+
+    4. スクリーンショット保存
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ YAMLには集計のカレンダー権限設定の詳細操作が期待されるが未実装
+
+    ⚠️ 139-02〜04は実装なし
+
+    '
+- case_no: 139-02
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 139-03
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 139-04
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 140-01
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない（チャート詳細権限：グラフ操作）
+
+    '
+- case_no: 140-02
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 140-03
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 140-04
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない
+
+    '
+- case_no: 141-01
+  status: skip
+  steps: '実装なし
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ spec.jsにテストが実装されていない（集計の項目フィールド削除制限）
+
+    '
+- case_no: 151-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計に存在しない項目フィールド削除制限の確認なし
+
+    '
+- case_no: 152-1
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計のグループ項目削除制限の確認なし
+
+    '
+- case_no: 214
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ チャートの追加オプション設定（表示件数上限）の詳細確認なし
+
+    '
+- case_no: 215
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計の表示件数設定の確認なし
+
+    '
+- case_no: 260
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計の縦スクロール動作確認なし
+
+    '
+- case_no: 261
+  status: partial
+  steps: '1. テーブルに遷移
+
+    2. ページ表示確認
+
+    '
+  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
+
+    '
+  gaps: '⚠️ 集計の横スクロール確認なし
+
+    '

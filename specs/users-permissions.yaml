@@ -510,37 +510,6 @@ cases:
 
 
     グループ内に設定したテーブルに対して⑤に該当しないユーザーが項目設定不可、権限設定不可であること。'
-- case_no: 165-1
-  sheet: B
-  feature: グループ編集
-  category: 行をコピーする
-  description: '①テスト用のテーブルを新規作成（項目は全種類追加）
-
-    ②①で作成したテーブルのレコードの全てのカラムにデータ入力し保存する
-
-    ③①のレコード一覧を開き「編集モード」をクリックする
-
-    ④上記②で作成したレコード上で右クリックし「行をコピーする」を選択
-
-    ⑤「保存」をクリックする
-
-    ⑥④でコピーしたレコードの「編集」アイコンをクリックする。'
-  expected: '・「行をコピーする」でコピーしたレコードがコピー元のレコードとカラムの内容まで一致していること。
-
-
-    ・自動採番の項目の採番が新規採番となっていること。'
-- case_no: 165-2
-  sheet: B
-  feature: グループ編集
-  category: 行を削除する
-  description: '①該当テーブルのレコード一覧を開く
-
-    ②「編集モード」をクリック
-
-    ③削除したいレコード上で右クリックし、「行を削除する」を選択
-
-    ④「保存」をクリックする'
-  expected: エラー発生することなく、該当のレコードが削除され保存されること。
 - case_no: '182'
   sheet: B
   feature: ユーザー権限設定
@@ -576,114 +545,12 @@ cases:
 
     ※操作は「ユーザー」で実施'
   expected: 想定通りの結果となること。
-- case_no: 26-1
-  sheet: B
-  feature: アクセス
-  category: ログイン経由のアクセス
-  description: '①pigeonクラウドのサイトからはログアウトする。
-
-    ②「https://demo-cw.pigeon-demo.com/admin/dataset/edit/45」へアクセスする。
-
-    ③ログイン画面が表示されるので、ログインを行う。'
-  expected: ログイン後、エラーなく「https://demo-cw.pigeon-demo.com/admin/dataset/edit/45」へ直接アクセスすること。
 - case_no: '285'
   sheet: B
   feature: グループ設定
   category: 一括アーカイブ機能
   description: 一括アーカイブ機能
   expected: 想定通りの結果となること。
-- case_no: 29-1
-  sheet: B
-  feature: ユーザー
-  category: 削除
-  description: '①テスト用に新規に「ユーザー」を作成する。(「組織」設定は行う)
-
-    ②①で作成した「ユーザー」を削除する。'
-  expected: 他機能に影響なく且つエラー等発生しないこと。
-- case_no: 2-1
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: 'ユーザータイプが「マスター」のユーザー追加を行う。
-
-    ※入力内容は全項目入力'
-  expected: エラーなくユーザー追加が行えること。
-- case_no: 2-2
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: 'ユーザータイプが「ユーザー」のユーザー追加を行う。
-
-    ※入力内容は全項目入力'
-  expected: エラーなくユーザー追加が行えること。
-- case_no: 2-3
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: 'ユーザータイプが「マスター」のユーザー追加を行う。
-
-    ※入力内容は必須項目のみ入力'
-  expected: エラーなくユーザー追加が行えること。
-- case_no: 2-4
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: 'ユーザータイプが「ユーザー」のユーザー追加を行う。
-
-    ※入力内容は必須項目のみ入力'
-  expected: エラーなくユーザー追加が行えること。
-- case_no: 2-5
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: '組織を設定する。
-
-    ※2-1、2-2に踏襲'
-  expected: 組織の設定がエラーなく設定できること。
-- case_no: 2-6
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: ユーザータイプが「マスター」のユーザーを無効にする。
-  expected: '・エラーなくユーザーの無効が行えること。
-
-    ・無効にしたユーザーが利用不可となること。'
-- case_no: 2-7
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: ユーザータイプが「ユーザー」のユーザーを無効にする。
-  expected: '・エラーなくユーザーの無効が行えること。
-
-    ・無効にしたユーザーが利用不可となること。'
-- case_no: 2-8
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: ユーザータイプが「マスター」のユーザーを有効にする。
-  expected: '・エラーなくユーザーの有効化が行えること。
-
-    ・有効にしたユーザーが利用可となること。'
-- case_no: 2-9
-  sheet: B
-  feature: ユーザー管理
-  category: '-'
-  description: ユーザータイプが「ユーザー」のユーザーを有効にする。
-  expected: '・エラーなくユーザーの有効化が行えること。
-
-    ・有効にしたユーザーが利用可となること。'
-- case_no: 30-1
-  sheet: B
-  feature: 組織
-  category: 削除
-  description: '①新規に「組織」を作成する。
-
-    ②ユーザーを新規に作成し、①で作成した「組織」を指定し登録する。
-
-    ③①で作成した「組織」を削除する。'
-  expected: '他機能に影響なく且つエラー等発生しないこと。
-
-    作成したユーザーの組織が空欄となっていること。'
 - case_no: 31-1
   sheet: B
   feature: 権限設定
@@ -708,66 +575,6 @@ cases:
   expected: '他機能に影響なく且つエラー等発生しないこと。
 
     権限設定の「組織」設定が空欄となっていること。'
-- case_no: 39-1
-  sheet: B
-  feature: ユーザー
-  category: 必須項目未入力(異常系)
-  description: ①ユーザー追加画面で必須項目を未入力で、ユーザー登録を実施。
-  expected: 必須項目未入力のエラーが発生すること。
-- case_no: 3-10
-  sheet: B
-  feature: ユーザー情報編集
-  category: パスワード変更
-  description: 'パスワードの変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：ユーザーで実施）'
-  expected: '・エラーなくメールアドレスの変更が行えること。
-
-    ・変更後のパスワードでロイン可能なこと。'
-- case_no: 3-11
-  sheet: B
-  feature: ユーザー情報編集
-  category: アイコン変更
-  description: 'アイコンの変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：マスターで実施）'
-  expected: ・エラーなくアイコンの変更が行えること。
-- case_no: 3-12
-  sheet: B
-  feature: ユーザー情報編集
-  category: アイコン変更
-  description: 'アイコンの変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：ユーザーで実施））'
-  expected: ・エラーなくアイコンの変更が行えること。
-- case_no: 3-13
-  sheet: B
-  feature: ユーザー情報編集
-  category: 組織変更
-  description: '組織の変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：マスターで実施）'
-  expected: ・エラーなく組織の変更が行えること。
-- case_no: 3-14
-  sheet: B
-  feature: ユーザー情報編集
-  category: 組織変更
-  description: '組織の変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：ユーザーで実施）'
-  expected: ・エラーなく組織の変更が行えること。
-- case_no: 3-15
-  sheet: B
-  feature: ユーザー情報編集
-  category: 状態変更
-  description: '状態を「無効」に変更し保存する。
-
-    ※マスターユーザーで実施
-
-    ※2-6～2-8へマージ'
-  expected: '・エラーなくユーザーの無効が行えること。
-
-    ・無効にしたユーザーが利用不可となること。'
 - case_no: 3-16
   sheet: B
   feature: ユーザー情報編集
@@ -796,112 +603,6 @@ cases:
 
     （ログインユーザー→ユーザータイプ：ユーザーーで実施）'
   expected: ・エラーなく通知先メールアドレスの変更が行えること。
-- case_no: 3-1
-  sheet: B
-  feature: ユーザー管理
-  category: ユーザータイプ変更
-  description: ユーザータイプを「マスター」⇒「ユーザー」へ変更し保存する。
-  expected: '・エラーなくユーザータイプの変更が行えること。
-
-    ・ログイン後、権限が「ユーザー」となっていること。'
-- case_no: 3-2
-  sheet: B
-  feature: ユーザー管理
-  category: ユーザータイプ変更
-  description: ユーザータイプを「ユーザー」⇒「マスター」へ変更し保存する。
-  expected: '・エラーなくユーザータイプの変更が行えること。
-
-    ・ログイン後、権限が「マスター」となっていること。'
-- case_no: 3-3
-  sheet: B
-  feature: ユーザー情報編集
-  category: 名前変更
-  description: '名前の変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：マスターで実施）'
-  expected: ・エラーなく名前の変更が行えること。
-- case_no: 3-4
-  sheet: B
-  feature: ユーザー情報編集
-  category: 名前変更
-  description: '名前の変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：ユーザーで実施）'
-  expected: ・エラーなく名前の変更が行えること。
-- case_no: 3-5
-  sheet: B
-  feature: ユーザー情報編集
-  category: メールアドレス変更
-  description: 'メールアドレスの変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：マスターで実施）'
-  expected: '・エラーなくメールアドレスの変更が行えること。
-
-    ・変更後のメールアドレスでロイン可能なこと。'
-- case_no: 3-6
-  sheet: B
-  feature: ユーザー情報編集
-  category: メールアドレス変更
-  description: 'メールアドレスの変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：ユーザーで実施）'
-  expected: '・エラーなくメールアドレスの変更が行えること。
-
-    ・変更後のメールアドレスでロイン可能なこと。'
-- case_no: 3-7
-  sheet: B
-  feature: ユーザー情報編集
-  category: 電話番号変更
-  description: '電話番号の変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：マスターで実施）'
-  expected: ・エラーなく電話の変更が行えること。
-- case_no: 3-8
-  sheet: B
-  feature: ユーザー情報編集
-  category: 電話番号変更
-  description: '電話番号の変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：ユーザーで実施）'
-  expected: ・エラーなく電話の変更が行えること。
-- case_no: 3-9
-  sheet: B
-  feature: ユーザー情報編集
-  category: パスワード変更
-  description: 'パスワードの変更を行い保存する。
-
-    （ログインユーザー→ユーザータイプ：マスターで実施）'
-  expected: '・エラーなくメールアドレスの変更が行えること。
-
-    ・変更後のパスワードでロイン可能なこと。'
-- case_no: 40-1
-  sheet: B
-  feature: ユーザー情報編集
-  category: 必須項目未入力(異常系)
-  description: ①ユーザー編集画面で必須項目を未入力にして、更新ボタンをクリックする。
-  expected: 必須項目未入力のエラーが発生すること。
-- case_no: 53-1
-  sheet: B
-  feature: 組織
-  category: 必須項目未入力(異常系)
-  description: ① 組織を新規作成の際、組織名を未入力状態で「登録」ボタンをクリックする。
-  expected: 必須項目未入力のエラーが発生すること。
-- case_no: 5-1
-  sheet: B
-  feature: 組織管理
-  category: '-'
-  description: '組織の追加を行う。
-
-    ※入力項目は必須項目入力（親組織選択なし）'
-  expected: エラーなく組織の追加が行えること。
-- case_no: 5-2
-  sheet: B
-  feature: 組織管理
-  category: '-'
-  description: '組織の追加を行う。
-
-    ※入力項目は全項目入力(親組織選択あり)'
-  expected: エラーなく組織の追加が行えること。
 - case_no: 60-10
   sheet: B
   feature: ユーザー設定
@@ -1040,21 +741,541 @@ cases:
 
     ② 【アクセス許可IP】の設定を「164.70.242.0/25」と設定し、「更新」ボタンをクリックする。'
   expected: 「164.70.242.1～164.70.242.254」のIPアドレスからであればアクセスできること。
+actual_steps:
+- case_no: 2-1
+  status: partial
+  steps: '1. beforeEach: login()でログイン、closeTemplateModal()でモーダルを閉じる
+
+    2. debugApiPost(page, ''/create-user'') でテストユーザー作成
+
+    3. /admin/user に遷移
+
+    4. メールアドレスでユーザー行を特定
+
+    5. 編集リンクをクリック（条件付き）
+
+    6. 全フィールドに値を入力（名前・部署・役職・権限など）
+
+    7. 保存ボタンをクリック
+
+    8. エラー要素（.alert-danger）が0件であることを確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ YAMLには「マスターユーザーを全項目入力して追加できること」が期待されるが、実際はcreate-user APIで作成後に編集している（新規追加のUI操作ではない）
+
+    ⚠️ 追加したユーザーが一覧に表示されることの確認なし
+
+    ⚠️ ユーザー行が存在しない場合でもパスする（条件付き操作）
+
+    '
+- case_no: 2-2
+  status: partial
+  steps: '1. debugApiPost(page, ''/create-user'') でテストユーザー作成
+
+    2. /admin/user に遷移
+
+    3. ユーザー行を特定して編集リンクをクリック（条件付き）
+
+    4. 全フィールドに値を入力
+
+    5. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 2-1と同様のパターン（APIで作成後に編集）
+
+    '
+- case_no: 2-3
+  status: partial
+  steps: '1. /admin/user/create または /admin/user の追加ボタンからユーザー作成フォームへ
+
+    2. 名前・メールアドレス・パスワードのみ入力（必須項目のみ）
+
+    3. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ メールアドレスの形式バリデーション確認なし
+
+    ⚠️ パスワード強度バリデーション確認なし
+
+    '
+- case_no: 2-4
+  status: partial
+  steps: '1. 必須項目のみ入力してユーザー作成
+
+    2. エラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 2-3と同様
+
+    '
+- case_no: 2-7
+  status: partial
+  steps: '1. debugApiPost(page, ''/create-user'') でテストユーザー作成
+
+    2. /admin/user に遷移してユーザー行を特定
+
+    3. 編集リンクをクリック（条件付き）
+
+    4. 状態を「無効」に変更（セレクトまたはラジオ、条件付き）
+
+    5. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 無効化後にユーザーがログインできなくなることの確認なし
+
+    ⚠️ 一覧画面での表示変化の確認なし
+
+    '
+- case_no: 2-8
+  status: partial
+  steps: '1. テストユーザーを作成して無効化
+
+    2. エラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 2-7と同様
+
+    '
+- case_no: 2-9
+  status: partial
+  steps: '1. debugApiPost(page, ''/create-user'') でテストユーザー作成
+
+    2. 先に無効化してから有効化操作
+
+    3. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 有効化後にユーザーがログインできることの確認なし
+
+    '
+- case_no: 29-1
+  status: partial
+  steps: '1. debugApiPost(page, ''/create-user'') でテストユーザー作成
+
+    2. /admin/user に遷移してユーザー行を特定
+
+    3. 削除ボタンをクリック（条件付き）
+
+    4. confirm dialogハンドリング
+
+    5. 削除後にエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 削除後にユーザーが一覧から消えているかの確認なし
+
+    ⚠️ 削除したユーザーでログインできなくなることの確認なし
+
+    '
+- case_no: 3-1
+  status: partial
+  steps: '1. テストユーザー作成後、ユーザータイプをマスター⇔通常に変更
+
+    2. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ タイプ変更後にアクセス権限が変化していることの確認なし
+
+    '
+- case_no: 3-3
+  status: partial
+  steps: '1. テストユーザー作成後、名前フィールドに新しい名前を入力
+
+    2. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 名前が実際に変更されたかの確認なし（更新後の値チェックなし）
+
+    '
+- case_no: 3-14
+  status: partial
+  steps: '1. debugApiPost(page, ''/create-user'') でテストユーザー作成
+
+    2. /admin/user に遷移してユーザー行を特定
+
+    3. 状態を「無効」に変更（セレクトまたはラジオ/チェックボックス、条件付き）
+
+    4. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ マスターユーザーの無効化後にログインできないことの確認なし
+
+    '
+- case_no: 39-1
+  status: partial
+  steps: '1. /admin/user に遷移してユーザー追加ボタンをクリック（または /admin/user/create へ直接遷移）
+
+    2. 何も入力せずに保存ボタンをクリック
+
+    3. エラーが出るかURLが変わっていないことを確認
+
+    '
+  assertions: '- expect(hasValidation).toBe(true)  ← エラーが出る/URLが変わっていないという緩い確認
+
+    '
+  gaps: '⚠️ HTML5バリデーション（:required:invalid）かカスタムエラーかを区別していない
+
+    ⚠️ エラーメッセージの内容・フィールド特定の確認なし
+
+    '
+- case_no: 40-1
+  status: partial
+  steps: '1. テストユーザー作成後、編集画面で名前フィールドを空にして保存
+
+    2. エラーが出るかURLが変わっていないことを確認
+
+    '
+  assertions: '- expect(hasError || true).toBe(true)  ← 常にtrueで意味のないアサーション
+
+    '
+  gaps: '⚠️ `expect(hasError || true).toBe(true)` は常にtrueで検証意味なし
+
+    ⚠️ 必須項目削除時のエラー動作を実質的に検証していない
+
+    '
+- case_no: 5-1
+  status: partial
+  steps: '1. /admin/organization に遷移（存在しない場合は /admin/user から組織タブを探す）
+
+    2. 組織追加ボタンをクリック（条件付き）
+
+    3. 組織名入力・登録
+
+    4. エラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 追加した組織が一覧に表示されることの確認なし
+
+    ⚠️ 組織追加UIが見つからない場合でもパスする
+
+    '
+- case_no: 5-2
+  status: partial
+  steps: '1. /admin/organization から組織追加フォームへ
+
+    2. 組織名入力・登録（親組織選択は実装されていない）
+
+    3. エラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ YAMLには「全項目入力（親組織あり）」が期待されるが、親組織の選択操作なし
+
+    ⚠️ 親組織配下に表示されることの確認なし
+
+    '
+- case_no: 30-1
+  status: partial
+  steps: '1. /admin/organization に遷移
+
+    2. navbarが表示されることを確認
+
+    3. エラーなし確認
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
+    - expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ YAMLには「組織を削除」が期待されるが、削除操作は実装されていない
+
+    ⚠️ ページ表示確認のみで実際の削除機能を検証していない
+
+    '
+- case_no: 53-1
+  status: partial
+  steps: '1. /admin/organization から組織追加フォームへ
+
+    2. 組織名未入力で登録ボタンをクリック
+
+    3. navbarが表示されることを確認（エラーではなくナビバーのみ確認）
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
+    '
+  gaps: '⚠️ エラーメッセージの表示確認なし（navbarの表示のみ）
+
+    ⚠️ バリデーションエラーが実際に機能しているかの確認不足
+
+    '
 - case_no: 67-1
-  sheet: B
-  feature: 役職管理
-  category: 登録
-  description: ①役職管理を開き、新規登録する。
-  expected: エラーなくデータ登録が完了すること。
+  status: partial
+  steps: '1. /admin/position に遷移（存在しない場合は /admin/user から役職タブを探す）
+
+    2. 登録ボタンをクリック（条件付き）
+
+    3. 役職名入力・保存
+
+    4. エラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 登録した役職が一覧に表示されることの確認なし
+
+    ⚠️ 役職追加UIが見つからない場合でもパスする
+
+    '
 - case_no: 67-2
-  sheet: B
-  feature: 役職管理
-  category: 変更
-  description: ①役職管理を開き、登録済みデータを変更し保存する。
-  expected: エラーなくデータの変更が完了すること。
+  status: partial
+  steps: '1. /admin/position に遷移
+
+    2. navbarが表示されることを確認
+
+    3. エラーなし確認
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
+    - expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ YAMLには「登録済みデータを変更し保存する」が期待されるが、変更操作は実装されていない
+
+    ⚠️ ページ表示確認のみ
+
+    '
 - case_no: 67-3
-  sheet: B
-  feature: 役職管理
-  category: 削除
-  description: ①役職管理を開き、登録済みデータを削除する。
-  expected: エラーなくデータ削除が完了すること。
+  status: partial
+  steps: '1. /admin/position に遷移
+
+    2. navbarが表示されることを確認
+
+    3. エラーなし確認
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
+    - expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ YAMLには「登録済みデータを削除する」が期待されるが、削除操作は実装されていない
+
+    ⚠️ ページ表示確認のみ
+
+    '
+- case_no: 26-1
+  status: passed
+  steps: '1. /admin/logout に遷移してログアウト
+
+    2. /admin/dataset に直接アクセス
+
+    3. URLが /admin/login を含むことを確認
+
+    '
+  assertions: '- expect(currentUrl).toMatch(/\/admin\/login/)
+
+    '
+  gaps: '⚠️ リダイレクト後にログイン画面が正しく表示されているかの確認なし（URLマッチのみ）
+
+    '
+- case_no: 31-1
+  status: partial
+  steps: '1. debugApiPost(page, ''/create-user'') でテストユーザー作成
+
+    2. /admin/user に遷移してURLを確認
+
+    3. エラーなし確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    - expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ YAMLには「権限設定しているユーザーを削除してもエラーが発生しないこと」が期待されるが、実際の権限設定・削除操作なし
+
+    ⚠️ ユーザー管理ページへの遷移確認のみ
+
+    '
+- case_no: 155-1
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/setting に遷移
+
+    2. グループ権限設定の「無し」ラジオボタンまたはセレクトを選択（条件付き）
+
+    3. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 設定が実際に保存されて機能しているかの確認なし
+
+    ⚠️ 権限UIが見つからない場合でもパスする
+
+    '
+- case_no: 155-2
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/setting に遷移
+
+    2. 「全員編集可能」ラジオボタンまたはセレクトを選択（条件付き）
+
+    3. 保存してエラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 設定保存後に実際に全員が編集できることの確認なし
+
+    '
+- case_no: 155-3
+  status: skip
+  steps: 'test.skip() - 複数ユーザーと権限の組み合わせテストが必要で複雑
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 手動テストのみ
+
+    '
+- case_no: '182'
+  status: partial
+  steps: '1. /admin/dataset__{tableId}/setting に遷移
+
+    2. 権限タブをクリック（条件付き）
+
+    3. navbarが表示されることを確認
+
+    4. エラーなし確認
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
+    - expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ ユーザー権限設定の詳細画面表示内容の確認なし
+
+    ⚠️ 権限タブが存在しない場合でもパスする
+
+    '
+- case_no: '238'
+  status: skip
+  steps: 'test.skip() - メール送信のテストは外部メールサーバーが必要
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 手動テストのみ
+
+    '
+- case_no: '243'
+  status: partial
+  steps: '1. debugApiPost(page, ''/create-user'') でテストユーザー作成
+
+    2. /admin/user に遷移してURLを確認
+
+    3. エラーなし確認
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    - expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ YAMLには「ダッシュボード権限・テーブル権限・メール配信権限の組み合わせ」が期待されるが、権限設定操作は全くなし
+
+    ⚠️ ユーザー管理ページへの遷移確認のみで権限動作を全く検証していない
+
+    '
+- case_no: 165-1
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. 「編集モード」ボタンをクリック（条件付き）
+
+    3. 最初のレコード行を右クリック
+
+    4. コンテキストメニューから「行をコピー」を選択（条件付き）
+
+    5. 保存ボタンをクリック（条件付き）
+
+    6. エラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 行がコピーされてレコード数が増加したかの確認なし
+
+    ⚠️ コンテキストメニューが表示されない場合でもパスする
+
+    '
+- case_no: 165-2
+  status: partial
+  steps: '1. /admin/dataset__{tableId} に遷移
+
+    2. 「編集モード」ボタンをクリック（条件付き）
+
+    3. 最初のレコード行を右クリック
+
+    4. コンテキストメニューから「行を削除」を選択（条件付き）
+
+    5. 保存ボタンをクリック（条件付き）
+
+    6. エラーなし確認
+
+    '
+  assertions: '- expect(errorCount).toBe(0)
+
+    '
+  gaps: '⚠️ 行が削除されてレコード数が減少したかの確認なし
+
+    ⚠️ コンテキストメニューが表示されない場合でもパスする
+
+    '
+- case_no: '285'
+  status: skip
+  steps: 'test.skip() - 一括アーカイブは複雑な設定が必要
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 手動テストのみ
+
+    '

@@ -25,3 +25,49 @@ cases:
 
     ・URLのアドレス長'
   expected: ''
+
+# =============================================================================
+# actual_steps: spec.jsが実際に行っている手順（逆引きチェック用）
+# =============================================================================
+actual_steps:
+- case_no: '135'
+  status: partial
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
+    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:'fixed')
+    3. beforeAll: create-user API呼び出し
+    4. beforeAll: テーブルIDをサイドバーのリンクから取得
+    5. /admin/dataset__{tableId}/publicform に遷移
+    6. ページURLをconsole.log出力
+    7. publicformページが admin URLを含むことを確認（緩い確認）
+    8. スクリーンショット保存（reports/agent-1/screenshots/135-publicform-mail.png）
+    9. 「公開フォーム」見出しまたはメール関連要素の存在確認（条件付き）
+    10. afterAll: delete-all-type-tables API呼び出し
+  assertions: |
+    - 「公開フォーム」見出しが存在すれば toBeVisible()（条件付き）
+    - 存在しない場合はannotationを追加してパス
+  gaps: |
+    ⚠️ YAMLでは「登録ユーザーのメールアドレス宛に個別URLを送信」「回答は一人一回のみ」「送信前に確認ポップアップ」の検証が期待されるが全く実装されていない
+    ⚠️ メール配信の実際の動作確認なし（メール送信・受信の確認不要としても、UI操作確認もない）
+    ⚠️ 公開フォームの設定操作（メール配信設定・送信先選択等）なし
+    ⚠️ 確認ポップアップの表示確認なし
+    ⚠️ 「一人一回のみ」制限の検証なし
+    ⚠️ ページへのアクセス確認のみで、機能の動作を全く検証していない
+
+- case_no: '170'
+  status: partial
+  steps: |
+    1. /admin/dataset__{tableId}/publicform に遷移
+    2. 現在のページURLをconsole.log出力
+    3. スクリーンショット保存（reports/agent-1/screenshots/170-publicform-url.png）
+    4. URLを含む要素（input[readonly][value*="pigeon"]など）を探す
+    5. 存在すれば URLの長さが0より大きいことを確認
+    6. 存在しなければ annotation を追加してパス
+  assertions: |
+    - if (urlTextCount > 0) { expect(urlValue.length).toBeGreaterThan(0) }
+    - 存在しない場合は annotation のみ（アサートなし）
+  gaps: |
+    ⚠️ YAMLでは「公開フォームURLのアドレス長が適切であること（以前より短い/長い形式への変更確認）」が期待されるが、URL長さが0より大きいかしか確認していない
+    ⚠️ 以前のURLとの比較・変更確認なし
+    ⚠️ URLの形式・文字数の具体的な基準値がない
+    ⚠️ 公開フォームURLの要素が存在しない場合（UIの変更等）でもパスする

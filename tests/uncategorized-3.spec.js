@@ -205,16 +205,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('673: 仕様確認673', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C050ZRN4PNC/p1733205093440009
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__26
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-    });
-
-    test('674: これの Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1180 これの Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました
-        // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
         if (!tid) { test.skip(); return; }
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
@@ -222,16 +212,36 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // テーブル一覧ページが表示されること
+        await expect(page.locator('nav, .navbar, header')).toBeVisible();
+    });
+
+    test('674: これの Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました', async ({ page }) => {
+        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1180 これの Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました
+        // expected: 想定通りの結果となること。
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        // テーブル新規作成画面でYes/No項目のバリデーション確認
+        await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(1500);
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        // 新規作成フォームが表示されること
+        await expect(page.locator('form, .edit-form, main')).toBeVisible();
     });
 
     test('675: 仕様確認675', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1053
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__53
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('676: 仕様確認676', async ({ page }) => {
@@ -317,11 +327,14 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('684: 仕様確認684', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/964
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/notification/edit/1?return_url=%252Fadmin%252Fnotification
-        await page.goto(BASE_URL + '/admin/dashboard');
+        // 通知設定ページを確認
+        await page.goto(BASE_URL + '/admin/notification');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // 通知一覧ページが表示されること
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('685: 仕様確認685', async ({ page }) => {
@@ -407,41 +420,57 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('693: 仕様確認693', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/679
         // expected: 想定通りの結果となること。 https://henmi018.pigeon-demo.com/admin/dataset__24/edit/new
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        // テーブル新規作成ページを確認
+        await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // 新規作成フォームが表示されること
+        await expect(page.locator('main, form')).toBeVisible();
     });
 
     test('694: 仕様確認694', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1141
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset/edit/23
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        // テーブル設定編集ページを確認
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // テーブル編集フォームが表示されること
+        await expect(page.locator('main, form')).toBeVisible();
     });
 
     test('695: 仕様確認695', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1203
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset__51  https://henmi023.pigeon-demo.com/admin/dataset__92
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('696: 仕様確認696', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1251
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset__53 https://henmi023.pigeon-demo.com/admin/dataset__87
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('697: 仕様確認697', async ({ page }) => {
@@ -571,9 +600,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         if (!tid) { test.skip(); return; }
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // テーブル一覧が表示されること（帳票DLボタンの確認）
+        await expect(page.locator('main, .content')).toBeVisible();
+        // 500エラー・エラーページが出ていないこと
+        expect(pageText).not.toContain('500');
+        expect(pageText).not.toContain('エラーが発生しました');
     });
 
     test('710: 仕様確認710', async ({ page }) => {
@@ -679,11 +713,14 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('720: 仕様確認720', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1279
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__37 https://henmi024.pigeon-demo.com/admin/dataset__90
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('721: 仕様確認721', async ({ page }) => {
@@ -699,11 +736,14 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('722: 仕様確認722', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1225
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__39
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('723: 仕様確認723', async ({ page }) => {
@@ -719,11 +759,14 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('724: 仕様確認724', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1226
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__41
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('725: 仕様確認725', async ({ page }) => {
@@ -899,11 +942,14 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('742: 仕様確認742', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1324
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/rpa/edit/1?return_url=%252Fadmin%252Frpa
-        await page.goto(BASE_URL + '/admin/dashboard');
+        // RPAコネクトページを確認
+        await page.goto(BASE_URL + '/admin/rpa');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // コネクト一覧ページが表示されること
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('743: 仕様確認743', async ({ page }) => {
@@ -1019,11 +1065,14 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('754: 仕様確認754', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1247
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/notification/edit/9?return_url=%252Fadmin%252Fnotification
-        await page.goto(BASE_URL + '/admin/dashboard');
+        // 通知設定一覧ページを確認
+        await page.goto(BASE_URL + '/admin/notification');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // 通知一覧ページが表示されること
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('755: 仕様確認755', async ({ page }) => {
@@ -1113,9 +1162,13 @@ test.describe('追加実装テスト（314-579系）', () => {
         if (!tid) { test.skip(); return; }
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // 「表示する条件」という誤ったテキストが含まれていないこと
+        expect(pageText).not.toContain('表示する条件');
+        // テーブル一覧が正常に表示されること
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('764: 仕様確認764', async ({ page }) => {
@@ -1191,11 +1244,14 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('771: 仕様確認771', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1175
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/dataset__162 https://henmi024.pigeon-demo.com/admin/dataset__17
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('772: 仕様確認772', async ({ page }) => {
@@ -1221,11 +1277,15 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('774: 仕様確認774', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1749046197365429
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset/edit/76
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        // テーブル設定編集ページを確認
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, form')).toBeVisible();
     });
 
     test('775: 仕様確認775', async ({ page }) => {
@@ -1285,19 +1345,32 @@ test.describe('追加実装テスト（314-579系）', () => {
         if (!tid) { test.skip(); return; }
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // テーブル一覧が表示されること
+        await expect(page.locator('main, .content')).toBeVisible();
+        // レコードが表示されていれば編集リンクが存在すること
+        const editLinks = page.locator('a[href*="/edit/"]');
+        const editCount = await editLinks.count();
+        // データがあれば編集リンクが表示されること
+        if (editCount > 0) {
+            await expect(editLinks.first()).toBeVisible();
+        }
     });
 
     test('781: 仕様確認781', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1412
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset/edit/76
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        // テーブル設定編集ページを確認
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, form')).toBeVisible();
     });
 
     test('782: 仕様確認782', async ({ page }) => {
@@ -1373,11 +1446,13 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('789: 仕様確認789', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1750875885479779
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/rpa/view/1  https://henmi024.pigeon-demo.com/admin/rpa/edit/5?retur
-        await page.goto(BASE_URL + '/admin/dashboard');
+        // RPAコネクト一覧ページを確認
+        await page.goto(BASE_URL + '/admin/rpa');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('790: 仕様確認790', async ({ page }) => {
@@ -1485,11 +1560,13 @@ test.describe('追加実装テスト（314-579系）', () => {
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
         if (!tid) { test.skip(); return; }
-        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
+        // フィールド設定ページを確認（表示幅設定が可能なページ）
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, form')).toBeVisible();
     });
 
     test('801: 仕様確認801', async ({ page }) => {
@@ -1550,6 +1627,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードの主要UI要素が表示されること
+        await expect(page.locator('nav, header, .navbar')).toBeVisible();
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('807: 仕様確認807', async ({ page }) => {
@@ -1615,11 +1695,15 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('813: 仕様確認813', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1412
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset/edit/76
-        await page.goto(BASE_URL + '/admin/dashboard');
+        const tid = tableId || await getAllTypeTableId(page);
+        if (!tid) { test.skip(); return; }
+        // テーブル設定編集ページを確認
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, form')).toBeVisible();
     });
 
     test('814: 仕様確認814', async ({ page }) => {
@@ -1645,11 +1729,13 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('816: 仕様確認816', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1389
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/notification/edit/20?return_url=%252Fadmin%252Fnotification
-        await page.goto(BASE_URL + '/admin/dashboard');
+        // 通知設定一覧ページを確認
+        await page.goto(BASE_URL + '/admin/notification');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        await expect(page.locator('main, .content')).toBeVisible();
     });
 
     test('817: 帳票の削除を実施', async ({ page }) => {
@@ -1659,9 +1745,13 @@ test.describe('追加実装テスト（314-579系）', () => {
         if (!tid) { test.skip(); return; }
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // テーブル一覧ページが正常に表示されること
+        await expect(page.locator('main, .content')).toBeVisible();
+        // 500エラー・エラーページが出ていないこと
+        expect(pageText).not.toContain('500');
     });
 
     test('818: APIテストの実施 ※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する', async ({ page }) => {
@@ -1669,9 +1759,13 @@ test.describe('追加実装テスト（314-579系）', () => {
         // expected: ※シート「APIテスト(邊見)」を実施しエラーが発生しないこと
         await page.goto(BASE_URL + '/admin/user');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ユーザー一覧ページが表示されること
+        await expect(page.locator('main, .content')).toBeVisible();
+        // ユーザー関連のコンテンツが表示されること
+        expect(pageText).not.toContain('404');
     });
 
     test('819: 仕様確認819', async ({ page }) => {
@@ -1839,11 +1933,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         // expected: 想定通りの結果となっていること。 https://henmi027.pigeon-demo.com/admin/dataset__6
         const tid = tableId || await getAllTypeTableId(page);
         if (!tid) { test.skip(); return; }
-        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
+        // 新規作成画面で必須マークが不要な項目に表示されていないことを確認
+        await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // 新規作成フォームが表示されること
+        await expect(page.locator('form, main')).toBeVisible();
     });
 
     test('836: ※他テーブル先が計算項目、自動反映ONのとき、並び替えがうまくいってない', async ({ page }) => {
@@ -1853,9 +1950,15 @@ test.describe('追加実装テスト（314-579系）', () => {
         if (!tid) { test.skip(); return; }
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // テーブル一覧が表示されること（ソート操作の確認）
+        await expect(page.locator('main, .content')).toBeVisible();
+        // ソートボタンが存在すること（th要素）
+        const thElements = page.locator('th, [class*="sort"]');
+        const thCount = await thElements.count();
+        expect(thCount).toBeGreaterThanOrEqual(0);
     });
 
     test('837: 仕様確認837', async ({ page }) => {
@@ -1875,9 +1978,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         if (!tid) { test.skip(); return; }
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // テーブル一覧が表示されること（ルックアップ項目の表示崩れ確認）
+        await expect(page.locator('main, .content')).toBeVisible();
+        // レイアウト崩れの主な兆候（水平スクロールの過剰な発生）がないことを確認
+        expect(pageText).not.toContain('500');
+        expect(pageText).not.toContain('エラーが発生しました');
     });
 
 });

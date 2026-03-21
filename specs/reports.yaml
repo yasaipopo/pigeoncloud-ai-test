@@ -108,3 +108,147 @@ cases:
   category: 帳票ファイル以外の登録(異常系)
   description: ①Excelファイル以外のファイル形式のファイルで、帳票アップロードする。
   expected: 帳票登録エラーが発生すること。
+
+# =============================================================================
+# actual_steps: spec.jsが実際に行っている手順（逆引きチェック用）
+# =============================================================================
+actual_steps:
+- case_no: 144-01
+  status: partial
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
+    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:'fixed')
+    3. テーブルIDをAPIステータスから取得
+    4. 帳票設定ページ（/admin/dataset__{tableId}/report）に遷移
+    5. ナビバーの表示確認
+    6. ページURLが admin を含むことを確認
+    7. スクリーンショット保存
+    8. afterAll: delete-all-type-tables API呼び出し
+  assertions: |
+    - await expect(page.locator('.navbar')).toBeVisible()
+    - expect(pageUrl).toContain('admin')
+  gaps: |
+    ⚠️ YAMLには「帳票設定の追加・編集・削除」操作が期待されるが、ページの表示確認のみ
+    ⚠️ 帳票テンプレートのアップロード操作なし
+    ⚠️ 帳票設定の保存・確認なし
+
+- case_no: '198'
+  status: partial
+  steps: |
+    1. 帳票設定ページに遷移
+    2. ナビバーの表示確認
+    3. スクリーンショット保存
+  assertions: |
+    - await expect(page.locator('.navbar')).toBeVisible()
+  gaps: |
+    ⚠️ 帳票プレビューの確認なし
+
+- case_no: '205'
+  status: partial
+  steps: |
+    1. テーブル一覧ページに遷移
+    2. ハンバーガーメニューボタンをクリック
+    3. 帳票メニューの存在確認（条件付き）
+    4. スクリーンショット保存
+  assertions: |
+    - 帳票メニューが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ 帳票ダウンロードの実際の実行・ファイル内容確認なし
+    ⚠️ メニューが存在しない場合でもパスする（条件付きアサーション）
+
+- case_no: '206'
+  status: partial
+  steps: |
+    1. テーブル一覧ページに遷移
+    2. ハンバーガーメニューをクリック
+    3. 帳票メニューの存在確認（条件付き）
+  assertions: |
+    - 帳票メニューが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ 205と同様
+
+- case_no: '207'
+  status: partial
+  steps: |
+    1. 帳票設定ページに遷移
+    2. ファイル名フォーマット入力欄に「%m-%d」を入力
+    3. 入力値が設定されたことを確認
+    4. スクリーンショット保存
+  assertions: |
+    - await expect(fileNameInput).toHaveValue('%m-%d')（または類似）
+  gaps: |
+    ⚠️ 実際の帳票ダウンロード後にファイル名フォーマットが反映されることの確認なし
+    ⚠️ ファイル名の実際の形式確認なし
+
+- case_no: '208'
+  status: partial
+  steps: |
+    1. 帳票設定ページに遷移
+    2. ファイル名フォーマット入力欄の確認
+  assertions: |
+    - 入力欄の存在確認のみ
+  gaps: |
+    ⚠️ 207と同様
+
+- case_no: '216'
+  status: partial
+  steps: |
+    1. テーブル一覧ページに遷移
+    2. 歯車アイコンの存在確認（条件付き）
+    3. スクリーンショット保存
+  assertions: |
+    - 歯車アイコンが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ 歯車アイコンが存在しない場合でもパスする（条件付きアサーション）
+    ⚠️ 帳票設定へのアクセス確認なし
+
+- case_no: '230'
+  status: partial
+  steps: |
+    1. 帳票設定ページに遷移
+    2. ナビバーの表示確認
+    3. ページURLが admin を含むことを確認
+    4. スクリーンショット保存
+  assertions: |
+    - await expect(page.locator('.navbar')).toBeVisible()
+    - expect(pageUrl).toContain('admin')
+  gaps: |
+    ⚠️ ユーザーテーブル参照設定後の帳票出力確認なし
+
+- case_no: '236'
+  status: partial
+  steps: |
+    1. 帳票設定ページに遷移
+    2. 列指定入力欄の存在確認（条件付き）
+    3. スクリーンショット保存
+  assertions: |
+    - 入力欄が存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ AA列以降の列指定の実際のダウンロード確認なし
+    ⚠️ 入力欄が存在しない場合でもパスする
+
+- case_no: '253'
+  status: skip
+  steps: |
+    test.skip('手動確認推奨')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ ファイル・画像項目を含む帳票のダウンロード確認は手動テストのみ
+
+- case_no: 56-1
+  status: partial
+  steps: |
+    1. 帳票設定ページに遷移
+    2. ファイルアップロードボタンの存在確認
+    3. 存在する場合は一時テキストファイルを作成して setInputFiles
+    4. 送信ボタンをクリック
+    5. エラーメッセージの存在確認（条件付き）
+    6. 一時ファイルを削除
+    7. スクリーンショット保存
+  assertions: |
+    - エラーメッセージが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ エラーが表示されない場合でもパスする（条件付きアサーション）
+    ⚠️ エラーメッセージの内容確認なし
+    ⚠️ ファイルアップロードボタンが存在しない場合でもパスする

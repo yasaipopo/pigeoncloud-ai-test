@@ -150,12 +150,20 @@ python3 runner/e2e_report_sheet.py --push-run
 ```
 
 これにより自動的に:
-1. **各specタブ**に「N回目」列を追加してテスト結果（passed/failed/skipped）を色付きで記録
+1. **「テスト結果」タブ（1つのみ）**に「N回目」列を追加して全spec・全ケースの結果（passed/failed/skipped）を色付きで記録
+   - 列構成: A=spec, B=case_no, C=feature, D=description, E=expected, F+=実行回ごとの結果
+   - uncategorized-2/3 の結果は uncategorized として正規化してマージ
 2. **「N回目テストレポート」タブ**を新規作成し、以下を記載:
    - 実行日時・合計/成功/失敗/スキップ件数
    - spec別結果一覧（判定・色付き）
-   - 失敗テスト一覧（動画リンク付き）
+   - 失敗テスト一覧（シートリンク付き）
    - **分析・総括**（失敗パターン自動分析・推奨アクション）
+
+**シートを作り直す場合**:
+```bash
+python3 runner/e2e_report_sheet.py --rebuild
+```
+テスト結果タブを削除・再作成し、1回目として書き直す。
 
 シート: https://docs.google.com/spreadsheets/d/1bdM8712izGrI9E9m4x2SkSyG6mBCK-apoxVI1xwG93E
 
@@ -267,6 +275,18 @@ osascript -e 'display notification "E2Eテスト完了: passed=XXX failed=N" wit
 - **スペックバグ**（セレクター変更・タイムアウト等）→ specを修正して再実行
 - **プロダクトバグ**（機能が壊れている）→ サマリーに記載して通知
 - **環境バグ**（一時的なエラー）→ 再実行して確認
+
+### プロダクトバグ判定時のルール
+**テストコードは絶対に修正しない**（skipや緩いアサーションへの変更も禁止）。
+Slack通知・Obsidian記録に留める。
+
+### 既知のプロダクトバグ候補（要確認）
+
+| spec | case | 症状 | 調査日 |
+|------|------|------|--------|
+| system-settings | 58-1 | 利用規約設定ON→OFF後、`.content` が hidden になりページ表示崩れ | 2026-03-20 |
+| users-permissions | 2-1, 2-2 | ユーザー追加フォームの保存ボタン（btn-outline-primary）が not visible | 2026-03-20 |
+| fields | 121-01 | `/admin/dataset/edit/{id}` のフィールド設定ページが60秒タイムアウト（パフォーマンス問題の可能性） | 2026-03-20 |
 
 ### スキップの扱い
 - `test.skip(true, 'todo')` → 実装して通す（スキップのまま残さない）
