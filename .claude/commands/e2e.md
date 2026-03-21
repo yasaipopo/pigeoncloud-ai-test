@@ -203,7 +203,7 @@ Slack Webhook:
 ```bash
 curl -s -X POST -H 'Content-type: application/json' \
   --data "{\"text\": \"...\"}" \
-  SLACK_WEBHOOK_PLACEHOLDER
+  ${SLACK_WEBHOOK_URL}
 ```
 
 Mac通知も送る:
