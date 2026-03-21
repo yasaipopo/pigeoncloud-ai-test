@@ -72,6 +72,7 @@ module.exports = async function globalSetup() {
         await page.waitForURL('**/admin/dashboard', { timeout: 30000 });
 
         // create-trial API を直接呼び出し（Angular UIフォームは不安定なためAPI経由）
+        let actualUrl, newPassword;
         const resp = await page.request.post(adminBaseUrl + '/api/admin/create-trial', {
             headers: {
                 'Content-Type': 'application/json',
@@ -84,11 +85,40 @@ module.exports = async function globalSetup() {
         console.log(`[global-setup] create-trial API 応答:`, JSON.stringify(result));
 
         if (!result.url || !result.pw) {
-            throw new Error(`create-trial 応答が不正: ${JSON.stringify(result)}`);
+            // APIが権限エラーの場合はUIフォームでフォールバック
+            console.log(`[global-setup] API失敗 → /admin/internal/create-client UI経由で作成`);
+            await page.goto(adminBaseUrl + '/admin/internal/create-client');
+            // Angular SPAのレンダリング待ち（networkidle + 追加待機）
+            await page.waitForLoadState('networkidle', { timeout: 30000 });
+            await page.waitForTimeout(2000);
+            // フォームのinputは form-control クラスなし（ナビゲーション用は form-control あり）
+            // inputs[3]=ドメイン, inputs[4]=ログインID なので :not(.form-control) で絞り込み
+            const formInputDomain = page.locator('input[type="text"]:not(.form-control):not(.shortcut-input)').first();
+            const formInputLogin  = page.locator('input[type="text"]:not(.form-control):not(.shortcut-input)').nth(1);
+            await formInputDomain.waitFor({ state: 'visible', timeout: 15000 });
+            await formInputDomain.fill(domain);
+            await formInputLogin.fill('admin');
+            // 作成ボタン（btn-success ladda-button, type=submit）をクリック
+            await page.waitForTimeout(500);
+            await page.locator('button.btn-success:has-text("作成")').click();
+            await page.waitForLoadState('networkidle', { timeout: 60000 });
+            const bodyText = await page.innerText('body');
+            console.log(`[global-setup] UI作成応答 (先頭300文字): ${bodyText.slice(0, 300)}`);
+            // レスポンスからURL/パスワードを抽出
+            const urlMatch = bodyText.match(/https?:\/\/[\w.-]+\.pigeon-(?:demo|cloud)\.com/);
+            const pwMatch = bodyText.match(/パスワード[：:]\s*(\S+)/i)
+                || bodyText.match(/password[：:]\s*(\S+)/i)
+                || bodyText.match(/pw[：:]\s*([A-Za-z0-9]{8,})/i);
+            if (!urlMatch) {
+                throw new Error(`create-client UI失敗: URLが取得できない。body: ${bodyText.slice(0, 300)}`);
+            }
+            actualUrl = urlMatch[0];
+            newPassword = pwMatch ? pwMatch[1] : 'admin';
+            console.log(`[global-setup] UI作成完了: ${actualUrl} / ${newPassword}`);
+        } else {
+            actualUrl = result.url;
+            newPassword = result.pw;
         }
-
-        const actualUrl = result.url;
-        const newPassword = result.pw;
 
         // 環境変数を更新（このプロセスとspec.jsで参照される）
         process.env.TEST_BASE_URL = actualUrl;

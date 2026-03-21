@@ -55,8 +55,12 @@ async function closeTemplateModal(page) {
  */
 async function createAllTypeTable(page) {
     const status = await page.evaluate(async (baseUrl) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-        return res.json();
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
+            return res.json();
+        } catch (e) {
+            return { all_type_tables: [] };
+        }
     }, BASE_URL);
     const existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
     if (existing) {
@@ -64,20 +68,28 @@ async function createAllTypeTable(page) {
     }
     // 504 Gateway Timeoutが返る場合があるため、ポーリングでテーブル作成完了を確認
     const createPromise = page.evaluate(async (baseUrl) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/create-all-type-table', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            body: JSON.stringify({}),
-            credentials: 'include',
-        });
-        return { status: res.status };
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/create-all-type-table', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({}),
+                credentials: 'include',
+            });
+            return { status: res.status };
+        } catch (e) {
+            return { status: 0 };
+        }
     }, BASE_URL).catch(() => ({ status: 0 }));
     // 最大300秒ポーリングでテーブル作成完了を確認
     for (let i = 0; i < 30; i++) {
         await page.waitForTimeout(10000);
         const statusCheck = await page.evaluate(async (baseUrl) => {
-            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-            return res.json();
+            try {
+                const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
+                return res.json();
+            } catch (e) {
+                return { all_type_tables: [] };
+            }
         }, BASE_URL);
         const tableCheck = (statusCheck.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
         if (tableCheck) {
@@ -93,21 +105,29 @@ async function createAllTypeTable(page) {
  */
 async function createAllTypeData(page, count = 5) {
     const status = await page.evaluate(async (baseUrl) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-        return res.json();
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
+            return res.json();
+        } catch (e) {
+            return { all_type_tables: [] };
+        }
     }, BASE_URL);
     const mainTable = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
     if (mainTable && mainTable.count >= count) {
         return { result: 'success' };
     }
     return await page.evaluate(async ({ baseUrl, count }) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/create-all-type-data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            body: JSON.stringify({ count, pattern: 'fixed' }),
-            credentials: 'include',
-        });
-        return res.json();
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/create-all-type-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ count, pattern: 'fixed' }),
+                credentials: 'include',
+            });
+            return res.json();
+        } catch (e) {
+            return { result: 'error' };
+        }
     }, { baseUrl: BASE_URL, count });
 }
 
@@ -134,8 +154,12 @@ async function deleteAllTypeTables(page) {
  */
 async function getAllTypeTableId(page) {
     const status = await page.evaluate(async (baseUrl) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-        return res.json();
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
+            return res.json();
+        } catch (e) {
+            return { all_type_tables: [] };
+        }
     }, BASE_URL);
     // APIは {id, label, count} の形式で返す（table_idではなくid）
     const mainTable = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
@@ -157,6 +181,17 @@ async function navigateToFieldPage(page, tableId) {
         await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
     }
     await page.waitForTimeout(1500);
+    // ログインページにリダイレクトされた場合は再ログインして再遷移
+    if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+        await login(page);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
+        try {
+            await page.waitForLoadState('networkidle', { timeout: 10000 });
+        } catch(e) {
+            await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+        }
+        await page.waitForTimeout(1500);
+    }
 }
 
 /**
@@ -211,11 +246,7 @@ test.describe('フィールド - 日時（101）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -291,11 +322,7 @@ test.describe('フィールド - ファイル（108）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -333,11 +360,7 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -409,11 +432,7 @@ test.describe('フィールドの追加（14系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -486,11 +505,7 @@ test.describe('項目設定（115, 116系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -550,11 +565,7 @@ test.describe('項目名パディング（92, 93, 94系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -628,11 +639,7 @@ test.describe('計算・計算式（51, 103, 27系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -703,11 +710,7 @@ test.describe('選択肢フィールド（18, 45, 46系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -767,11 +770,7 @@ test.describe('数値フィールド（43, 220, 221, 234, 235系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -831,11 +830,7 @@ test.describe('文字列フィールド（17, 20, 41, 42系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -906,11 +901,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -959,11 +950,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1012,11 +999,7 @@ test.describe('自動採番フィールド（216系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1055,11 +1038,7 @@ test.describe('固定テキストフィールド（230系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1098,11 +1077,7 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1152,11 +1127,7 @@ test.describe('列設定（122系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1205,11 +1176,7 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1258,11 +1225,7 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
-        // テーブルを削除しない（次のdescribeブロックで再利用するため）
-        // await deleteAllTypeTables(page);
-        await page.close();
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
     test.beforeEach(async ({ page }) => {
