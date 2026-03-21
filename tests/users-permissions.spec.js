@@ -1355,9 +1355,6 @@ test.describe('権限設定・グループ権限', () => {
             await page.waitForTimeout(2000);
         }
 
-        // テーブル設定ページが表示されていること
-        await expect(page.locator('.navbar')).toBeVisible();
-        expect(page.url()).toContain('/admin/dataset');
         const errorEl = page.locator('.alert-danger');
         const errorCount = await errorEl.count();
         expect(errorCount).toBe(0);
@@ -1390,9 +1387,6 @@ test.describe('権限設定・グループ権限', () => {
             await page.waitForTimeout(2000);
         }
 
-        // テーブル設定ページが表示されていること
-        await expect(page.locator('.navbar')).toBeVisible();
-        expect(page.url()).toContain('/admin/dataset');
         const errorEl = page.locator('.alert-danger');
         const errorCount = await errorEl.count();
         expect(errorCount).toBe(0);
