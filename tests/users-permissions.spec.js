@@ -11,6 +11,12 @@ const PASSWORD = process.env.TEST_PASSWORD;
  */
 async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded' });
+    // gotoした後に既にダッシュボード等にリダイレクトされた場合はログイン済みとみなす
+    const urlAfterGoto = page.url();
+    if (!urlAfterGoto.includes('/admin/login')) {
+        await page.waitForTimeout(1000);
+        return;
+    }
     // Angular SPAがレンダリングするまで待機
     await page.waitForSelector('#id', { timeout: 60000 });
     await page.fill('#id', email || EMAIL);
@@ -34,7 +40,18 @@ async function login(page, email, password) {
             }
             // 同じパスワードで再試行（ログインページを再gotoしてからfill）
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded' });
-            await page.waitForSelector('#id', { timeout: 60000 });
+            // 再gotoした後もダッシュボード等にリダイレクトされた場合はログイン済みとみなす
+            const urlAfterRetryGoto = page.url();
+            if (!urlAfterRetryGoto.includes('/admin/login')) {
+                await page.waitForTimeout(1000);
+                return;
+            }
+            // Angular SPAの遷移完了を待ってからURL再チェック（domcontentloaded後にルーターがリダイレクトする場合がある）
+            await page.waitForTimeout(1000);
+            if (!page.url().includes('/admin/login')) {
+                return;
+            }
+            await page.waitForSelector('#id', { timeout: 30000 });
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
