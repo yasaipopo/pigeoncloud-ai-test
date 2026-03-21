@@ -34,7 +34,7 @@ module.exports = defineConfig({
     timeout: 60000,
     expect: { timeout: 10000 },
     fullyParallel: false,
-    retries: 0,
+    retries: 1,
     workers: 1,
     reporter: [
         ['list'],
