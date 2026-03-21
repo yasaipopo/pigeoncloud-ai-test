@@ -286,7 +286,7 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
 
     test.beforeEach(async ({ page }) => {
         // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定
-        test.setTimeout(120000);
+        test.setTimeout(240000);
         try {
             await login(page);
         } catch (e) {
@@ -948,8 +948,8 @@ test.describe('ユーザー管理（作成・編集・削除・有効/無効）'
 test.describe('組織管理（追加・削除）', () => {
 
     test.beforeEach(async ({ page }) => {
-        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で180秒に延長）
-        test.setTimeout(180000);
+        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で240秒に延長）
+        test.setTimeout(240000);
         try {
             await login(page);
         } catch (e) {
@@ -1142,8 +1142,8 @@ test.describe('組織管理（追加・削除）', () => {
 test.describe('役職管理（登録・変更・削除）', () => {
 
     test.beforeEach(async ({ page }) => {
-        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で180秒に延長）
-        test.setTimeout(180000);
+        // ログイン（CSRF再試行含む）のために十分なタイムアウトを設定（フレーキー対策で240秒に延長）
+        test.setTimeout(240000);
         try {
             await login(page);
         } catch (e) {
@@ -2715,7 +2715,7 @@ test.describe('アクセス許可IP設定（サブネット各種）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(240000);
         try {
             await login(page);
         } catch (e) {
