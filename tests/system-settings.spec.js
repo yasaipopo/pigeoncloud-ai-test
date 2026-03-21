@@ -113,60 +113,30 @@ async function login(page, email, password) {
             });
             await page.waitForURL('**/admin/dashboard', { timeout: 20000 }).catch(() => {});
         } else if (bodyText.includes('パスワードを変更してください') || bodyText.includes('新しいパスワード')) {
-            // パスワード変更必須画面が表示されている場合は新しいパスワードで変更
-            const newPw = (password || PASSWORD) + '_new1';
-            const inputs = await page.locator('input[type="password"]').all();
-            if (inputs.length >= 2) {
-                await inputs[0].fill(newPw);
-                await inputs[1].fill(newPw);
-                await page.click('button[type=submit].btn-primary, button.btn-primary');
-                await page.waitForURL('**/admin/dashboard', { timeout: 20000 }).catch(() => {});
-                // pw_change_interval_daysをリセット（89-1テストの副作用除去）
-                await page.evaluate(async (baseUrl) => {
-                    const fd = new FormData();
-                    fd.append('id', '1');
-                    fd.append('pw_change_interval_days', '');
-                    await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
-                        method: 'POST', body: fd, credentials: 'include',
-                    }).catch(() => {});
-                }, BASE_URL).catch(() => {});
-            }
+            // パスワード変更必須画面 → pw_change_interval_daysをリセットしてからログインし直す
+            await page.evaluate(async (baseUrl) => {
+                const fd = new FormData();
+                fd.append('id', '1');
+                fd.append('pw_change_interval_days', '');
+                await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
+                    method: 'POST', body: fd, credentials: 'include',
+                }).catch(() => {});
+            }, BASE_URL).catch(() => {});
+            // 同じパスワードでログインし直す
+            await page.goto(BASE_URL + '/admin/login');
+            await page.waitForSelector('#id', { timeout: 15000 });
+            await page.fill('#id', email || EMAIL);
+            await page.fill('#password', password || PASSWORD);
+            await page.click('button[type=submit].btn-primary');
+            await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
         } else if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
-            // リトライ時も#idが現れるまで待つ
+            // 同じパスワードで再試行（パスワードは変わらないため代替パスワードは試みない）
             await page.waitForSelector('#id', { timeout: 10000 }).catch(() => {});
-            // エラーメッセージを確認（パスワード変更された場合は_new1パスワードも試みる）
-            const loginBodyText = await page.innerText('body').catch(() => '');
-            if (loginBodyText.includes('IDまたはパスワードが正しくありません') && !password) {
-                // 89-1テストによりパスワードが変更されている可能性 → _new1パスワードで試みる
-                const altPw = PASSWORD + '_new1';
-                await page.fill('#id', email || EMAIL);
-                await page.fill('#password', altPw);
-                await page.click('button[type=submit].btn-primary');
-                try {
-                    await page.waitForURL('**/admin/dashboard', { timeout: 20000 });
-                    // _new1パスワードでdashboard到達 → pw_change_interval_daysをAPIでリセット（副作用除去）
-                    await page.evaluate(async (baseUrl) => {
-                        const fd = new FormData();
-                        fd.append('id', '1');
-                        fd.append('pw_change_interval_days', '');
-                        await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
-                            method: 'POST', body: fd, credentials: 'include',
-                        }).catch(() => {});
-                    }, BASE_URL).catch(() => {});
-                } catch (e2) {
-                    // _new1も失敗 → 通常パスワードで再試行
-                    await page.fill('#id', email || EMAIL);
-                    await page.fill('#password', password || PASSWORD);
-                    await page.click('button[type=submit].btn-primary');
-                    await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-                }
-            } else {
-                await page.fill('#id', email || EMAIL);
-                await page.fill('#password', password || PASSWORD);
-                await page.click('button[type=submit].btn-primary');
-                await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-            }
+            await page.fill('#id', email || EMAIL);
+            await page.fill('#password', password || PASSWORD);
+            await page.click('button[type=submit].btn-primary');
+            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
         }
     }
     await page.waitForTimeout(2000);
@@ -375,8 +345,8 @@ test.describe('共通設定・システム設定', () => {
             }
 
             let loginSuccess = false;
-            // 89-1テストによりパスワードが変更されている可能性があるため複数候補を試みる
-            const candidates = [PASSWORD, PASSWORD + '_new1', PASSWORD + '_new1_new1'];
+            // パスワードは変わらないため同じパスワードのみ試みる
+            const candidates = [PASSWORD];
             for (const pw of candidates) {
                 try {
                     const url = await safeLoginForAfterAll(pw);
@@ -1352,7 +1322,7 @@ test.describe('共通設定・システム設定', () => {
         const currentValue = fieldCount > 0 ? await passwordIntervalInput.inputValue() : '';
         console.log('現在の間隔日数: ' + currentValue);
 
-        // 1日を設定する（API経由で設定変更）
+        // 9999日を設定する（パスワード強制変更を誘発させない値・API経由で設定変更）
         // pw_change_interval_daysフィールドは別のフォームとして送信
         const result = await page.evaluate(async ({ baseUrl, days }) => {
             try {
@@ -1369,7 +1339,7 @@ test.describe('共通設定・システム設定', () => {
             } catch (e) {
                 return { error: e.message };
             }
-        }, { baseUrl: BASE_URL, days: 1 });
+        }, { baseUrl: BASE_URL, days: 9999 });
         console.log('パスワード変更間隔設定API結果:', JSON.stringify(result));
 
         // 設定後の値をAPI経由で確認（ページ遷移するとパスワード変更が誘発されるため、
@@ -1404,32 +1374,8 @@ test.describe('共通設定・システム設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
 
-        // 設定ページが表示されていることを確認（パスワード変更画面でないこと）
-        const bodyText = await page.innerText('body');
-        if (bodyText.includes('パスワードを変更してください') || bodyText.includes('新しいパスワード')) {
-            // パスワード変更画面が出た場合は_new1パスワードに変更し、その後元に戻す
-            const newPw = PASSWORD + '_new1';
-            const inputs = await page.locator('input[type="password"]').all();
-            if (inputs.length >= 2) {
-                await inputs[0].fill(newPw);
-                await inputs[1].fill(newPw);
-                await page.click('button[type=submit].btn-primary, button.btn-primary');
-                await page.waitForURL('**/admin/dashboard', { timeout: 20000 }).catch(() => {});
-            }
-            // pw_change_interval_daysを再リセット
-            await page.evaluate(async (baseUrl) => {
-                const fd = new FormData();
-                fd.append('id', '1');
-                fd.append('pw_change_interval_days', '');
-                await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
-                    method: 'POST', body: fd, credentials: 'include',
-                }).catch(() => {});
-            }, BASE_URL).catch(() => {});
-            console.log('[89-1] パスワード変更画面が出たため_new1に変更・pw_change_interval_daysリセット完了');
-            // パスワードが_new1に変わったことをメモしておく（login関数で対処済み）
-        }
-
         // 設定ページが表示されていること（パスワード変更画面ではないこと）
+        // ※ days=9999のため強制変更画面は表示されないはず
         await expect(page.locator('form').first()).toBeVisible();
         await expect(page.locator('body')).toContainText('パスワード強制変更画面表示の間隔日数');
     });

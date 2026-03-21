@@ -53,49 +53,7 @@ async function login(page, email, password) {
                 await page.waitForTimeout(2000);
                 return;
             }
-            // パスワードが変更されている場合（system-settings 89-1テストの副作用）→ 複数の代替パスワードで試みる
-            if (pageText.includes('IDまたはパスワードが正しくありません') && !password) {
-                // 試みる代替パスワードリスト（_new1, 2サフィックス, など）
-                const altPasswords = [PASSWORD + '_new1', PASSWORD + '2', PASSWORD + '_new12'];
-                for (const altPw of altPasswords) {
-                    await page.fill('#id', email || EMAIL);
-                    await page.fill('#password', altPw);
-                    await page.click('button[type=submit].btn-primary');
-                    try {
-                        await page.waitForURL('**/admin/dashboard', { timeout: 10000, waitUntil: 'domcontentloaded' });
-                        // ログイン成功 → パスワード変更間隔・再利用禁止リセット
-                        await page.evaluate(async (baseUrl) => {
-                            const fd = new FormData();
-                            fd.append('id', '1');
-                            fd.append('pw_change_interval_days', '');
-                            await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
-                                method: 'POST', body: fd, credentials: 'include',
-                            }).catch(() => {});
-                            // パスワード再利用禁止を解除してから元のパスワードに戻す
-                            await fetch(baseUrl + '/api/admin/debug/settings', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                                body: JSON.stringify({ table: 'admin_setting', data: { prevent_password_reuse: 'false' } }),
-                                credentials: 'include',
-                            }).catch(() => {});
-                        }, BASE_URL).catch(() => {});
-                        await page.waitForTimeout(2000);
-                        return;
-                    } catch (e2alt) {
-                        // ログインページ以外にいたら成功とみなす
-                        if (!page.url().includes('/admin/login')) {
-                            await page.waitForTimeout(1000);
-                            return;
-                        }
-                        const pageText2alt = await page.innerText('body').catch(() => '');
-                        if (pageText2alt.includes('アカウントロック')) {
-                            throw new Error('ACCOUNT_LOCKED: アカウントがロックされています。テストをスキップします。');
-                        }
-                        // このパスワードも失敗 → 次を試す
-                    }
-                }
-                // すべての代替パスワードが失敗 → 通常リトライへ
-            }
+            // 同じパスワードで再試行（パスワードは変わらないため代替パスワードは試みない）
             await page.waitForTimeout(1000);
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
