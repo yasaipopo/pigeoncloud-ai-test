@@ -20,6 +20,8 @@ E2Eテスト結果 月次スプレッドシート管理スクリプト
 
 import json
 import os
+import shutil
+import subprocess
 import sys
 import re
 import time
@@ -1082,12 +1084,35 @@ def _col_idx_to_letter(idx: int) -> str:
 # ============================================================
 # 動画アップロード（オプション）
 # ============================================================
-def upload_videos(run_date: str = None) -> dict[str, str]:
-    """reports/agent-*/videos/ 内の .webm を Drive にアップロード"""
+def _convert_webm_to_mp4(webm_path: Path) -> Path | None:
+    """webmをmp4に変換して一時ファイルパスを返す。ffmpegがなければNoneを返す"""
+    if not shutil.which("ffmpeg"):
+        return None
+    mp4_path = webm_path.with_suffix(".mp4")
+    try:
+        result = subprocess.run(
+            ["ffmpeg", "-y", "-i", str(webm_path),
+             "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+             "-c:a", "aac", "-movflags", "+faststart",
+             str(mp4_path)],
+            capture_output=True, timeout=300
+        )
+        if result.returncode == 0 and mp4_path.exists():
+            return mp4_path
+    except Exception as e:
+        print(f"  ⚠️ ffmpeg変換失敗: {e}")
+    return None
+
+
+def upload_videos(run_date: str = None, agent_filter: set = None) -> dict[str, str]:
+    """reports/agent-*/videos/ 内の .webm をmp4変換してDriveにアップロード"""
     from googleapiclient.http import MediaFileUpload
 
     if not run_date:
         run_date = datetime.now().strftime("%Y-%m-%d")
+
+    use_mp4 = bool(shutil.which("ffmpeg"))
+    print(f"動画フォーマット: {'mp4 (ffmpeg変換あり)' if use_mp4 else 'webm (ffmpegなし)'}")
 
     drive = get_drive_service()
     date_folder_id = _get_or_create_drive_folder(drive, run_date, DRIVE_FOLDER_ID)
@@ -1097,12 +1122,20 @@ def upload_videos(run_date: str = None) -> dict[str, str]:
     date_compact = run_date.replace("-", "")
     video_files = [v for v in video_files if date_compact in str(v)]
 
+    if agent_filter:
+        import re as _re
+        video_files = [
+            v for v in video_files
+            if (m := _re.search(r'agent-(\d+)', str(v))) and int(m.group(1)) in agent_filter
+        ]
+
     print(f"アップロード対象動画: {len(video_files)}件")
     if not video_files:
         return {}
 
     spec_folders: dict[str, str] = {}
     result_links: dict[str, str] = {}
+    tmp_files: list[Path] = []
 
     for video_path in video_files:
         dir_name = video_path.parent.name
@@ -1114,7 +1147,19 @@ def upload_videos(run_date: str = None) -> dict[str, str]:
             spec_folders[spec_name] = _get_or_create_drive_folder(drive, spec_name, date_folder_id)
             time.sleep(0.5)
 
-        upload_name = f"{case_no}.webm" if case_no else video_path.name
+        # ffmpegがあればmp4変換
+        upload_path = video_path
+        ext = "webm"
+        mimetype = "video/webm"
+        if use_mp4:
+            mp4 = _convert_webm_to_mp4(video_path)
+            if mp4:
+                upload_path = mp4
+                ext = "mp4"
+                mimetype = "video/mp4"
+                tmp_files.append(mp4)
+
+        upload_name = f"{case_no}.{ext}" if case_no else upload_path.name
         file_meta = {"name": upload_name, "parents": [spec_folders[spec_name]]}
 
         existing = drive.files().list(
@@ -1125,7 +1170,7 @@ def upload_videos(run_date: str = None) -> dict[str, str]:
         if existing:
             file_id = existing[0]["id"]
         else:
-            media = MediaFileUpload(str(video_path), mimetype="video/webm", resumable=True)
+            media = MediaFileUpload(str(upload_path), mimetype=mimetype, resumable=True)
             uploaded = drive.files().create(body=file_meta, media_body=media, fields="id").execute()
             file_id = uploaded["id"]
             print(f"  ✅ アップロード: {spec_name}/{upload_name}")
@@ -1133,6 +1178,13 @@ def upload_videos(run_date: str = None) -> dict[str, str]:
         drive_url = f"https://drive.google.com/file/d/{file_id}/view"
         key = f"{spec_name}/{case_no}" if case_no else f"{spec_name}/{upload_name}"
         result_links[key] = drive_url
+
+    # 一時mp4ファイルを削除
+    for tmp in tmp_files:
+        try:
+            tmp.unlink()
+        except Exception:
+            pass
 
     print(f"アップロード完了: {len(result_links)}件")
     return result_links
