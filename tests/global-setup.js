@@ -48,7 +48,7 @@ module.exports = async function globalSetup() {
         pad(now.getHours()), pad(now.getMinutes()), pad(now.getSeconds()),
     ].join('');
 
-    const domain   = `tmp-testai-${dateStr}-${agentNum}`;
+    const domain   = `tmp-testai-base-${dateStr}-${agentNum}`;
     const newUrl   = `https://${domain}.pigeon-demo.com`;
 
     console.log(`[global-setup] テスト環境を作成中: ${newUrl}`);
@@ -75,7 +75,7 @@ module.exports = async function globalSetup() {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
-            data: { subdomain: domain, login_id: 'admin' },
+            data: { domain: domain, email: 'admin' },
             timeout: 60000,
         });
         const result = await resp.json();
