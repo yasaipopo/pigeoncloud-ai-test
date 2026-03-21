@@ -213,7 +213,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧ページが表示されること
-        await expect(page.locator('nav, .navbar, header')).toBeVisible();
+        await expect(page.locator('header.app-header, header.navbar').first()).toBeVisible();
     });
 
     test('674: これの Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました', async ({ page }) => {
@@ -228,7 +228,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 新規作成フォームが表示されること
-        await expect(page.locator('form, .edit-form, main')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('675: 仕様確認675', async ({ page }) => {
@@ -241,7 +241,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('676: 仕様確認676', async ({ page }) => {
@@ -252,6 +252,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('677: 仕様確認677', async ({ page }) => {
@@ -262,6 +265,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('678: 仕様確認678', async ({ page }) => {
@@ -272,6 +278,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('679: 仕様確認679', async ({ page }) => {
@@ -282,6 +291,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('680: 仕様確認680', async ({ page }) => {
@@ -292,6 +304,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('681: 仕様確認681', async ({ page }) => {
@@ -302,6 +317,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('682: 仕様確認682', async ({ page }) => {
@@ -312,6 +330,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('683: 仕様確認683', async ({ page }) => {
@@ -322,6 +343,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('684: 仕様確認684', async ({ page }) => {
@@ -334,7 +358,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 通知一覧ページが表示されること
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('685: 仕様確認685', async ({ page }) => {
@@ -345,6 +369,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('686: 仕様確認686', async ({ page }) => {
@@ -355,6 +382,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('687: 仕様確認687', async ({ page }) => {
@@ -365,6 +395,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('688: 仕様確認688', async ({ page }) => {
@@ -375,6 +408,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('689: 仕様確認689', async ({ page }) => {
@@ -385,6 +421,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('690: 仕様確認690', async ({ page }) => {
@@ -395,6 +434,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('691: 仕様確認691', async ({ page }) => {
@@ -405,6 +447,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('692: 仕様確認692', async ({ page }) => {
@@ -415,6 +460,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('693: 仕様確認693', async ({ page }) => {
@@ -429,7 +477,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 新規作成フォームが表示されること
-        await expect(page.locator('main, form')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('694: 仕様確認694', async ({ page }) => {
@@ -444,7 +492,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル編集フォームが表示されること
-        await expect(page.locator('main, form')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('695: 仕様確認695', async ({ page }) => {
@@ -457,7 +505,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('696: 仕様確認696', async ({ page }) => {
@@ -470,7 +518,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('697: 仕様確認697', async ({ page }) => {
@@ -481,6 +529,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('698: 仕様確認698', async ({ page }) => {
@@ -491,6 +542,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('699: 仕様確認699', async ({ page }) => {
@@ -501,6 +555,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('700: 仕様確認700', async ({ page }) => {
@@ -511,6 +568,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('701: 仕様確認701', async ({ page }) => {
@@ -521,6 +581,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('702: 仕様確認702', async ({ page }) => {
@@ -531,6 +594,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('703: 仕様確認703', async ({ page }) => {
@@ -541,6 +607,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('704: 仕様確認704', async ({ page }) => {
@@ -551,6 +620,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('705: 仕様確認705', async ({ page }) => {
@@ -561,6 +633,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('706: 仕様確認706', async ({ page }) => {
@@ -571,6 +646,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('707: 仕様確認707', async ({ page }) => {
@@ -581,6 +659,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('708: 仕様確認708', async ({ page }) => {
@@ -591,6 +672,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('709: 帳票のDLを別ブラウザで真っ白の画面開かずにDLできるように仕様変更', async ({ page }) => {
@@ -604,7 +688,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されること（帳票DLボタンの確認）
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
         // 500エラー・エラーページが出ていないこと
         expect(pageText).not.toContain('500');
         expect(pageText).not.toContain('エラーが発生しました');
@@ -618,6 +702,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('711: 仕様確認711', async ({ page }) => {
@@ -628,6 +715,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('712: 仕様確認712', async ({ page }) => {
@@ -638,6 +728,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('713: 仕様確認713', async ({ page }) => {
@@ -648,6 +741,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('714: 仕様確認714', async ({ page }) => {
@@ -658,6 +754,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('715: 仕様確認715', async ({ page }) => {
@@ -668,6 +767,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('716: 仕様確認716', async ({ page }) => {
@@ -678,6 +780,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('717: 仕様確認717', async ({ page }) => {
@@ -688,6 +793,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('718: 仕様確認718', async ({ page }) => {
@@ -698,6 +806,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('719: 仕様確認719', async ({ page }) => {
@@ -708,6 +819,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('720: 仕様確認720', async ({ page }) => {
@@ -720,7 +834,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('721: 仕様確認721', async ({ page }) => {
@@ -731,6 +845,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('722: 仕様確認722', async ({ page }) => {
@@ -743,7 +860,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('723: 仕様確認723', async ({ page }) => {
@@ -754,6 +871,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('724: 仕様確認724', async ({ page }) => {
@@ -766,7 +886,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('725: 仕様確認725', async ({ page }) => {
@@ -777,6 +897,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('726: 仕様確認726', async ({ page }) => {
@@ -787,6 +910,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('727: 仕様確認727', async ({ page }) => {
@@ -797,6 +923,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('728: 仕様確認728', async ({ page }) => {
@@ -807,6 +936,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('729: 仕様確認729', async ({ page }) => {
@@ -817,6 +949,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('730: 仕様確認730', async ({ page }) => {
@@ -827,6 +962,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('731: 仕様確認731', async ({ page }) => {
@@ -837,6 +975,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('732: 仕様確認732', async ({ page }) => {
@@ -847,6 +988,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('733: 仕様確認733', async ({ page }) => {
@@ -857,6 +1001,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('734: 仕様確認734', async ({ page }) => {
@@ -867,6 +1014,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('735: 仕様確認735', async ({ page }) => {
@@ -877,6 +1027,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('736: 仕様確認736', async ({ page }) => {
@@ -887,6 +1040,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('737: 仕様確認737', async ({ page }) => {
@@ -897,6 +1053,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('738: 仕様確認738', async ({ page }) => {
@@ -907,6 +1066,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('739: 仕様確認739', async ({ page }) => {
@@ -917,6 +1079,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('740: 仕様確認740', async ({ page }) => {
@@ -927,6 +1092,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('741: 仕様確認741', async ({ page }) => {
@@ -937,6 +1105,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('742: 仕様確認742', async ({ page }) => {
@@ -949,7 +1120,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // コネクト一覧ページが表示されること
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('743: 仕様確認743', async ({ page }) => {
@@ -960,6 +1131,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('744: 仕様確認744', async ({ page }) => {
@@ -970,6 +1144,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('745: 仕様確認745', async ({ page }) => {
@@ -980,6 +1157,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('746: 仕様確認746', async ({ page }) => {
@@ -990,6 +1170,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('747: 仕様確認747', async ({ page }) => {
@@ -1000,6 +1183,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('748: 仕様確認748', async ({ page }) => {
@@ -1010,6 +1196,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('749: 仕様確認749', async ({ page }) => {
@@ -1020,6 +1209,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('750: 仕様確認750', async ({ page }) => {
@@ -1030,6 +1222,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('751: 仕様確認751', async ({ page }) => {
@@ -1040,6 +1235,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('752: 仕様確認752', async ({ page }) => {
@@ -1050,6 +1248,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('753: 仕様確認753', async ({ page }) => {
@@ -1060,6 +1261,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('754: 仕様確認754', async ({ page }) => {
@@ -1072,7 +1276,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 通知一覧ページが表示されること
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('755: 仕様確認755', async ({ page }) => {
@@ -1083,6 +1287,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('756: 仕様確認756', async ({ page }) => {
@@ -1093,6 +1300,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('757: 仕様確認757', async ({ page }) => {
@@ -1103,6 +1313,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('758: 仕様確認758', async ({ page }) => {
@@ -1113,6 +1326,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('759: 仕様確認759', async ({ page }) => {
@@ -1123,6 +1339,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('760: 仕様確認760', async ({ page }) => {
@@ -1133,6 +1352,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('761: 仕様確認761', async ({ page }) => {
@@ -1143,6 +1365,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('762: 仕様確認762', async ({ page }) => {
@@ -1153,6 +1378,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('763: ※「表示する条件」ではなく「表示する項目」が正しい', async ({ page }) => {
@@ -1168,7 +1396,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // 「表示する条件」という誤ったテキストが含まれていないこと
         expect(pageText).not.toContain('表示する条件');
         // テーブル一覧が正常に表示されること
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('764: 仕様確認764', async ({ page }) => {
@@ -1179,6 +1407,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('765: 仕様確認765', async ({ page }) => {
@@ -1189,6 +1420,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('766: 仕様確認766', async ({ page }) => {
@@ -1199,6 +1433,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('767: 仕様確認767', async ({ page }) => {
@@ -1209,6 +1446,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('768: 仕様確認768', async ({ page }) => {
@@ -1219,6 +1459,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('769: 仕様確認769', async ({ page }) => {
@@ -1229,6 +1472,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('770: 仕様確認770', async ({ page }) => {
@@ -1239,6 +1485,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('771: 仕様確認771', async ({ page }) => {
@@ -1251,7 +1500,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('772: 仕様確認772', async ({ page }) => {
@@ -1262,6 +1511,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('773: 仕様確認773', async ({ page }) => {
@@ -1272,6 +1524,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('774: 仕様確認774', async ({ page }) => {
@@ -1285,7 +1540,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, form')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('775: 仕様確認775', async ({ page }) => {
@@ -1296,6 +1551,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('776: 仕様確認776', async ({ page }) => {
@@ -1306,6 +1564,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('777: 仕様確認777', async ({ page }) => {
@@ -1316,6 +1577,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('778: 仕様確認778', async ({ page }) => {
@@ -1326,6 +1590,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('779: 仕様確認779', async ({ page }) => {
@@ -1336,6 +1603,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('780: ※一括編集ではなく編集モードからの編集', async ({ page }) => {
@@ -1349,7 +1619,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されること
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
         // レコードが表示されていれば編集リンクが存在すること
         const editLinks = page.locator('a[href*="/edit/"]');
         const editCount = await editLinks.count();
@@ -1370,7 +1640,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, form')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('782: 仕様確認782', async ({ page }) => {
@@ -1381,6 +1651,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('783: 仕様確認783', async ({ page }) => {
@@ -1391,6 +1664,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('784: 仕様確認784', async ({ page }) => {
@@ -1401,6 +1677,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('785: 仕様確認785', async ({ page }) => {
@@ -1411,6 +1690,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('786: 仕様確認786', async ({ page }) => {
@@ -1421,6 +1703,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('787: 仕様確認787', async ({ page }) => {
@@ -1431,6 +1716,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('788: 仕様確認788', async ({ page }) => {
@@ -1441,6 +1729,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('789: 仕様確認789', async ({ page }) => {
@@ -1452,7 +1743,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('790: 仕様確認790', async ({ page }) => {
@@ -1463,6 +1754,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('791: 仕様確認791', async ({ page }) => {
@@ -1473,6 +1767,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('792: 仕様確認792', async ({ page }) => {
@@ -1483,6 +1780,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('793: 仕様確認793', async ({ page }) => {
@@ -1493,6 +1793,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('794: 仕様確認794', async ({ page }) => {
@@ -1503,6 +1806,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('795: 仕様確認795', async ({ page }) => {
@@ -1513,6 +1819,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('796: 仕様確認796', async ({ page }) => {
@@ -1523,6 +1832,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('797: 仕様確認797', async ({ page }) => {
@@ -1533,6 +1845,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('798: 仕様確認798', async ({ page }) => {
@@ -1543,6 +1858,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('799: 仕様確認799', async ({ page }) => {
@@ -1553,6 +1871,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('800: 以下①～③の対応を行うと即時反映されるかも確認する ①一覧の表示幅(px)は【300】で設定 ②項目の幅をドラッグで伸縮', async ({ page }) => {
@@ -1566,7 +1887,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, form')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('801: 仕様確認801', async ({ page }) => {
@@ -1577,6 +1898,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('802: 仕様確認802', async ({ page }) => {
@@ -1587,6 +1911,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('803: 仕様確認803', async ({ page }) => {
@@ -1597,6 +1924,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('804: 仕様確認804', async ({ page }) => {
@@ -1607,6 +1937,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('805: 仕様確認805', async ({ page }) => {
@@ -1617,6 +1950,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('806: 仕様確認806', async ({ page }) => {
@@ -1628,8 +1964,8 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードの主要UI要素が表示されること
-        await expect(page.locator('nav, header, .navbar')).toBeVisible();
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('header.app-header, header.navbar').first()).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('807: 仕様確認807', async ({ page }) => {
@@ -1640,6 +1976,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('808: 仕様確認808', async ({ page }) => {
@@ -1650,6 +1989,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('809: 仕様確認809', async ({ page }) => {
@@ -1660,6 +2002,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('810: 仕様確認810', async ({ page }) => {
@@ -1670,6 +2015,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('811: 仕様確認811', async ({ page }) => {
@@ -1680,6 +2028,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('812: 仕様確認812', async ({ page }) => {
@@ -1690,6 +2041,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('813: 仕様確認813', async ({ page }) => {
@@ -1703,7 +2057,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, form')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('814: 仕様確認814', async ({ page }) => {
@@ -1714,6 +2068,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('815: 仕様確認815', async ({ page }) => {
@@ -1724,6 +2081,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('816: 仕様確認816', async ({ page }) => {
@@ -1735,7 +2095,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('817: 帳票の削除を実施', async ({ page }) => {
@@ -1749,7 +2109,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧ページが正常に表示されること
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
         // 500エラー・エラーページが出ていないこと
         expect(pageText).not.toContain('500');
     });
@@ -1763,7 +2123,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ユーザー一覧ページが表示されること
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
         // ユーザー関連のコンテンツが表示されること
         expect(pageText).not.toContain('404');
     });
@@ -1776,6 +2136,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('820: 仕様確認820', async ({ page }) => {
@@ -1786,6 +2149,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('821: 仕様確認821', async ({ page }) => {
@@ -1796,6 +2162,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('822: 仕様確認822', async ({ page }) => {
@@ -1806,6 +2175,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('823: 仕様確認823', async ({ page }) => {
@@ -1816,6 +2188,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('824: 仕様確認824', async ({ page }) => {
@@ -1826,6 +2201,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('825: 仕様確認825', async ({ page }) => {
@@ -1836,6 +2214,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('826: 仕様確認826', async ({ page }) => {
@@ -1846,6 +2227,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('827: 仕様確認827', async ({ page }) => {
@@ -1856,6 +2240,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('828: 仕様確認828', async ({ page }) => {
@@ -1866,6 +2253,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('829: 仕様確認829', async ({ page }) => {
@@ -1876,6 +2266,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('830: 仕様確認830', async ({ page }) => {
@@ -1886,6 +2279,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('831: 仕様確認831', async ({ page }) => {
@@ -1896,6 +2292,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('832: 仕様確認832', async ({ page }) => {
@@ -1906,6 +2305,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('833: 仕様確認833', async ({ page }) => {
@@ -1916,6 +2318,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('834: 仕様確認834', async ({ page }) => {
@@ -1926,6 +2331,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('835: テーブル内の区分の項目の設定を必須にはしていないのですが、新規作成すると区分の横に必須マークが出るようになった', async ({ page }) => {
@@ -1940,7 +2348,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 新規作成フォームが表示されること
-        await expect(page.locator('form, main')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('836: ※他テーブル先が計算項目、自動反映ONのとき、並び替えがうまくいってない', async ({ page }) => {
@@ -1954,7 +2362,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されること（ソート操作の確認）
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
         // ソートボタンが存在すること（th要素）
         const thElements = page.locator('th, [class*="sort"]');
         const thCount = await thElements.count();
@@ -1969,6 +2377,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
+        // ダッシュボードUIが正常に表示されること
+        await expect(page.locator('header.app-header, header.navbar, [role="banner"]').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('838: ※ルックアップ表示したも項目の表示がずれる', async ({ page }) => {
@@ -1982,7 +2393,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されること（ルックアップ項目の表示崩れ確認）
-        await expect(page.locator('main, .content')).toBeVisible();
+        await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
         // レイアウト崩れの主な兆候（水平スクロールの過剰な発生）がないことを確認
         expect(pageText).not.toContain('500');
         expect(pageText).not.toContain('エラーが発生しました');
