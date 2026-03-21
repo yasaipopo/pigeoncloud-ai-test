@@ -32,29 +32,9 @@ async function login(page, email, password) {
             if (pageText.includes('アカウントロック')) {
                 throw new Error('ACCOUNT_LOCKED: アカウントがロックされています。テストをスキップします。');
             }
-            // パスワード変更強制画面（89-1テストの副作用でパスワード変更画面が出た場合）
-            if (pageText.includes('パスワードを変更してください') || pageText.includes('新しいパスワード')) {
-                const newPw = (password || PASSWORD) + '_new1';
-                const inputs = await page.locator('input[type="password"]').all();
-                if (inputs.length >= 2) {
-                    await inputs[0].fill(newPw);
-                    await inputs[1].fill(newPw);
-                    await page.click('button[type=submit].btn-primary, button.btn-primary');
-                    await page.waitForURL('**/admin/dashboard', { timeout: 20000 }).catch(() => {});
-                    await page.evaluate(async (baseUrl) => {
-                        const fd = new FormData();
-                        fd.append('id', '1');
-                        fd.append('pw_change_interval_days', '');
-                        await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
-                            method: 'POST', body: fd, credentials: 'include',
-                        }).catch(() => {});
-                    }, BASE_URL).catch(() => {});
-                }
-                await page.waitForTimeout(2000);
-                return;
-            }
-            // 同じパスワードで再試行（パスワードは変わらないため代替パスワードは試みない）
+            // 同じパスワードで再試行（#idが現れるまで待ってからfill）
             await page.waitForTimeout(1000);
+            await page.waitForSelector('#id', { timeout: 30000 });
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
