@@ -3357,3 +3357,135 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
         }
     });
 });
+
+// =============================================================================
+// ラジオボタン表示条件テスト（260系）
+// ラジオ選択値によって別フィールドが表示/非表示になることを確認
+// =============================================================================
+
+test.describe('ラジオボタン表示条件テスト（260系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(480000);
+        const page = await browser.newPage();
+        await login(page);
+        await createAllTypeTable(page);
+        tableId = await getAllTypeTableId(page);
+        await page.close();
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 260-1: ラジオ選択 → 表示条件フィールドの表示/非表示切り替え
+    // ラジオ=ラジオA のとき「ラジオ_表示条件テキスト」フィールドが表示される
+    // ラジオ=ラジオB のとき「ラジオ_表示条件テキスト」フィールドが非表示になる
+    // -------------------------------------------------------------------------
+    test('260-1: ラジオボタン選択により条件フィールドが表示・非表示に切り替わること', async ({ page }) => {
+        if (!tableId) { test.skip(); return; }
+        test.setTimeout(120000);
+
+        // レコード新規作成ページへ遷移
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded', { timeout: 20000 }).catch(() => {});
+        await page.waitForTimeout(3000);
+
+        // ページが正常に表示されること
+        await expect(page.locator('.navbar')).toBeVisible();
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+
+        // ラジオボタンフィールド（「ラジオ」ラベル）が存在することを確認
+        const radioFieldLabel = page.locator('label, .field-label, td, th').filter({ hasText: /^ラジオ$/ }).first();
+        const radioExists = await radioFieldLabel.count() > 0;
+        if (!radioExists) {
+            // ALLテストテーブルにラジオフィールドが見つからない場合はスキップ
+            console.log('260-1: ラジオフィールドが見つからないためスキップ');
+            test.skip(true, 'ラジオフィールドが見つかりません');
+            return;
+        }
+
+        // 「ラジオ_表示条件テキスト」フィールドの表示状態を確認するヘルパー
+        // ラベルテキストで対象コンテナを特定する
+        const getCondFieldVisible = async () => {
+            // フォーム内のフィールドはラベル + 入力欄のペア構造
+            // ラベルが「ラジオ_表示条件テキスト」のもの
+            const condLabel = page.locator('label, .field-label').filter({ hasText: 'ラジオ_表示条件テキスト' }).first();
+            if (await condLabel.count() === 0) return null; // フィールド自体がない（PRマージ前）
+            // ラベルが visible かどうかで表示条件の on/off を判定
+            return condLabel.isVisible().catch(() => false);
+        };
+
+        // --- 初期状態（ラジオ未選択）: 表示条件テキストは非表示のはず ---
+        const initialVisible = await getCondFieldVisible();
+        if (initialVisible === null) {
+            // ALLテストテーブルにラジオ_表示条件テキストフィールドがない場合
+            // （PRがまだマージされていない）→ スキップ
+            console.log('260-1: ラジオ_表示条件テキストフィールドが見つかりません（PR未マージ）');
+            test.skip(true, 'ラジオ_表示条件テキストフィールドが存在しません');
+            return;
+        }
+        // 初期状態は非表示であること（ラジオ未選択 or ラジオA以外）
+        expect(initialVisible).toBe(false);
+
+        // --- ラジオA を選択: 表示条件テキストが表示されるはず ---
+        // ラジオAのラジオボタンを選択
+        const radioA = page.locator('input[type="radio"]').filter({ has: page.locator(':scope') }).locator('..').filter({ hasText: 'ラジオA' }).locator('input[type="radio"]');
+        const radioASimple = page.locator('input[type="radio"][value="ラジオA"], input[type="radio"] + label:has-text("ラジオA")').first();
+
+        // まずシンプルなセレクターで試みる
+        let radioAInput = page.locator('input[type="radio"][value="ラジオA"]').first();
+        let radioACount = await radioAInput.count();
+
+        if (radioACount === 0) {
+            // valueではなく、ラベルテキストでラジオボタンを特定
+            const radioLabels = page.locator('label').filter({ hasText: /^ラジオA$/ });
+            const radioLabelCount = await radioLabels.count();
+            if (radioLabelCount > 0) {
+                const forAttr = await radioLabels.first().getAttribute('for');
+                if (forAttr) {
+                    radioAInput = page.locator(`input#${forAttr}`);
+                } else {
+                    // label内のinputを探す
+                    radioAInput = radioLabels.first().locator('input[type="radio"]');
+                }
+            }
+        }
+
+        radioACount = await radioAInput.count();
+        if (radioACount === 0) {
+            console.log('260-1: ラジオAの入力要素が見つかりません');
+            test.skip(true, 'ラジオAの入力要素が見つかりません');
+            return;
+        }
+
+        await radioAInput.first().click({ force: true });
+        await page.waitForTimeout(1500); // 表示条件のAngularバインディング更新を待つ
+
+        // ラジオA選択後: 表示条件テキストフィールドが表示されること
+        const visibleAfterA = await getCondFieldVisible();
+        expect(visibleAfterA).toBe(true);
+
+        // --- ラジオB を選択: 表示条件テキストが再び非表示になるはず ---
+        const radioBInput = page.locator('input[type="radio"][value="ラジオB"]').first();
+        const radioBCount = await radioBInput.count();
+
+        if (radioBCount > 0) {
+            await radioBInput.click({ force: true });
+            await page.waitForTimeout(1500);
+
+            // ラジオB選択後: 表示条件テキストフィールドが非表示になること
+            const visibleAfterB = await getCondFieldVisible();
+            expect(visibleAfterB).toBe(false);
+        }
+
+        // スクリーンショット保存
+        const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
+        await page.screenshot({ path: `${reportsDir}/screenshots/260-1-radio-display-condition.png`, fullPage: false });
+    });
+});
