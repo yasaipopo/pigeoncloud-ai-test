@@ -63,8 +63,21 @@ async function createAllTypeTable(page) {
         }
     }, BASE_URL);
     const existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
-    if (existing) {
+    // FORCE_TABLE_RECREATE=1 が設定されている場合は既存テーブルを削除して再作成
+    if (existing && process.env.FORCE_TABLE_RECREATE !== '1') {
         return { result: 'success', tableId: String(existing.table_id || existing.id) };
+    }
+    if (existing && process.env.FORCE_TABLE_RECREATE === '1') {
+        console.log('[createAllTypeTable] FORCE_TABLE_RECREATE=1: 既存テーブルを削除して再作成します');
+        await page.evaluate(async (baseUrl) => {
+            await fetch(baseUrl + '/api/admin/debug/delete-all-type-tables', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({}),
+                credentials: 'include',
+            });
+        }, BASE_URL);
+        await page.waitForTimeout(3000);
     }
     // 504 Gateway Timeoutが返る場合があるため、ポーリングでテーブル作成完了を確認
     const createPromise = page.evaluate(async (baseUrl) => {
