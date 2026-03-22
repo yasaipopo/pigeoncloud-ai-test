@@ -33,7 +33,7 @@ async function login(page) {
             await page.waitForURL('**/admin/dashboard', { timeout: 40000, waitUntil: 'domcontentloaded' });
         }
     }
-    await page.waitForTimeout(1500);
+    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
 }
 
 /**

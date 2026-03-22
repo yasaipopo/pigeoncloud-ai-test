@@ -76,7 +76,7 @@ async function login(page, email, password) {
             }
         }
     }
-    await page.waitForTimeout(1500);
+    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
 }
 
 /**
