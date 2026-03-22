@@ -52,13 +52,17 @@ run_spec .test_env_runtime.82  82 tests/system-settings.spec.js
 # 中くらい
 run_spec .test_env_runtime.80  80 tests/workflow.spec.js
 run_spec .test_env_runtime.81  81 tests/chart-calendar.spec.js
+run_spec .test_env_runtime.85  85 tests/chart-calendar-2.spec.js
 run_spec .test_env_runtime.71  71 tests/notifications.spec.js
+run_spec .test_env_runtime.92  92 tests/notifications-2.spec.js
 run_spec .test_env_runtime.72  72 tests/users-permissions.spec.js
 # 大きいもの
 run_spec .test_env_runtime.70  70 tests/table-definition.spec.js
 run_spec .test_env_runtime.62  62 tests/uncategorized-2.spec.js
 run_spec .test_env_runtime.63  63 tests/uncategorized-3.spec.js
 run_spec .test_env_runtime.60  60 tests/fields.spec.js
+run_spec .test_env_runtime.90  90 tests/fields-2.spec.js
+run_spec .test_env_runtime.91  91 tests/fields-3.spec.js
 run_spec .test_env_runtime.61  61 tests/uncategorized.spec.js
 
 echo ""

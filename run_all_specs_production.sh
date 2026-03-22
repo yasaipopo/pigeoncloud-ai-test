@@ -55,13 +55,17 @@ run_spec 282  tests/system-settings.spec.js
 # 中くらい
 run_spec 280  tests/workflow.spec.js
 run_spec 281  tests/chart-calendar.spec.js
+run_spec 285  tests/chart-calendar-2.spec.js
 run_spec 271  tests/notifications.spec.js
+run_spec 292  tests/notifications-2.spec.js
 run_spec 272  tests/users-permissions.spec.js
 # 大きいもの
 run_spec 270  tests/table-definition.spec.js
 run_spec 262  tests/uncategorized-2.spec.js
 run_spec 263  tests/uncategorized-3.spec.js
 run_spec 260  tests/fields.spec.js
+run_spec 290  tests/fields-2.spec.js
+run_spec 291  tests/fields-3.spec.js
 run_spec 261  tests/uncategorized.spec.js
 
 echo ""
