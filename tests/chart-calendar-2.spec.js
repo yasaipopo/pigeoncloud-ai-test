@@ -278,24 +278,27 @@ async function openTableMenu(page) {
 // チャート・カレンダー・集計 テスト
 // =============================================================================
 
+// ============================================================
+// ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
+// ============================================================
+test.beforeAll(async ({ browser }) => {
+    test.setTimeout(600000);
+    const page = await browser.newPage();
+    await login(page);
+    const tableRes = await createAllTypeTable(page);
+    if (tableRes.result !== 'success') {
+        await page.close();
+        throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
+    }
+    await createAllTypeData(page, 10);
+    await page.close();
+});
+
 // チャート テスト
 // =============================================================================
 
 test.describe('チャート - 基本機能', () => {
 
-    // テーブルとデータはbeforeAllで一度だけ作成（実行時間短縮のため）
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(600000); // テーブル作成のポーリングを考慮して10分
-        const page = await browser.newPage();
-        await login(page);
-        const tableRes = await createAllTypeTable(page);
-        if (tableRes.result !== 'success') {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await createAllTypeData(page, 10);
-        await page.close();
-    });
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
@@ -871,19 +874,6 @@ test.describe('チャート - 基本機能', () => {
 
 test.describe('集計・チャート - 詳細権限設定', () => {
 
-    // テーブルとデータはbeforeAllで一度だけ作成（実行時間短縮のため）
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(600000); // テーブル作成のポーリングを考慮して10分
-        const page = await browser.newPage();
-        await login(page);
-        const tableRes = await createAllTypeTable(page);
-        if (tableRes.result !== 'success') {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await createAllTypeData(page, 10);
-        await page.close();
-    });
 
     test.beforeEach(async ({ page }) => {
         // 長時間テストスイート実行後の遅延に対応するためタイムアウトを延長（詳細権限設定は時間がかかるため15分）

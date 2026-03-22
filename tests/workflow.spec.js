@@ -208,6 +208,19 @@ async function navigateToWorkflowPage(page, tableId) {
     }
 }
 
+// ============================================================
+// ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
+// ============================================================
+let _sharedTableId = null;
+
+test.beforeAll(async ({ browser }) => {
+    test.setTimeout(480000);
+    const page = await browser.newPage();
+    await login(page);
+    ({ tableId: _sharedTableId } = await setupAllTypeTable(page));
+    await page.close();
+});
+
 // =============================================================================
 // ワークフロー設定（21系）
 // =============================================================================
@@ -215,16 +228,8 @@ async function navigateToWorkflowPage(page, tableId) {
 test.describe('ワークフロー設定（21系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -306,16 +311,8 @@ test.describe('ワークフロー設定（21系）', () => {
 test.describe('ワークフロー基本動作（11系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -458,22 +455,8 @@ test.describe('ワークフロー基本動作（11系）', () => {
 test.describe('引き上げ承認（106系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(600000);
-        const page = await browser.newPage();
-        await login(page);
-        // まず既存テーブルを確認（setupAllTypeTableのfire-and-forgetが360sで間に合わない場合のフォールバック）
-        const result = await createAllTypeTable(page);
-        tableId = result.table_id ? String(result.table_id) : null;
-        if (!tableId) {
-            // リトライ: setupAllTypeTable（より長いポーリング）
-            ({ tableId } = await setupAllTypeTable(page, { maxPolls: 12, pollIntervalMs: 10000 }));
-        }
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -662,16 +645,8 @@ test.describe('引き上げ承認（106系）', () => {
 test.describe('一括操作（111系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -886,16 +861,8 @@ test.describe('一括操作（111系）', () => {
 test.describe('役職指定ワークフロー（68系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -1007,16 +974,8 @@ test.describe('役職指定ワークフロー（68系）', () => {
 test.describe('承認者削除（28系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -1084,16 +1043,8 @@ test.describe('承認者削除（28系）', () => {
 test.describe('申請取り下げ・一つ戻す機能（64, 296系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -1141,16 +1092,8 @@ test.describe('申請取り下げ・一つ戻す機能（64, 296系）', () => {
 test.describe('ワークフロー通知（36系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -1196,16 +1139,8 @@ test.describe('ワークフロー通知（36系）', () => {
 test.describe('自分自身を承認者に設定した場合（166）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -1240,16 +1175,8 @@ test.describe('自分自身を承認者に設定した場合（166）', () => {
 test.describe('ワークフロー高度設定（395系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {

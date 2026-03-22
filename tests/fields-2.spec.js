@@ -235,6 +235,21 @@ async function assertFieldPageLoaded(page, tableId) {
 // フィールド追加・各フィールドタイプ テスト
 // =============================================================================
 
+// ============================================================
+// ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
+// ============================================================
+let _sharedTableId = null;
+
+test.beforeAll(async ({ browser }) => {
+    test.setTimeout(480000);
+    const page = await browser.newPage();
+    await login(page);
+    await createAllTypeTable(page);
+    await createAllTypeData(page, 3);
+    _sharedTableId = await getAllTypeTableId(page);
+    await page.close();
+});
+
 // =============================================================================
 // 画像フィールド（48, 226, 240系）
 // =============================================================================
@@ -242,13 +257,8 @@ async function assertFieldPageLoaded(page, tableId) {
 test.describe('画像フィールド（48, 226, 240系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -291,13 +301,8 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
 test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -340,13 +345,8 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
 test.describe('自動採番フィールド（216系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -379,13 +379,8 @@ test.describe('自動採番フィールド（216系）', () => {
 test.describe('固定テキストフィールド（230系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -417,14 +412,8 @@ test.describe('固定テキストフィールド（230系）', () => {
 test.describe('ファイルフィールド（121, 227, 257系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        await createAllTypeData(page, 3);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -468,13 +457,8 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
 test.describe('列設定（122系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -517,13 +501,8 @@ test.describe('列設定（122系）', () => {
 test.describe('文章複数行フィールド（218, 219, 232, 233系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -566,13 +545,8 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
 test.describe('文字列一行フィールド（217, 231系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.afterAll(async ({ browser }) => {
@@ -604,13 +578,8 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
 test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000);
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
     test.beforeEach(async ({ page }) => {

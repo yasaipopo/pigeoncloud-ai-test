@@ -276,21 +276,23 @@ async function openTableMenu(page) {
 // チャート・カレンダー・集計 テスト
 // =============================================================================
 
-test.describe('チャート・集計 - オプション設定', () => {
-
-    // テーブルとデータはbeforeAllで一度だけ作成（実行時間短縮のため）
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(600000); // テーブル作成のポーリングを考慮して10分
-        const page = await browser.newPage();
-        await login(page);
-        const tableRes = await createAllTypeTable(page);
-        if (tableRes.result !== 'success') {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await createAllTypeData(page, 10);
+// ============================================================
+// ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
+// ============================================================
+test.beforeAll(async ({ browser }) => {
+    test.setTimeout(600000);
+    const page = await browser.newPage();
+    await login(page);
+    const tableRes = await createAllTypeTable(page);
+    if (tableRes.result !== 'success') {
         await page.close();
-    });
+        throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
+    }
+    await createAllTypeData(page, 10);
+    await page.close();
+});
+
+test.describe('チャート・集計 - オプション設定', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
@@ -439,19 +441,6 @@ test.describe('チャート・集計 - オプション設定', () => {
 
 test.describe('カレンダー - ビュー表示', () => {
 
-    // テーブルとデータはbeforeAllで一度だけ作成（実行時間短縮のため）
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(600000); // テーブル作成のポーリングを考慮して10分
-        const page = await browser.newPage();
-        await login(page);
-        const tableRes = await createAllTypeTable(page);
-        if (tableRes.result !== 'success') {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await createAllTypeData(page, 10);
-        await page.close();
-    });
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
@@ -647,19 +636,6 @@ test.describe('カレンダー - ビュー表示', () => {
 
 test.describe('集計 - 基本機能', () => {
 
-    // テーブルとデータはbeforeAllで一度だけ作成（実行時間短縮のため）
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(600000); // テーブル作成のポーリングを考慮して10分
-        const page = await browser.newPage();
-        await login(page);
-        const tableRes = await createAllTypeTable(page);
-        if (tableRes.result !== 'success') {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await createAllTypeData(page, 10);
-        await page.close();
-    });
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
