@@ -25,3 +25,8 @@ node_modules/
 # OS
 .DS_Store
 .claude/staging-deploy-watch.md
+
+# バックアップファイル
+tests/*.bak
+tests/*.bak2
+tests/*.bak3
