@@ -233,19 +233,26 @@ async function assertFieldPageLoaded(page, tableId) {
 // フィールド追加・各フィールドタイプ テスト
 // =============================================================================
 
+// ファイルレベルのALLテストテーブル共有（各describeで再作成しない）
+let _sharedTableId = null;
+test.beforeAll(async ({ browser }) => {
+    test.setTimeout(480000);
+    const page = await browser.newPage();
+    await login(page);
+    await createAllTypeTable(page);
+    await createAllTypeData(page, 5);
+    _sharedTableId = await getAllTypeTableId(page);
+    await page.close();
+});
+
 test.describe('フィールド - 日時（101）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -311,17 +318,11 @@ test.describe('フィールド - 日時（101）', () => {
 test.describe('フィールド - ファイル（108）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        await createAllTypeData(page, 3);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -350,16 +351,11 @@ test.describe('フィールド - ファイル（108）', () => {
 test.describe('フィールド - レイアウト2-4列（113）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -422,16 +418,11 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 test.describe('フィールドの追加（14系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -495,16 +486,11 @@ test.describe('フィールドの追加（14系）', () => {
 test.describe('項目設定（115, 116系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -555,16 +541,11 @@ test.describe('項目設定（115, 116系）', () => {
 test.describe('項目名パディング（92, 93, 94系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -629,16 +610,11 @@ test.describe('項目名パディング（92, 93, 94系）', () => {
 test.describe('計算・計算式（51, 103, 27系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -700,16 +676,11 @@ test.describe('計算・計算式（51, 103, 27系）', () => {
 test.describe('選択肢フィールド（18, 45, 46系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -760,16 +731,11 @@ test.describe('選択肢フィールド（18, 45, 46系）', () => {
 test.describe('数値フィールド（43, 220, 221, 234, 235系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -820,16 +786,11 @@ test.describe('数値フィールド（43, 220, 221, 234, 235系）', () => {
 test.describe('文字列フィールド（17, 20, 41, 42系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(480000); // createAllTypeTableが長時間かかるためタイムアウトを延長（360秒）
-        const page = await browser.newPage();
-        await login(page);
-        await createAllTypeTable(page);
-        tableId = await getAllTypeTableId(page);
-        await page.close();
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
     });
 
-    test.afterAll(async ({ browser }) => {
+    test.afterAll(async () => {
         // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
     });
 
@@ -883,8 +844,4 @@ test.describe('文字列フィールド（17, 20, 41, 42系）', () => {
         await assertFieldPageLoaded(page, tableId);
     });
 });
-
-// =============================================================================
-// 画像フィールド（48, 226, 240系）
-// =============================================================================
 
