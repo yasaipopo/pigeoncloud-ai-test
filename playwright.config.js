@@ -46,7 +46,7 @@ module.exports = defineConfig({
         headless: true,
         viewport: { width: 1280, height: 800 },
         screenshot: 'only-on-failure',
-        video: 'on',
+        video: 'retain-on-failure',
         launchOptions: {
             args: ['--no-sandbox', '--disable-dev-shm-usage'],
             // Docker(Linux)はシステムパス、ホストmacOSはデフォルトパス（Playwrightが自動解決）
