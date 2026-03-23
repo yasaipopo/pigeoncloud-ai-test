@@ -3756,3 +3756,163 @@ actual_steps:
   gaps: '⚠️ 数値フィールドの設定・確認なし
 
     '
+- case_no: "261-1"
+  feature: フィールド表示条件
+  category: 表示条件動作確認
+  description: |
+    選択肢フィールドの表示条件設定UIを開き、条件追加ができること
+  expected: |
+    フィールド設定で表示条件セクションが存在し、トリガーフィールドと値を設定できること
+  actual_steps:
+    - action: navigate
+      value: /admin/dataset/edit/{tableId}
+    - action: click
+      selector: ".cdk-drag.field-drag"
+    - action: wait
+      value: 1.5
+    - action: comment
+      value: フィールド編集パネルで「表示条件」セクションが表示されることを確認
+
+- case_no: "261-2"
+  feature: フィールド表示条件
+  category: 表示条件動作確認
+  description: |
+    Yes/Noフィールドの表示条件設定UIが利用可能であること
+  expected: |
+    Yes/Noフィールドの設定で表示条件を追加するUIが表示されること
+
+- case_no: "261-3"
+  feature: フィールド表示条件
+  category: 表示条件動作確認
+  description: |
+    チェックボックスフィールドの表示条件設定UIが利用可能であること
+  expected: |
+    チェックボックスフィールドの設定で表示条件を追加するUIが表示されること
+
+- case_no: "265-1"
+  feature: フィールドオプション
+  category: 必須設定
+  description: |
+    テキストフィールドを必須に設定した場合、レコード作成時に空欄で保存するとエラーになること
+  expected: |
+    必須フィールドが空の状態で保存ボタンをクリックするとエラーメッセージが表示されること
+
+- case_no: "265-2"
+  feature: フィールドオプション
+  category: 重複チェック
+  description: |
+    フィールドの重複チェック（ユニーク）設定UIが存在すること
+  expected: |
+    フィールド設定に重複チェックまたはユニーク設定のトグルが存在すること
+
+- case_no: "267-1"
+  feature: フィールドオプション
+  category: 初期値設定
+  description: |
+    テキストフィールドに初期値を設定した場合、レコード新規作成フォームで初期値が自動入力されること
+  expected: |
+    設定した初期値がレコード新規作成フォームの対象フィールドに自動入力されていること
+
+- case_no: "850-1"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    文字列(一行)フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-2"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    文章(複数行)フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-3"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    数値フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-4"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    Yes / Noフィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-5"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    選択肢(単一選択)フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-6"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    選択肢(複数選択)フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-7"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    日時フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-8"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    画像フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-9"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    ファイルフィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-10"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    他テーブル参照フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-11"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    計算フィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-12"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    固定テキストフィールドの追加オプションを開き、表示条件設定セクションが存在することを確認する。
+  expected: |
+    表示条件設定のUIが表示されること。
+
+- case_no: "850-13"
+  feature: フィールド追加オプション（表示条件）
+  category: フィールド設定
+  description: |
+    自動採番フィールドの追加オプションボタンが存在することを確認する。
+  expected: |
+    追加オプションボタンが存在すること。

@@ -30,3 +30,9 @@ node_modules/
 tests/*.bak
 tests/*.bak2
 tests/*.bak3
+
+# テスト環境ランタイムファイル（各実行ごとに生成）
+.test_env_runtime.*
+test-results/
+test_files/
+.playwright-mcp/

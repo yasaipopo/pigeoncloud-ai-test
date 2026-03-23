@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PigeonCloud E2Eテスト結果</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .navbar-brand { font-weight: bold; }
+    .run-card {
+      cursor: pointer;
+      transition: box-shadow .15s;
+      border-left: 4px solid #dee2e6;
+    }
+    .run-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .run-card.status-completed { border-left-color: #198754; }
+    .run-card.status-failed { border-left-color: #dc3545; }
+    .run-card.status-running { border-left-color: #0dcaf0; }
+    .progress { height: 8px; }
+    .stat-box {
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      min-width: 70px;
+    }
+    .stat-box .num { font-size: 1.6rem; font-weight: bold; line-height: 1; }
+    .stat-box .label { font-size: .7rem; color: #6c757d; }
+    .loading-spinner { display: flex; justify-content: center; padding: 60px; }
+    .empty-state { text-align: center; padding: 80px; color: #adb5bd; }
+    .run-time { font-size: .78rem; color: #6c757d; }
+    .run-title { font-weight: 600; font-size: 1rem; }
+    .run-subtitle { font-size: .8rem; color: #6c757d; }
+    .commit-badge {
+      font-family: monospace;
+      font-size: .75rem;
+      background: #e9ecef;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ナビゲーションバー -->
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container">
+    <span class="navbar-brand">
+      <i class="bi bi-clipboard-check me-2"></i>PigeonCloud E2E ビューアー
+    </span>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-secondary small" id="last-updated"></span>
+      <button class="btn btn-sm btn-outline-secondary" onclick="doLogout()">
+        <i class="bi bi-box-arrow-right me-1"></i>ログアウト
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <!-- フィルター＆タイトル -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>実行履歴</h5>
+    <div class="d-flex gap-2">
+      <select class="form-select form-select-sm" id="status-filter" style="width:130px">
+        <option value="all">すべて</option>
+        <option value="failed">FAILあり</option>
+        <option value="completed">成功のみ</option>
+        <option value="running">実行中</option>
+      </select>
+      <button class="btn btn-sm btn-outline-secondary" onclick="loadRuns()">
+        <i class="bi bi-arrow-clockwise"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-spinner" id="loading">
+    <div class="spinner-border text-secondary" role="status">
+      <span class="visually-hidden">読み込み中...</span>
+    </div>
+  </div>
+
+  <!-- エラー -->
+  <div class="alert alert-danger d-none" id="error-msg">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <span id="error-text"></span>
+  </div>
+
+  <!-- 実行一覧 -->
+  <div id="runs-list"></div>
+
+  <!-- もっと見る -->
+  <div class="text-center mt-3" id="load-more-wrap" style="display:none">
+    <button class="btn btn-outline-secondary" id="load-more-btn" onclick="loadMore()">
+      さらに読み込む
+    </button>
+  </div>
+</div>
+
+<script>
+// =========================================
+// 設定（deploy.sh で __API_URL__ を置換）
+// =========================================
+const CONFIG = {
+  apiUrl: '__API_URL__',
+};
+
+// =========================================
+// 認証チェック
+// =========================================
+const _token = localStorage.getItem('e2e_auth_token');
+if (!_token) {
+  location.href = 'login.html';
+}
+
+function authHeaders() {
+  return {
+    'Authorization': `Bearer ${localStorage.getItem('e2e_auth_token')}`,
+    'Content-Type': 'application/json'
+  };
+}
+
+function doLogout() {
+  localStorage.removeItem('e2e_auth_token');
+  location.href = 'login.html';
+}
+
+// =========================================
+// 状態
+// =========================================
+let lastKey = null;
+let isLoading = false;
+let totalLoaded = 0;  // 表示済み件数（通し番号計算用）
+
+// =========================================
+// ページ初期化
+// =========================================
+document.addEventListener('DOMContentLoaded', () => {
+  loadRuns();
+  document.getElementById('status-filter').addEventListener('change', () => {
+    lastKey = null;
+    totalLoaded = 0;
+    document.getElementById('runs-list').innerHTML = '';
+    loadRuns();
+  });
+});
+
+// =========================================
+// テスト実行一覧取得
+// =========================================
+async function loadRuns() {
+  if (!CONFIG.apiUrl) return;
+  showLoading(true);
+  lastKey = null;
+  totalLoaded = 0;
+  document.getElementById('runs-list').innerHTML = '';
+  document.getElementById('error-msg').classList.add('d-none');
+
+  try {
+    const data = await fetchRuns();
+    renderRuns(data.items, true);
+    if (data.last_key) {
+      lastKey = data.last_key;
+      document.getElementById('load-more-wrap').style.display = '';
+    } else {
+      document.getElementById('load-more-wrap').style.display = 'none';
+    }
+  } catch (e) {
+    showError('データ取得エラー: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+  document.getElementById('last-updated').textContent = '最終更新: ' + new Date().toLocaleTimeString('ja-JP');
+}
+
+async function loadMore() {
+  if (!lastKey || isLoading) return;
+  isLoading = true;
+  document.getElementById('load-more-btn').textContent = '読み込み中...';
+  try {
+    const data = await fetchRuns(lastKey);
+    renderRuns(data.items, false);
+    lastKey = data.last_key || null;
+    if (!lastKey) document.getElementById('load-more-wrap').style.display = 'none';
+  } catch (e) {
+    showError('追加読み込みエラー: ' + e.message);
+  } finally {
+    isLoading = false;
+    document.getElementById('load-more-btn').textContent = 'さらに読み込む';
+  }
+}
+
+async function fetchRuns(startKey = null) {
+  const statusFilter = document.getElementById('status-filter').value;
+  let url = `${CONFIG.apiUrl}/runs?limit=20&status=${statusFilter}`;
+  if (startKey) url += `&last_key=${encodeURIComponent(startKey)}`;
+  const r = await fetch(url, { headers: authHeaders() });
+  if (r.status === 401) {
+    doLogout();
+    throw new Error('認証が切れました');
+  }
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+// =========================================
+// 実行一覧レンダリング
+// =========================================
+function renderRuns(items, clear) {
+  const container = document.getElementById('runs-list');
+  if (clear) container.innerHTML = '';
+
+  if (!items.length && clear) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        テスト実行履歴がありません
+      </div>`;
+    return;
+  }
+
+  items.forEach((run, idx) => {
+    const runNo = totalLoaded + idx + 1;
+    const card = document.createElement('div');
+    card.className = `card run-card mb-2 status-${run.runStatus}`;
+    card.onclick = () => location.href = `run.html?runId=${run.runId}`;
+
+    const total = parseInt(run.totalCount) || 0;
+    const pass = parseInt(run.passCount) || 0;
+    const fail = parseInt(run.failCount) || 0;
+    const skip = parseInt(run.skipCount) || 0;
+    const passRate = total > 0 ? Math.round(pass / total * 100) : 0;
+
+    const statusIcon = {
+      completed: '<i class="bi bi-check-circle-fill text-success"></i>',
+      failed: '<i class="bi bi-x-circle-fill text-danger"></i>',
+      running: '<i class="bi bi-arrow-repeat text-info"></i>'
+    }[run.runStatus] || '<i class="bi bi-question-circle"></i>';
+
+    // 日付フォーマット: 「第N回 YYYY/M/D（曜日）」
+    const dateObj = run.startedAt ? new Date(run.startedAt) : null;
+    const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+    const dateLabel = dateObj
+      ? `第${runNo}回 ${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()}（${weekdays[dateObj.getDay()]}）`
+      : `第${runNo}回`;
+    const timeLabel = dateObj ? dateObj.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : '';
+
+    const durationStr = formatDuration(parseInt(run.durationMs) || 0);
+    const specBadge = run.specFile ? `<span class="badge bg-secondary me-1">${escHtml(run.specFile)}</span>` : '';
+
+    card.innerHTML = `
+      <div class="card-body py-2 px-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="fs-5">${statusIcon}</div>
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="run-title">${escHtml(dateLabel)}</span>
+              ${timeLabel ? `<span class="run-subtitle">${timeLabel}</span>` : ''}
+              ${specBadge}
+              ${run.commitHash ? `<span class="commit-badge">${escHtml(run.commitHash)}</span>` : ''}
+              ${run.branch && run.branch !== 'unknown' ? `<span class="badge bg-primary">${escHtml(run.branch)}</span>` : ''}
+            </div>
+            <div class="run-time">
+              <i class="bi bi-stopwatch me-1"></i>${durationStr}
+              ${run.testEnvUrl ? `&nbsp;|&nbsp;<a href="${escHtml(run.testEnvUrl)}" target="_blank" onclick="event.stopPropagation()" class="text-muted"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
+            </div>
+          </div>
+          <div class="d-flex gap-2 align-items-center flex-shrink-0">
+            <div class="stat-box bg-success bg-opacity-10">
+              <div class="num text-success">${pass}</div>
+              <div class="label">PASS</div>
+            </div>
+            <div class="stat-box bg-danger bg-opacity-10">
+              <div class="num text-danger">${fail}</div>
+              <div class="label">FAIL</div>
+            </div>
+            <div class="stat-box bg-secondary bg-opacity-10">
+              <div class="num text-secondary">${skip}</div>
+              <div class="label">SKIP</div>
+            </div>
+            <div class="d-none d-md-block" style="width:80px">
+              <div class="progress mb-1">
+                <div class="progress-bar bg-success" style="width:${passRate}%"></div>
+              </div>
+              <div class="text-center" style="font-size:.72rem;color:#6c757d">${passRate}%</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    container.appendChild(card);
+  });
+
+  totalLoaded += items.length;
+}
+
+// =========================================
+// ユーティリティ
+// =========================================
+function formatDuration(ms) {
+  if (!ms || ms <= 0) return '-';
+  const sec = Math.round(ms / 1000);
+  if (sec < 60) return `${sec}秒`;
+  const min = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (min < 60) return `${min}分${s}秒`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${h}時間${m}分`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showLoading(show) {
+  document.getElementById('loading').style.display = show ? 'flex' : 'none';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.classList.remove('d-none');
+  document.getElementById('error-text').textContent = msg;
+}
+</script>
+</body>
+</html>

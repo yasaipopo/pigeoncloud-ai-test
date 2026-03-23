@@ -649,3 +649,58 @@ actual_steps:
   gaps: '⚠️ Stripe外部サービス連携のため手動確認のみ
 
     '
+- case_no: 839-1
+  sheet: A
+  feature: SSO設定
+  category: セキュリティ
+  description: |
+    システム設定よりSSO設定ページにアクセスし、Google SAMLの設定項目が表示されること。
+    設定項目（識別子・応答URL・メタデータXMLアップロード）が存在することを確認する。
+  expected: SSO設定ページが正常に表示され、Google/Microsoft SAML設定UIが確認できること。
+- case_no: 839-2
+  sheet: A
+  feature: SSO設定
+  category: セキュリティ
+  description: |
+    SSO設定ページで「識別子（エンティティID）」と「応答URL」のクリップボードコピーボタンが存在すること。
+  expected: コピーボタンが表示されること。
+- case_no: 840-1
+  sheet: A
+  feature: クライアント証明書管理
+  category: セキュリティ
+  description: |
+    ユーザー管理または設定ページからクライアント証明書管理にアクセスし、
+    証明書発行・一覧表示・失効のUIが表示されること。
+  expected: クライアント証明書管理ページが正常に表示されること。
+- case_no: 841-1
+  sheet: A
+  feature: ログアーカイブ
+  category: ログ
+  description: |
+    左メニューよりログアーカイブ画面にアクセスし、
+    ログの一覧が表示されること。
+  expected: ログアーカイブページが正常に表示され、アーカイブ済みログの一覧が確認できること。
+- case_no: 843-1
+  sheet: A
+  feature: Googleマップフィールド
+  category: フィールド連携
+  description: |
+    GoogleマップフィールドをALLテストテーブルで確認し、
+    地図UIが表示されること。住所入力欄または地図コンポーネントが存在すること。
+  expected: Googleマップフィールドの地図UI・入力欄が正常に表示されること。
+- case_no: 844-1
+  sheet: A
+  feature: API公開設定
+  category: 外部連携
+  description: |
+    テーブル設定の「公開設定」タブまたは「API設定」からAPI公開ON/OFFの設定UIを確認する。
+    APIキーまたはエンドポイントURLが表示されること。
+  expected: API公開設定UIが正常に表示されること。
+- case_no: 845-1
+  sheet: A
+  feature: freee連携設定
+  category: 外部連携
+  description: |
+    システム設定またはテーブル設定からfreee連携設定UIへアクセスし、
+    連携設定フォームが表示されること。
+  expected: freee連携設定UIが確認できること（または機能が存在しない場合はskipとなること）。

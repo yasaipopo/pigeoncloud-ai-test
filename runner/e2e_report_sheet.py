@@ -1084,6 +1084,14 @@ def _col_idx_to_letter(idx: int) -> str:
 # ============================================================
 # 動画アップロード（オプション）
 # ============================================================
+
+# Drive フォルダ名
+DRIVE_ENV_FOLDER = {
+    "staging":    "staging",
+    "production": "本番",
+}
+
+
 def _convert_webm_to_mp4(webm_path: Path) -> Path | None:
     """webmをmp4に変換して一時ファイルパスを返す。ffmpegがなければNoneを返す"""
     if not shutil.which("ffmpeg"):
@@ -1104,48 +1112,163 @@ def _convert_webm_to_mp4(webm_path: Path) -> Path | None:
     return None
 
 
-def upload_videos(run_date: str = None, agent_filter: set = None) -> dict[str, str]:
-    """reports/agent-*/videos/ 内の .webm をmp4変換してDriveにアップロード"""
+def _make_video_filename(date_compact: str, case_no: str, title: str, is_pass: bool, ext: str) -> str:
+    """動画ファイル名を生成: {YYYYMMDD}_{case_no}_{short_title}_{pass|fail}.{ext}"""
+    # タイトルから短縮名を抽出（case_no後のテキスト、先頭20文字）
+    short = re.sub(r'^\d[\d\-]*:\s*', '', title).strip()  # 先頭の "395: " を除去
+    short = re.sub(r'[^\w\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]', '_', short)[:20].strip('_')
+    result_str = "pass" if is_pass else "fail"
+    safe_case = case_no.replace('/', '_') if case_no else "unknown"
+    return f"{date_compact}_{safe_case}_{short}_{result_str}.{ext}"
+
+
+def _collect_videos_from_playwright_results(
+    agent_dirs: list[Path], date_compact: str
+) -> list[dict]:
+    """
+    playwright-results.json を解析して、アップロードすべき動画リストを返す。
+
+    ルール:
+    - 最終FAIL (test.status == "unexpected"): 失敗動画のみ
+    - 最終PASS (retryあり, test.status == "expected"): 最後の成功動画のみ
+    - 最初からPASS (動画なし): 対象外
+    中間の失敗動画（最終的にpassした場合）は除外する。
+    """
+    def _walk_suites(node: dict, results: list):
+        for spec in node.get('specs', []):
+            for test in spec.get('tests', []):
+                test_results = test.get('results', [])
+                final_status = test.get('status', '')  # expected / unexpected / skipped
+
+                if final_status == 'skipped' or not test_results:
+                    continue
+
+                is_ultimately_pass = (final_status == 'expected')
+
+                if is_ultimately_pass:
+                    # 最後の結果（最大retry）のビデオのみ
+                    last_result = test_results[-1]
+                    videos = [a['path'] for a in last_result.get('attachments', [])
+                              if 'video' in a.get('contentType', '') and a.get('path')]
+                    for vpath in videos:
+                        results.append({
+                            'video_path': Path(vpath),
+                            'is_pass': True,
+                            'title': spec.get('title', ''),
+                        })
+                else:
+                    # 全失敗動画
+                    for result in test_results:
+                        videos = [a['path'] for a in result.get('attachments', [])
+                                  if 'video' in a.get('contentType', '') and a.get('path')]
+                        for vpath in videos:
+                            results.append({
+                                'video_path': Path(vpath),
+                                'is_pass': False,
+                                'title': spec.get('title', ''),
+                            })
+
+        for suite in node.get('suites', []):
+            _walk_suites(suite, results)
+
+    upload_list = []
+    for agent_dir in agent_dirs:
+        pw_json = agent_dir / "playwright-results.json"
+        if not pw_json.exists():
+            # playwright-results.jsonがなければディレクトリ名から類推（旧来方式）
+            for vfile in agent_dir.glob(f"videos/*{date_compact}*/**/*.webm"):
+                spec_name, case_no = _parse_video_dirname(vfile.parent.name)
+                upload_list.append({
+                    'video_path': vfile,
+                    'is_pass': False,  # 不明なのでfailとして扱う
+                    'title': case_no,
+                })
+            continue
+
+        with open(pw_json) as f:
+            data = json.load(f)
+
+        items = []
+        for suite in data.get('suites', []):
+            _walk_suites(suite, items)
+
+        # 対象日付のファイルのみ
+        for item in items:
+            if date_compact in str(item['video_path']) and item['video_path'].exists():
+                upload_list.append(item)
+
+    return upload_list
+
+
+def upload_videos(
+    run_date: str = None,
+    env_type: str = None,
+    run_n: int = 1,
+    agent_filter: set = None,
+) -> dict[str, str]:
+    """
+    動画をDriveにアップロード。
+
+    Drive構造:
+        root/
+        ├── staging/ (or 本番/)
+        │   └── YYYYMMDD/
+        │       └── N回目/
+        │           ├── 成功/  ← 最終passの最後の動画のみ
+        │           └── 失敗/  ← fail動画のみ
+
+    アップロード対象:
+        - 最終FAILテスト: 失敗動画
+        - 最終PASSテスト(retryあり): 最後の成功動画のみ
+        - 最初からPASS(動画なし): 対象外
+    """
     from googleapiclient.http import MediaFileUpload
 
     if not run_date:
         run_date = datetime.now().strftime("%Y-%m-%d")
+    date_compact = run_date.replace("-", "")
+
+    if not env_type:
+        env_type = os.environ.get("ENV_TYPE", "staging")
+    env_folder_name = DRIVE_ENV_FOLDER.get(env_type, env_type)
 
     use_mp4 = bool(shutil.which("ffmpeg"))
     print(f"動画フォーマット: {'mp4 (ffmpeg変換あり)' if use_mp4 else 'webm (ffmpegなし)'}")
 
-    drive = get_drive_service()
-    date_folder_id = _get_or_create_drive_folder(drive, run_date, DRIVE_FOLDER_ID)
-    print(f"Drive日付フォルダ: {run_date} (id={date_folder_id})")
-
-    video_files = list(REPORTS_DIR.glob("agent-*/videos/**/*.webm"))
-    date_compact = run_date.replace("-", "")
-    video_files = [v for v in video_files if date_compact in str(v)]
-
+    # 対象エージェントディレクトリ
+    agent_dirs = sorted(REPORTS_DIR.glob("agent-*"))
     if agent_filter:
-        import re as _re
-        video_files = [
-            v for v in video_files
-            if (m := _re.search(r'agent-(\d+)', str(v))) and int(m.group(1)) in agent_filter
-        ]
+        agent_dirs = [d for d in agent_dirs
+                      if (m := re.search(r'agent-(\d+)', d.name)) and int(m.group(1)) in agent_filter]
 
-    print(f"アップロード対象動画: {len(video_files)}件")
-    if not video_files:
+    # playwright-results.json からアップロード対象を収集
+    upload_items = _collect_videos_from_playwright_results(agent_dirs, date_compact)
+    print(f"アップロード対象動画: {len(upload_items)}件 (pass={sum(1 for i in upload_items if i['is_pass'])}, fail={sum(1 for i in upload_items if not i['is_pass'])})")
+    if not upload_items:
         return {}
 
-    spec_folders: dict[str, str] = {}
+    # Drive フォルダ階層を作成
+    drive = get_drive_service()
+    env_folder_id  = _get_or_create_drive_folder(drive, env_folder_name, DRIVE_FOLDER_ID)
+    date_folder_id = _get_or_create_drive_folder(drive, date_compact, env_folder_id)
+    run_folder_id  = _get_or_create_drive_folder(drive, f"{run_n}回目", date_folder_id)
+    pass_folder_id = _get_or_create_drive_folder(drive, "成功", run_folder_id)
+    fail_folder_id = _get_or_create_drive_folder(drive, "失敗", run_folder_id)
+    print(f"Drive: {env_folder_name}/{date_compact}/{run_n}回目/成功|失敗")
+
     result_links: dict[str, str] = {}
     tmp_files: list[Path] = []
 
-    for video_path in video_files:
-        dir_name = video_path.parent.name
-        spec_name, case_no = _parse_video_dirname(dir_name)
-        if not spec_name:
-            continue
+    for item in upload_items:
+        video_path: Path = item['video_path']
+        is_pass: bool = item['is_pass']
+        title: str = item['title']
 
-        if spec_name not in spec_folders:
-            spec_folders[spec_name] = _get_or_create_drive_folder(drive, spec_name, date_folder_id)
-            time.sleep(0.5)
+        # case_no を取得（ディレクトリ名またはタイトルから）
+        case_no_from_title = re.match(r'^(\d[\d\-]*)', title.strip())
+        case_no = case_no_from_title.group(1) if case_no_from_title else ""
+        if not case_no:
+            _, case_no = _parse_video_dirname(video_path.parent.name)
 
         # ffmpegがあればmp4変換
         upload_path = video_path
@@ -1159,25 +1282,27 @@ def upload_videos(run_date: str = None, agent_filter: set = None) -> dict[str, s
                 mimetype = "video/mp4"
                 tmp_files.append(mp4)
 
-        upload_name = f"{case_no}.{ext}" if case_no else upload_path.name
-        file_meta = {"name": upload_name, "parents": [spec_folders[spec_name]]}
+        upload_name = _make_video_filename(date_compact, case_no, title, is_pass, ext)
+        parent_id = pass_folder_id if is_pass else fail_folder_id
 
+        # 同名ファイルが既に存在する場合はスキップ
         existing = drive.files().list(
-            q=f"name='{upload_name}' and '{spec_folders[spec_name]}' in parents and trashed=false",
+            q=f"name='{upload_name}' and '{parent_id}' in parents and trashed=false",
             fields="files(id)"
         ).execute().get("files", [])
 
         if existing:
             file_id = existing[0]["id"]
+            print(f"  ⏭️ 既存: {'成功' if is_pass else '失敗'}/{upload_name}")
         else:
             media = MediaFileUpload(str(upload_path), mimetype=mimetype, resumable=True)
-            uploaded = drive.files().create(body=file_meta, media_body=media, fields="id").execute()
+            uploaded = drive.files().create(body={"name": upload_name, "parents": [parent_id]},
+                                            media_body=media, fields="id").execute()
             file_id = uploaded["id"]
-            print(f"  ✅ アップロード: {spec_name}/{upload_name}")
+            print(f"  ✅ アップロード: {'成功' if is_pass else '失敗'}/{upload_name}")
 
         drive_url = f"https://drive.google.com/file/d/{file_id}/view"
-        key = f"{spec_name}/{case_no}" if case_no else f"{spec_name}/{upload_name}"
-        result_links[key] = drive_url
+        result_links[f"{case_no}"] = drive_url
 
     # 一時mp4ファイルを削除
     for tmp in tmp_files:
@@ -1244,6 +1369,8 @@ if __name__ == "__main__":
     parser.add_argument("--show-url",       action="store_true", help="今月のシートURLを表示")
     parser.add_argument("--dry-run",        action="store_true", help="内容確認のみ（書き込みなし）")
     parser.add_argument("--date",           default=None, help="動画対象日付 (YYYY-MM-DD)")
+    parser.add_argument("--env-type",       default=None, help="環境種別: staging (default) / production")
+    parser.add_argument("--run-n",          type=int, default=1, help="実行回数 (N回目フォルダ名に使用、デフォルト: 1)")
     args = parser.parse_args()
 
     if args.failed_specs:
@@ -1260,13 +1387,11 @@ if __name__ == "__main__":
         if args.upload_videos and ss_id and not args.dry_run:
             now = datetime.now()
             ss = get_gspread_client().open_by_key(ss_id)
-            run_n = _get_run_number(ss) - 1
-            run_label = f"{run_n}回目"
-            video_links = upload_videos(args.date)
+            run_n = args.run_n or (_get_run_number(ss) - 1)
+            video_links = upload_videos(args.date, env_type=args.env_type, run_n=run_n)
     elif args.upload_videos:
-        now = datetime.now()
-        run_date = args.date or now.strftime("%Y-%m-%d")
-        video_links = upload_videos(run_date)
+        run_date = args.date or datetime.now().strftime("%Y-%m-%d")
+        video_links = upload_videos(run_date, env_type=args.env_type, run_n=args.run_n)
     elif args.show_url:
         now = datetime.now()
         ss = get_or_create_monthly_sheet(now.year, now.month)

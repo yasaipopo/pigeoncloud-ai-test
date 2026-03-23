@@ -1,0 +1,345 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'PigeonCloud E2E Test Result Viewer - Serverless Architecture'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: pigeon-e2e-viewer
+    Description: プロジェクト名（リソース命名に使用）
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [prod, staging]
+    Description: 環境名
+  AdminPassword:
+    Type: String
+    Default: pigeon-e2e-2026
+    NoEcho: true
+    Description: E2Eビューアーの管理画面ログインパスワード
+
+Resources:
+
+  # =========================================
+  # S3バケット: アセット（動画・スクショ）保存用
+  # =========================================
+  AssetsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-assets-${AWS::AccountId}'
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: [GET, PUT, POST]
+            AllowedOrigins: ['*']
+            MaxAge: 3600
+      LifecycleConfiguration:
+        Rules:
+          # 動画・スクショは90日で削除（ストレージコスト削減）
+          - Id: DeleteOldAssets
+            Status: Enabled
+            ExpirationInDays: 90
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # =========================================
+  # S3バケット: フロントエンド静的ファイル配信用
+  # =========================================
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-frontend-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # CloudFrontからのアクセスのみ許可するバケットポリシー
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${FrontendBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+  # =========================================
+  # DynamoDBテーブル: テスト実行履歴
+  # =========================================
+  RunsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-runs'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: runId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: S
+        - AttributeName: status
+          AttributeType: S
+      KeySchema:
+        - AttributeName: runId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        # 日時降順で一覧取得用（status="all"の仮想パーティション使用）
+        - IndexName: createdAt-index
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true  # 90日でTTL削除
+
+  # =========================================
+  # DynamoDBテーブル: テストケース結果
+  # =========================================
+  CasesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-cases'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: runId
+          AttributeType: S
+        - AttributeName: caseId
+          AttributeType: S
+        - AttributeName: caseStatus
+          AttributeType: S
+      KeySchema:
+        - AttributeName: runId
+          KeyType: HASH
+        - AttributeName: caseId
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        # FAILのみ絞り込み用
+        - IndexName: status-index
+          KeySchema:
+            - AttributeName: runId
+              KeyType: HASH
+            - AttributeName: caseStatus
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # =========================================
+  # IAMロール: Lambda実行用
+  # =========================================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:BatchWriteItem
+                Resource:
+                  - !GetAtt RunsTable.Arn
+                  - !Sub '${RunsTable.Arn}/index/*'
+                  - !GetAtt CasesTable.Arn
+                  - !Sub '${CasesTable.Arn}/index/*'
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub '${AssetsBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt AssetsBucket.Arn
+
+  # =========================================
+  # Lambda関数: API処理
+  # =========================================
+  ApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-api'
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          RUNS_TABLE: !Ref RunsTable
+          CASES_TABLE: !Ref CasesTable
+          ASSETS_BUCKET: !Ref AssetsBucket
+          REGION: !Sub '${AWS::Region}'
+          ADMIN_PASSWORD: !Ref AdminPassword
+      Code:
+        ZipFile: |
+          # プレースホルダー: backend/lambda/index.py の内容をデプロイ時に置換してください
+          def handler(event, context):
+              return {'statusCode': 200, 'body': 'placeholder'}
+
+  # =========================================
+  # API Gateway HTTP API
+  # (Lambda Function URLはSCPで制限されるため)
+  # =========================================
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub '${ProjectName}-api'
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - '*'
+        AllowHeaders:
+          - content-type
+          - x-api-key
+          - authorization
+
+  HttpApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: '$default'
+      AutoDeploy: true
+
+  HttpApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt ApiFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  HttpApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: '$default'
+      Target: !Sub 'integrations/${HttpApiIntegration}'
+
+  # API GatewayからLambdaを呼び出す権限
+  HttpApiLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*'
+
+  # =========================================
+  # CloudFront OAC（Origin Access Control）
+  # =========================================
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${ProjectName}-oac'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # =========================================
+  # CloudFront Distribution: フロントエンド配信
+  # =========================================
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        Origins:
+          - Id: FrontendS3
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt CloudFrontOAC.Id
+        DefaultCacheBehavior:
+          TargetOriginId: FrontendS3
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+          AllowedMethods: [GET, HEAD]
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        PriceClass: PriceClass_100  # 北米・欧州・アジアのみ（コスト最適化）
+        HttpVersion: http2
+
+Outputs:
+  CloudFrontURL:
+    Description: フロントエンドURL
+    Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
+    Export:
+      Name: !Sub '${ProjectName}-frontend-url'
+
+  ApiUrl:
+    Description: API エンドポイントURL
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
+    Export:
+      Name: !Sub '${ProjectName}-api-url'
+
+  AssetsBucketName:
+    Description: アセット保存S3バケット名
+    Value: !Ref AssetsBucket
+    Export:
+      Name: !Sub '${ProjectName}-assets-bucket'
+
+  FrontendBucketName:
+    Description: フロントエンドS3バケット名
+    Value: !Ref FrontendBucket
+    Export:
+      Name: !Sub '${ProjectName}-frontend-bucket'
+
+  RunsTableName:
+    Description: テスト実行履歴DynamoDBテーブル名
+    Value: !Ref RunsTable
+    Export:
+      Name: !Sub '${ProjectName}-runs-table'
+
+  CasesTableName:
+    Description: テストケース結果DynamoDBテーブル名
+    Value: !Ref CasesTable
+    Export:
+      Name: !Sub '${ProjectName}-cases-table'

@@ -278,3 +278,174 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
     });
 
 });
+
+// =============================================================================
+// フィルタ作成・適用・削除（245-248系）
+// =============================================================================
+
+test.describe('フィルタ作成・適用・削除（245-248系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(180000);
+        const page = await browser.newPage();
+        await login(page);
+        const status = await debugApiGet(page, '/status');
+        const existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+        if (existing) {
+            tableId = existing.id;
+        } else {
+            const result = await debugApiPost(page, '/create-all-type-table', {});
+            if (result.result === 'success') {
+                tableId = result.table_id;
+            }
+        }
+        // データが少なければ投入
+        if (tableId) {
+            const statusAfter = await debugApiGet(page, '/status');
+            const tbl = (statusAfter.all_type_tables || []).find(t => t.id === tableId);
+            if (!tbl || tbl.count < 3) {
+                await debugApiPost(page, '/create-all-type-data', { count: 3, pattern: 'fixed' });
+            }
+        }
+        await page.close();
+    });
+
+    test.beforeEach(async ({ page }) => {
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 245: フィルタ作成・適用
+    // -------------------------------------------------------------------------
+    test('245: フィルタボタンが存在し、フィルタ設定UIが開けること', async ({ page }) => {
+        if (!tableId) {
+            test.skip(true, 'テーブルIDが取得できませんでした');
+            return;
+        }
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(2000);
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('404');
+
+        // フィルタボタン（虫眼鏡アイコンボタン: 既存234テストと同じセレクター）
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
+
+        // フィルタボタンをクリック
+        await filterBtn.click({ force: true });
+        await page.waitForTimeout(1500);
+
+        // フィルタ / 集計パネルが表示されること
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
+
+        // 「絞り込み」タブが存在すること
+        await expect(page.locator('[role="tab"]:has-text("絞り込み")')).toBeVisible();
+
+        // フィルタ関連のUIが開いたこと
+        const bodyAfter = await page.innerText('body');
+        expect(bodyAfter).not.toContain('Internal Server Error');
+        expect(bodyAfter.includes('フィルタ') || bodyAfter.includes('条件')).toBe(true);
+    });
+
+    // -------------------------------------------------------------------------
+    // 246: フィルタ保存UI確認
+    // -------------------------------------------------------------------------
+    test('246: フィルタ保存UIが存在すること', async ({ page }) => {
+        if (!tableId) {
+            test.skip(true, 'テーブルIDが取得できませんでした');
+            return;
+        }
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(2000);
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+
+        // フィルタメニューを開く（虫眼鏡アイコンボタン）
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await filterBtn.click({ force: true });
+        await page.waitForTimeout(1500);
+
+        // フィルタ / 集計パネルが表示されること
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
+
+        // フィルタ保存に関するUI（保存して表示ボタン）が存在すること
+        const bodyAfter = await page.innerText('body');
+        expect(bodyAfter).not.toContain('Internal Server Error');
+        // 「保存して表示」ボタンが存在すること
+        await expect(page.locator('button:has-text("保存して表示")')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 247: フィルタ管理UI確認
+    // -------------------------------------------------------------------------
+    test('247: フィルタ一覧・管理UIが存在すること', async ({ page }) => {
+        if (!tableId) {
+            test.skip(true, 'テーブルIDが取得できませんでした');
+            return;
+        }
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(2000);
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+
+        // フィルタボタンを開く（虫眼鏡アイコンボタン）
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await filterBtn.click({ force: true });
+        await page.waitForTimeout(1500);
+
+        // フィルタ / 集計パネルが開いていること
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
+        const bodyAfter = await page.innerText('body');
+        expect(bodyAfter).not.toContain('Internal Server Error');
+        // 「絞り込み」タブが存在すること
+        await expect(page.locator('[role="tab"]:has-text("絞り込み")')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 248: 高度な検索・複合条件
+    // -------------------------------------------------------------------------
+    test('248: 高度な検索UIが表示され、複合条件を設定できること', async ({ page }) => {
+        if (!tableId) {
+            test.skip(true, 'テーブルIDが取得できませんでした');
+            return;
+        }
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(2000);
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+
+        // フィルタパネルを開く（虫眼鏡アイコンボタン）
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await filterBtn.click({ force: true });
+        await page.waitForTimeout(1500);
+
+        // フィルタ / 集計パネルが表示されること
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
+
+        // 「条件を追加」ボタンをクリックして複合条件を追加
+        await page.locator('button:has-text("条件を追加")').click();
+        await page.waitForTimeout(800);
+
+        // 条件行が追加されること
+        await expect(page.locator('.condition-col-field').first()).toBeVisible();
+
+        // さらに「グループ追加」ボタンで複合条件グループを追加
+        await page.locator('button:has-text("グループ追加")').click();
+        await page.waitForTimeout(800);
+
+        // 高度な検索UIが表示されること
+        const bodyAfter = await page.innerText('body');
+        expect(bodyAfter).not.toContain('Internal Server Error');
+        expect(bodyAfter.includes('AND') || bodyAfter.includes('OR') || bodyAfter.includes('条件')).toBe(true);
+    });
+});

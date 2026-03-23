@@ -114,26 +114,32 @@ ls reports/agent-{30..33}/done 2>/dev/null
 tail -5 reports/agent-30/run.log
 ```
 
-### Step 5: 動画の整理
+### Step 5: 結果・動画をE2Eビューアー（S3/DynamoDB）にアップロード
 
-各エージェントの最終実行ディレクトリから：
-- **passed/failedの動画のみ**収集（skippedは不要）
-- Google Drive `1lBuy_g3Jv6m4txbT-SsYkKqdeB59HA59` にアップロード
-- フォルダ構造: `E2Eテスト/{実行日}/{spec名}/{テストID}.webm`
+各エージェントの結果（playwright-results.json + 動画/スクリーンショット）を
+E2Eビューアーにアップロードする。
 
-```python
-# Google Drive アップロード
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
-from google.oauth2.service_account import Credentials
+```bash
+cd /Users/yasaipopo/PycharmProjects/pigeon-test
 
-creds = Credentials.from_service_account_file('secrets/service_account.json',
-    scopes=['https://www.googleapis.com/auth/drive'])
-service = build('drive', 'v3', credentials=creds)
-DRIVE_FOLDER_ID = '1lBuy_g3Jv6m4txbT-SsYkKqdeB59HA59'
+# 各エージェントの結果をアップロード（例: agent-30〜33）
+for AGENT_NUM in 30 31 32 33 34 35; do
+  REPORTS_DIR="reports/agent-${AGENT_NUM}"
+  if [ -f "${REPORTS_DIR}/playwright-results.json" ]; then
+    echo "=== agent-${AGENT_NUM} アップロード中 ==="
+    E2E_API_URL='https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com' \
+    AWS_PROFILE=lof-dev \
+    python3 e2e-viewer/upload_results.py \
+      --reports-dir "${REPORTS_DIR}" \
+      --agent-num "${AGENT_NUM}" \
+      --test-env-url "$(cat ${REPORTS_DIR}/test_env.txt 2>/dev/null || echo '')"
+  fi
+done
 ```
 
-ただし動画が多すぎる場合（50件超）は failed のみアップロード。
+- 動画・スクリーンショット → S3 `pigeon-e2e-viewer-assets-992382763349`
+- テスト結果（PASS/FAIL/SKIP） → DynamoDB via API
+- **ビューアーURL**: https://dezmzppc07xat.cloudfront.net
 
 ### Step 6: 結果集計 + Google Sheetsレポート作成
 
@@ -167,10 +173,7 @@ python3 runner/e2e_report_sheet.py --rebuild
 
 シート: https://docs.google.com/spreadsheets/d/1bdM8712izGrI9E9m4x2SkSyG6mBCK-apoxVI1xwG93E
 
-**動画アップロード（オプション・失敗動画が多い場合）**:
-```bash
-python3 runner/e2e_report_sheet.py --upload-videos --date $(date +%Y-%m-%d)
-```
+（動画・スクリーンショットはStep 5でE2Eビューアーに登録済み）
 
 ### Step 7: Slack通知（サマリー）
 
@@ -193,7 +196,7 @@ python3 runner/e2e_report_sheet.py --upload-videos --date $(date +%Y-%m-%d)
 
 🔗 Google Sheets: https://docs.google.com/spreadsheets/d/1h_gwuCGUAdj5fKPRZu438TKFkFkYUNUKz2K_vtEFlmI
 
-🎬 エラー動画: https://drive.google.com/drive/folders/1lBuy_g3Jv6m4txbT-SsYkKqdeB59HA59
+🎬 E2Eビューアー: https://dezmzppc07xat.cloudfront.net
 
 📅 実行日時: YYYY-MM-DD HH:MM JST
 🌿 コミット: {最新コミットハッシュ} {メッセージ}
