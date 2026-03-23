@@ -599,9 +599,7 @@ function renderRuns(items, clear) {
     card.dataset.sessionId  = sess.sid;
     card.dataset.runIds     = sess.runIds.join(',');
     // クリックで最初のrunId詳細へ
-    if (sess.runIds.length === 1) {
-      card.onclick = () => location.href = `run.html?runId=${sess.runIds[0]}`;
-    }
+    card.onclick = () => location.href = `run.html?runId=${sess.runIds[0]}`;
 
     container.appendChild(card);
     renderSessionCard(card, sess, sessionNo);
@@ -630,9 +628,8 @@ function renderSessionCard(card, sess, sessionNo) {
   const timeLabel = dateObj ? dateObj.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : '';
 
   const durationStr = formatDuration(durationMs);
-  const specBadge = specs.length
-    ? specs.map(s => `<span class="badge bg-secondary me-1">${escHtml(s)}</span>`).join('')
-    : '';
+  // spec.jsバッジは非表示（邪魔なため）
+  const specBadge = '';
   const envBadge = testEnvUrl
     ? (testEnvUrl.includes('pigeon-cloud.com')
         ? '<span class="badge bg-danger me-1">本番</span>'
@@ -705,7 +702,7 @@ function renderSessionCard(card, sess, sessionNo) {
             ${envBadge}
             ${agentDetail}
             ${commitHash ? `<span class="commit-badge">${escHtml(commitHash)}</span>` : ''}
-            ${branch && branch !== 'unknown' ? `<span class="badge bg-primary">${escHtml(branch)}</span>` : ''}
+            ${branch && branch !== 'unknown' ? `<span class="badge bg-secondary"><i class="bi bi-git me-1"></i>${escHtml(branch)}</span>` : ''}
           </div>
           <div class="run-time">
             <i class="bi bi-stopwatch me-1"></i>${durationStr}
