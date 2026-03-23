@@ -30,7 +30,11 @@ def generate_token(password: str) -> str:
 
 # DynamoDBクライアント
 dynamodb = boto3.resource('dynamodb', region_name=REGION)
-s3_client = boto3.client('s3', region_name=REGION)
+s3_client = boto3.client(
+    's3',
+    region_name=REGION,
+    endpoint_url=f'https://s3.{REGION}.amazonaws.com'
+)
 runs_table = dynamodb.Table(RUNS_TABLE)
 cases_table = dynamodb.Table(CASES_TABLE)
 
@@ -119,6 +123,13 @@ def handler(event, context):
             run_id = path.split('/')[2]
             return create_cases(run_id, event)
 
+        # PATCH /runs/{runId}/cases/{caseId} - テストケースのS3キーを更新
+        elif method == 'PATCH' and path.startswith('/runs/') and '/cases/' in path:
+            parts = path.split('/')
+            run_id = parts[2]
+            case_id = '/'.join(parts[4:])
+            return patch_case(run_id, case_id, event)
+
         # GET /assets/upload-url - S3署名付きURL発行
         elif method == 'POST' and path == '/assets/upload-url':
             return get_upload_url(event)
@@ -190,11 +201,33 @@ def get_runs(event):
     })
 
 
+def delete_cases_for_run(run_id):
+    """指定runIdの既存ケースをすべて削除（runId固定上書き時のリセット用）"""
+    try:
+        result = cases_table.query(
+            KeyConditionExpression=Key('runId').eq(run_id),
+            ProjectionExpression='runId, caseId'
+        )
+        items = result.get('Items', [])
+        while result.get('LastEvaluatedKey'):
+            result = cases_table.query(
+                KeyConditionExpression=Key('runId').eq(run_id),
+                ProjectionExpression='runId, caseId',
+                ExclusiveStartKey=result['LastEvaluatedKey']
+            )
+            items.extend(result.get('Items', []))
+        with cases_table.batch_writer() as batch:
+            for item in items:
+                batch.delete_item(Key={'runId': item['runId'], 'caseId': item['caseId']})
+    except Exception as e:
+        print(f'delete_cases_for_run error: {e}')
+
+
 def create_run(event):
     """
-    POST /runs - テスト実行登録
+    POST /runs - テスト実行登録（runIdが既存の場合は上書き＋ケース削除）
     ボディ:
-      - runId: 実行ID（YYYYMMDD_HHmmss_commitHash_agentN）
+      - runId: 実行ID（固定: agentN）
       - commitHash: コミットハッシュ
       - branch: ブランチ名
       - agentNum: エージェント番号
@@ -206,6 +239,9 @@ def create_run(event):
 
     now_iso = datetime.now(timezone.utc).isoformat()
 
+    # 既存ケースをすべて削除してからrun情報を上書き
+    delete_cases_for_run(run_id)
+
     item = {
         'runId': run_id,
         'status': 'all',           # GSI用パーティションキー（常に"all"）
@@ -214,6 +250,7 @@ def create_run(event):
         'branch': body.get('branch', 'unknown'),
         'agentNum': body.get('agentNum', 1),
         'specFile': body.get('specFile', ''),
+        'sessionId': str(body.get('sessionId', '1')),
         'testEnvUrl': body.get('testEnvUrl', ''),
         'totalCount': 0,
         'passCount': 0,
@@ -349,6 +386,7 @@ def create_cases(run_id, event):
                 'videoKey': case.get('videoKey', ''),
                 'screenshotKeys': case.get('screenshotKeys', []),
                 'traceKey': case.get('traceKey', ''),
+                'steps': case.get('steps', []),
                 'startedAt': case.get('startedAt', now_iso),
                 'createdAt': now_iso,
                 'ttl': ttl
@@ -375,6 +413,35 @@ def create_cases(run_id, event):
         pass  # カウント更新失敗は無視（ケース登録は成功済み）
 
     return response(201, {'message': f'{len(cases)}件登録完了', 'runId': run_id})
+
+
+def patch_case(run_id, case_id, event):
+    """
+    PATCH /runs/{runId}/cases/{caseId} - ケースのS3キーを後から更新
+    ボディ:
+      - videoKey, screenshotKeys, traceKey（いずれか）
+    """
+    body = json.loads(event.get('body') or '{}')
+    expr_parts = []
+    expr_values = {}
+    if 'videoKey' in body:
+        expr_parts.append('videoKey = :vk')
+        expr_values[':vk'] = body['videoKey']
+    if 'screenshotKeys' in body:
+        expr_parts.append('screenshotKeys = :sk')
+        expr_values[':sk'] = body['screenshotKeys']
+    if 'traceKey' in body:
+        expr_parts.append('traceKey = :tk')
+        expr_values[':tk'] = body['traceKey']
+    if not expr_parts:
+        return response(400, {'error': '更新フィールドがありません'})
+
+    cases_table.update_item(
+        Key={'runId': run_id, 'caseId': case_id},
+        UpdateExpression='SET ' + ', '.join(expr_parts),
+        ExpressionAttributeValues=expr_values
+    )
+    return response(200, {'message': '更新完了'})
 
 
 def get_upload_url(event):

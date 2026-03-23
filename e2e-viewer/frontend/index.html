@@ -51,6 +51,39 @@
       animation: pulse-border 2s ease-in-out infinite;
     }
 
+    /* 全体進捗パネル */
+    #session-panel {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .spec-agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .spec-agent-card {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: .83rem;
+      transition: border-color .2s;
+      cursor: pointer;
+    }
+    .spec-agent-card:hover { border-color: #6c757d; }
+    .spec-agent-card.sa-running  { border-left: 3px solid #0dcaf0; background: #f0fbff; animation: pulse-border 2s ease-in-out infinite; }
+    .spec-agent-card.sa-completed { border-left: 3px solid #198754; background: #f0fff4; }
+    .spec-agent-card.sa-failed   { border-left: 3px solid #dc3545; background: #fff5f5; }
+    .spec-agent-card.sa-pending  { border-left: 3px solid #adb5bd; background: #f8f9fa; color: #6c757d; }
+    .spec-agent-card .agent-num  { font-weight: 700; font-size: .75rem; color: #6c757d; }
+    .spec-agent-card .spec-list  { margin-top: 4px; line-height: 1.5; }
+    .spec-agent-card .agent-stats { font-size: .72rem; margin-top: 5px; color: #6c757d; }
+    .spec-agent-card .agent-progress { height: 4px; border-radius: 2px; margin-top: 5px; background: #e9ecef; overflow: hidden; }
+    .spec-agent-card .agent-progress-bar { height: 100%; background: #198754; transition: width .5s; }
+
     /* 実行中バナー */
     .running-banner {
       background: linear-gradient(90deg, #e8f4f8, #f0f8ff);
@@ -88,6 +121,15 @@
 </nav>
 
 <div class="container py-4">
+
+  <!-- 全体進捗パネル（フルラン時） -->
+  <div id="session-panel" style="display:none">
+    <div class="d-flex align-items-center justify-content-between">
+      <h6 class="mb-0"><i class="bi bi-grid-3x3-gap me-2"></i>全体進捗 <span id="session-summary" class="text-muted small fw-normal ms-2"></span></h6>
+      <span class="text-muted small" id="session-updated"></span>
+    </div>
+    <div class="spec-agent-grid" id="session-grid"></div>
+  </div>
 
   <!-- フィルター＆タイトル -->
   <div class="d-flex align-items-center justify-content-between mb-3">
@@ -164,12 +206,15 @@ let lastKey = null;
 let isLoading = false;
 let totalLoaded = 0;    // 表示済み件数（通し番号計算用）
 let autoRefreshTimer = null;  // running runがある場合の自動リフレッシュタイマー
+let allRunItems = [];   // 全runのアキュムレータ（セッション集約用）
+let allSessionIds = []; // 表示済みセッションID
 
 // =========================================
 // ページ初期化
 // =========================================
 document.addEventListener('DOMContentLoaded', () => {
   loadRuns();
+  loadSessionPanel();  // 全体進捗パネルを初期表示
   document.getElementById('status-filter').addEventListener('change', () => {
     lastKey = null;
     totalLoaded = 0;
@@ -249,32 +294,159 @@ async function fetchRuns(startKey = null) {
 }
 
 // =========================================
+// 全体進捗パネル（フルラン: agent30-35）
+// =========================================
+
+// エージェントごとのspec割り当て（e2e.md と同期）
+const AGENT_SPECS = [
+  { agentNum: 30, label: 'agent-A', specs: ['layout-ui', 'system-settings', 'table-definition', 'reports', 'records'] },
+  { agentNum: 31, label: 'agent-B', specs: ['notifications', 'users-permissions', 'auth'] },
+  { agentNum: 32, label: 'agent-C', specs: ['workflow', 'uncategorized'] },
+  { agentNum: 33, label: 'agent-D', specs: ['chart-calendar', 'fields', 'filters', 'comments-logs', 'csv-export', 'public-form'] },
+  { agentNum: 34, label: 'agent-C2', specs: ['uncategorized-2'] },
+  { agentNum: 35, label: 'agent-C3', specs: ['uncategorized-3'] },
+];
+
+let sessionPollTimer = null;
+
+async function loadSessionPanel() {
+  // 全エージェントのrun情報を並列取得
+  const results = await Promise.all(
+    AGENT_SPECS.map(async a => {
+      try {
+        const r = await fetch(`${CONFIG.apiUrl}/runs/agent${a.agentNum}`, { headers: authHeaders() });
+        if (r.ok) return { ...a, run: await r.json() };
+        return { ...a, run: null };
+      } catch (e) {
+        return { ...a, run: null };
+      }
+    })
+  );
+
+  const hasAny   = results.some(r => r.run);
+  const hasRunning = results.some(r => r.run?.runStatus === 'running');
+
+  if (!hasAny) {
+    document.getElementById('session-panel').style.display = 'none';
+    stopSessionPoll();
+    return;
+  }
+
+  document.getElementById('session-panel').style.display = '';
+
+  // サマリー計算
+  const runningCount   = results.filter(r => r.run?.runStatus === 'running').length;
+  const completedCount = results.filter(r => r.run && r.run.runStatus !== 'running').length;
+  const pendingCount   = results.filter(r => !r.run).length;
+  let summary = '';
+  if (runningCount > 0)   summary += `<span class="text-info fw-bold">${runningCount}実行中</span> `;
+  if (completedCount > 0) summary += `<span class="text-success">${completedCount}完了</span> `;
+  if (pendingCount > 0)   summary += `<span class="text-muted">${pendingCount}未開始</span>`;
+  document.getElementById('session-summary').innerHTML = summary;
+  document.getElementById('session-updated').textContent = new Date().toLocaleTimeString('ja-JP');
+
+  // グリッド描画
+  const grid = document.getElementById('session-grid');
+  grid.innerHTML = '';
+  results.forEach(item => {
+    const run = item.run;
+    const status = run ? run.runStatus : 'pending';
+    const card = document.createElement('div');
+    const statusClass = { running: 'sa-running', completed: 'sa-completed', failed: 'sa-failed', pending: 'sa-pending' }[status] || 'sa-pending';
+    card.className = `spec-agent-card ${statusClass}`;
+    if (run) card.onclick = () => location.href = `run.html?runId=agent${item.agentNum}`;
+
+    const statusBadge = {
+      running:   '<span class="badge bg-info text-dark"><span class="spinner-border spinner-border-sm me-1" style="width:.6rem;height:.6rem"></span>実行中</span>',
+      completed: '<span class="badge bg-success">完了</span>',
+      failed:    '<span class="badge bg-danger">FAIL</span>',
+      pending:   '<span class="badge bg-secondary">未開始</span>',
+    }[status] || '';
+
+    let statsHtml = '';
+    let progressHtml = '';
+    if (run && status !== 'pending') {
+      const pass = parseInt(run.passCount) || 0;
+      const fail = parseInt(run.failCount) || 0;
+      const skip = parseInt(run.skipCount) || 0;
+      const total = parseInt(run.totalCount) || 0;
+      const expected = parseInt(run.expectedTotal) || 0;
+      const pct = expected > 0 ? Math.min(100, Math.round(total / expected * 100)) : (total > 0 ? 100 : 0);
+      statsHtml = `<div class="agent-stats">PASS ${pass} / FAIL ${fail} / SKIP ${skip}${expected > 0 ? ` &nbsp;(${total}/${expected}件)` : ''}</div>`;
+      progressHtml = `<div class="agent-progress"><div class="agent-progress-bar" style="width:${pct}%"></div></div>`;
+    }
+
+    card.innerHTML = `
+      <div class="d-flex align-items-center justify-content-between">
+        <span class="agent-num">${escHtml(item.label)} (agent${item.agentNum})</span>
+        ${statusBadge}
+      </div>
+      <div class="spec-list">${item.specs.map(s => `<span class="badge bg-light text-dark border me-1">${escHtml(s)}</span>`).join('')}</div>
+      ${statsHtml}
+      ${progressHtml}`;
+
+    grid.appendChild(card);
+  });
+
+  // 実行中があればポーリング継続、なければ停止
+  if (hasRunning) {
+    startSessionPoll();
+  } else {
+    stopSessionPoll();
+  }
+}
+
+function startSessionPoll() {
+  if (sessionPollTimer) return;
+  sessionPollTimer = setInterval(loadSessionPanel, 4000);
+}
+
+function stopSessionPoll() {
+  if (sessionPollTimer) {
+    clearInterval(sessionPollTimer);
+    sessionPollTimer = null;
+  }
+}
+
+// =========================================
 // 自動リフレッシュ（running runがある場合のみ）
 // =========================================
 function startAutoRefresh() {
   if (autoRefreshTimer) return;
   autoRefreshTimer = setInterval(async () => {
     try {
-      // running runのカードだけ個別に更新する
+      // running セッションカードだけ個別に更新する
       const runCards = document.querySelectorAll('.run-card[data-run-status="running"]');
       if (runCards.length === 0) {
-        // running runがなくなったら自動リフレッシュ停止
         stopAutoRefresh();
         return;
       }
 
-      // 各runningカードのrunIdに対してAPIをポーリング
       for (const card of runCards) {
-        const cardRunId = card.dataset.runId;
-        if (!cardRunId) continue;
+        // data-run-ids はカンマ区切りの複数runId
+        const runIdsStr = card.dataset.runIds || card.dataset.runId || '';
+        if (!runIdsStr) continue;
+        const runIds = runIdsStr.split(',').map(s => s.trim()).filter(Boolean);
         try {
-          const r = await fetch(
-            `${CONFIG.apiUrl}/runs/${encodeURIComponent(cardRunId)}`,
-            { headers: authHeaders() }
-          );
-          if (!r.ok) continue;
-          const run = await r.json();
-          updateRunningCard(card, run);
+          // 全runを並列取得してマージ
+          const runs = await Promise.all(runIds.map(async rid => {
+            const r = await fetch(`${CONFIG.apiUrl}/runs/${encodeURIComponent(rid)}`, { headers: authHeaders() });
+            if (!r.ok) return null;
+            return r.json();
+          }));
+          const validRuns = runs.filter(Boolean);
+          if (validRuns.length === 0) continue;
+
+          const merged = {
+            passCount:     validRuns.reduce((s, r) => s + (parseInt(r.passCount)    || 0), 0),
+            failCount:     validRuns.reduce((s, r) => s + (parseInt(r.failCount)    || 0), 0),
+            skipCount:     validRuns.reduce((s, r) => s + (parseInt(r.skipCount)    || 0), 0),
+            totalCount:    validRuns.reduce((s, r) => s + (parseInt(r.totalCount)   || 0), 0),
+            expectedTotal: validRuns.reduce((s, r) => s + (parseInt(r.expectedTotal)|| 0), 0),
+            runStatus: validRuns.some(r => r.runStatus === 'running') ? 'running'
+                     : validRuns.some(r => r.runStatus === 'failed')  ? 'failed' : 'completed',
+          };
+          updateRunningCard(card, merged);
         } catch (e) {
           // 個別カードの更新失敗は無視
         }
@@ -336,13 +508,68 @@ function updateRunningCard(card, run) {
 }
 
 // =========================================
-// 実行一覧レンダリング
+// セッション集約ヘルパー
+// sessionId でグループ化し、1セッション=第N回として扱う
+// =========================================
+function groupBySessions(items) {
+  const map = {};
+  items.forEach(run => {
+    const sid = run.sessionId || run.runId; // sessionId未設定の古いrunはrunId単体
+    if (!map[sid]) map[sid] = [];
+    map[sid].push(run);
+  });
+  // sessionId の降順（数値として比較）で返す
+  return Object.entries(map)
+    .sort((a, b) => Number(b[0]) - Number(a[0]) || b[0].localeCompare(a[0]))
+    .map(([sid, runs]) => mergeSession(sid, runs));
+}
+
+function mergeSession(sid, runs) {
+  const pass     = runs.reduce((s, r) => s + (parseInt(r.passCount)    || 0), 0);
+  const fail     = runs.reduce((s, r) => s + (parseInt(r.failCount)    || 0), 0);
+  const skip     = runs.reduce((s, r) => s + (parseInt(r.skipCount)    || 0), 0);
+  const total    = runs.reduce((s, r) => s + (parseInt(r.totalCount)   || 0), 0);
+  const expected = runs.reduce((s, r) => s + (parseInt(r.expectedTotal)|| 0), 0);
+  const durationMs = Math.max(...runs.map(r => parseInt(r.durationMs) || 0));
+
+  const hasRunning = runs.some(r => r.runStatus === 'running');
+  const hasFailed  = runs.some(r => r.runStatus === 'failed');
+  const status = hasRunning ? 'running' : hasFailed ? 'failed' : 'completed';
+
+  const startedAt  = runs.map(r => r.startedAt).filter(Boolean).sort()[0];
+  const testEnvUrl = (runs.find(r => r.testEnvUrl) || {}).testEnvUrl || '';
+  const commitHash = (runs.find(r => r.commitHash) || {}).commitHash || '';
+  const branch     = (runs.find(r => r.branch)     || {}).branch     || '';
+
+  // 全runのspecFileをまとめる（重複除去・ソート）
+  const specs = [...new Set(
+    runs.flatMap(r => (r.specFile || '').split(',').map(s => s.trim()).filter(Boolean))
+  )].sort();
+
+  return { sid, runIds: runs.map(r => r.runId), runs, pass, fail, skip, total, expected,
+           durationMs, status, startedAt, testEnvUrl, commitHash, branch, specs };
+}
+
+// =========================================
+// 実行一覧レンダリング（sessionId単位で第N回表示）
 // =========================================
 function renderRuns(items, clear) {
   const container = document.getElementById('runs-list');
-  if (clear) container.innerHTML = '';
+  if (clear) {
+    container.innerHTML = '';
+    allSessionIds = [];
+  }
 
-  if (!items.length && clear) {
+  // 新しいrunをallRunItemsに追記してからセッション再計算
+  if (clear) {
+    allRunItems = [...items];
+  } else {
+    // loadMore: 既存にないrunだけ追加
+    const existing = new Set(allRunItems.map(r => r.runId));
+    items.forEach(r => { if (!existing.has(r.runId)) allRunItems.push(r); });
+  }
+
+  if (!allRunItems.length) {
     container.innerHTML = `
       <div class="empty-state">
         <i class="bi bi-inbox fs-1 d-block mb-2"></i>
@@ -351,128 +578,146 @@ function renderRuns(items, clear) {
     return;
   }
 
-  items.forEach((run, idx) => {
-    const runNo = totalLoaded + idx + 1;
+  const sessions = groupBySessions(allRunItems);
+
+  // 表示済みセッションIDのセット
+  const renderedSids = new Set(
+    [...container.querySelectorAll('.run-card[data-session-id]')].map(el => el.dataset.sessionId)
+  );
+
+  sessions.forEach((sess, idx) => {
+    const sessionNo = sessions.length - idx; // 古いほど小さい番号
+    if (renderedSids.has(sess.sid)) {
+      // 既存カードはdata属性だけ更新（ポーリング時に updateSessionCard が使う）
+      return;
+    }
+    renderedSids.add(sess.sid);
+
     const card = document.createElement('div');
-    card.className = `card run-card mb-2 status-${run.runStatus}`;
-    card.dataset.runStatus = run.runStatus;
-    card.dataset.runId = run.runId;
-    card.onclick = () => location.href = `run.html?runId=${run.runId}`;
-
-    const total = parseInt(run.totalCount) || 0;
-    const pass  = parseInt(run.passCount) || 0;
-    const fail  = parseInt(run.failCount) || 0;
-    const skip  = parseInt(run.skipCount) || 0;
-    const expected = parseInt(run.expectedTotal) || 0;
-    const passRate = total > 0 ? Math.round(pass / total * 100) : 0;
-
-    const statusIcon = {
-      completed: '<i class="bi bi-check-circle-fill text-success"></i>',
-      failed:    '<i class="bi bi-x-circle-fill text-danger"></i>',
-      running:   '<i class="bi bi-arrow-repeat text-info"></i>'
-    }[run.runStatus] || '<i class="bi bi-question-circle"></i>';
-
-    // 日付フォーマット: 「第N回 YYYY/M/D（曜日）」
-    const dateObj = run.startedAt ? new Date(run.startedAt) : null;
-    const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-    const dateLabel = dateObj
-      ? `第${runNo}回 ${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()}（${weekdays[dateObj.getDay()]}）`
-      : `第${runNo}回`;
-    const timeLabel = dateObj ? dateObj.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : '';
-
-    const durationStr = formatDuration(parseInt(run.durationMs) || 0);
-    const specBadge = run.specFile
-      ? `<span class="badge bg-secondary me-1">${escHtml(run.specFile)}</span>`
-      : '';
-
-    // 実行中と完了後で右サイドのUIを切り替える
-    let rightSideHtml;
-    if (run.runStatus === 'running') {
-      // === 実行中の右サイド ===
-      const completedCount = total;
-      const progressPct = expected > 0
-        ? Math.min(100, (completedCount / expected * 100)).toFixed(1)
-        : 0;
-      const progressCountText = expected > 0
-        ? `${completedCount}/${expected}件`
-        : `${completedCount}件`;
-
-      rightSideHtml = `
-        <div class="running-section">
-          <div class="running-banner mb-1">
-            <div class="spinner-border spinner-border-sm text-info"></div>
-            実行中
-          </div>
-          <div class="running-mini-stats">PASS ${pass} / FAIL ${fail} / SKIP ${skip}</div>
-          ${expected > 0 ? `
-          <div class="mt-1" style="min-width:120px">
-            <div class="progress progress-running bg-light">
-              <div class="progress-bar bg-info progress-bar-striped progress-bar-animated running-progress-bar"
-                   style="width:${progressPct}%" title="${progressCountText}"></div>
-            </div>
-            <div class="text-center progress-count" style="font-size:.68rem;color:#6c757d">${progressCountText}</div>
-          </div>` : ''}
-        </div>
-        <div class="final-section" style="display:none">
-          <div class="stat-box bg-success bg-opacity-10">
-            <div class="num text-success">${pass}</div>
-            <div class="label">PASS</div>
-          </div>
-        </div>`;
-    } else {
-      // === 完了後の右サイド ===
-      rightSideHtml = `
-        <div class="final-section">
-          <div class="d-flex gap-2 align-items-center">
-            <div class="stat-box bg-success bg-opacity-10">
-              <div class="num text-success">${pass}</div>
-              <div class="label">PASS</div>
-            </div>
-            <div class="stat-box bg-danger bg-opacity-10">
-              <div class="num text-danger">${fail}</div>
-              <div class="label">FAIL</div>
-            </div>
-            <div class="stat-box bg-secondary bg-opacity-10">
-              <div class="num text-secondary">${skip}</div>
-              <div class="label">SKIP</div>
-            </div>
-            <div class="d-none d-md-block" style="width:80px">
-              <div class="progress mb-1">
-                <div class="progress-bar bg-success" style="width:${passRate}%"></div>
-              </div>
-              <div class="text-center" style="font-size:.72rem;color:#6c757d">${passRate}%</div>
-            </div>
-          </div>
-        </div>`;
+    card.className = `card run-card mb-2 status-${sess.status}`;
+    card.dataset.runStatus  = sess.status;
+    card.dataset.sessionId  = sess.sid;
+    card.dataset.runIds     = sess.runIds.join(',');
+    // クリックで最初のrunId詳細へ
+    if (sess.runIds.length === 1) {
+      card.onclick = () => location.href = `run.html?runId=${sess.runIds[0]}`;
     }
 
-    card.innerHTML = `
-      <div class="card-body py-2 px-3">
-        <div class="d-flex align-items-center gap-3">
-          <div class="fs-5">${statusIcon}</div>
-          <div class="flex-grow-1 overflow-hidden">
-            <div class="d-flex align-items-center gap-2 mb-1">
-              <span class="run-title">${escHtml(dateLabel)}</span>
-              ${timeLabel ? `<span class="run-subtitle">${timeLabel}</span>` : ''}
-              ${specBadge}
-              ${run.commitHash ? `<span class="commit-badge">${escHtml(run.commitHash)}</span>` : ''}
-              ${run.branch && run.branch !== 'unknown' ? `<span class="badge bg-primary">${escHtml(run.branch)}</span>` : ''}
-            </div>
-            <div class="run-time">
-              <i class="bi bi-stopwatch me-1"></i>${durationStr}
-              ${run.testEnvUrl ? `&nbsp;|&nbsp;<a href="${escHtml(run.testEnvUrl)}" target="_blank" onclick="event.stopPropagation()" class="text-muted"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
-            </div>
+    container.appendChild(card);
+    renderSessionCard(card, sess, sessionNo);
+  });
+
+  totalLoaded = allRunItems.length;
+}
+
+function renderSessionCard(card, sess, sessionNo) {
+  const { pass, fail, skip, total, expected, status, startedAt,
+          testEnvUrl, commitHash, branch, specs, durationMs, runIds } = sess;
+
+  const passRate = total > 0 ? Math.round(pass / total * 100) : 0;
+
+  const statusIcon = {
+    completed: '<i class="bi bi-check-circle-fill text-success"></i>',
+    failed:    '<i class="bi bi-x-circle-fill text-danger"></i>',
+    running:   '<i class="bi bi-arrow-repeat text-info"></i>'
+  }[status] || '<i class="bi bi-question-circle"></i>';
+
+  const dateObj = startedAt ? new Date(startedAt) : null;
+  const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+  const dateLabel = dateObj
+    ? `第${sessionNo}回 ${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()}（${weekdays[dateObj.getDay()]}）`
+    : `第${sessionNo}回`;
+  const timeLabel = dateObj ? dateObj.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : '';
+
+  const durationStr = formatDuration(durationMs);
+  const specBadge = specs.length
+    ? specs.map(s => `<span class="badge bg-secondary me-1">${escHtml(s)}</span>`).join('')
+    : '';
+  const envBadge = testEnvUrl
+    ? (testEnvUrl.includes('pigeon-cloud.com')
+        ? '<span class="badge bg-danger me-1">本番</span>'
+        : testEnvUrl.includes('pigeon-demo.com')
+          ? '<span class="badge bg-warning text-dark me-1">Staging</span>'
+          : '')
+    : '';
+
+  // エージェント内訳（複数runがある場合）
+  const agentDetail = runIds.length > 1
+    ? `<span class="text-muted small">${runIds.length}エージェント並列</span>`
+    : '';
+
+  let rightSideHtml;
+  if (status === 'running') {
+    const progressPct = expected > 0 ? Math.min(100, (total / expected * 100)).toFixed(1) : 0;
+    const progressCountText = expected > 0 ? `${total}/${expected}件` : `${total}件`;
+    rightSideHtml = `
+      <div class="running-section">
+        <div class="running-banner mb-1">
+          <div class="spinner-border spinner-border-sm text-info"></div>
+          実行中
+        </div>
+        <div class="running-mini-stats">PASS ${pass} / FAIL ${fail} / SKIP ${skip}</div>
+        ${expected > 0 ? `
+        <div class="mt-1" style="min-width:120px">
+          <div class="progress progress-running bg-light">
+            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated running-progress-bar"
+                 style="width:${progressPct}%" title="${progressCountText}"></div>
           </div>
-          <div class="d-flex gap-2 align-items-center flex-shrink-0">
-            ${rightSideHtml}
+          <div class="text-center progress-count" style="font-size:.68rem;color:#6c757d">${progressCountText}</div>
+        </div>` : ''}
+      </div>
+      <div class="final-section" style="display:none">
+        <div class="stat-box bg-success bg-opacity-10">
+          <div class="num text-success">${pass}</div><div class="label">PASS</div>
+        </div>
+      </div>`;
+  } else {
+    rightSideHtml = `
+      <div class="final-section">
+        <div class="d-flex gap-2 align-items-center">
+          <div class="stat-box bg-success bg-opacity-10">
+            <div class="num text-success">${pass}</div><div class="label">PASS</div>
+          </div>
+          <div class="stat-box bg-danger bg-opacity-10">
+            <div class="num text-danger">${fail}</div><div class="label">FAIL</div>
+          </div>
+          <div class="stat-box bg-secondary bg-opacity-10">
+            <div class="num text-secondary">${skip}</div><div class="label">SKIP</div>
+          </div>
+          <div class="d-none d-md-block" style="width:80px">
+            <div class="progress mb-1">
+              <div class="progress-bar bg-success" style="width:${passRate}%"></div>
+            </div>
+            <div class="text-center" style="font-size:.72rem;color:#6c757d">${passRate}%</div>
           </div>
         </div>
       </div>`;
+  }
 
-    container.appendChild(card);
-  });
-
-  totalLoaded += items.length;
+  card.innerHTML = `
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="fs-5">${statusIcon}</div>
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+            <span class="run-title">${escHtml(dateLabel)}</span>
+            ${timeLabel ? `<span class="run-subtitle">${timeLabel}</span>` : ''}
+            ${envBadge}
+            ${agentDetail}
+            ${commitHash ? `<span class="commit-badge">${escHtml(commitHash)}</span>` : ''}
+            ${branch && branch !== 'unknown' ? `<span class="badge bg-primary">${escHtml(branch)}</span>` : ''}
+          </div>
+          <div class="run-time">
+            <i class="bi bi-stopwatch me-1"></i>${durationStr}
+            ${specBadge}
+            ${testEnvUrl ? `&nbsp;<a href="${escHtml(testEnvUrl)}" target="_blank" onclick="event.stopPropagation()" class="text-muted"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
+          </div>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-shrink-0">
+          ${rightSideHtml}
+        </div>
+      </div>
+    </div>`;
 }
 
 // =========================================

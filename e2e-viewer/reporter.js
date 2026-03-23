@@ -19,6 +19,8 @@ const { createHash } = require('crypto');
 const { existsSync, readFileSync } = require('fs');
 const { basename } = require('path');
 const { execSync } = require('child_process');
+const https = require('https');
+const http = require('http');
 
 const TOKEN_SALT = 'pigeon-e2e-viewer-salt-2026';
 const VIEWER_URL = 'https://dezmzppc07xat.cloudfront.net';
@@ -29,12 +31,57 @@ function generateToken(password) {
 
 async function uploadFileToPresignedUrl(presignedUrl, filePath, contentType) {
   const data = readFileSync(filePath);
-  const resp = await fetch(presignedUrl, {
-    method: 'PUT',
-    body: data,
-    headers: { 'Content-Type': contentType || 'application/octet-stream' },
+  process.stdout.write(`[E2EViewer] S3 PUT start: size=${data.length}\n`);
+  return new Promise((resolve, reject) => {
+    const url = new URL(presignedUrl);
+    const mod = url.protocol === 'https:' ? https : http;
+    const req = mod.request({
+      hostname: url.hostname,
+      path: url.pathname + url.search,
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType || 'application/octet-stream',
+        'Content-Length': data.length,
+      },
+    }, (res) => {
+      let body = '';
+      res.on('data', chunk => { body += chunk; });
+      res.on('end', () => {
+        process.stdout.write(`[E2EViewer] S3 PUT done: status=${res.statusCode}\n`);
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve();
+        } else {
+          reject(new Error(`S3 PUT ${res.statusCode}: ${body.slice(0, 200)}`));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(30000, () => {
+      req.destroy(new Error('S3 PUT timeout'));
+    });
+    req.write(data);
+    req.end();
   });
-  if (!resp.ok) throw new Error(`S3 PUT ${resp.status}`);
+}
+
+/**
+ * result.steps からexpect/test.stepカテゴリのステップを再帰収集
+ * @param {Array} steps
+ * @param {Array} acc
+ * @returns {{ title: string, ok: boolean, category: string }[]}
+ */
+function collectSteps(steps, acc = []) {
+  for (const step of steps || []) {
+    if (step.category === 'test.step') {
+      acc.push({ title: `▶ ${step.title}`, ok: !step.error, category: 'step' });
+      collectSteps(step.steps, acc);
+    } else if (step.category === 'expect') {
+      acc.push({ title: step.title, ok: !step.error, category: 'expect' });
+    } else {
+      collectSteps(step.steps, acc);
+    }
+  }
+  return acc;
 }
 
 class E2EViewerReporter {
@@ -45,12 +92,14 @@ class E2EViewerReporter {
     this.agentNum = parseInt(options.agentNum || process.env.AGENT_NUM || '1');
     this.testEnvUrl = options.testEnvUrl || process.env.TEST_BASE_URL || '';
 
+    this.sessionId = options.sessionId || process.env.TEST_NUMBER || '1';
     this.runId = null;
     this.passCount = 0;
     this.failCount = 0;
     this.skipCount = 0;
     this.startTime = null;
     this._beginPromise = null;  // onBeginの非同期処理を追跡
+    this._caseQueue = [];       // {caseData, uploadPromises[]} キュー（onEndで一括DynamoDB登録）
   }
 
   // =========================================
@@ -95,6 +144,16 @@ class E2EViewerReporter {
     return await resp.json();
   }
 
+  async _patch(path, body) {
+    const resp = await fetch(`${this.apiUrl}${path}`, {
+      method: 'PATCH',
+      headers: this._headers(),
+      body: JSON.stringify(body),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    return await resp.json();
+  }
+
   // =========================================
   // Git情報取得
   // =========================================
@@ -122,22 +181,6 @@ class E2EViewerReporter {
   // =========================================
 
   /**
-   * suiteを再帰的に走査してテスト総数をカウント（expectedTotal用）
-   */
-  _countTests(suite) {
-    let n = 0;
-    // spec（テストケース）を数える
-    for (const spec of suite.specs || []) {
-      n += spec.tests?.length || 1;
-    }
-    // 子suiteを再帰的に数える
-    for (const child of suite.suites || []) {
-      n += this._countTests(child);
-    }
-    return n;
-  }
-
-  /**
    * テスト開始前: ランを登録してrunIdを確定させる
    * onBeginはsyncだが、非同期処理をPromiseとして保持し
    * onTestEndで await する
@@ -150,24 +193,26 @@ class E2EViewerReporter {
     this.commitHash = commitHash;
     this.branch = branch;
 
-    // runId生成
-    const now = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`
-      + `_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-    this.runId = `${ts}_${commitHash}_agent${this.agentNum}`;
+    // runId: エージェント番号固定（毎回同じIDで上書き）
+    // ユーザーが明示的に別runを指定した場合のみ変更する
+    this.runId = `agent${this.agentNum}`;
 
-    // specファイル一覧（ルートsuiteの直下suites = ファイル単位）
+    // specファイル一覧: ルート→プロジェクト(chromium)→ファイル の2段階降りる
     const specFiles = [...new Set(
-      (suite.suites || []).map(s => basename(s.title || '')).filter(Boolean)
+      (suite.suites || [])
+        .flatMap(projectSuite => projectSuite.suites || [])
+        .map(fileSuite => basename(fileSuite.title || ''))
+        .filter(Boolean)
     )];
     this.specFile = specFiles.join(',');
 
     // テスト総数をカウント（リアルタイム進捗バーのETA計算に使用）
-    const expectedTotal = this._countTests(suite);
+    // allTests() はPlaywright公開APIで全テストを返す
+    const expectedTotal = suite.allTests ? suite.allTests().length : 0;
 
     this._beginPromise = this._post('/runs', {
       runId: this.runId,
+      sessionId: this.sessionId,
       commitHash,
       branch,
       agentNum: this.agentNum,
@@ -179,7 +224,7 @@ class E2EViewerReporter {
     }).then(() => {
       process.stdout.write(`\n[E2EViewer] 実行登録: ${this.runId} (総数: ${expectedTotal}件)\n`);
     }).catch(e => {
-      process.stderr.write(`[E2EViewer] 実行登録失敗: ${e.message}\n`);
+      process.stdout.write(`[E2EViewer] 実行登録失敗: ${e.message}\n`);
       this.runId = null;  // 登録失敗時はその後のアップロードをスキップ
     });
   }
@@ -236,45 +281,68 @@ class E2EViewerReporter {
       durationMs: result.duration || 0,
       errorMessage,
       startedAt: (result.startTime || new Date()).toISOString(),
+      steps: collectSteps(result.steps).slice(0, 60),
     };
 
-    // アタッチメント（動画・スクリーンショット・トレース）をS3にアップロード
-    for (const att of result.attachments || []) {
-      if (!att.path || !existsSync(att.path)) continue;
-      const fileName = basename(att.path);
-      const s3Key = `runs/${this.runId}/${caseId.slice(0, 40)}/${att.name}/${fileName}`;
-      try {
-        const { uploadUrl } = await this._post('/assets/upload-url', {
-          key: s3Key,
-          contentType: att.contentType || 'application/octet-stream',
-        });
-        await uploadFileToPresignedUrl(uploadUrl, att.path, att.contentType);
-        if (att.name === 'video') {
-          caseData.videoKey = s3Key;
-        } else if (att.name === 'trace') {
-          caseData.traceKey = s3Key;
-        } else {
-          (caseData.screenshotKeys ??= []).push(s3Key);
-        }
-      } catch (e) {
-        // S3アップロード失敗はテスト結果登録には影響させない
-      }
-    }
-
-    // DynamoDBにテストケース結果を登録
+    // ① リアルタイム進捗: S3キーなしで即時DynamoDB登録（カウント加算）
     try {
       await this._post(`/runs/${this.runId}/cases`, { cases: [caseData] });
     } catch (e) {
-      // ケース登録失敗は無視（次のテストを止めない）
+      // 無視
     }
+
+    // ② S3アップロード: onEndで await するためPromiseをキューに積む
+    const uploadPromises = (result.attachments || [])
+      .filter(att => att.path && existsSync(att.path))
+      .map(att => {
+        const fileName = basename(att.path);
+        const s3Key = `runs/${this.runId}/${caseId.slice(0, 40)}/${att.name}/${fileName}`;
+        return this._post('/assets/upload-url', {
+          key: s3Key,
+          contentType: att.contentType || 'application/octet-stream',
+        }).then(({ uploadUrl }) => uploadFileToPresignedUrl(uploadUrl, att.path, att.contentType)
+        ).then(() => {
+          if (att.name === 'video') {
+            caseData.videoKey = s3Key;
+          } else if (att.name === 'trace') {
+            caseData.traceKey = s3Key;
+          } else {
+            (caseData.screenshotKeys ??= []).push(s3Key);
+          }
+        }).catch(e => {
+          process.stdout.write(`[E2EViewer] upload failed (${att.name}): ${e.message}\n`);
+        });
+      });
+
+    this._caseQueue.push({ caseData, uploadPromises });
   }
 
   /**
-   * 全テスト完了後: ランの最終ステータス・集計を更新
+   * 全テスト完了後: S3アップロード完了待ち → ケースのS3キーを更新 → ランの最終ステータスを更新
    */
   async onEnd(result) {
     if (!this.apiUrl || !this.runId) return;
 
+    // ① キューに積まれたS3アップロードをすべて完了させてからDynamoDBを更新
+    process.stdout.write(`[E2EViewer] S3アップロード待機中 (${this._caseQueue.length}件)...\n`);
+    for (const { caseData, uploadPromises } of this._caseQueue) {
+      await Promise.all(uploadPromises);
+      // S3キーがあればDynamoDBをPATCH
+      const patch = {};
+      if (caseData.videoKey) patch.videoKey = caseData.videoKey;
+      if (caseData.screenshotKeys?.length) patch.screenshotKeys = caseData.screenshotKeys;
+      if (caseData.traceKey) patch.traceKey = caseData.traceKey;
+      if (Object.keys(patch).length > 0) {
+        await this._patch(
+          `/runs/${this.runId}/cases/${encodeURIComponent(caseData.caseId)}`,
+          patch
+        ).catch(e => {
+          process.stdout.write(`[E2EViewer] case patch失敗 (${caseData.caseId}): ${e.message}\n`);
+        });
+      }
+    }
+
+    // ② ランの最終ステータスを更新
     const totalCount = this.passCount + this.failCount + this.skipCount;
     const durationMs = Date.now() - (this.startTime || Date.now());
 
@@ -294,7 +362,7 @@ class E2EViewerReporter {
         + `[E2EViewer] 🔗 ${VIEWER_URL}\n`
       );
     } catch (e) {
-      process.stderr.write(`[E2EViewer] 完了更新失敗: ${e.message}\n`);
+      process.stdout.write(`[E2EViewer] 完了更新失敗: ${e.message}\n`);
     }
   }
 }
