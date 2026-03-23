@@ -498,27 +498,35 @@ test.describe('共通設定・システム設定', () => {
 
         // 削除用の一時テーブルを作成する
         // create-all-type-table は 504 で返ることがあるが、バックエンドは処理完了している
-        // AbortControllerで90秒タイムアウトを設定し、504後もテーブル存在確認する
-        const createResult = await page.evaluate(async ({ baseUrl }) => {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 90000);
-            try {
-                const resp = await fetch(baseUrl + '/api/admin/debug/create-all-type-table', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                    body: JSON.stringify({}),
-                    credentials: 'include',
-                    signal: controller.signal,
-                });
-                clearTimeout(timer);
-                const text = await resp.text();
-                try { return JSON.parse(text); } catch(e) { return { result: 'timeout', status: resp.status }; }
-            } catch (e) {
-                clearTimeout(timer);
-                return { result: 'aborted', message: e.message };
+        // 504の場合は15秒待ってリトライ（最大3回）
+        let createResult;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            createResult = await page.evaluate(async ({ baseUrl }) => {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 90000);
+                try {
+                    const resp = await fetch(baseUrl + '/api/admin/debug/create-all-type-table', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({}),
+                        credentials: 'include',
+                        signal: controller.signal,
+                    });
+                    clearTimeout(timer);
+                    const text = await resp.text();
+                    try { return JSON.parse(text); } catch(e) { return { result: 'timeout', status: resp.status }; }
+                } catch (e) {
+                    clearTimeout(timer);
+                    return { result: 'aborted', message: e.message };
+                }
+            }, { baseUrl: BASE_URL }).catch(e => ({ result: 'error', message: e.message }));
+            console.log(`一時テーブル作成結果(attempt ${attempt}): ` + JSON.stringify(createResult).substring(0, 100));
+            if (createResult?.result === 'success' || createResult?.success) break;
+            if (attempt < 3) {
+                console.log('504 or failure - 15秒待ってリトライ...');
+                await page.waitForTimeout(15000);
             }
-        }, { baseUrl: BASE_URL }).catch(e => ({ result: 'error', message: e.message }));
-        console.log('一時テーブル作成結果: ' + JSON.stringify(createResult).substring(0, 100));
+        }
         await page.waitForTimeout(2000).catch(() => {});
 
         // 作成されたテーブル一覧を取得して、共有tableId以外を削除
