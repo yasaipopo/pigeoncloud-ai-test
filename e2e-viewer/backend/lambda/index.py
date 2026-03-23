@@ -219,7 +219,10 @@ def create_run(event):
         'passCount': 0,
         'failCount': 0,
         'skipCount': 0,
-        'startedAt': now_iso,
+        # reporter.js から送られるテスト総数（リアルタイム進捗バー用）
+        'expectedTotal': body.get('expectedTotal', 0),
+        # reporter.js が送る開始時刻（省略時は現在時刻）
+        'startedAt': body.get('startedAt', now_iso),
         'finishedAt': None,
         'durationMs': 0,
         'createdAt': now_iso,
@@ -351,6 +354,25 @@ def create_cases(run_id, event):
                 'ttl': ttl
             }
             batch.put_item(Item=item)
+
+    # ケース登録後にrunのカウントを原子的に加算（リアルタイム進捗用）
+    pass_delta = sum(1 for c in cases if c.get('caseStatus') == 'passed')
+    fail_delta = sum(1 for c in cases if c.get('caseStatus') == 'failed')
+    skip_delta = sum(1 for c in cases if c.get('caseStatus') == 'skipped')
+    total_delta = len(cases)
+    try:
+        runs_table.update_item(
+            Key={'runId': run_id},
+            UpdateExpression='ADD passCount :p, failCount :f, skipCount :sk, totalCount :tc',
+            ExpressionAttributeValues={
+                ':p': pass_delta,
+                ':f': fail_delta,
+                ':sk': skip_delta,
+                ':tc': total_delta,
+            }
+        )
+    except Exception:
+        pass  # カウント更新失敗は無視（ケース登録は成功済み）
 
     return response(201, {'message': f'{len(cases)}件登録完了', 'runId': run_id})
 

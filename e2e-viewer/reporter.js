@@ -122,6 +122,22 @@ class E2EViewerReporter {
   // =========================================
 
   /**
+   * suiteを再帰的に走査してテスト総数をカウント（expectedTotal用）
+   */
+  _countTests(suite) {
+    let n = 0;
+    // spec（テストケース）を数える
+    for (const spec of suite.specs || []) {
+      n += spec.tests?.length || 1;
+    }
+    // 子suiteを再帰的に数える
+    for (const child of suite.suites || []) {
+      n += this._countTests(child);
+    }
+    return n;
+  }
+
+  /**
    * テスト開始前: ランを登録してrunIdを確定させる
    * onBeginはsyncだが、非同期処理をPromiseとして保持し
    * onTestEndで await する
@@ -147,6 +163,9 @@ class E2EViewerReporter {
     )];
     this.specFile = specFiles.join(',');
 
+    // テスト総数をカウント（リアルタイム進捗バーのETA計算に使用）
+    const expectedTotal = this._countTests(suite);
+
     this._beginPromise = this._post('/runs', {
       runId: this.runId,
       commitHash,
@@ -156,8 +175,9 @@ class E2EViewerReporter {
       testEnvUrl: this.testEnvUrl,
       runStatus: 'running',
       startedAt: new Date(this.startTime).toISOString(),
+      expectedTotal,
     }).then(() => {
-      process.stdout.write(`\n[E2EViewer] 実行登録: ${this.runId}\n`);
+      process.stdout.write(`\n[E2EViewer] 実行登録: ${this.runId} (総数: ${expectedTotal}件)\n`);
     }).catch(e => {
       process.stderr.write(`[E2EViewer] 実行登録失敗: ${e.message}\n`);
       this.runId = null;  // 登録失敗時はその後のアップロードをスキップ

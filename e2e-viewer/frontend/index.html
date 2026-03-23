@@ -16,21 +16,22 @@
     }
     .run-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
     .run-card.status-completed { border-left-color: #198754; }
-    .run-card.status-failed { border-left-color: #dc3545; }
-    .run-card.status-running { border-left-color: #0dcaf0; }
+    .run-card.status-failed    { border-left-color: #dc3545; }
+    .run-card.status-running   { border-left-color: #0dcaf0; }
     .progress { height: 8px; }
+    .progress-running { height: 12px; }
     .stat-box {
       text-align: center;
       padding: 8px 12px;
       border-radius: 8px;
       min-width: 70px;
     }
-    .stat-box .num { font-size: 1.6rem; font-weight: bold; line-height: 1; }
+    .stat-box .num   { font-size: 1.6rem; font-weight: bold; line-height: 1; }
     .stat-box .label { font-size: .7rem; color: #6c757d; }
     .loading-spinner { display: flex; justify-content: center; padding: 60px; }
     .empty-state { text-align: center; padding: 80px; color: #adb5bd; }
-    .run-time { font-size: .78rem; color: #6c757d; }
-    .run-title { font-weight: 600; font-size: 1rem; }
+    .run-time     { font-size: .78rem; color: #6c757d; }
+    .run-title    { font-weight: 600; font-size: 1rem; }
     .run-subtitle { font-size: .8rem; color: #6c757d; }
     .commit-badge {
       font-family: monospace;
@@ -38,6 +39,34 @@
       background: #e9ecef;
       padding: 1px 6px;
       border-radius: 4px;
+    }
+
+    /* 実行中カードのパルスアニメーション */
+    @keyframes pulse-border {
+      0%   { border-left-color: #0dcaf0; }
+      50%  { border-left-color: #0d6efd; }
+      100% { border-left-color: #0dcaf0; }
+    }
+    .run-card.status-running {
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+
+    /* 実行中バナー */
+    .running-banner {
+      background: linear-gradient(90deg, #e8f4f8, #f0f8ff);
+      border-radius: 6px;
+      padding: 4px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .82rem;
+      color: #0c7a9a;
+      font-weight: 600;
+    }
+    .running-mini-stats {
+      font-size: .72rem;
+      color: #6c757d;
+      margin-top: 3px;
     }
   </style>
 </head>
@@ -133,7 +162,8 @@ function doLogout() {
 // =========================================
 let lastKey = null;
 let isLoading = false;
-let totalLoaded = 0;  // 表示済み件数（通し番号計算用）
+let totalLoaded = 0;    // 表示済み件数（通し番号計算用）
+let autoRefreshTimer = null;  // running runがある場合の自動リフレッシュタイマー
 
 // =========================================
 // ページ初期化
@@ -144,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lastKey = null;
     totalLoaded = 0;
     document.getElementById('runs-list').innerHTML = '';
+    stopAutoRefresh();
     loadRuns();
   });
 });
@@ -158,6 +189,7 @@ async function loadRuns() {
   totalLoaded = 0;
   document.getElementById('runs-list').innerHTML = '';
   document.getElementById('error-msg').classList.add('d-none');
+  stopAutoRefresh();
 
   try {
     const data = await fetchRuns();
@@ -167,6 +199,11 @@ async function loadRuns() {
       document.getElementById('load-more-wrap').style.display = '';
     } else {
       document.getElementById('load-more-wrap').style.display = 'none';
+    }
+
+    // running runが含まれる場合は5秒ごとに自動リフレッシュ
+    if (data.items.some(r => r.runStatus === 'running')) {
+      startAutoRefresh();
     }
   } catch (e) {
     showError('データ取得エラー: ' + e.message);
@@ -185,6 +222,11 @@ async function loadMore() {
     renderRuns(data.items, false);
     lastKey = data.last_key || null;
     if (!lastKey) document.getElementById('load-more-wrap').style.display = 'none';
+
+    // running runが含まれている場合は自動リフレッシュを開始
+    if (data.items.some(r => r.runStatus === 'running') && !autoRefreshTimer) {
+      startAutoRefresh();
+    }
   } catch (e) {
     showError('追加読み込みエラー: ' + e.message);
   } finally {
@@ -207,6 +249,93 @@ async function fetchRuns(startKey = null) {
 }
 
 // =========================================
+// 自動リフレッシュ（running runがある場合のみ）
+// =========================================
+function startAutoRefresh() {
+  if (autoRefreshTimer) return;
+  autoRefreshTimer = setInterval(async () => {
+    try {
+      // running runのカードだけ個別に更新する
+      const runCards = document.querySelectorAll('.run-card[data-run-status="running"]');
+      if (runCards.length === 0) {
+        // running runがなくなったら自動リフレッシュ停止
+        stopAutoRefresh();
+        return;
+      }
+
+      // 各runningカードのrunIdに対してAPIをポーリング
+      for (const card of runCards) {
+        const cardRunId = card.dataset.runId;
+        if (!cardRunId) continue;
+        try {
+          const r = await fetch(
+            `${CONFIG.apiUrl}/runs/${encodeURIComponent(cardRunId)}`,
+            { headers: authHeaders() }
+          );
+          if (!r.ok) continue;
+          const run = await r.json();
+          updateRunningCard(card, run);
+        } catch (e) {
+          // 個別カードの更新失敗は無視
+        }
+      }
+    } catch (e) {
+      // 全体エラーは無視
+    }
+  }, 5000);
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = null;
+  }
+}
+
+/**
+ * running状態のカードのプログレスをリアルタイムで更新
+ */
+function updateRunningCard(card, run) {
+  const completed = parseInt(run.totalCount) || 0;
+  const expected  = parseInt(run.expectedTotal) || 0;
+  const pass = parseInt(run.passCount) || 0;
+  const fail = parseInt(run.failCount) || 0;
+  const skip = parseInt(run.skipCount) || 0;
+
+  // ミニ統計を更新
+  const miniStats = card.querySelector('.running-mini-stats');
+  if (miniStats) {
+    miniStats.textContent = `PASS ${pass} / FAIL ${fail} / SKIP ${skip}`;
+  }
+
+  // プログレスバーを更新
+  const progressBar = card.querySelector('.progress-running-bar');
+  if (progressBar && expected > 0) {
+    const pct = Math.min(100, (completed / expected * 100)).toFixed(1);
+    progressBar.style.width = `${pct}%`;
+    const progressCount = card.querySelector('.progress-count');
+    if (progressCount) progressCount.textContent = `${completed}/${expected}件`;
+  }
+
+  // 実行完了したらrunStatusを更新してカードを再描画
+  if (run.runStatus !== 'running') {
+    card.dataset.runStatus = run.runStatus;
+    card.classList.remove('status-running');
+    card.classList.add(`status-${run.runStatus}`);
+
+    // running専用UIをfinalに切り替え
+    const runningSection = card.querySelector('.running-section');
+    const finalSection   = card.querySelector('.final-section');
+    if (runningSection) runningSection.style.display = 'none';
+    if (finalSection)   finalSection.style.display = '';
+
+    // 完了後にrunning runがなければ自動リフレッシュを停止
+    const remaining = document.querySelectorAll('.run-card[data-run-status="running"]');
+    if (remaining.length === 0) stopAutoRefresh();
+  }
+}
+
+// =========================================
 // 実行一覧レンダリング
 // =========================================
 function renderRuns(items, clear) {
@@ -226,18 +355,21 @@ function renderRuns(items, clear) {
     const runNo = totalLoaded + idx + 1;
     const card = document.createElement('div');
     card.className = `card run-card mb-2 status-${run.runStatus}`;
+    card.dataset.runStatus = run.runStatus;
+    card.dataset.runId = run.runId;
     card.onclick = () => location.href = `run.html?runId=${run.runId}`;
 
     const total = parseInt(run.totalCount) || 0;
-    const pass = parseInt(run.passCount) || 0;
-    const fail = parseInt(run.failCount) || 0;
-    const skip = parseInt(run.skipCount) || 0;
+    const pass  = parseInt(run.passCount) || 0;
+    const fail  = parseInt(run.failCount) || 0;
+    const skip  = parseInt(run.skipCount) || 0;
+    const expected = parseInt(run.expectedTotal) || 0;
     const passRate = total > 0 ? Math.round(pass / total * 100) : 0;
 
     const statusIcon = {
       completed: '<i class="bi bi-check-circle-fill text-success"></i>',
-      failed: '<i class="bi bi-x-circle-fill text-danger"></i>',
-      running: '<i class="bi bi-arrow-repeat text-info"></i>'
+      failed:    '<i class="bi bi-x-circle-fill text-danger"></i>',
+      running:   '<i class="bi bi-arrow-repeat text-info"></i>'
     }[run.runStatus] || '<i class="bi bi-question-circle"></i>';
 
     // 日付フォーマット: 「第N回 YYYY/M/D（曜日）」
@@ -249,26 +381,49 @@ function renderRuns(items, clear) {
     const timeLabel = dateObj ? dateObj.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : '';
 
     const durationStr = formatDuration(parseInt(run.durationMs) || 0);
-    const specBadge = run.specFile ? `<span class="badge bg-secondary me-1">${escHtml(run.specFile)}</span>` : '';
+    const specBadge = run.specFile
+      ? `<span class="badge bg-secondary me-1">${escHtml(run.specFile)}</span>`
+      : '';
 
-    card.innerHTML = `
-      <div class="card-body py-2 px-3">
-        <div class="d-flex align-items-center gap-3">
-          <div class="fs-5">${statusIcon}</div>
-          <div class="flex-grow-1 overflow-hidden">
-            <div class="d-flex align-items-center gap-2 mb-1">
-              <span class="run-title">${escHtml(dateLabel)}</span>
-              ${timeLabel ? `<span class="run-subtitle">${timeLabel}</span>` : ''}
-              ${specBadge}
-              ${run.commitHash ? `<span class="commit-badge">${escHtml(run.commitHash)}</span>` : ''}
-              ${run.branch && run.branch !== 'unknown' ? `<span class="badge bg-primary">${escHtml(run.branch)}</span>` : ''}
-            </div>
-            <div class="run-time">
-              <i class="bi bi-stopwatch me-1"></i>${durationStr}
-              ${run.testEnvUrl ? `&nbsp;|&nbsp;<a href="${escHtml(run.testEnvUrl)}" target="_blank" onclick="event.stopPropagation()" class="text-muted"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
-            </div>
+    // 実行中と完了後で右サイドのUIを切り替える
+    let rightSideHtml;
+    if (run.runStatus === 'running') {
+      // === 実行中の右サイド ===
+      const completedCount = total;
+      const progressPct = expected > 0
+        ? Math.min(100, (completedCount / expected * 100)).toFixed(1)
+        : 0;
+      const progressCountText = expected > 0
+        ? `${completedCount}/${expected}件`
+        : `${completedCount}件`;
+
+      rightSideHtml = `
+        <div class="running-section">
+          <div class="running-banner mb-1">
+            <div class="spinner-border spinner-border-sm text-info"></div>
+            実行中
           </div>
-          <div class="d-flex gap-2 align-items-center flex-shrink-0">
+          <div class="running-mini-stats">PASS ${pass} / FAIL ${fail} / SKIP ${skip}</div>
+          ${expected > 0 ? `
+          <div class="mt-1" style="min-width:120px">
+            <div class="progress progress-running bg-light">
+              <div class="progress-bar bg-info progress-bar-striped progress-bar-animated running-progress-bar"
+                   style="width:${progressPct}%" title="${progressCountText}"></div>
+            </div>
+            <div class="text-center progress-count" style="font-size:.68rem;color:#6c757d">${progressCountText}</div>
+          </div>` : ''}
+        </div>
+        <div class="final-section" style="display:none">
+          <div class="stat-box bg-success bg-opacity-10">
+            <div class="num text-success">${pass}</div>
+            <div class="label">PASS</div>
+          </div>
+        </div>`;
+    } else {
+      // === 完了後の右サイド ===
+      rightSideHtml = `
+        <div class="final-section">
+          <div class="d-flex gap-2 align-items-center">
             <div class="stat-box bg-success bg-opacity-10">
               <div class="num text-success">${pass}</div>
               <div class="label">PASS</div>
@@ -288,6 +443,29 @@ function renderRuns(items, clear) {
               <div class="text-center" style="font-size:.72rem;color:#6c757d">${passRate}%</div>
             </div>
           </div>
+        </div>`;
+    }
+
+    card.innerHTML = `
+      <div class="card-body py-2 px-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="fs-5">${statusIcon}</div>
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="run-title">${escHtml(dateLabel)}</span>
+              ${timeLabel ? `<span class="run-subtitle">${timeLabel}</span>` : ''}
+              ${specBadge}
+              ${run.commitHash ? `<span class="commit-badge">${escHtml(run.commitHash)}</span>` : ''}
+              ${run.branch && run.branch !== 'unknown' ? `<span class="badge bg-primary">${escHtml(run.branch)}</span>` : ''}
+            </div>
+            <div class="run-time">
+              <i class="bi bi-stopwatch me-1"></i>${durationStr}
+              ${run.testEnvUrl ? `&nbsp;|&nbsp;<a href="${escHtml(run.testEnvUrl)}" target="_blank" onclick="event.stopPropagation()" class="text-muted"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
+            </div>
+          </div>
+          <div class="d-flex gap-2 align-items-center flex-shrink-0">
+            ${rightSideHtml}
+          </div>
         </div>
       </div>`;
 
@@ -304,16 +482,20 @@ function formatDuration(ms) {
   if (!ms || ms <= 0) return '-';
   const sec = Math.round(ms / 1000);
   if (sec < 60) return `${sec}秒`;
-  const min = Math.floor(sec / 60);
+  const totalMin = Math.floor(sec / 60);
   const s = sec % 60;
-  if (min < 60) return `${min}分${s}秒`;
-  const h = Math.floor(min / 60);
-  const m = min % 60;
+  if (totalMin < 60) return `${totalMin}分${s}秒`;
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
   return `${h}時間${m}分`;
 }
 
 function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function showLoading(show) {

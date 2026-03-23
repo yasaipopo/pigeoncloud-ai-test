@@ -29,6 +29,7 @@
       text-overflow: ellipsis;
     }
     .progress { height: 12px; }
+    .progress-live { height: 20px; border-radius: 6px; overflow: hidden; }
     .suite-header {
       background: #e9ecef;
       font-size: .82rem;
@@ -40,6 +41,34 @@
     }
     .filter-bar { background: #fff; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
     .stat-card { border-radius: 10px; padding: 12px 16px; }
+
+    /* 実行中カードのパルスアニメーション */
+    @keyframes pulse-border {
+      0%   { border-color: #0dcaf0; }
+      50%  { border-color: #0d6efd; }
+      100% { border-color: #0dcaf0; }
+    }
+    .card-running-anim {
+      border: 2px solid #0dcaf0;
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+
+    /* ライブプログレスパネル */
+    #live-progress-panel {
+      background: linear-gradient(135deg, #e8f4f8, #f0f8ff);
+      border: 1px solid #bee5eb;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .live-stat {
+      text-align: center;
+      padding: 6px 12px;
+      border-radius: 8px;
+      min-width: 60px;
+    }
+    .live-stat .num { font-size: 1.4rem; font-weight: bold; line-height: 1.1; }
+    .live-stat .lbl { font-size: .68rem; color: #6c757d; }
   </style>
 </head>
 <body>
@@ -58,7 +87,47 @@
 
 <div class="container py-4">
 
-  <!-- 実行情報ヘッダー -->
+  <!-- ===== リアルタイム実行中プログレスパネル ===== -->
+  <div id="live-progress-panel" style="display:none">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <div class="spinner-border spinner-border-sm text-info"></div>
+      <strong class="text-info">テスト実行中...</strong>
+      <span class="text-muted small ms-2">経過時間: <span id="live-elapsed">0秒</span></span>
+    </div>
+
+    <!-- プログレスバー（PASS=緑 / FAIL=赤 / SKIP=グレー / 残り=ライト） -->
+    <div class="progress-live d-flex mb-2 bg-light" id="live-progress-bar">
+      <div class="progress-bar bg-success" id="lpb-pass" style="width:0%" title="PASS"></div>
+      <div class="progress-bar bg-danger"  id="lpb-fail" style="width:0%" title="FAIL"></div>
+      <div class="progress-bar bg-secondary" id="lpb-skip" style="width:0%" title="SKIP"></div>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <span class="small text-muted">
+        <span id="live-completed">0</span> /
+        <span id="live-expected">?</span>件完了
+      </span>
+      <span class="small text-primary" id="live-eta"></span>
+    </div>
+
+    <!-- ライブカウント -->
+    <div class="d-flex gap-2">
+      <div class="live-stat bg-success bg-opacity-10">
+        <div class="num text-success" id="live-pass">0</div>
+        <div class="lbl">PASS</div>
+      </div>
+      <div class="live-stat bg-danger bg-opacity-10">
+        <div class="num text-danger" id="live-fail">0</div>
+        <div class="lbl">FAIL</div>
+      </div>
+      <div class="live-stat bg-secondary bg-opacity-10">
+        <div class="num text-secondary" id="live-skip">0</div>
+        <div class="lbl">SKIP</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 実行情報ヘッダー ===== -->
   <div class="card mb-4" id="run-header">
     <div class="card-body">
       <div class="d-flex align-items-center gap-2 mb-2">
@@ -105,7 +174,7 @@
       </div>
       <div class="progress">
         <div class="progress-bar bg-success" id="progress-pass" style="width:0%"></div>
-        <div class="progress-bar bg-danger" id="progress-fail" style="width:0%"></div>
+        <div class="progress-bar bg-danger"  id="progress-fail" style="width:0%"></div>
         <div class="progress-bar bg-secondary" id="progress-skip" style="width:0%"></div>
       </div>
     </div>
@@ -194,6 +263,237 @@ let allCases = [];
 let currentFilter = 'all';
 
 // =========================================
+// ポーリング・実行中進捗管理
+// =========================================
+let pollTimer = null;        // ポーリングタイマーID
+let elapsedTimer = null;     // 経過時間タイマーID
+let knownCaseIds = new Set(); // 既知ケースID（重複追加防止）
+let runStartTime = null;     // 開始時刻（UnixMs）
+
+/**
+ * ポーリング開始（3秒ごとにrun情報・ケース一覧を更新）
+ */
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(async () => {
+    await refreshRunInfo();
+    await refreshCases();
+  }, 3000);
+}
+
+/**
+ * ポーリング停止
+ */
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+
+/**
+ * 経過時間タイマー開始（1秒ごとに更新）
+ */
+function startElapsedTimer() {
+  if (elapsedTimer) return;
+  elapsedTimer = setInterval(() => {
+    if (!runStartTime) return;
+    const elapsed = Math.floor((Date.now() - runStartTime) / 1000);
+    document.getElementById('live-elapsed').textContent = formatDuration(elapsed * 1000);
+  }, 1000);
+}
+
+/**
+ * 経過時間タイマー停止
+ */
+function stopElapsedTimer() {
+  if (elapsedTimer) {
+    clearInterval(elapsedTimer);
+    elapsedTimer = null;
+  }
+}
+
+/**
+ * ライブプログレスパネルを非表示にして通常表示に切り替え
+ */
+function hideLiveProgress() {
+  document.getElementById('live-progress-panel').style.display = 'none';
+  document.getElementById('run-header').classList.remove('card-running-anim');
+}
+
+/**
+ * ライブプログレスパネルの数値を更新
+ */
+function updateLiveProgress(run) {
+  const completed = parseInt(run.totalCount) || 0;
+  const expected  = parseInt(run.expectedTotal) || 0;
+  const pass = parseInt(run.passCount) || 0;
+  const fail = parseInt(run.failCount) || 0;
+  const skip = parseInt(run.skipCount) || 0;
+  const remaining = expected > 0 ? Math.max(0, expected - completed) : 0;
+
+  // ライブカウント更新
+  document.getElementById('live-pass').textContent = pass;
+  document.getElementById('live-fail').textContent = fail;
+  document.getElementById('live-skip').textContent = skip;
+  document.getElementById('live-completed').textContent = completed;
+  document.getElementById('live-expected').textContent = expected > 0 ? expected : '?';
+
+  // プログレスバー幅計算（基準はexpectedTotal、なければcompletedを100%とする）
+  const base = expected > 0 ? expected : (completed || 1);
+  const passPct  = (pass  / base * 100).toFixed(1);
+  const failPct  = (fail  / base * 100).toFixed(1);
+  const skipPct  = (skip  / base * 100).toFixed(1);
+  document.getElementById('lpb-pass').style.width = `${passPct}%`;
+  document.getElementById('lpb-fail').style.width = `${failPct}%`;
+  document.getElementById('lpb-skip').style.width = `${skipPct}%`;
+
+  // ETA表示（完了数が5件超の場合のみ）
+  const etaEl = document.getElementById('live-eta');
+  if (completed > 5 && runStartTime && remaining > 0) {
+    const elapsed = Date.now() - runStartTime;
+    const msPerTest = elapsed / completed;
+    const etaMs = msPerTest * remaining;
+    etaEl.textContent = `あと約${formatDuration(etaMs)}`;
+  } else if (remaining === 0 && expected > 0) {
+    etaEl.textContent = 'まもなく完了';
+  } else {
+    etaEl.textContent = '';
+  }
+}
+
+/**
+ * run情報をAPIから取得してUIを更新（ポーリング用）
+ */
+async function refreshRunInfo() {
+  try {
+    const r = await fetch(
+      `${CONFIG.apiUrl}/runs/${encodeURIComponent(runId)}`,
+      { headers: authHeaders() }
+    );
+    if (!r.ok) return;
+    const run = await r.json();
+
+    updateLiveProgress(run);
+
+    // 実行完了したらポーリングを停止して通常表示に切り替え
+    if (run.runStatus !== 'running') {
+      stopPolling();
+      stopElapsedTimer();
+      hideLiveProgress();
+      updateFinalStats(run);
+    }
+  } catch (e) {
+    // ネットワークエラーは無視して次のポーリングまで待つ
+  }
+}
+
+/**
+ * 完了後の最終統計をUIに反映
+ */
+function updateFinalStats(run) {
+  const total = parseInt(run.totalCount) || 0;
+  const pass  = parseInt(run.passCount) || 0;
+  const fail  = parseInt(run.failCount) || 0;
+  const skip  = parseInt(run.skipCount) || 0;
+
+  // ステータスアイコン更新
+  const statusIcon = {
+    completed: '<i class="bi bi-check-circle-fill text-success"></i>',
+    failed:    '<i class="bi bi-x-circle-fill text-danger"></i>',
+    running:   '<i class="bi bi-arrow-repeat text-info"></i>'
+  }[run.runStatus] || '';
+  document.getElementById('run-status-icon').innerHTML = statusIcon;
+
+  document.getElementById('stat-pass').textContent  = pass;
+  document.getElementById('stat-fail').textContent  = fail;
+  document.getElementById('stat-skip').textContent  = skip;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('run-duration').textContent = formatDuration(parseInt(run.durationMs) || 0);
+
+  if (total > 0) {
+    document.getElementById('progress-pass').style.width = `${(pass / total * 100).toFixed(1)}%`;
+    document.getElementById('progress-fail').style.width = `${(fail / total * 100).toFixed(1)}%`;
+    document.getElementById('progress-skip').style.width = `${(skip / total * 100).toFixed(1)}%`;
+  }
+}
+
+/**
+ * ケース一覧をAPIから取得（実行中は差分だけ先頭に追加）
+ */
+async function refreshCases() {
+  try {
+    const r = await fetch(
+      `${CONFIG.apiUrl}/runs/${encodeURIComponent(runId)}/cases?limit=1000`,
+      { headers: authHeaders() }
+    );
+    if (!r.ok) return;
+    const data = await r.json();
+    const newCases = (data.items || []).filter(c => !knownCaseIds.has(c.caseId));
+    if (newCases.length === 0) return;
+
+    // 新規ケースをallCasesに追加
+    newCases.forEach(c => {
+      allCases.unshift(c); // 最新が先頭
+      knownCaseIds.add(c.caseId);
+    });
+
+    // テーブルの先頭にケース行を追加（フィルタ条件を考慮）
+    prependCases(newCases);
+  } catch (e) {
+    // 無視
+  }
+}
+
+/**
+ * 新規ケースをテーブルの先頭に追加（実行中ポーリング用）
+ */
+function prependCases(newCases) {
+  const tbody = document.getElementById('cases-tbody');
+  const query = document.getElementById('search-box').value.toLowerCase();
+
+  newCases.forEach(c => {
+    // フィルタ条件に合わない場合はスキップ
+    if (currentFilter !== 'all' && c.caseStatus !== currentFilter) return;
+    if (query && !c.testTitle.toLowerCase().includes(query)) return;
+
+    const row = document.createElement('tr');
+    row.className = `case-row status-${c.caseStatus}`;
+    row.dataset.status = c.caseStatus;
+    row.dataset.title = c.testTitle.toLowerCase();
+    row.onclick = () => openCaseModal(c);
+
+    const hasVideo = !!c.videoKey;
+    const hasScreenshot = c.screenshotKeys && c.screenshotKeys.length > 0;
+
+    row.innerHTML = `
+      <td>
+        <span class="badge status-badge-${c.caseStatus}">${statusLabel(c.caseStatus)}</span>
+      </td>
+      <td>
+        <div class="fw-medium">${escHtml(c.testTitle)}</div>
+        ${c.errorMessage ? `<div class="error-preview">${escHtml(c.errorMessage.substring(0, 150))}</div>` : ''}
+      </td>
+      <td class="text-end text-muted small">${formatDuration(parseInt(c.durationMs) || 0)}</td>
+      <td class="text-center">
+        ${hasVideo ? '<i class="bi bi-play-circle text-primary" title="動画あり"></i>' : ''}
+        ${hasScreenshot ? '<i class="bi bi-image text-info ms-1" title="スクショあり"></i>' : ''}
+      </td>`;
+
+    // suiteヘッダー行があれば一番上のケース行の前、なければtbodyの先頭に挿入
+    if (tbody.firstChild) {
+      tbody.insertBefore(row, tbody.firstChild);
+    } else {
+      tbody.appendChild(row);
+    }
+  });
+
+  // 表示件数更新
+  const displayCount = tbody.querySelectorAll('tr.case-row').length;
+  document.getElementById('display-count').textContent = `${displayCount}件表示`;
+}
+
+// =========================================
 // 初期化
 // =========================================
 document.addEventListener('DOMContentLoaded', async () => {
@@ -211,10 +511,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // =========================================
-// 実行情報取得
+// 実行情報取得（初回）
 // =========================================
 async function loadRunInfo() {
-  const r = await fetch(`${CONFIG.apiUrl}/runs/${encodeURIComponent(runId)}`, { headers: authHeaders() });
+  const r = await fetch(
+    `${CONFIG.apiUrl}/runs/${encodeURIComponent(runId)}`,
+    { headers: authHeaders() }
+  );
   if (r.status === 401) { doLogout(); throw new Error('認証が切れました'); }
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   const run = await r.json();
@@ -223,13 +526,14 @@ async function loadRunInfo() {
 
   const statusIcon = {
     completed: '<i class="bi bi-check-circle-fill text-success"></i>',
-    failed: '<i class="bi bi-x-circle-fill text-danger"></i>',
-    running: '<i class="bi bi-arrow-repeat text-info"></i>'
+    failed:    '<i class="bi bi-x-circle-fill text-danger"></i>',
+    running:   '<i class="bi bi-arrow-repeat text-info"></i>'
   }[run.runStatus] || '';
   document.getElementById('run-status-icon').innerHTML = statusIcon;
   document.getElementById('run-id-title').textContent = run.runId;
-  document.getElementById('run-started').textContent = run.startedAt ? new Date(run.startedAt).toLocaleString('ja-JP') : '-';
-  document.getElementById('run-duration').textContent = formatDuration(run.durationMs);
+  document.getElementById('run-started').textContent = run.startedAt
+    ? new Date(run.startedAt).toLocaleString('ja-JP') : '-';
+  document.getElementById('run-duration').textContent = formatDuration(parseInt(run.durationMs) || 0);
   document.getElementById('run-commit').textContent = run.commitHash || '-';
   document.getElementById('run-branch').textContent = run.branch || '-';
   document.getElementById('run-spec').textContent = run.specFile || '-';
@@ -239,28 +543,48 @@ async function loadRunInfo() {
     document.getElementById('run-env-col').style.removeProperty('display');
   }
 
-  const total = run.totalCount || 0;
-  document.getElementById('stat-pass').textContent = run.passCount || 0;
-  document.getElementById('stat-fail').textContent = run.failCount || 0;
-  document.getElementById('stat-skip').textContent = run.skipCount || 0;
+  const total = parseInt(run.totalCount) || 0;
+  const pass  = parseInt(run.passCount) || 0;
+  const fail  = parseInt(run.failCount) || 0;
+  const skip  = parseInt(run.skipCount) || 0;
+
+  document.getElementById('stat-pass').textContent  = pass;
+  document.getElementById('stat-fail').textContent  = fail;
+  document.getElementById('stat-skip').textContent  = skip;
   document.getElementById('stat-total').textContent = total;
 
   if (total > 0) {
-    document.getElementById('progress-pass').style.width = `${(run.passCount / total * 100).toFixed(1)}%`;
-    document.getElementById('progress-fail').style.width = `${(run.failCount / total * 100).toFixed(1)}%`;
-    document.getElementById('progress-skip').style.width = `${(run.skipCount / total * 100).toFixed(1)}%`;
+    document.getElementById('progress-pass').style.width = `${(pass / total * 100).toFixed(1)}%`;
+    document.getElementById('progress-fail').style.width = `${(fail / total * 100).toFixed(1)}%`;
+    document.getElementById('progress-skip').style.width = `${(skip / total * 100).toFixed(1)}%`;
+  }
+
+  // 実行中の場合はライブプログレスパネルを表示してポーリング開始
+  if (run.runStatus === 'running') {
+    runStartTime = run.startedAt ? new Date(run.startedAt).getTime() : Date.now();
+    document.getElementById('live-progress-panel').style.display = 'block';
+    document.getElementById('run-header').classList.add('card-running-anim');
+    updateLiveProgress(run);
+    startElapsedTimer();
+    startPolling();
   }
 }
 
 // =========================================
-// テストケース一覧取得
+// テストケース一覧取得（初回）
 // =========================================
 async function loadCases() {
-  const r = await fetch(`${CONFIG.apiUrl}/runs/${encodeURIComponent(runId)}/cases?limit=1000`, { headers: authHeaders() });
+  const r = await fetch(
+    `${CONFIG.apiUrl}/runs/${encodeURIComponent(runId)}/cases?limit=1000`,
+    { headers: authHeaders() }
+  );
   if (r.status === 401) { doLogout(); throw new Error('認証が切れました'); }
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   const data = await r.json();
   allCases = data.items || [];
+
+  // 既知ケースIDを登録
+  allCases.forEach(c => knownCaseIds.add(c.caseId));
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('cases-container').classList.remove('d-none');
@@ -269,7 +593,7 @@ async function loadCases() {
 }
 
 // =========================================
-// テストケース描画
+// テストケース描画（フル再描画）
 // =========================================
 function renderCases(cases) {
   const tbody = document.getElementById('cases-tbody');
@@ -310,7 +634,7 @@ function renderCases(cases) {
           <div class="fw-medium">${escHtml(c.testTitle)}</div>
           ${c.errorMessage ? `<div class="error-preview">${escHtml(c.errorMessage.substring(0, 150))}</div>` : ''}
         </td>
-        <td class="text-end text-muted small">${formatDuration(c.durationMs)}</td>
+        <td class="text-end text-muted small">${formatDuration(parseInt(c.durationMs) || 0)}</td>
         <td class="text-center">
           ${hasVideo ? '<i class="bi bi-play-circle text-primary" title="動画あり"></i>' : ''}
           ${hasScreenshot ? '<i class="bi bi-image text-info ms-1" title="スクショあり"></i>' : ''}
@@ -359,8 +683,8 @@ async function openCaseModal(c) {
   let html = `
     <div class="d-flex gap-3 mb-3">
       <span class="badge bg-${statusClass} fs-6">${statusLabel(c.caseStatus)}</span>
-      <span class="text-muted">${formatDuration(c.durationMs)}</span>
-      <span class="text-muted small">${c.specFile}</span>
+      <span class="text-muted">${formatDuration(parseInt(c.durationMs) || 0)}</span>
+      <span class="text-muted small">${escHtml(c.specFile || '')}</span>
     </div>`;
 
   // エラーメッセージ
@@ -379,7 +703,8 @@ async function openCaseModal(c) {
       </div>`;
   }
 
-  document.getElementById('modal-body').innerHTML = html + '<div id="modal-assets"><div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div> アセット読み込み中...</div></div>';
+  document.getElementById('modal-body').innerHTML = html +
+    '<div id="modal-assets"><div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div> アセット読み込み中...</div></div>';
 
   const modal = new bootstrap.Modal(document.getElementById('caseModal'));
   modal.show();
@@ -482,16 +807,24 @@ function statusLabel(s) {
 }
 
 function formatDuration(ms) {
-  if (!ms) return '-';
+  if (!ms || ms <= 0) return '-';
   const sec = Math.round(ms / 1000);
   if (sec < 60) return `${sec}秒`;
-  const min = Math.floor(sec / 60);
+  const totalMin = Math.floor(sec / 60);
   const s = sec % 60;
-  return `${min}分${s}秒`;
+  if (totalMin < 60) return `${totalMin}分${s}秒`;
+  // 1時間以上の対応
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return `${h}時間${m}分`;
 }
 
 function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 </script>
 </body>
