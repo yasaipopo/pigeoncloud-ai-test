@@ -202,7 +202,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await closeTemplateModal(page);
     });
 
-    test('673: テーブル一覧 - 正常表示確認', async ({ page }) => {
+    test('673: レコード一覧 - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C050ZRN4PNC/p1733205093440009
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__26
         const tid = tableId || await getAllTypeTableId(page);
@@ -216,7 +216,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('header.app-header, header.navbar').first()).toBeVisible();
     });
 
-    test('674: これの Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました', async ({ page }) => {
+    test('674: Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1180 これの Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -231,7 +231,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('675: テーブル一覧 - 正常表示確認', async ({ page }) => {
+    test('675: レコード一覧 - 回帰確認（#issue1053）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1053
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__53
         const tid = tableId || await getAllTypeTableId(page);
@@ -244,7 +244,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('676: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('676: ダッシュボード - 回帰確認（#issue946）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/946
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__52
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -257,7 +257,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('677: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('677: ダッシュボード - 回帰確認（#issue1016）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1016
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -270,7 +270,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('678: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('678: ダッシュボード - 回帰確認（#issue1032）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1032
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -283,7 +283,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('679: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('679: ダッシュボード - 回帰確認（#issue1230）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1230
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__47
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -296,7 +296,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('680: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('680: ダッシュボード - 回帰確認（#issue1238）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1238
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__34
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -309,7 +309,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('681: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('681: ダッシュボード - 回帰確認（#issue1183）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1183
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__30
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -322,7 +322,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('682: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('682: ダッシュボード - 回帰確認（#issue1235）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1235
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__28
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -335,7 +335,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('683: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('683: ダッシュボード - 回帰確認（#issue1118）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1118
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__26
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -348,7 +348,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('684: 通知設定 - 正常表示確認', async ({ page }) => {
+    test('684: 通知設定 - 回帰確認（#issue964）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/964
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/notification/edit/1?return_url=%252Fadmin%252Fnotification
         // 通知設定ページを確認
@@ -361,7 +361,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('685: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('685: ダッシュボード - 回帰確認（#issue1132）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1132
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__25
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -374,7 +374,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('686: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('686: ダッシュボード - 回帰確認（#issue1165）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1165
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__23
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -387,7 +387,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('687: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('687: ダッシュボード - 回帰確認（#issue1205）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1205
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__21
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -400,7 +400,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('688: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('688: ダッシュボード - 回帰確認（#issue1211）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1211
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -413,7 +413,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('689: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('689: ダッシュボード - 回帰確認（#issue553）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/553
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -426,7 +426,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('690: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('690: ダッシュボード - 回帰確認（#issue1219）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1219
         // expected: https://henmi017.pigeon-demo.com/admin/dataset__18
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -439,7 +439,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('691: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('691: ダッシュボード - 回帰確認（#issue1246）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1246
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -452,7 +452,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('692: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('692: ダッシュボード - 回帰確認（#issue1212）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1212
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -465,7 +465,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('693: レコード新規作成 - 正常表示確認', async ({ page }) => {
+    test('693: レコード新規作成 - 回帰確認（#issue679）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/679
         // expected: 想定通りの結果となること。 https://henmi018.pigeon-demo.com/admin/dataset__24/edit/new
         const tid = tableId || await getAllTypeTableId(page);
@@ -480,7 +480,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('694: レコード編集 - 正常表示確認', async ({ page }) => {
+    test('694: レコード編集 - 回帰確認（#issue1141）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1141
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset/edit/23
         const tid = tableId || await getAllTypeTableId(page);
@@ -495,7 +495,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('695: テーブル一覧 - 正常表示確認', async ({ page }) => {
+    test('695: レコード一覧 - 回帰確認（#issue1203）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1203
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset__51  https://henmi023.pigeon-demo.com/admin/dataset__92
         const tid = tableId || await getAllTypeTableId(page);
@@ -508,7 +508,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('696: テーブル一覧 - 正常表示確認', async ({ page }) => {
+    test('696: レコード一覧 - 回帰確認（#issue1251）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1251
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset__53 https://henmi023.pigeon-demo.com/admin/dataset__87
         const tid = tableId || await getAllTypeTableId(page);
@@ -521,7 +521,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('697: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('697: ダッシュボード - 回帰確認（#issue1007）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1007
         // expected: 想定通りの結果となること。 ●単項目のテーブル https://henmi011.pigeon-dev.com/admin/dataset__55/edit/new ●複数項目のテーブル https://henmi011.pigeon-de
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -534,7 +534,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('698: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('698: ダッシュボード - 回帰確認（#issue1269）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1269
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -547,7 +547,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('699: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('699: ダッシュボード - 回帰確認（#issue967）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/967
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -560,7 +560,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('700: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('700: ダッシュボード - 回帰確認（#issue1210）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1210
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__4
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -573,7 +573,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('701: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('701: ダッシュボード - 回帰確認（#issue1270）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1270
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__3
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -586,7 +586,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('702: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('702: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1738802545186909
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__112
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -599,7 +599,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('703: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('703: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1737881017605909?thread_ts=1733981177.144699&cid=C05CK6Z7YDQ
         // expected: 想定通りの結果となること。 https://henmi018.pigeon-demo.com/admin/dataset__9
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -612,7 +612,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('704: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('704: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p17392159423660399
         // expected: 想定通りの結果となること。 ※Dev環境(dev1 ~ dev5)でテスト実施
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -625,7 +625,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('705: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('705: ダッシュボード - 回帰確認（#issue1287）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1287
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__109
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -638,7 +638,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('706: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('706: ダッシュボード - 回帰確認（#issue1192）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1192
         // expected: 想定通りの結果となること。 https://henmi018.pigeon-demo.com/admin/dataset__30
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -651,7 +651,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('707: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('707: ダッシュボード - 回帰確認（#issue1190）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1190
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__2
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -664,7 +664,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('708: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('708: ダッシュボード - 回帰確認（#issue1213）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1213
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -694,7 +694,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(pageText).not.toContain('エラーが発生しました');
     });
 
-    test('710: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('710: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1740639950439849?thread_ts=1740518165.554519&cid=C06LF4G88FM
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -707,7 +707,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('711: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('711: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1741029567350709
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -720,7 +720,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('712: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('712: ダッシュボード - 回帰確認（#issue1314）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1314
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__21
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -733,7 +733,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('713: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('713: ダッシュボード - 回帰確認（#issue1049）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1049
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__65
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -746,7 +746,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('714: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('714: ダッシュボード - 回帰確認（#issue908）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/908
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -759,7 +759,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('715: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('715: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1741121853202309
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -772,7 +772,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('716: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('716: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1741342790381319
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -785,7 +785,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('717: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('717: ダッシュボード - 回帰確認（#issue1290）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1741343489222159 https://loftal.pigeon-cloud.com/admin/dataset__90/view/1
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -798,7 +798,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('718: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('718: ダッシュボード - 回帰確認（#issue1256）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1256
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__44
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -811,7 +811,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('719: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('719: ダッシュボード - 回帰確認（#issue1181）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1181
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -824,7 +824,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('720: テーブル一覧 - 正常表示確認', async ({ page }) => {
+    test('720: レコード一覧 - 回帰確認（#issue1279）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1279
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__37 https://henmi024.pigeon-demo.com/admin/dataset__90
         const tid = tableId || await getAllTypeTableId(page);
@@ -837,7 +837,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('721: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('721: ダッシュボード - 回帰確認（#issue958）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/958
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -850,7 +850,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('722: テーブル一覧 - 正常表示確認', async ({ page }) => {
+    test('722: レコード一覧 - 回帰確認（#issue1225）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1225
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__39
         const tid = tableId || await getAllTypeTableId(page);
@@ -863,7 +863,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('723: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('723: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1741465769936279
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -876,7 +876,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('724: テーブル一覧 - 正常表示確認', async ({ page }) => {
+    test('724: レコード一覧 - 回帰確認（#issue1226）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1226
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__41
         const tid = tableId || await getAllTypeTableId(page);
@@ -889,7 +889,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('725: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('725: ダッシュボード - 回帰確認（#issue1098）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1098
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__63
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -902,7 +902,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('726: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('726: ダッシュボード - 回帰確認（#issue1257）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1257
         // expected: 想定通りの結果となること。 テスト環境 https://t-20250320-67dbda1da45a9.pigeon-demo.com/admin/dataset__27 ID: admin PW: 1qazse4r
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -915,7 +915,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('727: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('727: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1742012570253099
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -928,7 +928,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('728: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('728: ダッシュボード - 回帰確認（#issue882）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/882
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__63
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -941,7 +941,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('729: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('729: ダッシュボード - 回帰確認（#issue1042）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1042
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__61/view/4
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -954,7 +954,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('730: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('730: ダッシュボード - 回帰確認（#issue1298）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1298
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -967,7 +967,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('731: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('731: ダッシュボード - 回帰確認（#issue1258）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1258
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -980,7 +980,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('732: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('732: ダッシュボード - 回帰確認（#issue1253）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1253
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -993,7 +993,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('733: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('733: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1742718204814239
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1006,7 +1006,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('734: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('734: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1742746013359439
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1019,7 +1019,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('735: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('735: ダッシュボード - 回帰確認（#issue1117）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1117
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__16/edit/new
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1032,7 +1032,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('736: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('736: ダッシュボード - 回帰確認（#issue1294）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1294
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1045,7 +1045,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('737: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('737: ダッシュボード - 回帰確認（#issue1218）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1218
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__12;_filter_id=18;_view_id=null;t=1746833536879
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1058,7 +1058,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('738: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('738: ダッシュボード - 回帰確認（#issue1323）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1323
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__61/view/3
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1071,7 +1071,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('739: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('739: ダッシュボード - 回帰確認（#issue1321）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1321
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/dataset__21
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1084,7 +1084,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('740: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('740: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1743189135930149
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1097,7 +1097,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('741: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('741: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1743269506563609
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1110,7 +1110,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('742: RPA設定 - 正常表示確認', async ({ page }) => {
+    test('742: rpa - 回帰確認（#issue1324）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1324
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/rpa/edit/1?return_url=%252Fadmin%252Frpa
         // RPAコネクトページを確認
@@ -1123,7 +1123,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('743: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('743: ダッシュボード - 回帰確認（#issue1342）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1342
         // expected: 想定通りの結果となること。 https://t-20250320-67dbda1da45a9.pigeon-demo.com/admin/dataset__27 ID: admin PW: 1qazse4r https://henmi022
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1136,7 +1136,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('744: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('744: ダッシュボード - 回帰確認（#issue1278）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1278
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__11
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1149,7 +1149,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('745: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('745: ダッシュボード - 回帰確認（#issue1289）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1289
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__54
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1162,7 +1162,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('746: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('746: ダッシュボード - 回帰確認（#issue1286）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1286
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset/edit/55
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1175,7 +1175,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('747: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('747: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1743823534568559
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1188,7 +1188,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('748: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('748: ダッシュボード - 回帰確認（#issue1327）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1327
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1201,7 +1201,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('749: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('749: ダッシュボード - 回帰確認（#issue1318）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1318
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__52/view/1
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1214,7 +1214,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('750: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('750: ダッシュボード - 回帰確認（#issue1319）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1319
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__52/view/1
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1227,7 +1227,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('751: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('751: ダッシュボード - 回帰確認（#issue959）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/959
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1240,7 +1240,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('752: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('752: ダッシュボード - 回帰確認（#issue1292）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1292
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/dataset__145
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1253,7 +1253,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('753: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('753: ダッシュボード - 回帰確認（#issue1363）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1363
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__7
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1266,7 +1266,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('754: 通知設定 - 正常表示確認', async ({ page }) => {
+    test('754: notification - 回帰確認（#issue1247）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1247
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/notification/edit/9?return_url=%252Fadmin%252Fnotification
         // 通知設定一覧ページを確認
@@ -1279,7 +1279,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('755: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('755: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745811344393479
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__52/view/1
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1292,7 +1292,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('756: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('756: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745805429246679
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1305,7 +1305,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('757: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('757: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745811344393479
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__52/view/1
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1318,7 +1318,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('758: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('758: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745812828365939
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__123
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1331,7 +1331,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('759: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('759: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745820707419929
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1344,7 +1344,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('760: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('760: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745837695920219
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1357,7 +1357,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('761: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('761: ダッシュボード - 回帰確認（#issue1204）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1204
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__90
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1370,7 +1370,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('762: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('762: ダッシュボード - 回帰確認（#issue1284）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1284
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__58
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1399,7 +1399,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('764: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('764: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1747108063122459
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1412,7 +1412,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('765: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('765: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1747118435740169
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1425,7 +1425,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('766: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('766: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1747118525319649
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1438,7 +1438,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('767: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('767: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1747119649950799
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__80
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1451,7 +1451,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('768: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('768: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1747385266631289?thread_ts=1747108063.122459&cid=C04J1D90QJY
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1464,7 +1464,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('769: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('769: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1747768709177359
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__100
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1477,7 +1477,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('770: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('770: ダッシュボード - 回帰確認（#issue553）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/553
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__99
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1490,7 +1490,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('771: テーブル一覧 - 正常表示確認', async ({ page }) => {
+    test('771: レコード一覧 - 回帰確認（#issue1175）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1175
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/dataset__162 https://henmi024.pigeon-demo.com/admin/dataset__17
         const tid = tableId || await getAllTypeTableId(page);
@@ -1503,7 +1503,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('772: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('772: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1747199333346399
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/dataset__164 https://henmi023.pigeon-demo.com/admin/dataset__83
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1516,7 +1516,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('773: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('773: ダッシュボード - 回帰確認（#issue967）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/967
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1529,7 +1529,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('774: レコード編集 - 正常表示確認', async ({ page }) => {
+    test('774: レコード編集 - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1749046197365429
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset/edit/76
         const tid = tableId || await getAllTypeTableId(page);
@@ -1543,7 +1543,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('775: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('775: ダッシュボード - 回帰確認（#issue1349）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1349
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__100
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1556,7 +1556,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('776: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('776: ダッシュボード - 回帰確認（#issue1345）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1345
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1569,7 +1569,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('777: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('777: ダッシュボード - 回帰確認（#issue1015）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1015
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__105/edit/new
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1582,7 +1582,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('778: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('778: ダッシュボード - 回帰確認（#issue1113）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1113
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1595,7 +1595,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('779: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('779: ダッシュボード - 回帰確認（#issue1307）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1307
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__106
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1629,7 +1629,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         }
     });
 
-    test('781: レコード編集 - 正常表示確認', async ({ page }) => {
+    test('781: レコード編集 - 回帰確認（#issue1412）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1412
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset/edit/76
         const tid = tableId || await getAllTypeTableId(page);
@@ -1643,7 +1643,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('782: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('782: ダッシュボード - 回帰確認（#issue1336）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1336
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__14
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1656,7 +1656,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('783: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('783: ダッシュボード - 回帰確認（#issue1022）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1022
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/dataset__2 https://henmi023.pigeon-demo.com/admin/dataset__17
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1669,7 +1669,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('784: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('784: ダッシュボード - 回帰確認（#issue944）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/944
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/dataset__165 https://henmi023.pigeon-demo.com/admin/dataset__16
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1682,7 +1682,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('785: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('785: ダッシュボード - 回帰確認（#issue927）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/927
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__82
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1695,7 +1695,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('786: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('786: ダッシュボード - 回帰確認（#issue1079）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1079
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset/edit/18
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1708,7 +1708,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('787: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('787: ダッシュボード - 回帰確認（#issue1385）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1385
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__135/view/1
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1721,7 +1721,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('788: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('788: ダッシュボード - 回帰確認（#issue1362）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1362
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__80
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1734,7 +1734,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('789: RPA設定 - 正常表示確認', async ({ page }) => {
+    test('789: rpa - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1750875885479779
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/rpa/view/1  https://henmi024.pigeon-demo.com/admin/rpa/edit/5?retur
         // RPAコネクト一覧ページを確認
@@ -1746,7 +1746,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('790: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('790: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1750763065092929
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1759,7 +1759,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('791: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('791: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1752211650748159
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1772,7 +1772,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('792: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('792: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1752211434013469
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1785,7 +1785,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('793: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('793: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1752211499109039
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__141
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1798,7 +1798,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('794: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('794: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1752211557325949
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1811,7 +1811,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('795: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('795: ダッシュボード - 回帰確認（#issue1360）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1360
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__77
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1824,7 +1824,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('796: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('796: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1753383953585199
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__60
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1837,7 +1837,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('797: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('797: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1754500272365939
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__56
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1850,7 +1850,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('798: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('798: ダッシュボード - 回帰確認（#issue1374）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1374
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset__88 https://henmi023.pigeon-demo.com/admin/dataset__57
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1863,7 +1863,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('799: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('799: ダッシュボード - 回帰確認（#issue967）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/967
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset/edit/57 https://henmi023.pigeon-demo.com/admin/dataset/edit/
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1876,7 +1876,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('800: 以下①～③の対応を行うと即時反映されるかも確認する ①一覧の表示幅(px)は【300】で設定 ②項目の幅をドラッグで伸縮', async ({ page }) => {
+    test('800: 以下①～③の対応を行うと即時反映されるかも確認する', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1375 以下①～③の対応を行うと即時反映されるかも確認する ①一覧の表示幅(px)は【300】で設定 ②項目の幅をドラッグで伸縮
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -1890,7 +1890,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('801: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('801: ダッシュボード - 回帰確認（#issue1376）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1376
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset/edit/134
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1903,7 +1903,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('802: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('802: ダッシュボード - 回帰確認（#issue1306）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1306
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__12
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1916,7 +1916,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('803: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('803: ダッシュボード - 回帰確認（#issue1344）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1344
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__95 https://henmi024.pigeon-demo.com/admin/dataset__12
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1929,7 +1929,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('804: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('804: ダッシュボード - 回帰確認（#issue1381）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1381
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__102
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1942,7 +1942,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('805: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('805: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1754368311795019?thread_ts=1753710210.146859&cid=C04J1D90QJY
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1955,7 +1955,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('806: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('806: ダッシュボード - 回帰確認（#issue1455）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1455
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dashboard https://henmi023.pigeon-demo.com/admin/dashboard
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1968,7 +1968,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('807: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('807: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1756823153701649?thread_ts=1756549205.786739&cid=C05CK6Z7YDQ
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__123
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1981,7 +1981,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('808: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('808: ダッシュボード - 回帰確認（#issue1174）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1174
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset__94 https://henmi024.pigeon-demo.com/admin/dataset__4
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1994,7 +1994,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('809: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('809: ダッシュボード - 回帰確認（#issue1302）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1302
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__9
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2007,7 +2007,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('810: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('810: ダッシュボード - 回帰確認（#issue1358）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1358
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__86
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2020,7 +2020,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('811: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('811: ダッシュボード - 回帰確認（#issue1311）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1311
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__135
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2033,7 +2033,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('812: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('812: ダッシュボード - 回帰確認（#issue1399）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1399
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset__103  https://henmi024.pigeon-demo.com/admin/dataset__82   ●
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2046,7 +2046,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('813: レコード編集 - 正常表示確認', async ({ page }) => {
+    test('813: レコード編集 - 回帰確認（#issue1412）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1412
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset/edit/76
         const tid = tableId || await getAllTypeTableId(page);
@@ -2060,7 +2060,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('814: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('814: ダッシュボード - 回帰確認（#issue1429）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1429
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-dev.com/admin/dataset__106
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2073,7 +2073,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('815: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('815: ダッシュボード - 回帰確認（#issue1304）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1304
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__67
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2086,7 +2086,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('816: 通知設定 - 正常表示確認', async ({ page }) => {
+    test('816: notification - 回帰確認（#issue1389）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1389
         // expected: 想定通りの結果となること。 https://henmi009.pigeon-dev.com/admin/notification/edit/20?return_url=%252Fadmin%252Fnotification
         // 通知設定一覧ページを確認
@@ -2114,7 +2114,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(pageText).not.toContain('500');
     });
 
-    test('818: APIテストの実施 ※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する', async ({ page }) => {
+    test('818: APIテストの実施', async ({ page }) => {
         // description: APIテストの実施 ※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する
         // expected: ※シート「APIテスト(邊見)」を実施しエラーが発生しないこと
         await page.goto(BASE_URL + '/admin/user');
@@ -2128,7 +2128,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(pageText).not.toContain('404');
     });
 
-    test('819: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('819: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1759256897527249
         // expected: 想定通りの結果となること https://henmi024.pigeon-demo.com/admin/dataset__19
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2141,7 +2141,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('820: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('820: ダッシュボード - 回帰確認（#issue1442）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1442
         // expected: 想定通りの結果となっていること https://henmi011.pigeon-dev.com/admin/dataset__115  https://henmi024.pigeon-demo.com/admin/dataset__79
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2154,7 +2154,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('821: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('821: ダッシュボード - 回帰確認（#issue1443）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1443
         // expected: 想定通りの結果となっていること。 https://henmi024.pigeon-demo.com/admin/dataset__107
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2167,7 +2167,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('822: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('822: ダッシュボード - 回帰確認（#issue1427）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1427
         // expected: 想定通りの結果となっていること。 https://henmi011.pigeon-dev.com/admin/dataset__116
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2180,7 +2180,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('823: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('823: ダッシュボード - 回帰確認（#issue1421）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1421
         // expected: 想定通りの結果ｔなっていること。 https://henmi011.pigeon-dev.com/admin/dataset__117 https://henmi024.pigeon-demo.com/admin/dataset__78
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2193,7 +2193,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('824: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('824: ダッシュボード - 回帰確認（#issue1359）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1359
         // expected: 想定通りの結果となっていること。 https://henmi011.pigeon-dev.com/admin/dataset__118 https://henmi024.pigeon-demo.com/admin/dataset__77
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2206,7 +2206,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('825: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('825: ダッシュボード - 回帰確認（#issue1407）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1407
         // expected: 想定通りの結果となっていること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2219,7 +2219,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('826: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('826: ダッシュボード - 回帰確認（#issue1330）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1330
         // expected: 想定通りの結果となっていること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2232,7 +2232,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('827: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('827: ダッシュボード - 回帰確認（#issue1432）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1432
         // expected: 想定通りの結果となっていること。 https://henmi025.pigeon-demo.com/admin/dataset__21/view/1
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2245,7 +2245,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('828: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('828: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769589479320439
         // expected: 想定通りの結果となっていること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2258,7 +2258,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('829: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('829: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769574891296539
         // expected: 想定通りの結果となっていること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2271,7 +2271,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('830: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('830: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769398139056169
         // expected: 想定通りの結果となっていること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2284,7 +2284,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('831: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('831: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769320662869579
         // expected: 想定通りの結果となっていること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2297,7 +2297,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('832: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('832: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769308501903709
         // expected: 想定通りの結果となっていること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2310,7 +2310,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('833: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('833: ダッシュボード - 回帰確認（#issue1516）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1516
         // expected: 想定通りの結果となっていること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2323,7 +2323,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('834: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('834: ダッシュボード - 回帰確認（#issue1546）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1546
         // expected: 想定通りの結果となっていること。 https://henmi027.pigeon-demo.com/admin/dataset__7
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2336,7 +2336,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('835: テーブル内の区分の項目の設定を必須にはしていないのですが、新規作成すると区分の横に必須マークが出るようになった', async ({ page }) => {
+    test('835: テーブル内の区分の項目の設定を必須にはしていないのですが、新規作成すると区分の横', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1761884423226249 テーブル内の区分の項目の設定を必須にはしていないのですが、新規作成すると区分の横に必須マークが出るようになった
         // expected: 想定通りの結果となっていること。 https://henmi027.pigeon-demo.com/admin/dataset__6
         const tid = tableId || await getAllTypeTableId(page);
@@ -2369,7 +2369,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount).toBeGreaterThanOrEqual(0);
     });
 
-    test('837: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('837: ダッシュボード - 回帰確認（#issue1540）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1540
         // expected: 想定通りの結果となっていること。 https://henmi027.pigeon-demo.com/admin/dataset__8
         await page.goto(BASE_URL + '/admin/dashboard');

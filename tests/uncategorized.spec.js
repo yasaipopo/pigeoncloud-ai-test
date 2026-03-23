@@ -196,7 +196,7 @@ test.describe('文字列表示設定（145系）', () => {
     // -------------------------------------------------------------------------
     // 145-01: 一覧表示文字数制限（...省略）
     // -------------------------------------------------------------------------
-    test('145-01: 文字列(一行)にて一覧表示文字数を設定した場合、超過分が「...」で表示されること', async ({ page }) => {
+    test('145-01: 「文字列(一行)」にて、一覧表示文字数を設定した場合、設定した文字数以上は「..', async ({ page }) => {
         // レコード一覧ページへ
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -274,7 +274,7 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
     // NOTE: 埋め込みフォームはモーダルで表示される機能のため、
     //       テーブルページが正常に表示されることを確認する
     // -------------------------------------------------------------------------
-    test('128: テーブルの埋め込みフォーム設定ページが正常に表示されること', async ({ page }) => {
+    test('128: テーブル管理を開く。', async ({ page }) => {
         // テーブルページへ（/settingは存在しないURLのため、テーブル一覧ページを使用）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -295,7 +295,7 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
     // NOTE: 公開フォームはモーダルで表示される機能のため、
     //       テーブルページが正常に表示されることを確認する
     // -------------------------------------------------------------------------
-    test('129: テーブルの公開フォーム設定ページが正常に表示されること', async ({ page }) => {
+    test('129: テーブル管理を開く。※対象のテーブルは全種類の項目が設定されたテーブルとする', async ({ page }) => {
         // テーブルページへ（/settingは存在しないURLのため、テーブル一覧ページを使用）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -353,7 +353,7 @@ test.describe('列表示幅設定（191系）', () => {
     // -------------------------------------------------------------------------
     // 191: 列の表示幅設定
     // -------------------------------------------------------------------------
-    test('191: UI上から列の表示幅設定がエラーなく行えること', async ({ page }) => {
+    test('191: UI上から列の表示幅の設定を行う', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -410,7 +410,7 @@ test.describe('大量データ（211系）', () => {
     // -------------------------------------------------------------------------
     // 211: 大量データでのキャッシュテスト（簡易版 - ページ表示確認のみ）
     // -------------------------------------------------------------------------
-    test('211: テーブルのキャッシュ機能が正常に動作すること（ページ表示確認）', async ({ page }) => {
+    test('211: 10万件データのテーブルでキャッシュ周りの動作確認', async ({ page }) => {
         // 通常件数（5件）でキャッシュ関連ページが表示できることを確認
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -466,7 +466,7 @@ test.describe('表示条件設定（250系）', () => {
     // -------------------------------------------------------------------------
     // 250: 項目削除時の表示条件設定との連携
     // -------------------------------------------------------------------------
-    test('250: 表示条件設定に使用中の項目を削除しようとするとモーダルで警告が表示されること', async ({ page }) => {
+    test('250: 項目削除時に表示条件設定の警告モーダルが表示されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -493,7 +493,7 @@ test.describe('ユーザー管理（251系）', () => {
     // -------------------------------------------------------------------------
     // 251: ユーザー管理テーブルのログイン状態ソート
     // -------------------------------------------------------------------------
-    test('251: ユーザー管理テーブルのログイン状態でソートができること', async ({ page }) => {
+    test('251: ユーザー管理テーブルの「ログイン状態」の列をクリックしてソート', async ({ page }) => {
         // ユーザー管理ページへ
         await page.goto(BASE_URL + '/admin/user');
         await page.waitForLoadState('domcontentloaded');
@@ -548,7 +548,7 @@ test.describe('権限設定（262系）', () => {
     // -------------------------------------------------------------------------
     // 262: テーブル権限設定 + 項目権限設定の組み合わせ
     // -------------------------------------------------------------------------
-    test('262: テーブル権限設定と項目権限設定を組み合わせて設定できること', async ({ page }) => {
+    test('262: テーブル権限設定のところで、「テーブル権限設定」のみですと問題ないですが', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/permission`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -574,7 +574,7 @@ test.describe('2段階認証（267系）', () => {
     // -------------------------------------------------------------------------
     // 267: メール以外のログインIDでは2段階認証設定不可
     // -------------------------------------------------------------------------
-    test('267: ログインIDがメール形式でない場合2段階認証が設定できないこと', async ({ page }) => {
+    test('267: 2段階認証を設定しようとしてるユーザーのログインIDが、メールでない場合は2段階', async ({ page }) => {
         // システム設定ページへ
         await page.goto(BASE_URL + '/admin/system');
         await page.waitForLoadState('domcontentloaded');
@@ -628,7 +628,7 @@ test.describe('検索機能（270系）', () => {
     // -------------------------------------------------------------------------
     // 270: 複数項目の簡易検索と虫眼鏡検索
     // -------------------------------------------------------------------------
-    test('270: 複数項目を許可した他テーブル参照の簡易検索と項目名の虫眼鏡検索が正常に動作すること', async ({ page }) => {
+    test('270: 複数項目の複数項目を許可してるその他テーブルの簡易検索と、項目名の虫眼鏡からの検', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -685,7 +685,7 @@ test.describe('自動採番（273系）', () => {
     // -------------------------------------------------------------------------
     // 273: 自動採番フォーマット空時のデフォルト採番形式
     // -------------------------------------------------------------------------
-    test('273: 自動採番のフォーマットが空の場合デフォルト形式で採番されること', async ({ page }) => {
+    test('273: 自動採番のフォーマットが空のときは、ID-{YYYY}-{MM}-{ID:4:0', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -737,7 +737,7 @@ test.describe('リッチテキスト（274系）', () => {
     // -------------------------------------------------------------------------
     // 274: リッチテキスト時に追加オプション設定が開くこと
     // -------------------------------------------------------------------------
-    test('274: リッチテキストフィールドの追加オプション設定が正常に開くこと', async ({ page }) => {
+    test('274: リッチテキストのとき追加オプション設定が開かないバグを修正', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -789,7 +789,7 @@ test.describe('日時フォーマット（275系）', () => {
     // -------------------------------------------------------------------------
     // 275: 日時フォーマット指定のチェック外し後の動作
     // -------------------------------------------------------------------------
-    test('275: 日時項目で表示フォーマットを指定するチェックを外した後にフォーマットが適用されないこと', async ({ page }) => {
+    test('275: 日時項目で、一度でも表示フォーマットを入力したら、その後 表示フォーマットを指定', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -841,7 +841,7 @@ test.describe('循環参照エラー（291系）', () => {
     // -------------------------------------------------------------------------
     // 291: 他テーブル参照の循環設定でエラーが出ること
     // -------------------------------------------------------------------------
-    test('291: A→B→C→Aのように循環する他テーブル参照を設定するとエラーが出力されること', async ({ page }) => {
+    test('291: A→B→C→Aのように、その他参照テーブルが循環するように設定する。', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -893,7 +893,7 @@ test.describe('一括編集（312系）', () => {
     // -------------------------------------------------------------------------
     // 312: 一括編集モーダルでIDを選択して対象レコードのみ更新
     // -------------------------------------------------------------------------
-    test('312: 一括編集でIDを選択した場合に対象レコードのみが更新されること', async ({ page }) => {
+    test('312: 一括編集のモーダルで、idを選択してる場合は更新されるid を確認できるようにな', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -924,7 +924,7 @@ test.describe('ダッシュボード集計（315系）', () => {
     // -------------------------------------------------------------------------
     // 315: ダッシュボードに集計を表示する際に絞り込み条件が考慮されること
     // -------------------------------------------------------------------------
-    test('315: ダッシュボードの集計で絞り込み条件が正しく考慮されて表示されること', async ({ page }) => {
+    test('315: ダッシュボードに集計を表示させたとき、、集計に対する絞り込みの条件が考慮されてい', async ({ page }) => {
         // ダッシュボードページへ
         await page.goto(BASE_URL + '/admin/dashboard');
         await page.waitForLoadState('domcontentloaded');
@@ -978,7 +978,7 @@ test.describe('テーブル削除ロック（349系）', () => {
     // -------------------------------------------------------------------------
     // 349: テーブルの削除ロック機能
     // -------------------------------------------------------------------------
-    test('349: テーブルの削除ロック設定が正常に表示されること', async ({ page }) => {
+    test('349: テーブルの削除ロック機能の追加', async ({ page }) => {
         // テーブル設定ページへ
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/setting`);
         await page.waitForLoadState('domcontentloaded');
@@ -1005,7 +1005,7 @@ test.describe('ログイン失敗制限（357系）', () => {
     // -------------------------------------------------------------------------
     // 357: ログイン失敗のメールアドレスベースカウント
     // -------------------------------------------------------------------------
-    test('357: ログイン失敗時のカウントがメールアドレスベースで行われるシステム設定が確認できること', async ({ page }) => {
+    test('357: ログイン時に、失敗した時に、IPベースだったような気がして、メールアドレスベース', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/system');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1030,7 +1030,7 @@ test.describe('メニュー並び替え（361系）', () => {
     // -------------------------------------------------------------------------
     // 361: メニュー並び替えで多数テーブルが表示されること
     // -------------------------------------------------------------------------
-    test('361: メニュー並び替え画面で全テーブルが表示されること', async ({ page }) => {
+    test('361: メニュー並び替えを押してテーブルの並び替えしようとするのですがフォルダ内の約30', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/dataset');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1084,7 +1084,7 @@ test.describe('CSVキャンセル（367系）', () => {
     // -------------------------------------------------------------------------
     // 367: CSVアップロード/ダウンロードのキャンセル機能
     // -------------------------------------------------------------------------
-    test('367: CSVのアップロード・ダウンロード処理中にキャンセルができること', async ({ page }) => {
+    test('367: csvのアップロード、ダウンロードともに、終わるまでならcsvのログの詳細画面か', async ({ page }) => {
         // CSVログページへ（存在する場合）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -1144,7 +1144,7 @@ test.describe('ヘッダー固定（370系）', () => {
     // -------------------------------------------------------------------------
     // 370: テーブル一覧のヘッダー1行目固定機能
     // -------------------------------------------------------------------------
-    test('370: テーブル一覧でヘッダー1行目が固定表示されること', async ({ page }) => {
+    test('370: テーブル一覧の「ヘッダー1行目」を固定する機能', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1198,7 +1198,7 @@ test.describe('桁数カンマ区切り（256系）', () => {
     // -------------------------------------------------------------------------
     // 256: 桁数(カンマ区切り)設定
     // -------------------------------------------------------------------------
-    test('256: 数値フィールドの桁数カンマ区切り設定が正常に動作すること', async ({ page }) => {
+    test('256: 桁数(カンマ区切り)', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1254,7 +1254,7 @@ test.describe('スマートフォン表示（146系）', () => {
     // -------------------------------------------------------------------------
     // 146-01: スマートフォンで選択肢タップ時にズームされないこと
     // -------------------------------------------------------------------------
-    test('146-01: モバイルビューポートで選択肢フィールドがズームなしで操作できること', async ({ page }) => {
+    test('146-01: スマートフォンの表示で、選択肢をタップした際にズームがされないよう修正', async ({ page }) => {
         // スマートフォンサイズにリサイズ
         await page.setViewportSize({ width: 375, height: 812 });
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
@@ -1310,7 +1310,7 @@ test.describe('子テーブル（325, 341系）', () => {
     // -------------------------------------------------------------------------
     // 325: 子テーブルが子テーブルを設定しようとするとエラー
     // -------------------------------------------------------------------------
-    test('325: 子テーブルに子テーブルを設定しようとするとエラーが出力されること', async ({ page }) => {
+    test('325: 子テーブルが子テーブルを設定しようとするとエラーがでるようにアップデート', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1324,7 +1324,7 @@ test.describe('子テーブル（325, 341系）', () => {
     // -------------------------------------------------------------------------
     // 341: 子テーブル設定でレコード詳細画面が表示されること
     // -------------------------------------------------------------------------
-    test('341: 子テーブルを設定したテーブルのレコード詳細画面が正常に表示されること', async ({ page }) => {
+    test('341: 子テーブルを設定し、レコード詳細画面を表示', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1379,7 +1379,7 @@ test.describe('一覧編集モード（324系）', () => {
     // -------------------------------------------------------------------------
     // 324: 一覧編集モードで編集後に詳細画面の値が消えないこと
     // -------------------------------------------------------------------------
-    test('324: 一覧編集モードで編集した値が詳細画面でも正しく表示されること', async ({ page }) => {
+    test('324: 一覧編集モードで編集した際に、詳細画面でその項目の値が消えてないことを確認', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1435,7 +1435,7 @@ test.describe('未実装テスト（todo）', () => {
         await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
     }
 
-    test('245: 最終更新者をテーブルに追加する機能が動作すること', async ({ page }) => {
+    test('245: 最終更新者を、作成者と同じくテーブルに追加', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1447,7 +1447,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('246: ページ - 動作確認', async ({ page }) => {
+    test('246: レコード一覧 - 回帰確認（#issue323）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1460,7 +1460,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('247: ページ - 動作確認', async ({ page }) => {
+    test('247: レコード一覧 - 回帰確認（#issue328）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1473,7 +1473,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount).toBeGreaterThan(0);
     });
 
-    test('248: ページ - 動作確認', async ({ page }) => {
+    test('248: レコード一覧 - 回帰確認（#issue321）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1486,7 +1486,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('249: ページ - 動作確認', async ({ page }) => {
+    test('249: レコード一覧 - 回帰確認（#issue266）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1499,105 +1499,105 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('252: ページ - 動作確認', async ({ page }) => {
+    test('252: ※すでに紐づけられてるユーザーが無効に変更されても、表示されるように仕様変更', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('263: ページ - 動作確認', async ({ page }) => {
+    test('263: ダッシュボード - 回帰確認（#issue365）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('264: ページ - 動作確認', async ({ page }) => {
+    test('264: ダッシュボード - 回帰確認（#issue371）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('265: ページ - 動作確認', async ({ page }) => {
+    test('265: ダッシュボード - 回帰確認（#issue372）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('266: ページ - 動作確認', async ({ page }) => {
+    test('266: ダッシュボード - 回帰確認（#issue367）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('268: ページ - 動作確認', async ({ page }) => {
+    test('268: ダッシュボード - 回帰確認（#issue368）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('269: ページ - 動作確認', async ({ page }) => {
+    test('269: ダッシュボード - 回帰確認（#issue360）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('271: ページ - 動作確認', async ({ page }) => {
+    test('271: ダッシュボード - 回帰確認（#issue247）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('272: ページ - 動作確認', async ({ page }) => {
+    test('272: ダッシュボード - 回帰確認（#issue384）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('276: ページ - 動作確認', async ({ page }) => {
+    test('276: ダッシュボード - 回帰確認（#issue390）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('277: ページ - 動作確認', async ({ page }) => {
+    test('277: ダッシュボード - 回帰確認（#issue389）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('278: ページ - 動作確認', async ({ page }) => {
+    test('278: ダッシュボード - 回帰確認（#issue369）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('280: ページ - 動作確認', async ({ page }) => {
+    test('280: ダッシュボード - 回帰確認（#issue381）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('281: ページ - 動作確認', async ({ page }) => {
+    test('281: ダッシュボード - 回帰確認（#issue293）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('282: ページ - 動作確認', async ({ page }) => {
+    test('282: Slack設定 - 回帰確認（Slack）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/slack');
         // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1605,7 +1605,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('283: ページ - 動作確認', async ({ page }) => {
+    test('283: Slack設定 - 回帰確認（Slack）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/slack');
         // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1613,14 +1613,14 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('287: ページ - 動作確認', async ({ page }) => {
+    test('287: ダッシュボード - 回帰確認（#issue398）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('288: ページ - 動作確認', async ({ page }) => {
+    test('288: Slack設定 - 回帰確認（Slack）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/slack');
         // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1628,14 +1628,14 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('289: ページ - 動作確認', async ({ page }) => {
+    test('289: ダッシュボード - 回帰確認（#issue400）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('290: 文章複数行でエンターキーを押し続けたときに画面が上がる現象が発生しないこと', async ({ page }) => {
+    test('290: 先方のおっしゃる通り、「問い合わせ内容」フォーム内(文章複数行の項目)でエンター', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1657,12 +1657,12 @@ test.describe('未実装テスト（todo）', () => {
         expect(await page.innerText('body')).not.toContain('Internal Server Error');
     });
 
-    test('292: カレンダーページの複数スケジュール印刷が正常に動作すること', async ({ page }) => {
+    test('292: カレンダーページに複数スケジュールを登録を行い、設定したカレンダーページを印刷す', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/calendar');
     });
 
-    test('293: ダッシュボードを複数作成できること', async ({ page }) => {
+    test('293: ダッシュボードを複数作成出来るように。またダッシュボードごとの権限設定も可能', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         // ダッシュボード一覧ページが表示されることを確認
@@ -1674,7 +1674,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('294: 同一ユーザーで4端末からログインした場合に1端末目が自動ログアウトされること', async ({ browser }) => {
+    test('294: 同一ユーザー(1ユーザー)で4端末からログインを行う。', async ({ browser }) => {
         // 4回の逐次ログインに備えてタイムアウトを延長（login関数は最大40秒 * 4回 = 160秒以上かかりうる）
         test.setTimeout(300000);
         // 4つのブラウザコンテキストで同時ログイン
@@ -1699,70 +1699,70 @@ test.describe('未実装テスト（todo）', () => {
         }
     });
 
-    test('297: ページ - 動作確認', async ({ page }) => {
+    test('297: ダッシュボード - 回帰確認（#issue403）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('299: ページ - 動作確認', async ({ page }) => {
+    test('299: ダッシュボード - 回帰確認（#issue386）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('300: ページ - 動作確認', async ({ page }) => {
+    test('300: ダッシュボード - 回帰確認（#issue415）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('301: ページ - 動作確認', async ({ page }) => {
+    test('301: ダッシュボード - 回帰確認（#issue408）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('303: ページ - 動作確認', async ({ page }) => {
+    test('303: ダッシュボード - 回帰確認（#issue419）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('304: ページ - 動作確認', async ({ page }) => {
+    test('304: ダッシュボード - 回帰確認（#issue427）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('305: ページ - 動作確認', async ({ page }) => {
+    test('305: ダッシュボード - 回帰確認（#issue428）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('306: ページ - 動作確認', async ({ page }) => {
+    test('306: ダッシュボード - 回帰確認（#issue423）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('307: ページ - 動作確認', async ({ page }) => {
+    test('307: ダッシュボード - 回帰確認（#issue429）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('308: 親テーブル編集画面の子テーブル計算項目リアルタイム表示', async ({ page }) => {
+    test('308: 親テーブル編集画面の、子テーブルの計算項目のリアルタイム表示', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1774,35 +1774,35 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('309: ページ - 動作確認', async ({ page }) => {
+    test('309: ダッシュボード - 回帰確認（#issue435）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('310: ページ - 動作確認', async ({ page }) => {
+    test('310: ダッシュボード - 回帰確認（#issue420）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('311: ページ - 動作確認', async ({ page }) => {
+    test('311: ダッシュボード - 回帰確認（#issue438）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('313: ページ - 動作確認', async ({ page }) => {
+    test('313: ダッシュボード - 回帰確認（#issue418）', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('316: クロス集計で複数可の他テーブル参照がある場合に左端空白でなく表示されること', async ({ page }) => {
+    test('316: クロス集計で、添付みたいな設定で、', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/reports');
         // 帳票ページが正常に表示されること
@@ -1810,7 +1810,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasReportContent).toBeGreaterThan(0);
     });
 
-    test('319: SMTP認証設定（LOGIN/PLAIN/CRAM-MD5）が正常に動作すること', async ({ page }) => {
+    test('319: SMTP認証を行うチェックとプルダウンから「LOGIN」「PLAIN」「CRAM', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/mail');
         // メール設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1818,7 +1818,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('323: フィルターの混合設定が正常に動作すること', async ({ page }) => {
+    test('323: フィルターの混合のとき、', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1833,7 +1833,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('326: 編集権限設定と編集条件の組み合わせが正しく動作すること', async ({ page }) => {
+    test('326: 編集権限なし →当然編集条件もなし', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1845,7 +1845,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('330: グループ並び替え・前期比チャート・パスワード再発行機能の確認', async ({ page }) => {
+    test('330: ・グループ並び替え機能', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/reports');
         // 帳票ページが正常に表示されること
@@ -1853,7 +1853,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasReportContent).toBeGreaterThan(0);
     });
 
-    test('342: テーブルJSONエクスポート時に添付ファイルがあってもくるくるが出ないこと', async ({ page }) => {
+    test('342: テーブルJSONエクスポート時、添付ファイルがあったら、インポートしたときくるく', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1862,7 +1862,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(await page.innerText('body')).not.toContain('Internal Server Error');
     });
 
-    test('350: 通知・リマインド設定で権限のないテーブルを選択するとエラーが出ること', async ({ page }) => {
+    test('350: 通知設定やリマインド設定で、テーブル権限のないテーブルを選択するとエラーが出るよ', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/notifications');
         // 通知設定ページが正常に表示されること
@@ -1870,7 +1870,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasNotificationContent).toBeGreaterThan(0);
     });
 
-    test('355: 領収書ダウンロード機能が正常に動作すること', async ({ page }) => {
+    test('355: 領収書ダウンロード機能の追加', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/system');
         // システム設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1878,7 +1878,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('360: ユーザーテーブルの編集不可項目（デフォルト項目）が正しく機能すること', async ({ page }) => {
+    test('360: ユーザーテーブルの編集不可項目(デフォルト項目)が効かないバグがあったので修正', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/users');
         // ユーザー管理ページが正常に表示されること
@@ -1889,7 +1889,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('362: テーブルの編集条件と他権限設定の組み合わせが正しく動作すること', async ({ page }) => {
+    test('362: テーブルの編集条件が設定されている権限がある', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1901,7 +1901,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('365: case_no 101-7のバグ修正が適用されていること', async ({ page }) => {
+    test('365: テストケース101-7のバグ修正', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1917,7 +1917,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('371: メール通知・配信の完了タイミングが正しく管理されること', async ({ page }) => {
+    test('371: メール通知、配信の機能を少しアップデートし、今まではsendgrid（外部メール', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/notifications');
         // 通知設定ページが正常に表示されること
@@ -1959,7 +1959,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await closeTemplateModal(page);
     });
 
-    test('314: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('314: ダッシュボード - 回帰確認（#issue444）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/444
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1973,7 +1973,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('317: ※以下環境で確認を実施する ID: admin PW: Yq23oLts2O5y', async ({ page }) => {
+    test('317: ※以下環境で確認を実施する', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/399  ※以下環境で確認を実施する https://demo-20231016.pigeon-demo.com/admin/da
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -1987,7 +1987,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('318: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('318: ダッシュボード - 回帰確認（#issue322）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/322
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2001,7 +2001,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('320: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('320: ダッシュボード - 回帰確認（#issue440）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/440
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2015,7 +2015,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('321: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('321: ダッシュボード - 回帰確認（#issue453）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/453
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2029,7 +2029,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('322: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('322: ダッシュボード - 回帰確認（#issue452）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/452
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__134
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2043,7 +2043,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('327: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('327: ダッシュボード - 回帰確認（#issue442）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/442
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2075,7 +2075,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('329: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('329: ダッシュボード - 回帰確認（#issue449）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/449
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2089,7 +2089,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('331: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('331: ダッシュボード - 回帰確認（#issue336）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/336
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2103,7 +2103,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('332: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('332: ダッシュボード - 回帰確認（#issue337）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/337
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2117,7 +2117,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('333: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('333: ダッシュボード - 回帰確認（#issue396）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/396
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2131,7 +2131,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('334: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('334: ダッシュボード - 回帰確認（#issue465）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/465
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2145,7 +2145,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('335: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('335: ダッシュボード - 回帰確認（#issue470）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/470
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2159,7 +2159,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('336: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('336: ダッシュボード - 回帰確認（#issue457）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/457
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2173,7 +2173,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('337: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('337: ダッシュボード - 回帰確認（#issue480）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/480
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2187,7 +2187,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('338: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('338: ダッシュボード - 回帰確認（#issue483）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/483
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2201,7 +2201,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('339: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('339: ダッシュボード - 回帰確認（#issue486）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/486
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2215,7 +2215,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('340: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('340: ダッシュボード - 回帰確認（#issue496）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/496
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__92
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2229,7 +2229,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('343: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('343: ダッシュボード - 回帰確認（#issue501）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/501
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2243,7 +2243,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('344: ※組織は複数項目で、複数項目はソートできないような仕様。組織がソートできなければOK', async ({ page }) => {
+    test('344: ※組織は複数項目で、複数項目はソートできないような仕様。組織がソートできなければ', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/489 ※組織は複数項目で、複数項目はソートできないような仕様。組織がソートできなければOK
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -2261,7 +2261,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('345: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('345: ダッシュボード - 回帰確認（#issue487）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/487
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__40
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2275,7 +2275,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('346: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('346: ダッシュボード - 回帰確認（#issue473）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/473
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__90
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2289,7 +2289,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('347: ※固定テキストが入ってるテーブルをエクスポート、インポートしたらエラーが出てたのを修正', async ({ page }) => {
+    test('347: ※固定テキストが入ってるテーブルをエクスポート、インポートしたらエラーが出てたの', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/468 ※固定テキストが入ってるテーブルをエクスポート、インポートしたらエラーが出てたのを修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -2307,7 +2307,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('348: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('348: ダッシュボード - 回帰確認（#issue461）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/461
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2321,7 +2321,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('351: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('351: ダッシュボード - 回帰確認（#issue478）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/478
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2335,7 +2335,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('352: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('352: ダッシュボード - 回帰確認（#issue494）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/494
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__132
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2349,7 +2349,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('353: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('353: ダッシュボード - 回帰確認（#issue493）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/493
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2363,7 +2363,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('354: ルックアップ自動反映されてて、ルックアップ元がその他テーブル項目のとき項目名の横の虫メガネの検索でヒットしなかったんです', async ({ page }) => {
+    test('354: ルックアップ自動反映されてて、ルックアップ元がその他テーブル項目のとき項目名の横', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/436 ルックアップ自動反映されてて、ルックアップ元がその他テーブル項目のとき項目名の横の虫メガネの検索でヒットしなかったんですが
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__37
         const tid = tableId || await getAllTypeTableId(page);
@@ -2381,7 +2381,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('356: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('356: ダッシュボード - 回帰確認（#issue503）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/503
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2395,7 +2395,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('358: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('358: ダッシュボード - 回帰確認（#issue505）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/505
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/api/public/f/dataset__37/22f4f68423/8
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2409,7 +2409,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('359: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('359: ダッシュボード - 回帰確認（#issue508）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/508
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2423,7 +2423,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('363: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('363: ダッシュボード - 回帰確認（#issue524）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/524
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2437,7 +2437,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('364: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('364: ダッシュボード - 回帰確認（#issue521）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/521
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2451,7 +2451,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('366: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('366: ダッシュボード - 回帰確認（#issue528）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/528
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2465,7 +2465,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('368: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('368: ダッシュボード - 回帰確認（#issue538）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/538
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2479,7 +2479,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('369: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('369: ダッシュボード - 回帰確認（#issue535）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/535
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__122/edit/1?return_url=%252Fadmin%252Fdataset__122
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2493,7 +2493,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('372: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('372: ダッシュボード - 回帰確認（#issue532）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/532
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2521,7 +2521,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('374: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('374: ダッシュボード - 回帰確認（#issue509）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/509
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__131
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2535,7 +2535,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('375: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('375: ダッシュボード - 回帰確認（#issue534）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/534
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2549,7 +2549,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('376: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('376: ダッシュボード - 回帰確認（#issue516）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/516
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2563,7 +2563,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('377: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('377: ダッシュボード - 回帰確認（#issue477）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/477
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2577,7 +2577,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('378: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('378: ダッシュボード - 回帰確認（#issue547）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/547
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2591,7 +2591,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('379: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('379: ダッシュボード - 回帰確認（#issue518）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/518
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2605,7 +2605,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('380: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('380: ダッシュボード - 回帰確認（#issue523）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/523
         // expected: 想定通りの結果となること。 https://henmi005.pigeon-demo.com/admin/dataset__14
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2619,7 +2619,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('381: 過去に、関連レコードのその他テーブルを計算で使えるようにしたのですが、バグがあったので修正。その関連テーブルのソートにI', async ({ page }) => {
+    test('381: 過去に、関連レコードのその他テーブルを計算で使えるようにしたのですが、バグがあっ', async ({ page }) => {
         // description: 過去に、関連レコードのその他テーブルを計算で使えるようにしたのですが、バグがあったので修正。その関連テーブルのソートにIDが入ってるケースでバグがあったので、再発しないかのテスト。 その他計算周りのテスト
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -2637,7 +2637,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('382: ワークフローの設定の箇所で 組織の全員が承認時のみに通知 がチェックできるようになりました。 チェックが入っている かつ', async ({ page }) => {
+    test('382: ワークフローの設定の箇所で', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/441 ワークフローの設定の箇所で 組織の全員が承認時のみに通知 がチェックできるようになりました。 チェックが入っている かつ
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/workflow');
@@ -2669,7 +2669,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('384: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('384: ダッシュボード - 回帰確認（#issue549）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/549
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2683,7 +2683,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('385: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('385: ダッシュボード - 回帰確認（#issue517）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/517
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2697,7 +2697,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('386: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('386: ダッシュボード - 回帰確認（#issue546）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/546
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2711,7 +2711,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('387: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('387: ダッシュボード - 回帰確認（#issue550）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/550
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2725,7 +2725,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('388: ① 子テーブルを含んだレコードを新規登録 ② ①登録後、レコードを編集し子テーブルを追加', async ({ page }) => {
+    test('388: 子テーブルを含んだレコードを新規登録', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/556  ① 子テーブルを含んだレコードを新規登録 ② ①登録後、レコードを編集し子テーブルを追加
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -2743,7 +2743,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('389: ・テーブル作成権限有＋グループ閲覧権限がない場合に閲覧権限がないグループ配下でテーブル作成不可 ・テーブル作成権限有＋グ', async ({ page }) => {
+    test('389: ・テーブル作成権限有＋グループ閲覧権限がない場合に閲覧権限がないグループ配下でテ', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/557 ・テーブル作成権限有＋グループ閲覧権限がない場合に閲覧権限がないグループ配下でテーブル作成不可 ・テーブル作成権限有＋グル
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -2761,7 +2761,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('390: 以前通知設定は、通知設定に対してslack, メアドなどを設定して、さらに個別通知設定／リマインダ設定で、テーブルを設定', async ({ page }) => {
+    test('390: 以前通知設定は、通知設定に対してslack, メアドなどを設定して、さらに個別通', async ({ page }) => {
         // description: 以前通知設定は、通知設定に対してslack, メアドなどを設定して、さらに個別通知設定／リマインダ設定で、テーブルを設定していましたが、これだと権限設定などで通知設定内のテーブルが１つは権限あって、１つは無いとかになる際に面倒なので、通知設
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -2779,7 +2779,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('391: その他設定に、”アラートを自動で閉じない”という設定を追加', async ({ page }) => {
+    test('391: その他設定に、“アラートを自動で閉じない”という設定を追加', async ({ page }) => {
         // description: その他設定に、”アラートを自動で閉じない”という設定を追加
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/system');
@@ -2792,7 +2792,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(hasSystemContent).toBeGreaterThan(0);
     });
 
-    test('392: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('392: ダッシュボード - 回帰確認（#issue571）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/571
         // expected: 想定通りの結果となること。 https://henmi011.pigeon-demo.com/admin/admin
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2806,7 +2806,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('393: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('393: ダッシュボード - 回帰確認（#issue562）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/562
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2820,7 +2820,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('394: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('394: ダッシュボード - 回帰確認（#issue578）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/578
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2834,7 +2834,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('396: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('396: ダッシュボード - 回帰確認（#issue585）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/585
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2848,7 +2848,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('397: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('397: ダッシュボード - 回帰確認（#issue540）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/540
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__74/edit/new
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2862,7 +2862,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('398: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('398: ダッシュボード - 回帰確認（#issue551）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/551
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2876,7 +2876,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('399: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('399: ダッシュボード - 回帰確認（#issue569）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/569
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2890,7 +2890,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('400: 配信メールにhtmlで画像を貼ったら、画像ではなくコードになっていたようなので、修正', async ({ page }) => {
+    test('400: 配信メールにhtmlで画像を貼ったら、画像ではなくコードになっていたようなので、', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/597 配信メールにhtmlで画像を貼ったら、画像ではなくコードになっていたようなので、修正
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2904,7 +2904,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('401: ユーザーテーブルに計算項目があるとき、 csvダウンロードで組織がidになっていたので、修正', async ({ page }) => {
+    test('401: ユーザーテーブルに計算項目があるとき、', async ({ page }) => {
         // description: ユーザーテーブルに計算項目があるとき、 csvダウンロードで組織がidになっていたので、修正
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/admin
         const tid = tableId || await getAllTypeTableId(page);
@@ -2922,7 +2922,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('402: 今、テーブルAの権限設定を、高度な設定の項目設定も例えばユーザーAに対して行って、 そのテーブルをテーブルBとしてコピー', async ({ page }) => {
+    test('402: 今、テーブルAの権限設定を、高度な設定の項目設定も例えばユーザーAに対して行って', async ({ page }) => {
         // description: 今、テーブルAの権限設定を、高度な設定の項目設定も例えばユーザーAに対して行って、 そのテーブルをテーブルBとしてコピーして、高度な設定の項目設定の権限グループを編集すると、テーブルA のグループも変わってしまう問題 このような問題があった
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -2940,11 +2940,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('403: 一覧画面から詳細に飛んだ際に、左右のキーで次・前の詳細画面に行けるように仕様変更。 ※本機能廃止のためテスト不要', async ({ page }) => {
+    test('403: 一覧画面から詳細に飛んだ際に、左右のキーで次・前の詳細画面に行けるように仕様変更', async ({ page }) => {
         test.skip(true, '本機能は廃止されたためテスト不要');
     });
 
-    test('404: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('404: ダッシュボード - 回帰確認（#issue587）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/587
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2976,7 +2976,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('406: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('406: ダッシュボード - 回帰確認（#issue529）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/529
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__71
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2990,7 +2990,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('407: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('407: ダッシュボード - 回帰確認（#issue536）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/536
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3004,7 +3004,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('408: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('408: ダッシュボード - 回帰確認（#issue573）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/573
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3018,7 +3018,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('409: ※以下機能の追加 ・CSVにワークフローの状態を含める ・CSVにテーブル名を含める', async ({ page }) => {
+    test('409: ※以下機能の追加', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/514 ※以下機能の追加 ・CSVにワークフローの状態を含める ・CSVにテーブル名を含める
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__26
         const tid = tableId || await getAllTypeTableId(page);
@@ -3036,7 +3036,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('410: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('410: ダッシュボード - 回帰確認（#issue555）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/555
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3050,7 +3050,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('411: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('411: ダッシュボード - 回帰確認（#issue551）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/551
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3064,7 +3064,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('412: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('412: ダッシュボード - 回帰確認（#issue596）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/596
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__95
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3078,7 +3078,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('413: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('413: ダッシュボード - 回帰確認（#issue593）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/593
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__95
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3092,7 +3092,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('414: 関連テーブルがある かつ viewの表示項目で並び順が入れ替えられてる とき、詳細画面での順番がおかしかったので修正', async ({ page }) => {
+    test('414: 関連テーブルがある', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/591 関連テーブルがある かつ viewの表示項目で並び順が入れ替えられてる とき、詳細画面での順番がおかしかったので修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3110,7 +3110,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('415: 編集モードでの編集時に、一覧に表示されてない項目が計算に使われている場合、編集中に計算されたなかったのを修正', async ({ page }) => {
+    test('415: 編集モードでの編集時に、一覧に表示されてない項目が計算に使われている場合、編集中', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/576 編集モードでの編集時に、一覧に表示されてない項目が計算に使われている場合、編集中に計算されたなかったのを修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3128,7 +3128,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('416: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('416: ダッシュボード - 回帰確認（#issue565）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/565
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/admin_invoices/view/5
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3142,7 +3142,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('417: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('417: ダッシュボード - 回帰確認（#issue607）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/607
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__92/edit/new
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3156,7 +3156,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('418: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('418: ダッシュボード - 回帰確認（#issue513）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/513
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3170,7 +3170,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('419: ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。リロードしても同じです。ログアウトして、', async ({ page }) => {
+    test('419: ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。', async ({ page }) => {
         // description: ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。リロードしても同じです。ログアウトして、またログインしたら、利用不可です。 そのissues修正完了致しました。テストお願い致します。
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/user');
@@ -3186,7 +3186,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('420: お客様からのご指摘ではなく気づいた点なのですが、項目を追加した時に場所を変更する際の挙動が少しやりづらいので、UI改善に', async ({ page }) => {
+    test('420: お客様からのご指摘ではなく気づいた点なのですが、項目を追加した時に場所を変更する', async ({ page }) => {
         // description: お客様からのご指摘ではなく気づいた点なのですが、項目を追加した時に場所を変更する際の挙動が少しやりづらいので、UI改善につなげていただければ幸いです。 事象：項目をドラッグして移動先へ移動させている途中に、移動可能であることを示す水色の枠が
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3204,7 +3204,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('421: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('421: ダッシュボード - 回帰確認（#issue580）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/580
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3218,7 +3218,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('422: テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グループの削除ボタンをつけることは可能でしょ', async ({ page }) => {
+    test('422: テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グル', async ({ page }) => {
         // description: テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グループの削除ボタンをつけることは可能でしょうか。 こちらですが、一覧画面のグループのところに削除アイコンつけて、削除したら中のテーブルは全部グループの外に出る（グ
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3254,7 +3254,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('424: これのテストお願いします！ ただ、新しく作った権限グループにはバリデーションはできておらず、 ①今すでに同じ権限グループ', async ({ page }) => {
+    test('424: これのテストお願いします！', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1702920982265599?thread_ts=1701737040.391339&cid=C05CK6Z7YDQ これのテストお願いします
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3272,7 +3272,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('425: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('425: ダッシュボード - 回帰確認（#issue615）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/615
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3286,7 +3286,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('426: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('426: ダッシュボード - 回帰確認（#issue595）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/595
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3300,7 +3300,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('427: ・日時項目の = 条件で正しく検索できること ・関連テーブルの表示条件に 日時項目の条件があるとき、正しく関連テーブルが', async ({ page }) => {
+    test('427: ・日時項目の = 条件で正しく検索できること', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1706493446865749 ・日時項目の = 条件で正しく検索できること ・関連テーブルの表示条件に 日時項目の条件があるとき、正しく関連テ
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3318,7 +3318,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('428: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('428: ダッシュボード - 回帰確認（#issue589）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/589
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3350,7 +3350,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('430: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('430: ダッシュボード - 回帰確認（#issue584）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/584
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3364,7 +3364,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('431: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('431: ダッシュボード - 回帰確認（#issue512）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/512
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3378,7 +3378,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('432: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('432: ダッシュボード - 回帰確認（#issue612）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/612
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3392,7 +3392,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('433: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('433: ダッシュボード - 回帰確認（#issue626）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/626
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset/edit/140
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3406,7 +3406,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('434: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('434: ダッシュボード - 回帰確認（#issue633）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/633
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3420,7 +3420,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('435: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('435: ダッシュボード - 回帰確認（#issue650）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/650
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3452,7 +3452,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('437: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('437: ダッシュボード - 回帰確認（#issue655）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/655
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__89
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3466,7 +3466,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('438: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('438: ダッシュボード - 回帰確認（#issue639）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/639
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__92
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3480,7 +3480,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('439: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('439: ダッシュボード - 回帰確認（#issue643）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/643
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__140
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3494,7 +3494,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('440: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('440: ダッシュボード - 回帰確認（#issue606）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/606
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3508,7 +3508,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('442: 一覧画面で全選択のチェックを行って一括削除を行った際、削除処理後もチェックされたままの状態となっていたので、処理後は全選', async ({ page }) => {
+    test('442: 一覧画面で全選択のチェックを行って一括削除を行った際、削除処理後もチェックされた', async ({ page }) => {
         // description: 一覧画面で全選択のチェックを行って一括削除を行った際、削除処理後もチェックされたままの状態となっていたので、処理後は全選択のチェックが外れるよう修正。一括更新の際も同様の処理を行うよう修正。
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3526,7 +3526,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('443: admin/dataset - 正常表示確認', async ({ page }) => {
+    test('443: テーブル管理 - 正常表示確認', async ({ page }) => {
         // description: https://www.notion.so/csv-6e68e9b4ed004087883138dd0117d2b6
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dataset');
@@ -3540,7 +3540,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(hasDatasetLinks).toBeGreaterThan(0);
     });
 
-    test('444: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('444: ダッシュボード - 回帰確認（#issue601）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/601
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3554,7 +3554,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('445: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('445: ダッシュボード - 回帰確認（#issue625）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/625
         // expected: 想定通りの結果となること。 https://henmi003.pigeon-demo.com/admin/dataset__10
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3568,7 +3568,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('446: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('446: ダッシュボード - 回帰確認（#issue632）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/632
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3582,7 +3582,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('447: csvエクスポートで、1行目と、1行目以降で、子テーブルのレコードの数が違うとき、おかしかったので修正。1行目の子テーブ', async ({ page }) => {
+    test('447: csvエクスポートで、1行目と、1行目以降で、子テーブルのレコードの数が違うとき', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/653 csvエクスポートで、1行目と、1行目以降で、子テーブルのレコードの数が違うとき、おかしかったので修正。1行目の子テーブル
         // expected: 想定通りの結果となること。 https://henmi003.pigeon-demo.com/admin/dataset__31
         const tid = tableId || await getAllTypeTableId(page);
@@ -3600,7 +3600,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('448: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('448: ダッシュボード - 回帰確認（#issue603）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/603
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3614,7 +3614,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('449: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('449: ダッシュボード - 回帰確認（#issue669）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/669
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3628,7 +3628,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('450: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('450: ダッシュボード - 回帰確認（#issue646）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/646
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3642,7 +3642,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('451: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('451: ダッシュボード - 回帰確認（#issue608）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/608
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3656,7 +3656,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('452: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('452: ダッシュボード - 回帰確認（#issue604）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/604
         // expected: 想定通りの結果となること。 https://henmi018.pigeon-demo.com/admin/dataset__45
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3684,7 +3684,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('454: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('454: ダッシュボード - 回帰確認（#issue648）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/648
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3698,7 +3698,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('455: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('455: ダッシュボード - 回帰確認（#issue693）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/693
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3712,7 +3712,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('456: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('456: ダッシュボード - 回帰確認（#issue638）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/638
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__67
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3726,7 +3726,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('457: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('457: ダッシュボード - 回帰確認（#issue645）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/645
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3740,7 +3740,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('459: フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修正', async ({ page }) => {
+    test('459: フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修', async ({ page }) => {
         // description: フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修正
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__130
         const tid = tableId || await getAllTypeTableId(page);
@@ -3758,7 +3758,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('460: 関連テーブルの表示条件で、 自分の項目 = 関連テーブル先の項目 と設定すると思いますが、 文字列 = 文字列 や 数値', async ({ page }) => {
+    test('460: 関連テーブルの表示条件で、', async ({ page }) => {
         // description: 関連テーブルの表示条件で、 自分の項目 = 関連テーブル先の項目 と設定すると思いますが、 文字列 = 文字列 や 数値 = 数値、他テーブル = 他テーブル、他テーブル = 文字列、年月 =年月、日時 = 日時や、ルックアップ = 何か 
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3776,7 +3776,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('461: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('461: ダッシュボード - 回帰確認（#issue640）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/640
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3790,7 +3790,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('462: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('462: ダッシュボード - 回帰確認（#issue711）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/711
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__90
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3804,7 +3804,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('463: ワークフローの通知のカスタマイズの件ですが、 今更で申し訳ないのですが以下2点をお手隙で修正いただけますと １．項目の変', async ({ page }) => {
+    test('463: ワークフローの通知のカスタマイズの件ですが、', async ({ page }) => {
         // description: ワークフローの通知のカスタマイズの件ですが、 今更で申し訳ないのですが以下2点をお手隙で修正いただけますと https://loftal.pigeon-cloud.com/admin/dataset__90/view/515 １．項目の変数
         // expected: 想定通りの結果となること。 https://henmi006.pigeon-demo.com/admin/dataset__84/edit/new
         const tid = tableId || await getAllTypeTableId(page);
@@ -3822,7 +3822,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('464: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('464: ダッシュボード - 回帰確認（#issue635）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/635
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3854,7 +3854,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('466: 下記スレッドの内容で、 ワークフローの承認済みのワークフローのスキップですが、 組織や項目にも対応したので、テストお願い', async ({ page }) => {
+    test('466: 下記スレッドの内容で、', async ({ page }) => {
         // description: 下記スレッドの内容で、 ワークフローの承認済みのワークフローのスキップですが、 組織や項目にも対応したので、テストお願いします！ 組織の一人や、組織の全員など、色々なパターンのテストをお願いします https://loftal.slack.
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3872,7 +3872,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('468: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('468: ダッシュボード - 回帰確認（#issue699）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/699
         // expected: 想定通りの結果となること。 https://henmi003.pigeon-demo.com/admin/dataset__21/view/1
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3886,7 +3886,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('469: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('469: ダッシュボード - 回帰確認（#issue647）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/647
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3900,7 +3900,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('470: 以下事象が発生しないことを確認する １．該当のレコードでワークフローを否認する a. データを編集しても、最初のワークフ', async ({ page }) => {
+    test('470: 以下事象が発生しないことを確認する', async ({ page }) => {
         // description: 以下事象が発生しないことを確認する  １．該当のレコードでワークフローを否認する 　　a. データを編集しても、最初のワークフローのままで条件に合ったワークフローに切り替わらない     b. テンプレート/組織のselect boxが表示
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -3918,7 +3918,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('471: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('471: ダッシュボード - 回帰確認（#issue667）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/667
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__10
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3932,7 +3932,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('472: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('472: ダッシュボード - 回帰確認（#issue718）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/718
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3960,7 +3960,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('474: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('474: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1709662404402039
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3974,7 +3974,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('475: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('475: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1709662438016639
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3988,7 +3988,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('476: 子テーブルのルックアップの、親テーブルのSUMIFで使えるようにしましたSUMIFは小文字でも反応するようにしました！', async ({ page }) => {
+    test('476: 子テーブルのルックアップの、親テーブルのSUMIFで使えるようにしましたSUMI', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/677 子テーブルのルックアップの、親テーブルのSUMIFで使えるようにしましたSUMIFは小文字でも反応するようにしました！
         // expected: 想定通りの結果となること。 https://henmi003.pigeon-demo.com/admin/dataset__17
         const tid = tableId || await getAllTypeTableId(page);
@@ -4006,7 +4006,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('477: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('477: ダッシュボード - 回帰確認（#issue671）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/671
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/admin
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4020,7 +4020,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('478: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('478: ダッシュボード - 回帰確認（#issue668）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/668
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__100/view/4
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4034,7 +4034,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('479: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('479: ダッシュボード - 回帰確認（#issue641）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/641
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4048,7 +4048,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('480: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('480: ダッシュボード - 回帰確認（#issue750）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/750
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4062,7 +4062,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('481: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('481: ダッシュボード - 回帰確認（#issue661）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/661
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset/edit/89
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4076,7 +4076,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('482: こちらテストお願いします！ 全件テストには追加いただいてると思いますが、 下記のバグがあって、一旦消していたので、下記の', async ({ page }) => {
+    test('482: こちらテストお願いします！', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1707550109873849 こちらテストお願いします！ 全件テストには追加いただいてると思いますが、 下記のバグがあって、一旦消していたので
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -4094,7 +4094,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('483: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('483: ダッシュボード - 回帰確認（#issue760）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/760
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4108,7 +4108,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('484: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('484: ダッシュボード - 回帰確認（#issue623）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/623
         // expected: 想定通りの結果となること。 https://henmi008.pigeon-demo.com/admin/dataset__64
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4122,7 +4122,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('485: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('485: ダッシュボード - 回帰確認（#issue764）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/764
         // expected: 想定通りの結果となること。 https://henmi008.pigeon-demo.com/admin/dataset__63
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4136,7 +4136,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('486: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('486: ダッシュボード - 回帰確認（#issue703）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/703
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4150,7 +4150,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('487: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('487: ダッシュボード - 回帰確認（#issue738）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/738
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4164,7 +4164,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('488: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('488: ダッシュボード - 回帰確認（#issue766）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/766
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__35
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4178,7 +4178,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('489: ①viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条件が保存されていることの確認 ②複数の', async ({ page }) => {
+    test('489: viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条', async ({ page }) => {
         // description: ①viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条件が保存されていることの確認 ②複数の条件で色をつけて、それぞれ色が変わっていることの確認(全体が一色になっておらず、条件によって色分けされる) ③日時項目の
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__57
         const tid = tableId || await getAllTypeTableId(page);
@@ -4196,7 +4196,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('490: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('490: ダッシュボード - 回帰確認（#issue743）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/743
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4210,7 +4210,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('491: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('491: ダッシュボード - 回帰確認（#issue689）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/689
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4224,7 +4224,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('492: ※子テーブルで権限設定で非表示項目にしていても、親テーブルの詳細画面から見えていたので、見えないようにしました', async ({ page }) => {
+    test('492: ※子テーブルで権限設定で非表示項目にしていても、親テーブルの詳細画面から見えてい', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/802 ※子テーブルで権限設定で非表示項目にしていても、親テーブルの詳細画面から見えていたので、見えないようにしました
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -4242,7 +4242,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('493: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('493: ダッシュボード - 回帰確認（#issue736）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/736
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__66
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4256,7 +4256,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('494: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('494: ダッシュボード - 回帰確認（#issue805）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/805
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__64/edit/1?return_url=%252Fadmin%252Fdataset__64
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4270,7 +4270,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('495: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('495: ダッシュボード - 回帰確認（#issue810）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/810
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__63
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4284,7 +4284,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('496: ※条件：子テーブルの複数項目ルックアップの項目にデータが入っていると、親テーブルから更新できない', async ({ page }) => {
+    test('496: ※条件：子テーブルの複数項目ルックアップの項目にデータが入っていると、親テーブル', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/803 ※条件：子テーブルの複数項目ルックアップの項目にデータが入っていると、親テーブルから更新できない
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -4302,7 +4302,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('497: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('497: ダッシュボード - 回帰確認（#issue804）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/804
         // expected: 想定通りの結果となること。 https://henmi006.pigeon-demo.com/admin/dataset__64
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4316,7 +4316,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('498: ・複数項目に対して、空検索ができなかった問題修正 ・編集権限無し、削除権限ありの場合に、削除ができなかった問題修正', async ({ page }) => {
+    test('498: ・複数項目に対して、空検索ができなかった問題修正', async ({ page }) => {
         // description: ・複数項目に対して、空検索ができなかった問題修正 ・編集権限無し、削除権限ありの場合に、削除ができなかった問題修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
@@ -4334,7 +4334,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('499: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('499: ダッシュボード - 回帰確認（#issue790）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/790
         // expected: 想定通りの結果となること。 https://henmi006.pigeon-demo.com/admin/dataset__62
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4348,7 +4348,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('500: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('500: ダッシュボード - 回帰確認（#issue708）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/708
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4362,7 +4362,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('501: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('501: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1711940028344739
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__5
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4376,7 +4376,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('502: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('502: ダッシュボード - 回帰確認（#issue772）', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/772
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4390,7 +4390,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('503: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('503: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1712026386247199
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -4404,7 +4404,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('504: ダッシュボード - 正常表示確認', async ({ page }) => {
+    test('504: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1712026435704059
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
