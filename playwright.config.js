@@ -39,6 +39,8 @@ module.exports = defineConfig({
     reporter: [
         ['list'],
         ['json', { outputFile: `${reportsDir}/playwright-results.json` }],
+        // E2E_API_URL が設定されているときだけリアルタイム登録レポーターを有効化
+        ...(process.env.E2E_API_URL ? [['./e2e-viewer/reporter.js']] : []),
     ],
     outputDir: videoDir,
     use: {

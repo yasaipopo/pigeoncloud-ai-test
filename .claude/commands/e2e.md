@@ -114,32 +114,41 @@ ls reports/agent-{30..33}/done 2>/dev/null
 tail -5 reports/agent-30/run.log
 ```
 
-### Step 5: 結果・動画をE2Eビューアー（S3/DynamoDB）にアップロード
+### Step 5: E2Eビューアーへの登録（自動）
 
-各エージェントの結果（playwright-results.json + 動画/スクリーンショット）を
-E2Eビューアーにアップロードする。
+**`E2E_API_URL` を設定してテストを実行するだけで自動登録される。**
+
+`e2e-viewer/reporter.js` が Playwright のカスタムレポーターとして動作し、
+テスト1件完了ごとにリアルタイムで DynamoDB/S3 に登録する。
+
+**サブエージェント起動コマンドに `E2E_API_URL` を追加する:**
 
 ```bash
 cd /Users/yasaipopo/PycharmProjects/pigeon-test
-
-# 各エージェントの結果をアップロード（例: agent-30〜33）
-for AGENT_NUM in 30 31 32 33 34 35; do
-  REPORTS_DIR="reports/agent-${AGENT_NUM}"
-  if [ -f "${REPORTS_DIR}/playwright-results.json" ]; then
-    echo "=== agent-${AGENT_NUM} アップロード中 ==="
-    E2E_API_URL='https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com' \
-    AWS_PROFILE=lof-dev \
-    python3 e2e-viewer/upload_results.py \
-      --reports-dir "${REPORTS_DIR}" \
-      --agent-num "${AGENT_NUM}" \
-      --test-env-url "$(cat ${REPORTS_DIR}/test_env.txt 2>/dev/null || echo '')"
-  fi
-done
+mkdir -p reports/agent-{AGENT_NUM}
+set -a; source .env; set +a
+export AGENT_NUM={AGENT_NUM}
+export E2E_API_URL='https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com'
+npx playwright test {SPEC_FILES} \
+  2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
+echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done
 ```
 
-- 動画・スクリーンショット → S3 `pigeon-e2e-viewer-assets-992382763349`
-- テスト結果（PASS/FAIL/SKIP） → DynamoDB via API
+- テスト完了ごとに結果 → DynamoDB、動画/スクリーンショット → S3 に随時登録
 - **ビューアーURL**: https://dezmzppc07xat.cloudfront.net
+
+**`E2E_API_URL` なしで実行した場合の事後アップロード（バックアップ用）:**
+```bash
+for AGENT_NUM in 30 31 32 33 34 35; do
+  REPORTS_DIR="reports/agent-${AGENT_NUM}"
+  [ -f "${REPORTS_DIR}/playwright-results.json" ] || continue
+  E2E_API_URL='https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com' \
+  python3 e2e-viewer/upload_results.py \
+    --reports-dir "${REPORTS_DIR}" \
+    --agent-num "${AGENT_NUM}" \
+    --test-env-url "$(cat ${REPORTS_DIR}/test_env.txt 2>/dev/null || echo '')"
+done
+```
 
 ### Step 6: 結果集計 + Google Sheetsレポート作成
 
