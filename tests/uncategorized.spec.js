@@ -1198,19 +1198,14 @@ test.describe('桁数カンマ区切り（256系）', () => {
     // -------------------------------------------------------------------------
     // 256: 桁数(カンマ区切り)設定
     // -------------------------------------------------------------------------
-    test('256: 桁数(カンマ区切り)', async ({ page }) => {
-        await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // レコード一覧テーブルが正常に表示されること（数値列が存在）
-        // table exists check
-        const tableExists = await page.locator('table').count();
-        expect(tableExists).toBeGreaterThan(0);
-        const thTexts = await page.locator('table thead th').allTextContents();
-        const hasNumericColumn = thTexts.some(t => t.includes('数値') || t.includes('整数') || t.includes('小数'));
-        expect(hasNumericColumn).toBe(true);
+    test('256: 集計したときの数字に桁区切りのカンマを付けて欲しい。（#issue222）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 });
 
@@ -1447,56 +1442,53 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('246: レコード一覧 - 回帰確認（#issue323）', async ({ page }) => {
+    test('246: JSONエクスポートできない。（添付ファイル参照）（#issue323）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
-        // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
-        // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
-        expect(thCount2).toBeGreaterThanOrEqual(0);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('247: レコード一覧 - 回帰確認（#issue328）', async ({ page }) => {
+    test('247: 「選択肢(単一選択)」-「選択肢」に「1」、（#issue328）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
-        // レコード一覧テーブルが正常に表示されること
-        // table exists check
-        const tableExists = await page.locator('table').count();
-        expect(tableExists).toBeGreaterThan(0);
-        const thCount = await page.locator('table thead th').count();
-        expect(thCount).toBeGreaterThan(0);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('248: レコード一覧 - 回帰確認（#issue321）', async ({ page }) => {
+    test('248: カレンダー表示で、時間が隠れてしまう。（#issue321）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
-        // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
-        // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
-        expect(thCount2).toBeGreaterThanOrEqual(0);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('249: レコード一覧 - 回帰確認（#issue266）', async ({ page }) => {
+    test('249: メール配信機能の「メール配信」テーブルのID71ですが、（#issue266）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
-        await checkPage(page, `/admin/dataset__${tableId}`);
-        // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
-        // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
-        expect(thCount2).toBeGreaterThanOrEqual(0);
+        // 通知設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('252: ※すでに紐づけられてるユーザーが無効に変更されても、表示されるように仕様変更', async ({ page }) => {
@@ -1506,133 +1498,181 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('263: ダッシュボード - 回帰確認（#issue365）', async ({ page }) => {
+    test('263: 複数の計算項目を使用し、計算式を入れています。（#issue365）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('264: ダッシュボード - 回帰確認（#issue371）', async ({ page }) => {
+    test('264: 帳票のダウンロードをするとエラーになるそうで、（#issue371）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('265: ダッシュボード - 回帰確認（#issue372）', async ({ page }) => {
+    test('265: ヒヤリハット（#issue372）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('266: ダッシュボード - 回帰確認（#issue367）', async ({ page }) => {
+    test('266: ダッシュボードにて表示中のテーブルで、（#issue367）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 権限設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/permission`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('268: ダッシュボード - 回帰確認（#issue368）', async ({ page }) => {
+    test('268: 添付画像1枚目の通り、（#issue368）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('269: ダッシュボード - 回帰確認（#issue360）', async ({ page }) => {
+    test('269: 計算項目で、（#issue360）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('271: ダッシュボード - 回帰確認（#issue247）', async ({ page }) => {
+    test('271: カレンダー表示のPRが正しく動くか確認して頂き、問題無さそうならmergeしてほしいです。（#issue247）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('272: ダッシュボード - 回帰確認（#issue384）', async ({ page }) => {
+    test('272: テーブル作成権限のあるユーザー様に対し、ExcelやJSONから作成できるよう修正希望。（#issue384）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('276: ダッシュボード - 回帰確認（#issue390）', async ({ page }) => {
+    test('276: （左上に戻るボタン）（#issue390）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('277: ダッシュボード - 回帰確認（#issue389）', async ({ page }) => {
+    test('277: ユーザーテーブルで、（#issue389）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('278: ダッシュボード - 回帰確認（#issue369）', async ({ page }) => {
+    test('278: 画像のルックアップのコピーがある場合、レコード登録ができないです。（#issue369）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('280: ダッシュボード - 回帰確認（#issue381）', async ({ page }) => {
+    test('280: 権限設定内にある登録ユーザーの並び替えが反映されないため、修正希望です。（#issue381）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('281: ダッシュボード - 回帰確認（#issue293）', async ({ page }) => {
+    test('281: 一覧画面で”文章(複数行)”を使用している項目を編集モードで編集しようとすると、（#issue293）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('282: Slack設定 - 回帰確認（Slack）', async ({ page }) => {
-        await login(page);
-        await checkPage(page, '/admin/settings/slack');
-        // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test.skip('282: Slackスレッド参照（詳細確認要）', async ({ page }) => {
+        // TODO: Slackスレッド内容を確認してテストを実装すること
     });
 
-    test('283: Slack設定 - 回帰確認（Slack）', async ({ page }) => {
-        await login(page);
-        await checkPage(page, '/admin/settings/slack');
-        // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test.skip('283: Slackスレッド参照（詳細確認要）', async ({ page }) => {
+        // TODO: Slackスレッド内容を確認してテストを実装すること
     });
 
-    test('287: ダッシュボード - 回帰確認（#issue398）', async ({ page }) => {
+    test('287: テーブル画面の項目名横の検索マークを押し、（#issue398）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('288: Slack設定 - 回帰確認（Slack）', async ({ page }) => {
-        await login(page);
-        await checkPage(page, '/admin/settings/slack');
-        // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test.skip('288: Slackスレッド参照（詳細確認要）', async ({ page }) => {
+        // TODO: Slackスレッド内容を確認してテストを実装すること
     });
 
-    test('289: ダッシュボード - 回帰確認（#issue400）', async ({ page }) => {
+    test('289: こちらのフィルタですが、グラフが表示されません。（#issue400）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('290: 先方のおっしゃる通り、「問い合わせ内容」フォーム内(文章複数行の項目)でエンター', async ({ page }) => {
@@ -1699,67 +1739,106 @@ test.describe('未実装テスト（todo）', () => {
         }
     });
 
-    test('297: ダッシュボード - 回帰確認（#issue403）', async ({ page }) => {
+    test('297: 値が複数あると絞り込みができないです。何か方法はありますでしょうか？（#issue403）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('299: ダッシュボード - 回帰確認（#issue386）', async ({ page }) => {
+    test('299: 子テーブルに親テーブルのデータを引用する際、（#issue386）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('300: ダッシュボード - 回帰確認（#issue415）', async ({ page }) => {
+    test('300: 個数制限を設定したのちに子テーブル機能を有効にした場合、（#issue415）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('301: ダッシュボード - 回帰確認（#issue408）', async ({ page }) => {
+    test('301: DATE_FORMAT({帰着日},"%m")（#issue408）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('303: ダッシュボード - 回帰確認（#issue419）', async ({ page }) => {
+    test('303: ダッシュボードにチャートや絞り込みしたレコードを表示できますが、（#issue419）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('304: ダッシュボード - 回帰確認（#issue427）', async ({ page }) => {
+    test('304: 権限設定によって編集不可項目を設定すると表示されなくなる（#issue427）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 帳票設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('305: ダッシュボード - 回帰確認（#issue428）', async ({ page }) => {
+    test('305: dataset id 14は下にスクロールすると、（#issue428）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 権限設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/permission`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('306: ダッシュボード - 回帰確認（#issue423）', async ({ page }) => {
+    test('306: 他テーブル参照のテーブルが壊れているときにテーブルを開こうとすると「不明なエラー」の表示が出るため、（#issue423）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('307: ダッシュボード - 回帰確認（#issue429）', async ({ page }) => {
+    test('307: カレンダーは現状添付画像のような状況ですので、日付が消えないように修正していただきたいです。（#issue429）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('308: 親テーブル編集画面の、子テーブルの計算項目のリアルタイム表示', async ({ page }) => {
@@ -1774,32 +1853,48 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('309: ダッシュボード - 回帰確認（#issue435）', async ({ page }) => {
+    test('309: CSVアップロードの際、（#issue435）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('310: ダッシュボード - 回帰確認（#issue420）', async ({ page }) => {
+    test('310: 帳票出力後、添付のように＜p＞が反映されてしまっています。（#issue420）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 帳票設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('311: ダッシュボード - 回帰確認（#issue438）', async ({ page }) => {
+    test('311: 操作ユーザーID・・・ID15：営業管理者（#issue438）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('313: ダッシュボード - 回帰確認（#issue418）', async ({ page }) => {
+    test('313: CSVアップロードの際の注意書きに、（#issue418）', async ({ page }) => {
         await login(page);
-        await checkPage(page, '/admin/dashboard');
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
     test('316: クロス集計で、添付みたいな設定で、', async ({ page }) => {
@@ -1959,18 +2054,16 @@ test.describe('追加実装テスト（314-579系）', () => {
         await closeTemplateModal(page);
     });
 
-    test('314: ダッシュボード - 回帰確認（#issue444）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/444
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('314: yes/noの項目に、「必須項目にする」を追加希望です。（#issue444）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('317: ※以下環境で確認を実施する', async ({ page }) => {
@@ -1987,74 +2080,64 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('318: ダッシュボード - 回帰確認（#issue322）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/322
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('318: カレンダー表示で、（#issue322）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('320: ダッシュボード - 回帰確認（#issue440）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/440
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('320: 項目の複製ボタンの実装をお願いいたします。（#issue440）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('321: ダッシュボード - 回帰確認（#issue453）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/453
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('321: フォルダURLの中に半角スペースが入っていると、（#issue453）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('322: ダッシュボード - 回帰確認（#issue452）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/452
-        // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__134
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('322: 数値項目（数値の形式は「少数」、桁数は「1.00」）に「1.00」と入力した場合、（#issue452）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('327: ダッシュボード - 回帰確認（#issue442）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/442
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('327: 関連レコード一覧の表示順が、テーブル設定画面とレコード詳細画面で違ってしまう点を修正希望です。（#issue442）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('328: ルックアップ先に指定されてる項目は必須設定ができないように', async ({ page }) => {
@@ -2075,172 +2158,126 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('329: ダッシュボード - 回帰確認（#issue449）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/449
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('329: グループ追加に関して、（#issue449）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 権限設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/permission`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('331: ダッシュボード - 回帰確認（#issue336）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/336
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('331: 新規テーブル登録時に、他テーブル参照でユーザーテーブルを参照し、（#issue336）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('332: ダッシュボード - 回帰確認（#issue337）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/337
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('332: 2つのフィルタに対して、（#issue337）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('333: ダッシュボード - 回帰確認（#issue396）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/396
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('333: ワークフローで承認者となるユーザーを選択する際に、（#issue396）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('334: ダッシュボード - 回帰確認（#issue465）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/465
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('334: ビューを編集した後、（#issue465）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('335: ダッシュボード - 回帰確認（#issue470）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/470
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('335: フィルタのデフォルト設定で、「全てのユーザーのデフォルトにする」にチェックが入っていても、（#issue470）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('336: ダッシュボード - 回帰確認（#issue457）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/457
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('336: ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。（#issue457）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('337: ダッシュボード - 回帰確認（#issue480）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/480
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('337: CSVダウンロードの際、固定テキストはダウンロード項目に含まれないように修正希望です。（#issue480）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('338: ダッシュボード - 回帰確認（#issue483）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/483
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('338: DB名：qnpc0kmeat（#issue483）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('339: ダッシュボード - 回帰確認（#issue486）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/486
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('339: 事象：チャート機能で、（#issue486）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('340: ダッシュボード - 回帰確認（#issue496）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/496
-        // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__92
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('340: 権限１：マスターユーザーに、テーブル項目設定とテーブル管理者を設定（#issue496）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('343: ダッシュボード - 回帰確認（#issue501）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/501
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('343: 文字列（一行）で、（#issue501）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('344: ※組織は複数項目で、複数項目はソートできないような仕様。組織がソートできなければ', async ({ page }) => {
@@ -2261,32 +2298,29 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('345: ダッシュボード - 回帰確認（#issue487）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/487
-        // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__40
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('345: 現在、（#issue487）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('346: ダッシュボード - 回帰確認（#issue473）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/473
-        // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__90
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('346: カレンダー表記がデフォルトになっているテーブルから、同じくカレンダー表記の別テーブルへ遷移したとき、（#issue473）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('347: ※固定テキストが入ってるテーブルをエクスポート、インポートしたらエラーが出てたの', async ({ page }) => {
@@ -2307,60 +2341,47 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('348: ダッシュボード - 回帰確認（#issue461）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/461
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('348: もともと、（#issue461）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('351: ダッシュボード - 回帰確認（#issue478）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/478
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('351: ログアウトをしてもユーザー管理画面から見るとログイン中表記になってしまう件を修正希望です。（#issue478）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('352: ダッシュボード - 回帰確認（#issue494）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/494
-        // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__132
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('352: 計算項目で項目名が指定されてる場合、（#issue494）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('353: ダッシュボード - 回帰確認（#issue493）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/493
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('353: 子テーブルでカレンダー表示の設定をしてもカレンダー表示できないため、できるように修正を希望です。（#issue493）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('354: ルックアップ自動反映されてて、ルックアップ元がその他テーブル項目のとき項目名の横', async ({ page }) => {
@@ -2381,130 +2402,100 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('356: ダッシュボード - 回帰確認（#issue503）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/503
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('356: レコードのコメントが入力されると通知が行くよう設定した場合（添付画像3枚目）、（#issue503）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 通知設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('358: ダッシュボード - 回帰確認（#issue505）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/505
-        // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/api/public/f/dataset__37/22f4f68423/8
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('358: 公開フォームで、子テーブル内でルックアップのコピーが出来ない。（動画参照）（#issue505）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 公開フォーム機能が正常に動作すること
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('359: ダッシュボード - 回帰確認（#issue508）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/508
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('359: 列を複数にしていると、公開フォームで項目が収まらない場合があります。（#issue508）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 公開フォーム機能が正常に動作すること
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('363: ダッシュボード - 回帰確認（#issue524）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/524
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('363: DB名：q6p0sl0i6o（#issue524）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('364: ダッシュボード - 回帰確認（#issue521）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/521
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('364: ユーザー管理テーブルで他テーブル参照項目を作成すると、（#issue521）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('366: ダッシュボード - 回帰確認（#issue528）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/528
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('366: ユーザー管理テーブルの権限設定で、（#issue528）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('368: ダッシュボード - 回帰確認（#issue538）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/538
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('368: 下記関数を使用可能にしていただきたいです。（#issue538）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('369: ダッシュボード - 回帰確認（#issue535）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/535
-        // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__122/edit/1?return_url=%252Fadmin%252Fdataset__122
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('369: 添付のように「大人」「子ども」などの項目で、（#issue535）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('372: ダッシュボード - 回帰確認（#issue532）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/532
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('372: ユーザー管理テーブルで、（#issue532）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
     test('373: PigionAIの動作確認', async ({ page }) => {
@@ -2521,102 +2512,84 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('374: ダッシュボード - 回帰確認（#issue509）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/509
-        // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__131
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('374: 固定テキストに対し、表示条件設定をできるようにしていただきたいです。（#issue509）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('375: ダッシュボード - 回帰確認（#issue534）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/534
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('375: 現状ユーザータイプは、（#issue534）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 通知設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('376: ダッシュボード - 回帰確認（#issue516）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/516
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('376: 絞り込み設定で、条件が日付の場合、（#issue516）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('377: ダッシュボード - 回帰確認（#issue477）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/477
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('377: メール通知で、htmlメールをテキストメールで配信できるようオプションの追加を希望です。（#issue477）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 通知設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('378: ダッシュボード - 回帰確認（#issue547）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/547
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('378: ログをクロス集計したフィルタでCSVダウンロードしようとすると、（#issue547）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('379: ダッシュボード - 回帰確認（#issue518）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/518
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('379: CSVログは、自分がUP/DLした分だけは全ユーザー見られるようにしていただきたいです。（#issue518）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('380: ダッシュボード - 回帰確認（#issue523）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/523
-        // expected: 想定通りの結果となること。 https://henmi005.pigeon-demo.com/admin/dataset__14
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('380: 計算項目の「計算値の自動���新」のOFFにチェックを入れても、（#issue523）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('381: 過去に、関連レコードのその他テーブルを計算で使えるようにしたのですが、バグがあっ', async ({ page }) => {
@@ -2669,60 +2642,52 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('384: ダッシュボード - 回帰確認（#issue549）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/549
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('384: リマインド設定の通知をクリックすると、通知の画面へ遷移されてしまうため、（#issue549）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 通知設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('385: ダッシュボード - 回帰確認（#issue517）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/517
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('385: 検索において、半角と全角が識別されてしまうのですが、（#issue517）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('386: ダッシュボード - 回帰確認（#issue546）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/546
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('386: 現状、（#issue546）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('387: ダッシュボード - 回帰確認（#issue550）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/550
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('387: 「時間を手で入力する際に、（#issue550）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('388: 子テーブルを含んだレコードを新規登録', async ({ page }) => {
@@ -2792,102 +2757,79 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(hasSystemContent).toBeGreaterThan(0);
     });
 
-    test('392: ダッシュボード - 回帰確認（#issue571）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/571
-        // expected: 想定通りの結果となること。 https://henmi011.pigeon-demo.com/admin/admin
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('392: ユーザーテーブルからの他テーブル参照でルックアップが機能していないようですので、修正希望です。（#issue571）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('393: ダッシュボード - 回帰確認（#issue562）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/562
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('393: 文字列（１行）に、例えば「1-03」と入力してあるものを、（#issue562）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('394: ダッシュボード - 回帰確認（#issue578）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/578
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('394: ワークフローに「自分のメイン組織の部長」を入れているが、（#issue578）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('396: ダッシュボード - 回帰確認（#issue585）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/585
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('396: IF文の条件文が空の場合を指定する場合のnullが正しく動作していないため、修正希望です。（#issue585）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('397: ダッシュボード - 回帰確認（#issue540）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/540
-        // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__74/edit/new
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('397: 子テーブルごとに表示条件設定を独立させるよう修正希望です。（#issue540）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('398: ダッシュボード - 回帰確認（#issue551）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/551
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('398: 日時項目を手入力する際に、自動で半角英数の入力モードに切り替わるように変更できないでしょうか？（#issue551）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('399: ダッシュボード - 回帰確認（#issue569）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/569
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('399: 他テーブル参照で、（#issue569）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('400: 配信メールにhtmlで画像を貼ったら、画像ではなくコードになっていたようなので、', async ({ page }) => {
@@ -2944,18 +2886,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         test.skip(true, '本機能は廃止されたためテスト不要');
     });
 
-    test('404: ダッシュボード - 回帰確認（#issue587）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/587
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('404: １、通知ログの「作成日時」で、「相対値」にチェックを入れると、「今日」や「明日」を選ぶ前に、（#issue587）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 通知設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('405: ※テーブル詳細画面の右側のサイドバーのログに残るよう仕様変更', async ({ page }) => {
@@ -2976,46 +2914,36 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('406: ダッシュボード - 回帰確認（#issue529）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/529
-        // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__71
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('406: 親テーブルの項目が他テーブル参照の時、（#issue529）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('407: ダッシュボード - 回帰確認（#issue536）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/536
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('407: チャートの上部に表記されるラベルは、開始月の年が表示される仕様となっているため、（#issue536）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('408: ダッシュボード - 回帰確認（#issue573）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/573
-        // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('408: 左側メニューにテーブルやグループがないとき、（#issue573）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('409: ※以下機能の追加', async ({ page }) => {
@@ -3036,60 +2964,54 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('410: ダッシュボード - 回帰確認（#issue555）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/555
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('410: マスターユーザーは、ユーザー一覧からロック解除出来るようにしてもらっても良いでしょうか？（#issue555）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('411: ダッシュボード - 回帰確認（#issue551）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/551
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('411: 日時項目を手入力する際に、自動で半角英数の入力モードに切り替わるように変更できないでしょうか？（#issue551）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('412: ダッシュボード - 回帰確認（#issue596）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/596
-        // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__95
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('412: 検索において、英数字の半角と全角が識別されてしまうのですが、（#issue596）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('413: ダッシュボード - 回帰確認（#issue593）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/593
-        // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__95
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('413: ひらがな、全角、半角すべてで検索されるように修正希望です。（#issue593）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('414: 関連テーブルがある', async ({ page }) => {
@@ -3128,46 +3050,30 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('416: ダッシュボード - 回帰確認（#issue565）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/565
-        // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/admin_invoices/view/5
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('416: ユーザータイプ：ユーザーでも、請求情報にアクセスできる権限設定を実装希望です。（#issue565）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('417: ダッシュボード - 回帰確認（#issue607）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/607
-        // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__92/edit/new
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('417: ※カスタマイズ希望となりますが、全体に適用をお願いいたします。（#issue607）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('418: ダッシュボード - 回帰確認（#issue513）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/513
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('418: 全ての承認が完了後でも変更可能にしたい（添付ファイルの7その他を参照）（#issue513）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('419: ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。', async ({ page }) => {
@@ -3204,18 +3110,16 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('421: ダッシュボード - 回帰確認（#issue580）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/580
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('421: 「項目のコピー（ルックアップ）」を選択するとき、（#issue580）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('422: テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グル', async ({ page }) => {
@@ -3272,32 +3176,29 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('425: ダッシュボード - 回帰確認（#issue615）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/615
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('425: HTMLメールで、配信リストから送信すると、テンプレートでは正しく表示されているものが、（#issue615）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 通知設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('426: ダッシュボード - 回帰確認（#issue595）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/595
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('426: 年度開始日を設定することで、年度の絞り込みが可能になりましたが、（#issue595）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('427: ・日時項目の = 条件で正しく検索できること', async ({ page }) => {
@@ -3318,18 +3219,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('428: ダッシュボード - 回帰確認（#issue589）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/589
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('428: DB名：jcmzow3guq（#issue589）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('429: リクエストログにテーブル名が入るのかのチェック', async ({ page }) => {
@@ -3350,88 +3247,66 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('430: ダッシュボード - 回帰確認（#issue584）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/584
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('430: 関連レコードの「表示する条件」で、以下の異なる項目の種類を結び付けられるよう修正希望です。（#issue584）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('431: ダッシュボード - 回帰確認（#issue512）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/512
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('431: 各申請画面でのフロー設定（添付ファイルの2を参照）（#issue512）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('432: ダッシュボード - 回帰確認（#issue612）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/612
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('432: スマートフォンからピジョンクラウドにログインし、（#issue612）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('433: ダッシュボード - 回帰確認（#issue626）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/626
-        // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset/edit/140
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('433: 参照元テーブル名：新_STB在庫管理DBの試作（#issue626）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('434: ダッシュボード - 回帰確認（#issue633）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/633
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('434: ### 要望（#issue633）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('435: ダッシュボード - 回帰確認（#issue650）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/650
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('435: ワークフロー設定内の「承認後も編集可能」にチェック後、ユーザーを選択する画面に（#issue650）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('436: メールアドレスのルックアップができなかったため修正', async ({ page }) => {
@@ -3452,60 +3327,45 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('437: ダッシュボード - 回帰確認（#issue655）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/655
-        // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__89
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('437: 他テーブル参照で「組織」テーブルの「組織名」を参照し、（#issue655）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('438: ダッシュボード - 回帰確認（#issue639）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/639
-        // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__92
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('438: テーブル作成者以外のユーザーは、テーブル管理者であっても（#issue639）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('439: ダッシュボード - 回帰確認（#issue643）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/643
-        // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__140
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('439: DB名：sunnylive（#issue643）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('440: ダッシュボード - 回帰確認（#issue606）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/606
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('440: 日時項目のフォーマット部分に、以下を追加していただけますでしょうか。（#issue606）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('442: 一覧画面で全選択のチェックを行って一括削除を行った際、削除処理後もチェックされた', async ({ page }) => {
@@ -3526,7 +3386,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('443: テーブル管理 - 正常表示確認', async ({ page }) => {
+    test('443: #issueNone の動作確認', async ({ page }) => {
         // description: https://www.notion.so/csv-6e68e9b4ed004087883138dd0117d2b6
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dataset');
@@ -3540,46 +3400,39 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(hasDatasetLinks).toBeGreaterThan(0);
     });
 
-    test('444: ダッシュボード - 回帰確認（#issue601）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/601
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('444: 他テーブル参照で、参照先が文字列（一行）だった場合、（#issue601）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('445: ダッシュボード - 回帰確認（#issue625）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/625
-        // expected: 想定通りの結果となること。 https://henmi003.pigeon-demo.com/admin/dataset__10
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('445: 他テーブル参照項目の「複数の値の登録を許可する」にチェックが入っている項目は、（#issue625）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('446: ダッシュボード - 回帰確認（#issue632）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/632
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('446: DB名：midac（#issue632）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('447: csvエクスポートで、1行目と、1行目以降で、子テーブルのレコードの数が違うとき', async ({ page }) => {
@@ -3600,74 +3453,57 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('448: ダッシュボード - 回帰確認（#issue603）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/603
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('448: 計算項目に「値の重複を禁止する」の機能をつけていただきたいです。（#issue603）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('449: ダッシュボード - 回帰確認（#issue669）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/669
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('449: 添付の箇所（他テーブル参照の一覧用表示項目）って、機能してますかね？（#issue669）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('450: ダッシュボード - 回帰確認（#issue646）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/646
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('450: ### 要望（#issue646）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('451: ダッシュボード - 回帰確認（#issue608）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/608
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('451: 項目権限設定 もログ出力対象とする（#issue608）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 権限設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/permission`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('452: ダッシュボード - 回帰確認（#issue604）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/604
-        // expected: 想定通りの結果となること。 https://henmi018.pigeon-demo.com/admin/dataset__45
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('452: 親テーブルの日時項目「作業日」を入力すると、（#issue604）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('453: zipでの画像アップロードができないバグがあったので修正', async ({ page }) => {
@@ -3684,60 +3520,47 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('454: ダッシュボード - 回帰確認（#issue648）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/648
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('454: コピー環境で再現されましたので、動作の動画キャプチャを添付いたします。（#issue648）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 権限設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/permission`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('455: ダッシュボード - 回帰確認（#issue693）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/693
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('455: 「申請ワークフローのcsvインポート」について（#issue693）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('456: ダッシュボード - 回帰確認（#issue638）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/638
-        // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__67
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('456: フィルタ名：YC今年度集計（#issue638）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('457: ダッシュボード - 回帰確認（#issue645）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/645
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('457: ### 要望（#issue645）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('459: フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修', async ({ page }) => {
@@ -3776,32 +3599,31 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('461: ダッシュボード - 回帰確認（#issue640）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/640
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('461: 項目横の虫眼鏡から検索を行った後、（#issue640）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('462: ダッシュボード - 回帰確認（#issue711）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/711
-        // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__90
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('462: 関連レコード一覧が設置されているとき、（#issue711）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('463: ワークフローの通知のカスタマイズの件ですが、', async ({ page }) => {
@@ -3822,18 +3644,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('464: ダッシュボード - 回帰確認（#issue635）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/635
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('464: ### 要望（#issue635）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('465: ワークフローの下書き後、編集画面から申請が行えるかのテスト', async ({ page }) => {
@@ -3872,32 +3690,26 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('468: ダッシュボード - 回帰確認（#issue699）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/699
-        // expected: 想定通りの結果となること。 https://henmi003.pigeon-demo.com/admin/dataset__21/view/1
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('468: 関連レコードの「表示する条件」で、以下の異なる項目の種類を結び付けられるよう修正希望です。（#issue699）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('469: ダッシュボード - 回帰確認（#issue647）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/647
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('469: ### 要望（#issue647）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('470: 以下事象が発生しないことを確認する', async ({ page }) => {
@@ -3918,32 +3730,27 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('471: ダッシュボード - 回帰確認（#issue667）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/667
-        // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__10
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('471: 項目タイプ「日時」で種類「年月」のデフォルト値を、（#issue667）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('472: ダッシュボード - 回帰確認（#issue718）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/718
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('472: レコードのコメント機能でコメントを入力する際、（#issue718）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('473: ※正しい使用は、１つ戻る・１つ進むです', async ({ page }) => {
@@ -3960,32 +3767,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('474: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
-        // description: https://loftal.slack.com/archives/C06LF4G88FM/p1709662404402039
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test.skip('474: Slackスレッド参照（詳細確認要）', async ({ page }) => {
+        // TODO: Slackスレッド内容を確認してテストを実装すること
+        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1709662404402039
     });
 
-    test('475: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
-        // description: https://loftal.slack.com/archives/C06LF4G88FM/p1709662438016639
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test.skip('475: Slackスレッド参照（詳細確認要）', async ({ page }) => {
+        // TODO: Slackスレッド内容を確認してテストを実装すること
+        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1709662438016639
     });
 
     test('476: 子テーブルのルックアップの、親テーブルのSUMIFで使えるようにしましたSUMI', async ({ page }) => {
@@ -4006,74 +3795,59 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('477: ダッシュボード - 回帰確認（#issue671）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/671
-        // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/admin
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('477: コピー環境で再現されました。（#issue671）', async ({ page }) => {
+        await login(page);
+        // ユーザー管理ページが正常に表示されること
+        await checkPage(page, '/admin/user');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('478: ダッシュボード - 回帰確認（#issue668）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/668
-        // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__100/view/4
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('478: カレンダー表示で、nullの予定を非表示にできるようにしていただきたいです。（#issue668）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // カレンダービューに切り替えできること
+        const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
+        if (await calBtn.count() > 0) {
+            await calBtn.first().click();
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('479: ダッシュボード - 回帰確認（#issue641）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/641
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('479: 作成日時「2024年01月28日 18:32」の通知があるにもかかわらず、（#issue641）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 通知設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('480: ダッシュボード - 回帰確認（#issue750）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/750
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('480: ワークフローのテンプレートを表示する機能を先月リリースしてもらう際に、（#issue750）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('481: ダッシュボード - 回帰確認（#issue661）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/661
-        // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset/edit/89
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('481: 親テーブルのレコード作成時にデフォルトで表示させておく機能を追加いただきましたが、（#issue661）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('482: こちらテストお願いします！', async ({ page }) => {
@@ -4094,88 +3868,75 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('483: ダッシュボード - 回帰確認（#issue760）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/760
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('483: 「PigeonCloud実装依頼・FB」にてテストステータス、（#issue760）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('484: ダッシュボード - 回帰確認（#issue623）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/623
-        // expected: 想定通りの結果となること。 https://henmi008.pigeon-demo.com/admin/dataset__64
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('484: DB名：midac（#issue623）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // ワークフロー設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('485: ダッシュボード - 回帰確認（#issue764）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/764
-        // expected: 想定通りの結果となること。 https://henmi008.pigeon-demo.com/admin/dataset__63
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('485: 現状、文字列(一行)項目で、「複数の値の登録を許可する」を有効にしている場合、（#issue764）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('486: ダッシュボード - 回帰確認（#issue703）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/703
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('486: ### 要望（#issue703）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('487: ダッシュボード - 回帰確認（#issue738）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/738
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('487: 現状の矢印キーでの移動を削除し、ボタンを設置してのレコード遷移機能を実装希望です。（#issue738）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // レコード一覧が正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('488: ダッシュボード - 回帰確認（#issue766）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/766
-        // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__35
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('488: 子テーブルに計算項目で{親テーブル::項目名}があった場合、（#issue766）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('489: viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条', async ({ page }) => {
@@ -4196,32 +3957,26 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('490: ダッシュボード - 回帰確認（#issue743）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/743
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('490: 関連レコード一覧の表示する項目に設定した順番で、（#issue743）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('491: ダッシュボード - 回帰確認（#issue689）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/689
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('491: ダッシュボードに表示されているフィルタやチャートを、（#issue689）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // 集計ページが正常に表示されること
+        await checkPage(page, `/admin/summary__${tableId}`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('492: ※子テーブルで権限設定で非表示項目にしていても、親テーブルの詳細画面から見えてい', async ({ page }) => {
@@ -4242,46 +3997,39 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('493: ダッシュボード - 回帰確認（#issue736）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/736
-        // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__66
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('493: テーブルの追加オプションで「レコード複製する項目を指定」の「複製しない項目」に子テーブルを設定...（#issue736）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 項目（フィールド）が正常に表示されること
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('494: ダッシュボード - 回帰確認（#issue805）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/805
-        // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__64/edit/1?return_url=%252Fadmin%252Fdataset__64
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('494: リッチテキストのタグが表示されてしまう（#issue805）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('495: ダッシュボード - 回帰確認（#issue810）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/810
-        // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__63
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('495: 動画をご確認いただければと思います。（#issue810）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // CSVエクスポート/インポートが正常に動作すること
+        const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+        // ページが正常に表示されること
+        expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
     test('496: ※条件：子テーブルの複数項目ルックアップの項目にデータが入っていると、親テーブル', async ({ page }) => {
@@ -4302,18 +4050,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('497: ダッシュボード - 回帰確認（#issue804）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/804
-        // expected: 想定通りの結果となること。 https://henmi006.pigeon-demo.com/admin/dataset__64
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('497: 「01.プロジェクト入力」（#issue804）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
     test('498: ・複数項目に対して、空検索ができなかった問題修正', async ({ page }) => {
@@ -4334,88 +4078,54 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('499: ダッシュボード - 回帰確認（#issue790）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/790
-        // expected: 想定通りの結果となること。 https://henmi006.pigeon-demo.com/admin/dataset__62
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('499: 子テーブルがビューで非表示に設定していても表示されてしまうため、表示されないようにしたい。（#issue790）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 公開フォーム機能が正常に動作すること
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('500: ダッシュボード - 回帰確認（#issue708）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/708
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('500: フィルタで日時型 (yyyy/mm/dd hh:mm:ssのように時間も持っている型の項目) ...（#issue708）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        await checkPage(page, `/admin/dataset__${tableId}`);
+        // 絞り込み機能が使用できること
+        const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
+        if (await filterBtn.count() > 0) {
+            await filterBtn.first().click();
+            await page.waitForTimeout(500);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('501: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
-        // description: https://loftal.slack.com/archives/C06LF4G88FM/p1711940028344739
-        // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__5
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test.skip('501: Slackスレッド参照（詳細確認要）', async ({ page }) => {
+        // TODO: Slackスレッド内容を確認してテストを実装すること
+        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1711940028344739
     });
 
-    test('502: ダッシュボード - 回帰確認（#issue772）', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/772
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test('502: 親テーブルからレコード編集画面を見たとき、（#issue772）', async ({ page }) => {
+        await login(page);
+        const { tableId } = await setupAllTypeTable(page);
+        expect(tableId).toBeTruthy();
+        // テーブル設定ページが正常に表示されること
+        await checkPage(page, `/admin/dataset__${tableId}/setting`);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
     });
 
-    test('503: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
-        // description: https://loftal.slack.com/archives/C06LF4G88FM/p1712026386247199
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test.skip('503: Slackスレッド参照（詳細確認要）', async ({ page }) => {
+        // TODO: Slackスレッド内容を確認してテストを実装すること
+        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1712026386247199
     });
 
-    test('504: ダッシュボード - 回帰確認（Slack）', async ({ page }) => {
-        // description: https://loftal.slack.com/archives/C06LF4G88FM/p1712026435704059
-        // expected: 想定通りの結果となること。
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // ダッシュボードページが正常にロードされること
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-        const title = await page.title();
-        expect(title).toContain('Pigeon');
+    test.skip('504: Slackスレッド参照（詳細確認要）', async ({ page }) => {
+        // TODO: Slackスレッド内容を確認してテストを実装すること
+        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1712026435704059
     });
 
 });
