@@ -1447,7 +1447,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('246: レコード関連仕様確認1', async ({ page }) => {
+    test('246: ページ - 動作確認', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1460,7 +1460,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('247: レコード関連仕様確認2', async ({ page }) => {
+    test('247: ページ - 動作確認', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1473,7 +1473,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount).toBeGreaterThan(0);
     });
 
-    test('248: レコード関連仕様確認3', async ({ page }) => {
+    test('248: ページ - 動作確認', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1486,7 +1486,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('249: レコード関連仕様確認4', async ({ page }) => {
+    test('249: ページ - 動作確認', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1499,105 +1499,105 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('252: 仕様確認5', async ({ page }) => {
+    test('252: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('263: 仕様確認6', async ({ page }) => {
+    test('263: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('264: 仕様確認7', async ({ page }) => {
+    test('264: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('265: 仕様確認8', async ({ page }) => {
+    test('265: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('266: 仕様確認9', async ({ page }) => {
+    test('266: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('268: 仕様確認10', async ({ page }) => {
+    test('268: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('269: 仕様確認11', async ({ page }) => {
+    test('269: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('271: 仕様確認12', async ({ page }) => {
+    test('271: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('272: 仕様確認13', async ({ page }) => {
+    test('272: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('276: 仕様確認14', async ({ page }) => {
+    test('276: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('277: 仕様確認15', async ({ page }) => {
+    test('277: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('278: 仕様確認16', async ({ page }) => {
+    test('278: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('280: 仕様確認17', async ({ page }) => {
+    test('280: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('281: 仕様確認18', async ({ page }) => {
+    test('281: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('282: Slack連携仕様確認1', async ({ page }) => {
+    test('282: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/slack');
         // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1605,7 +1605,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('283: Slack連携仕様確認2', async ({ page }) => {
+    test('283: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/slack');
         // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1613,14 +1613,14 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('287: 仕様確認19', async ({ page }) => {
+    test('287: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('288: Slack仕様確認3', async ({ page }) => {
+    test('288: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/slack');
         // Slack設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1628,7 +1628,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('289: 仕様確認20', async ({ page }) => {
+    test('289: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
@@ -1699,63 +1699,63 @@ test.describe('未実装テスト（todo）', () => {
         }
     });
 
-    test('297: 仕様確認21', async ({ page }) => {
+    test('297: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('299: 仕様確認22', async ({ page }) => {
+    test('299: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('300: 仕様確認23', async ({ page }) => {
+    test('300: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('301: 仕様確認24', async ({ page }) => {
+    test('301: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('303: 仕様確認25', async ({ page }) => {
+    test('303: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('304: 仕様確認26', async ({ page }) => {
+    test('304: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('305: 仕様確認27', async ({ page }) => {
+    test('305: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('306: 仕様確認28', async ({ page }) => {
+    test('306: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('307: 仕様確認29', async ({ page }) => {
+    test('307: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
@@ -1774,28 +1774,28 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('309: 仕様確認30', async ({ page }) => {
+    test('309: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('310: 仕様確認31', async ({ page }) => {
+    test('310: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('311: 仕様確認32', async ({ page }) => {
+    test('311: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('313: 仕様確認33', async ({ page }) => {
+    test('313: ページ - 動作確認', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
