@@ -12,6 +12,50 @@ const { chromium } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * ログイン済みのstorageState（クッキー）をキャッシュする
+ * 既に存在する場合はスキップ（テスト毎のログインを不要にする）
+ */
+async function saveStorageStateIfNeeded(agentNum) {
+    const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
+    if (fs.existsSync(storageStatePath)) {
+        console.log(`[global-setup] storageState既存: ${storageStatePath}`);
+        return;
+    }
+    const baseUrl = process.env.TEST_BASE_URL || '';
+    const email = process.env.TEST_EMAIL || 'admin';
+    const password = process.env.TEST_PASSWORD || '';
+    if (!baseUrl || !password) return;
+
+    console.log(`[global-setup] storageState作成中 (${baseUrl})...`);
+    const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    try {
+        await page.goto(baseUrl + '/admin/login', { timeout: 30000 });
+        await page.fill('#id', email);
+        await page.fill('#password', password);
+        await page.click('button[type=submit].btn-primary');
+        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        // 利用規約同意画面への対処
+        const termsCheckbox = page.locator('input[type=checkbox]').first();
+        if (await termsCheckbox.count() > 0) {
+            await termsCheckbox.check();
+            const continueBtn = page.locator('button').filter({ hasText: '続ける' }).first();
+            if (await continueBtn.count() > 0) {
+                await continueBtn.click();
+                await page.waitForURL('**/admin/dashboard', { timeout: 30000 }).catch(() => {});
+            }
+        }
+        await context.storageState({ path: storageStatePath });
+        console.log(`[global-setup] storageState保存完了: ${storageStatePath}`);
+    } catch (e) {
+        console.log(`[global-setup] storageState保存失敗 (無視): ${e.message}`);
+    } finally {
+        await browser.close();
+    }
+}
+
 module.exports = async function globalSetup() {
     const currentUrl = process.env.TEST_BASE_URL || '';
 
@@ -28,6 +72,8 @@ module.exports = async function globalSetup() {
             }
         }
         console.log(`[global-setup] .test_env_runtimeから環境を読み込み: ${process.env.TEST_BASE_URL}`);
+        // storageStateが未作成なら認証してキャッシュ保存
+        await saveStorageStateIfNeeded(agentNum);
         return;
     }
 

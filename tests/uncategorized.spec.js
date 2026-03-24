@@ -17,6 +17,13 @@ const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings'
  * ログイン共通関数
  */
 async function login(page, email, password) {
+    // すでにログイン済み（dashboardにいる）場合はスキップ
+    try {
+        const currentUrl = page.url();
+        if (currentUrl && currentUrl.includes('/admin/') && !currentUrl.includes('/admin/login')) {
+            return;
+        }
+    } catch (e) { /* ignore */ }
     await page.goto(BASE_URL + '/admin/login');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
