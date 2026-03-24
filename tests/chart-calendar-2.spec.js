@@ -245,13 +245,17 @@ async function navigateToAllTypeTable(page) {
     const tableId = mainTable.table_id || mainTable.id;
     await page.goto(BASE_URL + '/admin/dataset__' + tableId);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    // Angular描画完了を待機（アクションメニューボタンが表示されるまで）
+    await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000);
 }
 
 /**
  * アクションドロップダウンメニューを開く（帳票以外のdropdown-toggle）
  */
 async function openActionMenu(page) {
+    // ボタンが表示されるまで待機
+    await page.waitForSelector('button.dropdown-toggle', { timeout: 8000 }).catch(() => {});
     // 帳票ではないdropdown-toggleボタンをクリック
     const buttons = await page.locator('button.dropdown-toggle').all();
     for (const btn of buttons) {

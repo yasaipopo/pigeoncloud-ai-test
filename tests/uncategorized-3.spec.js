@@ -200,7 +200,11 @@ async function checkPage(page, path) {
     // Angular SPAのデータ読み込み完了を待機（テーブルまたはコンテンツが表示されるまで）
     // /admin/dataset__XXX 系ページではtableが表示されるまで待機
     if (path.includes('/admin/dataset__') && !path.includes('/setting') && !path.includes('/edit')) {
-        await page.waitForSelector('table, .no-records, [class*="empty"]', { timeout: 8000 }).catch(() => {});
+        // まずtableを待機（見つからなければno-records等を待機）
+        const tableFound = await page.waitForSelector('table', { timeout: 8000 }).then(() => true).catch(() => false);
+        if (!tableFound) {
+            await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 5000 }).catch(() => {});
+        }
     }
     // その他ページは固定の待機
     await page.waitForTimeout(500);
