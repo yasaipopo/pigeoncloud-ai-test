@@ -637,10 +637,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             }
         }
 
-        if (!mainTableId) {
-            test.skip(true, 'ALLテストテーブルが見つからないためスキップ');
-            return;
-        }
+        expect(mainTableId, 'ALLテストテーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
         console.log('[253] mainTableId:', mainTableId);
 
@@ -661,12 +658,9 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await page.waitForTimeout(2000);
         }
 
-        // 「テーブルが見つかりません」エラーが表示された場合はスキップ
+        // 「テーブルが見つかりません」エラーが表示されないこと
         const bodyText253 = await page.locator('body').innerText().catch(() => '');
-        if (bodyText253.includes('テーブルが見つかりません')) {
-            test.skip(true, 'テーブルが見つかりません（テーブルが削除された可能性）');
-            return;
-        }
+        expect(bodyText253, 'テーブルが正常に表示されること').not.toContain('テーブルが見つかりません');
 
         // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();

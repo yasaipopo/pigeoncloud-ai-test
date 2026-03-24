@@ -194,10 +194,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
         test(`${caseNo}: ${fieldType}フィールドの追加オプション（表示条件）UIが確認できること`, async ({ page }) => {
             test.setTimeout(120000);
 
-            if (!editUrl) {
-                test.skip(true, 'テーブルIDが取得できなかった');
-                return;
-            }
+            expect(editUrl, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
             await page.goto(editUrl);
             await page.waitForLoadState('domcontentloaded');
@@ -209,11 +206,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
             // 対象フィールドタイプのダイアログを開く
             const found = await openFieldDialogByType(page, fieldType);
 
-            if (!found) {
-                console.log(`${caseNo}: フィールドタイプ "${fieldType}" が見つかりませんでした（skip）`);
-                test.skip(true, `フィールドタイプ "${fieldType}" がALLテストテーブルに存在しない`);
-                return;
-            }
+            expect(found, `フィールドタイプ "${fieldType}" がALLテストテーブルに存在すること`).toBeTruthy();
 
             if (hasDisplayCondition) {
                 // 「追加オプション設定」ボタンが表示されること（開いているモーダル内）

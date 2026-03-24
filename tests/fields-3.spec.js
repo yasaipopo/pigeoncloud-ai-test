@@ -960,7 +960,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     // 113-13: 2-4列レイアウトで絞り込み集計
     // -------------------------------------------------------------------------
     test('113-13: 2-4列レイアウト設定後に集計（絞り込み）ができること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -972,7 +972,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     // 113-14: 2-4列レイアウトで集計
     // -------------------------------------------------------------------------
     test('113-14: 2-4列レイアウト設定後に集計（集計）ができること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1022,7 +1022,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     // 113-19: チャート表示
     // -------------------------------------------------------------------------
     test('113-19: 2-4列レイアウト設定後にチャート表示ができること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1034,7 +1034,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     // 113-20: レコード複製
     // -------------------------------------------------------------------------
     test('113-20: 2-4列レイアウト設定後にレコード複製ができること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1046,7 +1046,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     // 113-21: CSVダウンロード
     // -------------------------------------------------------------------------
     test('113-21: 2-4列レイアウト設定後にCSVダウンロードができること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1058,7 +1058,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     // 113-22: CSVアップロード
     // -------------------------------------------------------------------------
     test('113-22: 2-4列レイアウト設定後にCSVアップロードができること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1187,7 +1187,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
     // 121-02: ファイルフィールドのアップロード（追加テスト）
     // -------------------------------------------------------------------------
     test('121-02: ファイルフィールドのアップロードが正常に動作すること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1221,7 +1221,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
     // 132-01: 数値項目の桁区切り・単位表示確認
     // -------------------------------------------------------------------------
     test('132-01: 数値項目の桁区切り表示や単位表示が設定通りとなること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1268,7 +1268,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
     // 147-01: 文字列一行フィールドに10000文字入力
     // -------------------------------------------------------------------------
     test('147-01: 文字列一行フィールドに10000文字入力してエラーなく保存できること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1538,7 +1538,7 @@ test.describe('項目機能 追加ケース（158〜204系）', () => {
     // 175: キーボード入力対応
     // -------------------------------------------------------------------------
     test('175: フィールド入力時にキーボード操作ができること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1573,7 +1573,7 @@ test.describe('項目機能 追加ケース（158〜204系）', () => {
     // 186: フォーム入力時の計算フィールドリアルタイム表示
     // -------------------------------------------------------------------------
     test('186: フォーム入力時に計算フィールドの計算結果がリアルタイム表示されること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1781,7 +1781,7 @@ test.describe('表示条件・必須条件設定（223〜231系）', () => {
     // 240: CSVインポート・エクスポート時の電話番号先頭0
     // -------------------------------------------------------------------------
     test('240: CSVインポート・エクスポート時に電話番号等の先頭0が保持されること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
@@ -1825,7 +1825,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
     // -------------------------------------------------------------------------
     test('236: 300MB超のZIPファイルアップロードでエラーが発生すること', async ({ page }) => {
         test.setTimeout(480000); // 大容量ファイルのためタイムアウトを3分に延長
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
         // Playwright の page.request を使って upload-json エンドポイントに
         // 300MB超のダミーZIPをPOSTし、サーバー側のサイズ制限エラーを確認する
@@ -1882,7 +1882,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
     // -------------------------------------------------------------------------
     test('257: 一般ユーザーが添付ファイルを削除しても結果が反映されないこと（権限なし確認）', async ({ page }) => {
         test.setTimeout(480000); // ユーザー作成・ログイン操作のため3分に延長
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
         // ユーザー上限を外す（create-userが制限で失敗しないように、ページセッションを使用）
         await page.evaluate(async (baseUrl) => {
@@ -1908,7 +1908,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
         // ユーザー作成に失敗した場合はスキップ（上限解除後も失敗する場合はインフラ問題）
         if (!userBody || userBody.result !== 'success') {
             console.log('257: ユーザー作成失敗:', JSON.stringify(userBody));
-            test.skip(true, `ユーザー作成失敗: ${JSON.stringify(userBody)}`);
+            expect(userBody.result, 'ユーザー作成が成功すること（beforeAllで上限解除済み）').toBe('success');
             return;
         }
 
@@ -1948,7 +1948,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
     // 14-25': 他テーブル参照フィールド追加（複数値許可あり）
     // -------------------------------------------------------------------------
     test("14-25': 他テーブル参照フィールドを複数値許可ありで設定できること（UI確認）", async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // フィールド設定ページにアクセス
         await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
         await page.waitForLoadState('domcontentloaded');
@@ -2006,7 +2006,7 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
     // ラジオ=ラジオB のとき「ラジオ_表示条件テキスト」フィールドが非表示になる
     // -------------------------------------------------------------------------
     test('260-1: ラジオボタン選択により条件フィールドが表示・非表示に切り替わること', async ({ page }) => {
-        if (!tableId) { test.skip(); return; }
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         test.setTimeout(120000);
 
         // レコード新規作成ページへ遷移
@@ -2045,12 +2045,7 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
             const labels = Array.from(document.querySelectorAll('label'));
             return labels.some(l => l.textContent.trim() === 'ラジオ');
         });
-        if (!radioExists) {
-            // ALLテストテーブルにラジオフィールドが見つからない場合はスキップ
-            console.log('260-1: ラジオフィールドが見つからないためスキップ');
-            test.skip(true, 'ラジオフィールドが見つかりません');
-            return;
-        }
+        expect(radioExists, 'ALLテストテーブルにラジオフィールドが存在すること').toBe(true);
 
         // 「ラジオ_表示条件テキスト」フィールドの表示状態を確認するヘルパー
         // DOMにない場合はfalse（非表示）として扱う
@@ -2089,21 +2084,12 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
             }
             return false;
         });
-        if (!clickedRadioA) {
-            console.log('260-1: ラジオAの入力要素が見つかりません');
-            test.skip(true, 'ラジオAの入力要素が見つかりません');
-            return;
-        }
+        expect(clickedRadioA, 'ラジオAの入力要素が存在してクリックできること').toBe(true);
         await page.waitForTimeout(1500); // 表示条件のAngularバインディング更新を待つ
 
         // ラジオA選択後: 表示条件テキストフィールドが表示されること
         const visibleAfterA = await getCondFieldVisible();
-        if (visibleAfterA === false) {
-            // ラジオA選択後もフィールドが現れない = テーブルに表示条件フィールドが存在しない
-            console.log('260-1: ラジオA選択後もラジオ_表示条件テキストが現れません（テーブルが古いか機能未実装）');
-            test.skip(true, 'ラジオA選択後にラジオ_表示条件テキストが現れません');
-            return;
-        }
+        expect(visibleAfterA, 'ラジオA選択後にラジオ_表示条件テキストフィールドが表示されること').toBe(true);
         expect(visibleAfterA).toBe(true);
 
         // --- ラジオB を選択: 表示条件テキストが再び非表示になるはず ---

@@ -215,10 +215,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(120000);
         // マスターユーザーでログインしてテストユーザーを作成
         const userBody = await debugApiPost(page, '/create-user');
-        if (userBody.result !== 'success') {
-            test.skip(true, `ユーザー作成失敗のためスキップ: ${userBody.error_message || JSON.stringify(userBody.error_a)}`);
-            return;
-        }
+        expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         const testEmail = userBody.email;
         const testPassword = userBody.password;
 
@@ -540,8 +537,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                 test.skip(true, `アカウントロックのためスキップ: ${alertText}`);
                 return;
             }
-            test.skip(true, 'ログインに失敗したためスキップ');
-            return;
+            throw new Error('ログインに失敗しました（beforeEachで成功しているはずだが予期しない状態）');
         }
 
         // テーブルのレコード一覧を表示
@@ -735,10 +731,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テストユーザーを作成
         const userBody = await debugApiPost(page, '/create-user');
-        if (userBody.result !== 'success') {
-            test.skip(true, `ユーザー作成失敗のためスキップ: ${userBody.error_message || JSON.stringify(userBody.error_a)}`);
-            return;
-        }
+        expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
 
         await logout(page);
 
@@ -783,10 +776,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テストユーザーを作成
         const userBody = await debugApiPost(page, '/create-user');
-        if (userBody.result !== 'success') {
-            test.skip(true, `ユーザー作成失敗のためスキップ: ${userBody.error_message || JSON.stringify(userBody)}`);
-            return;
-        }
+        expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         await logout(page);
         try {
             await login(page, userBody.email, userBody.password);
@@ -826,10 +816,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
         const userBody = await debugApiPost(page, '/create-user');
-        if (userBody.result !== 'success') {
-            test.skip(true, `ユーザー作成失敗のためスキップ: ${userBody.error_message || JSON.stringify(userBody)}`);
-            return;
-        }
+        expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         await logout(page);
         try {
             await login(page, userBody.email, userBody.password);
@@ -869,10 +856,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
         const userBody = await debugApiPost(page, '/create-user');
-        if (userBody.result !== 'success') {
-            test.skip(true, `ユーザー作成失敗のためスキップ: ${userBody.error_message || JSON.stringify(userBody)}`);
-            return;
-        }
+        expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         await logout(page);
         try {
             await login(page, userBody.email, userBody.password);

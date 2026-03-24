@@ -514,11 +514,7 @@ test.describe('通知設定', () => {
         // テストユーザーを作成（ユーザー上限に達した場合はスキップ）
         const userBody = await debugApiPost(page, '/create-user');
         console.log('create-user result:', JSON.stringify(userBody));
-        if (userBody.result !== 'success') {
-            console.log('ユーザー作成失敗（ユーザー上限の可能性）: スキップします');
-            test.skip(true, `ユーザー作成失敗: ${userBody.error_message || JSON.stringify(userBody.error_a)}`);
-            return;
-        }
+        expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         expect(userBody.result).toBe('success');
 
         // 通知設定ページへ

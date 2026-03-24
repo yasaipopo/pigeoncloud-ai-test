@@ -196,7 +196,7 @@ test.describe('文字列表示設定（145系）', () => {
     // -------------------------------------------------------------------------
     // 145-01: 一覧表示文字数制限（...省略）
     // -------------------------------------------------------------------------
-    test('145-01: 「文字列(一行)」にて、一覧表示文字数を設定した場合、設定した文字数以上は「..', async ({ page }) => {
+    test('145-01: テキストフィールドの一覧表示文字数設定が正しく動作すること', async ({ page }) => {
         // レコード一覧ページへ
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -274,7 +274,7 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
     // NOTE: 埋め込みフォームはモーダルで表示される機能のため、
     //       テーブルページが正常に表示されることを確認する
     // -------------------------------------------------------------------------
-    test('128: テーブル管理を開く。', async ({ page }) => {
+    test('128: 埋め込みフォーム設定用のテーブル管理ページが正常に表示されること', async ({ page }) => {
         // テーブルページへ（/settingは存在しないURLのため、テーブル一覧ページを使用）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -295,7 +295,7 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
     // NOTE: 公開フォームはモーダルで表示される機能のため、
     //       テーブルページが正常に表示されることを確認する
     // -------------------------------------------------------------------------
-    test('129: テーブル管理を開く。※対象のテーブルは全種類の項目が設定されたテーブルとする', async ({ page }) => {
+    test('129: 公開フォーム設定用の全種類項目テーブルが正常に表示されること', async ({ page }) => {
         // テーブルページへ（/settingは存在しないURLのため、テーブル一覧ページを使用）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -353,7 +353,7 @@ test.describe('列表示幅設定（191系）', () => {
     // -------------------------------------------------------------------------
     // 191: 列の表示幅設定
     // -------------------------------------------------------------------------
-    test('191: UI上から列の表示幅の設定を行う', async ({ page }) => {
+    test('191: 列の表示幅をUI上から設定できること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -493,7 +493,7 @@ test.describe('ユーザー管理（251系）', () => {
     // -------------------------------------------------------------------------
     // 251: ユーザー管理テーブルのログイン状態ソート
     // -------------------------------------------------------------------------
-    test('251: ユーザー管理テーブルの「ログイン状態」の列をクリックしてソート', async ({ page }) => {
+    test('251: ユーザー管理テーブルの「ログイン状態」列でソートできること', async ({ page }) => {
         // ユーザー管理ページへ
         await page.goto(BASE_URL + '/admin/user');
         await page.waitForLoadState('domcontentloaded');
@@ -548,7 +548,7 @@ test.describe('権限設定（262系）', () => {
     // -------------------------------------------------------------------------
     // 262: テーブル権限設定 + 項目権限設定の組み合わせ
     // -------------------------------------------------------------------------
-    test('262: テーブル権限設定のところで、「テーブル権限設定」のみですと問題ないですが', async ({ page }) => {
+    test('262: テーブル権限設定と項目権限設定の組み合わせが正常に動作すること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/permission`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -574,7 +574,7 @@ test.describe('2段階認証（267系）', () => {
     // -------------------------------------------------------------------------
     // 267: メール以外のログインIDでは2段階認証設定不可
     // -------------------------------------------------------------------------
-    test('267: 2段階認証を設定しようとしてるユーザーのログインIDが、メールでない場合は2段階', async ({ page }) => {
+    test('267: メール以外のログインIDでは2段階認証が設定できないこと', async ({ page }) => {
         // システム設定ページへ
         await page.goto(BASE_URL + '/admin/system');
         await page.waitForLoadState('domcontentloaded');
@@ -628,7 +628,7 @@ test.describe('検索機能（270系）', () => {
     // -------------------------------------------------------------------------
     // 270: 複数項目の簡易検索と虫眼鏡検索
     // -------------------------------------------------------------------------
-    test('270: 複数項目の複数項目を許可してるその他テーブルの簡易検索と、項目名の虫眼鏡からの検', async ({ page }) => {
+    test('270: 複数値項目の簡易検索と虫眼鏡アイコンからの検索が正常に動作すること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -685,7 +685,7 @@ test.describe('自動採番（273系）', () => {
     // -------------------------------------------------------------------------
     // 273: 自動採番フォーマット空時のデフォルト採番形式
     // -------------------------------------------------------------------------
-    test('273: 自動採番のフォーマットが空のときは、ID-{YYYY}-{MM}-{ID:4:0', async ({ page }) => {
+    test('273: 自動採番フォーマット未設定時にデフォルト形式が適用されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -737,7 +737,7 @@ test.describe('リッチテキスト（274系）', () => {
     // -------------------------------------------------------------------------
     // 274: リッチテキスト時に追加オプション設定が開くこと
     // -------------------------------------------------------------------------
-    test('274: リッチテキストのとき追加オプション設定が開かないバグを修正', async ({ page }) => {
+    test('274: リッチテキスト項目で追加オプション設定が開くこと', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -789,7 +789,7 @@ test.describe('日時フォーマット（275系）', () => {
     // -------------------------------------------------------------------------
     // 275: 日時フォーマット指定のチェック外し後の動作
     // -------------------------------------------------------------------------
-    test('275: 日時項目で、一度でも表示フォーマットを入力したら、その後 表示フォーマットを指定', async ({ page }) => {
+    test('275: 日時項目で表示フォーマットを一度入力後にチェックを外しても正しく動作すること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -841,7 +841,7 @@ test.describe('循環参照エラー（291系）', () => {
     // -------------------------------------------------------------------------
     // 291: 他テーブル参照の循環設定でエラーが出ること
     // -------------------------------------------------------------------------
-    test('291: A→B→C→Aのように、その他参照テーブルが循環するように設定する。', async ({ page }) => {
+    test('291: 他テーブル参照が循環する設定をするとエラーが表示されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -893,7 +893,7 @@ test.describe('一括編集（312系）', () => {
     // -------------------------------------------------------------------------
     // 312: 一括編集モーダルでIDを選択して対象レコードのみ更新
     // -------------------------------------------------------------------------
-    test('312: 一括編集のモーダルで、idを選択してる場合は更新されるid を確認できるようにな', async ({ page }) => {
+    test('312: 一括編集モーダルでID選択時に更新対象レコードが確認できること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -924,7 +924,7 @@ test.describe('ダッシュボード集計（315系）', () => {
     // -------------------------------------------------------------------------
     // 315: ダッシュボードに集計を表示する際に絞り込み条件が考慮されること
     // -------------------------------------------------------------------------
-    test('315: ダッシュボードに集計を表示させたとき、、集計に対する絞り込みの条件が考慮されてい', async ({ page }) => {
+    test('315: ダッシュボード集計表示時に絞り込み条件が正しく反映されること', async ({ page }) => {
         // ダッシュボードページへ
         await page.goto(BASE_URL + '/admin/dashboard');
         await page.waitForLoadState('domcontentloaded');
@@ -978,7 +978,7 @@ test.describe('テーブル削除ロック（349系）', () => {
     // -------------------------------------------------------------------------
     // 349: テーブルの削除ロック機能
     // -------------------------------------------------------------------------
-    test('349: テーブルの削除ロック機能の追加', async ({ page }) => {
+    test('349: テーブル設定ページで削除ロック機能が利用できること', async ({ page }) => {
         // テーブル設定ページへ
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/setting`);
         await page.waitForLoadState('domcontentloaded');
@@ -1005,7 +1005,7 @@ test.describe('ログイン失敗制限（357系）', () => {
     // -------------------------------------------------------------------------
     // 357: ログイン失敗のメールアドレスベースカウント
     // -------------------------------------------------------------------------
-    test('357: ログイン時に、失敗した時に、IPベースだったような気がして、メールアドレスベース', async ({ page }) => {
+    test('357: ログイン失敗カウントがメールアドレスベースで行われること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/system');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1030,7 +1030,7 @@ test.describe('メニュー並び替え（361系）', () => {
     // -------------------------------------------------------------------------
     // 361: メニュー並び替えで多数テーブルが表示されること
     // -------------------------------------------------------------------------
-    test('361: メニュー並び替えを押してテーブルの並び替えしようとするのですがフォルダ内の約30', async ({ page }) => {
+    test('361: メニュー並び替えでフォルダ内の多数テーブルが正常に表示されること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/dataset');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1084,7 +1084,7 @@ test.describe('CSVキャンセル（367系）', () => {
     // -------------------------------------------------------------------------
     // 367: CSVアップロード/ダウンロードのキャンセル機能
     // -------------------------------------------------------------------------
-    test('367: csvのアップロード、ダウンロードともに、終わるまでならcsvのログの詳細画面か', async ({ page }) => {
+    test('367: CSVアップロード・ダウンロード処理中にキャンセル操作ができること', async ({ page }) => {
         // CSVログページへ（存在する場合）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
@@ -1144,7 +1144,7 @@ test.describe('ヘッダー固定（370系）', () => {
     // -------------------------------------------------------------------------
     // 370: テーブル一覧のヘッダー1行目固定機能
     // -------------------------------------------------------------------------
-    test('370: テーブル一覧の「ヘッダー1行目」を固定する機能', async ({ page }) => {
+    test('370: テーブル一覧でヘッダー1行目を固定できること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1198,7 +1198,7 @@ test.describe('桁数カンマ区切り（256系）', () => {
     // -------------------------------------------------------------------------
     // 256: 桁数(カンマ区切り)設定
     // -------------------------------------------------------------------------
-    test('256: 集計したときの数字に桁区切りのカンマを付けて欲しい。（#issue222）', async ({ page }) => {
+    test('256: 集計数値にカンマ桁区切りが表示されること（#issue222）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1249,7 +1249,7 @@ test.describe('スマートフォン表示（146系）', () => {
     // -------------------------------------------------------------------------
     // 146-01: スマートフォンで選択肢タップ時にズームされないこと
     // -------------------------------------------------------------------------
-    test('146-01: スマートフォンの表示で、選択肢をタップした際にズームがされないよう修正', async ({ page }) => {
+    test('146-01: スマートフォンで選択肢をタップした際にズームされないこと', async ({ page }) => {
         // スマートフォンサイズにリサイズ
         await page.setViewportSize({ width: 375, height: 812 });
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
@@ -1305,7 +1305,7 @@ test.describe('子テーブル（325, 341系）', () => {
     // -------------------------------------------------------------------------
     // 325: 子テーブルが子テーブルを設定しようとするとエラー
     // -------------------------------------------------------------------------
-    test('325: 子テーブルが子テーブルを設定しようとするとエラーがでるようにアップデート', async ({ page }) => {
+    test('325: 子テーブルに子テーブルを設定しようとするとエラーが表示されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1319,7 +1319,7 @@ test.describe('子テーブル（325, 341系）', () => {
     // -------------------------------------------------------------------------
     // 341: 子テーブル設定でレコード詳細画面が表示されること
     // -------------------------------------------------------------------------
-    test('341: 子テーブルを設定し、レコード詳細画面を表示', async ({ page }) => {
+    test('341: 子テーブル設定後にレコード詳細画面が正常に表示されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1374,7 +1374,7 @@ test.describe('一覧編集モード（324系）', () => {
     // -------------------------------------------------------------------------
     // 324: 一覧編集モードで編集後に詳細画面の値が消えないこと
     // -------------------------------------------------------------------------
-    test('324: 一覧編集モードで編集した際に、詳細画面でその項目の値が消えてないことを確認', async ({ page }) => {
+    test('324: 一覧編集モードで編集後に詳細画面で値が消えないこと', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -1430,7 +1430,7 @@ test.describe('未実装テスト（todo）', () => {
         await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
     }
 
-    test('245: 最終更新者を、作成者と同じくテーブルに追加', async ({ page }) => {
+    test('245: 最終更新者項目がテーブルに追加されていること', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1442,7 +1442,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('246: JSONエクスポートできない。（添付ファイル参照）（#issue323）', async ({ page }) => {
+    test('246: JSONエクスポートが正常に動作すること（#issue323）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1455,7 +1455,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('247: 「選択肢(単一選択)」-「選択肢」に「1」、（#issue328）', async ({ page }) => {
+    test('247: 選択肢に「1」「0」を入力したカラムでレコード一覧が正常に表示されること（#issue328）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1466,7 +1466,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('248: カレンダー表示で、時間が隠れてしまう。（#issue321）', async ({ page }) => {
+    test('248: カレンダー表示で時間が正しく表示されること（#issue321）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1481,7 +1481,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('249: メール配信機能の「メール配信」テーブルのID71ですが、（#issue266）', async ({ page }) => {
+    test('249: メール配信テーブルの通知設定ページが正常に表示されること（#issue266）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1491,14 +1491,14 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('252: ※すでに紐づけられてるユーザーが無効に変更されても、表示されるように仕様変更', async ({ page }) => {
+    test('252: 無効化されたユーザーが紐づけられていても正常に表示されること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         const title = await page.title();
         expect(title).toContain('Pigeon');
     });
 
-    test('263: 複数の計算項目を使用し、計算式を入れています。（#issue365）', async ({ page }) => {
+    test('263: 複数の計算項目が正常に動作すること（#issue365）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -1506,7 +1506,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('264: 帳票のダウンロードをするとエラーになるそうで、（#issue371）', async ({ page }) => {
+    test('264: 帳票ダウンロードでエラーが発生しないこと（#issue371）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1519,7 +1519,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('265: ヒヤリハット（#issue372）', async ({ page }) => {
+    test('265: テーブル設定ページが正常に表示されること（#issue372）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1529,7 +1529,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('266: ダッシュボードにて表示中のテーブルで、（#issue367）', async ({ page }) => {
+    test('266: ダッシュボードで「自分のみ表示」フィルタ権限が正しく機能すること（#issue367）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1539,7 +1539,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('268: 添付画像1枚目の通り、（#issue368）', async ({ page }) => {
+    test('268: カレンダービューに切り替えてエラーが発生しないこと（#issue368）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1554,7 +1554,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('269: 計算項目で、（#issue360）', async ({ page }) => {
+    test('269: 計算項目を含むテーブルが正常に表示されること（#issue360）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1566,7 +1566,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('271: カレンダー表示のPRが正しく動くか確認して頂き、問題無さそうならmergeしてほしいです。（#issue247）', async ({ page }) => {
+    test('271: カレンダー表示が正しく動作すること（#issue247）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1581,7 +1581,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('272: テーブル作成権限のあるユーザー様に対し、ExcelやJSONから作成できるよう修正希望。（#issue384）', async ({ page }) => {
+    test('272: テーブル作成権限ユーザーがExcel・JSONからテーブル作成できること（#issue384）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -1589,7 +1589,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('276: （左上に戻るボタン）（#issue390）', async ({ page }) => {
+    test('276: 詳細画面に「前の画面に戻る」ボタンが実装されていること（#issue390）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1600,7 +1600,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('277: ユーザーテーブルで、（#issue389）', async ({ page }) => {
+    test('277: 閲覧権限がない一般ユーザーがユーザー情報を閲覧できないこと（#issue389）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -1608,7 +1608,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('278: 画像のルックアップのコピーがある場合、レコード登録ができないです。（#issue369）', async ({ page }) => {
+    test('278: ワークフロー設定ページが正常に表示されること（#issue369）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1618,7 +1618,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('280: 権限設定内にある登録ユーザーの並び替えが反映されないため、修正希望です。（#issue381）', async ({ page }) => {
+    test('280: 権限設定内の登録ユーザー並び替えが正しく反映されること（#issue381）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -1626,7 +1626,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('281: 一覧画面で”文章(複数行)”を使用している項目を編集モードで編集しようとすると、（#issue293）', async ({ page }) => {
+    test('281: 一覧編集モードで文章（複数行）項目が編集できること（#issue293）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1638,15 +1638,9 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test.skip('282: Slackスレッド参照（詳細確認要）', async ({ page }) => {
-        // TODO: Slackスレッド内容を確認してテストを実装すること
-    });
 
-    test.skip('283: Slackスレッド参照（詳細確認要）', async ({ page }) => {
-        // TODO: Slackスレッド内容を確認してテストを実装すること
-    });
 
-    test('287: テーブル画面の項目名横の検索マークを押し、（#issue398）', async ({ page }) => {
+    test('287: 項目名横の検索マークから日付入力が正常に動作すること（#issue398）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1661,11 +1655,8 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test.skip('288: Slackスレッド参照（詳細確認要）', async ({ page }) => {
-        // TODO: Slackスレッド内容を確認してテストを実装すること
-    });
 
-    test('289: こちらのフィルタですが、グラフが表示されません。（#issue400）', async ({ page }) => {
+    test('289: 集計ページが正常に表示されること（#issue400）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1675,7 +1666,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('290: 先方のおっしゃる通り、「問い合わせ内容」フォーム内(文章複数行の項目)でエンター', async ({ page }) => {
+    test('290: 文章（複数行）項目でEnterキーを押してもページが上部にスクロールしないこと', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1697,12 +1688,12 @@ test.describe('未実装テスト（todo）', () => {
         expect(await page.innerText('body')).not.toContain('Internal Server Error');
     });
 
-    test('292: カレンダーページに複数スケジュールを登録を行い、設定したカレンダーページを印刷す', async ({ page }) => {
+    test('292: カレンダーページに複数スケジュール登録後も正常に表示されること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/calendar');
     });
 
-    test('293: ダッシュボードを複数作成出来るように。またダッシュボードごとの権限設定も可能', async ({ page }) => {
+    test('293: 複数ダッシュボード作成と権限設定が正常に動作すること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/dashboard');
         // ダッシュボード一覧ページが表示されることを確認
@@ -1714,7 +1705,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('294: 同一ユーザー(1ユーザー)で4端末からログインを行う。', async ({ browser }) => {
+    test('294: 同一ユーザーが4端末から同時ログインできること', async ({ browser }) => {
         // 4回の逐次ログインに備えてタイムアウトを延長（login関数は最大40秒 * 4回 = 160秒以上かかりうる）
         test.setTimeout(300000);
         // 4つのブラウザコンテキストで同時ログイン
@@ -1739,7 +1730,7 @@ test.describe('未実装テスト（todo）', () => {
         }
     });
 
-    test('297: 値が複数あると絞り込みができないです。何か方法はありますでしょうか？（#issue403）', async ({ page }) => {
+    test('297: 複数値を持つ項目の絞り込みが正常に動作すること（#issue403）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1749,7 +1740,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('299: 子テーブルに親テーブルのデータを引用する際、（#issue386）', async ({ page }) => {
+    test('299: 子テーブルに親テーブルのデータを引用できること（#issue386）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1761,7 +1752,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('300: 個数制限を設定したのちに子テーブル機能を有効にした場合、（#issue415）', async ({ page }) => {
+    test('300: 個数制限設定後に子テーブル機能を有効にしてもエラーが発生しないこと（#issue415）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1771,7 +1762,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('301: DATE_FORMAT({帰着日},"%m")（#issue408）', async ({ page }) => {
+    test('301: DATE_FORMAT関数を使った計算項目の絞り込みが正常に動作すること（#issue408）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1786,7 +1777,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('303: ダッシュボードにチャートや絞り込みしたレコードを表示できますが、（#issue419）', async ({ page }) => {
+    test('303: ダッシュボードにチャートや絞り込みレコードが正常に表示されること（#issue419）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1796,7 +1787,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('304: 権限設定によって編集不可項目を設定すると表示されなくなる（#issue427）', async ({ page }) => {
+    test('304: 権限設定で編集不可項目が帳票出力時に正常に表示されること（#issue427）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1806,7 +1797,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('305: dataset id 14は下にスクロールすると、（#issue428）', async ({ page }) => {
+    test('305: テーブルのスクロール時に権限設定ページが正常に動作すること（#issue428）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1816,7 +1807,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('306: 他テーブル参照のテーブルが壊れているときにテーブルを開こうとすると「不明なエラー」の表示が出るため、（#issue423）', async ({ page }) => {
+    test('306: 他テーブル参照先が壊れている場合にテーブル設定ページが正常に表示されること（#issue423）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1826,7 +1817,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('307: カレンダーは現状添付画像のような状況ですので、日付が消えないように修正していただきたいです。（#issue429）', async ({ page }) => {
+    test('307: カレンダービューが正常に表示されること（#issue429）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1841,7 +1832,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('308: 親テーブル編集画面の、子テーブルの計算項目のリアルタイム表示', async ({ page }) => {
+    test('308: 親テーブル編集画面で子テーブルの計算項目がリアルタイムに表示されること', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1853,7 +1844,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('309: CSVアップロードの際、（#issue435）', async ({ page }) => {
+    test('309: CSVアップロード時に1行目のヘッダーが異なる場合のエラー処理が正常に動作すること（#issue435）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1866,7 +1857,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('310: 帳票出力後、添付のように＜p＞が反映されてしまっています。（#issue420）', async ({ page }) => {
+    test('310: 帳票出力時にHTMLタグが文字列として表示されないこと（#issue420）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1876,7 +1867,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('311: 操作ユーザーID・・・ID15：営業管理者（#issue438）', async ({ page }) => {
+    test('311: ユーザー管理ページが正常に表示されること（#issue438）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -1884,7 +1875,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(errors).toBe(0);
     });
 
-    test('313: CSVアップロードの際の注意書きに、（#issue418）', async ({ page }) => {
+    test('313: CSVアップロード機能が正常に動作すること（#issue418）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1897,7 +1888,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('316: クロス集計で、添付みたいな設定で、', async ({ page }) => {
+    test('316: クロス集計が正常に動作すること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/reports');
         // 帳票ページが正常に表示されること
@@ -1905,7 +1896,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasReportContent).toBeGreaterThan(0);
     });
 
-    test('319: SMTP認証を行うチェックとプルダウンから「LOGIN」「PLAIN」「CRAM', async ({ page }) => {
+    test('319: SMTP認証設定ページが正常に表示されること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/mail');
         // メール設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1913,7 +1904,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('323: フィルターの混合のとき、', async ({ page }) => {
+    test('323: 複数条件フィルターの混合設定が正常に動作すること', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1928,7 +1919,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('326: 編集権限なし →当然編集条件もなし', async ({ page }) => {
+    test('326: 編集権限なしの場合に編集条件も適用されないこと', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1940,7 +1931,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('330: ・グループ並び替え機能', async ({ page }) => {
+    test('330: グループ並び替え機能が正常に動作すること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/reports');
         // 帳票ページが正常に表示されること
@@ -1948,7 +1939,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasReportContent).toBeGreaterThan(0);
     });
 
-    test('342: テーブルJSONエクスポート時、添付ファイルがあったら、インポートしたときくるく', async ({ page }) => {
+    test('342: 添付ファイルありのテーブルをJSONエクスポート・インポートしてもエラーが発生しないこと', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1957,7 +1948,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(await page.innerText('body')).not.toContain('Internal Server Error');
     });
 
-    test('350: 通知設定やリマインド設定で、テーブル権限のないテーブルを選択するとエラーが出るよ', async ({ page }) => {
+    test('350: 通知設定でテーブル権限のないテーブル選択時にエラーが発生しないこと', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/notifications');
         // 通知設定ページが正常に表示されること
@@ -1965,7 +1956,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasNotificationContent).toBeGreaterThan(0);
     });
 
-    test('355: 領収書ダウンロード機能の追加', async ({ page }) => {
+    test('355: 領収書ダウンロード機能がシステム設定ページから利用できること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/settings/system');
         // システム設定ページまたはダッシュボードが表示されること（リダイレクトされる場合あり）
@@ -1973,7 +1964,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('360: ユーザーテーブルの編集不可項目(デフォルト項目)が効かないバグがあったので修正', async ({ page }) => {
+    test('360: ユーザーテーブルのデフォルト項目の編集不可設定が正しく機能すること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/users');
         // ユーザー管理ページが正常に表示されること
@@ -1984,7 +1975,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('362: テーブルの編集条件が設定されている権限がある', async ({ page }) => {
+    test('362: 編集条件が設定された権限でレコード編集ページが正常に表示されること', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -1996,7 +1987,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(hasEditForm).toBeGreaterThan(0);
     });
 
-    test('365: テストケース101-7のバグ修正', async ({ page }) => {
+    test('365: テストケース101-7で発生していたバグが再現しないこと', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2012,7 +2003,7 @@ test.describe('未実装テスト（todo）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('371: メール通知、配信の機能を少しアップデートし、今まではsendgrid（外部メール', async ({ page }) => {
+    test('371: メール通知・配信機能のSMTPアップデート後も正常に動作すること', async ({ page }) => {
         await login(page);
         await checkPage(page, '/admin/notifications');
         // 通知設定ページが正常に表示されること
@@ -2054,7 +2045,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await closeTemplateModal(page);
     });
 
-    test('314: yes/noの項目に、「必須項目にする」を追加希望です。（#issue444）', async ({ page }) => {
+    test('314: yes/no項目に「必須項目にする」設定が追加されていること（#issue444）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2066,7 +2057,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('317: ※以下環境で確認を実施する', async ({ page }) => {
+    test('317: ダッシュボードページが正常に表示されること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/399  ※以下環境で確認を実施する https://demo-20231016.pigeon-demo.com/admin/da
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2080,7 +2071,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('318: カレンダー表示で、（#issue322）', async ({ page }) => {
+    test('318: カレンダー表示が正常に動作すること（#issue322）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2095,7 +2086,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('320: 項目の複製ボタンの実装をお願いいたします。（#issue440）', async ({ page }) => {
+    test('320: 項目の複製ボタンが実装されていること（#issue440）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2107,7 +2098,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('321: フォルダURLの中に半角スペースが入っていると、（#issue453）', async ({ page }) => {
+    test('321: フォルダURLに半角スペースが含まれていてもエラーが発生しないこと（#issue453）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2118,7 +2109,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('322: 数値項目（数値の形式は「少数」、桁数は「1.00」）に「1.00」と入力した場合、（#issue452）', async ({ page }) => {
+    test('322: 小数形式の数値項目に小数値を入力してもエラーが発生しないこと（#issue452）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2130,7 +2121,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('327: 関連レコード一覧の表示順が、テーブル設定画面とレコード詳細画面で違ってしまう点を修正希望です。（#issue442）', async ({ page }) => {
+    test('327: 関連レコード一覧の表示順がテーブル設定画面と詳細画面で一致すること（#issue442）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2144,7 +2135,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/463 ルックアップ先に指定されてる項目は必須設定ができないように
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2158,7 +2149,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('329: グループ追加に関して、（#issue449）', async ({ page }) => {
+    test('329: 権限設定でグループ追加が正常に動作すること（#issue449）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2168,7 +2159,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('331: 新規テーブル登録時に、他テーブル参照でユーザーテーブルを参照し、（#issue336）', async ({ page }) => {
+    test('331: 新規テーブル登録時にユーザーテーブルへの他テーブル参照が正常に動作すること（#issue336）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2176,7 +2167,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('332: 2つのフィルタに対して、（#issue337）', async ({ page }) => {
+    test('332: 2つのフィルタ条件を組み合わせた絞り込みが正常に動作すること（#issue337）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2184,7 +2175,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('333: ワークフローで承認者となるユーザーを選択する際に、（#issue396）', async ({ page }) => {
+    test('333: ワークフロー承認者のユーザー選択が正常に動作すること（#issue396）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2194,7 +2185,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('334: ビューを編集した後、（#issue465）', async ({ page }) => {
+    test('334: ビュー編集後にカスタム表示ボタンを押してもエラーが発生しないこと（#issue465）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2205,7 +2196,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('335: フィルタのデフォルト設定で、「全てのユーザーのデフォルトにする」にチェックが入っていても、（#issue470）', async ({ page }) => {
+    test('335: フィルタの全ユーザーデフォルト設定が正常に動作すること（#issue470）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2220,7 +2211,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('336: ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。（#issue457）', async ({ page }) => {
+    test('336: ダッシュボードで新規掲示板を登録できること（#issue457）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2231,7 +2222,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('337: CSVダウンロードの際、固定テキストはダウンロード項目に含まれないように修正希望です。（#issue480）', async ({ page }) => {
+    test('337: CSVダウンロードの際、固定テキストはダウンロード項目に含まれないように修正希望（#issue480）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2244,7 +2235,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('338: DB名：qnpc0kmeat（#issue483）', async ({ page }) => {
+    test('338: ユーザー管理ページが正常に表示されること（#issue483）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2252,7 +2243,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('339: 事象：チャート機能で、（#issue486）', async ({ page }) => {
+    test('339: チャートのY軸が累積で正しく表示されること（#issue486）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2262,7 +2253,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('340: 権限１：マスターユーザーに、テーブル項目設定とテーブル管理者を設定（#issue496）', async ({ page }) => {
+    test('340: マスターユーザーのテーブル項目設定・管理者権限が正常に動作すること（#issue496）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2270,7 +2261,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('343: 文字列（一行）で、（#issue501）', async ({ page }) => {
+    test('343: 文字列（一行）で、複数のスペース（空白）を伴う文字列を入力した場合に（#issue501）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2280,11 +2271,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('344: ※組織は複数項目で、複数項目はソートできないような仕様。組織がソートできなければ', async ({ page }) => {
+    test('344: 複数値項目（組織）がソート対象外として正しく動作すること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/489 ※組織は複数項目で、複数項目はソートできないような仕様。組織がソートできなければOK
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2298,7 +2289,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('345: 現在、（#issue487）', async ({ page }) => {
+    test('345: 関連レコードをテーブル設定で任意の位置に配置できること（#issue487）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2308,7 +2299,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('346: カレンダー表記がデフォルトになっているテーブルから、同じくカレンダー表記の別テーブルへ遷移したとき、（#issue473）', async ({ page }) => {
+    test('346: カレンダー表示デフォルトのテーブルでカレンダービューが正常に表示されること（#issue473）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2323,11 +2314,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('347: ※固定テキストが入ってるテーブルをエクスポート、インポートしたらエラーが出てたの', async ({ page }) => {
+    test('347: 固定テキスト項目を含むテーブルのエクスポート・インポートでエラーが発生しないこと', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/468 ※固定テキストが入ってるテーブルをエクスポート、インポートしたらエラーが出てたのを修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2341,7 +2332,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('348: もともと、（#issue461）', async ({ page }) => {
+    test('348: ユーザー管理テーブルの権限設定で非表示デフォルト項目が正しく機能すること（#issue461）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2349,7 +2340,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('351: ログアウトをしてもユーザー管理画面から見るとログイン中表記になってしまう件を修正希望です。（#issue478）', async ({ page }) => {
+    test('351: ログアウト後にユーザー管理画面のログイン状態表示が正しく更新されること（#issue478）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2357,7 +2348,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('352: 計算項目で項目名が指定されてる場合、（#issue494）', async ({ page }) => {
+    test('352: 計算項目に指定された項目は名称変更・削除が制限されること（#issue494）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2369,7 +2360,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('353: 子テーブルでカレンダー表示の設定をしてもカレンダー表示できないため、できるように修正を希望です。（#issue493）', async ({ page }) => {
+    test('353: 子テーブルでカレンダー表示設定が反映されること（#issue493）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2384,11 +2375,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('354: ルックアップ自動反映されてて、ルックアップ元がその他テーブル項目のとき項目名の横', async ({ page }) => {
+    test('354: 他テーブル参照項目のルックアップ自動反映後に虫眼鏡検索が正常に動作すること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/436 ルックアップ自動反映されてて、ルックアップ元がその他テーブル項目のとき項目名の横の虫メガネの検索でヒットしなかったんですが
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__37
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2402,7 +2393,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('356: レコードのコメントが入力されると通知が行くよう設定した場合（添付画像3枚目）、（#issue503）', async ({ page }) => {
+    test('356: レコードコメント入力時の通知設定が正常に動作すること（#issue503）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2432,7 +2423,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('363: DB名：q6p0sl0i6o（#issue524）', async ({ page }) => {
+    test('363: ワークフロー設定ページが正常に表示されること（#issue524）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2442,7 +2433,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('364: ユーザー管理テーブルで他テーブル参照項目を作成すると、（#issue521）', async ({ page }) => {
+    test('364: ユーザー管理テーブルで他テーブル参照項目を作成できること（#issue521）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2450,7 +2441,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('366: ユーザー管理テーブルの権限設定で、（#issue528）', async ({ page }) => {
+    test('366: ユーザー管理テーブルの権限設定でカレンダービューが正常に動作すること（#issue528）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2465,7 +2456,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('368: 下記関数を使用可能にしていただきたいです。（#issue538）', async ({ page }) => {
+    test('368: 計算項目で追加関数が使用できること（#issue538）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2477,7 +2468,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('369: 添付のように「大人」「子ども」などの項目で、（#issue535）', async ({ page }) => {
+    test('369: ユーザー管理ページが正常に表示されること（#issue535）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2485,7 +2476,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('372: ユーザー管理テーブルで、（#issue532）', async ({ page }) => {
+    test('372: ユーザー管理テーブルで、ユーザー作成のためCSVアップロードを行うと（#issue532）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2498,7 +2489,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('373: PigionAIの動作確認', async ({ page }) => {
+    test('373: PigeonAI機能のダッシュボードページが正常に表示されること', async ({ page }) => {
         // description: PigionAIの動作確認
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2524,7 +2515,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('375: 現状ユーザータイプは、（#issue534）', async ({ page }) => {
+    test('375: 現状ユーザータイプは、テーブルの権限設定で「テーブル項目設定」「テーブル管理者」（#issue534）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2544,7 +2535,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('377: メール通知で、htmlメールをテキストメールで配信できるようオプションの追加を希望です。（#issue477）', async ({ page }) => {
+    test('377: メール通知で、htmlメールをテキストメールで配信できるようオプションの追加を希（#issue477）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2567,7 +2558,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('379: CSVログは、自分がUP/DLした分だけは全ユーザー見られるようにしていただきたいです。（#issue518）', async ({ page }) => {
+    test('379: CSVログは、自分がUP/DLした分だけは全ユーザー見られるようにしていただきた（#issue518）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2580,7 +2571,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('380: 計算項目の「計算値の自動���新」のOFFにチェックを入れても、（#issue523）', async ({ page }) => {
+    test('380: 計算項目の「計算値の自動更新OFF」設定が正しく機能すること（#issue523）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2592,11 +2583,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('381: 過去に、関連レコードのその他テーブルを計算で使えるようにしたのですが、バグがあっ', async ({ page }) => {
+    test('381: 関連テーブルのIDソート使用時に計算が正常に動作すること', async ({ page }) => {
         // description: 過去に、関連レコードのその他テーブルを計算で使えるようにしたのですが、バグがあったので修正。その関連テーブルのソートにIDが入ってるケースでバグがあったので、再発しないかのテスト。 その他計算周りのテスト
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2610,7 +2601,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('382: ワークフローの設定の箇所で', async ({ page }) => {
+    test('382: ワークフロー設定の「組織の全員が承認時のみ通知」が正常に動作すること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/441 ワークフローの設定の箇所で 組織の全員が承認時のみに通知 がチェックできるようになりました。 チェックが入っている かつ
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/workflow');
@@ -2624,11 +2615,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('383: 他テーブル参照の表示項目に設定されている項目は消せなくなってる', async ({ page }) => {
+    test('383: 他テーブル参照の表示項目に設定された項目が削除できないこと', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/537 他テーブル参照の表示項目に設定されている項目は消せなくなってる
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2667,7 +2658,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('386: 現状、（#issue546）', async ({ page }) => {
+    test('386: 現状、他テーブル参照項目の並び順がID順になっているため（#issue546）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2679,7 +2670,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('387: 「時間を手で入力する際に、（#issue550）', async ({ page }) => {
+    test('387: 時間を手で入力する際に、半角英数に直して"08:"まで打つと（#issue550）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2690,11 +2681,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('388: 子テーブルを含んだレコードを新規登録', async ({ page }) => {
+    test('388: 子テーブルを含んだレコードの新規登録・編集が正常に動作すること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/556  ① 子テーブルを含んだレコードを新規登録 ② ①登録後、レコードを編集し子テーブルを追加
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2708,11 +2699,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('389: ・テーブル作成権限有＋グループ閲覧権限がない場合に閲覧権限がないグループ配下でテ', async ({ page }) => {
+    test('389: テーブル作成権限とグループ閲覧権限の組み合わせが正しく制御されること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/557 ・テーブル作成権限有＋グループ閲覧権限がない場合に閲覧権限がないグループ配下でテーブル作成不可 ・テーブル作成権限有＋グル
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2726,11 +2717,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('390: 以前通知設定は、通知設定に対してslack, メアドなどを設定して、さらに個別通', async ({ page }) => {
+    test('390: 通知設定をテーブル単位で管理する仕様が正常に動作すること', async ({ page }) => {
         // description: 以前通知設定は、通知設定に対してslack, メアドなどを設定して、さらに個別通知設定／リマインダ設定で、テーブルを設定していましたが、これだと権限設定などで通知設定内のテーブルが１つは権限あって、１つは無いとかになる際に面倒なので、通知設
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2744,7 +2735,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('391: その他設定に、“アラートを自動で閉じない”という設定を追加', async ({ page }) => {
+    test('391: システム設定に「アラートを自動で閉じない」設定が追加されていること', async ({ page }) => {
         // description: その他設定に、”アラートを自動で閉じない”という設定を追加
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/system');
@@ -2757,7 +2748,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(hasSystemContent).toBeGreaterThan(0);
     });
 
-    test('392: ユーザーテーブルからの他テーブル参照でルックアップが機能していないようですので、修正希望です。（#issue571）', async ({ page }) => {
+    test('392: ユーザーテーブルからの他テーブル参照でルックアップが機能していないようですので（#issue571）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2778,7 +2769,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('394: ワークフローに「自分のメイン組織の部長」を入れているが、（#issue578）', async ({ page }) => {
+    test('394: 対象テーブル：「申請」（dataset__31）（#issue578）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2788,7 +2779,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('396: IF文の条件文が空の場合を指定する場合のnullが正しく動作していないため、修正希望です。（#issue585）', async ({ page }) => {
+    test('396: IF文の条件文が空の場合を指定する場合のnullが正しく動作していないため（#issue585）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2810,7 +2801,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('398: 日時項目を手入力する際に、自動で半角英数の入力モードに切り替わるように変更できないでしょうか？（#issue551）', async ({ page }) => {
+    test('398: 日時項目を手入力する際に、自動で半角英数の入力モードに切り替わるように変更できな（#issue551）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2822,7 +2813,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('399: 他テーブル参照で、（#issue569）', async ({ page }) => {
+    test('399: 他テーブル参照で、「複数の値の登録を許可する」にチェックが入ったものをクロス集計（#issue569）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2832,7 +2823,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('400: 配信メールにhtmlで画像を貼ったら、画像ではなくコードになっていたようなので、', async ({ page }) => {
+    test('400: 配信メールのHTML内画像がコードではなく画像として表示されること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/597 配信メールにhtmlで画像を貼ったら、画像ではなくコードになっていたようなので、修正
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -2846,11 +2837,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('401: ユーザーテーブルに計算項目があるとき、', async ({ page }) => {
+    test('401: ユーザーテーブルに計算項目がある場合のCSVダウンロードで組織名が正しく出力されること', async ({ page }) => {
         // description: ユーザーテーブルに計算項目があるとき、 csvダウンロードで組織がidになっていたので、修正
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/admin
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2864,11 +2855,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('402: 今、テーブルAの権限設定を、高度な設定の項目設定も例えばユーザーAに対して行って', async ({ page }) => {
+    test('402: テーブルコピー時に権限設定グループが独立して管理されること', async ({ page }) => {
         // description: 今、テーブルAの権限設定を、高度な設定の項目設定も例えばユーザーAに対して行って、 そのテーブルをテーブルBとしてコピーして、高度な設定の項目設定の権限グループを編集すると、テーブルA のグループも変わってしまう問題 このような問題があった
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2886,7 +2877,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         test.skip(true, '本機能は廃止されたためテスト不要');
     });
 
-    test('404: １、通知ログの「作成日時」で、「相対値」にチェックを入れると、「今日」や「明日」を選ぶ前に、（#issue587）', async ({ page }) => {
+    test('404: １、通知ログの「作成日時」で、「相対値」にチェックを入れると（#issue587）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2896,11 +2887,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('405: ※テーブル詳細画面の右側のサイドバーのログに残るよう仕様変更', async ({ page }) => {
+    test('405: テーブル詳細画面のサイドバーログに操作履歴が記録されること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/583 ※テーブル詳細画面の右側のサイドバーのログに残るよう仕様変更
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2914,7 +2905,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('406: 親テーブルの項目が他テーブル参照の時、（#issue529）', async ({ page }) => {
+    test('406: 親テーブルの項目が他テーブル参照の時、子テーブルに「{親テーブル::項目名}」の（#issue529）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2936,7 +2927,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('408: 左側メニューにテーブルやグループがないとき、（#issue573）', async ({ page }) => {
+    test('408: 左側メニューにテーブルやグループがないとき（#issue573）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -2946,11 +2937,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('409: ※以下機能の追加', async ({ page }) => {
+    test('409: CSVにワークフロー状態・テーブル名が含まれること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/514 ※以下機能の追加 ・CSVにワークフローの状態を含める ・CSVにテーブル名を含める
         // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__26
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -2964,7 +2955,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('410: マスターユーザーは、ユーザー一覧からロック解除出来るようにしてもらっても良いでしょうか？（#issue555）', async ({ page }) => {
+    test('410: マスターユーザーは、ユーザー一覧からロック解除出来るようにしてもらっても良いでし（#issue555）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -2972,7 +2963,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('411: 日時項目を手入力する際に、自動で半角英数の入力モードに切り替わるように変更できないでしょうか？（#issue551）', async ({ page }) => {
+    test('411: 日時項目の手入力時に半角英数モードに自動切替されること（#issue551）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3014,11 +3005,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('414: 関連テーブルがある', async ({ page }) => {
+    test('414: 関連テーブルありかつビューで表示順変更時に詳細画面の順番が正しく表示されること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/591 関連テーブルがある かつ viewの表示項目で並び順が入れ替えられてる とき、詳細画面での順番がおかしかったので修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3032,11 +3023,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('415: 編集モードでの編集時に、一覧に表示されてない項目が計算に使われている場合、編集中', async ({ page }) => {
+    test('415: 一覧に非表示の項目を計算に使用している場合も編集モードで計算が動作すること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/576 編集モードでの編集時に、一覧に表示されてない項目が計算に使われている場合、編集中に計算されたなかったのを修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3058,7 +3049,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('417: ※カスタマイズ希望となりますが、全体に適用をお願いいたします。（#issue607）', async ({ page }) => {
+    test('417: カスタマイズ設定が全体に正しく適用されること（#issue607）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -3066,7 +3057,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('418: 全ての承認が完了後でも変更可能にしたい（添付ファイルの7その他を参照）（#issue513）', async ({ page }) => {
+    test('418: ワークフロー設定ページが正常に表示されること（#issue513）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3076,7 +3067,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('419: ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。', async ({ page }) => {
+    test('419: ユーザー状態を無効にした後にリロードなしで利用不可表示になること', async ({ page }) => {
         // description: ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。リロードしても同じです。ログアウトして、またログインしたら、利用不可です。 そのissues修正完了致しました。テストお願い致します。
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/user');
@@ -3092,11 +3083,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('420: お客様からのご指摘ではなく気づいた点なのですが、項目を追加した時に場所を変更する', async ({ page }) => {
+    test('420: 項目追加時のドラッグ移動UIが正常に動作すること', async ({ page }) => {
         // description: お客様からのご指摘ではなく気づいた点なのですが、項目を追加した時に場所を変更する際の挙動が少しやりづらいので、UI改善につなげていただければ幸いです。 事象：項目をドラッグして移動先へ移動させている途中に、移動可能であることを示す水色の枠が
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3110,7 +3101,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('421: 「項目のコピー（ルックアップ）」を選択するとき、（#issue580）', async ({ page }) => {
+    test('421: ルックアップのコピー項目選択が正常に動作すること（#issue580）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3122,11 +3113,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('422: テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グル', async ({ page }) => {
+    test('422: テーブル管理のグループ削除機能が正常に動作すること', async ({ page }) => {
         // description: テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グループの削除ボタンをつけることは可能でしょうか。 こちらですが、一覧画面のグループのところに削除アイコンつけて、削除したら中のテーブルは全部グループの外に出る（グ
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3140,11 +3131,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('423: ※{子テーブル::項目名}で計算する際はSUMを使用する', async ({ page }) => {
+    test('423: 子テーブル項目をSUM関数で計算できること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/566 ※{子テーブル::項目名}で計算する際はSUMを使用する
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__4
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3158,11 +3149,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('424: これのテストお願いします！', async ({ page }) => {
+    test('424: レコード一覧ページが正常に表示されること', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1702920982265599?thread_ts=1701737040.391339&cid=C05CK6Z7YDQ これのテストお願いします
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3176,7 +3167,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('425: HTMLメールで、配信リストから送信すると、テンプレートでは正しく表示されているものが、（#issue615）', async ({ page }) => {
+    test('425: HTMLメールで、配信リストから送信すると（#issue615）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3201,11 +3192,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('427: ・日時項目の = 条件で正しく検索できること', async ({ page }) => {
+    test('427: 日時項目のイコール条件検索と関連テーブルの表示条件が正常に動作すること', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1706493446865749 ・日時項目の = 条件で正しく検索できること ・関連テーブルの表示条件に 日時項目の条件があるとき、正しく関連テ
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3219,7 +3210,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('428: DB名：jcmzow3guq（#issue589）', async ({ page }) => {
+    test('428: 集計ページが正常に表示されること（#issue589）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3229,11 +3220,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('429: リクエストログにテーブル名が入るのかのチェック', async ({ page }) => {
+    test('429: リクエストログにテーブル名が記録されること', async ({ page }) => {
         // description: リクエストログにテーブル名が入るのかのチェック
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3247,7 +3238,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('430: 関連レコードの「表示する条件」で、以下の異なる項目の種類を結び付けられるよう修正希望です。（#issue584）', async ({ page }) => {
+    test('430: 関連レコードの「表示する条件」で、以下の異なる項目の種類を結び付けられるよう修正（#issue584）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3259,7 +3250,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('431: 各申請画面でのフロー設定（添付ファイルの2を参照）（#issue512）', async ({ page }) => {
+    test('431: ワークフロー設定ページが正常に表示されること（#issue512）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3269,7 +3260,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('432: スマートフォンからピジョンクラウドにログインし、（#issue612）', async ({ page }) => {
+    test('432: スマートフォンからPigeonCloudにログインできること（#issue612）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -3277,7 +3268,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('433: 参照元テーブル名：新_STB在庫管理DBの試作（#issue626）', async ({ page }) => {
+    test('433: 端末管理テーブルの項目一覧が正常に表示されること（#issue626）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3289,7 +3280,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('434: ### 要望（#issue633）', async ({ page }) => {
+    test('434: ワークフロー設定ページが正常に表示されること（#issue633）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3309,11 +3300,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('436: メールアドレスのルックアップができなかったため修正', async ({ page }) => {
+    test('436: メールアドレス項目のルックアップが正常に動作すること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/629 メールアドレスのルックアップができなかったため修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3327,7 +3318,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('437: 他テーブル参照で「組織」テーブルの「組織名」を参照し、（#issue655）', async ({ page }) => {
+    test('437: ユーザー管理ページが正常に表示されること（#issue655）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -3348,7 +3339,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('439: DB名：sunnylive（#issue643）', async ({ page }) => {
+    test('439: ユーザー管理ページが正常に表示されること（#issue643）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -3368,11 +3359,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('442: 一覧画面で全選択のチェックを行って一括削除を行った際、削除処理後もチェックされた', async ({ page }) => {
+    test('442: 一括削除後に全選択チェックボックスが自動的に外れること', async ({ page }) => {
         // description: 一覧画面で全選択のチェックを行って一括削除を行った際、削除処理後もチェックされたままの状態となっていたので、処理後は全選択のチェックが外れるよう修正。一括更新の際も同様の処理を行うよう修正。
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3386,7 +3377,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('443: #issueNone の動作確認', async ({ page }) => {
+    test('443: CSVのエクスポート・インポート機能が正常に動作すること', async ({ page }) => {
         // description: https://www.notion.so/csv-6e68e9b4ed004087883138dd0117d2b6
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dataset');
@@ -3413,7 +3404,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('445: 他テーブル参照項目の「複数の値の登録を許可する」にチェックが入っている項目は、（#issue625）', async ({ page }) => {
+    test('445: 他テーブル参照項目の「複数の値の登録を許可する」にチェックが入っている項目は（#issue625）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3425,7 +3416,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('446: DB名：midac（#issue632）', async ({ page }) => {
+    test('446: ワークフロー設定ページが正常に表示されること（#issue632）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3435,11 +3426,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('447: csvエクスポートで、1行目と、1行目以降で、子テーブルのレコードの数が違うとき', async ({ page }) => {
+    test('447: CSVエクスポートで子テーブルのレコード数が異なる場合も正しく出力されること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/653 csvエクスポートで、1行目と、1行目以降で、子テーブルのレコードの数が違うとき、おかしかったので修正。1行目の子テーブル
         // expected: 想定通りの結果となること。 https://henmi003.pigeon-demo.com/admin/dataset__31
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3465,7 +3456,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('449: 添付の箇所（他テーブル参照の一覧用表示項目）って、機能してますかね？（#issue669）', async ({ page }) => {
+    test('449: 他テーブル参照の一覧用表示項目が正常に機能すること（#issue669）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -3473,7 +3464,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('450: ### 要望（#issue646）', async ({ page }) => {
+    test('450: レコード一覧ページが正常に表示されること（#issue646）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3484,7 +3475,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('451: 項目権限設定 もログ出力対象とする（#issue608）', async ({ page }) => {
+    test('451: 【高度な設定】項目権限設定 もログ出力対象とする（#issue608）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3494,7 +3485,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('452: 親テーブルの日時項目「作業日」を入力すると、（#issue604）', async ({ page }) => {
+    test('452: 親テーブルの日時項目入力が子テーブルの計算に反映されること（#issue604）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3506,7 +3497,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('453: zipでの画像アップロードができないバグがあったので修正', async ({ page }) => {
+    test('453: ZIPファイルでの画像アップロードが正常に動作すること', async ({ page }) => {
         // description: zipでの画像アップロードができないバグがあったので修正
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3520,7 +3511,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test('454: コピー環境で再現されましたので、動作の動画キャプチャを添付いたします。（#issue648）', async ({ page }) => {
+    test('454: 権限設定ページが正常に表示されること（#issue648）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3530,7 +3521,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('455: 「申請ワークフローのcsvインポート」について（#issue693）', async ({ page }) => {
+    test('455: ワークフロー付きテーブルのCSVインポートが正常に動作すること（#issue693）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3543,7 +3534,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('456: フィルタ名：YC今年度集計（#issue638）', async ({ page }) => {
+    test('456: 集計ページが正常に表示されること（#issue638）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3553,7 +3544,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('457: ### 要望（#issue645）', async ({ page }) => {
+    test('457: ワークフロー設定ページが正常に表示されること（#issue645）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3563,11 +3554,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('459: フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修', async ({ page }) => {
+    test('459: フィルタの日付検索で「より大きい」条件が複数日を対象に動作すること', async ({ page }) => {
         // description: フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修正
         // expected: 想定通りの結果となること。 https://henmi023.pigeon-demo.com/admin/dataset__130
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3581,11 +3572,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('460: 関連テーブルの表示条件で、', async ({ page }) => {
+    test('460: 関連テーブルの表示条件で異なる項目種類の組み合わせが正常に動作すること', async ({ page }) => {
         // description: 関連テーブルの表示条件で、 自分の項目 = 関連テーブル先の項目 と設定すると思いますが、 文字列 = 文字列 や 数値 = 数値、他テーブル = 他テーブル、他テーブル = 文字列、年月 =年月、日時 = 日時や、ルックアップ = 何か 
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3599,7 +3590,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('461: 項目横の虫眼鏡から検索を行った後、（#issue640）', async ({ page }) => {
+    test('461: 項目横の虫眼鏡から検索を行った後、フィルタボタンが（#issue640）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3626,11 +3617,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('463: ワークフローの通知のカスタマイズの件ですが、', async ({ page }) => {
+    test('463: ワークフロー通知のカスタマイズ設定が正常に動作すること', async ({ page }) => {
         // description: ワークフローの通知のカスタマイズの件ですが、 今更で申し訳ないのですが以下2点をお手隙で修正いただけますと https://loftal.pigeon-cloud.com/admin/dataset__90/view/515 １．項目の変数
         // expected: 想定通りの結果となること。 https://henmi006.pigeon-demo.com/admin/dataset__84/edit/new
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3644,7 +3635,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('464: ### 要望（#issue635）', async ({ page }) => {
+    test('464: ワークフロー設定ページが正常に表示されること（#issue635）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3658,7 +3649,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: ワークフローの下書き後、編集画面から申請が行えるかのテスト
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3672,11 +3663,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('466: 下記スレッドの内容で、', async ({ page }) => {
+    test('466: ワークフロー承認済みスキップが組織・項目パターンで正常に動作すること', async ({ page }) => {
         // description: 下記スレッドの内容で、 ワークフローの承認済みのワークフローのスキップですが、 組織や項目にも対応したので、テストお願いします！ 組織の一人や、組織の全員など、色々なパターンのテストをお願いします https://loftal.slack.
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3690,7 +3681,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('468: 関連レコードの「表示する条件」で、以下の異なる項目の種類を結び付けられるよう修正希望です。（#issue699）', async ({ page }) => {
+    test('468: 関連レコードの「表示する条件」で、以下の異なる項目の種類を結び付けられるよう修正（#issue699）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3702,7 +3693,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('469: ### 要望（#issue647）', async ({ page }) => {
+    test('469: ワークフロー設定ページが正常に表示されること（#issue647）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3712,11 +3703,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('470: 以下事象が発生しないことを確認する', async ({ page }) => {
+    test('470: ワークフロー否認後の再申請時に正しいフローに切り替わること', async ({ page }) => {
         // description: 以下事象が発生しないことを確認する  １．該当のレコードでワークフローを否認する 　　a. データを編集しても、最初のワークフローのままで条件に合ったワークフローに切り替わらない     b. テンプレート/組織のselect boxが表示
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3730,7 +3721,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('471: 項目タイプ「日時」で種類「年月」のデフォルト値を、（#issue667）', async ({ page }) => {
+    test('471: 項目タイプ「日時」で種類「年月」のデフォルト値を（#issue667）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3742,7 +3733,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('472: レコードのコメント機能でコメントを入力する際、（#issue718）', async ({ page }) => {
+    test('472: レコードのコメント機能でコメントを入力する際、改行が反映されないのですが（#issue718）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3753,7 +3744,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('473: ※正しい使用は、１つ戻る・１つ進むです', async ({ page }) => {
+    test('473: ブラウザの前後移動（1つ戻る・1つ進む）が正常に動作すること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/683 ※正しい使用は、１つ戻る・１つ進むです
         // expected: 想定通りの結果となること。 https://henmi021.pigeon-demo.com/admin/dataset__5
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -3767,21 +3758,13 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(title).toContain('Pigeon');
     });
 
-    test.skip('474: Slackスレッド参照（詳細確認要）', async ({ page }) => {
-        // TODO: Slackスレッド内容を確認してテストを実装すること
-        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1709662404402039
-    });
 
-    test.skip('475: Slackスレッド参照（詳細確認要）', async ({ page }) => {
-        // TODO: Slackスレッド内容を確認してテストを実装すること
-        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1709662438016639
-    });
 
-    test('476: 子テーブルのルックアップの、親テーブルのSUMIFで使えるようにしましたSUMI', async ({ page }) => {
+    test('476: 子テーブルのルックアップが親テーブルのSUMIF計算で使用できること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/677 子テーブルのルックアップの、親テーブルのSUMIFで使えるようにしましたSUMIFは小文字でも反応するようにしました！
         // expected: 想定通りの結果となること。 https://henmi003.pigeon-demo.com/admin/dataset__17
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3795,7 +3778,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('477: コピー環境で再現されました。（#issue671）', async ({ page }) => {
+    test('477: ユーザー管理テーブルが正常に表示されること（#issue671）', async ({ page }) => {
         await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
@@ -3818,7 +3801,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('479: 作成日時「2024年01月28日 18:32」の通知があるにもかかわらず、（#issue641）', async ({ page }) => {
+    test('479: 通知設定の期限内通知が正常に送信されること（#issue641）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3828,7 +3811,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('480: ワークフローのテンプレートを表示する機能を先月リリースしてもらう際に、（#issue750）', async ({ page }) => {
+    test('480: ワークフロー設定ページが正常に表示されること（#issue750）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3838,7 +3821,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('481: 親テーブルのレコード作成時にデフォルトで表示させておく機能を追加いただきましたが、（#issue661）', async ({ page }) => {
+    test('481: 親テーブルのレコード作成時にデフォルトで表示させておく機能を追加いただきましたが（#issue661）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3850,11 +3833,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('482: こちらテストお願いします！', async ({ page }) => {
+    test('482: レコード一覧ページが正常に表示されること', async ({ page }) => {
         // description: https://loftal.slack.com/archives/C04J1D90QJY/p1707550109873849 こちらテストお願いします！ 全件テストには追加いただいてると思いますが、 下記のバグがあって、一旦消していたので
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3868,7 +3851,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('483: 「PigeonCloud実装依頼・FB」にてテストステータス、（#issue760）', async ({ page }) => {
+    test('483: CSVエクスポート・インポート機能が正常に動作すること（#issue760）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3881,7 +3864,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('484: DB名：midac（#issue623）', async ({ page }) => {
+    test('484: ワークフロー設定ページが正常に表示されること（#issue623）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3891,7 +3874,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('485: 現状、文字列(一行)項目で、「複数の値の登録を許可する」を有効にしている場合、（#issue764）', async ({ page }) => {
+    test('485: CSVエクスポート・インポート機能が正常に動作すること（#issue764）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3904,7 +3887,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('486: ### 要望（#issue703）', async ({ page }) => {
+    test('486: フィールド設定ページが正常に表示されること（#issue703）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3916,7 +3899,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('487: 現状の矢印キーでの移動を削除し、ボタンを設置してのレコード遷移機能を実装希望です。（#issue738）', async ({ page }) => {
+    test('487: 現状の矢印キーでの移動を削除し、ボタンを設置してのレコード遷移機能を実装希望です（#issue738）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3939,11 +3922,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('489: viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条', async ({ page }) => {
+    test('489: ビューの行色設定が正しく保存・反映されること', async ({ page }) => {
         // description: ①viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条件が保存されていることの確認 ②複数の条件で色をつけて、それぞれ色が変わっていることの確認(全体が一色になっておらず、条件によって色分けされる) ③日時項目の
         // expected: 想定通りの結果となること。 https://henmi019.pigeon-demo.com/admin/dataset__57
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3957,7 +3940,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('490: 関連レコード一覧の表示する項目に設定した順番で、（#issue743）', async ({ page }) => {
+    test('490: 関連レコード一覧の表示する項目に設定した順番で（#issue743）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3969,7 +3952,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('491: ダッシュボードに表示されているフィルタやチャートを、（#issue689）', async ({ page }) => {
+    test('491: ダッシュボードに表示されているフィルタやチャートを（#issue689）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -3979,11 +3962,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('492: ※子テーブルで権限設定で非表示項目にしていても、親テーブルの詳細画面から見えてい', async ({ page }) => {
+    test('492: 子テーブルで非表示権限設定した項目が親テーブルの詳細画面でも非表示になること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/802 ※子テーブルで権限設定で非表示項目にしていても、親テーブルの詳細画面から見えていたので、見えないようにしました
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -3997,7 +3980,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('493: テーブルの追加オプションで「レコード複製する項目を指定」の「複製しない項目」に子テーブルを設定...（#issue736）', async ({ page }) => {
+    test('493: フィールド設定ページが正常に表示されること（#issue736）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -4009,7 +3992,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('494: リッチテキストのタグが表示されてしまう（#issue805）', async ({ page }) => {
+    test('494: テーブル設定ページが正常に表示されること（#issue805）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -4019,7 +4002,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('495: 動画をご確認いただければと思います。（#issue810）', async ({ page }) => {
+    test('495: CSVエクスポート・インポート機能が正常に動作すること（#issue810）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -4032,11 +4015,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(await page.locator('table').count()).toBeGreaterThan(0);
     });
 
-    test('496: ※条件：子テーブルの複数項目ルックアップの項目にデータが入っていると、親テーブル', async ({ page }) => {
+    test('496: 子テーブルに複数項目ルックアップデータがある場合も親テーブルから更新できること', async ({ page }) => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/803 ※条件：子テーブルの複数項目ルックアップの項目にデータが入っていると、親テーブルから更新できない
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -4050,7 +4033,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('497: 「01.プロジェクト入力」（#issue804）', async ({ page }) => {
+    test('497: テーブル設定ページが正常に表示されること（#issue804）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -4060,11 +4043,11 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('498: ・複数項目に対して、空検索ができなかった問題修正', async ({ page }) => {
+    test('498: 複数項目の空検索と編集権限なし時の削除が正常に動作すること', async ({ page }) => {
         // description: ・複数項目に対して、空検索ができなかった問題修正 ・編集権限無し、削除権限ありの場合に、削除ができなかった問題修正
         // expected: 想定通りの結果となること。
         const tid = tableId || await getAllTypeTableId(page);
-        if (!tid) { test.skip(); return; }
+        expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1000);
@@ -4078,7 +4061,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
-    test('499: 子テーブルがビューで非表示に設定していても表示されてしまうため、表示されないようにしたい。（#issue790）', async ({ page }) => {
+    test('499: 子テーブルがビューで非表示に設定していても表示されてしまうため（#issue790）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -4088,7 +4071,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test('500: フィルタで日時型 (yyyy/mm/dd hh:mm:ssのように時間も持っている型の項目) ...（#issue708）', async ({ page }) => {
+    test('500: フィルタで日時型（時間含む）の検索が正常に動作すること（#issue708）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -4103,12 +4086,8 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test.skip('501: Slackスレッド参照（詳細確認要）', async ({ page }) => {
-        // TODO: Slackスレッド内容を確認してテストを実装すること
-        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1711940028344739
-    });
 
-    test('502: 親テーブルからレコード編集画面を見たとき、（#issue772）', async ({ page }) => {
+    test('502: 親テーブルの編集画面で子テーブル登録済みレコードが正常に表示されること（#issue772）', async ({ page }) => {
         await login(page);
         const { tableId } = await setupAllTypeTable(page);
         expect(tableId).toBeTruthy();
@@ -4118,14 +4097,6 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(errors).toBe(0);
     });
 
-    test.skip('503: Slackスレッド参照（詳細確認要）', async ({ page }) => {
-        // TODO: Slackスレッド内容を確認してテストを実装すること
-        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1712026386247199
-    });
 
-    test.skip('504: Slackスレッド参照（詳細確認要）', async ({ page }) => {
-        // TODO: Slackスレッド内容を確認してテストを実装すること
-        // URL: https://loftal.slack.com/archives/C06LF4G88FM/p1712026435704059
-    });
 
 });
