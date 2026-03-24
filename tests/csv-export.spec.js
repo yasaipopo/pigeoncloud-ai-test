@@ -1089,6 +1089,10 @@ test.describe('JSONエクスポート・インポート', () => {
         await closeTemplateModal(page);
         const result = await setupAllTypeTable(page);
         testTableId = result && result.tableId ? result.tableId : null;
+        // JSONエクスポートテストではレコード選択が必要なためデータを作成する
+        if (testTableId) {
+            await createAllTypeData(page, 3, 'fixed');
+        }
         await page.close();
     });
 
@@ -1104,6 +1108,13 @@ test.describe('JSONエクスポート・インポート', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
         await expect(page.locator('.navbar')).toBeVisible();
+
+        // グループが折りたたまれている場合は「全て展開」ボタンをクリックしてテーブルを表示
+        const expandBtn = page.locator('button:has-text("全て展開")').first();
+        if (await expandBtn.count() > 0) {
+            await expandBtn.click();
+            await page.waitForTimeout(1000);
+        }
 
         // テーブルのチェックボックスをオン（一覧の最初のチェックボックス）
         const firstCheckbox = page.locator(
@@ -1304,6 +1315,22 @@ test.describe('JSONエクスポート・インポート', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
         await expect(page.locator('.navbar')).toBeVisible();
+
+        // グループが折りたたまれている場合は「全て展開」ボタンをクリックしてテーブルを表示
+        const expandBtn = page.locator('button:has-text("全て展開")').first();
+        if (await expandBtn.count() > 0) {
+            await expandBtn.click();
+            await page.waitForTimeout(1000);
+        }
+
+        // まずチェックボックスを選択（インポートボタンはテーブル選択後に表示される場合がある）
+        const firstCheckbox = page.locator(
+            'table input[type="checkbox"]:not([id="check-all"]), .dataset-list input[type="checkbox"]'
+        ).first();
+        if (await firstCheckbox.count() > 0) {
+            await firstCheckbox.click().catch(() => {});
+            await page.waitForTimeout(1000);
+        }
 
         // 「インポート」ボタンまたは「JSONインポート」メニューを探す
         // ドロップダウン形式の場合、まず「インポート」ドロップダウンを開く

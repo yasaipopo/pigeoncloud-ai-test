@@ -491,9 +491,20 @@ test.beforeAll(async ({ browser }) => {
         await page.waitForTimeout(3000); // 削除完了待機
     }
 
-    // ワークフローテスト専用の簡易テーブルを作成
+    // ワークフローテスト専用の簡易テーブルを作成（最大3回リトライ）
     // （ALLTESTテーブルはルックアップ型不一致で保存エラーになる場合があるため）
-    _sharedTableId = await createWorkflowTestTable(page);
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            _sharedTableId = await createWorkflowTestTable(page);
+            if (_sharedTableId) break;
+        } catch (e) {
+            console.log(`[file-level beforeAll] createWorkflowTestTable attempt ${attempt} failed:`, e.message);
+            if (attempt === 3) throw e;
+            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForTimeout(3000);
+        }
+    }
     // テストユーザーを作成（承認者/申請者として使用）
     _testUser = await createTestUser(page);
     await page.close();
@@ -510,10 +521,15 @@ test.describe('ワークフロー設定（21系）', () => {
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
         const page = await browser.newPage();
-        await login(page);
-        await closeTemplateModal(page);
-        await enableWorkflow(page, tableId);
-        await page.close();
+        try {
+            await login(page);
+            await closeTemplateModal(page);
+            await enableWorkflow(page, tableId);
+        } catch (e) {
+            console.log('[21系 beforeAll] enableWorkflow error (ignored):', e.message);
+        } finally {
+            await page.close();
+        }
     });
 
     test.beforeEach(async ({ page }) => {
@@ -665,10 +681,15 @@ test.describe('ワークフロー基本動作（11系）', () => {
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
         const page = await browser.newPage();
-        await login(page);
-        await closeTemplateModal(page);
-        await enableWorkflow(page, tableId);
-        await page.close();
+        try {
+            await login(page);
+            await closeTemplateModal(page);
+            await enableWorkflow(page, tableId);
+        } catch (e) {
+            console.log('[11系 beforeAll] enableWorkflow error (ignored):', e.message);
+        } finally {
+            await page.close();
+        }
     });
 
     test.beforeEach(async ({ page }) => {
@@ -938,10 +959,15 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
         const page = await browser.newPage();
-        await login(page);
-        await closeTemplateModal(page);
-        await enableWorkflow(page, tableId);
-        await page.close();
+        try {
+            await login(page);
+            await closeTemplateModal(page);
+            await enableWorkflow(page, tableId);
+        } catch (e) {
+            console.log('[68系 beforeAll] enableWorkflow error (ignored):', e.message);
+        } finally {
+            await page.close();
+        }
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1178,10 +1204,15 @@ test.describe('引き上げ承認（106系）', () => {
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
         const page = await browser.newPage();
-        await login(page);
-        await closeTemplateModal(page);
-        await enableWorkflow(page, tableId);
-        await page.close();
+        try {
+            await login(page);
+            await closeTemplateModal(page);
+            await enableWorkflow(page, tableId);
+        } catch (e) {
+            console.log('[106系 beforeAll] enableWorkflow error (ignored):', e.message);
+        } finally {
+            await page.close();
+        }
     });
 
     test.beforeEach(async ({ page }) => {

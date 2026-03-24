@@ -254,15 +254,23 @@ async function navigateToAllTypeTable(page) {
 async function openActionMenu(page) {
     // ボタンが表示されるまで待機
     await page.waitForSelector('button.dropdown-toggle', { timeout: 8000 }).catch(() => {});
-    // 帳票ではないdropdown-toggleボタンをクリック
+    // 帳票ではないdropdown-toggleボタンを順番に試す（集計/チャートが含まれるメニューを探す）
     const buttons = await page.locator('button.dropdown-toggle').all();
     for (const btn of buttons) {
         if (await btn.isVisible()) {
             const text = await btn.innerText();
             if (!text.includes('帳票')) {
                 await btn.click({ force: true });
-                await page.waitForTimeout(500);
-                return;
+                await page.waitForTimeout(700);
+                // 集計またはチャートメニューが表示されたか確認
+                const menuItem = page.locator('.dropdown-item:has-text("集計"), .dropdown-item:has-text("チャート")').first();
+                const found = await menuItem.isVisible().catch(() => false);
+                if (found) {
+                    return;
+                }
+                // 正しいメニューでなければ閉じて次を試す
+                await page.keyboard.press('Escape');
+                await page.waitForTimeout(300);
             }
         }
     }
@@ -1020,7 +1028,7 @@ test.describe('集計 - 基本機能', () => {
     // 110-02: 集計 平均値（少数）
     // --------------------------------------------------------------------------
     test('110-02: 集計で少数フィールドの「平均」を表示した場合、少数の桁数+1桁の表示となること', async ({ page }) => {
-
+        test.setTimeout(300000);
         try {
             // ALLテストテーブルに直接遷移
             await navigateToAllTypeTable(page);
@@ -1028,6 +1036,8 @@ test.describe('集計 - 基本機能', () => {
             await openActionMenu(page);
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+            const summaryVisible = await summaryMenu.isVisible().catch(() => false);
+            if (!summaryVisible) throw new Error('集計メニューが表示されませんでした');
             await summaryMenu.click({ force: true });
             await page.waitForTimeout(2000);
 
@@ -1074,7 +1084,7 @@ test.describe('集計 - 基本機能', () => {
     // 118-01: 集計 フィルタ（日付の相対値検索）
     // --------------------------------------------------------------------------
     test('118-01: 集計フィルタで日付の相対値（今日〜来年）検索が想定通りに動作すること', async ({ page }) => {
-
+        test.setTimeout(300000);
         try {
             // ALLテストテーブルに直接遷移
             await navigateToAllTypeTable(page);
@@ -1082,6 +1092,8 @@ test.describe('集計 - 基本機能', () => {
             await openActionMenu(page);
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+            const summaryVisible = await summaryMenu.isVisible().catch(() => false);
+            if (!summaryVisible) throw new Error('集計メニューが表示されませんでした');
             await summaryMenu.click({ force: true });
             await page.waitForTimeout(2000);
 

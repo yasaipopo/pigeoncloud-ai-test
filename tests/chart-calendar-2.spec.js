@@ -256,15 +256,23 @@ async function navigateToAllTypeTable(page) {
 async function openActionMenu(page) {
     // ボタンが表示されるまで待機
     await page.waitForSelector('button.dropdown-toggle', { timeout: 8000 }).catch(() => {});
-    // 帳票ではないdropdown-toggleボタンをクリック
+    // 帳票ではないdropdown-toggleボタンを順番に試す（集計/チャートが含まれるメニューを探す）
     const buttons = await page.locator('button.dropdown-toggle').all();
     for (const btn of buttons) {
         if (await btn.isVisible()) {
             const text = await btn.innerText();
             if (!text.includes('帳票')) {
                 await btn.click({ force: true });
-                await page.waitForTimeout(500);
-                return;
+                await page.waitForTimeout(700);
+                // 集計またはチャートメニューが表示されたか確認
+                const menuItem = page.locator('.dropdown-item:has-text("集計"), .dropdown-item:has-text("チャート")').first();
+                const found = await menuItem.isVisible().catch(() => false);
+                if (found) {
+                    return;
+                }
+                // 正しいメニューでなければ閉じて次を試す
+                await page.keyboard.press('Escape');
+                await page.waitForTimeout(300);
             }
         }
     }
