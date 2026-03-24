@@ -186,6 +186,8 @@ async function checkPage(page, path) {
     expect(bodyText).not.toContain('404 Not Found');
     // ナビゲーションヘッダーが正常に表示されていること（タイムアウト5秒）
     await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
+    // Angular SPAのコンポーネント描画完了を待機（domcontentloadedの後も非同期ロードが続く）
+    await page.waitForTimeout(1500);
 }
 
 // =============================================================================
