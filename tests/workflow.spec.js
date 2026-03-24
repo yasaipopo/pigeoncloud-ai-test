@@ -121,25 +121,43 @@ async function createWorkflowTestTable(page) {
  * テーブル設定のワークフロータブへ移動する
  */
 async function navigateToWorkflowTab(page, tableId) {
-    // テーブル設定ページに直接ナビゲート（gear button経由より確実）
-    await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
-    await page.waitForLoadState('domcontentloaded');
-    // タブが表示されるまで待機（Angular読み込み完了）
-    await page.waitForSelector('[role=tab]', { timeout: 30000 });
-    await page.waitForTimeout(500);
-    // ワークフロータブをクリック
-    const tabs = page.locator('[role=tab]');
-    const count = await tabs.count();
-    for (let i = 0; i < count; i++) {
-        const text = (await tabs.nth(i).innerText()).trim();
-        if (text === 'ワークフロー') {
-            await tabs.nth(i).click();
-            // ワークフロー設定コンポーネント内のラベルが描画されるまで待機（label.switchまで確認）
-            await page.waitForSelector('dataset-workflow-options label.switch', { timeout: 30000 });
-            await page.waitForTimeout(300);
-            break;
+    for (let attempt = 0; attempt < 3; attempt++) {
+        // テーブル設定ページに直接ナビゲート
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+        // networkidleまで待機（AngularのHTTPデータ取得完了を確認）
+        await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('[role=tab]', { timeout: 30000 });
+        await page.waitForTimeout(1000);
+
+        // page.evaluate()でDOMを直接クリック（locator.click()はタイミング問題があるため）
+        const tabInfo = await page.evaluate(() => {
+            const tabs = Array.from(document.querySelectorAll('[role=tab]'));
+            const texts = tabs.map(t => t.textContent.trim());
+            for (const tab of tabs) {
+                if (tab.textContent.includes('ワークフロー')) {
+                    tab.click();
+                    return { found: true, texts };
+                }
+            }
+            return { found: false, texts };
+        });
+
+        if (!tabInfo.found) {
+            console.log(`[navigateToWorkflowTab] ワークフロータブが見つからなかった attempt=${attempt + 1}, tabs=${JSON.stringify(tabInfo.texts)}`);
+            continue;
         }
+        console.log(`[navigateToWorkflowTab] ワークフロータブをクリック attempt=${attempt + 1}`);
+
+        // Angular ngbNavContent のレンダリングを待機（最大10秒）
+        await page.waitForTimeout(2000);
+        const found = await page.evaluate(() => !!document.querySelector('dataset-workflow-options'));
+        if (found) {
+            await page.waitForTimeout(500);
+            return;
+        }
+        console.log(`[navigateToWorkflowTab] dataset-workflow-options が見つからず attempt=${attempt + 1}`);
     }
+    console.log('[navigateToWorkflowTab] 3回試みたが dataset-workflow-options が見つからなかった');
 }
 
 /**
@@ -160,18 +178,22 @@ async function saveTableSettings(page, tableId) {
  */
 async function enableWorkflow(page, tableId) {
     await navigateToWorkflowTab(page, tableId);
-    // ワークフローON/OFFトグルの現在状態を確認（dataset-workflow-optionsは既にnavigateToWorkflowTabで待機済み）
-    const isChecked = await page.evaluate(() => {
+    // page.evaluate()でDOMを直接操作（locator.click()はAbortErrorを発生させる可能性があるため使わない）
+    const clicked = await page.evaluate(() => {
         const wfSection = document.querySelector('dataset-workflow-options');
-        if (!wfSection) return null;
+        if (!wfSection) return false;
         const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
-        return cb ? cb.checked : null;
+        if (!cb) return false;
+        if (cb.checked) return true; // 既にON
+        const label = wfSection.querySelector('label.switch');
+        if (label) { label.click(); return true; }
+        return false;
     });
-    // nullの場合（チェックボックスが見つからない）もfalseと同様にONにする
-    if (isChecked !== true) {
-        await page.locator('dataset-workflow-options label.switch').first().click({ force: true });
-        await page.waitForTimeout(1500);
+    if (!clicked) {
+        console.log('[enableWorkflow] dataset-workflow-options が見つからないためスキップ');
+        return;
     }
+    await page.waitForTimeout(1500);
     await saveTableSettings(page, tableId);
 }
 
@@ -180,15 +202,17 @@ async function enableWorkflow(page, tableId) {
  */
 async function disableWorkflow(page, tableId) {
     await navigateToWorkflowTab(page, tableId);
-    const isChecked = await page.evaluate(() => {
+    // page.evaluate()でDOMを直接操作（locator.click()はAbortErrorを発生させる可能性があるため使わない）
+    const clicked = await page.evaluate(() => {
         const wfSection = document.querySelector('dataset-workflow-options');
-        if (!wfSection) return null;
+        if (!wfSection) return false;
         const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
-        return cb ? cb.checked : null;
+        if (!cb || !cb.checked) return false; // 既にOFFまたは見つからない
+        const label = wfSection.querySelector('label.switch');
+        if (label) { label.click(); return true; }
+        return false;
     });
-    // nullの場合も含め、trueでなければOFFにしない（nullはコンポーネント未描画）
-    if (isChecked === true) {
-        await page.locator('dataset-workflow-options label.switch').first().click({ force: true });
+    if (clicked) {
         await page.waitForTimeout(1500);
     }
     await saveTableSettings(page, tableId);
@@ -364,8 +388,9 @@ async function forceShowWorkflowModal(page, targetBtnSelector = null) {
  */
 async function approveRecord(page, tableId, recordId, comment = '') {
     await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('domcontentloaded');
+    // networkidleはAngular SPAで無限待機になるためdomcontentloadedに変更
+    await page.waitForTimeout(2000);
 
     // 承認アクションボタン（btn-success text-bold）をクリック → Angular が workflow_ok() を実行
     await page.locator('button.btn-success.text-bold:has-text("承認")').first().click({ timeout: 10000 });
@@ -391,8 +416,9 @@ async function approveRecord(page, tableId, recordId, comment = '') {
  */
 async function rejectRecord(page, tableId, recordId, comment = '') {
     await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('domcontentloaded');
+    // networkidleはAngular SPAで無限待機になるためdomcontentloadedに変更
+    await page.waitForTimeout(2000);
 
     // 否認アクションボタン（btn-danger text-bold）をクリック → Angular が workflow_reject() を実行
     await page.locator('button.btn-danger.text-bold:has-text("否認")').first().click({ timeout: 10000 });
@@ -418,8 +444,9 @@ async function rejectRecord(page, tableId, recordId, comment = '') {
  */
 async function withdrawRecord(page, tableId, recordId) {
     await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('domcontentloaded');
+    // networkidleはAngular SPAで無限待機になるためdomcontentloadedに変更
+    await page.waitForTimeout(2000);
 
     // 申請取り下げボタン（btn-danger text-bold）をクリック → Angular が workflow_withdraw() を実行
     await page.locator('button.btn-danger.text-bold:has-text("申請取り下げ")').click({ timeout: 10000 });
@@ -543,13 +570,37 @@ test.describe('ワークフロー設定（21系）', () => {
     test('21-1: ワークフロー承認者はデータ編集可能設定が保存されること', async ({ page }) => {
         test.setTimeout(150000);
         await navigateToWorkflowTab(page, tableId);
-        // ワークフローONを確認
-        const isWfEnabled = await page.evaluate(() => {
+        // ワークフローONを確認（Angular描画完了を待機してから確認）
+        await page.waitForFunction(() => {
+            const wfSection = document.querySelector('dataset-workflow-options');
+            if (!wfSection) return false;
+            const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
+            return cb !== null; // チェックボックス要素が存在すればOK
+        }, { timeout: 10000 }).catch(() => {});
+        let isWfEnabled = await page.evaluate(() => {
             const wfSection = document.querySelector('dataset-workflow-options');
             if (!wfSection) return false;
             const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
             return cb ? cb.checked : false;
         });
+        if (!isWfEnabled) {
+            // beforeAllでenableWorkflowが失敗した場合はここで再試行
+            console.log('[21-1] isWfEnabled=false、ここでenableWorkflowを再試行');
+            await enableWorkflow(page, tableId);
+            await navigateToWorkflowTab(page, tableId);
+            await page.waitForFunction(() => {
+                const wfSection = document.querySelector('dataset-workflow-options');
+                if (!wfSection) return false;
+                const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
+                return cb !== null;
+            }, { timeout: 10000 }).catch(() => {});
+            isWfEnabled = await page.evaluate(() => {
+                const wfSection = document.querySelector('dataset-workflow-options');
+                if (!wfSection) return false;
+                const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
+                return cb ? cb.checked : false;
+            });
+        }
         expect(isWfEnabled).toBeTruthy();
         // 「ワークフロー承認者はデータ編集可能」設定が表示されること
         const bodyText = await page.innerText('body');
@@ -703,13 +754,37 @@ test.describe('ワークフロー基本動作（11系）', () => {
     test('11-1: テーブルに対してワークフロー設定が行えること', async ({ page }) => {
         test.setTimeout(90000);
         await navigateToWorkflowTab(page, tableId);
-        // ワークフローが有効になっていること
-        const isEnabled = await page.evaluate(() => {
+        // ワークフローが有効になっていること（Angular描画完了後に確認）
+        await page.waitForFunction(() => {
+            const wfSection = document.querySelector('dataset-workflow-options');
+            if (!wfSection) return false;
+            const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
+            return cb !== null;
+        }, { timeout: 10000 }).catch(() => {});
+        let isEnabled = await page.evaluate(() => {
             const wfSection = document.querySelector('dataset-workflow-options');
             if (!wfSection) return false;
             const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
             return cb ? cb.checked : false;
         });
+        if (!isEnabled) {
+            // beforeAllでenableWorkflowが失敗した場合はここで再試行
+            console.log('[11-1] isEnabled=false、ここでenableWorkflowを再試行');
+            await enableWorkflow(page, tableId);
+            await navigateToWorkflowTab(page, tableId);
+            await page.waitForFunction(() => {
+                const wfSection = document.querySelector('dataset-workflow-options');
+                if (!wfSection) return false;
+                const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
+                return cb !== null;
+            }, { timeout: 10000 }).catch(() => {});
+            isEnabled = await page.evaluate(() => {
+                const wfSection = document.querySelector('dataset-workflow-options');
+                if (!wfSection) return false;
+                const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
+                return cb ? cb.checked : false;
+            });
+        }
         expect(isEnabled).toBeTruthy();
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');

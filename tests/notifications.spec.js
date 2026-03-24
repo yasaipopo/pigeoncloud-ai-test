@@ -17,7 +17,7 @@ const PASSWORD = process.env.TEST_PASSWORD;
 async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login');
     // networkidleを待ってAngularがCSRFトークンを取得してからフォームに入力する
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
     await page.waitForSelector('#id', { state: 'visible', timeout: 10000 }).catch(() => {});
     await page.fill('#id', email || EMAIL);
     await page.fill('#password', password || PASSWORD);
@@ -35,7 +35,7 @@ async function login(page, email, password) {
             await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
 }
 
 /**
@@ -248,7 +248,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -283,7 +283,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -383,7 +383,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -420,7 +420,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -451,7 +451,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -487,7 +487,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -712,7 +712,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -747,7 +747,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -796,7 +796,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -828,7 +828,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -868,7 +868,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -928,7 +928,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -953,7 +953,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -975,7 +975,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1047,12 +1047,12 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         // 通知設定フォームのレンダリング完了を待機
         await page.waitForFunction(
             () => document.body.innerText.includes('通知設定') || document.body.innerText.includes('通知名'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(1000);
 
@@ -1406,7 +1406,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1430,7 +1430,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1461,7 +1461,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1552,7 +1552,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1599,7 +1599,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1633,7 +1633,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1805,7 +1805,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1858,7 +1858,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1978,7 +1978,7 @@ test.describe('通知設定', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(
             () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 

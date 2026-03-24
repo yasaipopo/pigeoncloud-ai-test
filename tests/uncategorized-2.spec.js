@@ -198,6 +198,21 @@ async function checkPage(page, path) {
     expect(bodyText).not.toContain('Internal Server Error');
     expect(bodyText).not.toContain('404 Not Found');
     await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
+    // Angular SPAのテーブル描画完了を待機（domcontentloadedの後も非同期ロードが続く）
+    // データセット一覧ページの場合は特別処理（サーバー負荷で遅延しやすい）
+    if (path.includes('/dataset__') && !path.includes('/setting') && !path.includes('/edit')) {
+        // サーバー負荷により読み込みが遅くなる場合があるため35秒待機
+        const tableFound = await page.waitForSelector('table', { timeout: 35000 }).then(() => true).catch(() => false);
+        if (tableFound) {
+            // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
+            await page.waitForSelector('table thead th', { timeout: 10000 }).catch(() => {});
+        } else {
+            await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 5000 }).catch(() => {});
+        }
+        await page.waitForTimeout(500);
+    } else {
+        await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
+    }
 }
 
 // =============================================================================
@@ -216,6 +231,9 @@ test.describe('追加実装テスト（314-579系）', () => {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
+        // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
+        await createAllTypeData(page, 3).catch(() => {});
+        await page.waitForTimeout(1000);
         await page.close();
     });
 

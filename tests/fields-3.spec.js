@@ -2085,7 +2085,12 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
             return false;
         });
         expect(clickedRadioA, 'ラジオAの入力要素が存在してクリックできること').toBe(true);
-        await page.waitForTimeout(1500); // 表示条件のAngularバインディング更新を待つ
+        // 表示条件のAngularバインディング更新を待つ（DOM変化を検出するまで最大10秒）
+        await page.waitForFunction(
+            () => Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト'),
+            { timeout: 10000 }
+        ).catch(() => {}); // タイムアウト時はそのまま続行
+        await page.waitForTimeout(500);
 
         // ラジオA選択後: 表示条件テキストフィールドが表示されること
         const visibleAfterA = await getCondFieldVisible();

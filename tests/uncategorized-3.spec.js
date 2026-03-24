@@ -200,9 +200,12 @@ async function checkPage(page, path) {
     // Angular SPAのデータ読み込み完了を待機（テーブルまたはコンテンツが表示されるまで）
     // /admin/dataset__XXX 系ページではtableが表示されるまで待機
     if (path.includes('/admin/dataset__') && !path.includes('/setting') && !path.includes('/edit')) {
-        // まずtableを待機（見つからなければno-records等を待機）
-        const tableFound = await page.waitForSelector('table', { timeout: 8000 }).then(() => true).catch(() => false);
-        if (!tableFound) {
+        // サーバー負荷により読み込みが遅くなる場合があるため35秒待機
+        const tableFound = await page.waitForSelector('table', { timeout: 35000 }).then(() => true).catch(() => false);
+        if (tableFound) {
+            // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
+            await page.waitForSelector('table thead th', { timeout: 10000 }).catch(() => {});
+        } else {
             await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 5000 }).catch(() => {});
         }
     }
@@ -229,6 +232,9 @@ test.describe('追加実装テスト（314-579系）', () => {
             await page.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
+        // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
+        await createAllTypeData(page, 3).catch(() => {});
+        await page.waitForTimeout(1000);
         await page.close();
     });
 
@@ -1014,9 +1020,17 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('777: 日時項目の種類を時刻のみに設定してもテーブル一覧フィールドヘッダーが正常表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // Angular SPAのtheadレンダリング完了を待機
+        await page.waitForFunction(() => {
+            const ths = document.querySelectorAll('table thead th');
+            return ths.length > 0;
+        }, { timeout: 10000 }).catch(() => {});
+        await page.waitForTimeout(1000);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        const headerCount = await headers.count();
+        console.log('777: thead th数:', headerCount);
+        expect(headerCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });

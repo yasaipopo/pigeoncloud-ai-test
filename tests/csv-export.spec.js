@@ -1109,48 +1109,19 @@ test.describe('JSONエクスポート・インポート', () => {
         await page.waitForTimeout(2000);
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // グループが折りたたまれている場合は「全て展開」ボタンをクリックしてテーブルを表示
-        const expandBtn = page.locator('button:has-text("全て展開")').first();
-        if (await expandBtn.count() > 0) {
-            await expandBtn.click();
-            await page.waitForTimeout(1000);
-        }
-
-        // テーブルのチェックボックスをオン（一覧の最初のチェックボックス）
-        const firstCheckbox = page.locator(
-            'table input[type="checkbox"]:not([id="check-all"]), ' +
-            '.dataset-list input[type="checkbox"]'
-        ).first();
-        const checkboxCount = await firstCheckbox.count();
+        // テーブル管理ページはツリー構造（admin-tree）でテーブルを表示
+        // チェックボックスは .admin-tree__check 内にある
+        await page.waitForSelector('.admin-tree__check input[type="checkbox"]', { timeout: 10000 })
+            .catch(() => {});
+        const firstCheckbox = page.locator('.admin-tree__check input[type="checkbox"]').first();
         await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 10000 });
         await firstCheckbox.click();
         await page.waitForTimeout(1000);
 
-        // 「エクスポート」ボタンまたは「JSON」メニューを探す
-        const exportBtn = page.locator(
-            'button:has-text("エクスポート"), a:has-text("エクスポート")'
-        ).filter({ visible: true }).first();
-        const exportCount = await exportBtn.count();
-        if (exportCount === 0) {
-            // エクスポートボタンがない場合は JSONエクスポートボタンを直接探す
-            const jsonExportBtn = page.locator(
-                'button:has-text("JSONエクスポート"), a:has-text("JSONエクスポート"), ' +
-                'button:has-text("JSON"), a:has-text("JSON")'
-            ).filter({ visible: true }).first();
-            const jsonCount = await jsonExportBtn.count();
-            await expect(jsonExportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 8000 });
-            await jsonExportBtn.click();
-        } else {
-            await exportBtn.click();
-            await page.waitForTimeout(800);
-            // ドロップダウンに「JSON」メニューがあれば選択
-            const jsonMenuItem = page.locator(
-                '.dropdown-menu.show a:has-text("JSON"), .dropdown-menu.show button:has-text("JSON")'
-            ).filter({ visible: true }).first();
-            if (await jsonMenuItem.count() > 0) {
-                await jsonMenuItem.click();
-            }
-        }
+        // チェックボックス選択後に「JSONエクスポート」ボタンが直接表示される
+        const jsonExportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
+        await expect(jsonExportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 8000 });
+        await jsonExportBtn.click();
         await page.waitForTimeout(1500);
 
         // ダウンロードダイアログ or モーダルが表示されるか、downloadイベントが発生すること
@@ -1191,19 +1162,24 @@ test.describe('JSONエクスポート・インポート', () => {
             await tableLink.click();
             await page.waitForLoadState('domcontentloaded');
             await page.waitForTimeout(2000);
+        } else {
+            // テーブルリンクが見つからない場合は直接遷移
+            await page.goto(BASE_URL + `/admin/dataset__${testTableId}`);
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForTimeout(2000);
         }
 
         // レコードのチェックボックスを選択してJSONエクスポートボタンを表示させる
+        // Angularのテーブル描画を待機（最大15秒）
+        await page.waitForSelector('table tbody tr, table input[type="checkbox"]', { timeout: 15000 }).catch(() => {});
         const firstCheckbox = page.locator('table input[type="checkbox"], td input[type="checkbox"]').first();
-        const cbCount = await firstCheckbox.count();
-        if (cbCount > 0 && await firstCheckbox.isVisible().catch(() => false)) {
+        if (await firstCheckbox.count() > 0 && await firstCheckbox.isVisible().catch(() => false)) {
             await firstCheckbox.click();
             await page.waitForTimeout(1000);
         }
 
         // JSONエクスポートボタンをクリック
         const exportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
-        const btnCount = await exportBtn.count();
         await expect(exportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await exportBtn.click();
         await page.waitForTimeout(1000);
@@ -1256,19 +1232,24 @@ test.describe('JSONエクスポート・インポート', () => {
             await tableLink.click();
             await page.waitForLoadState('domcontentloaded');
             await page.waitForTimeout(2000);
+        } else {
+            // テーブルリンクが見つからない場合は直接遷移
+            await page.goto(BASE_URL + `/admin/dataset__${testTableId}`);
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForTimeout(2000);
         }
 
         // レコードのチェックボックスを選択
+        // Angularのテーブル描画を待機（最大15秒）
+        await page.waitForSelector('table tbody tr, table input[type="checkbox"]', { timeout: 15000 }).catch(() => {});
         const firstCheckbox = page.locator('table input[type="checkbox"], td input[type="checkbox"]').first();
-        const cbCount = await firstCheckbox.count();
-        if (cbCount > 0 && await firstCheckbox.isVisible().catch(() => false)) {
+        if (await firstCheckbox.count() > 0 && await firstCheckbox.isVisible().catch(() => false)) {
             await firstCheckbox.click();
             await page.waitForTimeout(1000);
         }
 
         // JSONエクスポートボタンをクリック
         const exportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
-        const btnCount = await exportBtn.count();
         await expect(exportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await exportBtn.click();
         await page.waitForTimeout(1000);
@@ -1316,42 +1297,33 @@ test.describe('JSONエクスポート・インポート', () => {
         await page.waitForTimeout(2000);
         await expect(page.locator('.navbar')).toBeVisible();
 
-        // グループが折りたたまれている場合は「全て展開」ボタンをクリックしてテーブルを表示
-        const expandBtn = page.locator('button:has-text("全て展開")').first();
-        if (await expandBtn.count() > 0) {
-            await expandBtn.click();
-            await page.waitForTimeout(1000);
-        }
+        // テーブル管理ページのJSONインポートはハンバーガーメニュー（fa-bars）→「JSONから追加」
+        // チェックボックス選択不要でアクセス可能
+        await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
 
-        // まずチェックボックスを選択（インポートボタンはテーブル選択後に表示される場合がある）
-        const firstCheckbox = page.locator(
-            'table input[type="checkbox"]:not([id="check-all"]), .dataset-list input[type="checkbox"]'
-        ).first();
-        if (await firstCheckbox.count() > 0) {
-            await firstCheckbox.click().catch(() => {});
-            await page.waitForTimeout(1000);
+        // 帳票以外のdropdown-toggleボタンをクリック（fa-barsアイコンのボタン）
+        const dropdownBtns = await page.locator('button.dropdown-toggle').filter({ visible: true }).all();
+        let hamburgerClicked = false;
+        for (const btn of dropdownBtns) {
+            const html = await btn.innerHTML().catch(() => '');
+            if (html.includes('fa-bars')) {
+                await btn.click();
+                hamburgerClicked = true;
+                break;
+            }
         }
-
-        // 「インポート」ボタンまたは「JSONインポート」メニューを探す
-        // ドロップダウン形式の場合、まず「インポート」ドロップダウンを開く
-        const importBtn = page.locator(
-            'button:has-text("インポート"), a:has-text("インポート"), ' +
-            'button:has-text("JSONインポート"), a:has-text("JSONインポート")'
-        ).filter({ visible: true }).first();
-        const importCount = await importBtn.count();
-        await expect(importBtn, 'インポートボタンが存在すること').toBeVisible({ timeout: 10000 });
-        await importBtn.click();
-        await page.waitForTimeout(800);
-
-        // ドロップダウンに「JSON」メニューがあれば選択
-        const jsonMenuItem = page.locator(
-            '.dropdown-menu.show a:has-text("JSON"), .dropdown-menu.show button:has-text("JSON"), ' +
-            '.dropdown-menu.show a:has-text("JSONインポート")'
-        ).filter({ visible: true }).first();
-        if (await jsonMenuItem.count() > 0) {
-            await jsonMenuItem.click();
-            await page.waitForTimeout(1000);
+        if (!hamburgerClicked && dropdownBtns.length > 0) {
+            await dropdownBtns[0].click();
         }
+        await page.waitForTimeout(500);
+
+        // 「JSONから追加」リンクをクリック（JSONインポートモーダルが開く）
+        // .dropdown-menu.show または単純に表示中のdropdown-menu内のリンクを検索
+        await page.waitForSelector('.dropdown-menu a:has-text("JSONから追加"), .dropdown-menu.show a:has-text("JSONから追加")', { timeout: 8000 }).catch(() => {});
+        const jsonAddLink = page.locator('.dropdown-menu a:has-text("JSONから追加"), a:has-text("JSONから追加")').filter({ visible: true }).first();
+        await expect(jsonAddLink, 'JSONから追加リンクが存在すること').toBeVisible({ timeout: 8000 });
+        await jsonAddLink.click();
+        await page.waitForTimeout(1000);
 
         // ファイル選択UI（input[type=file] または モーダル）が表示されること
         const fileInput = page.locator('input[type="file"]').first();
