@@ -2107,10 +2107,22 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
             return false;
         });
         if (clickedRadioB) {
-            await page.waitForTimeout(1500);
+            // Angular表示条件の更新を待機（DOMから要素が消えるまで最大5秒）
+            await page.waitForFunction(
+                () => {
+                    const labels = Array.from(document.querySelectorAll('label'));
+                    return !labels.some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト');
+                },
+                { timeout: 5000 }
+            ).catch(() => {}); // タイムアウト時はそのまま続行
+            await page.waitForTimeout(500);
 
             // ラジオB選択後: 表示条件テキストフィールドが非表示になること
             const visibleAfterB = await getCondFieldVisible();
+            // 非表示にならない場合は警告ログのみ（仕様変更の可能性があるため）
+            if (visibleAfterB) {
+                console.warn('260-1: ラジオB選択後も表示条件テキストが非表示にならない（仕様変更の可能性）');
+            }
             expect(visibleAfterB).toBe(false);
         }
 

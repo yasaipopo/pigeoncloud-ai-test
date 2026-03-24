@@ -174,6 +174,20 @@ async function getAllTypeTableId(page) {
     return mainTable ? (mainTable.table_id || mainTable.id) : null;
 }
 
+/**
+ * 指定パスにアクセスして基本的な表示確認を行うヘルパー
+ * 500エラー・404エラーが表示されていないことを確認する
+ */
+async function checkPage(page, path) {
+    await page.goto(BASE_URL + path);
+    await page.waitForLoadState('domcontentloaded');
+    const bodyText = await page.innerText('body');
+    expect(bodyText).not.toContain('Internal Server Error');
+    expect(bodyText).not.toContain('404 Not Found');
+    // ナビゲーションヘッダーが正常に表示されていること（タイムアウト5秒）
+    await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
+}
+
 // =============================================================================
 // 文字列表示設定（145系）
 // =============================================================================
@@ -1423,17 +1437,6 @@ test.describe('未実装テスト（todo）', () => {
             console.log('beforeAll table creation error (ignored):', e.message);
         }
     });
-
-    // ページアクセス確認ヘルパー
-    async function checkPage(page, path) {
-        await page.goto(BASE_URL + path);
-        await page.waitForLoadState('domcontentloaded');
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-        expect(bodyText).not.toContain('404 Not Found');
-        // ナビゲーションヘッダーが正常に表示されていること（タイムアウト5秒）
-        await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
-    }
 
     test('245: 最終更新者項目がテーブルに追加されていること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();

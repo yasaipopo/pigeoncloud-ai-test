@@ -20,13 +20,34 @@ async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
+    // ログインページへのリダイレクトを確認（既認証の場合はダッシュボードへ飛ぶ）
+    if (page.url().includes('/admin/dashboard') || page.url().includes('/admin/dataset')) {
+        // 既にログイン済みの場合はそのまま続行
+        await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+        return;
+    }
     // アカウントロックチェック
     const bodyText = await page.innerText('body').catch(() => '');
     if (bodyText.includes('アカウントロック') || bodyText.includes('account lock')) {
         throw new Error('アカウントロック: テスト環境のログインが制限されています');
     }
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
+    // ログインフォームが表示されているか確認してからfill
+    const idField = page.locator('#id');
+    const idVisible = await idField.isVisible().catch(() => false);
+    if (!idVisible) {
+        // ログインフォームが表示されていない場合は再確認
+        await page.waitForTimeout(2000);
+        const stillNotVisible = !(await idField.isVisible().catch(() => false));
+        if (stillNotVisible) {
+            // ダッシュボードにいるか確認
+            if (page.url().includes('/admin/')) {
+                await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+                return;
+            }
+        }
+    }
+    await page.fill('#id', email || EMAIL, { timeout: 20000 });
+    await page.fill('#password', password || PASSWORD, { timeout: 10000 });
     await page.click('button[type=submit].btn-primary');
     try {
         await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
@@ -169,14 +190,23 @@ async function getAllTypeTableId(page) {
 
 /**
  * ページアクセス確認ヘルパー
+ * Angular SPAのレンダリング完了を待機してからアサーションを行う
  */
 async function checkPage(page, path) {
     await page.goto(BASE_URL + path);
     await page.waitForLoadState('domcontentloaded');
+    // Angularアプリのレンダリング完了を待機（ナビゲーションバー表示まで）
+    await expect(page.locator('header.app-header, .navbar, nav.navbar')).toBeVisible({ timeout: 15000 }).catch(() => {});
+    // Angular SPAのデータ読み込み完了を待機（テーブルまたはコンテンツが表示されるまで）
+    // /admin/dataset__XXX 系ページではtableが表示されるまで待機
+    if (path.includes('/admin/dataset__') && !path.includes('/setting') && !path.includes('/edit')) {
+        await page.waitForSelector('table, .no-records, [class*="empty"]', { timeout: 8000 }).catch(() => {});
+    }
+    // その他ページは固定の待機
+    await page.waitForTimeout(500);
     const bodyText = await page.innerText('body');
     expect(bodyText).not.toContain('Internal Server Error');
     expect(bodyText).not.toContain('404 Not Found');
-    await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
 }
 
 // =============================================================================
@@ -1268,11 +1298,13 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
+        // Internal Server Errorのみチェック（'500'は件数表示などで誤検知するため使用しない）
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧ページが正常に表示されること
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
-        // 500エラー・エラーページが出ていないこと
-        expect(pageText).not.toContain('500');
+        // 500エラーページの .alert-danger が出ていないこと
+        const errCount = await page.locator('.alert-danger').count();
+        expect(errCount).toBe(0);
     });
 
     test('818: APIテスト実施後にユーザー一覧ページが正常に表示されること', async ({ page }) => {
@@ -1422,12 +1454,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
         const pageText = await page.innerText('body');
+        // Internal Server Errorのみチェック（'500'は件数表示などで誤検知するため使用しない）
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されること（ルックアップ項目の表示崩れ確認）
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
-        // レイアウト崩れの主な兆候（水平スクロールの過剰な発生）がないことを確認
-        expect(pageText).not.toContain('500');
+        // エラーが表示されていないことを確認
         expect(pageText).not.toContain('エラーが発生しました');
+        const errCount = await page.locator('.alert-danger').count();
+        expect(errCount).toBe(0);
     });
 
 });

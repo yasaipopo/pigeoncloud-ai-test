@@ -900,9 +900,10 @@ test.describe('通知設定', () => {
         // 通知設定新規作成ページで表示項目設定UIを確認
         await page.goto(BASE_URL + '/admin/notification/edit/new');
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのレンダリング完了を待つ（「通知設定」テキストが表示されるまで）
         await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            () => document.body.innerText.includes('通知設定') && !document.body.innerText.includes('読み込み中'),
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -994,9 +995,10 @@ test.describe('通知設定', () => {
         // 通知設定新規作成ページで表示項目設定UIを確認
         await page.goto(BASE_URL + '/admin/notification/edit/new');
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのレンダリング完了を待つ（「通知設定」テキストが表示されるまで）
         await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            () => document.body.innerText.includes('通知設定') && !document.body.innerText.includes('読み込み中'),
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
@@ -1016,9 +1018,10 @@ test.describe('通知設定', () => {
         // 通知設定新規作成ページで表示項目設定UIを確認
         await page.goto(BASE_URL + '/admin/notification/edit/new');
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのレンダリング完了を待つ（「通知設定」テキストが表示されるまで）
         await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 15000 }
+            () => document.body.innerText.includes('通知設定') && !document.body.innerText.includes('読み込み中'),
+            { timeout: 30000 }
         ).catch(() => {});
         await page.waitForTimeout(2000);
 
