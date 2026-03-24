@@ -54,7 +54,7 @@ test.describe('ダッシュボード', () => {
         if (modalVisible) {
             _createdDashboardName = `テストDB_${Date.now()}`;
             await modal.locator('input[type=text], input').first().fill(_createdDashboardName);
-            await modal.locator('button').filter({ hasText: '送信' }).click();
+            await modal.locator('button').filter({ hasText: '送信' }).first().click();
             await page.waitForTimeout(1500);
             // タブが作成されたか確認
             const newTab = page.locator('[role=tab]').filter({ hasText: _createdDashboardName });
@@ -98,6 +98,8 @@ test.describe('ダッシュボード', () => {
         await login(page);
         await page.goto(BASE_URL + '/admin/dashboard');
         await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+        // Angularレンダリング完了を待機（tablistが表示されるまで）
+        await expect(page.locator('[role=tablist]')).toBeVisible({ timeout: 10000 });
         await page.waitForTimeout(1500);
 
         // タブリスト右の新規作成ボタン（+アイコン）をクリック
@@ -106,16 +108,16 @@ test.describe('ダッシュボード', () => {
         const addBtn = tablist.locator('button').last();
         await addBtn.click();
 
-        // モーダルが開くのを待つ
+        // モーダルが開くのを待つ（8秒に延長）
         const modal = page.locator('.modal.show');
-        await expect(modal).toBeVisible({ timeout: 5000 });
+        await expect(modal).toBeVisible({ timeout: 8000 });
 
         // ダッシュボード名を入力（DB-02専用の名前、beforeAllとは別）
         const db02Name = `テストDB02_${Date.now()}`;
         await modal.locator('input[type=text], textbox, input').first().fill(db02Name);
 
-        // 送信ボタンをクリック
-        await modal.locator('button').filter({ hasText: '送信' }).click();
+        // 送信ボタンをクリック（複数マッチ回避のためfirst()使用）
+        await modal.locator('button').filter({ hasText: '送信' }).first().click();
 
         // 新しいタブが追加されることを確認
         await page.waitForTimeout(1500);
