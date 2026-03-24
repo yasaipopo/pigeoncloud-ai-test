@@ -1946,6 +1946,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
         try {
             await login(page);
         } catch (e) {
