@@ -285,10 +285,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
     // 261-1: 選択肢フィールド→表示条件設定UIの確認
     // -------------------------------------------------------------------------
     test('261-1: 選択肢フィールドのインライン編集パネルで「表示条件」セクションが確認できること', async ({ page }) => {
-        if (!tableId) {
-            test.skip(true, 'ALLテストテーブルのID取得失敗のためスキップ');
-            return;
-        }
+        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         await navigateToFieldPage(page, tableId);
         await assertFieldPageLoaded(page, tableId);
 
@@ -296,8 +293,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            test.skip(true, 'フィールド行が見つからないためスキップ');
-            return;
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 10000 });
         }
 
         // 選択肢フィールドを探してクリック
@@ -323,18 +319,14 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
     // 261-2: Yes/No フィールド→表示条件設定UIの確認
     // -------------------------------------------------------------------------
     test('261-2: Yes/Noフィールドのインライン編集パネルが開けること', async ({ page }) => {
-        if (!tableId) {
-            test.skip(true, 'ALLテストテーブルのID取得失敗のためスキップ');
-            return;
-        }
+        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         await navigateToFieldPage(page, tableId);
         await assertFieldPageLoaded(page, tableId);
 
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            test.skip(true, 'フィールド行が見つからないためスキップ');
-            return;
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 10000 });
         }
 
         // Yes/No フィールドを探してクリック
@@ -342,8 +334,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         const opened = await openFieldEditPanel(page, 'Yes / No');
         if (!opened) {
             // Yes/Noフィールドが見つからない場合はスキップ
-            test.skip(true, 'Yes/Noフィールドが見つからないためスキップ');
-            return;
+            await expect(yesnoField, 'Yes/Noフィールドが存在すること（ALLテストテーブルに含まれるべき）').toBeVisible({ timeout: 10000 });
         }
 
         // クリック後にページが正常であること
@@ -380,26 +371,21 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
     // 261-3: チェックボックスフィールド→表示条件設定UIの確認
     // -------------------------------------------------------------------------
     test('261-3: チェックボックスフィールドのインライン編集パネルが開けること', async ({ page }) => {
-        if (!tableId) {
-            test.skip(true, 'ALLテストテーブルのID取得失敗のためスキップ');
-            return;
-        }
+        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         await navigateToFieldPage(page, tableId);
         await assertFieldPageLoaded(page, tableId);
 
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            test.skip(true, 'フィールド行が見つからないためスキップ');
-            return;
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 10000 });
         }
 
         // ALLテストテーブルには"選択肢(複数選択)"フィールドが存在する（チェックボックスはない）
         const opened = await openFieldEditPanel(page, '選択肢(複数選択)');
         if (!opened) {
             // 選択肢(複数選択)フィールドが見つからない場合はスキップ
-            test.skip(true, '選択肢(複数選択)フィールドが見つからないためスキップ');
-            return;
+            await expect(multiSelectField, '選択肢(複数選択)フィールドが存在すること').toBeVisible({ timeout: 10000 });
         }
 
         // クリック後にページが正常であること
@@ -431,10 +417,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
     // 265-1: 必須設定→空保存エラー確認
     // -------------------------------------------------------------------------
     test('265-1: テキストフィールドに必須設定後、空保存でエラーメッセージが表示されること', async ({ page }) => {
-        if (!tableId) {
-            test.skip(true, 'ALLテストテーブルのID取得失敗のためスキップ');
-            return;
-        }
+        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
 
         // Step1: フィールド設定ページで「テキスト」フィールドの必須トグルをONにする
         await navigateToFieldPage(page, tableId);
@@ -443,15 +426,13 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            test.skip(true, 'フィールド行が見つからないためスキップ');
-            return;
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 10000 });
         }
 
         // テキストフィールドを探してクリックしインライン編集パネルを開く
         const opened = await openFieldEditPanel(page, 'テキスト');
         if (!opened) {
-            test.skip(true, 'テキストフィールドが見つからないためスキップ');
-            return;
+            await expect(textField, 'テキストフィールドが存在すること').toBeVisible({ timeout: 10000 });
         }
 
         // 必須トグルを探す（label/input[type=checkbox]/toggle等）
@@ -612,18 +593,14 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
     // 265-2: 重複チェック設定UI確認
     // -------------------------------------------------------------------------
     test('265-2: テキスト/数値フィールドで重複チェック設定のUIが表示されること', async ({ page }) => {
-        if (!tableId) {
-            test.skip(true, 'ALLテストテーブルのID取得失敗のためスキップ');
-            return;
-        }
+        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         await navigateToFieldPage(page, tableId);
         await assertFieldPageLoaded(page, tableId);
 
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            test.skip(true, 'フィールド行が見つからないためスキップ');
-            return;
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 10000 });
         }
 
         // テキストフィールドを探してクリック
@@ -632,8 +609,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
             // 数値フィールドを代替確認
             const openedNum = await openFieldEditPanel(page, '数値');
             if (!openedNum) {
-                test.skip(true, 'テキスト/数値フィールドが見つからないためスキップ');
-                return;
+                await expect(targetField, 'テキスト/数値フィールドが存在すること').toBeVisible({ timeout: 10000 });
             }
         }
 
@@ -671,10 +647,7 @@ test.describe('初期値設定テスト（267系）', () => {
     // 267-1: テキストフィールドの初期値設定→新規レコード作成時に自動入力
     // -------------------------------------------------------------------------
     test('267-1: テキストフィールドに初期値を設定すると新規レコード作成時に自動入力されること', async ({ page }) => {
-        if (!tableId) {
-            test.skip(true, 'ALLテストテーブルのID取得失敗のためスキップ');
-            return;
-        }
+        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
 
         const testDefaultValue = '__テスト初期値__';
 
@@ -685,15 +658,13 @@ test.describe('初期値設定テスト（267系）', () => {
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            test.skip(true, 'フィールド行が見つからないためスキップ');
-            return;
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 10000 });
         }
 
         // テキストフィールドを探してクリックしインライン編集パネルを開く
         const opened = await openFieldEditPanel(page, 'テキスト');
         if (!opened) {
-            test.skip(true, 'テキストフィールドが見つからないためスキップ');
-            return;
+            await expect(textField, 'テキストフィールドが存在すること').toBeVisible({ timeout: 10000 });
         }
 
         // 初期値入力欄を探して値を入力

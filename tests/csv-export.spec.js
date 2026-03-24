@@ -1111,10 +1111,7 @@ test.describe('JSONエクスポート・インポート', () => {
             '.dataset-list input[type="checkbox"]'
         ).first();
         const checkboxCount = await firstCheckbox.count();
-        if (checkboxCount === 0) {
-            test.skip(true, 'テーブル一覧にチェックボックスが見つからないためスキップ');
-            return;
-        }
+        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 10000 });
         await firstCheckbox.click();
         await page.waitForTimeout(1000);
 
@@ -1130,10 +1127,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 'button:has-text("JSON"), a:has-text("JSON")'
             ).filter({ visible: true }).first();
             const jsonCount = await jsonExportBtn.count();
-            if (jsonCount === 0) {
-                test.skip(true, 'エクスポートボタンが見つからないためスキップ');
-                return;
-            }
+            await expect(jsonExportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 8000 });
             await jsonExportBtn.click();
         } else {
             await exportBtn.click();
@@ -1180,10 +1174,7 @@ test.describe('JSONエクスポート・インポート', () => {
         await page.waitForTimeout(2000);
 
         // testTableIdがあれば、そのテーブルのリンクをクリックしてレコード一覧へ
-        if (!testTableId) {
-            test.skip(true, 'テーブルIDが取得できなかったためスキップ');
-            return;
-        }
+        expect(testTableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         const tableLink = page.locator(`a[href*="dataset__${testTableId}"]`).first();
         if (await tableLink.count() > 0) {
             await tableLink.click();
@@ -1202,10 +1193,7 @@ test.describe('JSONエクスポート・インポート', () => {
         // JSONエクスポートボタンをクリック
         const exportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
         const btnCount = await exportBtn.count();
-        if (btnCount === 0) {
-            test.skip(true, 'JSONエクスポートボタンが見つからないためスキップ');
-            return;
-        }
+        await expect(exportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await exportBtn.click();
         await page.waitForTimeout(1000);
 
@@ -1251,10 +1239,7 @@ test.describe('JSONエクスポート・インポート', () => {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(2000);
 
-        if (!testTableId) {
-            test.skip(true, 'テーブルIDが取得できなかったためスキップ');
-            return;
-        }
+        expect(testTableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         const tableLink = page.locator(`a[href*="dataset__${testTableId}"]`).first();
         if (await tableLink.count() > 0) {
             await tableLink.click();
@@ -1273,10 +1258,7 @@ test.describe('JSONエクスポート・インポート', () => {
         // JSONエクスポートボタンをクリック
         const exportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
         const btnCount = await exportBtn.count();
-        if (btnCount === 0) {
-            test.skip(true, 'JSONエクスポートボタンが見つからないためスキップ');
-            return;
-        }
+        await expect(exportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await exportBtn.click();
         await page.waitForTimeout(1000);
 
@@ -1330,10 +1312,7 @@ test.describe('JSONエクスポート・インポート', () => {
             'button:has-text("JSONインポート"), a:has-text("JSONインポート")'
         ).filter({ visible: true }).first();
         const importCount = await importBtn.count();
-        if (importCount === 0) {
-            test.skip(true, 'インポートボタンが見つからないためスキップ');
-            return;
-        }
+        await expect(importBtn, 'インポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await importBtn.click();
         await page.waitForTimeout(800);
 

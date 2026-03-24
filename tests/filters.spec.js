@@ -321,8 +321,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     // -------------------------------------------------------------------------
     test('245: フィルタボタンが存在し、フィルタ設定UIが開けること', async ({ page }) => {
         if (!tableId) {
-            test.skip(true, 'テーブルIDが取得できませんでした');
-            return;
+            expect(tableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
@@ -356,8 +355,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     // -------------------------------------------------------------------------
     test('246: フィルタ保存UIが存在すること', async ({ page }) => {
         if (!tableId) {
-            test.skip(true, 'テーブルIDが取得できませんでした');
-            return;
+            expect(tableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
@@ -386,8 +384,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     // -------------------------------------------------------------------------
     test('247: フィルタ一覧・管理UIが存在すること', async ({ page }) => {
         if (!tableId) {
-            test.skip(true, 'テーブルIDが取得できませんでした');
-            return;
+            expect(tableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
@@ -414,8 +411,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     // -------------------------------------------------------------------------
     test('248: 高度な検索UIが表示され、複合条件を設定できること', async ({ page }) => {
         if (!tableId) {
-            test.skip(true, 'テーブルIDが取得できませんでした');
-            return;
+            expect(tableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');

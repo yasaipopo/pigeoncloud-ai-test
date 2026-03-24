@@ -41,6 +41,28 @@ test.describe('ダッシュボード', () => {
         await login(page);
         const result = await setupAllTypeTable(page);
         _tableId = result.tableId;
+
+        // DB-03〜DB-05のために事前にダッシュボードを作成しておく
+        await page.goto(BASE_URL + '/admin/dashboard');
+        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+        await page.waitForTimeout(1500);
+        const tablist = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
+        const addBtn = tablist.locator('button').last();
+        await addBtn.click();
+        const modal = page.locator('.modal.show');
+        const modalVisible = await modal.isVisible({ timeout: 5000 }).catch(() => false);
+        if (modalVisible) {
+            _createdDashboardName = `テストDB_${Date.now()}`;
+            await modal.locator('input[type=text], input').first().fill(_createdDashboardName);
+            await modal.locator('button').filter({ hasText: '送信' }).click();
+            await page.waitForTimeout(1500);
+            // タブが作成されたか確認
+            const newTab = page.locator('[role=tab]').filter({ hasText: _createdDashboardName });
+            const tabFound = await newTab.isVisible({ timeout: 5000 }).catch(() => false);
+            if (!tabFound) {
+                _createdDashboardName = null;
+            }
+        }
         await page.close();
     });
 
@@ -88,16 +110,16 @@ test.describe('ダッシュボード', () => {
         const modal = page.locator('.modal.show');
         await expect(modal).toBeVisible({ timeout: 5000 });
 
-        // ダッシュボード名を入力
-        _createdDashboardName = 'テストダッシュボード_E2E';
-        await modal.locator('input[type=text], textbox, input').first().fill(_createdDashboardName);
+        // ダッシュボード名を入力（DB-02専用の名前、beforeAllとは別）
+        const db02Name = `テストDB02_${Date.now()}`;
+        await modal.locator('input[type=text], textbox, input').first().fill(db02Name);
 
         // 送信ボタンをクリック
         await modal.locator('button').filter({ hasText: '送信' }).click();
 
         // 新しいタブが追加されることを確認
         await page.waitForTimeout(1500);
-        const newTab = page.locator('[role=tab]').filter({ hasText: _createdDashboardName });
+        const newTab = page.locator('[role=tab]').filter({ hasText: db02Name });
         await expect(newTab).toBeVisible({ timeout: 5000 });
     });
 
@@ -107,18 +129,11 @@ test.describe('ダッシュボード', () => {
         await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(1500);
 
-        // DB-02で作成したダッシュボードタブを選択
-        if (!_createdDashboardName) {
-            test.skip(true, '作成済みダッシュボードが存在しないためスキップ');
-            return;
-        }
+        // beforeAllで作成したダッシュボードタブを選択
+        expect(_createdDashboardName, 'beforeAllでダッシュボードが作成されていること').toBeTruthy();
 
         const targetTab = page.locator('[role=tab]').filter({ hasText: _createdDashboardName });
-        const tabCount = await targetTab.count();
-        if (tabCount === 0) {
-            test.skip(true, 'テストダッシュボードが見つからないためスキップ');
-            return;
-        }
+        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 5000 });
 
         // タブのテキスト部分をクリックして選択
         await targetTab.first().click();
@@ -195,18 +210,11 @@ test.describe('ダッシュボード', () => {
         await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(1500);
 
-        if (!_createdDashboardName) {
-            test.skip(true, '作成済みダッシュボードが存在しないためスキップ');
-            return;
-        }
+        // beforeAllで作成したダッシュボードタブを選択
+        expect(_createdDashboardName, 'beforeAllでダッシュボードが作成されていること').toBeTruthy();
 
-        // 作成したダッシュボードタブを選択
         const targetTab = page.locator('[role=tab]').filter({ hasText: _createdDashboardName });
-        const tabCount = await targetTab.count();
-        if (tabCount === 0) {
-            test.skip(true, 'テストダッシュボードが見つからないためスキップ');
-            return;
-        }
+        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 5000 });
         await targetTab.first().click();
         await page.waitForTimeout(1000);
 
@@ -253,19 +261,12 @@ test.describe('ダッシュボード', () => {
         await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(1500);
 
-        if (!_createdDashboardName) {
-            test.skip(true, '作成済みダッシュボードが存在しないためスキップ');
-            return;
-        }
+        // beforeAllで作成したダッシュボードタブを削除
+        expect(_createdDashboardName, 'beforeAllでダッシュボードが作成されていること').toBeTruthy();
 
         // 作成したダッシュボードタブを確認
         const targetTab = page.locator('[role=tab]').filter({ hasText: _createdDashboardName });
-        const tabCount = await targetTab.count();
-        if (tabCount === 0) {
-            // すでに削除されているか存在しない場合はスキップ
-            test.skip(true, 'テストダッシュボードが見つからないためスキップ');
-            return;
-        }
+        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 5000 });
 
         // タブ内の▼アイコンをクリックしてメニューを開く
         const tabEl = targetTab.first();
