@@ -35,7 +35,7 @@ module.exports = defineConfig({
     expect: { timeout: 10000 },
     fullyParallel: false,
     retries: 1,
-    workers: 1,
+    workers: process.env.PLAYWRIGHT_WORKERS ? parseInt(process.env.PLAYWRIGHT_WORKERS) : 1,
     reporter: [
         ['list'],
         ['json', { outputFile: `${reportsDir}/playwright-results.json` }],
