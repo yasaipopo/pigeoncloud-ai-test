@@ -237,9 +237,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('506: ワークフロー設定ページがエラーなく正常に表示されること（#issue819）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -247,9 +245,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('507: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue791）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -259,9 +255,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('508: 帳票設定ページがエラーなく正常に表示されること（#issue820）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 帳票設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
         const errors = await page.locator('.alert-danger').count();
@@ -292,9 +286,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('510: ワークフロー設定ページで承認者設定がエラーなく表示されること（#issue812）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -318,9 +310,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('512: ワークフロー設定ページがエラーなく正常に表示されること（#issue795）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -328,9 +318,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('513: ワークフローのフロー固定時に承認者追加できる設定が有効の場合にワークフロー設定ページが正常表示されること（#issue818）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -338,7 +326,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('514: ユーザー管理ページがエラーなく正常に表示されること（#issue826）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -346,7 +333,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('515: マスターユーザーから全ユーザーのUP/DL履歴をユーザー管理ページで確認できること（#issue673）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -374,9 +360,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('517: 必須条件設定で他の項目を条件利用する場合にテーブル一覧がエラーなく正常表示されること（#issue834）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -386,9 +370,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('518: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue740）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -495,7 +477,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('530: テーブル管理者権限を持つ一般ユーザーが帳票の登録・編集を行えるようにユーザー管理ページが正常表示されること（#issue704）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -503,9 +484,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('531: 選択肢（複数項目）で型エラーが発生せずテーブル一覧が正常表示されること（#issue856）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -516,7 +495,6 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('533: ユーザー管理ページがエラーなく正常に表示されること（#issue866）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -561,7 +539,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('536: ユーザー管理ページがエラーなく正常に表示されること（#issue837）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -601,9 +578,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('539: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue742）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -638,9 +613,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('545: 複数ファイル項目で追加ボタン後にファイル未選択のまま登録するとバリデーションエラーになること（#issue869）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -651,9 +624,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('547: テーブル一覧画面がエラーなく正常に表示されること（#issue828）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 公開フォーム機能が正常に動作すること
         const errors = await page.locator('.alert-danger').count();
@@ -662,9 +633,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('549: ワークフローステータス変更をアクションにした通知設定ページがエラーなく表示されること（#issue898）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 通知設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
         const errors = await page.locator('.alert-danger').count();
@@ -762,9 +731,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('555: 親テーブルに計算項目がない場合でも子テーブルがリアルタイム更新されること（#issue696）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -831,7 +798,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('559: 権限設定の変更が即時反映されユーザー管理ページが正常表示されること（#issue753）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -882,9 +848,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('567: ワークフロー設定ページがエラーなく正常に表示されること（#issue938）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -938,9 +902,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('574: ワークフロー承認者を無効ユーザーにした場合にワークフロー設定ページが正常表示されること（#issue990）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -948,9 +910,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('575: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue913）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -960,9 +920,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('576: テーブル一覧画面がエラーなく正常に表示されること（#issue940）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
         expect(await page.locator('table').count()).toBeGreaterThan(0);
@@ -971,9 +929,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('577: ワークフロー設定ページがエラーなく正常に表示されること（#issue1003）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -981,9 +937,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('578: Excelシート下部でも帳票の${テーブル名.項目名}式が正しく反映されること（#issue983）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 帳票設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
         const errors = await page.locator('.alert-danger').count();
@@ -1040,9 +994,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('583: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue867）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1092,9 +1044,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('588: ワークフロー申請時にワークフロー設定ページがエラーなく正常表示されること（#issue1040）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -1102,7 +1052,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('589: ユーザー管理ページがエラーなく正常に表示されること（#issue1025）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -1110,7 +1059,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('590: ユーザーテーブルから他テーブル参照のルックアップが正常に機能すること（#issue571）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -1118,9 +1066,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('591: CSVエクスポート・インポート機能がエラーなく正常に動作すること（#issue939）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1153,9 +1099,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('594: 過去にワークフロー使用済みのテーブルでワークフロー設定ページが正常表示されること（#issue1035）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -1163,9 +1107,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('595: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue962）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1175,9 +1117,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('596: カレンダービューへの切り替えがエラーなく正常に動作すること（#issue945）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // カレンダービューに切り替えできること
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
@@ -1190,9 +1130,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('597: ユーザーを無効・削除後もワークフロー履歴から名前が消えずに表示されること（#issue1029）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -1201,9 +1139,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('599: 日時項目で時刻のみ選択・時間間隔を1分以外に設定した場合にテーブル一覧が正常表示されること（#issue1063）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1213,9 +1149,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('600: ワークフローのCSVインポート機能がエラーなく正常に動作すること（#issue975）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1226,9 +1160,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('601: 数値項目に4桁以上の数字が入力されている場合に帳票設定ページが正常表示されること（#issue1013）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 帳票設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
         const errors = await page.locator('.alert-danger').count();
@@ -1236,9 +1168,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('602: CSVエクスポート・インポート機能がエラーなく正常に動作すること（#issue982）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1249,9 +1179,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('603: コネクトのトリガーにワークフロー完了タイミングが追加されワークフロー設定ページが正常表示されること（#issue1044）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -1260,9 +1188,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('605: ユーザー管理テーブルのCSVエクスポート・インポートが正常に動作すること（#issue769）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1273,7 +1199,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('606: ユーザー管理ページがエラーなく正常に表示されること（#issue881）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -1281,9 +1206,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('607: テーブル一覧画面がエラーなく正常に表示されること（#issue1074）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
         expect(await page.locator('table').count()).toBeGreaterThan(0);
@@ -1292,9 +1215,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('608: 他テーブル参照で複数値登録を許可した項目をCSVダウンロードしてもエラーが発生しないこと（#issue1065）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1305,9 +1226,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('609: FTP処理失敗・一部成功時にどのテーブルのエラーかを通知設定ページで確認できること（#issue1093）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 通知設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
         const errors = await page.locator('.alert-danger').count();
@@ -1328,9 +1247,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('611: CSVエクスポート・インポート機能がエラーなく正常に動作すること（#issue936）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1489,9 +1406,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('619: 子テーブルでCSVにテーブル名を含めるオプション有効時にCSVダウンロードが正常に動作すること（#issue991）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1502,7 +1417,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('620: ログイン画面のパスワードリセット機能追加後にユーザー管理ページが正常表示されること（#issue950）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -1510,9 +1424,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('621: ワークフロー設定ページがエラーなく正常に表示されること（#issue1030）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -1520,9 +1432,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('622: テーブル絞り込みフィルター機能がエラーなく正常に動作すること（#issue1023）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 絞り込み機能が使用できること
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
@@ -1535,9 +1445,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('623: 他テーブル参照（複数）から文字列一行（複数）へのルックアップが正常動作すること（#issue1108）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1547,9 +1455,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('624: 親テーブルでの絞り込みフィルター機能がエラーなく正常に動作すること（#issue949）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 絞り込み機能が使用できること
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
@@ -1562,9 +1468,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('625: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1005）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1574,9 +1478,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('626: ユーザーテーブルのCSVダウンロードが正常に動作すること（#issue1109）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1587,7 +1489,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('627: ユーザー管理画面のテーブル一覧で役職が正しく表示されること（#issue892）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -1595,9 +1496,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('628: 計算式にnextWeekDay関数が追加されテーブル一覧が正常表示されること（#issue706）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1607,9 +1506,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('629: コメント追加時のメール通知設定がある場合に通知設定ページが正常表示されること（#issue970）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 通知設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
         const errors = await page.locator('.alert-danger').count();
@@ -1617,7 +1514,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('630: 同時ログイン数が上限に達している場合でもユーザー管理ページが正常表示されること（#issue519）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -1625,9 +1521,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('631: 集計ページでチャートと同様に開始月を設定できること（#issue553）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 集計ページが正常に表示されること
         await checkPage(page, `/admin/summary__${tableId}`);
         const errors = await page.locator('.alert-danger').count();
@@ -1636,9 +1530,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('633: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1139）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1672,7 +1564,6 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('635: ユーザー管理ページがエラーなく正常に表示されること（#issue1140）', async ({ page }) => {
-        await login(page);
         // ユーザー管理ページが正常に表示されること
         await checkPage(page, '/admin/user');
         const errors = await page.locator('.alert-danger').count();
@@ -1680,9 +1571,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('636: コピー環境で重複データに対してエラーが出て登録できないことを確認できること（#issue732）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1711,9 +1600,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('639: ブラウザのタブ名がPigeonCloud固定でなくページごとに異なるタイトルになること（#issue961）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // テーブル設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting`);
         const errors = await page.locator('.alert-danger').count();
@@ -1721,9 +1608,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('640: チャートおよび集計の絞り込みで日時項目の相対値選択が正常に動作すること（#issue932）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 集計ページが正常に表示されること
         await checkPage(page, `/admin/summary__${tableId}`);
         const errors = await page.locator('.alert-danger').count();
@@ -1732,9 +1617,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('642: 主キーの複数項目設定がCSVアップ以外でも機能するようになりCSVエクスポートが正常動作すること（#issue1162）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1745,9 +1628,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('643: 主キー設定の上限が5項目以上に拡張されてテーブル一覧が正常表示されること（#issue1163）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1758,9 +1639,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test('645: ワークフローの左メニューに表示される申請バッジ数が正しい値であること（#issue1129）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // ワークフロー設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
         const errors = await page.locator('.alert-danger').count();
@@ -1768,9 +1647,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('646: 他テーブル参照で複数値登録を許可する設定が有効の場合にテーブル一覧が正常表示されること（#issue1028）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1848,9 +1725,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('653: コメントで組織へメンションする際にエラーメッセージが出ないことをテーブル一覧で確認できること（#issue974）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
         expect(await page.locator('table').count()).toBeGreaterThan(0);
@@ -1859,9 +1734,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('654: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue984）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1871,9 +1744,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('655: 帳票設定ページがエラーなく正常に表示されること（#issue1107）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 帳票設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
         const errors = await page.locator('.alert-danger').count();
@@ -1881,9 +1752,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('656: CSVダウンロードで現在のフィルタを反映するオプションが正常に動作すること（#issue1191）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -1894,9 +1763,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('657: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1047）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -1906,9 +1773,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('658: 通知設定の通知先にログインユーザーのメールアドレスを指定できること（#issue1197）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 通知設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
         const errors = await page.locator('.alert-danger').count();
@@ -1916,9 +1781,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('659: 集計ページのフィルター機能がエラーなく正常に動作すること（#issue1201）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 集計ページが正常に表示されること
         await checkPage(page, `/admin/summary__${tableId}`);
         const errors = await page.locator('.alert-danger').count();
@@ -1926,9 +1789,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('660: 公開フォームリンク先をスマホから閲覧した場合にエラーなく正常表示されること（#issue976）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 公開フォーム機能が正常に動作すること
         const errors = await page.locator('.alert-danger').count();
@@ -1936,9 +1797,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('661: チャートプレビュー画面の前後切り替えボタンが正常に動作すること（#issue1032）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 集計ページが正常に表示されること
         await checkPage(page, `/admin/summary__${tableId}`);
         const errors = await page.locator('.alert-danger').count();
@@ -1964,9 +1823,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('663: 誤操作防止のために一括否認・一括削除ボタンを非表示にする設定ができること（#issue1198）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // テーブル設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting`);
         const errors = await page.locator('.alert-danger').count();
@@ -1974,9 +1831,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('664: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1115）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
@@ -2011,9 +1866,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('666: CSVエクスポート・インポート機能がエラーなく正常に動作すること（#issue1214）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -2024,9 +1877,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('667: CSVアップロード前にデータをリセットする機能が正常に動作すること（#issue1216）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -2037,9 +1888,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('668: 他の項目で値の絞り込みを行う機能がエラーなく正常に動作すること（#issue1217）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 絞り込み機能が使用できること
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
@@ -2052,9 +1901,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('669: 画像項目でファイルサイズや画素数が表示される機能追加後にテーブル一覧が正常表示されること（#issue1195）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // CSVエクスポート/インポートが正常に動作すること
         const csvLinks = page.locator('a, button').filter({ hasText: /CSV|エクスポート|インポート/ });
@@ -2065,9 +1912,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('670: 受信メール取込み機能の強化版追加後に通知設定ページが正常表示されること（#issue1196）', async ({ page }) => {
-        await login(page);
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 通知設定ページが正常に表示されること
         await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
         const errors = await page.locator('.alert-danger').count();
