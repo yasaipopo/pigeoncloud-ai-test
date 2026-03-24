@@ -379,7 +379,9 @@ test.describe('列表示幅設定（191系）', () => {
     test('191: 列の表示幅をUI上から設定できること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        // Angularレンダリング完了を待機
+        await page.waitForSelector('table, .no-records, [class*="empty"]', { timeout: 10000 }).catch(() => {});
+        await page.waitForTimeout(500);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること（列ヘッダーが存在）
@@ -492,6 +494,8 @@ test.describe('表示条件設定（250系）', () => {
     test('250: 項目削除時に表示条件設定の警告モーダルが表示されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのフィールド一覧レンダリング完了を待機
+        await page.waitForSelector('table, .field-list, [class*="field"], admin-forms-field, tr', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -574,6 +578,8 @@ test.describe('権限設定（262系）', () => {
     test('262: テーブル権限設定と項目権限設定の組み合わせが正常に動作すること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/permission`);
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAの権限設定ページレンダリング完了を待機
+        await page.waitForSelector('table, [class*="permission"], input[type="checkbox"], .tab', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -711,6 +717,8 @@ test.describe('自動採番（273系）', () => {
     test('273: 自動採番フォーマット未設定時にデフォルト形式が適用されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのフィールド一覧レンダリング完了を待機
+        await page.waitForSelector('table, .field-list, [class*="field"], admin-forms-field, tr', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -763,6 +771,8 @@ test.describe('リッチテキスト（274系）', () => {
     test('274: リッチテキスト項目で追加オプション設定が開くこと', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのフィールド一覧レンダリング完了を待機
+        await page.waitForSelector('table, .field-list, [class*="field"], admin-forms-field, tr', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -815,6 +825,8 @@ test.describe('日時フォーマット（275系）', () => {
     test('275: 日時項目で表示フォーマットを一度入力後にチェックを外しても正しく動作すること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのフィールド一覧レンダリング完了を待機
+        await page.waitForSelector('table, .field-list, [class*="field"], admin-forms-field, tr', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -867,6 +879,8 @@ test.describe('循環参照エラー（291系）', () => {
     test('291: 他テーブル参照が循環する設定をするとエラーが表示されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのフィールド一覧レンダリング完了を待機
+        await page.waitForSelector('table, .field-list, [class*="field"], admin-forms-field, tr', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -1005,6 +1019,8 @@ test.describe('テーブル削除ロック（349系）', () => {
         // テーブル設定ページへ
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/setting`);
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのテーブル設定ページレンダリング完了を待機
+        await page.waitForSelector('input, select, form, [class*="setting"]', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -1329,6 +1345,8 @@ test.describe('子テーブル（325, 341系）', () => {
     test('325: 子テーブルに子テーブルを設定しようとするとエラーが表示されること', async ({ page }) => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}/field`);
         await page.waitForLoadState('domcontentloaded');
+        // Angular SPAのフィールド一覧レンダリング完了を待機
+        await page.waitForSelector('table, .field-list, [class*="field"], admin-forms-field, tr', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -1419,6 +1437,8 @@ test.describe('一覧編集モード（324系）', () => {
 // =============================================================================
 
 test.describe('未実装テスト（todo）', () => {
+    let tableId = null;
+
     test.beforeAll(async ({ browser, request }) => {
         test.setTimeout(600000);
         // debug-tools/settings が認証不要の場合のみ動作（失敗しても続行）
@@ -1428,8 +1448,14 @@ test.describe('未実装テスト（todo）', () => {
         try {
             const page = await browser.newPage();
             await login(page);
-            await createAllTypeTable(page);
-            await createAllTypeData(page, 5);
+            // setupAllTypeTableでtableIdを取得
+            const result = await setupAllTypeTable(page);
+            tableId = result.tableId;
+            if (!tableId) {
+                // 後退処理: 直接テーブル作成を試みる
+                await createAllTypeTable(page);
+                await createAllTypeData(page, 5);
+            }
             await page.close();
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {

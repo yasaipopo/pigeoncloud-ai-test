@@ -576,8 +576,8 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されること（帳票DLボタンの確認）
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
-        // 500エラー・エラーページが出ていないこと
-        expect(pageText).not.toContain('500');
+        // 500エラー・エラーページが出ていないこと（'500'は件数表示で誤検知するため使用しない）
+        expect(pageText).not.toContain('Internal Server Error');
         expect(pageText).not.toContain('エラーが発生しました');
     });
 

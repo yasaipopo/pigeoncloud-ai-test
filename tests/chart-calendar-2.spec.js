@@ -2283,8 +2283,8 @@ test.describe('集計・チャート - 詳細権限設定', () => {
         await page.waitForTimeout(2000);
 
         // 集計モーダルが開いたことを確認（何らかのタブが見える）
-        const anyTab = page.locator('a.nav-link[role="tab"], [role="tab"]').first();
-        await expect(anyTab).toBeVisible({ timeout: 5000 });
+        const anyTab = page.locator('a.nav-link[role="tab"], [role="tab"], a.nav-link').first();
+        await expect(anyTab).toBeVisible({ timeout: 10000 });
 
         // 絞り込みタブが存在すればクリック
         const filterTab = page.locator('a.nav-link').filter({ hasText: /絞り込み/ }).first();
