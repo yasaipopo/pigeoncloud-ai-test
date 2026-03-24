@@ -505,8 +505,15 @@ test.beforeAll(async ({ browser }) => {
 test.describe('ワークフロー設定（21系）', () => {
     let tableId;
 
-    test.beforeAll(async () => {
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120000);
         tableId = _sharedTableId;
+        // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
+        const page = await browser.newPage();
+        await login(page);
+        await closeTemplateModal(page);
+        await enableWorkflow(page, tableId);
+        await page.close();
     });
 
     test.beforeEach(async ({ page }) => {
@@ -519,7 +526,6 @@ test.describe('ワークフロー設定（21系）', () => {
     // -------------------------------------------------------------------------
     test('21-1: ワークフロー承認者はデータ編集可能設定が保存されること', async ({ page }) => {
         test.setTimeout(150000);
-        await enableWorkflow(page, tableId);
         await navigateToWorkflowTab(page, tableId);
         // ワークフローONを確認
         const isWfEnabled = await page.evaluate(() => {
@@ -621,8 +627,6 @@ test.describe('ワークフロー設定（21系）', () => {
     // -------------------------------------------------------------------------
     test('21-4: ワークフロー申請の取り下げがエラーなく完了すること', async ({ page }) => {
         test.setTimeout(120000);
-        // ワークフローを有効化
-        await enableWorkflow(page, tableId);
         // admin として申請（承認者もadmin自身）
         const adminName = EMAIL.split('@')[0]; // 検索用
         const recordId = await createRecordAndSubmit(page, tableId, adminName, '取り下げテスト申請');
@@ -656,8 +660,15 @@ test.describe('ワークフロー設定（21系）', () => {
 test.describe('ワークフロー基本動作（11系）', () => {
     let tableId;
 
-    test.beforeAll(async () => {
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120000);
         tableId = _sharedTableId;
+        // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
+        const page = await browser.newPage();
+        await login(page);
+        await closeTemplateModal(page);
+        await enableWorkflow(page, tableId);
+        await page.close();
     });
 
     test.beforeEach(async ({ page }) => {
@@ -670,7 +681,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
     test('11-1: テーブルに対してワークフロー設定が行えること', async ({ page }) => {
         test.setTimeout(90000);
-        await enableWorkflow(page, tableId);
         await navigateToWorkflowTab(page, tableId);
         // ワークフローが有効になっていること
         const isEnabled = await page.evaluate(() => {
@@ -689,8 +699,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
     test('11-2: ユーザーAが申請しBが承認できること', async ({ page }) => {
         test.setTimeout(120000);
-        await enableWorkflow(page, tableId);
-
         // adminで申請してadminが承認（WFTestテーブルはルートグループのためテストユーザーは非アクセス）
         const approverName = EMAIL.split('@')[0];
         const recordId = await createRecordAndSubmit(page, tableId, approverName, '承認テスト申請コメント');
@@ -719,8 +727,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
     test('11-3: 多段承認フロー（A申請→B承認→C最終承認）ができること', async ({ page }) => {
         test.setTimeout(120000);
-        await enableWorkflow(page, tableId);
-
         // adminで申請（承認者にadminを指定）
         const approverName = EMAIL.split('@')[0];
         const recordId = await createRecordAndSubmit(page, tableId, approverName, '多段承認テスト');
@@ -745,7 +751,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
     test('11-4: 否認された後に再申請ができること', async ({ page }) => {
         test.setTimeout(120000);
-        await enableWorkflow(page, tableId);
         const approverName = EMAIL.split('@')[0];
 
         // adminで申請
@@ -776,7 +781,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
     test('11-5: 組織による承認（一人の承認が必要）ができること', async ({ page }) => {
         test.setTimeout(120000);
-        await enableWorkflow(page, tableId);
         // adminで申請、承認者タイプ=組織(役職)
         await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
         await page.waitForLoadState('domcontentloaded');
@@ -815,7 +819,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
     test('11-6: 承認者データ編集可能設定が申請フローに反映されること', async ({ page }) => {
         test.setTimeout(120000);
-        await enableWorkflow(page, tableId);
         // 「承認者はデータ編集可能」をONにして保存
         await navigateToWorkflowTab(page, tableId);
         await toggleWorkflowOption(page, '承認者はデータ編集可能', true);
@@ -839,15 +842,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     test('11-7: 一度承認後に再申請が可能な設定ができること', async ({ page }) => {
         test.setTimeout(120000);
         await navigateToWorkflowTab(page, tableId);
-        const isWfEnabled = await page.evaluate(() => {
-            const wfSection = document.querySelector('dataset-workflow-options');
-            const cb = wfSection?.querySelector('input[type="checkbox"].switch-input');
-            return cb ? cb.checked : false;
-        });
-        if (!isWfEnabled) {
-            await enableWorkflow(page, tableId);
-            await navigateToWorkflowTab(page, tableId);
-        }
         // 再申請可能設定をON
         await toggleWorkflowOption(page, '再申請', true);
         await saveTableSettings(page, tableId);
@@ -864,15 +858,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     test('11-8: ワークフローのフロー固定設定が機能すること', async ({ page }) => {
         test.setTimeout(120000);
         await navigateToWorkflowTab(page, tableId);
-        const isWfEnabled = await page.evaluate(() => {
-            const wfSection = document.querySelector('dataset-workflow-options');
-            const cb = wfSection?.querySelector('input[type="checkbox"].switch-input');
-            return cb ? cb.checked : false;
-        });
-        if (!isWfEnabled) {
-            await enableWorkflow(page, tableId);
-            await navigateToWorkflowTab(page, tableId);
-        }
         // フロー固定をON
         await toggleWorkflowOption(page, 'フローを固定する', true);
         await page.waitForTimeout(1000);
@@ -890,7 +875,6 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
     test('11-9: 否認→再編集→再申請→承認の完全フローが動作すること', async ({ page }) => {
         test.setTimeout(180000);
-        await enableWorkflow(page, tableId);
         // 11-8 がフロー固定をONにしている場合があるためリセット
         await navigateToWorkflowTab(page, tableId);
         await toggleWorkflowOption(page, 'フローを固定する', false);
@@ -949,14 +933,20 @@ test.describe('ワークフロー基本動作（11系）', () => {
 test.describe('役職指定固定ワークフロー（68系）', () => {
     let tableId;
 
-    test.beforeAll(async () => {
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120000);
         tableId = _sharedTableId;
+        // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
+        const page = await browser.newPage();
+        await login(page);
+        await closeTemplateModal(page);
+        await enableWorkflow(page, tableId);
+        await page.close();
     });
 
     test.beforeEach(async ({ page }) => {
         await login(page);
         await closeTemplateModal(page);
-        await enableWorkflow(page, tableId);
     });
 
     // -------------------------------------------------------------------------
@@ -1183,8 +1173,15 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
 test.describe('引き上げ承認（106系）', () => {
     let tableId;
 
-    test.beforeAll(async () => {
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120000);
         tableId = _sharedTableId;
+        // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
+        const page = await browser.newPage();
+        await login(page);
+        await closeTemplateModal(page);
+        await enableWorkflow(page, tableId);
+        await page.close();
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1206,7 +1203,6 @@ test.describe('引き上げ承認（106系）', () => {
     // -------------------------------------------------------------------------
     test('106-01: 組織(1人の承認が必要)→の後の承認者では引き上げ承認ボタンが表示されないこと', async ({ page }) => {
         test.setTimeout(120000);
-        await enableWorkflow(page, tableId);
         // 引き上げ承認機能をONにする
         await navigateToWorkflowTab(page, tableId);
         await toggleWorkflowOption(page, '引き上げ承認', true);
@@ -1260,7 +1256,6 @@ test.describe('引き上げ承認（106系）', () => {
     // -------------------------------------------------------------------------
     test('106-03: ユーザー→ユーザーの多段承認でBが引き上げ承認できること', async ({ page }) => {
         test.setTimeout(120000);
-        await enableWorkflow(page, tableId);
         // 引き上げ承認機能をONにする
         await navigateToWorkflowTab(page, tableId);
         await toggleWorkflowOption(page, '引き上げ承認', true);
@@ -1579,8 +1574,15 @@ test.describe('一括操作（111系）', () => {
 test.describe('承認者削除後の確認（28系）', () => {
     let tableId;
 
-    test.beforeAll(async () => {
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120000);
         tableId = _sharedTableId;
+        // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
+        const page = await browser.newPage();
+        await login(page);
+        await closeTemplateModal(page);
+        await enableWorkflow(page, tableId);
+        await page.close();
     });
 
     test.beforeEach(async ({ page }) => {
@@ -1593,7 +1595,6 @@ test.describe('承認者削除後の確認（28系）', () => {
     // -------------------------------------------------------------------------
     test('28-1: ワークフロー承認済み後に承認者ユーザーを削除しても問題ないこと', async ({ page }) => {
         test.setTimeout(240000);
-        await enableWorkflow(page, tableId);
         const approverName = EMAIL.split('@')[0];
         // adminで申請・承認（adminが承認者として設定される）
         const recordId = await createRecordAndSubmit(page, tableId, approverName, '承認者削除テスト申請');
@@ -1626,7 +1627,6 @@ test.describe('承認者削除後の確認（28系）', () => {
     // -------------------------------------------------------------------------
     test('28-3: ワークフロー申請中に承認者ユーザーを削除しても問題ないこと', async ({ page }) => {
         test.setTimeout(180000);
-        await enableWorkflow(page, tableId);
         // 専用テストユーザーを作成（承認者として使用後に削除）
         const tempUser2 = await createTestUser(page);
         // adminで申請、承認者=tempUser2
