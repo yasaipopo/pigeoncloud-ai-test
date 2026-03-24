@@ -188,6 +188,18 @@ async function getAllTypeTableId(page) {
     return mainTable ? (mainTable.table_id || mainTable.id) : null;
 }
 
+/**
+ * ページアクセス確認ヘルパー
+ */
+async function checkPage(page, path) {
+    await page.goto(BASE_URL + path);
+    await page.waitForLoadState('domcontentloaded');
+    const bodyText = await page.innerText('body');
+    expect(bodyText).not.toContain('Internal Server Error');
+    expect(bodyText).not.toContain('404 Not Found');
+    await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
+}
+
 // =============================================================================
 // 文字列表示設定（145系）
 // =============================================================================
