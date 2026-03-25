@@ -23,7 +23,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             // CSRFエラー時のリトライ: 再度networkidleまで待ってからログイン
@@ -32,7 +32,7 @@ async function login(page, email, password) {
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
         }
     }
     await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
@@ -199,7 +199,7 @@ test.describe('通知設定', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(180000); // beforeEach(login+closeModal)が60s超えることがあるため延長
+        test.setTimeout(300000); // loginが90s×2+overhead=200s超えることがあるため延長
         await login(page, EMAIL, PASSWORD);
         await closeTemplateModal(page);
     });

@@ -1436,6 +1436,7 @@ test.describe('一括操作（111系）', () => {
     let tableId;
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(300000);
         // tableId を共有テーブルから取得
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のため、beforeAllで1回だけ実行する

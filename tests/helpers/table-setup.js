@@ -137,14 +137,17 @@ async function getAllTypeTableId(page) {
  */
 async function deleteAllTypeTables(page) {
     try {
+        // fire-and-forgetで削除（タイムアウト対策。削除の完了を待たない）
         await page.evaluate(async (baseUrl) => {
-            await fetch(baseUrl + '/api/admin/debug/delete-all-type-tables', {
+            fetch(baseUrl + '/api/admin/debug/delete-all-type-tables', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 body: JSON.stringify({}),
                 credentials: 'include',
-            });
-        }, BASE_URL);
+            }).catch(() => {});
+        }, BASE_URL).catch(() => {});
+        // 少し待ってから返る（削除処理が開始されたことを確認）
+        await page.waitForTimeout(3000).catch(() => {});
     } catch (e) {
         // クリーンアップ失敗は無視
     }
