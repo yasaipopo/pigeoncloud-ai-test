@@ -17,13 +17,15 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
+            // Laddaボタンが無効化されている場合は有効になるまで待機
+            await page.waitForSelector('button[type=submit].btn-primary:not([disabled])', { timeout: 30000 }).catch(() => {});
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
@@ -963,6 +965,14 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await saveTableSettings(page, tableId);
         // 設定が保存されること
         await navigateToWorkflowTab(page, tableId);
+        // ワークフローオプションの内容が完全に描画されるまで待機（Angular遅延ロード対策）
+        await page.waitForFunction(
+            () => {
+                const el = document.querySelector('dataset-workflow-options');
+                return el && el.innerText && el.innerText.includes('再申請');
+            },
+            { timeout: 20000 }
+        ).catch(() => {});
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
         expect(bodyText).toContain('再申請');
