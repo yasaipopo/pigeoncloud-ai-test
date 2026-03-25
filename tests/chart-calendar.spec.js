@@ -1,10 +1,25 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { setupAllTypeTable } = require('./helpers/table-setup');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
+const fs = require('fs');
+const path = require('path');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
+
+/**
+ * storageStateを使ったブラウザコンテキストを作成する
+ */
+async function createLoginContext(browser) {
+    const agentNum = process.env.AGENT_NUM || '1';
+    const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
+    if (fs.existsSync(authStatePath)) {
+        return await browser.newContext({ storageState: authStatePath });
+    }
+    return await browser.newContext();
+}
 
 /**
  * ログイン共通関数
@@ -293,15 +308,18 @@ async function openTableMenu(page) {
 // ============================================================
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(600000);
-    const page = await browser.newPage();
-    await login(page);
+    const context = await createLoginContext(browser);
+    const page = await context.newPage();
+    await ensureLoggedIn(page);
     const tableRes = await createAllTypeTable(page);
     if (tableRes.result !== 'success') {
         await page.close();
+        await context.close();
         throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
     }
     await createAllTypeData(page, 10);
     await page.close();
+    await context.close();
 });
 
 test.describe('チャート・集計 - オプション設定', () => {

@@ -6,6 +6,7 @@ if (!process.env.BASE_URL) {
 const { test, expect } = require('@playwright/test');
 const { setupAllTypeTable } = require('./helpers/table-setup');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
 const path = require('path');
 
@@ -50,6 +51,18 @@ async function login(page, email, password) {
         }
     }
     await page.waitForTimeout(2000);
+}
+
+/**
+ * storageStateを使ったブラウザコンテキストを作成する
+ */
+async function createLoginContext(browser) {
+    const agentNum = process.env.AGENT_NUM || '1';
+    const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
+    if (fs.existsSync(authStatePath)) {
+        return await browser.newContext({ storageState: authStatePath });
+    }
+    return await browser.newContext();
 }
 
 /**
@@ -168,13 +181,15 @@ async function getFirstTableId(page) {
 test.describe('レイアウト・メニュー・UI・ダッシュボード（テーブル不要）', () => {
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        const page = await browser.newPage();
+        test.setTimeout(360000);
+        const context = await createLoginContext(browser);
+        const page = await context.newPage();
         try {
-            await login(page);
+            await ensureLoggedIn(page);
         } catch (e) {
             console.log('beforeAll ログイン失敗（アカウントロック等）:', e.message);
             await page.close();
+            await context.close();
             return;
         }
         // ユーザー上限・テーブル上限をpage経由（セッション付き）で解除
@@ -192,11 +207,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             console.log('ユーザー/テーブル上限解除:', resp.result);
         } catch (e) { console.log('上限解除failed:', e.message); }
         await page.close();
+        await context.close();
     });
 
     test.beforeEach(async ({ page }) => {
         try {
-            await login(page);
+            await ensureLoggedIn(page);
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
                 console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
@@ -497,19 +513,22 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
+        const context = await createLoginContext(browser);
+        const page = await context.newPage();
+        await ensureLoggedIn(page);
         ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
+            await context.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
         await page.close();
+        await context.close();
     });
 
     test.beforeEach(async ({ page }) => {
         try {
-            await login(page);
+            await ensureLoggedIn(page);
         } catch (e) {
             if (e.message && e.message.includes('アカウントロック')) {
                 // アカウントロック時はテストをスキップする
@@ -688,18 +707,17 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
 
         // テーブル管理画面へ（/settingはルートへリダイレクトのため/admin/datasetを使用）
-        await page.goto(BASE_URL + `/admin/dataset`);
-        await page.waitForLoadState('domcontentloaded');
+        await page.goto(BASE_URL + `/admin/dataset`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(1500);
 
         // テーブル管理ページが表示されることを確認
-        await expect(page).toHaveURL(/\/admin\/dataset/);
+        await expect(page).toHaveURL(/\/admin\/dataset/, { timeout: 15000 });
         // ページタイトルにテーブル定義が含まれることを確認
-        await expect(page).toHaveTitle(/テーブル定義/);
+        await expect(page).toHaveTitle(/テーブル定義/, { timeout: 10000 });
         // navbar（ヘッダー）が表示されていることを確認
-        await expect(page.locator('.navbar')).toBeVisible();
-        // サイドバーナビゲーションが表示されていることを確認
-        await expect(page.locator('nav.sidebar-nav')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+        // サイドバーナビゲーションが表示されていることを確認（Angular描画待ち）
+        await expect(page.locator('nav.sidebar-nav')).toBeVisible({ timeout: 20000 });
     });
 
     // ---------------------------------------------------------------------------

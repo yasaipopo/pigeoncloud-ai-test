@@ -1,8 +1,11 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
 const { execSync } = require('child_process');
+const fs = require('fs');
 // エージェント番号ごとに出力先を分ける（並列実行対応）
 const agentNum = process.env.AGENT_NUM || '1';
+// storageState（ログイン済みクッキー）のパス: global-setupが作成する
+const authStatePath = `.auth-state.${agentNum}.json`;
 const reportsDir = process.env.REPORTS_DIR || `reports/agent-${agentNum}`;
 
 // 動画保存ディレクトリ: videos/YYYYMMDD_HHmmss_<commitHash>/
@@ -31,7 +34,7 @@ const videoDir = `${reportsDir}/videos/${dateStr}_${commitHash}`;
 module.exports = defineConfig({
     testDir: './tests',
     globalSetup: './tests/global-setup.js',
-    timeout: 60000,
+    timeout: 300000, // setupAllTypeTableのポーリング(最大200秒)に対応するため5分に延長
     expect: { timeout: 10000 },
     fullyParallel: false,
     retries: 1,
@@ -47,8 +50,10 @@ module.exports = defineConfig({
         baseURL: process.env.TEST_BASE_URL || 'https://ai-test.pigeon-demo.com',
         headless: true,
         viewport: { width: 1280, height: 800 },
-        screenshot: 'only-on-failure',
-        video: 'retain-on-failure',
+        screenshot: 'on',
+        video: 'on',
+        // storageStateがあればログイン済みクッキーを再利用（login()呼び出し頻度を大幅削減）
+        ...(fs.existsSync(authStatePath) ? { storageState: authStatePath } : {}),
         launchOptions: {
             args: ['--no-sandbox', '--disable-dev-shm-usage'],
             // Docker(Linux)はシステムパス、ホストmacOSはデフォルトパス（Playwrightが自動解決）

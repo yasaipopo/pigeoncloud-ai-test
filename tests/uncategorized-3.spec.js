@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 // =============================================================================
 // 未分類テスト（580件）
@@ -50,7 +51,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD, { timeout: 10000 });
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
     } catch (e) {
         // アカウントロックエラーをチェック
         const errText = await page.innerText('body').catch(() => '');
@@ -66,14 +67,16 @@ async function login(page, email, password) {
             if (await continueBtn.count() > 0) {
                 await continueBtn.click();
                 await page.waitForTimeout(2000);
-                await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
+                await page.waitForURL('**/admin/dashboard', { timeout: 180000 }).catch(() => {});
             }
         } else if (page.url().includes('/admin/login')) {
+            // Laddaボタンが無効化されている場合は有効になるまで待機
+            await page.waitForSelector('button[type=submit].btn-primary:not([disabled])', { timeout: 30000 }).catch(() => {});
             await page.waitForTimeout(1000);
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
@@ -239,18 +242,8 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000); // ログインタイムアウト対策
-        try {
-            await login(page);
-        } catch (e) {
-            if (e.message && e.message.includes('アカウントロック')) {
-                console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
-                process.exit(1);
-            }
-            // ログイン失敗時は1回リトライ
-            await page.waitForTimeout(3000);
-            await login(page);
-        }
+        test.setTimeout(30000); // storageState利用により大幅短縮
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
 

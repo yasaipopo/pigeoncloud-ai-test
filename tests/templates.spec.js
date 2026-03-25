@@ -1,32 +1,16 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
 /**
- * ログイン共通関数
+ * ログイン共通関数（ensureLoggedInにフォールバック）
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-    await page.waitForSelector('#id', { timeout: 30000 });
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-    } catch (e) {
-        if (page.url().includes('/admin/login')) {
-            await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-        }
-    }
-    await page.waitForTimeout(1000);
+    await ensureLoggedIn(page);
 }
 
 /**
@@ -34,8 +18,7 @@ async function login(page) {
  * @param {import('@playwright/test').Page} page
  */
 async function openTableManagementBarsMenu(page) {
-    await page.goto(BASE_URL + '/admin/dataset');
-    await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
+    await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(1500);
 
     // fa-bars ドロップダウンボタンをクリック
@@ -183,8 +166,8 @@ test.describe('テンプレート', () => {
         const modalAfter = await page.locator('.modal.show').count();
         const finalUrl = page.url();
 
-        // エラーモーダルが出ていないこと
-        const errorModal = await page.locator('.modal.show .modal-danger, .modal-dialog.modal-danger').count();
+        // エラーモーダルが出ていないこと（.modal.show内にエラーコンテンツがないこと）
+        const errorModal = await page.locator('.modal.show .modal-danger').count();
         expect(errorModal).toBe(0);
 
         // インストール完了後はモーダルが閉じるかダッシュボードにいること

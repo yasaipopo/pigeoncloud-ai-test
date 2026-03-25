@@ -141,7 +141,7 @@ module.exports = async function globalSetup() {
             // inputs[3]=ドメイン, inputs[4]=ログインID なので :not(.form-control) で絞り込み
             const formInputDomain = page.locator('input[type="text"]:not(.form-control):not(.shortcut-input)').first();
             const formInputLogin  = page.locator('input[type="text"]:not(.form-control):not(.shortcut-input)').nth(1);
-            await formInputDomain.waitFor({ state: 'visible', timeout: 15000 });
+            await formInputDomain.waitFor({ state: 'visible', timeout: 30000 });
             await formInputDomain.fill(domain);
             await formInputLogin.fill('admin');
             // 作成ボタン（btn-success ladda-button, type=submit）をクリック
@@ -180,10 +180,16 @@ module.exports = async function globalSetup() {
         ].join('\n') + '\n');
 
         console.log(`[global-setup] 環境作成完了: ${actualUrl} / admin / ${newPassword}`);
+
+        // 新規環境のstorageState（認証クッキー）を作成してキャッシュ
+        await browser.close();
+        await saveStorageStateIfNeeded(agentNum);
+        return;
     } catch (err) {
         console.error('[global-setup] 環境作成失敗:', err.message);
         // 失敗してもテストは続行（既存環境で動かす）
     } finally {
-        await browser.close();
+        // browser が既に閉じられている場合もあるため try-catch で囲む
+        try { await browser.close(); } catch(e) {}
     }
 };

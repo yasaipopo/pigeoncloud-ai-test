@@ -131,7 +131,7 @@ for i in $(seq 1 $WORKERS); do
       source ".test_env_runtime.$i"
       set +a
     fi
-    npx playwright test $specs --reporter=list 2>&1
+    npx playwright test $specs 2>&1
   ) > "$logfile" 2>&1 &
 
   echo "$! $i" >> "$PIDS_FILE"

@@ -1,6 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 const path = require('path');
 const fs = require('fs');
 
@@ -32,6 +33,18 @@ async function login(page) {
     }
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(1000);
+}
+
+/**
+ * storageStateを使ったブラウザコンテキストを作成する
+ */
+async function createLoginContext(browser) {
+    const agentNum = process.env.AGENT_NUM || '1';
+    const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
+    if (fs.existsSync(authStatePath)) {
+        return await browser.newContext({ storageState: authStatePath });
+    }
+    return await browser.newContext();
 }
 
 /**
@@ -105,8 +118,7 @@ async function getFirstTableId(page) {
  * @param {string} tableId
  */
 async function navigateToTablePage(page, tableId) {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-    await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     // Angular描画: 「帳票」ボタンが表示されるまで待機（最大15秒）
     await page.waitForSelector('button:has-text("帳票"), button.dropdown-toggle', { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(1000);
@@ -126,9 +138,9 @@ async function navigateToReportSetting(page, tableId) {
 // =============================================================================
 
 test.describe('帳票（登録・出力・ダウンロード）', () => {
-    // describeブロック全体のデフォルトタイムアウトを120秒に設定
-    // （beforeEachのログイン処理が遅い場合に60秒で失敗することを防ぐ）
-    test.describe.configure({ timeout: 120000 });
+    // describeブロック全体のデフォルトタイムアウトを240秒に設定
+    // （beforeEachのログイン処理が遅い場合に120秒で失敗することを防ぐ）
+    test.describe.configure({ timeout: 240000 });
 
     // describeブロック内で共有するtableId
     let tableId = null;
@@ -136,19 +148,22 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // テスト全体の前に一度だけテーブルIDを取得（テーブルがなければ作成）
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
+        const context = await createLoginContext(browser);
+        const page = await context.newPage();
+        await ensureLoggedIn(page);
         ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
             await page.close();
+            await context.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
         await page.close();
+        await context.close();
     });
 
     // 各テスト前: ログインのみ
     test.beforeEach(async ({ page }) => {
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
 
@@ -650,7 +665,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // ログインページにリダイレクトされた場合は再ログイン
         if (page.url().includes('/admin/login')) {
-            await login(page);
+            await ensureLoggedIn(page);
             await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
             await page.waitForLoadState('domcontentloaded');
             await page.waitForTimeout(3000);
@@ -709,7 +724,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             // ログインページにリダイレクトされた場合は再ログイン
             if (page.url().includes('/admin/login')) {
-                await login(page);
+                await ensureLoggedIn(page);
                 await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
                 await page.waitForLoadState('domcontentloaded');
                 await page.waitForTimeout(3000);

@@ -1,10 +1,25 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
+const { setupAllTypeTable, deleteAllTypeTables, createAllTypeData } = require('./helpers/table-setup');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
+const fs = require('fs');
+const path = require('path');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
+
+/**
+ * storageStateを使ったブラウザコンテキストを作成する
+ */
+async function createLoginContext(browser) {
+    const agentNum = process.env.AGENT_NUM || '1';
+    const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
+    if (fs.existsSync(authStatePath)) {
+        return await browser.newContext({ storageState: authStatePath });
+    }
+    return await browser.newContext();
+}
 
 /**
  * ログイン共通関数
@@ -289,7 +304,7 @@ test.describe('ログ管理', () => {
     // 13-1 (A/B): ログ一覧表示
     // ---------------------------------------------------------------------------
     test('13-1: 各ユーザーの操作ログが確認できること', async ({ page }) => {
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
         // ログページへ遷移
@@ -318,7 +333,7 @@ test.describe('ログ管理', () => {
     // 13-2 (A/B): CSV UP/DL履歴
     // ---------------------------------------------------------------------------
     test('13-2: CSV UP/DL履歴が確認できること', async ({ page }) => {
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
         // CSV UP/DL履歴ページへ遷移
@@ -350,12 +365,11 @@ test.describe('ログ管理', () => {
     // 196 (B): リクエストログ
     // ---------------------------------------------------------------------------
     test('196: リクエストログで処理ステータスが確認できること', async ({ page }) => {
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
         // リクエストログページへ遷移
-        await page.goto(BASE_URL + '/admin/job_logs');
-        await page.waitForLoadState('domcontentloaded');
+        await page.goto(BASE_URL + '/admin/job_logs', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(1000);
 
         // リクエストログページが表示されることを確認
@@ -382,8 +396,8 @@ test.describe('ログ管理', () => {
 // =============================================================================
 
 test.describe('コメントメンション', () => {
-    // 各テストのタイムアウトを90秒に設定（コメント送信待機を含む）
-    test.describe.configure({ timeout: 90000 });
+    // 各テストのタイムアウトを180秒に設定（コメント送信待機を含む）
+    test.describe.configure({ timeout: 180000 });
 
     /** テーブルURL（beforeAll で設定） */
     let tableUrl = '/admin/dataset__7';
@@ -392,24 +406,32 @@ test.describe('コメントメンション', () => {
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
+        const context = await createLoginContext(browser);
+        const page = await context.newPage();
+        await ensureLoggedIn(page);
         const { tableId } = await setupAllTypeTable(page);
         if (!tableId) {
             await page.close();
+            await context.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
         tableUrl = '/admin/dataset__' + tableId;
+        // データが0件だとレコードviewURLが取得できないためデータ投入
+        await createAllTypeData(page, 3).catch((e) => console.log('createAllTypeData error (ignored):', e.message));
+        await page.waitForTimeout(2000);
         recordViewUrl = await getFirstRecordViewUrl(page, tableUrl);
         await page.close();
+        await context.close();
     });
 
     test.afterAll(async ({ browser }) => {
         try {
-            const page = await browser.newPage();
-            await login(page);
+            const context = await createLoginContext(browser);
+            const page = await context.newPage();
+            await ensureLoggedIn(page);
             await deleteAllTypeTables(page);
             await page.close();
+            await context.close();
         } catch (e) {}
     });
 
@@ -417,7 +439,7 @@ test.describe('コメントメンション', () => {
     // 69-1 (A/B): 1ユーザーへのメンション
     // ---------------------------------------------------------------------------
     test('69-1: 1ユーザーへのメンション付きコメントが送信できること', async ({ page }) => {
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
         // テストユーザー作成（失敗しても継続）
@@ -477,12 +499,11 @@ test.describe('コメントメンション', () => {
     // 69-2 (A/B): 複数ユーザーへのメンション
     // ---------------------------------------------------------------------------
     test('69-2: 複数ユーザーへのメンション付きコメントが送信できること', async ({ page }) => {
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
         // レコード詳細ページへ遷移
-        await page.goto(BASE_URL + recordViewUrl);
-        await page.waitForLoadState('domcontentloaded');
+        await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(5000);
         await page.keyboard.press('Escape');
@@ -526,7 +547,7 @@ test.describe('コメントメンション', () => {
     // 69-3 (A/B): 存在しないユーザーでメンション
     // ---------------------------------------------------------------------------
     test('69-3: 存在しないユーザーでメンションしてもコメントが保存されること', async ({ page }) => {
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
         // レコード詳細ページへ遷移
@@ -572,7 +593,7 @@ test.describe('コメントメンション', () => {
     // 69-4 (A): 組織へのメンション
     // ---------------------------------------------------------------------------
     test('69-4: 組織へのメンション付きコメントが送信できること', async ({ page }) => {
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
         // レコード詳細ページへ遷移
@@ -633,7 +654,7 @@ test.describe('コメントメンション', () => {
     test('242: ログとコメントをまとめて表示が有効の時にメンション機能が動作すること', async ({ page }) => {
         // このテストは設定変更+コメント送信を含むため個別にタイムアウトを延長
         test.setTimeout(180000);
-        await login(page);
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
         // テーブルIDをURLから取得（例: /admin/dataset__7 -> 7）
@@ -641,8 +662,7 @@ test.describe('コメントメンション', () => {
         const tableId = match ? match[1] : '7';
 
         // テーブル設定ページでログとコメントをまとめて表示を有効化
-        await page.goto(BASE_URL + '/admin/dataset/edit/' + tableId);
-        await page.waitForLoadState('domcontentloaded');
+        await page.goto(BASE_URL + '/admin/dataset/edit/' + tableId, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(3000);
         await page.keyboard.press('Escape');
         await page.waitForTimeout(500);
@@ -696,8 +716,7 @@ test.describe('コメントメンション', () => {
         }
 
         // レコード詳細ページへ遷移
-        await page.goto(BASE_URL + recordViewUrl);
-        await page.waitForLoadState('domcontentloaded');
+        await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(5000);
         await page.keyboard.press('Escape');

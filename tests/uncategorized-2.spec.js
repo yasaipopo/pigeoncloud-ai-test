@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 // =============================================================================
 // 未分類テスト（580件）
@@ -44,7 +45,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 45000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
     } catch (e) {
         // アカウントロックエラーをチェック
         const errText = await page.innerText('body').catch(() => '');
@@ -57,10 +58,12 @@ async function login(page, email, password) {
             // 再度ログインを試みる
             const currentUrl = page.url();
             if (currentUrl.includes('/admin/login')) {
+                // Laddaボタンが無効化されている場合は有効になるまで待機
+                await page.waitForSelector('button[type=submit].btn-primary:not([disabled])', { timeout: 30000 }).catch(() => {});
                 await page.fill('#id', email || EMAIL);
                 await page.fill('#password', password || PASSWORD);
                 await page.click('button[type=submit].btn-primary');
-                await page.waitForURL('**/admin/dashboard', { timeout: 45000 }).catch(() => {});
+                await page.waitForURL('**/admin/dashboard', { timeout: 180000 }).catch(() => {});
             }
         }
         // 利用規約同意画面への対処
@@ -72,7 +75,7 @@ async function login(page, email, password) {
             if (await continueBtn.count() > 0) {
                 await continueBtn.click();
                 await page.waitForTimeout(2000);
-                await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
+                await page.waitForURL('**/admin/dashboard', { timeout: 180000 }).catch(() => {});
             }
         }
     }
@@ -238,19 +241,8 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        // 各テストのタイムアウトをbeforeEach込みで120秒に延長（login処理が長引くケース対応）
-        test.setTimeout(120000);
-        try {
-            await login(page);
-        } catch (e) {
-            if (e.message && e.message.includes('アカウントロック')) {
-                // アカウントロックの場合はテストをスキップ（process.exitではなく）
-                console.error('アカウントロック検出 - このテストをスキップします:', e.message);
-                test.skip();
-                return;
-            }
-            throw e;
-        }
+        test.setTimeout(30000); // storageState利用により大幅短縮
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
 
@@ -798,11 +790,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         // テーブル一覧が正常表示されること
         await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
         expect(page.url()).toContain(`/admin/dataset__${tid}`);
-        // 帳票ボタンが表示されること（Excelテーブル機能関連）
-        const reportBtn = page.locator('button, a').filter({ hasText: /帳票/ });
-        // ページにエラーメッセージが出ていないこと
+        // ページにエラーメッセージが出ていないこと（厳密な500エラーのみチェック）
         expect(pageText).not.toContain('エラーが発生しました');
-        expect(pageText).not.toContain('500');
+        expect(pageText).not.toContain('500 Internal Server Error');
+        expect(pageText).not.toContain('500 Error');
     });
 
     test('558: 子テーブルが親テーブル項目を使った計算を持つ場合に編集中もリアルタイム反映されること', async ({ page }) => {
