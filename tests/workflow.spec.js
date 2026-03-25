@@ -1436,7 +1436,7 @@ test.describe('一括操作（111系）', () => {
     let tableId;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(300000);
+        test.setTimeout(600000); // enableWorkflowは重い処理のため10分に延長
         // tableId を共有テーブルから取得
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のため、beforeAllで1回だけ実行する
@@ -1455,6 +1455,7 @@ test.describe('一括操作（111系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
+        test.setTimeout(300000); // loginが遅い環境でデフォルト60s超えることがあるため延長
         // ワークフロー有効化はbeforeAllで済んでいるため、ここではログインのみ行う
         await login(page);
         await closeTemplateModal(page);
@@ -1478,7 +1479,7 @@ test.describe('一括操作（111系）', () => {
     // 111-01: 一括承認（1件選択）
     // -------------------------------------------------------------------------
     test('111-01: 申請を1つ選択して一括承認できること', async ({ page }) => {
-        test.setTimeout(300000);
+        test.setTimeout(600000); // createRecordAndSubmitが遅い環境で300s超えることがあるため延長
         // adminで申請を作成
         const approverName = EMAIL.split('@')[0];
         const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認テスト');
@@ -1522,7 +1523,7 @@ test.describe('一括操作（111系）', () => {
     // 111-02: 一括承認（複数選択）
     // -------------------------------------------------------------------------
     test('111-02: 申請を複数選択して一括承認できること', async ({ page }) => {
-        test.setTimeout(300000);
+        test.setTimeout(600000); // createRecordAndSubmitが遅い環境で300s超えることがあるため延長
         // adminで複数申請
         const approverName = EMAIL.split('@')[0];
         await createRecordAndSubmit(page, tableId, approverName, '一括承認A');

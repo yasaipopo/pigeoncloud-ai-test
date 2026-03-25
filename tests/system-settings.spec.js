@@ -144,7 +144,7 @@ async function login(page, email, password) {
                 await page.click('button[type=submit].btn-primary');
             }
             // URLが変わるまで待つ（ログイン処理が完了するまで）
-            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
     await page.waitForTimeout(2000);
@@ -163,6 +163,23 @@ async function closeTemplateModal(page) {
             await page.waitForTimeout(800);
         }
     } catch (e) {}
+}
+
+/**
+ * ページ遷移後にloginリダイレクトされた場合に再ログインして再遷移する
+ * セッション切れ（login_max_devices等）対策
+ */
+async function gotoWithSessionRecovery(page, url) {
+    await page.goto(url);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+    if (page.url().includes('/admin/login')) {
+        console.log('[gotoWithSessionRecovery] セッション切れ検出。再ログイン後に再遷移します。');
+        await login(page).catch(() => {});
+        await page.goto(url);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(1500);
+    }
 }
 
 /**
@@ -495,10 +512,9 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('10-3: テーブル定義の変更がエラーなく行えること', async ({ page }) => {
 
-        // テーブル設定ページへ（Angular router: dataset__{id}/setting または dataset__{id} でテーブル設定に遷移）
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        // テーブル設定ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
+        await page.waitForTimeout(500); // Angular追加レンダリング待機
 
         // テーブル一覧ページが表示されることを確認（URL・ナビバーヘッダー）
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
@@ -984,10 +1000,8 @@ test.describe('共通設定・システム設定', () => {
             }
         }
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1009,10 +1023,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-4: 全てのデータ削除がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1028,10 +1040,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-5: 集計を選択してデータ集計がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1049,10 +1059,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-6: チャート追加がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1067,10 +1075,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-7: 帳票登録がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1085,10 +1091,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-8: データ検索がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1108,10 +1112,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-9: データ編集がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1127,10 +1129,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-10: レコードの詳細情報表示がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1150,10 +1150,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-11: レコードの編集がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1169,10 +1167,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-12: レコードの削除がエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1187,10 +1183,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-2: CSVダウンロードがエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
@@ -1208,10 +1202,8 @@ test.describe('共通設定・システム設定', () => {
     // ---------------------------------------------------------------------------
     test('9-3: CSVアップロードがエラーなく行えること', async ({ page }) => {
 
-        // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        // レコード一覧ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
+        await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
