@@ -1995,7 +1995,7 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000); // 本番環境での重いページ読み込みに対応（5分）
         await login(page);
         await closeTemplateModal(page);
     });
@@ -2007,18 +2007,16 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
     // -------------------------------------------------------------------------
     test('260-1: ラジオボタン選択により条件フィールドが表示・非表示に切り替わること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-        test.setTimeout(120000);
+        test.setTimeout(300000); // 最大5分（本番環境での重いページ読み込みに対応）
 
-        // レコード新規作成ページへ遷移
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
-        await page.waitForLoadState('domcontentloaded', { timeout: 20000 }).catch(() => {});
-        // Angular SPAのレンダリング完了を待機
-        // admin-forms-field: フォームフィールドのAngularコンポーネント（ALLテストテーブルでは96個）
-        // > 10個になるまで待つことで、十分な数のフィールドが描画されたことを確認
+        // レコード新規作成ページへ遷移（domcontentloadedを待つことでnavigatioTimeout節約）
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+        // Angular SPAのレンダリング完了を待機（最大20秒）
         await page.waitForFunction(
             () => document.querySelectorAll('admin-forms-field').length > 10,
-            { timeout: 60000 }
-        ).catch(() => page.waitForTimeout(5000));
+            { timeout: 20000 }
+        ).catch(() => page.waitForTimeout(2000));
 
         // Angularの表示条件(display condition)適用を待機
         // 初期レンダリング時は全フィールドが一時的に描画されるが、
