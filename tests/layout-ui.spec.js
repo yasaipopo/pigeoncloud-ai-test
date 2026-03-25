@@ -58,6 +58,11 @@ async function login(page, email, password) {
  */
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
         return await browser.newContext({ storageState: authStatePath });
@@ -273,8 +278,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // テーブル管理画面へ
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
@@ -292,8 +296,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     test('78-1: ダッシュボードでチャートをドラッグアンドドロップで並び替えができること', async ({ page }) => {
         test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
@@ -341,8 +344,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
@@ -362,8 +364,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
@@ -390,8 +391,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
@@ -417,8 +417,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         try {
             // その他設定ページへ
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -457,8 +456,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -561,12 +559,11 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブルのレコード一覧を表示
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // Ctrl+Space を押す
         await page.keyboard.press('Control+Space');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // テーブル検索UI（モーダルやサーチバー）が表示されることを確認
         // セレクターは実装依存のため、何らかの検索UIが出現したことを確認する
@@ -590,8 +587,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブル編集ページへ
         await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dataset\/edit/);
 
@@ -656,8 +652,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブル編集ページへ
         await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dataset\/edit/);
 
@@ -708,7 +703,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブル管理画面へ（/settingはルートへリダイレクトのため/admin/datasetを使用）
         await page.goto(BASE_URL + `/admin/dataset`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/, { timeout: 15000 });
@@ -728,8 +723,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブル管理画面へ
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
@@ -768,8 +762,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // ダッシュボードが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dashboard/);
@@ -810,8 +803,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブルのレコード一覧へ
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
         // ページタイトルが表示されていることを確認（テーブル名が含まれる）
         const title = await page.title();
@@ -850,8 +842,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
@@ -890,8 +881,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // ダッシュボードを表示
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
@@ -915,8 +905,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブルのレコード一覧へ
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
         // navbar（ヘッダー）が表示されていることを確認
@@ -935,8 +924,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブルのレコード一覧へ
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
         // navbar（ヘッダー）が表示されていることを確認
@@ -962,8 +950,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブルのレコード一覧へ（/notificationはルートへリダイレクトのため直接レコード一覧を使用）
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // ページが表示されることを確認
         const url = page.url();

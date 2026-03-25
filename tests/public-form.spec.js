@@ -6,6 +6,10 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 /**
  * ログイン共通関数
  */
@@ -53,8 +57,7 @@ async function closeTemplateModal(page) {
  */
 async function openOtherTab(page, tableId) {
     await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    await waitForAngular(page);
 
     // Angular ngb-navのタブをJSでクリック（SPAルーティング問題回避）
     await page.evaluate(() => {

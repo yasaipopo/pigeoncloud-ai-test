@@ -68,7 +68,7 @@ async function getTableLinkFromDashboard(page) {
     await page.goto(BASE_URL + '/admin/dashboard');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(2000);
+    await waitForAngular(page);
     const href = await page.evaluate(() => {
         const links = Array.from(document.querySelectorAll('a[href*="/admin/dataset__"]'));
         for (const link of links) {
@@ -171,14 +171,12 @@ async function closeTemplateModal(page) {
  */
 async function gotoWithSessionRecovery(page, url) {
     await page.goto(url);
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await waitForAngular(page);
     if (page.url().includes('/admin/login')) {
         console.log('[gotoWithSessionRecovery] セッション切れ検出。再ログイン後に再遷移します。');
         await login(page).catch(() => {});
         await page.goto(url);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
     }
 }
 
@@ -426,8 +424,7 @@ test.describe('共通設定・システム設定', () => {
     test('10-1: テーブルの順番入れ替えがエラーなく行えること', async ({ page }) => {
         // テーブル管理 (/admin/dataset) でドラッグアンドドロップによる順番変更
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dataset/);
 
@@ -484,8 +481,7 @@ test.describe('共通設定・システム設定', () => {
 
         // テーブル管理ページへ
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/dataset/);
 
@@ -688,8 +684,7 @@ test.describe('共通設定・システム設定', () => {
 
         // その他設定ページへ（Angular router: /admin/admin_setting/edit/1）
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // その他設定ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
@@ -705,9 +700,8 @@ test.describe('共通設定・システム設定', () => {
         expect(userBody.result).toBe('success');
 
         // ページを再読み込みしてユーザー数を確認
-        await page.reload();
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
         // リロード後もフォームが表示されていること
@@ -720,15 +714,14 @@ test.describe('共通設定・システム設定', () => {
     test('7-2: ユーザーを減らすとシステム利用状況のユーザー数表示が減ること', async ({ page }) => {
         // セッションを確立する（ログインページを経由せずダッシュボードへ移動）
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // ユーザー上限を解除してからユーザーを作成する（正しいAPIエンドポイントを使用）
         const limitResult2 = await debugApiPost(page, '/settings', { table: 'setting', data: { max_user: 9999 } });
         console.log('ユーザー上限解除(7-2):', JSON.stringify(limitResult2));
 
         // 上限解除後に少し待機してDB更新・キャッシュクリアを確実にする
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // テストユーザーを作成
         const userBody = await debugApiPost(page, '/create-user');
@@ -737,8 +730,7 @@ test.describe('共通設定・システム設定', () => {
 
         // ユーザー管理ページへ
         await page.goto(BASE_URL + '/admin/user');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/user/);
         // ユーザー管理ページにテーブルまたはユーザー一覧が表示されていること
@@ -746,8 +738,7 @@ test.describe('共通設定・システム設定', () => {
 
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
         // 設定フォームが表示されていること
@@ -762,8 +753,7 @@ test.describe('共通設定・システム設定', () => {
 
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
         // 設定フォームが表示されていること
@@ -772,9 +762,8 @@ test.describe('共通設定・システム設定', () => {
         await expect(page.locator('body')).toContainText('ロック自動解除時間');
 
         // ページを再読み込みして確認
-        await page.reload();
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
         await expect(page.locator('form').first()).toBeVisible();
@@ -796,15 +785,13 @@ test.describe('共通設定・システム設定', () => {
 
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // ログインページにリダイレクトされた場合は再ログイン
         if (page.url().includes('/admin/login')) {
             await login(page);
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
@@ -821,6 +808,11 @@ test.describe('共通設定・システム設定', () => {
 
         const smtpUser = process.env.SMTP_USER || process.env.IMAP_USER;
         const smtpPass = process.env.SMTP_PASS || process.env.IMAP_PASS;
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
         if (!smtpUser || !smtpPass) {
             test.skip(true, 'SMTP認証情報未設定のためスキップ');
             return;
@@ -862,8 +854,7 @@ test.describe('共通設定・システム設定', () => {
 
         // システム利用状況ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
         // 現在のメール通知数を取得（ページテキストから）
@@ -881,8 +872,7 @@ test.describe('共通設定・システム設定', () => {
 
         // システム利用状況ページを再読み込み
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // ページが正常に表示されていることを確認（設定フォームの固有要素）
         await expect(page.locator('form').first()).toBeVisible();
@@ -899,8 +889,7 @@ test.describe('共通設定・システム設定', () => {
         test.setTimeout(120000);
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -911,8 +900,7 @@ test.describe('共通設定・システム設定', () => {
         if (result?.result === 'success') {
             // 設定が保存されたことを確認（ページ再読み込み）
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
             const isCheckedAfter = await page.locator('#setTwoFactor_1').isChecked();
             console.log('二段階認証ON反映確認: ' + isCheckedAfter);
             // 設定後は必ずOFFに戻す（他テストへの影響を防ぐ）
@@ -934,8 +922,7 @@ test.describe('共通設定・システム設定', () => {
         test.setTimeout(120000);
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -949,8 +936,7 @@ test.describe('共通設定・システム設定', () => {
 
         // 設定が解除されたことを確認（ページ再読み込み）
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const isCheckedAfter = await page.locator('#setTwoFactor_1').isChecked();
         console.log('二段階認証OFF反映確認（チェックなし）: ' + !isCheckedAfter);
         // 二段階認証がOFFになっていること（チェックなし）
@@ -988,15 +974,14 @@ test.describe('共通設定・システム設定', () => {
             // create-all-type-tableは非同期のため、フロントエンドからアクセス可能になるまで待機
             for (let retry = 0; retry < 12; retry++) {
                 await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-                await page.waitForLoadState('domcontentloaded');
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
                 const bodyText = await page.innerText('body').catch(() => '');
                 if (!bodyText.includes('テーブルが見つかりません')) {
                     console.log('[9-1] テーブルアクセス確認完了 (retry=', retry, ')');
                     break;
                 }
                 console.log('[9-1] テーブルまだ準備中... (retry=', retry, ')');
-                await page.waitForTimeout(10000);
+                await waitForAngular(page);
             }
         }
 
@@ -1251,8 +1236,7 @@ test.describe('共通設定・システム設定', () => {
         test.setTimeout(120000);
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -1267,8 +1251,7 @@ test.describe('共通設定・システム設定', () => {
 
         // ページを再読み込みして設定が反映されたことを確認
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const isCheckedAfter = await page.locator('#ignore_new_pw_input_1').isChecked();
         console.log('パスワードリセットOFF設定反映確認: ' + isCheckedAfter);
 
@@ -1287,8 +1270,7 @@ test.describe('共通設定・システム設定', () => {
         test.setTimeout(120000);
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -1302,8 +1284,7 @@ test.describe('共通設定・システム設定', () => {
 
         // ページを再読み込みして設定が反映されたことを確認
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const isCheckedAfter = await page.locator('#ignore_new_pw_input_1').isChecked();
         console.log('パスワードリセットON設定反映確認（チェックなし）: ' + !isCheckedAfter);
 
@@ -1322,8 +1303,7 @@ test.describe('共通設定・システム設定', () => {
         test.setTimeout(120000);
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -1357,8 +1337,7 @@ test.describe('共通設定・システム設定', () => {
         test.setTimeout(120000);
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -1386,8 +1365,7 @@ test.describe('共通設定・システム設定', () => {
 
         // ページを再読み込みしてOFFが反映されたか確認（OFFになっているので安全）
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const isCheckedAfter = await page.locator('#setTermsAndConditions_1').isChecked();
         console.log('利用規約表示OFF反映確認（ページ）: ' + !isCheckedAfter);
         // 利用規約表示がOFFになっていること（チェックなし）
@@ -1405,8 +1383,7 @@ test.describe('共通設定・システム設定', () => {
         test.setTimeout(120000);
         // その他設定ページへ
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
@@ -1468,8 +1445,7 @@ test.describe('共通設定・システム設定', () => {
 
         // リセット後にページへアクセス（パスワード変更誘発なし）
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // 設定ページが表示されていること（パスワード変更画面ではないこと）
         // ※ days=9999のため強制変更画面は表示されないはず
@@ -1514,7 +1490,7 @@ test.describe('共通設定・システム設定', () => {
         await page.goto(BASE_URL + '/admin/sso-settings');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // ページが表示されること（エラーページでないこと）
         const url = page.url();
@@ -1526,8 +1502,7 @@ test.describe('共通設定・システム設定', () => {
             await page.click('button[type=submit].btn-primary');
             await page.waitForURL('**/admin/**', { timeout: 20000 }).catch(() => {});
             await page.goto(BASE_URL + '/admin/sso-settings');
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // SSO設定に関連する要素を確認（Google/Microsoft設定フォーム・メタデータXMLアップロード等）
@@ -1560,7 +1535,7 @@ test.describe('共通設定・システム設定', () => {
         await page.goto(BASE_URL + '/admin/sso-settings');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 識別子・応答URL関連のUI要素を確認
         const uiExists = await page.evaluate(() => {
@@ -1593,7 +1568,7 @@ test.describe('共通設定・システム設定', () => {
         await page.goto(BASE_URL + '/admin/maintenance-cert');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         const certPageContent = await page.evaluate(() => {
             const text = document.body.innerText || '';
@@ -1619,7 +1594,7 @@ test.describe('共通設定・システム設定', () => {
         await page.goto(BASE_URL + '/admin/log-archives');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         const logContent = await page.evaluate(() => {
             const text = document.body.innerText || '';
@@ -1643,8 +1618,7 @@ test.describe('共通設定・システム設定', () => {
         // ALLテストテーブルのレコード詳細でGoogleマップフィールドを確認
         // まずダッシュボードからALLテストテーブルに遷移
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         try {
             // ALLテストテーブルのリンクを探す（count()で安全にチェック）
@@ -1652,7 +1626,7 @@ test.describe('共通設定・システム設定', () => {
             if (tableLinks.length > 0) {
                 await tableLinks[0].click({ timeout: 8000 }).catch(() => {});
                 await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
 
                 // レコード新規作成フォームを開く（count()で安全にチェック）
                 const addBtns = await page.locator('button').filter({ hasText: '追加' }).all();
@@ -1697,8 +1671,7 @@ test.describe('共通設定・システム設定', () => {
     test('844-1: テーブルのAPI公開設定UIが確認できること', async ({ page }) => {
         // テーブル設定画面からAPI公開設定を探す
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // テーブル設定ページへ（hrefをDOMから直接取得してタイムアウトを回避）
         const href = await page.evaluate(() => {
@@ -1710,8 +1683,7 @@ test.describe('共通設定・システム設定', () => {
             const tableId = match ? match[1] : null;
             if (tableId) {
                 await page.goto(`${BASE_URL}/admin/dataset/edit/${tableId}`);
-                await page.waitForLoadState('domcontentloaded');
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
 
                 // API公開設定タブを探す
                 const apiTab = page.locator('[role=tab]').filter({ hasText: 'API' });
@@ -1721,7 +1693,7 @@ test.describe('共通設定・システム設定', () => {
 
                 if (hasApiTab) {
                     await apiTab.first().click();
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
                 } else if (hasPublicTab) {
                     await publicTab.first().click();
                     await page.waitForTimeout(1000);
@@ -1757,8 +1729,7 @@ test.describe('共通設定・システム設定', () => {
     test('845-1: freee連携設定UIが確認できること（非対応の場合はskip）', async ({ page }) => {
         // システム設定のその他設定からfreee連携を探す
         await page.goto(BASE_URL + '/admin/other_setting');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         const freeeContent = await page.evaluate(() => {
             const text = document.body.innerText || '';

@@ -102,8 +102,7 @@ async function debugApiPost(page, path, body = {}) {
  */
 async function getFirstTableId(page) {
     await page.goto(BASE_URL + '/admin/dashboard');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 
     const link = page.locator('a[href*="/admin/dataset__"]').first();
     const href = await link.getAttribute('href', { timeout: 15000 }).catch(() => null);
@@ -121,7 +120,7 @@ async function navigateToTablePage(page, tableId) {
     await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     // Angular描画: 「帳票」ボタンが表示されるまで待機（最大15秒）
     await page.waitForSelector('button:has-text("帳票"), button.dropdown-toggle', { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 }
 
 /**
@@ -501,7 +500,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         await page.goto(BASE_URL + '/admin/admin');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // ナビバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
@@ -634,7 +633,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await page.goto(BASE_URL + '/admin/dashboard');
             await page.waitForLoadState('domcontentloaded');
             try { await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 15000 }); } catch (e) {}
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
             mainTableId = await findOrCreateAllTypeTable();
             // それでも見つからない場合はダッシュボードのリンクから取得
             if (!mainTableId) {
@@ -658,19 +657,17 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // ALLテストテーブルのページに移動
         await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // ログインページにリダイレクトされた場合は再ログイン
         if (page.url().includes('/admin/login')) {
             await ensureLoggedIn(page);
             await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(3000);
+            await waitForAngular(page);
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // 「テーブルが見つかりません」エラーが表示されないこと
@@ -716,9 +713,8 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         // ページをリロードしてレコードを確認（最大3回リトライ）
         let rowCount = 0;
         for (let attempt = 0; attempt < 3; attempt++) {
-            await page.reload();
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(3000);
+            await page.reload({ waitUntil: 'domcontentloaded' });
+            await waitForAngular(page);
             await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
             await page.waitForTimeout(2000);
 
@@ -726,10 +722,9 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             if (page.url().includes('/admin/login')) {
                 await ensureLoggedIn(page);
                 await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
-                await page.waitForLoadState('domcontentloaded');
-                await page.waitForTimeout(3000);
+                await waitForAngular(page);
                 await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const rows = page.locator('table tbody tr');
@@ -771,8 +766,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         await page.keyboard.press('Escape');
         await page.waitForTimeout(1000);
         await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
 
         // 帳票ボタンが表示されること
@@ -872,6 +866,11 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
         await page.screenshot({ path: `${reportsDir}/screenshots/56-1-report-invalid-file.png`, fullPage: true });
     });
 

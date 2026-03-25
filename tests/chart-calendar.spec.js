@@ -14,6 +14,11 @@ const PASSWORD = process.env.TEST_PASSWORD;
  */
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
         return await browser.newContext({ storageState: authStatePath });
@@ -30,8 +35,7 @@ async function login(page, email, password) {
 
     // まずCSRFトークンを取得してAPIで直接ログインを試みる
     await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    await waitForAngular(page);
 
     const loginResult = await page.evaluate(async ({ email, password, adminTable }) => {
         try {
@@ -60,8 +64,7 @@ async function login(page, email, password) {
     if (loginResult.result === 'success') {
         // ログイン成功後ダッシュボードへ移動
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         return;
     }
 
@@ -69,16 +72,14 @@ async function login(page, email, password) {
     const base64Token = Buffer.from(`${loginEmail}:${loginPassword}`).toString('base64');
     try {
         await page.goto(BASE_URL + '/api/login/debug?token=' + base64Token);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
     } catch (e) {
         // debugLoginが利用不可の場合は無視
     }
 
     // ダッシュボードへ移動
     await page.goto(BASE_URL + '/admin/dashboard');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    await waitForAngular(page);
 
     // まだログインページにいる場合は通常フォームログインを試みる
     if (page.url().includes('/admin/login')) {
@@ -260,7 +261,7 @@ async function navigateToAllTypeTable(page) {
     await page.waitForLoadState('domcontentloaded');
     // Angular描画完了を待機（アクションメニューボタンが表示されるまで）
     await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 }
 
 /**
@@ -808,8 +809,7 @@ test.describe('集計 - 基本機能', () => {
             // ダッシュボードへ移動して確認（ダッシュボードオプションがあった場合のみ）
             if (hasDashboardOption) {
                 await page.goto(BASE_URL + '/admin/dashboard');
-                await page.waitForLoadState('domcontentloaded');
-                await page.waitForTimeout(3000);
+                await waitForAngular(page);
 
                 // ダッシュボードにテーブルが表示されていることを確認
                 const dashboardTable = page.locator('.dashboard-item, .dashboard-table, table.table');

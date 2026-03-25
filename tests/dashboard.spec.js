@@ -6,6 +6,11 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
+
 /**
  * ログイン共通関数
  */
@@ -44,15 +49,14 @@ test.describe('ダッシュボード', () => {
 
         // DB-03〜DB-05のために事前にダッシュボードを作成しておく
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // テンプレートインストールモーダルが自動表示されている場合は閉じる
         const templateModal = page.locator('.modal.show');
         const isTemplateModal = await templateModal.isVisible({ timeout: 3000 }).catch(() => false);
         if (isTemplateModal) {
             await page.locator('button:has-text("スキップ")').first().click({ force: true }).catch(() => {});
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // 「+」ボタン（fa-plus）をforce:trueでクリック（背後に重なる要素があるため）
@@ -113,8 +117,7 @@ test.describe('ダッシュボード', () => {
     test('DB-01: ダッシュボード画面が正常に表示されること', async ({ page }) => {
         await login(page);
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // ナビゲーションバーが表示されること
         await expect(page.locator('.navbar')).toBeVisible();
@@ -134,14 +137,13 @@ test.describe('ダッシュボード', () => {
     test('DB-02: 新しいダッシュボードタブを作成できること', async ({ page }) => {
         await login(page);
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // テンプレートモーダルが自動表示されている場合は閉じる
         const templateModal02 = await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false);
         if (templateModal02) {
             await page.locator('button:has-text("スキップ")').first().click({ force: true }).catch(() => {});
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // 「+」ボタンをforce:trueでクリック
@@ -190,8 +192,7 @@ test.describe('ダッシュボード', () => {
     test('DB-03: ダッシュボードにビューコンテンツを追加できること', async ({ page }) => {
         await login(page);
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // beforeAllで作成したダッシュボードタブを選択
         expect(_createdDashboardName, 'beforeAllでダッシュボードが作成されていること').toBeTruthy();
@@ -271,8 +272,7 @@ test.describe('ダッシュボード', () => {
     test('DB-04: ダッシュボードに掲示板コンテンツを追加できること', async ({ page }) => {
         await login(page);
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // beforeAllで作成したダッシュボードタブを選択
         expect(_createdDashboardName, 'beforeAllでダッシュボードが作成されていること').toBeTruthy();
@@ -322,8 +322,7 @@ test.describe('ダッシュボード', () => {
     test('DB-05: ダッシュボードタブを削除できること', async ({ page }) => {
         await login(page);
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // beforeAllで作成したダッシュボードタブを削除
         expect(_createdDashboardName, 'beforeAllでダッシュボードが作成されていること').toBeTruthy();
@@ -386,8 +385,7 @@ test.describe('ダッシュボード', () => {
     test('DB-06: デフォルトダッシュボード（HOMEタブ）が表示されること', async ({ page }) => {
         await login(page);
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // HOMEタブが存在すること
         const homeTab = page.locator('[role=tab]').filter({ hasText: 'HOME' });

@@ -109,8 +109,7 @@ async function getFirstTableId(page) {
  */
 async function goToNotificationPage(page, tableId) {
     await page.goto(BASE_URL + "/admin/notification");
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    await waitForAngular(page);
 }
 
 /**
@@ -123,14 +122,18 @@ async function setupSmtp(page) {
     const smtpPort = process.env.SMTP_PORT || '587';
     const smtpUser = process.env.SMTP_USER || process.env.IMAP_USER;
     const smtpPass = process.env.SMTP_PASS || process.env.IMAP_PASS;
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
     if (!smtpUser || !smtpPass) {
         console.log('[setupSmtp] SMTP認証情報未設定のためスキップ');
         return;
     }
     try {
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // 「通知の送信メールアドレスをSMTPで指定」トグルをONにする（まだOFFの場合）
         const smtpToggle = page.locator('text=通知の送信メールアドレスをSMTPで指定').locator('..').locator('..');
@@ -215,8 +218,7 @@ test.describe('メール配信', () => {
     test('99-1: メールテンプレートをテキストタイプTEXTで新規作成がエラーなく行えること', async ({ page }) => {
         // メール配信 > メールテンプレートページへ
         await page.goto(BASE_URL + '/admin/mail_template');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         console.log('メールテンプレートURL: ' + url);
@@ -236,8 +238,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-2: メールテンプレートをテキストタイプHTMLで新規作成がエラーなく行えること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_template');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         expect(url).toContain('/admin/');
@@ -253,8 +254,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-3: メールテンプレートの削除がエラーなく行えること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_template');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         expect(page.url()).toContain('/admin/');
 
@@ -275,8 +275,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-4: メールテンプレートで必須項目未入力のまま登録するとエラーが発生すること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_template');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         expect(url).toContain('/admin/');
@@ -305,8 +304,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-5: 配信リストの新規追加がエラーなく行えること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_list');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         console.log('配信リストURL: ' + url);
@@ -329,8 +327,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-6: 配信リストの削除がエラーなく行えること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_list');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         expect(page.url()).toContain('/admin/');
 
@@ -351,8 +348,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-7: 配信リストで必須項目未入力のまま登録するとエラーが発生すること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_list');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         expect(url).toContain('/admin/');
@@ -380,8 +376,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-8: メール配信の新規追加がエラーなく行えること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         console.log('メール配信URL: ' + url);
@@ -398,8 +393,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-9: メール配信設定の削除がエラーなく行えること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         expect(page.url()).toContain('/admin/');
 
@@ -420,8 +414,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('99-10: メール配信で必須項目未入力のまま登録するとエラーが発生すること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         expect(url).toContain('/admin/');
@@ -450,8 +443,7 @@ test.describe('メール配信', () => {
     test('99-11: メール配信設定でフィルタなしの場合に設定通りの配信設定画面が確認できること', async ({ page }) => {
         // メール配信設定ページにアクセスしてUIを確認（実際の送信は時刻経過が必要）
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -463,8 +455,7 @@ test.describe('メール配信', () => {
     test('99-12: メール配信設定でフィルタあり場合の配信設定画面が確認できること', async ({ page }) => {
         // メール配信設定ページにアクセスしてUIを確認（実際の送信は時刻経過が必要）
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -479,8 +470,7 @@ test.describe('メール配信', () => {
     test('99-13: 配信リストに設定済みのメールアドレス項目削除制限の設定画面が確認できること', async ({ page }) => {
         // 配信リストページにアクセスしてUIを確認
         await page.goto(BASE_URL + '/admin/mail_list');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -495,8 +485,7 @@ test.describe('メール配信', () => {
     test('99-14: 配信リストに設定済みのテーブル削除制限の設定画面が確認できること', async ({ page }) => {
         // 配信リストページにアクセスしてUIを確認
         await page.goto(BASE_URL + '/admin/mail_list');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -511,8 +500,7 @@ test.describe('メール配信', () => {
     test('99-15: 配信リストに設定済みのフィルタ削除制限の設定画面が確認できること', async ({ page }) => {
         // 配信リストページにアクセスしてUIを確認
         await page.goto(BASE_URL + '/admin/mail_list');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -527,16 +515,14 @@ test.describe('メール配信', () => {
     test('99-16: メール配信設定でメールテンプレート設定UIが確認できること', async ({ page }) => {
         // メール配信設定ページにアクセスしてテンプレート設定UIを確認
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
         // メールテンプレートページの確認
         await page.goto(BASE_URL + '/admin/mail_template');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         expect(page.url()).toContain('/admin/');
         console.log('99-16: メール配信・テンプレートページ確認完了');
         // 注: テンプレート削除後の表示変化確認は手動テストで確認
@@ -548,8 +534,7 @@ test.describe('メール配信', () => {
     test('99-17: メール配信設定で配信リスト設定UIが確認できること', async ({ page }) => {
         // 配信リストページにアクセスしてUIを確認
         await page.goto(BASE_URL + '/admin/mail_list');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -571,8 +556,7 @@ test.describe('メール配信', () => {
     test('99-19: メール配信設定一覧ページに編集・詳細アイコンが表示されること', async ({ page }) => {
         // メール配信設定ページにアクセスして一覧UIを確認
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -590,8 +574,7 @@ test.describe('メール配信', () => {
     test('99-20: メール配信設定ページが正常に表示されること（配信中/配信済みの編集不可確認）', async ({ page }) => {
         // メール配信設定ページにアクセスして一覧UIを確認
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -606,8 +589,7 @@ test.describe('メール配信', () => {
     test('99-21: メール配信設定ページで一括削除機能のUIが確認できること', async ({ page }) => {
         // メール配信設定ページにアクセスして一括操作UIを確認
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -625,8 +607,7 @@ test.describe('メール配信', () => {
     test('99-22: メール配信設定ページで複数選択時の一括操作UIが確認できること', async ({ page }) => {
         // メール配信設定ページにアクセスして一括操作UIを確認
         await page.goto(BASE_URL + '/admin/mail_delivery');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -644,7 +625,7 @@ test.describe('メール配信', () => {
         await page.goto(BASE_URL + '/admin/mail_delivery/edit/new');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(() => !document.body.innerText.includes('読み込み中'), { timeout: 10000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         expect(page.url()).toContain('/admin/');
 
@@ -678,8 +659,7 @@ test.describe('メール配信', () => {
     test('150-1: ステップメール設定で必須項目未入力のまま登録するとエラーが発生すること', async ({ page }) => {
         // ステップメール設定ページへ
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         console.log('ステップメールURL: ' + url);
@@ -697,8 +677,7 @@ test.describe('メール配信', () => {
     test('150-2: ステップメール設定ページが正常に表示されること', async ({ page }) => {
         // ステップメール設定ページにアクセスしてUIを確認（各種パターンのメール送信は時刻経過が必要）
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -710,8 +689,7 @@ test.describe('メール配信', () => {
     test('150-8: ステップメール設定の有効/無効切り替えUIが存在すること', async ({ page }) => {
         // ステップメール設定ページにアクセスして有効/無効UIを確認
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -725,8 +703,7 @@ test.describe('メール配信', () => {
     test('150-9: ステップメール設定の有効化UIが確認できること', async ({ page }) => {
         // ステップメール設定ページにアクセスして有効化UIを確認
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -741,8 +718,7 @@ test.describe('メール配信', () => {
     test('156-1: 配信メールでラベル名タグ置換機能のUI設定が確認できること', async ({ page }) => {
         // メールテンプレート設定ページにアクセスしてタグ置換UI確認
         await page.goto(BASE_URL + '/admin/mail_template');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -757,8 +733,7 @@ test.describe('メール配信', () => {
     test('157: ステップメール設定でテンプレート＋カスタム混在の設定UIが確認できること', async ({ page }) => {
         // ステップメール設定ページにアクセスしてUI確認
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -775,7 +750,7 @@ test.describe('メール配信', () => {
         await page.goto(BASE_URL + '/admin/mail_delivery/edit/new');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(() => !document.body.innerText.includes('読み込み中'), { timeout: 10000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -795,7 +770,7 @@ test.describe('メール配信', () => {
         await page.goto(BASE_URL + '/admin/mail_delivery/edit/new');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForFunction(() => !document.body.innerText.includes('読み込み中'), { timeout: 10000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const bodyText = await page.innerText('body');
@@ -809,8 +784,7 @@ test.describe('メール配信', () => {
     // ---------------------------------------------------------------------------
     test('218: 配信リストの画面下部に配信先一覧が表示されること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/mail_list');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         const url = page.url();
         expect(url).toContain('/admin/');
@@ -828,8 +802,7 @@ test.describe('メール配信', () => {
     test('102-7: 通知設定でワークフロー全ステータスチェック時の設定UIが確認できること（複数承認者）', async ({ page }) => {
         // 通知設定ページにアクセスしてワークフロー通知設定UIを確認
         await page.goto(BASE_URL + '/admin/notification');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         expect(page.url()).toContain('/admin/');
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -843,8 +816,7 @@ test.describe('メール配信', () => {
     test('102-8: 通知設定でワークフロー全ステータスチェック時の否認時通知設定UIが確認できること', async ({ page }) => {
         // 通知設定ページにアクセスしてワークフロー否認時通知設定UIを確認
         await page.goto(BASE_URL + '/admin/notification');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         expect(page.url()).toContain('/admin/');
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -858,8 +830,7 @@ test.describe('メール配信', () => {
     test('102-9: 通知設定でワークフロー全ステータスチェック時の組織宛て申請通知設定UIが確認できること', async ({ page }) => {
         // 通知設定ページにアクセスして組織宛て通知設定UIを確認
         await page.goto(BASE_URL + '/admin/notification');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         expect(page.url()).toContain('/admin/');
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -873,8 +844,7 @@ test.describe('メール配信', () => {
     test('102-10: 通知設定でワークフロー全ステータスチェック時の取り下げ通知設定UIが確認できること', async ({ page }) => {
         // 通知設定ページにアクセスしてワークフロー取り下げ時通知設定UIを確認
         await page.goto(BASE_URL + '/admin/notification');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         expect(page.url()).toContain('/admin/');
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -888,8 +858,7 @@ test.describe('メール配信', () => {
     test('150-3: ステップメール設定で送信時刻を0時台に設定できるUIが確認できること', async ({ page }) => {
         // ステップメール設定ページにアクセスしてUI確認
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const pageText = await page.innerText('body');
@@ -904,8 +873,7 @@ test.describe('メール配信', () => {
     test('150-4: ステップメール設定で文面・添付ファイル設定のUIが確認できること', async ({ page }) => {
         // ステップメール設定ページにアクセスしてUI確認
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const pageText = await page.innerText('body');
@@ -920,8 +888,7 @@ test.describe('メール配信', () => {
     test('150-5: ステップメール設定で複数ステップ設定のUIが確認できること', async ({ page }) => {
         // ステップメール設定ページにアクセスしてUI確認
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const pageText = await page.innerText('body');
@@ -936,8 +903,7 @@ test.describe('メール配信', () => {
     test('150-6: ステップメール設定で+追加するボタンで複数ステップを追加するUIが確認できること', async ({ page }) => {
         // ステップメール設定ページにアクセスして+追加ボタンUIを確認
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const pageText = await page.innerText('body');
@@ -954,8 +920,7 @@ test.describe('メール配信', () => {
     test('150-7: ステップメール設定で更に複数ステップを追加するUIが確認できること', async ({ page }) => {
         // ステップメール設定ページにアクセスしてUI確認
         await page.goto(BASE_URL + '/admin/step_mail');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const pageText = await page.innerText('body');
@@ -970,8 +935,7 @@ test.describe('メール配信', () => {
     test('156-2: 配信メールでHTMLタイプのメールテンプレート設定UIが確認できること', async ({ page }) => {
         // メールテンプレートページにアクセスしてHTMLタイプUI確認
         await page.goto(BASE_URL + '/admin/mail_template');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const url = page.url();
         expect(url).toContain('/admin/');
         const pageText = await page.innerText('body');

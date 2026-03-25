@@ -14,6 +14,11 @@ const PASSWORD = process.env.TEST_PASSWORD;
  */
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
         return await browser.newContext({ storageState: authStatePath });
@@ -148,7 +153,7 @@ async function setupTestTable(page) {
     await page.goto(BASE_URL + '/admin/dashboard');
     await page.waitForLoadState('domcontentloaded');
     try { await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 10000 }); } catch (e) {}
-    await page.waitForTimeout(2000);
+    await waitForAngular(page);
 
     const newLink = await page.evaluate(() => {
         const links = Array.from(document.querySelectorAll('a[href*="dataset__"]'));
@@ -226,7 +231,7 @@ async function getFirstRecordViewUrl(page, tableUrl) {
     await page.goto(BASE_URL + tableUrl);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(3000);
+    await waitForAngular(page);
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
 
@@ -278,7 +283,7 @@ async function getFirstRecordViewUrl(page, tableUrl) {
     await page.goto(BASE_URL + tableUrl);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(3000);
+    await waitForAngular(page);
     try { await page.waitForSelector(`a[href*="${tableUrl}/view/"]`, { timeout: 15000 }); } catch (e) {}
 
     const retryHref = await page.evaluate((tableUrl) => {
@@ -309,8 +314,7 @@ test.describe('ログ管理', () => {
 
         // ログページへ遷移
         await page.goto(BASE_URL + '/admin/logs');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // ログページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/logs/);
@@ -340,7 +344,7 @@ test.describe('ログ管理', () => {
         await page.goto(BASE_URL + '/admin/csv');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(4000);
+        await waitForAngular(page);
 
         // CSV履歴ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/csv/);
@@ -370,7 +374,7 @@ test.describe('ログ管理', () => {
 
         // リクエストログページへ遷移
         await page.goto(BASE_URL + '/admin/job_logs', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // リクエストログページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/job_logs/);
@@ -449,7 +453,7 @@ test.describe('コメントメンション', () => {
         await page.goto(BASE_URL + recordViewUrl);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(5000);
+        await waitForAngular(page);
         await page.keyboard.press('Escape');
         await page.waitForTimeout(500);
 
@@ -505,7 +509,7 @@ test.describe('コメントメンション', () => {
         // レコード詳細ページへ遷移
         await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(5000);
+        await waitForAngular(page);
         await page.keyboard.press('Escape');
         await page.waitForTimeout(500);
 
@@ -554,7 +558,7 @@ test.describe('コメントメンション', () => {
         await page.goto(BASE_URL + recordViewUrl);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(5000);
+        await waitForAngular(page);
         await page.keyboard.press('Escape');
         await page.waitForTimeout(500);
 
@@ -600,7 +604,7 @@ test.describe('コメントメンション', () => {
         await page.goto(BASE_URL + recordViewUrl);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(5000);
+        await waitForAngular(page);
         await page.keyboard.press('Escape');
         await page.waitForTimeout(500);
 
@@ -611,7 +615,7 @@ test.describe('コメントメンション', () => {
             await page.goto(BASE_URL + recordViewUrl);
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-            await page.waitForTimeout(3000);
+            await waitForAngular(page);
             await page.keyboard.press('Escape');
             await page.waitForTimeout(500);
         }
@@ -663,7 +667,7 @@ test.describe('コメントメンション', () => {
 
         // テーブル設定ページでログとコメントをまとめて表示を有効化
         await page.goto(BASE_URL + '/admin/dataset/edit/' + tableId, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         await page.keyboard.press('Escape');
         await page.waitForTimeout(500);
 
@@ -718,7 +722,7 @@ test.describe('コメントメンション', () => {
         // レコード詳細ページへ遷移
         await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(5000);
+        await waitForAngular(page);
         await page.keyboard.press('Escape');
         await page.waitForTimeout(500);
 

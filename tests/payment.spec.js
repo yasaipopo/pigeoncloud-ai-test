@@ -5,6 +5,10 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 // Stripeテストカード情報（Sandboxモード用）
 const STRIPE_TEST_CARD = '4242 4242 4242 4242';
 const STRIPE_TEST_EXPIRY = '12 / 30';
@@ -42,7 +46,7 @@ async function login(page) {
             await page.waitForURL('**/admin/dashboard', { timeout: 20000 }).catch(() => {});
         }
     }
-    await page.waitForTimeout(2000);
+    await waitForAngular(page);
 }
 
 /**
@@ -55,7 +59,7 @@ async function gotoPaymentPage(page) {
     try {
         await page.waitForSelector('h1.plan-header, h2.plan-header, .plan-card', { timeout: 15000 });
     } catch (e) {
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
     }
 }
 

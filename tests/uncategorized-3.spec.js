@@ -11,6 +11,10 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 const { setupAllTypeTable } = require('./helpers/table-setup');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 
@@ -19,8 +23,7 @@ const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings'
  */
 async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
     // ログインページへのリダイレクトを確認（既認証の場合はダッシュボードへ飛ぶ）
     if (page.url().includes('/admin/dashboard') || page.url().includes('/admin/dataset')) {
         // 既にログイン済みの場合はそのまま続行
@@ -255,8 +258,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // テーブル新規作成画面でYes/No項目のバリデーション確認
         await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 新規作成フォームが表示されること
@@ -573,8 +575,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されること（帳票DLボタンの確認）
@@ -947,8 +948,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 「表示する条件」という誤ったテキストが含まれていないこと
@@ -1165,8 +1165,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // フィールド設定ページを確認（表示幅設定が可能なページ）
         await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         await expect(page.locator('main').first()).toBeVisible({ timeout: 30000 });
@@ -1306,8 +1305,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         // Internal Server Errorのみチェック（'500'は件数表示などで誤検知するため使用しない）
         expect(pageText).not.toContain('Internal Server Error');
@@ -1322,8 +1320,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: APIテストの実施 ※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する
         // expected: ※シート「APIテスト(邊見)」を実施しエラーが発生しないこと
         await page.goto(BASE_URL + '/admin/user');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ユーザー一覧ページが表示されること
@@ -1433,8 +1430,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されること（ソート操作の確認）
@@ -1462,8 +1458,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         // Internal Server Errorのみチェック（'500'は件数表示などで誤検知するため使用しない）
         expect(pageText).not.toContain('Internal Server Error');

@@ -7,6 +7,10 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 async function login(page) {
     await page.goto(BASE_URL + '/admin/login');
     await page.waitForLoadState('domcontentloaded');
@@ -136,7 +140,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
             // （各テストで毎回ループせず、1回だけ実行してキャッシュ）
             await page.goto(editUrl);
             await page.waitForSelector('.overSetting', { timeout: 30000 }).catch(() => {});
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             _fieldIndexMap = await page.evaluate(async () => {
                 const map = {};
@@ -201,7 +205,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             // Angular アプリの読み込み完了を待つ
             await page.waitForSelector('.overSetting', { timeout: 30000 }).catch(() => {});
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 対象フィールドタイプのダイアログを開く
             const found = await openFieldDialogByType(page, fieldType);

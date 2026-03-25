@@ -25,6 +25,11 @@ async function login(page, email, password) {
  */
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
         return await browser.newContext({ storageState: authStatePath });
@@ -176,11 +181,10 @@ async function openCsvUploadModal(page) {
 async function navigateToEditCsvTab(page, tableId) {
     // 正しいテーブル設定ページURL: /admin/dataset/edit/{tableId}
     await page.goto(BASE_URL + '/admin/dataset/edit/' + tableId);
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    await waitForAngular(page);
     // CSVタブをクリック
     await page.locator('a.nav-link:has-text("CSV")').first().click();
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 }
 
 /**
@@ -267,7 +271,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // CSVアップロードモーダルを開く
         await openCsvUploadModal(page);
@@ -321,7 +325,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // CSVアップロードモーダルを開く
         await openCsvUploadModal(page);
@@ -423,7 +427,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         // ドロップダウンボタンが表示されるまで待機
         await page.waitForSelector('button.btn-outline-primary.dropdown-toggle', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // CSVアップロードモーダルを開く
         await openCsvUploadModal(page);
@@ -611,7 +615,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // CSVアップロードモーダルを開いてCSVダウンロード（空）ボタンを確認
         await openCsvUploadModal(page);
@@ -650,7 +654,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // 簡易検索でフィルターを適用（フィルタなしの場合、モーダルが開かず直接ダウンロードになる）
         await applyQuickSearchFilter(page);
@@ -697,7 +701,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // テーブルヘッダーをクリックして並び替えを行う（最初のソート可能な列）
         const thElements = page.locator('th.table-admin-view__field-name, th[sortable], th');
@@ -750,8 +754,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // まずデータセット一覧に移動（/admin/datasetから遷移しないとdataset_view=falseになる）
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // テーブルへのリンクをクリックして遷移（SPA内部遷移でdataset_viewがtrueになる）
         const tableLink = page.locator(`a[href*="dataset__${testTableId}"]`).first();
@@ -831,8 +834,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // データセット一覧画面（dataset管理画面）に移動
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // ハンバーガードロップダウンを開く
         const dropdownBtn = page.locator('button.btn-outline-primary.dropdown-toggle').first();
@@ -878,7 +880,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // CSVアップロードモーダルを開く
         await openCsvUploadModal(page);
@@ -923,7 +925,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         // テーブルに移動してCSVダウンロードを確認
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // フィルタを適用してモーダルが表示されるようにする（簡易検索inputが表示中の場合のみ）
         const searchInputEl = page.locator('input#search_input, input[placeholder="簡易検索"]').first();
@@ -967,7 +969,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // CSVアップロードモーダルを開く
         await openCsvUploadModal(page);
@@ -1009,7 +1011,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         await openCsvUploadModal(page);
 
@@ -1048,7 +1050,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // CSVアップロードモーダルを開く
         await openCsvUploadModal(page);
@@ -1125,8 +1127,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
         // テーブル管理一覧（/admin/dataset）に遷移
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         await expect(page.locator('.navbar')).toBeVisible();
 
         // テーブル管理ページはツリー構造（admin-tree）でテーブルを表示
@@ -1172,8 +1173,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
         // /admin/dataset一覧に遷移してテーブルリンクをクリック（dataset_view=trueにするため）
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // testTableIdがあれば、そのテーブルのリンクをクリックしてレコード一覧へ
         expect(testTableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
@@ -1185,8 +1185,7 @@ test.describe('JSONエクスポート・インポート', () => {
         } else {
             // テーブルリンクが見つからない場合は直接遷移
             await page.goto(BASE_URL + `/admin/dataset__${testTableId}`);
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // レコードのチェックボックスを選択してJSONエクスポートボタンを表示させる
@@ -1243,8 +1242,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
         // /admin/dataset一覧に遷移してテーブルリンクをクリック
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         expect(testTableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         const tableLink = page.locator(`a[href*="dataset__${testTableId}"]`).first();
@@ -1255,8 +1253,7 @@ test.describe('JSONエクスポート・インポート', () => {
         } else {
             // テーブルリンクが見つからない場合は直接遷移
             await page.goto(BASE_URL + `/admin/dataset__${testTableId}`);
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // レコードのチェックボックスを選択
@@ -1313,8 +1310,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
         // テーブル管理一覧（/admin/dataset）に遷移
         await page.goto(BASE_URL + '/admin/dataset');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         await expect(page.locator('.navbar')).toBeVisible();
 
         // テーブル管理ページのJSONインポートはハンバーガーメニュー（fa-bars）→「JSONから追加」

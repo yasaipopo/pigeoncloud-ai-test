@@ -196,7 +196,7 @@ async function navigateToFieldPage(page, tableId) {
         // networkidleにならない場合はdomcontentloadedで続行
         await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
     }
-    await page.waitForTimeout(1500);
+    await waitForAngular(page);
     // ログインページにリダイレクトされた場合は再ログインして再遷移
     if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
         await login(page);
@@ -206,7 +206,7 @@ async function navigateToFieldPage(page, tableId) {
         } catch(e) {
             await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
         }
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
     }
 }
 
@@ -962,8 +962,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     test('113-13: 2-4列レイアウト設定後に集計（絞り込み）ができること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -974,8 +973,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     test('113-14: 2-4列レイアウト設定後に集計（集計）ができること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1024,8 +1022,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     test('113-19: 2-4列レイアウト設定後にチャート表示ができること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1036,8 +1033,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     test('113-20: 2-4列レイアウト設定後にレコード複製ができること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1048,8 +1044,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     test('113-21: 2-4列レイアウト設定後にCSVダウンロードができること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1060,8 +1055,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
     test('113-22: 2-4列レイアウト設定後にCSVアップロードができること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1189,8 +1183,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
     test('121-02: ファイルフィールドのアップロードが正常に動作すること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1223,8 +1216,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
     test('132-01: 数値項目の桁区切り表示や単位表示が設定通りとなること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1270,8 +1262,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
     test('147-01: 文字列一行フィールドに10000文字入力してエラーなく保存できること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 追加ボタンをクリック（テーブル一覧ページにある「追加」ボタン）
@@ -1540,8 +1531,7 @@ test.describe('項目機能 追加ケース（158〜204系）', () => {
     test('175: フィールド入力時にキーボード操作ができること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1575,8 +1565,7 @@ test.describe('項目機能 追加ケース（158〜204系）', () => {
     test('186: フォーム入力時に計算フィールドの計算結果がリアルタイム表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1783,8 +1772,7 @@ test.describe('表示条件・必須条件設定（223〜231系）', () => {
     test('240: CSVインポート・エクスポート時に電話番号等の先頭0が保持されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1951,8 +1939,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // フィールド設定ページにアクセス
         await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 「項目を追加する」ボタンをクリック
@@ -2016,7 +2003,8 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
         await page.waitForFunction(
             () => document.querySelectorAll('admin-forms-field').length > 10,
             { timeout: 20000 }
-        ).catch(() => page.waitForTimeout(2000));
+        );
+        await waitForAngular(page);
 
         // Angularの表示条件(display condition)適用を待機
         // 初期レンダリング時は全フィールドが一時的に描画されるが、
@@ -2152,6 +2140,11 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
         await page.screenshot({ path: `${reportsDir}/screenshots/260-1-radio-display-condition.png`, fullPage: false });
     });
 });

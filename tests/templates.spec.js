@@ -6,6 +6,10 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 /**
  * ログイン共通関数（ensureLoggedInにフォールバック）
  */
@@ -19,7 +23,7 @@ async function login(page) {
  */
 async function openTableManagementBarsMenu(page) {
     await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-    await page.waitForTimeout(1500);
+    await waitForAngular(page);
 
     // fa-bars ドロップダウンボタンをクリック
     await page.evaluate(() => {

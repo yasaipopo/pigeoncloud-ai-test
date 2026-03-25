@@ -165,7 +165,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // ナビゲーションバーが表示されていること
         await expect(page.locator('.navbar')).toBeVisible();
@@ -234,7 +234,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         // レコード一覧に移動
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(5000);
+        await waitForAngular(page);
 
         // ナビゲーションバーが表示されていること
         await expect(page.locator('.navbar')).toBeVisible();
@@ -291,6 +291,11 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
+
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
         await page.screenshot({ path: `${reportsDir}/screenshots/244-advanced-search.png`, fullPage: true });
     });
 
@@ -343,8 +348,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             expect(tableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         expect(pageText).not.toContain('404');
@@ -377,8 +381,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             expect(tableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
 
@@ -406,7 +409,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             test.skip(true, 'テーブルIDが取得できていないためスキップ');
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
 
@@ -432,7 +435,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             test.skip(true, 'テーブルIDが取得できていないためスキップ');
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
 

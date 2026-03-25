@@ -7,6 +7,10 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 /**
  * ログイン共通関数
  * SPA環境ではURLが /admin/login のまま変わらない場合があるため .navbar で待機
@@ -195,7 +199,7 @@ async function navigateToFieldPage(page, tableId) {
         // networkidleにならない場合はdomcontentloadedで続行
         await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
     }
-    await page.waitForTimeout(1500);
+    await waitForAngular(page);
     // ログインページにリダイレクトされた場合は再ログインして再遷移
     if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
         await login(page);
@@ -205,7 +209,7 @@ async function navigateToFieldPage(page, tableId) {
         } catch(e) {
             await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
         }
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
     }
 }
 
@@ -456,8 +460,7 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
     test('192: ファイルのZIPアップロード機能が正常に表示されること', async ({ page }) => {
         // レコード一覧ページへ（ZIPアップロードはレコード系機能）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });

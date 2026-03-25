@@ -8,6 +8,11 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
+
 /**
  * ログイン共通関数
  */
@@ -17,8 +22,7 @@ async function login(page, email, password) {
 
     // まずCSRFトークンを取得してAPIで直接ログインを試みる
     await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    await waitForAngular(page);
 
     const loginResult = await page.evaluate(async ({ email, password, adminTable }) => {
         try {
@@ -47,8 +51,7 @@ async function login(page, email, password) {
     if (loginResult.result === 'success') {
         // ログイン成功後ダッシュボードへ移動
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         return;
     }
 
@@ -56,16 +59,14 @@ async function login(page, email, password) {
     const base64Token = Buffer.from(`${loginEmail}:${loginPassword}`).toString('base64');
     try {
         await page.goto(BASE_URL + '/api/login/debug?token=' + base64Token);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
     } catch (e) {
         // debugLoginが利用不可の場合は無視
     }
 
     // ダッシュボードへ移動
     await page.goto(BASE_URL + '/admin/dashboard');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    await waitForAngular(page);
 
     // まだログインページにいる場合は通常フォームログインを試みる
     if (page.url().includes('/admin/login')) {
@@ -247,7 +248,7 @@ async function navigateToAllTypeTable(page) {
     await page.waitForLoadState('domcontentloaded');
     // Angular描画完了を待機（アクションメニューボタンが表示されるまで）
     await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 }
 
 /**
@@ -625,8 +626,7 @@ test.describe('チャート - 基本機能', () => {
 
         try {
             await page.goto(BASE_URL + '/admin/dashboard');
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             await closeTemplateModal(page);
 

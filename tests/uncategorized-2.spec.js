@@ -11,6 +11,11 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
+
 const { setupAllTypeTable } = require('./helpers/table-setup');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 
@@ -252,8 +257,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -290,8 +294,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が表示されていること（数値項目が含まれるテーブル）
@@ -321,8 +324,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧ページが正常表示されること
@@ -368,8 +370,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // レコード新規作成画面を確認
         await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 編集画面が表示されること
@@ -406,8 +407,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: ワークフローのAND/ORにて2人目以降で役職を選択しても役職がない状態になっているところを修正
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/workflow');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ワークフロー一覧ページが表示されること
@@ -419,8 +419,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.slack.com/archives/C050ZRN4PNC/p1713485676817669?thread_ts=1713451435.976919&cid=C050ZRN4PNC  以下オペレーションを行
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -436,8 +435,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -449,8 +447,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/830 これの修正して、カレンダーの表示周りを少し変えたので、問題ないかテスト
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -468,8 +465,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.slack.com/archives/C06LF4G88FM/p1714450955084249 親削除権限あり & 子削除権限無し => 子削除禁止 親削除権限無し & 子削除権限無し => 子削除禁止 親削
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -485,8 +481,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -529,8 +524,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -538,8 +532,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(page.url()).toContain(`/admin/dataset__${tid}`);
         // 新規レコード作成画面でも正常表示されること
         await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const editPageText = await page.innerText('body');
         expect(editPageText).not.toContain('Internal Server Error');
         await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
@@ -549,8 +542,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/853 ※高速化モードでも確認する
         // expected: https://henmi008.pigeon-demo.com/admin/dataset__19
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -571,8 +563,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: 確認いたしました。仰る通り、アクションがワークフローステータス変更時のとき、 メールタイトルは設定したものに、通知内容がデフォルトのままになってしまっているようでした 通知設定に内容が入っていればそれを、なければデフォルトを使うようにしたの
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/workflow');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ワークフロー一覧ページが表示されること
@@ -586,8 +577,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -619,8 +609,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が正常表示されること
@@ -669,8 +658,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // レコード新規作成画面で他テーブル参照の検索ボタンを確認
         await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 編集フォームが表示されること
@@ -686,8 +674,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が正常表示されること
@@ -710,8 +697,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が正常表示されること
@@ -737,8 +723,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -766,8 +751,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/833 テストお願いします！ エンジニアメモに記載の関数でできるようにしました
         // expected: 想定通りの結果となること。 https://henmi017.pigeon-demo.com/admin/dataset__132
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -783,8 +767,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が正常表示されること
@@ -802,8 +785,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -811,8 +793,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(page.url()).toContain(`/admin/dataset__${tid}`);
         // レコード編集画面でも正常表示されること
         await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const editPageText = await page.innerText('body');
         expect(editPageText).not.toContain('Internal Server Error');
         await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
@@ -832,8 +813,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -855,8 +835,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/912 テストお願いします！ ただ手元で再現しないので、お客様の手元でもこれで治るか微妙です...
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -882,8 +861,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -907,8 +885,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: 伝えたか忘れましたが、今のdevelopから、決済が即時反映され、すぐに登録ユーザー数が変わるので、そちらもテストいただきたいです。 （現在のユーザー以下にした場合にエラーになるか、増やした場合、即時反映になるかなど）
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/user');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ユーザー一覧ページが表示されること
@@ -971,8 +948,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -988,8 +964,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://www.notion.so/33994765980a49bea69f0c91f75686a2
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -1003,8 +978,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/852 テストお願いします！ 仕様の参考 https://loftal.slack.com/archives/C050ZRN4PN
         // expected: 想定通りの結果となること。 https://henmi015.pigeon-demo.com/admin/dataset__88
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -1030,8 +1004,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -1049,8 +1022,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // expected: 想定通りの結果となること。
         // ユーザー一覧ページで2段階認証設定が確認できること
         await page.goto(BASE_URL + '/admin/user');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ユーザー一覧が表示されること
@@ -1058,8 +1030,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(page.url()).toContain('/admin/user');
         // adminユーザーの編集ページへ
         await page.goto(BASE_URL + '/admin/mypage');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const mypageText = await page.innerText('body');
         expect(mypageText).not.toContain('Internal Server Error');
     });
@@ -1104,8 +1075,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -1261,8 +1231,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`, { timeout: 90000 });
-        await page.waitForLoadState('domcontentloaded', { timeout: 90000 });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     });
@@ -1288,7 +1257,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await page.waitForLoadState('domcontentloaded');
         // テーブル名が表示されるまで待機（SPAのロード完了を確認）
         await page.locator('h5, [class*="title"], [class*="table-name"]').first().waitFor({ timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -1324,8 +1293,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // expected: 想定通りの結果となること。
         // チャート設定画面を確認（テーブルのビュー設定でチャートを追加できる）
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードが表示されること
@@ -1339,8 +1307,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: テストお願いいたします。:おじぎ_女性: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1011 testing video チャート機能の凡例（添付画像赤枠部分）が6個以上あ
         // expected: 想定通りの結果となること。 https://henmi024.pigeon-demo.com/admin/dataset__63  https://henmi024.pigeon-demo.com/admin/dataset__99
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -1365,7 +1332,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         }
         // テーブルタイトルが表示されるまで待機（SPAのロード完了確認）
         await page.locator('h5').first().waitFor({ timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -1392,7 +1359,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         }
         // テーブルタイトルが表示されるまで待機（SPAのロード完了確認）
         await page.locator('h5').first().waitFor({ timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が正常表示されること
@@ -1415,8 +1382,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/235 これバグってたようなので修正したのテストお願いします！
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること（セッション切れでリダイレクトされることも考慮）
@@ -1566,8 +1532,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブル一覧が正常表示されること
@@ -1607,8 +1572,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること（数字のみ項目名でも計算エラーにならない）
@@ -1681,8 +1645,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1086 テストお願いします！ ただ次は12月31日か1月31日しか確認できないかもです
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -1700,8 +1663,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
@@ -1716,8 +1678,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         // description: https://loftal.slack.com/archives/C050ZRN4PNC/p1731920540210149 テストお願いします！ SMTPが問題なく動くか確認していただきたいです
         // expected: 想定通りの結果となること。
         await page.goto(BASE_URL + '/admin/dashboard');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ダッシュボードページが正常表示されること
@@ -1734,8 +1695,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // レコード編集画面で関連テーブル参照を確認
         await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // 編集フォームが表示されること
@@ -1831,8 +1791,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page).catch(() => null);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること（SUMIFの計算エラーが出ていないこと）
@@ -1867,8 +1826,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // テーブルページが正常表示されること
