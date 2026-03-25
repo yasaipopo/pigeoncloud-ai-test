@@ -178,22 +178,42 @@ async function saveTableSettings(page, tableId) {
  */
 async function enableWorkflow(page, tableId) {
     await navigateToWorkflowTab(page, tableId);
-    // page.evaluate()でDOMを直接操作（locator.click()はAbortErrorを発生させる可能性があるため使わない）
-    const clicked = await page.evaluate(() => {
+    // まずチェックボックスの現在状態を確認
+    const state = await page.evaluate(() => {
         const wfSection = document.querySelector('dataset-workflow-options');
-        if (!wfSection) return false;
+        if (!wfSection) return { found: false, checked: false };
         const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
-        if (!cb) return false;
-        if (cb.checked) return true; // 既にON
-        const label = wfSection.querySelector('label.switch');
-        if (label) { label.click(); return true; }
-        return false;
+        if (!cb) return { found: false, checked: false };
+        return { found: true, checked: cb.checked };
     });
-    if (!clicked) {
+    if (!state.found) {
         console.log('[enableWorkflow] dataset-workflow-options が見つからないためスキップ');
         return;
     }
+    if (state.checked) {
+        console.log('[enableWorkflow] ワークフローは既にON');
+        return;
+    }
+    // Playwrightのlocator.click()でAngular change detectionをトリガー
+    const switchLabel = page.locator('dataset-workflow-options label.switch').first();
+    await switchLabel.click({ force: true, timeout: 10000 }).catch(async () => {
+        // フォールバック: page.evaluate()で直接クリック
+        await page.evaluate(() => {
+            const wfSection = document.querySelector('dataset-workflow-options');
+            if (!wfSection) return;
+            const label = wfSection.querySelector('label.switch');
+            if (label) label.click();
+        });
+    });
     await page.waitForTimeout(1500);
+    // クリック後の状態確認
+    const afterState = await page.evaluate(() => {
+        const wfSection = document.querySelector('dataset-workflow-options');
+        if (!wfSection) return { checked: false };
+        const cb = wfSection.querySelector('input[type="checkbox"].switch-input');
+        return { checked: cb ? cb.checked : false };
+    });
+    console.log('[enableWorkflow] クリック後のワークフロー状態:', afterState.checked);
     await saveTableSettings(page, tableId);
 }
 

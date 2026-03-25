@@ -116,11 +116,19 @@ test.describe('RPA（コネクト）', () => {
             await page.waitForTimeout(500);
         }
 
-        // 作成ボタンをクリック
-        const createBtn = page.locator('button').filter({ hasText: /作成|保存|フローを作成/ });
+        // 作成ボタンをクリック（btn-primaryまたはvisibleなボタンを優先）
+        const createBtn = page.locator('button.btn-primary, button.btn-outline-primary:visible').filter({ hasText: /作成|保存|フローを作成/ });
         const createBtnCount = await createBtn.count();
         if (createBtnCount > 0) {
-            await createBtn.first().click();
+            await createBtn.first().click({ force: true });
+            await page.waitForTimeout(2000);
+        } else {
+            // フォールバック: page.evaluateで作成ボタンをクリック
+            await page.evaluate(() => {
+                const btns = Array.from(document.querySelectorAll('button'));
+                const btn = btns.find(b => /作成|保存|フローを作成/.test(b.textContent?.trim()) && b.offsetParent !== null);
+                if (btn) btn.click();
+            });
             await page.waitForTimeout(2000);
         }
 
