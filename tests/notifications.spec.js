@@ -1574,10 +1574,19 @@ test.describe('通知設定', () => {
     // 184(B): 通知設定 - コメント追加時
     // ---------------------------------------------------------------------------
     test('184: 通知設定でコメント追加時にチェックを入れるとコメント時に通知が行われること', async ({ page }) => {
-        // beforeAllで設定済みのtableIdを使用（getFirstTableId再呼び出しは不安定なため削除）
+        // beforeAllで設定済みのtableIdを使用。nullの場合はdebug APIで取得を試みる
         if (!tableId) {
-            console.log('184: tableIdが設定されていないためスキップ対象');
-            return;
+            // debug/status APIからALLテストテーブルのIDを取得
+            const status = await page.request.get(BASE_URL + '/admin/debug/status').then(r => r.json()).catch(() => null);
+            const tables = status?.all_type_tables || status?.tables || [];
+            const found = tables.find(t => t.label === 'ALLテストテーブル') || tables[tables.length - 1];
+            if (found) {
+                tableId = String(found.id || found.table_id);
+                console.log('184: debug/status APIからtableId取得:', tableId);
+            }
+            if (!tableId) {
+                throw new Error('184: tableIdが取得できません。beforeAllでALLテストテーブルの作成に失敗している可能性があります。');
+            }
         }
 
         // 通知設定新規作成ページでコメント通知UIを確認

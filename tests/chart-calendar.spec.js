@@ -470,8 +470,127 @@ test.describe('チャート・集計 - オプション設定', () => {
 // カレンダー テスト
 // =============================================================================
 
+/**
+ * ALLテストテーブルにカレンダービューを作成するヘルパー関数
+ * カレンダービューが存在しない場合、ビュー作成UIから作成する
+ * 作成後にカレンダータブのセレクターを返す
+ */
+async function ensureCalendarView(page) {
+    await navigateToAllTypeTable(page);
+
+    // カレンダービューのタブが既に存在するか確認
+    const calendarTab = page.locator(
+        'a[href*="calendar"], .nav-link:has-text("カレンダー"), button:has-text("カレンダー"), .view-switch-calendar'
+    ).first();
+    if (await calendarTab.count() > 0) {
+        // 既にカレンダービューが存在する
+        return;
+    }
+
+    // カレンダービューが存在しない場合、アクションメニューから「ビュー追加」を試みる
+    await openActionMenu(page);
+
+    // 「ビュー追加」または「カレンダー」メニューアイテムを探す
+    const viewAddMenu = page.locator(
+        '.dropdown-item:has-text("ビュー"), .dropdown-item:has-text("カレンダー"), .dropdown-item:has-text("ビューを追加")'
+    ).first();
+
+    if (await viewAddMenu.count() === 0) {
+        // ドロップダウンを閉じて、別の方法を試みる
+        await page.keyboard.press('Escape');
+        await waitForAngular(page);
+
+        // ビュー追加ボタンを探す（「+」ボタンやテーブルタブ近くのボタン）
+        const addViewBtn = page.locator(
+            'button:has-text("ビューを追加"), a:has-text("ビューを追加"), button[title*="ビュー"], .add-view-btn'
+        ).first();
+
+        if (await addViewBtn.count() === 0) {
+            throw new Error(
+                'カレンダービューが設定されておらず、ビュー追加UIも見つかりません。' +
+                'ALLテストテーブルにカレンダービューを手動で作成してください。'
+            );
+        }
+        await addViewBtn.click({ force: true });
+        await waitForAngular(page);
+    } else {
+        await viewAddMenu.click({ force: true });
+        await waitForAngular(page);
+    }
+
+    // カレンダー種別を選択するモーダル/パネルが開いたことを確認
+    const calendarOption = page.locator(
+        'label:has-text("カレンダー"), input[value*="calendar"], .view-type-calendar, li:has-text("カレンダー") input'
+    ).first();
+
+    if (await calendarOption.count() === 0) {
+        throw new Error(
+            'ビュー作成モーダルで「カレンダー」選択肢が見つかりません。' +
+            'UIが変更されている可能性があります。'
+        );
+    }
+
+    await calendarOption.click({ force: true });
+    await waitForAngular(page);
+
+    // FROM/TOフィールドを選択する（日付フィールドがある場合）
+    // ALLテストテーブルには日付フィールドがあるはずなので選択する
+    const fromSelect = page.locator('select[name*="from"], select[ng-model*="from"], select').nth(0);
+    const toSelect = page.locator('select[name*="to"], select[ng-model*="to"], select').nth(1);
+
+    // 最初の日付フィールドを選択（存在する場合のみ）
+    if (await fromSelect.count() > 0 && await fromSelect.isVisible()) {
+        const fromOptions = await fromSelect.locator('option').all();
+        for (const opt of fromOptions) {
+            const text = await opt.innerText();
+            if (text && !text.includes('選択') && !text.includes('--')) {
+                const val = await opt.getAttribute('value');
+                if (val) {
+                    await fromSelect.selectOption(val);
+                    break;
+                }
+            }
+        }
+    }
+
+    // 保存ボタンをクリック
+    const saveBtn = page.locator(
+        'button:has-text("保存"), button:has-text("作成"), .btn-primary:has-text("OK"), .btn-primary'
+    ).first();
+
+    if (await saveBtn.count() > 0) {
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+    }
+
+    // 再度カレンダービューのタブが表示されたことを確認
+    await page.waitForTimeout(2000);
+    await navigateToAllTypeTable(page);
+
+    const calendarTabAfter = page.locator(
+        'a[href*="calendar"], .nav-link:has-text("カレンダー"), button:has-text("カレンダー")'
+    ).first();
+
+    if (await calendarTabAfter.count() === 0) {
+        throw new Error(
+            'カレンダービューの作成を試みましたが、カレンダータブが表示されません。' +
+            'ビュー作成UIの操作が正しくない可能性があります。'
+        );
+    }
+}
+
 test.describe('カレンダー - ビュー表示', () => {
 
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(300000);
+        const context = await createLoginContext(browser);
+        const page = await context.newPage();
+        await ensureLoggedIn(page);
+        // カレンダービューが存在することを確保する
+        await ensureCalendarView(page);
+        await page.close();
+        await context.close();
+    });
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
@@ -487,39 +606,31 @@ test.describe('カレンダー - ビュー表示', () => {
         // ALLテストテーブルに直接遷移
         await navigateToAllTypeTable(page);
 
-        // カレンダービューに切り替え（カレンダーアイコン or タブ）
+        // カレンダービューに切り替え（beforeAllで存在が保証されている）
         const calendarTab = page.locator(
             'a[href*="calendar"], .nav-link:has-text("カレンダー"), button:has-text("カレンダー"), .view-switch-calendar'
         ).first();
-        const calendarTabCount = await calendarTab.count();
-        if (calendarTabCount > 0) {
-            await calendarTab.click({ force: true });
+        await expect(calendarTab).toBeVisible({ timeout: 10000 });
+        await calendarTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 週表示ボタンをクリック
+        const weekBtn = page.locator(
+            'button:has-text("週"), .fc-timeGridWeek-button, a:has-text("週"), .calendar-week-btn'
+        ).first();
+        if (await weekBtn.count() > 0) {
+            await weekBtn.click({ force: true });
             await waitForAngular(page);
-
-            // 週表示ボタンをクリック
-            const weekBtn = page.locator(
-                'button:has-text("週"), .fc-timeGridWeek-button, a:has-text("週"), .calendar-week-btn'
-            ).first();
-            if (await weekBtn.count() > 0) {
-                await weekBtn.click({ force: true });
-                await waitForAngular(page);
-            }
-
-            // エラーがないことを確認
-            const errorMsg = page.locator('.alert-danger, .error-message');
-            await expect(errorMsg).toHaveCount(0);
-
-            // カレンダー要素が表示されていることを確認
-            const calendarEl = page.locator('.fc-view, .calendar-view, .fc-timeGridWeek-view, .fc');
-            expect(await calendarEl.count()).toBeGreaterThan(0);
-            await expect(calendarEl.first()).toBeVisible();
-        } else {
-            // カレンダービューが設定されていない場合は、カレンダー設定モーダルを開いて存在を確認
-            console.log('カレンダービューが見つかりませんでした（カレンダー設定が必要）');
-            // テーブル一覧ページは正常に表示されていることを確認
-            const pageText = await page.innerText('body');
-            expect(pageText).not.toContain('Internal Server Error');
         }
+
+        // エラーがないことを確認
+        const errorMsg = page.locator('.alert-danger, .error-message');
+        await expect(errorMsg).toHaveCount(0);
+
+        // カレンダー要素が表示されていることを確認
+        const calendarEl = page.locator('.fc-view, .calendar-view, .fc-timeGridWeek-view, .fc');
+        expect(await calendarEl.count()).toBeGreaterThan(0);
+        await expect(calendarEl.first()).toBeVisible();
     });
 
     // --------------------------------------------------------------------------
@@ -530,36 +641,29 @@ test.describe('カレンダー - ビュー表示', () => {
         // ALLテストテーブルに直接遷移
         await navigateToAllTypeTable(page);
 
-        // カレンダービューへ切り替え
+        // カレンダービューへ切り替え（beforeAllで存在が保証されている）
         const calendarTab = page.locator(
             'a[href*="calendar"], .nav-link:has-text("カレンダー"), button:has-text("カレンダー")'
         ).first();
-        const calendarTabCount = await calendarTab.count();
-        if (calendarTabCount > 0) {
-            await calendarTab.click({ force: true });
+        await expect(calendarTab).toBeVisible({ timeout: 10000 });
+        await calendarTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 日表示ボタンをクリック
+        const dayBtn = page.locator(
+            'button:has-text("日"), .fc-timeGridDay-button, a:has-text("日表示"), .calendar-day-btn'
+        ).first();
+        if (await dayBtn.count() > 0) {
+            await dayBtn.click({ force: true });
             await waitForAngular(page);
-
-            // 日表示ボタンをクリック
-            const dayBtn = page.locator(
-                'button:has-text("日"), .fc-timeGridDay-button, a:has-text("日表示"), .calendar-day-btn'
-            ).first();
-            if (await dayBtn.count() > 0) {
-                await dayBtn.click({ force: true });
-                await waitForAngular(page);
-            }
-
-            const errorMsg = page.locator('.alert-danger, .error-message');
-            await expect(errorMsg).toHaveCount(0);
-
-            const calendarEl = page.locator('.fc-view, .fc-timeGridDay-view, .calendar-view, .fc');
-            expect(await calendarEl.count()).toBeGreaterThan(0);
-            await expect(calendarEl.first()).toBeVisible();
-        } else {
-            console.log('日表示ボタンが見つかりませんでした（カレンダー設定が必要）');
-            // テーブル一覧ページは正常に表示されていることを確認
-            const pageText = await page.innerText('body');
-            expect(pageText).not.toContain('Internal Server Error');
         }
+
+        const errorMsg = page.locator('.alert-danger, .error-message');
+        await expect(errorMsg).toHaveCount(0);
+
+        const calendarEl = page.locator('.fc-view, .fc-timeGridDay-view, .calendar-view, .fc');
+        expect(await calendarEl.count()).toBeGreaterThan(0);
+        await expect(calendarEl.first()).toBeVisible();
     });
 
     // --------------------------------------------------------------------------
@@ -567,48 +671,50 @@ test.describe('カレンダー - ビュー表示', () => {
     // --------------------------------------------------------------------------
     test('214: カレンダーFROM/TO設定で月/週/日ビューが想定通り表示されること', async ({ page }) => {
 
-        try {
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
+        // ALLテストテーブルに直接遷移
+        await navigateToAllTypeTable(page);
 
-            // カレンダービューへ
-            const calendarTab = page.locator('a[href*="calendar"], .nav-link:has-text("カレンダー")').first();
-            if (await calendarTab.count() === 0) {
-                console.log('カレンダービューが設定されていません（スキップ）');
-                return;
-            }
-            await calendarTab.click({ force: true });
+        // カレンダービューへ（beforeAllで存在が保証されている）
+        const calendarTab = page.locator('a[href*="calendar"], .nav-link:has-text("カレンダー")').first();
+        await expect(calendarTab).toBeVisible({ timeout: 10000 });
+        await calendarTab.click({ force: true });
+        await waitForAngular(page);
+
+        // カレンダー本体が表示されていることを確認
+        const calendarEl = page.locator('.fc, .fc-view, .calendar-view').first();
+        await expect(calendarEl).toBeVisible({ timeout: 10000 });
+
+        // 月表示に切り替えてエラーがないことを確認
+        const monthBtn = page.locator('button:has-text("月"), .fc-dayGridMonth-button').first();
+        if (await monthBtn.count() > 0) {
+            await monthBtn.click({ force: true });
             await waitForAngular(page);
+            const errorMsg = page.locator('.alert-danger, .error-message');
+            await expect(errorMsg).toHaveCount(0);
+            const calendarView = page.locator('.fc-dayGridMonth-view, .fc-view, .fc');
+            expect(await calendarView.count()).toBeGreaterThan(0);
+        }
 
-            // 月表示
-            const monthBtn = page.locator('button:has-text("月"), .fc-dayGridMonth-button').first();
-            if (await monthBtn.count() > 0) {
-                await monthBtn.click({ force: true });
-                await waitForAngular(page);
-                const errorMsg = page.locator('.alert-danger, .error-message');
-                await expect(errorMsg).toHaveCount(0);
-            }
+        // 週表示に切り替えてエラーがないことを確認
+        const weekBtn = page.locator('button:has-text("週"), .fc-timeGridWeek-button').first();
+        if (await weekBtn.count() > 0) {
+            await weekBtn.click({ force: true });
+            await waitForAngular(page);
+            const errorMsg = page.locator('.alert-danger, .error-message');
+            await expect(errorMsg).toHaveCount(0);
+            const calendarView = page.locator('.fc-timeGridWeek-view, .fc-view, .fc');
+            expect(await calendarView.count()).toBeGreaterThan(0);
+        }
 
-            // 週表示
-            const weekBtn = page.locator('button:has-text("週"), .fc-timeGridWeek-button').first();
-            if (await weekBtn.count() > 0) {
-                await weekBtn.click({ force: true });
-                await waitForAngular(page);
-                const errorMsg = page.locator('.alert-danger, .error-message');
-                await expect(errorMsg).toHaveCount(0);
-            }
-
-            // 日表示
-            const dayBtn = page.locator('button:has-text("日"), .fc-timeGridDay-button').first();
-            if (await dayBtn.count() > 0) {
-                await dayBtn.click({ force: true });
-                await waitForAngular(page);
-                const errorMsg = page.locator('.alert-danger, .error-message');
-                await expect(errorMsg).toHaveCount(0);
-            }
-
-        } catch (_e) {
-            // テーブル削除をスキップ（パフォーマンス改善）
+        // 日表示に切り替えてエラーがないことを確認
+        const dayBtn = page.locator('button:has-text("日"), .fc-timeGridDay-button').first();
+        if (await dayBtn.count() > 0) {
+            await dayBtn.click({ force: true });
+            await waitForAngular(page);
+            const errorMsg = page.locator('.alert-danger, .error-message');
+            await expect(errorMsg).toHaveCount(0);
+            const calendarView = page.locator('.fc-timeGridDay-view, .fc-view, .fc');
+            expect(await calendarView.count()).toBeGreaterThan(0);
         }
     });
 
@@ -617,46 +723,53 @@ test.describe('カレンダー - ビュー表示', () => {
     // --------------------------------------------------------------------------
     test('215: カレンダーでDrag&Dropによる予約情報移動が想定通り動作すること', async ({ page }) => {
 
-        try {
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
+        // ALLテストテーブルに直接遷移
+        await navigateToAllTypeTable(page);
 
-            const calendarTab = page.locator('a[href*="calendar"], .nav-link:has-text("カレンダー")').first();
-            if (await calendarTab.count() === 0) {
-                console.log('カレンダービューが設定されていません（スキップ）');
-                return;
-            }
-            await calendarTab.click({ force: true });
-            await waitForAngular(page);
+        // カレンダービューへ（beforeAllで存在が保証されている）
+        const calendarTab = page.locator('a[href*="calendar"], .nav-link:has-text("カレンダー")').first();
+        await expect(calendarTab).toBeVisible({ timeout: 10000 });
+        await calendarTab.click({ force: true });
+        await waitForAngular(page);
 
-            // カレンダーイベント要素を確認
-            const events = page.locator('.fc-event, .calendar-event');
-            const eventCount = await events.count();
-            if (eventCount > 0) {
-                const firstEvent = events.first();
-                const eventBox = await firstEvent.boundingBox();
+        // カレンダー本体が表示されていることを確認
+        const calendarEl = page.locator('.fc, .fc-view, .calendar-view').first();
+        await expect(calendarEl).toBeVisible({ timeout: 10000 });
 
-                if (eventBox) {
-                    // 隣のセルへドラッグ（50px右にドロップ）
-                    await page.mouse.move(eventBox.x + eventBox.width / 2, eventBox.y + eventBox.height / 2);
-                    await page.mouse.down();
-                    await page.waitForTimeout(300);
-                    await page.mouse.move(eventBox.x + eventBox.width / 2 + 50, eventBox.y + eventBox.height / 2, { steps: 10 });
-                    await page.waitForTimeout(300);
-                    await page.mouse.up();
-                    await page.waitForTimeout(2000);
-                }
-
-                // エラーがないことを確認
-                const errorMsg = page.locator('.alert-danger, .error-message');
-                await expect(errorMsg).toHaveCount(0);
-            } else {
-                console.log('カレンダーイベントが見つかりませんでした');
-            }
-
-        } catch (_e) {
-            // テーブル削除をスキップ（パフォーマンス改善）
+        // カレンダーイベント要素を確認
+        const events = page.locator('.fc-event, .calendar-event');
+        const eventCount = await events.count();
+        if (eventCount === 0) {
+            // データが0件の場合は月表示でイベントを探す（データ投入済みのはずなので失敗扱い）
+            throw new Error(
+                'カレンダーにイベントが表示されていません。' +
+                'beforeAllでデータ投入（createAllTypeData）が実行されているはずですが、' +
+                'カレンダーのFROM/TOフィールドが設定されていない可能性があります。'
+            );
         }
+
+        const firstEvent = events.first();
+        const eventBox = await firstEvent.boundingBox();
+
+        if (!eventBox) {
+            throw new Error('カレンダーイベントのバウンディングボックスが取得できませんでした');
+        }
+
+        // 隣のセルへドラッグ（50px右にドロップ）
+        await page.mouse.move(eventBox.x + eventBox.width / 2, eventBox.y + eventBox.height / 2);
+        await page.mouse.down();
+        await page.waitForTimeout(300);
+        await page.mouse.move(eventBox.x + eventBox.width / 2 + 50, eventBox.y + eventBox.height / 2, { steps: 10 });
+        await page.waitForTimeout(300);
+        await page.mouse.up();
+        await page.waitForTimeout(2000);
+
+        // エラーがないことを確認
+        const errorMsg = page.locator('.alert-danger, .error-message');
+        await expect(errorMsg).toHaveCount(0);
+
+        // ドラッグ後もカレンダーが表示されていることを確認
+        await expect(calendarEl).toBeVisible();
     });
 
 });

@@ -179,11 +179,20 @@ test.describe('RPA（コネクト）', () => {
             return Array.from(document.querySelectorAll('table thead th')).map(th => th.textContent.trim());
         });
 
-        // IDとコネクト名とステータスのカラムが存在すること
+        // テーブルが表示されていること（ヘッダーが1つ以上あること）
+        expect(headers.length, 'コネクト一覧テーブルにヘッダー列が存在すること').toBeGreaterThan(0);
+
+        // IDカラムが存在すること
         const hasId = headers.some(h => h.includes('ID'));
+        // コネクト名（またはRPA名）カラムが存在すること
         const hasName = headers.some(h => h.includes('コネクト名') || h.includes('RPA名') || h.includes('名'));
+        // ステータスカラムが存在すること
         const hasStatus = headers.some(h => h.includes('ステータス'));
-        expect(hasId || hasName || hasStatus).toBeTruthy();
+
+        // 各カラムを個別に確認（コネクト一覧には必ずID・名前・ステータスの3列が揃っているべき）
+        expect(hasId, `IDカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
+        expect(hasName, `コネクト名カラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
+        expect(hasStatus, `ステータスカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
     });
 
     test('RPA-05: コネクト一覧の今月使用量が表示されること', async ({ page }) => {

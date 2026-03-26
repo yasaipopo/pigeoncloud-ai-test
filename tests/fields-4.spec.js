@@ -469,17 +469,12 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
             }
         }
 
-        // 必須トグルが見つからない場合はUI確認のみ行う
+        // 必須トグルが見つからない場合はエラーで失敗させる
         if (!requiredToggled) {
-            // bodyテキストに「必須」が含まれているか確認
             const bodyText = await page.innerText('body');
             const hasRequired = bodyText.includes('必須');
             console.log(`[265-1] 必須トグル未操作。必須テキスト存在: ${hasRequired}`);
-
-            // フィールド設定UIが正常に表示されていることを確認
-            expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
-            return;
+            throw new Error('[265-1] 必須設定トグルが見つかりません。テキストフィールドのインライン編集パネルに「必須」チェックボックスが表示されているか確認してください。');
         }
 
         // 保存ボタンをクリック
@@ -543,13 +538,10 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
         }
 
         if (!recordFormOpened) {
-            // フォームが開けない場合はページ確認のみ
-            const bodyText = await page.innerText('body');
-            expect(bodyText).not.toContain('Internal Server Error');
-            console.log('[265-1] 新規作成ボタンが見つからないためフォーム確認スキップ');
+            console.log('[265-1] 新規作成ボタンが見つかりません');
             // 後片付け: 必須設定をOFFに戻す試み
             await cleanupRequiredSetting(page, tableId);
-            return;
+            throw new Error('[265-1] 新規作成ボタンが見つかりません。レコード一覧ページに「新規作成」または「追加」ボタンが表示されているか確認してください。');
         }
 
         // 保存ボタンを空のまま押してエラーを確認
@@ -581,13 +573,14 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
 
-        // 必須エラーメッセージが表示されているか確認（存在しなくてもエラーとしない）
+        // 必須エラーメッセージが表示されているか確認（空保存で必須エラーが出ること）
         const hasErrorMsg = bodyText.includes('入力してください') ||
                            bodyText.includes('必須') ||
                            bodyText.includes('required') ||
                            bodyText.includes('エラー') ||
                            bodyText.includes('必要');
         console.log(`[265-1] エラーメッセージ確認: ${hasErrorMsg}`);
+        expect(hasErrorMsg, '空のまま保存した際に必須エラーメッセージが表示されること（「入力してください」「必須」「エラー」等のテキストが含まれること）').toBe(true);
 
         // 後片付け: 必須設定をOFFに戻す
         await cleanupRequiredSetting(page, tableId);
@@ -699,13 +692,11 @@ test.describe('初期値設定テスト（267系）', () => {
         }
 
         if (!defaultValueSet) {
-            // 初期値入力欄が見つからない場合はUI確認のみ
+            // 初期値入力欄が見つからない場合はエラーで失敗させる
             const bodyText = await page.innerText('body');
             const hasDefaultText = bodyText.includes('初期値') || bodyText.includes('デフォルト') || bodyText.includes('default');
             console.log(`[267-1] 初期値入力欄未検出。初期値テキスト存在: ${hasDefaultText}`);
-            expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
-            return;
+            throw new Error('[267-1] 初期値入力欄が見つかりません。テキストフィールドのインライン編集パネルに「初期値」入力欄が表示されているか確認してください。');
         }
 
         // 保存ボタンをクリック
@@ -767,12 +758,10 @@ test.describe('初期値設定テスト（267系）', () => {
         }
 
         if (!recordFormOpened) {
-            const bodyText = await page.innerText('body');
-            expect(bodyText).not.toContain('Internal Server Error');
-            console.log('[267-1] 新規作成ボタンが見つからないためフォーム確認スキップ');
+            console.log('[267-1] 新規作成ボタンが見つかりません');
             // 後片付け: 初期値を消去
             await cleanupDefaultValue(page, tableId);
-            return;
+            throw new Error('[267-1] 新規作成ボタンが見つかりません。レコード一覧ページに「新規作成」または「追加」ボタンが表示されているか確認してください。');
         }
 
         // フォーム内のinput要素に初期値が入っているか確認
@@ -810,6 +799,7 @@ test.describe('初期値設定テスト（267系）', () => {
         }
 
         console.log(`[267-1] 初期値の自動入力確認: ${defaultFound}`);
+        expect(defaultFound, `テキストフィールドの初期値「${testDefaultValue}」が新規作成フォームに自動入力されていること`).toBe(true);
         await expect(page.locator('.navbar')).toBeVisible();
 
         // 後片付け: 初期値を消去

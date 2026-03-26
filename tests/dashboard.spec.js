@@ -337,8 +337,8 @@ test.describe('ダッシュボード', () => {
         const menu = page.locator('[role=menu]');
         const menuVisible = await menu.isVisible().catch(() => false);
         if (!menuVisible) {
-            // メニューが開かない場合はスキップ
-            return;
+            // メニューが開かない場合はエラー（タブ削除はメニュー経由でしか行えないため）
+            throw new Error('DB-05: ダッシュボードタブの▼メニューが開きませんでした。UIを確認してください（[role=menu]が表示されません）。');
         }
 
         const deleteItem = menu.locator('[role=menuitem]').filter({ hasText: '削除' });
