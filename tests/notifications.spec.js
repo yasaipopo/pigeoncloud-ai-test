@@ -1778,11 +1778,9 @@ test.describe('通知設定', () => {
         // Angular SPAのコンテンツが描画されるまで少し待つ
         await page.waitForTimeout(1000);
         const pageText = await page.innerText('body');
-        // メール取り込み設定が存在しない場合はスキップ（ページが別のコンテンツの場合）
+        // メール取り込み設定が存在しない場合はエラー
         if (!pageText.includes('メール取り込み')) {
-            console.log('188-4: メール取り込みページコンテンツ未検出（仕様変更またはSPAロード問題）- URLのみ確認');
-            expect(page.url()).toContain('/admin/');
-            return;
+            throw new Error('188-4: メール取り込みページコンテンツが未検出 — /admin/import_pop_mail のUI構造を確認してください（仕様変更またはSPAロード問題の可能性）');
         }
         expect(pageText).toContain('メール取り込み');
 
@@ -1883,9 +1881,7 @@ test.describe('通知設定', () => {
         const smtpCount = await smtpSection.count();
         console.log('217-1: SMTP設定セクション:', smtpCount);
         if (smtpCount === 0) {
-            console.log('217-1: SMTP設定セクションが見つからない（UIが変更された可能性あり）- ページのみ確認');
-            expect(page.url()).toContain('/admin/admin_setting');
-            return;
+            throw new Error('217-1: SMTP設定セクションが見つからなかった — /admin/admin_setting/edit/1 のUI構造を確認してください（UIが変更された可能性があります）');
         }
 
         // SMTP有効チェックボックスを確認
@@ -2004,8 +2000,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('235: 通知設定で特定項目の更新時に通知設定を行い全種別の項目で通知が行えること', async ({ page }) => {
         if (!tableId) {
-            console.log('235: tableIdなし');
-            return;
+            throw new Error('235: tableIdが設定されていません — beforeAllの setupAllTypeTable が失敗した可能性があります');
         }
 
         // 通知新規追加ページへ
