@@ -1,4 +1,6 @@
 // @ts-check
+// globalSetupはPlaywrightの.env自動読み込みが適用されないため明示的にdotenvをロード
+require('dotenv').config();
 /**
  * Playwright グローバルセットアップ
  *
@@ -94,7 +96,7 @@ module.exports = async function globalSetup() {
         pad(now.getHours()), pad(now.getMinutes()), pad(now.getSeconds()),
     ].join('');
 
-    const domain   = `tmp-testai-${dateStr}-${agentNum}`;
+    const domain   = `tmptestai${dateStr}${agentNum}`;
     // ADMIN_BASE_URL から base ドメインを抽出（pigeon-demo.com or pigeon-cloud.com）
     const adminHost = adminBaseUrl.replace(/^https?:\/\/[^.]+\./, '');
     const newUrl    = `https://${domain}.${adminHost}`;
