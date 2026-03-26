@@ -1100,25 +1100,31 @@ test.describe('編集ロック', () => {
         // レコード詳細ページへ遷移
         // recordIdが取得できていない場合は一覧から最初のレコードを開く
         if (recordId) {
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/record/${recordId}`);
+            // /view/ が正しいAngularルート（/record/ は不正）
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         } else {
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
-            // data-record-url ボタン（PR #2846+）、未デプロイ時は checkbox value で直接遷移
+            // data-record-url ボタン（PR #2846+）クリック → SPAナビ
             const firstDetailBtn = page.locator('button[data-record-url]').first();
             const detailBtnVisible = await firstDetailBtn.isVisible({ timeout: 3000 }).catch(() => false);
             if (detailBtnVisible) {
-                await firstDetailBtn.click();
+                const recUrl = await firstDetailBtn.getAttribute('data-record-url').catch(() => null);
+                if (recUrl) {
+                    await page.goto(BASE_URL + recUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                } else {
+                    await firstDetailBtn.click();
+                }
             } else {
+                // フォールバック: checkbox value で /view/ に直接遷移
                 const firstCheckbox = page.locator('tr[mat-row] input[type="checkbox"]').first();
                 await expect(firstCheckbox, 'テーブルの最初のレコードが存在すること').toBeVisible({ timeout: 10000 });
                 const cbRecordId = await firstCheckbox.getAttribute('value', { timeout: 5000 }).catch(() => null);
-                if (cbRecordId) await page.goto(BASE_URL + `/admin/dataset__${tableId}/record/${cbRecordId}`);
+                if (cbRecordId) await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${cbRecordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             }
         }
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-        await expect(page.locator('.navbar')).toBeVisible();
+        await waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         // 「編集」ボタンをクリック
         const editBtn = page.locator(
@@ -1164,25 +1170,31 @@ test.describe('編集ロック', () => {
 
         // レコード詳細ページへ遷移
         if (recordId) {
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/record/${recordId}`);
+            // /view/ が正しいAngularルート（/record/ は不正）
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         } else {
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
-            // data-record-url ボタン（PR #2846+）、未デプロイ時は checkbox value で直接遷移
+            // data-record-url ボタン（PR #2846+）クリック → SPAナビ
             const firstDetailBtn = page.locator('button[data-record-url]').first();
             const detailBtnVisible = await firstDetailBtn.isVisible({ timeout: 3000 }).catch(() => false);
             if (detailBtnVisible) {
-                await firstDetailBtn.click();
+                const recUrl = await firstDetailBtn.getAttribute('data-record-url').catch(() => null);
+                if (recUrl) {
+                    await page.goto(BASE_URL + recUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                } else {
+                    await firstDetailBtn.click();
+                }
             } else {
+                // フォールバック: checkbox value で /view/ に直接遷移
                 const firstCheckbox = page.locator('tr[mat-row] input[type="checkbox"]').first();
                 await expect(firstCheckbox, 'テーブルの最初のレコードが存在すること').toBeVisible({ timeout: 10000 });
                 const cbRecordId = await firstCheckbox.getAttribute('value', { timeout: 5000 }).catch(() => null);
-                if (cbRecordId) await page.goto(BASE_URL + `/admin/dataset__${tableId}/record/${cbRecordId}`);
+                if (cbRecordId) await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${cbRecordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             }
         }
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-        await expect(page.locator('.navbar')).toBeVisible();
+        await waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         // 「編集」ボタンをクリック
         const editBtn = page.locator(
@@ -1220,25 +1232,31 @@ test.describe('編集ロック', () => {
 
         // レコード詳細ページへ遷移
         if (recordId) {
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/record/${recordId}`);
+            // /view/ が正しいAngularルート（/record/ は不正）
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         } else {
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
-            // data-record-url ボタン（PR #2846+）、未デプロイ時は checkbox value で直接遷移
+            // data-record-url ボタン（PR #2846+）クリック → SPAナビ
             const firstDetailBtn = page.locator('button[data-record-url]').first();
             const detailBtnVisible = await firstDetailBtn.isVisible({ timeout: 3000 }).catch(() => false);
             if (detailBtnVisible) {
-                await firstDetailBtn.click();
+                const recUrl = await firstDetailBtn.getAttribute('data-record-url').catch(() => null);
+                if (recUrl) {
+                    await page.goto(BASE_URL + recUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                } else {
+                    await firstDetailBtn.click();
+                }
             } else {
+                // フォールバック: checkbox value で /view/ に直接遷移
                 const firstCheckbox = page.locator('tr[mat-row] input[type="checkbox"]').first();
                 await expect(firstCheckbox, 'テーブルの最初のレコードが存在すること').toBeVisible({ timeout: 10000 });
                 const cbRecordId = await firstCheckbox.getAttribute('value', { timeout: 5000 }).catch(() => null);
-                if (cbRecordId) await page.goto(BASE_URL + `/admin/dataset__${tableId}/record/${cbRecordId}`);
+                if (cbRecordId) await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${cbRecordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             }
         }
-        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-        await expect(page.locator('.navbar')).toBeVisible();
+        await waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         // 「編集」ボタンをクリック
         const editBtn = page.locator(
