@@ -91,6 +91,7 @@ mkdir -p reports/agent-{AGENT_NUM}
 # .envを読み込む（AGENT_NUMは上書きして正しい番号を設定）
 set -a; source .env; set +a
 export AGENT_NUM={AGENT_NUM}
+export TEST_NUMBER={TEST_NUMBER}
 npx playwright test {SPEC_FILES} \
   2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
 echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done
@@ -98,8 +99,16 @@ echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done
 完了したら passed/failed/skipped の件数を報告してください。
 ```
 
-**注意**: `--reporter=json` はコマンドラインに追加しないこと。config で設定済みの
+**注意1**: `--reporter=json` はコマンドラインに追加しないこと。config で設定済みの
 JSON reporter（`reports/agent-N/playwright-results.json`）が上書きされる。
+
+**注意2: スクリーンショット・動画は必ず全テストで取得すること**:
+`playwright.config.js` の `use` セクションに以下が設定されていること（デフォルト値）:
+```javascript
+screenshot: 'on',   // 全テストでスクリーンショット取得（失敗時のみはNG）
+video: 'on',        // 全テストで動画を保存（失敗時のみはNG）
+```
+これらが `'only-on-failure'` / `'retain-on-failure'` になっていたら必ず `'on'` に戻すこと。
 
 SPEC_FILESは `tests/workflow.spec.js tests/uncategorized.spec.js` のように展開する。
 
@@ -121,13 +130,18 @@ tail -5 reports/agent-30/run.log
 `e2e-viewer/reporter.js` が Playwright のカスタムレポーターとして動作し、
 テスト1件完了ごとにリアルタイムで DynamoDB/S3 に登録する。
 
-**サブエージェント起動コマンドに `E2E_API_URL` を追加する:**
+**サブエージェント起動コマンドに `E2E_API_URL` と `TEST_NUMBER` を追加する:**
+
+> **⚠️ `TEST_NUMBER` はビューアーの「第N回」表示を決める重要な設定。**
+> 必ず毎回インクリメントして設定すること（設定なし・`'1'`固定だと全実行が同じセッションに混ざる）。
+> 現在の最大値は `GET /runs` レスポンスの `sessionId` を確認するか、ビューアーの実行履歴件数 + 1 を使う。
 
 ```bash
 cd /Users/yasaipopo/PycharmProjects/pigeon-test
 mkdir -p reports/agent-{AGENT_NUM}
 set -a; source .env; set +a
 export AGENT_NUM={AGENT_NUM}
+export TEST_NUMBER={TEST_NUMBER}
 export E2E_API_URL='https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com'
 npx playwright test {SPEC_FILES} \
   2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
@@ -376,6 +390,8 @@ cd /Users/yasaipopo/PycharmProjects/pigeon-test
 mkdir -p reports/agent-{AGENT_NUM}
 set -a; source .env; set +a
 export AGENT_NUM={AGENT_NUM}
+export TEST_NUMBER={TEST_NUMBER}
+export E2E_API_URL='https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com'
 npx playwright test {SPEC_FILES} \
   2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
 echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done

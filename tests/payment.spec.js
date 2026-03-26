@@ -215,7 +215,7 @@ test.describe('支払い・プラン管理', () => {
         // 範囲外の値（最小値5未満）を入力
         await userNumInput.fill('2');
         await userNumInput.press('Tab');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // バリデーションエラーメッセージが表示されること
         // ※AngularのバリデーションまたはHTML5バリデーションによる表示
@@ -237,7 +237,7 @@ test.describe('支払い・プラン管理', () => {
         // 範囲外の値（最大値3000超）を入力
         await userNumInput.fill('9999');
         await userNumInput.press('Tab');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 範囲超過でもエラーまたは警告が表示されること
         const pageContent = await page.locator('main').textContent().catch(() => '');

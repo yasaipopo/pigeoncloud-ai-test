@@ -69,7 +69,7 @@ async function login(page, email, password) {
             const continueBtn = page.locator('button').filter({ hasText: '続ける' }).first();
             if (await continueBtn.count() > 0) {
                 await continueBtn.click();
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
                 await page.waitForURL('**/admin/dashboard', { timeout: 180000 }).catch(() => {});
             }
         } else if (page.url().includes('/admin/login')) {
@@ -95,7 +95,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -281,7 +281,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -294,7 +294,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -689,7 +689,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -797,7 +797,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -936,7 +936,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -978,7 +978,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1052,7 +1052,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1265,7 +1265,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1407,7 +1407,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);

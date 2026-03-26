@@ -105,18 +105,18 @@ test.describe('RPA（コネクト）', () => {
 
         // RPA名を入力
         await page.fill('input[placeholder="フロー名"]', 'テストRPA_E2E');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // テーブルを選択（ALLテストテーブル）
         await page.locator('ng-select, .ng-select').first().click();
-        await page.waitForTimeout(800);
+        await waitForAngular(page);
 
         // 選択肢からALLテストテーブルを選ぶ
         const allTestOption = page.locator('.ng-option').filter({ hasText: 'ALLテストテーブル' });
         const optionCount = await allTestOption.count();
         if (optionCount > 0) {
             await allTestOption.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
 
         // 作成ボタンをクリック（btn-primaryまたはvisibleなボタンを優先）
@@ -124,7 +124,7 @@ test.describe('RPA（コネクト）', () => {
         const createBtnCount = await createBtn.count();
         if (createBtnCount > 0) {
             await createBtn.first().click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         } else {
             // フォールバック: page.evaluateで作成ボタンをクリック
             await page.evaluate(() => {

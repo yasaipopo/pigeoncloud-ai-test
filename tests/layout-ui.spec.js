@@ -80,7 +80,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {}
 }
@@ -93,7 +93,7 @@ async function logout(page) {
     let logoutClicked = false;
     for (let i = 0; i < 5; i++) {
         await page.click('.nav-link.nav-pill.avatar', { force: true });
-        await page.waitForTimeout(800);
+        await waitForAngular(page);
         const dropdown = page.locator('.dropdown-menu.show');
         const visible = await dropdown.isVisible().catch(() => false);
         if (visible) {
@@ -258,7 +258,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // ユーザーアイコンをクリック
         await page.click('.nav-link.nav-pill.avatar', { force: true });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // ドロップダウンメニューが表示されることを確認
         const dropdown = page.locator('.dropdown-menu.show');
@@ -435,7 +435,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
                 // 保存ボタンをクリック
                 await page.locator('button.btn-primary:has-text("更新"), button[type=submit]:has-text("更新")').first().click();
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
 
                 // ページが正常に残っていることを確認
                 await expect(page).toHaveURL(/\/admin\/admin_setting/);
@@ -468,20 +468,20 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         if (deleteBtnCount > 0) {
             await deleteBtn.first().click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 確認ダイアログが出た場合はOKをクリック
             try {
                 const confirmBtn = page.locator('.modal.show button:has-text("OK"), .modal.show button:has-text("削除"), .modal.show .btn-primary');
                 if (await confirmBtn.count() > 0) {
                     await confirmBtn.first().click();
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
             } catch (e) {}
 
             // 保存ボタンをクリック
             await page.locator('button.btn-primary:has-text("更新"), button[type=submit]:has-text("更新")').first().click();
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
             console.log('カスタムCSS削除・保存完了');
         } else {
             console.log('削除対象のCSSファイルがないか、削除ボタンが見つからないためスキップ');
@@ -597,7 +597,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         console.log('追加オプションタブ数:', menuTabCount);
         if (menuTabCount > 0) {
             await menuTabBtn.first().click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // アイコンタイプのselectを確認
@@ -636,7 +636,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         const saveBtnCount = await saveBtn.count();
         if (saveBtnCount > 0) {
             await saveBtn.first().click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // ページが表示されることを確認
@@ -660,7 +660,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         const menuTabBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("メニュー")');
         if (await menuTabBtn.count() > 0) {
             await menuTabBtn.first().click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // アイコン画像の削除ボタンを探す
@@ -671,13 +671,13 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         if (deleteBtnCount > 0) {
             await deleteBtn.first().click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             // 確認ダイアログ
             try {
                 const confirmBtn = page.locator('.modal.show button:has-text("OK"), .modal.show .btn-primary');
                 if (await confirmBtn.count() > 0) {
                     await confirmBtn.first().click();
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
             } catch (e) {}
             console.log('アイコン画像削除完了');
@@ -689,7 +689,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         const saveBtn = page.locator('button[type=submit]:has-text("保存"), button:has-text("保存"), button.btn-primary:has-text("更新")');
         if (await saveBtn.count() > 0) {
             await saveBtn.first().click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         await expect(page).toHaveURL(/\/admin\/dataset/);

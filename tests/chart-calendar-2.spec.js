@@ -98,7 +98,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -264,7 +264,7 @@ async function openActionMenu(page) {
             const text = await btn.innerText();
             if (!text.includes('帳票')) {
                 await btn.click({ force: true });
-                await page.waitForTimeout(700);
+                await waitForAngular(page);
                 // 集計またはチャートメニューが表示されたか確認
                 const menuItem = page.locator('.dropdown-item:has-text("集計"), .dropdown-item:has-text("チャート")').first();
                 const found = await menuItem.isVisible().catch(() => false);
@@ -273,7 +273,7 @@ async function openActionMenu(page) {
                 }
                 // 正しいメニューでなければ閉じて次を試す
                 await page.keyboard.press('Escape');
-                await page.waitForTimeout(300);
+                await waitForAngular(page);
             }
         }
     }
@@ -332,13 +332,13 @@ test.describe('チャート - 基本機能', () => {
         const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
         await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
         await chartAddMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 設定タブが表示されることを確認
         const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
         await expect(settingTab).toBeVisible({ timeout: 5000 });
         await settingTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 「全員に表示」ラジオをON（input[name="grant"]が存在する）
         const allUsersOption = page.locator(
@@ -346,12 +346,12 @@ test.describe('チャート - 基本機能', () => {
         ).first();
         await expect(allUsersOption).toBeVisible({ timeout: 3000 });
         await allUsersOption.click({ force: true });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 3000 });
         await saveBtn.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('エラーが発生しました');
@@ -371,13 +371,13 @@ test.describe('チャート - 基本機能', () => {
         const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
         await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
         await chartAddMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 設定タブが表示されることを確認
         const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
         await expect(settingTab).toBeVisible({ timeout: 5000 });
         await settingTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 「自分のみ表示」ラジオをON
         const selfOnlyOption = page.locator(
@@ -385,12 +385,12 @@ test.describe('チャート - 基本機能', () => {
         ).first();
         await expect(selfOnlyOption).toBeVisible({ timeout: 3000 });
         await selfOnlyOption.click({ force: true });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 3000 });
         await saveBtn.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('エラーが発生しました');
@@ -411,13 +411,13 @@ test.describe('チャート - 基本機能', () => {
         const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
         await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
         await chartAddMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 設定タブが表示されることを確認
         const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
         await expect(settingTab).toBeVisible({ timeout: 5000 });
         await settingTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // タイトル設定
         const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
@@ -435,14 +435,14 @@ test.describe('チャート - 基本機能', () => {
         const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
         if (await chartSettingTab.count() > 0) {
             await chartSettingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // 保存ボタンが存在することを確認してクリック
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 3000 });
         await saveBtn.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // チャート一覧に作成したチャートが表示されていることを確認
         const pageText = await page.innerText('body');
@@ -462,17 +462,17 @@ test.describe('チャート - 基本機能', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 絞り込みタブ
             const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
             await filterTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
             if (await addCondBtn.count() > 0) {
                 await addCondBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 「空ではない」を選択
                 const operatorSelect = page.locator('select[name*="operator"], select.condition-operator').last();
@@ -488,7 +488,7 @@ test.describe('チャート - 基本機能', () => {
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
                 await displayBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -512,16 +512,16 @@ test.describe('チャート - 基本機能', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
             await filterTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
             if (await addCondBtn.count() > 0) {
                 await addCondBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 日付フィールドを選択
                 const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
@@ -538,14 +538,14 @@ test.describe('チャート - 基本機能', () => {
                 const relativeCheck = page.locator('input[type="checkbox"][name*="relative"], label:has-text("相対値")').first();
                 if (await relativeCheck.count() > 0) {
                     await relativeCheck.click({ force: true });
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
             }
 
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
                 await displayBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -570,13 +570,13 @@ test.describe('チャート - 基本機能', () => {
         const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
         await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
         await chartAddMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // チャート設定タブが表示されることを確認
         const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
         await expect(chartSettingTab).toBeVisible({ timeout: 5000 });
         await chartSettingTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // データ項目1を設定
         const dataItem1 = page.locator('select[name*="data_item"], select[name*="item"]').first();
@@ -592,21 +592,21 @@ test.describe('チャート - 基本機能', () => {
         const lineGraphOption = page.locator('label:has-text("線グラフ"), input[value*="line"]').first();
         if (await lineGraphOption.count() > 0) {
             await lineGraphOption.click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
 
         // y軸 棒グラフを選択（2軸目）
         const barGraphOption = page.locator('label:has-text("棒グラフ"), input[value*="bar"]').first();
         if (await barGraphOption.count() > 0) {
             await barGraphOption.click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
 
         // 表示ボタン
         const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
         if (await displayBtn.count() > 0) {
             await displayBtn.click({ force: true });
-            await page.waitForTimeout(3000);
+            await waitForAngular(page);
         }
 
         // チャートが表示されていることを確認（Canvasまたはchartライブラリ要素）
@@ -636,13 +636,13 @@ test.describe('チャート - 基本機能', () => {
             ).first();
             if (await dashboardChartAddBtn.count() > 0) {
                 await dashboardChartAddBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
 
                 // 設定タブ
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 if (await settingTab.count() > 0) {
                     await settingTab.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
                 }
 
                 // タイトル入力
@@ -667,7 +667,7 @@ test.describe('チャート - 基本機能', () => {
                 const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
                 if (await saveBtn.count() > 0) {
                     await saveBtn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                 }
             }
 
@@ -692,16 +692,16 @@ test.describe('チャート - 基本機能', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
             await filterTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
             if (await addCondBtn.count() > 0) {
                 await addCondBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 日時フィールドを選択
                 const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
@@ -729,14 +729,14 @@ test.describe('チャート - 基本機能', () => {
                 const relativeCheck = page.locator('input[type="checkbox"][name*="relative"], label:has-text("相対値")').first();
                 if (await relativeCheck.count() > 0) {
                     await relativeCheck.click({ force: true });
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
             }
 
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
                 await displayBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -761,25 +761,25 @@ test.describe('チャート - 基本機能', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // デフォルト設定タブ
             const settingTab = page.locator('a:has-text("デフォルト設定")').first();
             if (await settingTab.count() > 0) {
                 await settingTab.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
 
             // デフォルト設定 -> 「全てのユーザーのデフォルトにする」チェック
             const defaultAllCheck = page.locator('label[for="check_default"], label:has-text("全てのユーザーのデフォルト")').first();
             if (await defaultAllCheck.count() > 0) {
                 await defaultAllCheck.click({ force: true });
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
 
                 const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
                 if (await saveBtn.count() > 0) {
                     await saveBtn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                 }
 
                 const pageText = await page.innerText('body');
@@ -806,24 +806,24 @@ test.describe('チャート - 基本機能', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 行に色を付けるタブ
             const colorTab = page.locator('a:has-text("行に色を付ける"), .nav-link:has-text("行に色を付ける")').first();
             if (await colorTab.count() > 0) {
                 await colorTab.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 const addColorBtn = page.locator('.tab-pane.active button:has-text("条件・色を追加"), button:has-text("条件・色を追加")').first();
                 if (await addColorBtn.count() > 0) {
                     await addColorBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
                 }
 
                 const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
                 if (await saveBtn.count() > 0) {
                     await saveBtn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                 }
 
                 const pageText = await page.innerText('body');
@@ -848,25 +848,25 @@ test.describe('チャート - 基本機能', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const colorTab = page.locator('a:has-text("行に色を付ける"), .nav-link:has-text("行に色を付ける")').first();
             if (await colorTab.count() > 0) {
                 await colorTab.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 const addColorBtn = page.locator('.tab-pane.active button:has-text("条件・色を追加"), button:has-text("条件・色を追加")').first();
                 if (await addColorBtn.count() > 0) {
                     await addColorBtn.click({ force: true });
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                     await addColorBtn.click({ force: true });
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
 
                 const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
                 if (await saveBtn.count() > 0) {
                     await saveBtn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                 }
 
                 const pageText = await page.innerText('body');
@@ -907,12 +907,12 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 設定タブ
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // タイトル入力
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
@@ -924,26 +924,26 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 編集可能なユーザーの「選択」ボタン
                 const editableSelectBtn = page.locator('button:has-text("選択")').first();
                 if (await editableSelectBtn.count() > 0) {
                     await editableSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // 全ユーザーにチェック
                     const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[value*="all_users"]').first();
                     if (await allUsersCheck.count() > 0) {
                         await allUsersCheck.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     // 保存
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -951,7 +951,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -976,24 +976,24 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             await page.waitForTimeout(500);
             const summaryMenu136 = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu136.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             try { await settingTab.waitFor({ state: 'visible', timeout: 5000 }); } catch (_e) {}
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 詳細権限設定
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // ユーザー・組織をブランクのまま保存
                 const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
                 if (await saveBtn.count() > 0) {
                     await saveBtn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
 
                     // エラーメッセージが表示されることを確認
                     const pageText = await page.innerText('body');
@@ -1021,12 +1021,12 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 設定タブ
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // タイトル
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
@@ -1038,23 +1038,23 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 const editableSelectBtn = page.locator('button:has-text("選択")').first();
                 if (await editableSelectBtn.count() > 0) {
                     await editableSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[value*="all_users"]').first();
                     if (await allUsersCheck.count() > 0) {
                         await allUsersCheck.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1062,7 +1062,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1086,22 +1086,22 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // ユーザー・組織をブランクのまま保存
                 const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
                 if (await saveBtn.count() > 0) {
                     await saveBtn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                     const pageText = await page.innerText('body');
                     expect(pageText).not.toContain('Internal Server Error');
                 }
@@ -1126,11 +1126,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1141,19 +1141,19 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 編集可能なユーザーの「選択」ボタン
                 const editableSelectBtn = page.locator('button:has-text("選択")').first();
                 if (await editableSelectBtn.count() > 0) {
                     await editableSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // ユーザー指定タブ/オプションを選択
                     const userSpecifyOption = page.locator('a:has-text("ユーザー指定"), label:has-text("ユーザー指定"), li:has-text("ユーザー指定")').first();
                     if (await userSpecifyOption.count() > 0) {
                         await userSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     // リストの最初のユーザーを選択
@@ -1165,7 +1165,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1173,7 +1173,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1192,11 +1192,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1207,19 +1207,19 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 編集可能なユーザーの「選択」ボタン
                 const editableSelectBtn = page.locator('button:has-text("選択")').first();
                 if (await editableSelectBtn.count() > 0) {
                     await editableSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // 組織指定タブ/オプションを選択
                     const orgSpecifyOption = page.locator('a:has-text("組織指定"), label:has-text("組織指定"), li:has-text("組織指定")').first();
                     if (await orgSpecifyOption.count() > 0) {
                         await orgSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                         // 組織リストが表示されることを確認（組織が存在しない場合も正常）
                         const orgList = page.locator('.org-list, .organization-list, .modal table');
                         // 組織の最初のチェックボックスを選択（あれば）
@@ -1232,7 +1232,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalCloseBtn = page.locator('.modal button:has-text("閉じる"), .modal .btn-secondary, .modal .modal-header button.close').first();
                     if (await modalCloseBtn.count() > 0) {
                         await modalCloseBtn.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1257,11 +1257,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1272,7 +1272,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 閲覧のみ可能なユーザーの「選択」ボタン（2番目のボタン）
                 const selectBtns = page.locator('button:has-text("選択")');
@@ -1283,19 +1283,19 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     : selectBtns.first();
                 if (await viewOnlySelectBtn.count() > 0) {
                     await viewOnlySelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // 全ユーザーを選択
                     const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[value*="all_users"]').first();
                     if (await allUsersCheck.count() > 0) {
                         await allUsersCheck.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1303,7 +1303,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1326,11 +1326,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1341,7 +1341,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 閲覧のみ可能なユーザーの「選択」ボタン（2番目）
                 const selectBtns = page.locator('button:has-text("選択")');
@@ -1351,13 +1351,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     : selectBtns.first();
                 if (await viewOnlySelectBtn.count() > 0) {
                     await viewOnlySelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // ユーザー指定を選択
                     const userSpecifyOption = page.locator('a:has-text("ユーザー指定"), label:has-text("ユーザー指定"), li:has-text("ユーザー指定")').first();
                     if (await userSpecifyOption.count() > 0) {
                         await userSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     // テストユーザーをチェック
@@ -1376,7 +1376,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1384,7 +1384,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1403,11 +1403,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1418,7 +1418,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 閲覧のみ可能なユーザーの「選択」ボタン（2番目）
                 const selectBtns = page.locator('button:has-text("選択")');
@@ -1428,13 +1428,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     : selectBtns.first();
                 if (await viewOnlySelectBtn.count() > 0) {
                     await viewOnlySelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // 組織指定を選択
                     const orgSpecifyOption = page.locator('a:has-text("組織指定"), label:has-text("組織指定"), li:has-text("組織指定")').first();
                     if (await orgSpecifyOption.count() > 0) {
                         await orgSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                         // 組織の最初のチェックボックスを選択（あれば）
                         const firstOrgCheck = page.locator('.modal table input[type="checkbox"]').first();
                         if (await firstOrgCheck.count() > 0) {
@@ -1445,7 +1445,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalCloseBtn = page.locator('.modal button:has-text("閉じる"), .modal .btn-secondary, .modal .modal-header button.close').first();
                     if (await modalCloseBtn.count() > 0) {
                         await modalCloseBtn.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1466,22 +1466,22 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // ユーザー・組織をブランクのまま保存
                 const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
                 if (await saveBtn.count() > 0) {
                     await saveBtn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                     const pageText = await page.innerText('body');
                     expect(pageText).not.toContain('Internal Server Error');
                 }
@@ -1500,11 +1500,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
             await chartAddMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1515,7 +1515,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 const selectBtns = page.locator('button:has-text("選択")');
 
@@ -1523,18 +1523,18 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const editSelectBtn = selectBtns.first();
                 if (await editSelectBtn.count() > 0) {
                     await editSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[value*="all_users"]').first();
                     if (await allUsersCheck.count() > 0) {
                         await allUsersCheck.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
 
@@ -1547,12 +1547,12 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     : updatedSelectBtns.first();
                 if (await viewSelectBtn.count() > 0) {
                     await viewSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     const userSpecifyOption = page.locator('a:has-text("ユーザー指定"), label:has-text("ユーザー指定")').first();
                     if (await userSpecifyOption.count() > 0) {
                         await userSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     // リストの最初のユーザーを選択
@@ -1564,7 +1564,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalSaveBtn2 = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn2.count() > 0) {
                         await modalSaveBtn2.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1572,7 +1572,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1596,11 +1596,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1611,19 +1611,19 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 編集可能なユーザーの「選択」ボタン
                 const editableSelectBtn = page.locator('button:has-text("選択")').first();
                 if (await editableSelectBtn.count() > 0) {
                     await editableSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // ユーザー指定を選択
                     const userSpecifyOption = page.locator('a:has-text("ユーザー指定"), label:has-text("ユーザー指定"), li:has-text("ユーザー指定")').first();
                     if (await userSpecifyOption.count() > 0) {
                         await userSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     // テストユーザーをチェック
@@ -1642,7 +1642,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1650,7 +1650,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1669,11 +1669,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1684,19 +1684,19 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 編集可能なユーザーの「選択」ボタン
                 const editableSelectBtn = page.locator('button:has-text("選択")').first();
                 if (await editableSelectBtn.count() > 0) {
                     await editableSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // 組織指定を選択
                     const orgSpecifyOption = page.locator('a:has-text("組織指定"), label:has-text("組織指定"), li:has-text("組織指定")').first();
                     if (await orgSpecifyOption.count() > 0) {
                         await orgSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                         // 組織の最初のチェックボックスを選択（あれば）
                         const firstOrgCheck = page.locator('.modal table input[type="checkbox"]').first();
                         if (await firstOrgCheck.count() > 0) {
@@ -1707,7 +1707,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalCloseBtn = page.locator('.modal button:has-text("閉じる"), .modal .btn-secondary, .modal .modal-header button.close').first();
                     if (await modalCloseBtn.count() > 0) {
                         await modalCloseBtn.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1732,11 +1732,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1747,7 +1747,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 閲覧のみ可能なユーザーの「選択」ボタン（2番目）
                 const selectBtns = page.locator('button:has-text("選択")');
@@ -1757,19 +1757,19 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     : selectBtns.first();
                 if (await viewOnlySelectBtn.count() > 0) {
                     await viewOnlySelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // 全ユーザーを選択
                     const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[value*="all_users"]').first();
                     if (await allUsersCheck.count() > 0) {
                         await allUsersCheck.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1777,7 +1777,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1800,11 +1800,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1815,7 +1815,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 閲覧のみ可能なユーザーの「選択」ボタン（2番目）
                 const selectBtns = page.locator('button:has-text("選択")');
@@ -1825,13 +1825,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     : selectBtns.first();
                 if (await viewOnlySelectBtn.count() > 0) {
                     await viewOnlySelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // ユーザー指定を選択
                     const userSpecifyOption = page.locator('a:has-text("ユーザー指定"), label:has-text("ユーザー指定"), li:has-text("ユーザー指定")').first();
                     if (await userSpecifyOption.count() > 0) {
                         await userSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     // テストユーザーをチェック
@@ -1850,7 +1850,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
                     if (await modalSaveBtn.count() > 0) {
                         await modalSaveBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1858,7 +1858,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1877,11 +1877,11 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
             if (await titleInput.count() > 0) {
@@ -1892,7 +1892,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 閲覧のみ可能なユーザーの「選択」ボタン（2番目）
                 const selectBtns = page.locator('button:has-text("選択")');
@@ -1902,13 +1902,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     : selectBtns.first();
                 if (await viewOnlySelectBtn.count() > 0) {
                     await viewOnlySelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // 組織指定を選択
                     const orgSpecifyOption = page.locator('a:has-text("組織指定"), label:has-text("組織指定"), li:has-text("組織指定")').first();
                     if (await orgSpecifyOption.count() > 0) {
                         await orgSpecifyOption.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                         // 組織の最初のチェックボックスを選択（あれば）
                         const firstOrgCheck = page.locator('.modal table input[type="checkbox"]').first();
                         if (await firstOrgCheck.count() > 0) {
@@ -1919,7 +1919,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                     const modalCloseBtn = page.locator('.modal button:has-text("閉じる"), .modal .btn-secondary, .modal .modal-header button.close').first();
                     if (await modalCloseBtn.count() > 0) {
                         await modalCloseBtn.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1940,22 +1940,22 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
             if (await detailPermBtn.count() > 0) {
                 await detailPermBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // ユーザー・組織をブランクのまま保存
                 const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
                 if (await saveBtn.count() > 0) {
                     await saveBtn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                     const pageText = await page.innerText('body');
                     expect(pageText).not.toContain('Internal Server Error');
                 }
@@ -1978,7 +1978,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const settingTab = page.locator('[role="tab"]').filter({ hasText: /^設定$/ }).first();
             await settingTab.waitFor({ state: 'visible', timeout: 10000 });
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // タイトル入力（.modal.show内のtextbox）
             const titleInput = page.locator('.modal.show input[type="text"], .modal.show input:not([type])').first();
@@ -1991,27 +1991,27 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const detailPermLabel = page.locator('.modal.show').locator('text=詳細権限設定').first();
             if (await detailPermLabel.count() > 0) {
                 await detailPermLabel.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 編集可能ユーザー：「選択」ボタン（1番目）
                 const editSelectBtn = page.locator('.modal.show button:has-text("選択")').first();
                 if (await editSelectBtn.count() > 0) {
                     await editSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // ユーザー・組織選択サブモーダルで「全ユーザー」をクリック
                     // サブモーダルはz-indexが上のモーダルとして表示される
                     const allUsersItem = page.locator('.modal.show').last().locator('text=全ユーザー').first();
                     if (await allUsersItem.count() > 0) {
                         await allUsersItem.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
 
                     // 送信ボタン
                     const submitBtn = page.locator('.modal.show button:has-text("送信")').first();
                     if (await submitBtn.count() > 0) {
                         await submitBtn.click({ force: true });
-                        await page.waitForTimeout(1000);
+                        await waitForAngular(page);
                     }
                 }
 
@@ -2022,13 +2022,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const viewSelectBtn = selectBtnCount >= 2 ? selectBtns.nth(1) : selectBtns.first();
                 if (await viewSelectBtn.count() > 0) {
                     await viewSelectBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // サブモーダルが開いたらキャンセル（ユーザー選択操作が複雑なため確認のみ）
                     const cancelBtn = page.locator('.modal.show button:has-text("キャンセル")').first();
                     if (await cancelBtn.count() > 0) {
                         await cancelBtn.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -2037,7 +2037,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('.modal.show button:has-text("保存して表示")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -2062,7 +2062,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const settingTab = page.locator('[role="tab"]').filter({ hasText: /^設定$/ }).first();
             await settingTab.waitFor({ state: 'visible', timeout: 10000 });
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // タイトル入力（.modal.show内のinput）
             const titleInput = page.locator('.modal.show input[type="text"], .modal.show input:not([type])').first();
@@ -2074,7 +2074,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const allShowLabel = page.locator('.modal.show').locator('text=全員に表示').first();
             if (await allShowLabel.count() > 0) {
                 await allShowLabel.click({ force: true });
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
 
             // ダッシュボードに表示はUIに存在しない（仕様変更）のでスキップ
@@ -2083,7 +2083,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('.modal.show button:has-text("保存して表示")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -2102,12 +2102,12 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const summaryTab = page.locator('a.nav-link').filter({ hasText: /^集計$/ }).first();
             if (await summaryTab.count() > 0) {
                 await summaryTab.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
 
             // 他のテーブルの項目を使用チェックボックス
@@ -2121,7 +2121,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const showBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await showBtn.count() > 0) {
                 await showBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -2144,13 +2144,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 集計タブへ移動
             const summaryTab = page.locator('a.nav-link').filter({ hasText: /^集計$/ }).first();
             if (await summaryTab.count() > 0) {
                 await summaryTab.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
 
             // 他のテーブルの項目を使用チェックボックス
@@ -2164,7 +2164,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             if (await settingTab.count() > 0) {
                 await settingTab.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
@@ -2182,7 +2182,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存する"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -2201,13 +2201,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
         const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
         await expect(summaryMenu).toBeVisible({ timeout: 5000 });
         await summaryMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 集計モーダルが開いたことを確認（集計タブが見える）
         const summaryTab = page.locator('a.nav-link').filter({ hasText: /^集計$/ }).first();
         await expect(summaryTab).toBeVisible({ timeout: 5000 });
         await summaryTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 集計フォームが表示されていることを確認（集計選択セレクトまたは計算式ボタンが存在する）
         const aggregateForm = page.locator(
@@ -2235,13 +2235,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 集計タブへ移動して計算式を使用
             const summaryTab = page.locator('a.nav-link').filter({ hasText: /^集計$/ }).first();
             if (await summaryTab.count() > 0) {
                 await summaryTab.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
 
             // 計算式を使用チェックボックス
@@ -2255,7 +2255,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             if (await settingTab.count() > 0) {
                 await settingTab.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
 
             const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
@@ -2273,7 +2273,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             const saveBtn = page.locator('button:has-text("保存する"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -2292,7 +2292,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
         const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
         await expect(summaryMenu).toBeVisible({ timeout: 5000 });
         await summaryMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 集計モーダルが開いたことを確認（何らかのタブが見える）
         const anyTab = page.locator('a.nav-link[role="tab"], [role="tab"], a.nav-link').first();
@@ -2302,7 +2302,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
         const filterTab = page.locator('a.nav-link').filter({ hasText: /絞り込み/ }).first();
         if (await filterTab.count() > 0) {
             await filterTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         const pageText = await page.innerText('body');

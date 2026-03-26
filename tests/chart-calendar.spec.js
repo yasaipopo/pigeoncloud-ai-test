@@ -9,15 +9,15 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 /**
  * storageStateを使ったブラウザコンテキストを作成する
  */
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
-
-async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
-}
 
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
@@ -111,7 +111,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -277,7 +277,7 @@ async function openActionMenu(page) {
             const text = await btn.innerText();
             if (!text.includes('帳票')) {
                 await btn.click({ force: true });
-                await page.waitForTimeout(700);
+                await waitForAngular(page);
                 // 集計またはチャートメニューが表示されたか確認
                 const menuItem = page.locator('.dropdown-item:has-text("集計"), .dropdown-item:has-text("チャート")').first();
                 const found = await menuItem.isVisible().catch(() => false);
@@ -286,7 +286,7 @@ async function openActionMenu(page) {
                 }
                 // 正しいメニューでなければ閉じて次を試す
                 await page.keyboard.press('Escape');
-                await page.waitForTimeout(300);
+                await waitForAngular(page);
             }
         }
     }
@@ -344,7 +344,7 @@ test.describe('チャート・集計 - オプション設定', () => {
         const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
         await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
         await chartAddMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // チャートモーダルが開いたことを確認（nav-linkタブが存在する）
         const modalOrPanel = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
@@ -352,7 +352,7 @@ test.describe('チャート・集計 - オプション設定', () => {
         const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定"), li:has-text("チャート設定") a');
         await expect(chartSettingTab.first()).toBeVisible({ timeout: 5000 });
         await chartSettingTab.first().click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // オプション「累積(時系列の場合)」チェックボックスをON
         const cumulativeLabel = page.locator('label:has-text("累積")').first();
@@ -392,7 +392,7 @@ test.describe('チャート・集計 - オプション設定', () => {
         const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
         if (await displayBtn.count() > 0) {
             await displayBtn.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // 画面にエラーがないことを確認
@@ -414,19 +414,19 @@ test.describe('チャート・集計 - オプション設定', () => {
         const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
         await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
         await chartAddMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // チャート設定タブが表示されることを確認
         const chartSettingTab = page.locator('a.nav-link:has-text("チャート設定")').first();
         await expect(chartSettingTab).toBeVisible({ timeout: 5000 });
         await chartSettingTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 「累積(時系列の場合)」をONにすると「過去分も全て加算」が表示される
         const sumCheck = page.locator('label:has-text("累積")').first();
         if (await sumCheck.count() > 0) {
             await sumCheck.click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const pastAllCheck = page.locator('label:has-text("過去分")').first();
         if (await pastAllCheck.count() > 0) {
@@ -455,7 +455,7 @@ test.describe('チャート・集計 - オプション設定', () => {
         const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
         if (await displayBtn.count() > 0) {
             await displayBtn.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // エラーがないことを確認
@@ -494,7 +494,7 @@ test.describe('カレンダー - ビュー表示', () => {
         const calendarTabCount = await calendarTab.count();
         if (calendarTabCount > 0) {
             await calendarTab.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 週表示ボタンをクリック
             const weekBtn = page.locator(
@@ -502,7 +502,7 @@ test.describe('カレンダー - ビュー表示', () => {
             ).first();
             if (await weekBtn.count() > 0) {
                 await weekBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             // エラーがないことを確認
@@ -537,7 +537,7 @@ test.describe('カレンダー - ビュー表示', () => {
         const calendarTabCount = await calendarTab.count();
         if (calendarTabCount > 0) {
             await calendarTab.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 日表示ボタンをクリック
             const dayBtn = page.locator(
@@ -545,7 +545,7 @@ test.describe('カレンダー - ビュー表示', () => {
             ).first();
             if (await dayBtn.count() > 0) {
                 await dayBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const errorMsg = page.locator('.alert-danger, .error-message');
@@ -578,13 +578,13 @@ test.describe('カレンダー - ビュー表示', () => {
                 return;
             }
             await calendarTab.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 月表示
             const monthBtn = page.locator('button:has-text("月"), .fc-dayGridMonth-button').first();
             if (await monthBtn.count() > 0) {
                 await monthBtn.click({ force: true });
-                await page.waitForTimeout(1500);
+                await waitForAngular(page);
                 const errorMsg = page.locator('.alert-danger, .error-message');
                 await expect(errorMsg).toHaveCount(0);
             }
@@ -593,7 +593,7 @@ test.describe('カレンダー - ビュー表示', () => {
             const weekBtn = page.locator('button:has-text("週"), .fc-timeGridWeek-button').first();
             if (await weekBtn.count() > 0) {
                 await weekBtn.click({ force: true });
-                await page.waitForTimeout(1500);
+                await waitForAngular(page);
                 const errorMsg = page.locator('.alert-danger, .error-message');
                 await expect(errorMsg).toHaveCount(0);
             }
@@ -602,7 +602,7 @@ test.describe('カレンダー - ビュー表示', () => {
             const dayBtn = page.locator('button:has-text("日"), .fc-timeGridDay-button').first();
             if (await dayBtn.count() > 0) {
                 await dayBtn.click({ force: true });
-                await page.waitForTimeout(1500);
+                await waitForAngular(page);
                 const errorMsg = page.locator('.alert-danger, .error-message');
                 await expect(errorMsg).toHaveCount(0);
             }
@@ -627,7 +627,7 @@ test.describe('カレンダー - ビュー表示', () => {
                 return;
             }
             await calendarTab.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // カレンダーイベント要素を確認
             const events = page.locator('.fc-event, .calendar-event');
@@ -688,7 +688,7 @@ test.describe('集計 - 基本機能', () => {
         const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
         await expect(summaryMenu).toBeVisible({ timeout: 5000 });
         await summaryMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 集計モーダル/パネルが開いたことを確認（何らかのタブが見える）
         const anyTab = page.locator('a.nav-link[role="tab"], [role="tab"], a.nav-link').first();
@@ -697,20 +697,20 @@ test.describe('集計 - 基本機能', () => {
         const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
         if (await settingTab.count() > 0 && await settingTab.isVisible()) {
             await settingTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // 「全員に表示」ラジオボタンをON（実際のvalue: "public"）
         const allUsersOption = page.locator('input[name="grant"][value="public"]').first();
         await expect(allUsersOption).toBeVisible({ timeout: 5000 });
         await allUsersOption.click({ force: true });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // 保存ボタンが存在して、クリックできることを確認
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 3000 });
         await saveBtn.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 保存成功の確認（エラーが出ていないこと）
         const pageText = await page.innerText('body');
@@ -731,7 +731,7 @@ test.describe('集計 - 基本機能', () => {
         const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
         await expect(summaryMenu).toBeVisible({ timeout: 5000 });
         await summaryMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 集計モーダル/パネルが開いたことを確認（何らかのタブが見える）
         const anyTab2 = page.locator('a.nav-link[role="tab"], [role="tab"], a.nav-link').first();
@@ -740,19 +740,19 @@ test.describe('集計 - 基本機能', () => {
         const settingTab2 = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
         if (await settingTab2.count() > 0 && await settingTab2.isVisible()) {
             await settingTab2.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // 「自分のみ表示」ラジオボタンをON（実際のvalue: "private"）
         const selfOnlyOption = page.locator('input[name="grant"][value="private"]').first();
         await expect(selfOnlyOption).toBeVisible({ timeout: 5000 });
         await selfOnlyOption.click({ force: true });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 3000 });
         await saveBtn.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('エラーが発生しました');
@@ -772,7 +772,7 @@ test.describe('集計 - 基本機能', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 設定タブ（完全一致で指定）
             const allNavLinks = page.locator('a.nav-link');
@@ -781,7 +781,7 @@ test.describe('集計 - 基本機能', () => {
                 const t = allNavLinks.nth(i);
                 if ((await t.innerText()).trim() === '設定' && await t.isVisible()) {
                     await t.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
                     settingTabClicked = true;
                     break;
                 }
@@ -798,13 +798,13 @@ test.describe('集計 - 基本機能', () => {
             const hasDashboardOption = await dashboardCheck.count() > 0;
             if (hasDashboardOption) {
                 await dashboardCheck.first().click({ force: true });
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
 
             // 保存
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             await saveBtn.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // ダッシュボードへ移動して確認（ダッシュボードオプションがあった場合のみ）
             if (hasDashboardOption) {
@@ -838,20 +838,20 @@ test.describe('集計 - 基本機能', () => {
         const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
         await expect(summaryMenu).toBeVisible({ timeout: 5000 });
         await summaryMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 絞り込みタブが表示されることを確認
         const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
         await expect(filterTab).toBeVisible({ timeout: 5000 });
         await filterTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 条件を追加ボタン
         const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
         if (await addCondBtn.count() > 0) {
             await expect(addCondBtn).toBeVisible({ timeout: 3000 });
             await addCondBtn.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 条件演算子のセレクトから「空ではない」を選択
             const operatorSelect = page.locator('select[name*="operator"], select.condition-operator').last();
@@ -868,7 +868,7 @@ test.describe('集計 - 基本機能', () => {
         const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
         if (await displayBtn.count() > 0) {
             await displayBtn.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // エラーがないことを確認
@@ -890,27 +890,27 @@ test.describe('集計 - 基本機能', () => {
         const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
         await expect(summaryMenu).toBeVisible({ timeout: 5000 });
         await summaryMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 絞り込みタブが表示されることを確認
         const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
         await expect(filterTab).toBeVisible({ timeout: 5000 });
         await filterTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 条件を追加ボタンが表示されることを確認
         const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
         if (await addCondBtn.count() > 0) {
             await expect(addCondBtn).toBeVisible({ timeout: 3000 });
             await addCondBtn.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // 保存ボタンが存在することを確認してクリック
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 3000 });
         await saveBtn.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -930,27 +930,27 @@ test.describe('集計 - 基本機能', () => {
         const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
         await expect(summaryMenu).toBeVisible({ timeout: 5000 });
         await summaryMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 行に色を付けるタブが表示されることを確認
         const colorTab = page.locator('a:has-text("行に色を付ける"), .nav-link:has-text("行に色を付ける")').first();
         await expect(colorTab).toBeVisible({ timeout: 5000 });
         await colorTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 色設定追加ボタンが表示されることを確認
         const addColorBtn = page.locator('.tab-pane.active button:has-text("条件・色を追加"), button:has-text("条件・色を追加")').first();
         if (await addColorBtn.count() > 0) {
             await expect(addColorBtn).toBeVisible({ timeout: 3000 });
             await addColorBtn.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // 保存ボタンが存在することを確認してクリック
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 3000 });
         await saveBtn.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -969,25 +969,25 @@ test.describe('集計 - 基本機能', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const colorTab = page.locator('a:has-text("行に色を付ける"), .nav-link:has-text("行に色を付ける")').first();
             await colorTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 複数の色設定を追加
             const addColorBtn = page.locator('.tab-pane.active button:has-text("条件・色を追加"), button:has-text("条件・色を追加")').first();
             if (await addColorBtn.count() > 0) {
                 await addColorBtn.click({ force: true });
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
                 await addColorBtn.click({ force: true });
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
 
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
             if (await saveBtn.count() > 0) {
                 await saveBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1011,13 +1011,13 @@ test.describe('集計 - 基本機能', () => {
         const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
         await expect(summaryMenu).toBeVisible({ timeout: 5000 });
         await summaryMenu.click({ force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
 
         // 集計タブが表示されることを確認
         const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
         await expect(aggregateTab).toBeVisible({ timeout: 5000 });
         await aggregateTab.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 集計項目で「平均」を選択
         const methodSelect = page.locator('select[name*="method"], select[name*="aggregate"], select.aggregate-method').first();
@@ -1034,7 +1034,7 @@ test.describe('集計 - 基本機能', () => {
         const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
         if (await displayBtn.count() > 0) {
             await displayBtn.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         const pageText = await page.innerText('body');
@@ -1057,12 +1057,12 @@ test.describe('集計 - 基本機能', () => {
             const summaryVisible = await summaryMenu.isVisible().catch(() => false);
             if (!summaryVisible) throw new Error('集計メニューが表示されませんでした');
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 集計タブ
             const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
             await aggregateTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 少数フィールドを選択して平均
             const dataItemSelect = page.locator('select[name*="field"], select[name*="item"], select.data-item').first();
@@ -1087,7 +1087,7 @@ test.describe('集計 - 基本機能', () => {
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
                 await displayBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1113,18 +1113,18 @@ test.describe('集計 - 基本機能', () => {
             const summaryVisible = await summaryMenu.isVisible().catch(() => false);
             if (!summaryVisible) throw new Error('集計メニューが表示されませんでした');
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 絞り込みタブ
             const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
             await filterTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 条件追加
             const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
             if (await addCondBtn.count() > 0) {
                 await addCondBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 日付フィールドを選択
                 const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
@@ -1141,7 +1141,7 @@ test.describe('集計 - 基本機能', () => {
                 const relativeCheck = page.locator('input[type="checkbox"][name*="relative"], label:has-text("相対値")').first();
                 if (await relativeCheck.count() > 0) {
                     await relativeCheck.click({ force: true });
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
 
                 // 「今日」を選択
@@ -1159,7 +1159,7 @@ test.describe('集計 - 基本機能', () => {
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
                 await displayBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1184,16 +1184,16 @@ test.describe('集計 - 基本機能', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
             await filterTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
             if (await addCondBtn.count() > 0) {
                 await addCondBtn.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 日時フィールドを選択
                 const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
@@ -1221,7 +1221,7 @@ test.describe('集計 - 基本機能', () => {
                 const relativeCheck = page.locator('input[type="checkbox"][name*="relative"], label:has-text("相対値")').first();
                 if (await relativeCheck.count() > 0) {
                     await relativeCheck.click({ force: true });
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
 
                 // 各相対値をテスト（今日、今月、今年）
@@ -1242,7 +1242,7 @@ test.describe('集計 - 基本機能', () => {
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
                 await displayBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');
@@ -1267,18 +1267,18 @@ test.describe('集計 - 基本機能', () => {
 
             const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
             await summaryMenu.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 集計タブ
             const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
             await aggregateTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 「集計を使用する」チェックボックスをON
             const useAggCheck = page.locator('label:has-text("集計を使用する"), input[name*="use_aggregate"]').first();
             if (await useAggCheck.count() > 0) {
                 await useAggCheck.click({ force: true });
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
 
             // データ項目1を設定
@@ -1294,7 +1294,7 @@ test.describe('集計 - 基本機能', () => {
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
                 await displayBtn.click({ force: true });
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
             }
 
             const pageText = await page.innerText('body');

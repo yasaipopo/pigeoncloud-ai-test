@@ -52,7 +52,7 @@ async function closeTemplateModal(page) {
             const backdrop = page.locator('.modal-backdrop');
             if (await backdrop.count() > 0) {
                 await page.keyboard.press('Escape');
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
         }
     } catch (e) {}
@@ -95,7 +95,7 @@ async function createWorkflowTestTable(page) {
 
     // フィールドを1つ追加（「項目を追加する」→「文字列(一行)」→項目名入力→「追加する」）
     await page.getByRole('button', { name: /項目を追加する/ }).click();
-    await page.waitForTimeout(800);
+    await waitForAngular(page);
     // 「文字列(一行)」を選択（ダイアログ内）
     await page.getByRole('dialog').getByRole('button', { name: /文字列\(一行\)/ }).click();
     // フィールド設定フォームが表示されるまで待機
@@ -105,11 +105,11 @@ async function createWorkflowTestTable(page) {
     await page.waitForTimeout(300);
     // フィールド追加の「追加する」ボタン（exact matchでダイアログ内のみ）
     await page.getByRole('button', { name: '追加する', exact: true }).click();
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 
     // フィールドが追加されたことを確認してから「登録」
     await page.getByRole('button', { name: '登録', exact: true }).click();
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
     // 確認ダイアログ「本当に追加してもよろしいですか？」→「追加する」
     // .modal.showクラスを持つ表示中のBootstrapモーダルに限定してクリック
     await page.locator('.modal.show').getByRole('button', { name: '追加する', exact: true }).click({ timeout: 10000 });
@@ -268,7 +268,7 @@ async function toggleWorkflowOption(page, labelText, enable) {
         // labelText を含む row 内の label.switch を Playwright で直接クリック
         const row = page.locator('dataset-workflow-options .form-group.row').filter({ hasText: labelText }).first();
         await row.locator('label.switch').click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
     }
     return state.needsToggle;
 }
@@ -292,7 +292,7 @@ async function createRecordAndSubmit(page, tableId, approverName, comment = '') 
     await page.waitForTimeout(500);
     // 「申請」ボタンをクリック（ワークフロー有効時は申請ボタンが表示される）
     await submitBtn.click({ timeout: 10000 });
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
     // 申請ダイアログが開くまで待機（Angular は <dialog open> を使わず CSS で表示するため
     // dialog セレクターではなく、ダイアログ内のボタン「申請する」で検出する）
     await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
@@ -321,7 +321,7 @@ async function createRecordAndSubmit(page, tableId, approverName, comment = '') 
     // 最初のオプション（「申請したユーザー」等）をクリック
     const option = page.locator('.ng-option').first();
     await option.click({ timeout: 10000 });
-    await page.waitForTimeout(500);
+    await waitForAngular(page);
     // 申請コメント入力（任意）
     if (comment) {
         await page.locator('textarea').last().fill(comment);
@@ -435,7 +435,7 @@ async function approveRecord(page, tableId, recordId, comment = '') {
         await page.locator('textarea.form-control').last().fill(comment);
     }
     await confirmBtn.click({ timeout: 5000 });
-    await page.waitForTimeout(3000);
+    await waitForAngular(page);
 }
 
 /**
@@ -463,7 +463,7 @@ async function rejectRecord(page, tableId, recordId, comment = '') {
         await page.locator('textarea.form-control').last().fill(comment);
     }
     await confirmBtn.click({ timeout: 5000 });
-    await page.waitForTimeout(3000);
+    await waitForAngular(page);
 }
 
 /**
@@ -487,7 +487,7 @@ async function withdrawRecord(page, tableId, recordId) {
     const confirmBtn = page.locator('button.btn-warning.btn-ladda').last();
     await confirmBtn.waitFor({ state: 'visible', timeout: 5000 });
     await confirmBtn.click({ timeout: 5000 });
-    await page.waitForTimeout(3000);
+    await waitForAngular(page);
 }
 
 /**
@@ -704,7 +704,7 @@ test.describe('ワークフロー設定（21系）', () => {
         await expect(addTemplateBtn).toBeVisible({ timeout: 8000 });
         // テンプレートを追加する
         await addTemplateBtn.click();
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         // テンプレートのフォームが表示されること
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -736,7 +736,7 @@ test.describe('ワークフロー設定（21系）', () => {
         const withdrawConfirmBtn = page.locator('button.btn-warning.btn-ladda').last();
         await withdrawConfirmBtn.waitFor({ state: 'visible', timeout: 5000 });
         await withdrawConfirmBtn.click({ timeout: 5000 });
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         // エラーが表示されないこと
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -909,24 +909,24 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(500);
         await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
         { const _btn = page.locator('button:has-text("承認フロー追加")').first();
           await _btn.waitFor({ state: 'visible', timeout: 20000 });
           await page.waitForTimeout(300);
           await _btn.click({ timeout: 10000 }); }
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         // 承認者種別 = 組織(役職) を選択
         const divisionRadio = page.locator('input[type="radio"][value="division"]').first();
         await divisionRadio.click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         // 組織(役職)の設定UIが表示されること
         await expect(page.locator('division-forms-field').first()).toBeVisible({ timeout: 5000 });
         // 「一人の承認が必要」が選択されていること（または選択する）
         const oneRadio = page.locator('input[type="radio"][value="one"]').first();
         if (await oneRadio.count() > 0) {
             await oneRadio.click();
-            await page.waitForTimeout(300);
+            await waitForAngular(page);
         }
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -1022,13 +1022,13 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await expect(page.locator('button').filter({ hasText: /^申請$/ }).first()).toBeVisible({ timeout: 10000 });
         // 再申請
         await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
         await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
         { const _btn = page.locator('button:has-text("承認フロー追加")').first();
           await _btn.waitFor({ state: 'visible', timeout: 20000 });
           await page.waitForTimeout(300);
           await _btn.click({ timeout: 10000 }); }
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         await page.waitForFunction(
             () => !Array.from(document.querySelectorAll('user-forms-field'))
                 .some(el => el.textContent.includes('Loading...')),
@@ -1041,9 +1041,9 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await page.waitForSelector('.ng-option', { timeout: 12000 }).catch(() => {});
         await page.waitForTimeout(300);
         await page.locator('.ng-option').first().click({ timeout: 10000 });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         await page.locator('button.btn-primary:has-text("申請する")').click({ timeout: 10000 });
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         // adminで最終承認
         await approveRecord(page, tableId, recordId, '再申請を承認します');
         // 承認済みになること
@@ -1095,36 +1095,36 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(500);
         await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
         // 承認フロー追加
         { const _btn = page.locator('button:has-text("承認フロー追加")').first();
           await _btn.waitFor({ state: 'visible', timeout: 20000 });
           await page.waitForTimeout(300);
           await _btn.click({ timeout: 10000 }); }
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         // 組織(役職)タイプを選択
         await page.locator('input[type="radio"][value="division"]').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         // 一人の承認が必要を選択
         const oneRadio = page.locator('input[type="radio"][value="one"]').first();
         if (await oneRadio.count() > 0) await oneRadio.click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         // 組織セレクトが表示されること
         await expect(page.locator('division-forms-field').first()).toBeVisible({ timeout: 5000 });
         // 組織を選択（最初のオプション）
         await page.locator('division-forms-field .ng-select-container').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         const divOption = page.locator('.ng-option').first();
         if (await divOption.count() > 0) {
             await divOption.click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         // 申請コメントを入力
         await page.locator('textarea.form-control').last().fill('役職指定承認テスト');
         // 申請する
         await page.locator('button.btn-primary:has-text("申請する")').click({ timeout: 8000 });
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         const url = page.url();
         const match = url.match(/\/view\/(\d+)/) || url.match(/\/(\d+)$/);
         const recordId = match ? match[1] : null;
@@ -1155,28 +1155,28 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(500);
         await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
         { const _btn = page.locator('button:has-text("承認フロー追加")').first();
           await _btn.waitFor({ state: 'visible', timeout: 20000 });
           await page.waitForTimeout(300);
           await _btn.click({ timeout: 10000 }); }
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         await page.locator('input[type="radio"][value="division"]').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         const oneRadio = page.locator('input[type="radio"][value="one"]').first();
         if (await oneRadio.count() > 0) await oneRadio.click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         await page.locator('division-forms-field .ng-select-container').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         const divOption = page.locator('.ng-option').first();
         if (await divOption.count() > 0) {
             await divOption.click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         await page.locator('textarea.form-control').last().fill('役職指定否認テスト');
         await page.locator('button.btn-primary:has-text("申請する")').click({ timeout: 8000 });
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         const url = page.url();
         const match = url.match(/\/view\/(\d+)/) || url.match(/\/(\d+)$/);
         const recordId = match ? match[1] : null;
@@ -1206,20 +1206,20 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
         if (await addTemplateBtn.count() > 0) {
             await addTemplateBtn.click();
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
         // テンプレート内で承認フロー追加（テーブル設定のテンプレートエディタでは「フロー追加」）
         const addFlowBtn = page.locator('button:has-text("フロー追加")').first();
         if (await addFlowBtn.count() > 0) {
             await addFlowBtn.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             // 組織(役職)タイプを選択
             const divRadio = page.locator('input[type="radio"][value="division"]').first();
             if (await divRadio.count() > 0) await divRadio.click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
             const oneRadio = page.locator('input[type="radio"][value="one"]').first();
             if (await oneRadio.count() > 0) await oneRadio.click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         // 設定保存（確認ダイアログ込み）
         await saveTableSettings(page, tableId);
@@ -1272,20 +1272,20 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(500);
         await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
         { const _btn = page.locator('button:has-text("承認フロー追加")').first();
           await _btn.waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
           await page.waitForTimeout(300);
           await _btn.click({ timeout: 10000 }).catch(() => {}); }
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         // 組織(役職)タイプ選択
         await page.locator('input[type="radio"][value="division"]').first().click().catch(() => {});
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         // 全員の承認が必要を選択
         const allRadio = page.locator('input[type="radio"][value="all"]').first();
         if (await allRadio.count() > 0) await allRadio.click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         const modalText = await page.evaluate(() => {
             const dialogs = Array.from(document.querySelectorAll('[role="dialog"], dialog'));
             const visibleDialog = dialogs.find(d => {
@@ -1353,27 +1353,27 @@ test.describe('引き上げ承認（106系）', () => {
         await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(500);
         await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
         // 承認フロー追加
         { const _btn = page.locator('button:has-text("承認フロー追加")').first();
           await _btn.waitFor({ state: 'visible', timeout: 20000 });
           await page.waitForTimeout(300);
           await _btn.click({ timeout: 10000 }); }
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         // 1段階目: 組織(1人)
         await page.locator('input[type="radio"][value="division"]').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         const oneRadio = page.locator('input[type="radio"][value="one"]').first();
         if (await oneRadio.count() > 0) await oneRadio.click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         await page.locator('division-forms-field .ng-select-container').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         const divOpt = page.locator('.ng-option').first();
         if (await divOpt.count() > 0) { await divOpt.click(); await page.waitForTimeout(500); }
         // 申請する
         await page.locator('button.btn-primary:has-text("申請する")').click({ timeout: 8000 });
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         const url = page.url();
         const match = url.match(/\/view\/(\d+)/) || url.match(/\/(\d+)$/);
         const recordId = match ? match[1] : null;
@@ -1516,11 +1516,11 @@ test.describe('一括操作（111系）', () => {
         const bulkApproveBtn = page.locator('button.btn-success:has-text("一括承認"), button:has-text("一括承認")').first();
         if (await bulkApproveBtn.count() > 0) {
             await bulkApproveBtn.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             // Bootstrap modal で確認ダイアログが開いた場合に承認ボタンをクリック
             if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
                 await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 3000 }).catch(() => {});
-                await page.waitForTimeout(3000);
+                await waitForAngular(page);
             }
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1557,7 +1557,7 @@ test.describe('一括操作（111系）', () => {
         const bulkApproveBtn = page.locator('button:has-text("一括承認")').first();
         if (await bulkApproveBtn.count() > 0) {
             await bulkApproveBtn.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
                 await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 3000 }).catch(() => {});
             }
@@ -1582,7 +1582,7 @@ test.describe('一括操作（111系）', () => {
         const bulkApproveBtn = page.locator('button:has-text("一括承認")').first();
         if (await bulkApproveBtn.count() > 0) {
             await bulkApproveBtn.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             // Bootstrap modal でコメント入力・承認確定
             if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
                 const commentArea = page.locator('.modal.show textarea.form-control');
@@ -1612,7 +1612,7 @@ test.describe('一括操作（111系）', () => {
         const bulkRejectBtn = page.locator('button:has-text("一括否認")').first();
         if (await bulkRejectBtn.count() > 0) {
             await bulkRejectBtn.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
                 await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 3000 }).catch(() => {});
             }
@@ -1644,7 +1644,7 @@ test.describe('一括操作（111系）', () => {
         const bulkRejectBtn = page.locator('button:has-text("一括否認")').first();
         if (await bulkRejectBtn.count() > 0) {
             await bulkRejectBtn.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
                 await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 3000 }).catch(() => {});
             }
@@ -1671,7 +1671,7 @@ test.describe('一括操作（111系）', () => {
         const bulkWithdrawBtn = page.locator('button:has-text("一括取り下げ")').first();
         if (await bulkWithdrawBtn.count() > 0) {
             await bulkWithdrawBtn.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
                 await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 3000 }).catch(() => {});
             }
@@ -1703,7 +1703,7 @@ test.describe('一括操作（111系）', () => {
         const bulkWithdrawBtn = page.locator('button:has-text("一括取り下げ")').first();
         if (await bulkWithdrawBtn.count() > 0) {
             await bulkWithdrawBtn.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
                 await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 3000 }).catch(() => {});
             }
@@ -1783,13 +1783,13 @@ test.describe('承認者削除後の確認（28系）', () => {
         await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(500);
         await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
         { const _btn = page.locator('button:has-text("承認フロー追加")').first();
           await _btn.waitFor({ state: 'visible', timeout: 20000 });
           await page.waitForTimeout(300);
           await _btn.click({ timeout: 10000 }); }
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         await page.waitForFunction(
             () => !Array.from(document.querySelectorAll('user-forms-field'))
                 .some(el => el.textContent.includes('Loading...')),
@@ -1802,7 +1802,7 @@ test.describe('承認者削除後の確認（28系）', () => {
         await page.keyboard.type(tempUser2.email.split('@')[0], { delay: 50 });
         await page.waitForTimeout(1000);
         await page.locator('.ng-option').first().click({ timeout: 8000 });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
         await page.locator('button.btn-primary:has-text("申請する")').click({ timeout: 8000 });
         await page.waitForURL(url => !url.includes('/edit/new'), { timeout: 20000 }).catch(() => {});
         await page.waitForTimeout(1000);

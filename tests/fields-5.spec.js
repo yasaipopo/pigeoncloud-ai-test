@@ -37,7 +37,7 @@ async function closeTemplateModal(page) {
         const count = await modal.count();
         if (count > 0) {
             await modal.locator('button').first().click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {}
 }
@@ -77,12 +77,12 @@ async function openFieldDialogByType(page, fieldType) {
             const overSettings = page.locator('.overSetting');
             await overSettings.nth(idx).scrollIntoViewIfNeeded().catch(() => {});
             await overSettings.nth(idx).click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
             const heading = page.locator('.modal.show h5').filter({ hasText: fieldType });
             if (await heading.count() > 0) return true;
             // 失敗したら閉じてフォールバックへ
             await page.keyboard.press('Escape');
-            await page.waitForTimeout(200);
+            await waitForAngular(page);
         } catch (e) {}
     }
 
@@ -219,7 +219,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
 
                 // 「追加オプション設定」をクリック
                 await additionalOptionsBtn.click();
-                await page.waitForTimeout(800);
+                await waitForAngular(page);
 
                 // 「表示条件設定」セクションが存在することを確認（開いているモーダル内）
                 const displayConditionSection = page.locator('.modal.show').locator('text=表示条件設定').first();

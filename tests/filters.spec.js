@@ -9,6 +9,10 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 /**
  * storageStateを使ったブラウザコンテキストを作成する
  */
@@ -55,7 +59,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -125,7 +129,7 @@ async function openFilterPanel(page) {
     // ツールバー上の検索（フィルタ）ボタンをクリック
     const searchBtn = page.locator('button.btn-outline-primary i.fa-search').first();
     await searchBtn.locator('..').click({ force: true });
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 }
 
 // =============================================================================
@@ -188,7 +192,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
         // フィルタボタン（fa-search）をクリックしてパネルを開く
         await filterSearchBtn.click({ force: true });
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // フィルタ / 集計パネルが表示されること
         await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
@@ -207,7 +211,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
         // 「条件を追加」ボタンをクリックして条件行を追加する
         await page.locator('button:has-text("条件を追加")').click();
-        await page.waitForTimeout(800);
+        await waitForAngular(page);
 
         // 条件行が追加されること（フィールド選択ドロップダウンが表示される）
         await expect(page.locator('.condition-col-field').first()).toBeVisible();
@@ -249,7 +253,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
         // フィルタパネルを開く
         await filterSearchBtn.click({ force: true });
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // フィルタ / 集計パネルが表示されること
         await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
@@ -258,7 +262,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         const filterTab = page.locator('[role="tab"]:has-text("絞り込み")');
         await expect(filterTab).toBeVisible();
         await filterTab.click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // 「高度な機能（変数設定）」チェックボックスが表示されること
         await expect(page.locator('text=高度な機能（変数設定）')).toBeVisible();
@@ -266,14 +270,14 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         // 複数の条件を追加してAND/OR条件（複合条件）が設定できることを確認
         // 1つ目の条件を追加
         await page.locator('button:has-text("条件を追加")').click();
-        await page.waitForTimeout(600);
+        await waitForAngular(page);
 
         // 条件行が存在すること
         await expect(page.locator('.condition-drag-item, .condition-select-row').first()).toBeVisible();
 
         // 2つ目の条件を追加してグループ化できること
         await page.locator('button:has-text("条件を追加")').click();
-        await page.waitForTimeout(600);
+        await waitForAngular(page);
 
         // 「グループ追加」ボタンが表示されていること（複合グループ条件）
         await expect(page.locator('button:has-text("グループ追加")')).toBeVisible();
@@ -284,17 +288,13 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
         // 「集計」タブをクリック
         await aggTab.click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // 集計タブに「集計を使用する」チェックボックスが表示されること
         await expect(page.locator('text=集計を使用する')).toBeVisible();
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
-
-async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
-}
 
         await page.screenshot({ path: `${reportsDir}/screenshots/244-advanced-search.png`, fullPage: true });
     });
@@ -359,7 +359,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
 
         // フィルタボタンをクリック
         await filterBtn.click({ force: true });
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // フィルタ / 集計パネルが表示されること
         await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
@@ -389,7 +389,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
         await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
         await filterBtn.click({ force: true });
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // フィルタ / 集計パネルが表示されること
         await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
@@ -417,7 +417,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
         await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
         await filterBtn.click({ force: true });
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // フィルタ / 集計パネルが開いていること
         await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
@@ -443,14 +443,14 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
         await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
         await filterBtn.click({ force: true });
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // フィルタ / 集計パネルが表示されること
         await expect(page.locator('h5:has-text("フィルタ / 集計"), heading:has-text("フィルタ / 集計")')).toBeVisible();
 
         // 「条件を追加」ボタンをクリックして複合条件を追加
         await page.locator('button:has-text("条件を追加")').click({ timeout: 10000 }).catch(() => {});
-        await page.waitForTimeout(800);
+        await waitForAngular(page);
 
         // 条件行が追加されること（UIが存在する場合）
         const condField = page.locator('.condition-col-field').first();
@@ -461,7 +461,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
 
         // さらに「グループ追加」ボタンで複合条件グループを追加
         await page.locator('button:has-text("グループ追加")').click({ timeout: 5000 }).catch(() => {});
-        await page.waitForTimeout(800);
+        await waitForAngular(page);
 
         // 高度な検索UIが表示されること
         const bodyAfter = await page.innerText('body');

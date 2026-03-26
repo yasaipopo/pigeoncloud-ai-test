@@ -20,9 +20,9 @@ const path = require('path');
  */
 async function saveStorageStateIfNeeded(agentNum) {
     const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
+    // 既存ファイルは削除して必ず再作成する（テスト環境が毎回変わるため古いクッキーは無効）
     if (fs.existsSync(storageStatePath)) {
-        console.log(`[global-setup] storageState既存: ${storageStatePath}`);
-        return;
+        fs.unlinkSync(storageStatePath);
     }
     const baseUrl = process.env.TEST_BASE_URL || '';
     const email = process.env.TEST_EMAIL || 'admin';

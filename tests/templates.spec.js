@@ -95,7 +95,7 @@ test.describe('テンプレート', () => {
 
         // テンプレートをクリックして詳細を表示
         await templateIcons.first().click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 詳細ビューに切り替わること（インストールボタンが表示される）
         const installBtn = await page.locator('.modal.show .btn-warning').filter({ hasText: /インストール/ });
@@ -120,7 +120,7 @@ test.describe('テンプレート', () => {
         // テンプレートをクリックして詳細へ
         const templateIcons = await page.locator('.modal.show .template_icon');
         await templateIcons.first().click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // インストールボタンが表示されていること
         const installBtn = page.locator('.modal.show .btn-warning').filter({ hasText: /インストール/ });
@@ -129,7 +129,7 @@ test.describe('テンプレート', () => {
         // 「戻る」ボタンをクリック
         const backBtn = page.locator('.modal.show button').filter({ hasText: '戻る' });
         await backBtn.first().click();
-        await page.waitForTimeout(800);
+        await waitForAngular(page);
 
         // テンプレート一覧に戻ること
         const templateIconsAfter = await page.locator('.modal.show .template_icon').count();
@@ -155,7 +155,7 @@ test.describe('テンプレート', () => {
         }
 
         await targetTemplate.first().click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // インストールボタンをクリック
         const installBtn = page.locator('.modal.show .btn-warning').filter({ hasText: /インストール/ });
@@ -163,7 +163,7 @@ test.describe('テンプレート', () => {
         expect(installBtnCount).toBeGreaterThan(0);
 
         await installBtn.first().click();
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // インストール中の進捗またはモーダルが閉じること（成功時）
         // モーダルが閉じるかダッシュボードにリダイレクトされること
@@ -192,7 +192,7 @@ test.describe('テンプレート', () => {
 
         if (closeBtnCount > 0) {
             await closeBtn.first().click();
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
 
             // モーダルが閉じていること
             const modalAfter = await page.locator('.modal.show').count();
@@ -201,7 +201,7 @@ test.describe('テンプレート', () => {
             // スキップボタンで閉じる
             const skipBtn = page.locator('.modal.show button').filter({ hasText: 'スキップ' });
             await skipBtn.first().click();
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
             const modalAfter = await page.locator('.modal.show').count();
             expect(modalAfter).toBe(0);
         }

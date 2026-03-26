@@ -48,7 +48,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {}
 }
@@ -58,7 +58,7 @@ async function closeTemplateModal(page) {
  */
 async function logout(page) {
     await page.click('.nav-link.nav-pill.avatar', { force: true });
-    await page.waitForTimeout(500);
+    await waitForAngular(page);
     await page.click('.dropdown-menu.show .dropdown-item:has-text("ログアウト")', { force: true });
     await page.waitForURL('**/admin/login', { timeout: 10000 });
 }
@@ -142,7 +142,7 @@ async function waitForAngular(page, timeout = 15000) {
             try {
                 const toggleBtn = page.locator('label[for="use_smtp_1"], .fieldname_use_smtp .checkbox-custom').first();
                 await toggleBtn.click({ timeout: 5000 });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             } catch (e2) {
                 console.log('[setupSmtp] トグルクリック失敗（スキップ）:', e2.message.substring(0, 100));
                 return;
@@ -175,7 +175,7 @@ async function waitForAngular(page, timeout = 15000) {
 
         // 更新ボタン（「更新する」ボタン対応、タイムアウト5秒）
         await page.locator('button:has-text("更新")').last().click({ timeout: 5000, force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         console.log(`[setupSmtp] SMTP設定完了: ${smtpHost}:${smtpPort} / ${smtpUser}`);
     } catch (e) {
         console.log('[setupSmtp] SMTP設定失敗（続行）:', e.message);
@@ -260,14 +260,14 @@ test.describe('通知設定', () => {
         const reminderBtn = page.locator('button:has-text("リマインダ設定を追加する")');
         if (await reminderBtn.count() > 0) {
             await reminderBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // リマインドテキスト未入力のまま登録
         const submitBtn = page.locator('button[type="submit"], button:has-text("登録"), button:has-text("保存")').first();
         if (await submitBtn.count() > 0) {
             await submitBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // バリデーションエラーでページ遷移しないことを確認
@@ -300,7 +300,7 @@ test.describe('通知設定', () => {
         const submitBtn = page.locator('button[type="submit"], button:has-text("登録"), button:has-text("保存")').first();
         if (await submitBtn.count() > 0) {
             await submitBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
             // バリデーションエラーでページ遷移しないことを確認
             expect(page.url()).toContain('/admin/notification');
         }
@@ -344,7 +344,7 @@ test.describe('通知設定', () => {
         const submitBtn = page.locator('button[type="submit"], button:has-text("登録"), button:has-text("保存")').first();
         if (await submitBtn.count() > 0) {
             await submitBtn.click({ force: true });
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // ③ レコードを新規作成してトリガー発火
@@ -589,7 +589,7 @@ test.describe('通知設定', () => {
             const bulkBtn = page.locator('button:has-text("一括"), button.bulk-action, [data-action="bulk"]');
             if (await bulkBtn.count() > 0) {
                 await bulkBtn.first().click();
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
         }
 
@@ -659,14 +659,14 @@ test.describe('通知設定', () => {
             const deleteBtn = page.locator('button:has-text("削除"), button.bulk-delete, [data-action="bulk-delete"]');
             if (await deleteBtn.count() > 0) {
                 await deleteBtn.first().click({ force: true });
-                await page.waitForTimeout(1500);
+                await waitForAngular(page);
                 // 確認ダイアログが表示されるのを待ってからクリック
                 try {
                     await page.waitForSelector('.modal.show, .modal.fade.show', { timeout: 5000 });
                     const confirmBtn = page.locator('.modal.show button.btn-danger, .modal.show button:has-text("OK"), .modal.show button:has-text("はい")');
                     if (await confirmBtn.count() > 0) {
                         await confirmBtn.first().click();
-                        await page.waitForTimeout(2000);
+                        await waitForAngular(page);
                     }
                 } catch (e) {
                     console.log('57-3: 確認ダイアログなし（削除実行済みか不要）');
@@ -835,7 +835,7 @@ test.describe('通知設定', () => {
         const reminderBtn = page.locator('button:has-text("リマインダ設定を追加する")');
         if (await reminderBtn.count() > 0) {
             await reminderBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // リマインダ設定フォームが表示されることを確認
@@ -875,7 +875,7 @@ test.describe('通知設定', () => {
         const reminderBtn = page.locator('button:has-text("リマインダ設定を追加する")');
         if (await reminderBtn.count() > 0) {
             await reminderBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // リマインダ設定フォームが表示されることを確認
@@ -1193,7 +1193,7 @@ test.describe('通知設定', () => {
             await webhookInput.fill(webhookUrl(key));
             const saveBtn = page.locator('button[type="submit"], button:has-text("保存"), button:has-text("登録")').first();
             await saveBtn.click();
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         } else {
             console.log('105-01: Webhook入力欄が見つかりません。通知設定UIを確認してください');
         }
@@ -1239,7 +1239,7 @@ test.describe('通知設定', () => {
             await webhookInputs.nth(1).fill(webhookUrl(key2));
             const saveBtn = page.locator('button[type="submit"], button:has-text("保存"), button:has-text("登録")').first();
             await saveBtn.click();
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
         }
 
         // レコード作成でトリガー
@@ -1283,7 +1283,7 @@ test.describe('通知設定', () => {
             await slackInput.fill(webhookUrl(key));
             const saveBtn = page.locator('button[type="submit"], button:has-text("保存"), button:has-text("登録")').first();
             await saveBtn.click();
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             await debugApiPost(page, '/create-all-type-data', { count: 1, pattern: 'fixed' });
             await page.waitForTimeout(3000);
@@ -1326,7 +1326,7 @@ test.describe('通知設定', () => {
             await slackInputs.nth(1).fill(webhookUrl(key2));
             const saveBtn = page.locator('button[type="submit"], button:has-text("保存"), button:has-text("登録")').first();
             await saveBtn.click();
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // レコード作成でトリガー
             await debugApiPost(page, '/create-all-type-data', { count: 1, pattern: 'fixed' });
@@ -1460,7 +1460,7 @@ test.describe('通知設定', () => {
         const reminderBtn = page.locator('button:has-text("リマインダ設定を追加する")');
         if (await reminderBtn.count() > 0) {
             await reminderBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // リマインダ設定フォームが表示されることを確認
@@ -1491,7 +1491,7 @@ test.describe('通知設定', () => {
         const firstRecord = page.locator('tr[data-id], tbody tr').first();
         if (await firstRecord.count() > 0) {
             await firstRecord.click();
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // コメントパネルを表示してコメント投稿
@@ -1505,7 +1505,7 @@ test.describe('通知設定', () => {
             await page.keyboard.type(`172テスト_コメント通知確認_${Date.now()}`);
             const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right, button:has-text("送信"), button:has-text("コメント")').first();
             await sendBtn.click({ force: true });
-            await page.waitForTimeout(5000);
+            await waitForAngular(page);
         }
 
         // メール受信確認（最大60秒）
@@ -1639,7 +1639,7 @@ test.describe('通知設定', () => {
             const visibleBtn = await importBtn.first().isVisible().catch(() => false);
             if (visibleBtn) {
                 await importBtn.first().click({ force: true });
-                await page.waitForTimeout(3000);
+                await waitForAngular(page);
 
                 // エラーページが表示されていないことを確認
                 const afterText = await page.innerText('body');
@@ -1698,7 +1698,7 @@ test.describe('通知設定', () => {
 
             // チェックを切り替え（有効→無効）
             await enabledLabel.click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
 
             const isCheckedAfter = await page.locator('#enabled_1').isChecked().catch(() => null);
             console.log('188-3: enabled切り替え後の状態:', isCheckedAfter);
@@ -1710,7 +1710,7 @@ test.describe('通知設定', () => {
 
             // 元に戻す
             await enabledLabel.click({ force: true });
-            await page.waitForTimeout(300);
+            await waitForAngular(page);
         } else {
             // enabledフィールドが見つからない場合はページアクセスのみ確認
             // メール取り込み設定ページが存在することを確認（URL で判断）
@@ -1746,7 +1746,7 @@ test.describe('通知設定', () => {
             const menuBtn = page.locator('.nav-link.nav-pill.avatar, button.dropdown-toggle').first();
             if (await menuBtn.count() > 0) {
                 await menuBtn.click({ force: true });
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
                 const menuLink = page.locator('a:has-text("メール取り込み設定")').first();
                 if (await menuLink.count() > 0 && await menuLink.isVisible()) {
                     await menuLink.click();
@@ -1889,7 +1889,7 @@ test.describe('通知設定', () => {
             const smtpLabel = page.locator('label[for="use_smtp_1"], .fieldname_use_smtp .checkbox-custom').first();
             if (await smtpLabel.count() > 0) {
                 await smtpLabel.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
         }
 
@@ -1933,7 +1933,7 @@ test.describe('通知設定', () => {
             const smtpLabel = page.locator('label[for="use_smtp_1"], .fieldname_use_smtp .checkbox-custom').first();
             if (await smtpLabel.count() > 0) {
                 await smtpLabel.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             }
         }
 
@@ -1982,7 +1982,7 @@ test.describe('通知設定', () => {
         // リマインダボタンをクリックしてリマインダUIが表示されることを確認
         if (await reminderBtn.count() > 0) {
             await reminderBtn.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
             const afterText = await page.innerText('body');
             expect(afterText).toContain('リマインダ設定');
             console.log('221: リマインダ設定UI確認完了');
@@ -2051,7 +2051,7 @@ test.describe('通知設定', () => {
         const firstRecord = page.locator('tr[data-id], tbody tr').first();
         if (await firstRecord.count() > 0) {
             await firstRecord.click();
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // コメントパネルを表示してコメント投稿
@@ -2065,7 +2065,7 @@ test.describe('通知設定', () => {
             await page.keyboard.type(`298テスト_コメント通知確認_${Date.now()}`);
             const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right, button:has-text("送信"), button:has-text("コメント")').first();
             await sendBtn.click({ force: true });
-            await page.waitForTimeout(5000);
+            await waitForAngular(page);
         }
 
         // メール受信確認（最大60秒）

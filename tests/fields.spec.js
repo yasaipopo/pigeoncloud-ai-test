@@ -47,7 +47,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -583,7 +583,7 @@ test.describe('項目名パディング（92, 93, 94系）', () => {
         const addBtn = page.locator('button:has-text("追加"), button:has-text("項目追加"), .btn-primary:has-text("追加")').first();
         if (await addBtn.count() > 0) {
             await addBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
             // 項目名に全角スペースを含む文字列を入力
             const fieldNameInput = page.locator('input[name*="field_name"], input[placeholder*="項目名"], input[id*="field_name"]').first();
             if (await fieldNameInput.count() > 0) {

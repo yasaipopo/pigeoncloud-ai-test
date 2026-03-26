@@ -45,7 +45,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -1269,7 +1269,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
         const addBtn = page.locator('a:has-text("追加"), button:has-text("新規追加")').first();
         if (await addBtn.count() > 0) {
             await addBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
             // 文字列フィールドに10000文字入力
             const textInput = page.locator('input[type="text"]:visible, textarea:visible').first();
             if (await textInput.count() > 0) {
@@ -1912,7 +1912,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
         await page.fill('#id', userEmail);
         await page.fill('#password', userPassword);
         await page.click('button[type=submit].btn-primary');
-        await page.waitForTimeout(8000);
+        await waitForAngular(page);
         const bodyText = await page.innerText('body');
         // 一般ユーザーはログインできるが、管理操作は制限されている
         expect(bodyText).not.toContain('Internal Server Error');
@@ -1946,17 +1946,17 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
         const addBtn = await page.$('button.btn-success:has-text("項目を追加する"), button:has-text("項目を追加する")');
         if (addBtn) {
             await addBtn.click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
             // 「他テーブル参照」ボタンをクリック
             const refBtn = await page.$('button:has-text("他テーブル参照")');
             if (refBtn) {
                 await refBtn.click({ force: true });
-                await page.waitForTimeout(1500);
+                await waitForAngular(page);
                 // 「追加オプション設定」ボタンをクリック
                 const optBtn = await page.$('button[aria-controls="collapseExample"]');
                 if (optBtn) {
                     await optBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
                     // 「複数の値の登録を許可する」チェックボックスの存在を確認
                     const collapseSection = await page.$('#collapseExample');
                     if (collapseSection) {

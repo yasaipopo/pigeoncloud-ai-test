@@ -47,7 +47,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -161,7 +161,7 @@ async function openDropdownMenu(page) {
 async function openCsvDownloadModal(page) {
     await openDropdownMenu(page);
     await page.locator('a.dropdown-item:has-text("CSVダウンロード")').first().click();
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 }
 
 /**
@@ -170,7 +170,7 @@ async function openCsvDownloadModal(page) {
 async function openCsvUploadModal(page) {
     await openDropdownMenu(page);
     await page.locator('a.dropdown-item:has-text("CSVアップロード")').first().click();
-    await page.waitForTimeout(1000);
+    await waitForAngular(page);
 }
 
 /**
@@ -287,7 +287,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // アップロードボタンをクリック
         await page.locator('.modal.show button:has-text("アップロード")').first().click();
-        await page.waitForTimeout(8000);
+        await waitForAngular(page);
 
         // エラーが発生することを確認（アップロード確認モーダルが出る場合は対応）
         try {
@@ -295,7 +295,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             const confirmCount = await confirmModal.count();
             if (confirmCount > 0) {
                 await confirmModal.first().click();
-                await page.waitForTimeout(5000);
+                await waitForAngular(page);
             }
         } catch (e) {}
 
@@ -356,7 +356,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             isDisabled = await uploadBtn.isDisabled();
             if (!isDisabled) {
                 await uploadBtn.click();
-                await page.waitForTimeout(5000);
+                await waitForAngular(page);
             }
         }
 
@@ -406,7 +406,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             if (!isChecked) {
                 // ラベルをクリックしてONにする
                 await page.locator('label.switch').nth(0).click();
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
             console.log('193-1: スイッチON設定完了');
         }
@@ -414,7 +414,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         // 保存ボタンをクリック（テーブル設定ページでは "更新" ボタン）
         const saveBtn = page.locator('button.btn-primary.btn-ladda:has-text("更新"), button.btn-primary.btn-ladda:has-text("登録")').first();
         await saveBtn.click();
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // 保存成功を確認（エラーがないこと）
         const alertDanger = await page.locator('.alert-danger').count();
@@ -451,7 +451,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -473,7 +473,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             const isChecked = await firstSwitch.isChecked();
             if (isChecked) {
                 await page.locator('label.switch').nth(0).click();
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
             console.log('193-2: スイッチOFF設定完了');
         }
@@ -481,7 +481,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         // 保存ボタンをクリック（テーブル設定ページでは "更新" ボタン）
         const saveBtn = page.locator('button.btn-primary.btn-ladda:has-text("更新"), button.btn-primary.btn-ladda:has-text("登録")').first();
         await saveBtn.click();
-        await page.waitForTimeout(3000);
+        await waitForAngular(page);
 
         // 保存成功を確認
         const alertDanger = await page.locator('.alert-danger').count();
@@ -528,11 +528,11 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             const isChecked = await targetSwitch.isChecked();
             if (!isChecked) {
                 await page.locator('label.switch').nth(5).click();
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
             // 保存
             await page.locator('button.btn-primary.btn-ladda:has-text("更新"), button.btn-primary.btn-ladda:has-text("登録")').first().click();
-            await page.waitForTimeout(3000);
+            await waitForAngular(page);
             expect(await page.locator('.alert-danger').count()).toBe(0);
             console.log('194-1: 選択肢自動追加(ON)保存完了');
         } else {
@@ -562,11 +562,11 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             const isChecked = await targetSwitch.isChecked();
             if (isChecked) {
                 await page.locator('label.switch').nth(5).click();
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
             // 保存
             await page.locator('button.btn-primary.btn-ladda:has-text("更新"), button.btn-primary.btn-ladda:has-text("登録")').first().click();
-            await page.waitForTimeout(3000);
+            await waitForAngular(page);
             expect(await page.locator('.alert-danger').count()).toBe(0);
             console.log('194-2: 選択肢自動追加(OFF)保存完了');
         } else {
@@ -602,11 +602,11 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             const isChecked = await childSwitch.isChecked();
             if (!isChecked) {
                 await page.locator('label.switch').nth(6).click();
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
             // 保存
             await page.locator('button.btn-primary.btn-ladda:has-text("更新"), button.btn-primary.btn-ladda:has-text("登録")').first().click();
-            await page.waitForTimeout(3000);
+            await waitForAngular(page);
             expect(await page.locator('.alert-danger').count()).toBe(0);
             console.log('148-01〜03: 子テーブル含むCSV設定(ON)保存完了');
         }
@@ -628,7 +628,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         // CSVダウンロード確認（148-01）
         // フィルタなしの場合はモーダルは開かず直接ダウンロードが開始される
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // ドロップダウンに"CSVダウンロード"項目が存在することを確認
         await openDropdownMenu(page);
@@ -638,7 +638,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // ドロップダウンを閉じる（Escape）
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -709,7 +709,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         if (thCount > 0) {
             // 最初の列ヘッダーをクリックしてソート
             await thElements.first().click();
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
             console.log('161: ヘッダークリックでソート実行');
         }
 
@@ -737,7 +737,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -768,13 +768,13 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         const firstCheckbox = page.locator('table input[type="checkbox"], td input[type="checkbox"]').first();
         await firstCheckbox.waitFor({ state: 'visible', timeout: 30000 });
         await firstCheckbox.click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // JSONエクスポートボタンをクリック
         const exportBtn = page.locator('button:has-text("JSONエクスポート")');
         await expect(exportBtn).toBeVisible({ timeout: 10000 });
         await exportBtn.click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // エクスポートモーダルが開いていることを確認
         const exportModal = page.locator('.modal.show');
@@ -807,13 +807,13 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // 各オプションをチェックする
         await dataCheckbox.click();
-        await page.waitForTimeout(300);
+        await waitForAngular(page);
         await grantCheckbox.click();
-        await page.waitForTimeout(300);
+        await waitForAngular(page);
         await filterCheckbox.click();
-        await page.waitForTimeout(300);
+        await waitForAngular(page);
         await notificationCheckbox.click();
-        await page.waitForTimeout(300);
+        await waitForAngular(page);
 
         // エクスポートボタンが存在することを確認
         const exportExecuteBtn = page.locator('.modal.show button:has-text("エクスポート")');
@@ -822,7 +822,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -839,7 +839,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         // ハンバーガードロップダウンを開く
         const dropdownBtn = page.locator('button.btn-outline-primary.dropdown-toggle').first();
         await dropdownBtn.click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // 「エクセルから追加」メニューアイテムが表示されていることを確認
         const excelMenuItem = page.locator('a.dropdown-item:has-text("エクセルから追加")');
@@ -848,7 +848,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // クリックしてExcelインポートUIが開くことを確認
         await excelMenuItem.first().click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // Excelインポートモーダルが表示されることを確認
         const importModal = page.locator('.modal.show');
@@ -860,7 +860,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // ページが正常に表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible();
@@ -908,7 +908,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -953,7 +953,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -993,7 +993,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -1030,7 +1030,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click().catch(() => {});
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         console.log('148-02: 子テーブルCSVアップロードUIの確認完了（実際の子テーブル設定は手動確認が必要）');
     });
@@ -1066,7 +1066,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click().catch(() => {});
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         console.log('148-03: CSVダウンロード(空) 子テーブルヘッダー確認（子テーブル設定は手動確認が必要）');
     });
@@ -1137,13 +1137,13 @@ test.describe('JSONエクスポート・インポート', () => {
         const firstCheckbox = page.locator('.admin-tree__check input[type="checkbox"]').first();
         await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 10000 });
         await firstCheckbox.click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // チェックボックス選択後に「JSONエクスポート」ボタンが直接表示される
         const jsonExportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
         await expect(jsonExportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 8000 });
         await jsonExportBtn.click();
-        await page.waitForTimeout(1500);
+        await waitForAngular(page);
 
         // ダウンロードダイアログ or モーダルが表示されるか、downloadイベントが発生すること
         // モーダル表示の場合
@@ -1160,7 +1160,7 @@ test.describe('JSONエクスポート・インポート', () => {
         // モーダルが開いている場合は閉じる
         if (modalVisible) {
             await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click().catch(() => {});
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
     });
 
@@ -1194,14 +1194,14 @@ test.describe('JSONエクスポート・インポート', () => {
         const firstCheckbox = page.locator('table input[type="checkbox"], td input[type="checkbox"]').first();
         if (await firstCheckbox.count() > 0 && await firstCheckbox.isVisible().catch(() => false)) {
             await firstCheckbox.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // JSONエクスポートボタンをクリック
         const exportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
         await expect(exportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await exportBtn.click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // エクスポートモーダルが開いていることを確認
         const modal = page.locator('.modal.show');
@@ -1213,7 +1213,7 @@ test.describe('JSONエクスポート・インポート', () => {
             const isChecked = await dataCheckbox.isChecked().catch(() => false);
             if (isChecked) {
                 await dataCheckbox.click();
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
         }
 
@@ -1230,7 +1230,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click().catch(() => {});
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -1262,14 +1262,14 @@ test.describe('JSONエクスポート・インポート', () => {
         const firstCheckbox = page.locator('table input[type="checkbox"], td input[type="checkbox"]').first();
         if (await firstCheckbox.count() > 0 && await firstCheckbox.isVisible().catch(() => false)) {
             await firstCheckbox.click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
 
         // JSONエクスポートボタンをクリック
         const exportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
         await expect(exportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await exportBtn.click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // エクスポートモーダルが開いていることを確認
         const modal = page.locator('.modal.show');
@@ -1281,7 +1281,7 @@ test.describe('JSONエクスポート・インポート', () => {
             const isChecked = await dataCheckbox.isChecked().catch(() => false);
             if (!isChecked) {
                 await dataCheckbox.click();
-                await page.waitForTimeout(500);
+                await waitForAngular(page);
             }
         }
 
@@ -1298,7 +1298,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
         // モーダルを閉じる
         await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click().catch(() => {});
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
     });
 
     // =========================================================================
@@ -1339,7 +1339,7 @@ test.describe('JSONエクスポート・インポート', () => {
         const jsonAddLink = page.locator('.dropdown-menu a:has-text("JSONから追加"), a:has-text("JSONから追加")').filter({ visible: true }).first();
         await expect(jsonAddLink, 'JSONから追加リンクが存在すること').toBeVisible({ timeout: 8000 });
         await jsonAddLink.click();
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // ファイル選択UI（input[type=file] または モーダル）が表示されること
         const fileInput = page.locator('input[type="file"]').first();
@@ -1366,7 +1366,7 @@ test.describe('JSONエクスポート・インポート', () => {
         // モーダルが開いている場合は閉じる
         if (modalVisible) {
             await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click().catch(() => {});
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
     });
 });

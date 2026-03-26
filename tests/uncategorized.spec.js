@@ -68,7 +68,7 @@ async function login(page, email, password) {
             const continueBtn = page.locator('button').filter({ hasText: '続ける' }).first();
             if (await continueBtn.count() > 0) {
                 await continueBtn.click();
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
                 await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
             }
         } else if (page.url().includes('/admin/login')) {
@@ -94,7 +94,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -309,21 +309,6 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -394,21 +379,6 @@ test.describe('列表示幅設定（191系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -463,21 +433,6 @@ test.describe('大量データ（211系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -523,21 +478,6 @@ test.describe('表示条件設定（250系）', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
@@ -618,21 +558,6 @@ test.describe('権限設定（262系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -711,21 +636,6 @@ test.describe('検索機能（270系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -772,21 +682,6 @@ test.describe('自動採番（273系）', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
@@ -836,21 +731,6 @@ test.describe('リッチテキスト（274系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -898,21 +778,6 @@ test.describe('日時フォーマット（275系）', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
@@ -962,21 +827,6 @@ test.describe('循環参照エラー（291系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -1024,21 +874,6 @@ test.describe('一括編集（312系）', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
@@ -1114,21 +949,6 @@ test.describe('テーブル削除ロック（349系）', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
@@ -1236,21 +1056,6 @@ test.describe('CSVキャンセル（367系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -1304,21 +1109,6 @@ test.describe('ヘッダー固定（370系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -1363,21 +1153,6 @@ test.describe('桁数カンマ区切り（256系）', () => {
         await context.close();
     });
 
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
         await ensureLoggedIn(page);
@@ -1418,21 +1193,6 @@ test.describe('スマートフォン表示（146系）', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
@@ -1479,21 +1239,6 @@ test.describe('子テーブル（325, 341系）', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
@@ -1561,21 +1306,6 @@ test.describe('一覧編集モード（324系）', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {
-            console.log('afterAll cleanup error (ignored):', e.message);
-        }
-    });
-
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(30000); // storageState利用により大幅短縮
@@ -1694,7 +1424,7 @@ test.describe('未実装テスト（todo）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1755,7 +1485,7 @@ test.describe('未実装テスト（todo）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1779,7 +1509,7 @@ test.describe('未実装テスト（todo）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1845,7 +1575,7 @@ test.describe('未実装テスト（todo）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1952,7 +1682,7 @@ test.describe('未実装テスト（todo）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1997,7 +1727,7 @@ test.describe('未実装テスト（todo）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2224,7 +1954,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2330,7 +2060,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2418,7 +2148,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2472,7 +2202,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2541,7 +2271,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2716,7 +2446,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3009,7 +2739,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3022,7 +2752,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3192,7 +2922,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3552,7 +3282,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3727,7 +3457,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const calBtn = page.locator('button, a, [title]').filter({ hasText: /カレンダー/ });
         if (await calBtn.count() > 0) {
             await calBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3973,7 +3703,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
         if (await filterBtn.count() > 0) {
             await filterBtn.first().click();
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);

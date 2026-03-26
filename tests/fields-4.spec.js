@@ -48,7 +48,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -305,7 +305,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         if (!opened) {
             // 選択肢フィールドが見つからない場合は最初のフィールドで代替確認
             await fieldRows.first().click({ force: true });
-            await page.waitForTimeout(1500);
+            await waitForAngular(page);
         }
 
         // インライン編集パネルまたは設定エリアが表示されること
@@ -458,7 +458,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
                     const isChecked = await el.isChecked().catch(() => false);
                     if (!isChecked) {
                         await el.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
                     requiredToggled = true;
                     console.log(`[265-1] 必須トグル発見・操作: ${sel}`);
@@ -496,7 +496,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
                 const cnt = await btn.count();
                 if (cnt > 0) {
                     await btn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                     saved = true;
                     console.log(`[265-1] 保存ボタンクリック: ${sel}`);
                     break;
@@ -532,7 +532,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
                 const cnt = await btn.count();
                 if (cnt > 0) {
                     await btn.click({ force: true });
-                    await page.waitForTimeout(1500);
+                    await waitForAngular(page);
                     recordFormOpened = true;
                     console.log(`[265-1] 新規作成ボタンクリック: ${sel}`);
                     break;
@@ -567,7 +567,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
                 const cnt = await btn.count();
                 if (cnt > 0) {
                     await btn.click({ force: true });
-                    await page.waitForTimeout(1500);
+                    await waitForAngular(page);
                     formSaved = true;
                     console.log(`[265-1] フォーム保存ボタンクリック: ${sel}`);
                     break;
@@ -721,7 +721,7 @@ test.describe('初期値設定テスト（267系）', () => {
                 const cnt = await btn.count();
                 if (cnt > 0) {
                     await btn.click({ force: true });
-                    await page.waitForTimeout(2000);
+                    await waitForAngular(page);
                     console.log(`[267-1] 保存ボタンクリック: ${sel}`);
                     break;
                 }
@@ -756,7 +756,7 @@ test.describe('初期値設定テスト（267系）', () => {
                 const cnt = await btn.count();
                 if (cnt > 0) {
                     await btn.click({ force: true });
-                    await page.waitForTimeout(1500);
+                    await waitForAngular(page);
                     recordFormOpened = true;
                     console.log(`[267-1] 新規作成ボタンクリック: ${sel}`);
                     break;
@@ -845,7 +845,7 @@ async function cleanupRequiredSetting(page, tableId) {
                     const isChecked = await el.isChecked().catch(() => false);
                     if (isChecked) {
                         await el.click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
                     break;
                 }
@@ -858,7 +858,7 @@ async function cleanupRequiredSetting(page, tableId) {
         const cnt = await btn.count();
         if (cnt > 0) {
             await btn.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
     } catch (e) {
         console.log(`[cleanup] 必須設定クリーンアップ失敗: ${e.message}`);
@@ -899,7 +899,7 @@ async function cleanupDefaultValue(page, tableId) {
         const cnt = await btn.count();
         if (cnt > 0) {
             await btn.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         }
     } catch (e) {
         console.log(`[cleanup] 初期値クリーンアップ失敗: ${e.message}`);

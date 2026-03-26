@@ -44,7 +44,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -135,18 +135,6 @@ test.describe('公開フォーム・公開メールリンク', () => {
     });
 
     // テスト後: テーブルを削除
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const page = await browser.newPage();
-            await login(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-        } catch (e) {
-            // teardownのエラーは無視
-        }
-    });
-
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000);
         await login(page);
@@ -315,7 +303,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         if (pubFormLinkCount > 0) {
             await expect(pubFormLinkItem.first()).toBeVisible();
             await pubFormLinkItem.first().click();
-            await page.waitForTimeout(2000);
+            await waitForAngular(page);
 
             // 公開フォームリンクモーダルが開くことを確認
             const pubFormModal = page.locator('.modal.show');
@@ -352,7 +340,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
                     const closeBtnCount = await closeBtn.count();
                     if (closeBtnCount > 0) {
                         await closeBtn.first().click({ force: true });
-                        await page.waitForTimeout(500);
+                        await waitForAngular(page);
                     }
                 }
             }

@@ -50,7 +50,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {}
 }
@@ -60,7 +60,7 @@ async function closeTemplateModal(page) {
  */
 async function logout(page) {
     await page.click('.nav-link.nav-pill.avatar', { force: true });
-    await page.waitForTimeout(500);
+    await waitForAngular(page);
     await page.click('.dropdown-menu.show .dropdown-item:has-text("ログアウト")', { force: true });
     await page.waitForURL('**/admin/login', { timeout: 10000 });
 }
@@ -144,7 +144,7 @@ async function waitForAngular(page, timeout = 15000) {
             try {
                 const toggleBtn = page.locator('label[for="use_smtp_1"], .fieldname_use_smtp .checkbox-custom').first();
                 await toggleBtn.click({ timeout: 5000 });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
             } catch (e2) {
                 console.log('[setupSmtp] トグルクリック失敗（スキップ）:', e2.message.substring(0, 100));
                 return;
@@ -177,7 +177,7 @@ async function waitForAngular(page, timeout = 15000) {
 
         // 更新ボタン（「更新する」ボタン対応、タイムアウト5秒）
         await page.locator('button:has-text("更新")').last().click({ timeout: 5000, force: true });
-        await page.waitForTimeout(2000);
+        await waitForAngular(page);
         console.log(`[setupSmtp] SMTP設定完了: ${smtpHost}:${smtpPort} / ${smtpUser}`);
     } catch (e) {
         console.log('[setupSmtp] SMTP設定失敗（続行）:', e.message);
@@ -284,13 +284,13 @@ test.describe('メール配信', () => {
         const addBtn = page.locator('button:has-text("追加"), a:has-text("追加"), .btn-add');
         if (await addBtn.count() > 0) {
             await addBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 未入力で登録ボタンをクリック
             const submitBtn = page.locator('button[type="submit"], button:has-text("登録")');
             if (await submitBtn.count() > 0) {
                 await submitBtn.first().click();
-                await page.waitForTimeout(1500);
+                await waitForAngular(page);
 
                 // エラーメッセージの確認
                 const errorMsg = page.locator('.alert-danger, .error, .invalid-feedback, .text-danger');
@@ -357,13 +357,13 @@ test.describe('メール配信', () => {
         const addBtn = page.locator('button:has-text("追加"), a:has-text("追加"), .btn-add');
         if (await addBtn.count() > 0) {
             await addBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 未入力で登録ボタンをクリック
             const submitBtn = page.locator('button[type="submit"], button:has-text("登録")');
             if (await submitBtn.count() > 0) {
                 await submitBtn.first().click();
-                await page.waitForTimeout(1500);
+                await waitForAngular(page);
 
                 const errorMsg = page.locator('.alert-danger, .error, .invalid-feedback, .text-danger');
                 console.log('エラーメッセージ数: ' + (await errorMsg.count()));
@@ -423,13 +423,13 @@ test.describe('メール配信', () => {
         const addBtn = page.locator('button:has-text("追加"), a:has-text("追加"), .btn-add');
         if (await addBtn.count() > 0) {
             await addBtn.first().click();
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
 
             // 未入力で登録ボタンをクリック
             const submitBtn = page.locator('button[type="submit"], button:has-text("登録")');
             if (await submitBtn.count() > 0) {
                 await submitBtn.first().click();
-                await page.waitForTimeout(1500);
+                await waitForAngular(page);
 
                 const errorMsg = page.locator('.alert-danger, .error, .invalid-feedback, .text-danger');
                 console.log('エラーメッセージ数: ' + (await errorMsg.count()));

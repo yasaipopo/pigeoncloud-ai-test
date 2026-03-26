@@ -9,15 +9,15 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 /**
  * storageStateを使ったブラウザコンテキストを作成する
  */
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
-
-async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
-}
 
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
@@ -59,7 +59,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -208,7 +208,7 @@ async function openAsideMenu(page) {
         const asideBtn = page.locator('aside button, .aside-toggle, [aria-label*="コメント"], .aside-menu-toggler').first();
         if (await asideBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
             await asideBtn.click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
     } catch (e) { /* フォールバックに進む */ }
 
@@ -233,7 +233,7 @@ async function getFirstRecordViewUrl(page, tableUrl) {
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(500);
+    await waitForAngular(page);
 
     // Angularのレコードリストが描画されるまで待機
     await page.waitForSelector(`a[href*="${tableUrl}/view/"]`, { timeout: 20000 }).catch(() => {});
@@ -427,18 +427,6 @@ test.describe('コメントメンション', () => {
         await page.close();
         await context.close();
     });
-
-    test.afterAll(async ({ browser }) => {
-        try {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-            await context.close();
-        } catch (e) {}
-    });
-
     // ---------------------------------------------------------------------------
     // 69-1 (A/B): 1ユーザーへのメンション
     // ---------------------------------------------------------------------------
@@ -455,7 +443,7 @@ test.describe('コメントメンション', () => {
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // レコード詳細ページが表示されていることを確認
         await expect(page).toHaveURL(/\/view\//);
@@ -475,13 +463,13 @@ test.describe('コメントメンション', () => {
 
         // コメントを入力（@ユーザー名でメンション）
         await commentDiv.click();
-        await page.waitForTimeout(200);
+        await waitForAngular(page);
         await page.keyboard.type('テストコメント @マスターユーザー');
         await page.waitForTimeout(800);
 
         // オートコンプリートのドロップダウンを閉じる（Escape + 再クリック）
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(300);
+        await waitForAngular(page);
 
         // 送信ボタンをクリック
         await sendBtn.click({ force: true });
@@ -511,7 +499,7 @@ test.describe('コメントメンション', () => {
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // aside-menu（コメントパネル）を開く
         await openAsideMenu(page);
@@ -525,12 +513,12 @@ test.describe('コメントメンション', () => {
 
         // 複数ユーザーへのメンション付きコメントを入力
         await commentDiv.click();
-        await page.waitForTimeout(200);
+        await waitForAngular(page);
         await page.keyboard.type('複数メンションテスト @マスターユーザー @マスターユーザー');
         await page.waitForTimeout(1000);
         // オートコンプリートドロップダウンが開いている場合は閉じる
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // 送信ボタンをクリック
         await sendBtn.click({ force: true });
@@ -560,7 +548,7 @@ test.describe('コメントメンション', () => {
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // aside-menu（コメントパネル）を開く
         await openAsideMenu(page);
@@ -573,12 +561,12 @@ test.describe('コメントメンション', () => {
 
         // 存在しないユーザーへのメンション付きコメントを入力
         await commentDiv.click();
-        await page.waitForTimeout(200);
+        await waitForAngular(page);
         await page.keyboard.type('存在しないユーザーテスト @存在しないユーザーXYZ99999');
         await page.waitForTimeout(1000);
         // オートコンプリートドロップダウンが開いている場合は閉じる
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // 送信ボタンをクリック
         const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
@@ -606,7 +594,7 @@ test.describe('コメントメンション', () => {
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // URLが /view/ を含まない場合（リダイレクト等）、現在のtableUrlから再取得する
         if (!page.url().includes('/view/')) {
@@ -617,7 +605,7 @@ test.describe('コメントメンション', () => {
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         }
 
         // aside-menu（コメントパネル）を開く
@@ -633,7 +621,7 @@ test.describe('コメントメンション', () => {
 
         // 組織へのメンション付きコメントを入力
         await commentDiv.click();
-        await page.waitForTimeout(200);
+        await waitForAngular(page);
         await page.keyboard.type('組織メンションテスト @組織1');
         await page.waitForTimeout(300);
 
@@ -669,13 +657,13 @@ test.describe('コメントメンション', () => {
         await page.goto(BASE_URL + '/admin/dataset/edit/' + tableId, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // 「詳細・編集画面」タブをクリック
         try {
             const detailTab = page.locator('.nav-link').filter({ hasText: '詳細・編集画面' }).first();
             await detailTab.click({ force: true });
-            await page.waitForTimeout(1000);
+            await waitForAngular(page);
         } catch (e) {
             // タブが見つからない場合はスキップ
         }
@@ -724,7 +712,7 @@ test.describe('コメントメンション', () => {
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // aside-menu（コメントパネル）を開く
         await openAsideMenu(page);
@@ -741,7 +729,7 @@ test.describe('コメントメンション', () => {
 
         // @でメンション入力
         await commentDiv.click();
-        await page.waitForTimeout(200);
+        await waitForAngular(page);
         await page.keyboard.type('@マスターユーザー');
         await page.waitForTimeout(300);
 

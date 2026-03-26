@@ -57,7 +57,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {
         // モーダルがなければ何もしない
@@ -241,7 +241,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // 帳票ボタンをクリックしてドロップダウンメニューを開く
         await reportBtn.click({ force: true });
-        await page.waitForTimeout(800);
+        await waitForAngular(page);
 
         // ドロップダウンメニューが開いた場合のみ内容を確認
         const dropdownMenu = page.locator('.dropdown-menu.show');
@@ -261,7 +261,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // ESCでメニューを閉じる
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(300);
+        await waitForAngular(page);
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -288,7 +288,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // 帳票ボタンをクリックしてドロップダウンメニューを開く
         await reportBtn.click({ force: true });
-        await page.waitForTimeout(800);
+        await waitForAngular(page);
 
         // ドロップダウンメニューが開いた場合のみ内容を確認
         const dropdownMenu = page.locator('.dropdown-menu.show');
@@ -300,7 +300,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         }
 
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(300);
+        await waitForAngular(page);
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -332,7 +332,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         if (listMenuCount > 0) {
             await listMenuBtn.click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
 
             // 帳票登録メニュー項目を探す
             const reportRegisterItem = page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').first();
@@ -342,7 +342,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 // 帳票登録メニューが表示されること
                 await expect(reportRegisterItem).toBeVisible();
                 await reportRegisterItem.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 帳票登録モーダルが開いた場合、ファイル名フォーマット入力欄を確認
                 const modal = page.locator('.modal.show');
@@ -366,7 +366,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                     // モーダルを閉じる
                     const cancelBtn = modal.locator('button:has-text("キャンセル"), button.btn-secondary').first();
                     await cancelBtn.click({ force: true }).catch(() => {});
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
             } else {
                 // メニューを閉じる
@@ -404,7 +404,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         if (listMenuCount > 0) {
             await listMenuBtn.click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
 
             const reportRegisterItem = page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').first();
             const reportRegisterCount = await reportRegisterItem.count();
@@ -412,7 +412,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             if (reportRegisterCount > 0) {
                 await expect(reportRegisterItem).toBeVisible();
                 await reportRegisterItem.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 const modal = page.locator('.modal.show');
                 const modalCount = await modal.count();
@@ -432,7 +432,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
                     const cancelBtn = modal.locator('button:has-text("キャンセル"), button.btn-secondary').first();
                     await cancelBtn.click({ force: true }).catch(() => {});
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
             } else {
                 await page.keyboard.press('Escape');
@@ -464,7 +464,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         const listMenuBtn = page.locator('.dropdown-toggle').filter({ hasNotText: '帳票' }).first();
         await expect(listMenuBtn).toBeVisible();
         await listMenuBtn.click({ force: true });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // ドロップダウンメニューが表示されること
         const dropdownMenu = page.locator('.dropdown-menu.show').first();
@@ -484,7 +484,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // ESCでメニューを閉じる
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(300);
+        await waitForAngular(page);
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -543,7 +543,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         if (listMenuCount > 0) {
             await listMenuBtn.click({ force: true });
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
 
             const reportRegisterItem = page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').first();
             const reportRegisterCount = await reportRegisterItem.count();
@@ -551,7 +551,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             if (reportRegisterCount > 0) {
                 await expect(reportRegisterItem).toBeVisible();
                 await reportRegisterItem.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // 帳票登録モーダルが開いた場合、列指定UIを確認
                 const modal = page.locator('.modal.show');
@@ -570,7 +570,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
                     const cancelBtn = modal.locator('button:has-text("キャンセル"), button.btn-secondary').first();
                     await cancelBtn.click({ force: true }).catch(() => {});
-                    await page.waitForTimeout(500);
+                    await waitForAngular(page);
                 }
             } else {
                 await page.keyboard.press('Escape');
@@ -764,7 +764,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // 帳票ボタンがアクセス可能かどうか確認（テーブル一覧から）
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
         await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
         await waitForAngular(page);
         await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
@@ -807,7 +807,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         const listMenuBtn = page.locator('.dropdown-toggle').filter({ hasNotText: '帳票' }).first();
         await expect(listMenuBtn).toBeVisible();
         await listMenuBtn.click({ force: true });
-        await page.waitForTimeout(500);
+        await waitForAngular(page);
 
         // ドロップダウンメニューが表示されること
         const dropdownMenu = page.locator('.dropdown-menu.show').first();
@@ -817,7 +817,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         const reportRegisterItem = dropdownMenu.locator('a:has-text("帳票登録"), button:has-text("帳票登録")').first();
         await expect(reportRegisterItem).toBeVisible();
         await reportRegisterItem.click({ force: true });
-        await page.waitForTimeout(1000);
+        await waitForAngular(page);
 
         // 帳票登録モーダルが開くこと
         const modal = page.locator('.modal.show');
@@ -842,7 +842,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 const submitCount = await submitBtn.count();
                 if (submitCount > 0 && await submitBtn.isVisible()) {
                     await submitBtn.click({ force: true });
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
 
                     // エラーメッセージが表示されること
                     const errorMsg = page.locator('.alert-danger, .toast-error, [class*="error-message"], .invalid-feedback').first();
@@ -858,7 +858,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // モーダルを閉じる
             const cancelBtn = modal.locator('button:has-text("キャンセル"), button.btn-secondary, button.close').first();
             await cancelBtn.click({ force: true }).catch(() => {});
-            await page.waitForTimeout(500);
+            await waitForAngular(page);
         } else {
             // モーダルが開かない場合はメニューを閉じる
             await page.keyboard.press('Escape');

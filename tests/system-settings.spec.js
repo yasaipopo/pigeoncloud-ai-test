@@ -160,7 +160,7 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
     } catch (e) {}
 }
@@ -185,7 +185,7 @@ async function gotoWithSessionRecovery(page, url) {
  */
 async function logout(page) {
     await page.click('.nav-link.nav-pill.avatar', { force: true });
-    await page.waitForTimeout(500);
+    await waitForAngular(page);
     await page.click('.dropdown-menu.show .dropdown-item:has-text("ログアウト")', { force: true });
     await page.waitForURL('**/admin/login', { timeout: 10000 });
 }
@@ -363,7 +363,7 @@ test.describe('共通設定・システム設定', () => {
                 await page.fill('#id', EMAIL);
                 await page.fill('#password', pw);
                 await page.click('button[type=submit].btn-primary');
-                await page.waitForTimeout(5000);
+                await waitForAngular(page);
                 return page.url();
             }
 
@@ -1197,14 +1197,14 @@ async function waitForAngular(page, timeout = 15000) {
         const toggleCount = await dropdownToggle.count();
         if (toggleCount > 0) {
             await dropdownToggle.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
 
             // ドロップダウンメニューから「CSVアップロード」をクリック
             const csvUploadItem = page.locator('.dropdown-menu.show a:has-text("CSVアップロード"), .dropdown-menu.show button:has-text("CSVアップロード")').first();
             const csvUploadCount = await csvUploadItem.count();
             if (csvUploadCount > 0) {
                 await csvUploadItem.click({ force: true });
-                await page.waitForTimeout(1000);
+                await waitForAngular(page);
 
                 // CSVファイルアップロードモーダルを探す
                 const fileInput = page.locator('.modal.show input[type="file"], input#inputCsv').first();
@@ -1218,7 +1218,7 @@ async function waitForAngular(page, timeout = 15000) {
                     const uploadBtnCount = await uploadBtn.count();
                     if (uploadBtnCount > 0) {
                         await uploadBtn.click({ force: true });
-                        await page.waitForTimeout(3000);
+                        await waitForAngular(page);
                     }
                 }
             }
@@ -1696,7 +1696,7 @@ async function waitForAngular(page, timeout = 15000) {
                     await waitForAngular(page);
                 } else if (hasPublicTab) {
                     await publicTab.first().click();
-                    await page.waitForTimeout(1000);
+                    await waitForAngular(page);
                 }
 
                 const apiContent = await page.evaluate(() => {
