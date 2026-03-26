@@ -349,11 +349,8 @@ test.describe('ログ管理', () => {
         // CSV履歴ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/csv/);
 
-        // ページにCSV UP/DL履歴テキストが表示されるまで待機
-        await page.waitForFunction(
-            () => document.body.innerText.includes('CSV UP/DL履歴') && document.querySelectorAll('table').length > 0,
-            { timeout: 15000 }
-        ).catch(() => {});
+        // テーブルヘッダーが描画されるまで待機（navのCSV UP/DL履歴テキストより確実）
+        await page.waitForSelector('table th', { timeout: 15000 }).catch(() => {});
 
         // ページタイトルにCSV UP/DL履歴が含まれることを確認
         const pageText = await page.innerText('body');
