@@ -126,7 +126,7 @@ module.exports = async function globalSetup() {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
-            data: { domain: domain, email: 'admin' },
+            data: { domain: domain, email: 'admin', with_all_type_table: true },
             timeout: 60000,
         });
         const result = await resp.json();

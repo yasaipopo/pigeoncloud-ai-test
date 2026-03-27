@@ -16,8 +16,45 @@ async function waitForAngular(page, timeout = 15000) {
  */
 async function login(page) {
     await page.goto(BASE_URL + '/admin/login');
+    await waitForAngular(page);
+
+    // APIログインを優先（フォームロード待機不要で高速・確実）
+    const loginResult = await page.evaluate(async ({ email, password }) => {
+        try {
+            const csrfResp = await fetch('/api/csrf_token');
+            const csrf = await csrfResp.json();
+            const loginResp = await fetch('/api/login/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email, password,
+                    admin_table: 'admin',
+                    csrf_name: csrf.csrf_name,
+                    csrf_value: csrf.csrf_value,
+                    login_type: 'user',
+                    auth_token: null,
+                    isManageLogin: false
+                })
+            });
+            return await loginResp.json();
+        } catch (e) {
+            return { result: 'error', error: e.toString() };
+        }
+    }, { email: EMAIL, password: PASSWORD });
+
+    if (loginResult.result === 'success') {
+        await page.goto(BASE_URL + '/admin/dashboard');
+        await waitForAngular(page);
+        return;
+    }
+
+    // APIログイン失敗時はフォームログイン
     await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-    await page.waitForSelector('#id', { timeout: 30000 });
+    const idField = await page.waitForSelector('#id', { timeout: 30000 }).catch(() => null);
+    if (!idField) {
+        if (!page.url().includes('/admin/login')) return;
+        throw new Error('ログインフォームの#idフィールドが見つかりません');
+    }
     await page.fill('#id', EMAIL);
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');

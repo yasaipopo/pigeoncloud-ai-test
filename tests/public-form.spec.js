@@ -54,6 +54,7 @@ async function closeTemplateModal(page) {
 /**
  * テーブル設定の「その他」タブを開く
  * Angular SPAのためdispatchEventを使用してタブ切り替え
+ * @returns {Promise<string>} 「その他」タブパネルのIDまたは識別子
  */
 async function openOtherTab(page, tableId) {
     await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
@@ -75,8 +76,27 @@ async function enablePublicForm(page, tableId) {
     await openOtherTab(page, tableId);
 
     const pubFormPanel = await page.evaluate(() => {
-        // 「その他」タブパネルの内容確認
-        const panel = document.querySelector('#ngb-nav-7-panel');
+        // 「その他」タブパネルを動的IDではなくテキストで特定する
+        // Angular ngb-nav は表示数によってIDが変わるためハードコードIDは使用しない
+        let panel = null;
+        // 方法1: [role="tabpanel"] で現在アクティブなものを探す
+        const activePanels = document.querySelectorAll('[role="tabpanel"]');
+        for (const p of activePanels) {
+            if (p.textContent.includes('公開フォームをONにする')) {
+                panel = p;
+                break;
+            }
+        }
+        // 方法2: 直接 .form-group から公開フォーム要素を探す（タブパネル外の場合）
+        if (!panel) {
+            const formGroups = document.querySelectorAll('.form-group.row.admin-forms');
+            for (const group of formGroups) {
+                if (group.textContent.includes('公開フォームをONにする')) {
+                    panel = group.closest('[role="tabpanel"]') || group.parentElement;
+                    break;
+                }
+            }
+        }
         if (!panel) return null;
         const formGroups = panel.querySelectorAll('.form-group.row.admin-forms');
         let pubFormGroup = null;
@@ -96,12 +116,10 @@ async function enablePublicForm(page, tableId) {
     }
 
     if (!pubFormPanel.isChecked) {
-        // スイッチをONにする
+        // スイッチをONにする（動的IDを使わずテキストで検索）
         await page.evaluate(() => {
-            const panel = document.querySelector('#ngb-nav-7-panel');
-            if (!panel) return;
-            const formGroups = panel.querySelectorAll('.form-group.row.admin-forms');
-            for (const group of formGroups) {
+            const allFormGroups = document.querySelectorAll('.form-group.row.admin-forms');
+            for (const group of allFormGroups) {
                 if (group.textContent.includes('公開フォームをONにする')) {
                     const handle = group.querySelector('.switch-handle');
                     if (handle) handle.click();
@@ -154,36 +172,39 @@ test.describe('公開フォーム・公開メールリンク', () => {
         await openOtherTab(page, tableId);
 
         // 「その他」タブパネルが表示されていることを確認
-        const otherPanel = page.locator('#ngb-nav-7-panel');
-        await expect(otherPanel).toBeVisible({ timeout: 10000 });
+        // Angular ngb-nav のIDは動的に変わるため、テキストで判別する
+        // アクティブな tabpanel 内に「公開フォームをONにする」テキストが存在することを確認
+        const pubFormLabelGlobal = page.locator(
+            '[role="tabpanel"] label:has-text("公開フォームをONにする"), ' +
+            '[role="tabpanel"] .form-control-label:has-text("公開フォームをONにする"), ' +
+            'label:has-text("公開フォームをONにする")'
+        ).first();
+        await expect(pubFormLabelGlobal).toBeVisible({ timeout: 10000 });
 
-        // 「公開フォームをONにする」ラベルが存在することを確認
-        const pubFormLabel = otherPanel.locator('label:has-text("公開フォームをONにする"), .form-control-label:has-text("公開フォームをONにする")');
-        await expect(pubFormLabel.first()).toBeVisible({ timeout: 5000 });
+        // 「公開フォームをONにする」ラベルが存在することを確認（上記で兼用）
 
         // スイッチ（checkbox）が存在することを確認
-        const pubFormRow = otherPanel.locator('.form-group.row.admin-forms:has-text("公開フォームをONにする")');
-        await expect(pubFormRow.first()).toBeVisible({ timeout: 5000 });
+        const pubFormRow = page.locator('.form-group.row.admin-forms:has-text("公開フォームをONにする")').first();
+        await expect(pubFormRow).toBeVisible({ timeout: 5000 });
 
-        const switchInput = pubFormRow.first().locator('input[type="checkbox"].switch-input');
+        const switchInput = pubFormRow.locator('input[type="checkbox"].switch-input');
         await expect(switchInput).toBeDefined();
         // スイッチのcount確認
         const switchCount = await switchInput.count();
         expect(switchCount, '公開フォームスイッチが存在すること').toBeGreaterThan(0);
 
         // スイッチハンドル（クリック可能要素）が存在することを確認
-        const switchHandle = pubFormRow.first().locator('.switch-handle');
+        const switchHandle = pubFormRow.locator('.switch-handle');
         const handleCount = await switchHandle.count();
         expect(handleCount, '公開フォームスイッチハンドルが存在すること').toBeGreaterThan(0);
 
         // Step 2: 公開フォームをONにする（スイッチをクリック）
         const isChecked = await switchInput.isChecked();
         if (!isChecked) {
+            // 動的IDを使わずテキストで検索してクリック
             await page.evaluate(() => {
-                const panel = document.querySelector('#ngb-nav-7-panel');
-                if (!panel) return;
-                const formGroups = panel.querySelectorAll('.form-group.row.admin-forms');
-                for (const group of formGroups) {
+                const allFormGroups = document.querySelectorAll('.form-group.row.admin-forms');
+                for (const group of allFormGroups) {
                     if (group.textContent.includes('公開フォームをONにする')) {
                         const handle = group.querySelector('.switch-handle');
                         if (handle) handle.click();
@@ -360,12 +381,13 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 console.log('公開フォームリンクメニューが表示されませんでした。ビュー設定が必要な可能性があります。');
 
                 // テーブル編集ページで公開フォーム設定UIが存在することを確認（フォールバック）
+                // Angular ngb-nav のIDは動的に変わるためテキストベースで確認する
                 await openOtherTab(page, tableId);
-                const otherPanel = page.locator('#ngb-nav-7-panel');
-                await expect(otherPanel, '「その他」タブパネルが存在すること').toBeVisible({ timeout: 10000 });
-
-                const pubFormLabel = otherPanel.locator('label:has-text("公開フォームをONにする"), .form-control-label:has-text("公開フォームをONにする")');
-                await expect(pubFormLabel.first(), '「公開フォームをONにする」ラベルが存在すること').toBeVisible({ timeout: 5000 });
+                const pubFormLabelFallback = page.locator(
+                    '[role="tabpanel"] label:has-text("公開フォームをONにする"), ' +
+                    'label:has-text("公開フォームをONにする")'
+                ).first();
+                await expect(pubFormLabelFallback, '「公開フォームをONにする」ラベルが存在すること').toBeVisible({ timeout: 10000 });
             }
         }
     });

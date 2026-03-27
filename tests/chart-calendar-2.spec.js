@@ -2299,8 +2299,13 @@ test.describe('集計・チャート - 詳細権限設定', () => {
         await expect(anyTab).toBeVisible({ timeout: 10000 });
 
         // 絞り込みタブが存在すればクリック
+        // タブが不可視（CSSで隠れている）場合もあるので isVisible() チェックを外し、
+        // スクロール後に force: true でクリックする
         const filterTab = page.locator('a.nav-link').filter({ hasText: /絞り込み/ }).first();
         if (await filterTab.count() > 0) {
+            // スクロールして表示させてからクリック
+            await filterTab.scrollIntoViewIfNeeded().catch(() => {});
+            await page.waitForTimeout(500);
             await filterTab.click({ force: true });
             await waitForAngular(page);
         }

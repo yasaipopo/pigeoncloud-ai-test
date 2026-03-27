@@ -519,11 +519,21 @@ async function ensureCalendarView(page) {
     }
 
     // カレンダー種別を選択するモーダル/パネルが開いたことを確認
+    // AngularのSPAで動的に生成されるため、モーダルの表示を待ってから確認
+    await page.waitForTimeout(1500);
     const calendarOption = page.locator(
-        'label:has-text("カレンダー"), input[value*="calendar"], .view-type-calendar, li:has-text("カレンダー") input'
+        'label:has-text("カレンダー"), input[value*="calendar"], .view-type-calendar, li:has-text("カレンダー") input, ' +
+        '.modal label:has-text("カレンダー"), [class*="view-type"]:has-text("カレンダー"), ' +
+        'li label:has-text("カレンダー"), .list-group-item:has-text("カレンダー")'
     ).first();
 
     if (await calendarOption.count() === 0) {
+        // 現在のモーダル内容をログ出力してデバッグ
+        const modalContent = await page.evaluate(() => {
+            const modal = document.querySelector('.modal.show, .modal.fade.show, ngb-modal-window');
+            return modal ? modal.textContent?.substring(0, 300) : 'モーダルなし: ' + document.body.textContent?.substring(0, 200);
+        });
+        console.log('[ensureCalendarView] モーダル内容:', modalContent);
         throw new Error(
             'ビュー作成モーダルで「カレンダー」選択肢が見つかりません。' +
             'UIが変更されている可能性があります。'
@@ -813,10 +823,27 @@ test.describe('集計 - 基本機能', () => {
             await waitForAngular(page);
         }
 
-        // 「全員に表示」ラジオボタンをON（実際のvalue: "public"）
-        const allUsersOption = page.locator('input[name="grant"][value="public"]').first();
-        await expect(allUsersOption).toBeVisible({ timeout: 5000 });
-        await allUsersOption.click({ force: true });
+        // 「全員に表示」ラジオボタンをON
+        // input[type="radio"] はCSSカスタマイズでhidden扱いになるため、
+        // 対応するラベルをクリックするか、JSで直接操作する
+        const allUsersInput = page.locator('input[name="grant"][value="public"]').first();
+        const allUsersLabel = page.locator('label:has-text("全員"), label:has-text("公開"), .radio-label:has-text("全員")').first();
+        // 要素の存在確認（visibleでなくてもcount > 0で確認）
+        const inputCount = await allUsersInput.count();
+        expect(inputCount, '「全員に表示」ラジオボタン入力要素が存在すること').toBeGreaterThan(0);
+        if (await allUsersLabel.count() > 0 && await allUsersLabel.isVisible()) {
+            // ラベルが見えればラベルをクリック
+            await allUsersLabel.click({ force: true });
+        } else {
+            // JavaScriptで直接クリック（hidden radioの場合）
+            await page.evaluate(() => {
+                const input = document.querySelector('input[name="grant"][value="public"]');
+                if (input) {
+                    input.click();
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
         await waitForAngular(page);
 
         // 保存ボタンが存在して、クリックできることを確認
@@ -856,10 +883,23 @@ test.describe('集計 - 基本機能', () => {
             await waitForAngular(page);
         }
 
-        // 「自分のみ表示」ラジオボタンをON（実際のvalue: "private"）
-        const selfOnlyOption = page.locator('input[name="grant"][value="private"]').first();
-        await expect(selfOnlyOption).toBeVisible({ timeout: 5000 });
-        await selfOnlyOption.click({ force: true });
+        // 「自分のみ表示」ラジオボタンをON
+        // input[type="radio"] はCSSカスタマイズでhidden扱いになるため、JSで直接操作する
+        const selfOnlyInput = page.locator('input[name="grant"][value="private"]').first();
+        const selfOnlyLabel = page.locator('label:has-text("自分"), label:has-text("非公開"), .radio-label:has-text("自分")').first();
+        const selfInputCount = await selfOnlyInput.count();
+        expect(selfInputCount, '「自分のみ表示」ラジオボタン入力要素が存在すること').toBeGreaterThan(0);
+        if (await selfOnlyLabel.count() > 0 && await selfOnlyLabel.isVisible()) {
+            await selfOnlyLabel.click({ force: true });
+        } else {
+            await page.evaluate(() => {
+                const input = document.querySelector('input[name="grant"][value="private"]');
+                if (input) {
+                    input.click();
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
         await waitForAngular(page);
 
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();

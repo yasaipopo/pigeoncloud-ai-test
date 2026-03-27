@@ -20,17 +20,29 @@ async function login(page) {
 /**
  * テーブル管理画面のfa-barsドロップダウンを開く
  * @param {import('@playwright/test').Page} page
+ * @returns {Promise<boolean>} ドロップダウンが開けたかどうか
  */
 async function openTableManagementBarsMenu(page) {
+    // /admin/dataset は初回アクセス時に /admin/dataset/edit/new にリダイレクトされる場合があるため
+    // 2回ナビゲートするパターンを使用する
     await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
-
-    // fa-bars ドロップダウンボタンをクリック
-    await page.evaluate(() => {
-        const barsBtn = document.querySelector('button.btn-outline-primary .fa-bars');
-        if (barsBtn) barsBtn.closest('button').click();
-    });
     await page.waitForTimeout(800);
+
+    if (!page.url().includes('/admin/dataset') || page.url().includes('/edit') || page.url().includes('dashboard')) {
+        await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+        await page.waitForTimeout(800);
+    }
+
+    // fa-bars ドロップダウンボタンを Playwright の click() で操作（Angular の click イベントが正しく処理される）
+    const faBarsBtn = page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle').filter({ has: page.locator('.fa-bars') });
+    const btnCount = await faBarsBtn.count();
+    if (btnCount === 0) return false;
+
+    await faBarsBtn.first().click();
+    await page.waitForTimeout(800);
+    return true;
 }
 
 /**
@@ -40,19 +52,16 @@ async function openTableManagementBarsMenu(page) {
  * @returns {Promise<boolean>} モーダルが開けたかどうか
  */
 async function openTemplateModal(page) {
-    await openTableManagementBarsMenu(page);
+    const menuOpened = await openTableManagementBarsMenu(page);
+    if (!menuOpened) return false;
 
-    // 「テンプレートから追加」をクリック
-    const clicked = await page.evaluate(() => {
-        const items = Array.from(document.querySelectorAll('.dropdown-menu.show .dropdown-item, .dropdown-item'));
-        const templateItem = items.find(a => a.textContent.includes('テンプレートから追加'));
-        if (templateItem) { templateItem.click(); return true; }
-        return false;
-    });
+    // 「テンプレートから追加」を Playwright の locator でクリック（Angular の click イベントが正しく処理される）
+    const templateItem = page.locator('.dropdown-menu.show .dropdown-item').filter({ hasText: 'テンプレートから追加' });
+    const templateItemCount = await templateItem.count();
+    if (templateItemCount === 0) return false;
 
-    if (!clicked) return false;
-
-    await page.waitForTimeout(1500);
+    await templateItem.first().click();
+    await page.waitForTimeout(2000);
 
     // モーダルが開いているか確認
     const modalCount = await page.locator('.modal.show').count();
