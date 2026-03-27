@@ -240,13 +240,16 @@ test.describe('RPA（コネクト）', () => {
 
         // IDカラムが存在すること
         const hasId = headers.some(h => h.includes('ID'));
+        // テーブルカラムが存在すること
+        const hasTable = headers.some(h => h.includes('テーブル'));
         // コネクト名（またはRPA名）カラムが存在すること
         const hasName = headers.some(h => h.includes('コネクト名') || h.includes('RPA名') || h.includes('名'));
         // ステータスカラムが存在すること
         const hasStatus = headers.some(h => h.includes('ステータス'));
 
-        // 各カラムを個別に確認（コネクト一覧には必ずID・名前・ステータスの3列が揃っているべき）
+        // 各カラムを個別に確認（コネクト一覧には ID・テーブル・コネクト名・ステータスの4列が揃っているべき）
         expect(hasId, `IDカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
+        expect(hasTable, `テーブルカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
         expect(hasName, `コネクト名カラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
         expect(hasStatus, `ステータスカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
     });
