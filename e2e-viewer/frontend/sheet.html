@@ -108,7 +108,7 @@
       <h6 class="mb-3"><i class="bi bi-kanban me-1"></i>パイプライン進捗</h6>
       <div class="row g-3 mb-3">
         <!-- yaml -->
-        <div class="col-md-4">
+        <div class="col-md-4 col-lg">
           <div class="border rounded p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <strong class="small">1. YAML品質チェック</strong>
@@ -126,7 +126,7 @@
           </div>
         </div>
         <!-- spec -->
-        <div class="col-md-4">
+        <div class="col-md-4 col-lg">
           <div class="border rounded p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <strong class="small">2. Spec実装</strong>
@@ -144,7 +144,7 @@
           </div>
         </div>
         <!-- run -->
-        <div class="col-md-4">
+        <div class="col-md-4 col-lg">
           <div class="border rounded p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <strong class="small">3. 実行確認</strong>
@@ -162,6 +162,46 @@
               <span class="badge badge-fail-product" id="run-fprod">0</span>
               <span class="badge badge-fail-env" id="run-fenv">0</span>
               <span class="badge badge-unchecked" id="run-unc">0</span>
+            </div>
+          </div>
+        </div>
+        <!-- staging -->
+        <div class="col-md-6 col-lg">
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small">Staging結果</strong>
+              <span class="text-muted small" id="staging-ratio">-</span>
+            </div>
+            <div class="progress progress-thin mb-2">
+              <div class="progress-bar bg-success" id="staging-bar-pass" style="width:0%"></div>
+              <div class="progress-bar bg-danger" id="staging-bar-fail" style="width:0%"></div>
+              <div class="progress-bar bg-secondary" id="staging-bar-skip" style="width:0%"></div>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="badge result-pass" id="staging-pass">0</span>
+              <span class="badge result-fail" id="staging-fail">0</span>
+              <span class="badge result-skip" id="staging-skip">0</span>
+              <span class="badge badge-unchecked" id="staging-unc">0</span>
+            </div>
+          </div>
+        </div>
+        <!-- main -->
+        <div class="col-md-6 col-lg">
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small">Main結果</strong>
+              <span class="text-muted small" id="main-ratio">-</span>
+            </div>
+            <div class="progress progress-thin mb-2">
+              <div class="progress-bar bg-success" id="main-bar-pass" style="width:0%"></div>
+              <div class="progress-bar bg-danger" id="main-bar-fail" style="width:0%"></div>
+              <div class="progress-bar bg-secondary" id="main-bar-skip" style="width:0%"></div>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="badge result-pass" id="main-pass">0</span>
+              <span class="badge result-fail" id="main-fail">0</span>
+              <span class="badge result-skip" id="main-skip">0</span>
+              <span class="badge badge-unchecked" id="main-unc">0</span>
             </div>
           </div>
         </div>
@@ -369,6 +409,34 @@ function updateSummaryUI(s) {
   document.getElementById('run-bar-fspec').style.width = `${(runFspec/total*100).toFixed(1)}%`;
   document.getElementById('run-bar-fprod').style.width = `${(runFprod/total*100).toFixed(1)}%`;
   document.getElementById('run-bar-fenv').style.width = `${(runFenv/total*100).toFixed(1)}%`;
+
+  // Staging
+  const stgPass = s.staging?.pass || 0;
+  const stgFail = s.staging?.fail || 0;
+  const stgSkip = s.staging?.skip || 0;
+  const stgUnc = s.staging?.unchecked || 0;
+  document.getElementById('staging-pass').textContent = `PASS ${stgPass}`;
+  document.getElementById('staging-fail').textContent = `FAIL ${stgFail}`;
+  document.getElementById('staging-skip').textContent = `SKIP ${stgSkip}`;
+  document.getElementById('staging-unc').textContent = `- ${stgUnc}`;
+  document.getElementById('staging-ratio').textContent = `${stgPass}/${total}`;
+  document.getElementById('staging-bar-pass').style.width = `${(stgPass/total*100).toFixed(1)}%`;
+  document.getElementById('staging-bar-fail').style.width = `${(stgFail/total*100).toFixed(1)}%`;
+  document.getElementById('staging-bar-skip').style.width = `${(stgSkip/total*100).toFixed(1)}%`;
+
+  // Main
+  const mainPass = s.main?.pass || 0;
+  const mainFail = s.main?.fail || 0;
+  const mainSkip = s.main?.skip || 0;
+  const mainUnc = s.main?.unchecked || 0;
+  document.getElementById('main-pass').textContent = `PASS ${mainPass}`;
+  document.getElementById('main-fail').textContent = `FAIL ${mainFail}`;
+  document.getElementById('main-skip').textContent = `SKIP ${mainSkip}`;
+  document.getElementById('main-unc').textContent = `- ${mainUnc}`;
+  document.getElementById('main-ratio').textContent = `${mainPass}/${total}`;
+  document.getElementById('main-bar-pass').style.width = `${(mainPass/total*100).toFixed(1)}%`;
+  document.getElementById('main-bar-fail').style.width = `${(mainFail/total*100).toFixed(1)}%`;
+  document.getElementById('main-bar-skip').style.width = `${(mainSkip/total*100).toFixed(1)}%`;
 }
 
 // =========================================

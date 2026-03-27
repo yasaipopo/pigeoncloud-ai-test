@@ -5,6 +5,7 @@ Lambda Function URLで動作するシンプルなREST API
 
 import json
 import os
+import re
 import boto3
 import uuid
 import hashlib
@@ -800,9 +801,31 @@ def pipeline_summary(event):
         else:
             summary['run']['unchecked'] += 1
 
+        # staging
+        sr = item.get('stagingResult')
+        if sr == 'pass':
+            summary['staging']['pass'] += 1
+        elif sr == 'fail':
+            summary['staging']['fail'] += 1
+        elif sr == 'skip':
+            summary['staging']['skip'] += 1
+        else:
+            summary['staging']['unchecked'] += 1
+
+        # main
+        mr = item.get('mainResult')
+        if mr == 'pass':
+            summary['main']['pass'] += 1
+        elif mr == 'fail':
+            summary['main']['fail'] += 1
+        elif mr == 'skip':
+            summary['main']['skip'] += 1
+        else:
+            summary['main']['unchecked'] += 1
+
         # spec別
         if spec_name not in by_spec:
-            by_spec[spec_name] = {'total': 0, 'yaml_ok': 0, 'spec_ok': 0, 'run_pass': 0}
+            by_spec[spec_name] = {'total': 0, 'yaml_ok': 0, 'spec_ok': 0, 'run_pass': 0, 'staging_pass': 0, 'main_pass': 0}
         by_spec[spec_name]['total'] += 1
         if yc == 'ok':
             by_spec[spec_name]['yaml_ok'] += 1
@@ -810,6 +833,10 @@ def pipeline_summary(event):
             by_spec[spec_name]['spec_ok'] += 1
         if rc == 'pass':
             by_spec[spec_name]['run_pass'] += 1
+        if sr == 'pass':
+            by_spec[spec_name]['staging_pass'] += 1
+        if mr == 'pass':
+            by_spec[spec_name]['main_pass'] += 1
 
     summary['bySpec'] = by_spec
 
@@ -1035,7 +1062,6 @@ def pipeline_sync_results(event):
         case_no = ''
 
         # testTitleから "数字-数字" パターンを抽出
-        import re
         title_match = re.match(r'^(\d+-\d+)', test_title)
         if title_match:
             case_no = title_match.group(1)

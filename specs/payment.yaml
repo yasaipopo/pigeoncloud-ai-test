@@ -1,0 +1,40 @@
+group: 支払い・プラン管理
+spec_file: tests/payment.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: "PAY-01"
+  feature: 支払い
+  description: |
+    支払いページが表示されること
+  expected: |
+    支払いページが表示されること
+- case_no: "PAY-02"
+  feature: 支払い
+  description: |
+    プラン変更フォームと料金情報が表示されること
+  expected: |
+    プラン変更フォームと料金情報が表示されること
+- case_no: "PAY-03"
+  feature: 支払い
+  description: |
+    Stripe checkoutの関連iframeが存在すること
+  expected: |
+    Stripe checkoutの関連iframeが存在すること
+- case_no: "PAY-04"
+  feature: 支払い
+  description: |
+    テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
+  expected: |
+    テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
+- case_no: "PAY-05"
+  feature: 支払い
+  description: |
+    ユーザー数の範囲外入力でバリデーションエラーが表示されること
+  expected: |
+    ユーザー数の範囲外入力でバリデーションエラーが表示されること
+- case_no: "PAY-06"
+  feature: 支払い
+  description: |
+    支払い履歴APIエンドポイントが存在すること
+  expected: |
+    支払い履歴APIエンドポイントが存在すること
