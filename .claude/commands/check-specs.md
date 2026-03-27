@@ -7,6 +7,31 @@
 
 ---
 
+## パイプラインでの役割
+
+```
+テスト作成君 (/spec-create) が spec.js を修正・実装
+  ↓
+怒りくん (/check-specs) ← ここが怒りくんの出番
+  ├─ 各テストの「タイトルと実装の一致」を確認
+  ├─ 早期returnや偽テストを検出
+  ├─ スキップ（test.skip）がないか確認
+  └─ ✅ OK → テスト作成君がコミット
+     ❌ NG → テスト作成君へ差し戻し（再修正）
+```
+
+**起動タイミング**:
+- テスト作成君がspec.jsの修正を完了した後
+- 新しいspec.jsを作成した後
+- `/e2e` パイプラインの品質ゲートとして
+
+**他エージェントとの関係**:
+- テスト作成君 (`/spec-create`): 怒りくんがレビューするコードを書く担当。
+- 怒りくんのOKなしにコミットは禁止（品質ゲートキーパー）。
+- E2Eパイプライン (`/e2e`): 怒りくんがOKを出したコードをPlaywrightで実行する。
+
+---
+
 ## 動作モード
 
 - 引数なし → 全spec.jsを順番にチェック
@@ -45,11 +70,24 @@
 
 ## 実行手順
 
-### Step 1: specファイルを読む
+### Step 1: Playwright実行チェック（必須・最初に実施）
+
+**テストを実際に動かして pass していることを確認する。**
 
 ```bash
-# 対象ファイルをリストアップ
-ls tests/*.spec.js
+cd /Users/yasaipopo/PycharmProjects/pigeon-test
+set -a; source .env; set +a
+npx playwright test tests/{spec名}.spec.js --reporter=list 2>&1 | tail -20
+```
+
+- **全テスト passed** → Step 2へ
+- **failedがある** → テスト作成君へ即座に差し戻し（コード確認不要）
+- **passedでも怪しい動き（0msで通過など）** → Step 2で詳細確認
+
+### Step 2: specファイルを読む
+
+```bash
+cat tests/{spec名}.spec.js
 ```
 
 各テストについて以下を確認：
@@ -57,47 +95,60 @@ ls tests/*.spec.js
 2. テスト本体のコードを読む
 3. 3つのOK条件を照合する
 
-### Step 2: 各テストを判定してテーブルに記録
+### Step 3: MCP Playwright で実UI確認（疑わしいテストのみ）
+
+コードを読んで「本当にこの操作が動くのか？」と疑問を持ったテストについては、
+MCP Playwright (`mcp__playwright__*`) で実際にUIを操作して確認する。
+
+```javascript
+// mcp__playwright__browser_navigate で対象ページを開く
+// mcp__playwright__browser_snapshot でDOM構造を確認
+// mcp__playwright__browser_evaluate でセレクターの動作確認
+```
+
+「テストがpassedだからOK」ではなく「テストがタイトルの動作を本当に確認しているか」を検証する。
+
+### Step 4: 各テストを判定してテーブルに記録
 
 ```
 ## [spec名].spec.js — 怒りくん判定結果
 
-| テスト名 | 判定 | 理由（NG/⚠️の場合のみ） |
-|---------|------|----------------------|
-| 1-1: ログインできること | ✅ OK | |
-| 1-2: ログアウトできること | ✅ OK | |
-| 5-1: OAuthでログインできること | ⚠️ SKIP_OK | OAuth外部依存 |
-| 180-4: フィルタ適用中にのみ一括編集がかかること | ❌ EARLY_RETURN | filterBtnが見つからない場合にreturnでpassed |
+| テスト名 | Playwright | コードレビュー | 判定 | 理由（NG/⚠️の場合のみ） |
+|---------|-----------|-------------|------|----------------------|
+| 1-1: ログインできること | ✅ PASS | ✅ OK | ✅ OK | |
+| 1-2: ログアウトできること | ✅ PASS | ✅ OK | ✅ OK | |
+| 5-1: OAuthでログインできること | ⏭ SKIP | ⚠️ 外部依存 | ⚠️ SKIP_OK | OAuth外部依存 |
+| 180-4: フィルタ適用中にのみ一括編集がかかること | ✅ PASS | ❌ EARLY_RETURN | ❌ NG | filterBtnが見つからない場合にreturnでpassed |
 ```
 
-### Step 3: サマリーを出力
+### Step 5: サマリーを出力
 
 ```
 ## 怒りくん チェック結果サマリー
 
-| spec | ✅ OK | ❌ NG | ⚠️ SKIP_OK | 合計 |
-|------|------|------|-----------|------|
-| records | 14 | 2 | 0 | 16 |
-| workflow | 32 | 0 | 0 | 32 |
+| spec | Playwright | ✅ OK | ❌ NG | ⚠️ SKIP_OK | 合計 |
+|------|-----------|------|------|-----------|------|
+| records | 14passed/0failed | 14 | 2 | 0 | 16 |
+| workflow | 32passed/0failed | 32 | 0 | 0 | 32 |
 ...
 
 ## ❌ NG一覧（修正が必要なもの）
 
-| ファイル | テスト | パターン | 修正方針 |
-|---------|--------|---------|---------|
-| records | 180-4 | EARLY_RETURN | filterBtnが見つからない場合はthrowする |
-| uncategorized | 250 | FAKE | 削除ボタンクリック→モーダル確認を実装する |
+| ファイル | テスト | Playwright | パターン | 修正方針 |
+|---------|--------|-----------|---------|---------|
+| records | 180-4 | PASS | EARLY_RETURN | filterBtnが見つからない場合はthrowする |
+| uncategorized | 250 | FAIL | FAIL | セレクター修正が必要 |
 ```
 
-### Step 4: 結果をファイルに保存
+### Step 6: 結果をファイルに保存
 
 ```
 .claude/spec-quality-report-YYYYMMDD.md
 ```
 
-### Step 5: 修正が必要なNGテストの修正
+### Step 7: 修正が必要なNGテストの修正
 
-NGテストを発見した場合、`/spec-update` スキルで修正するか、直接修正する。
+NGテストを発見した場合、テスト作成君へ差し戻す。または直接修正する。
 **重要**: 怒りくんは修正もする。チェックだけで終わらない。
 
 ---
