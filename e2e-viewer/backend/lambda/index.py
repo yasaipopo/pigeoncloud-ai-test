@@ -176,6 +176,10 @@ def handler(event, context):
         elif method == 'POST' and path == '/pipeline':
             return pipeline_update(event)
 
+        # DELETE /pipeline/cleanup - yaml上にないケースを削除
+        elif method == 'POST' and path == '/pipeline/cleanup':
+            return pipeline_cleanup(event)
+
         else:
             return response(404, {'error': f'Not found: {method} {path}'})
 
@@ -1172,4 +1176,43 @@ def pipeline_sync_results(event):
         'totalCases': len(all_cases),
         'runId': run_id,
         'env': env,
+    })
+
+
+def pipeline_cleanup(event):
+    """
+    POST /pipeline/cleanup - yaml上にないケースをDBから削除
+    ボディ:
+      - validKeys: [{"spec": "auth", "caseNo": "1-1"}, ...] — 残すべきケースのリスト
+    validKeysに含まれないDBレコードを削除する。
+    """
+    body = json.loads(event.get('body') or '{}')
+    valid_keys = body.get('validKeys', [])
+
+    if not valid_keys:
+        return response(400, {'error': 'validKeys は必須です'})
+
+    valid_set = set(f"{k['spec']}#{k['caseNo']}" for k in valid_keys)
+
+    # DB全件取得
+    items = []
+    result = pipeline_table.scan()
+    items.extend(result.get('Items', []))
+    while result.get('LastEvaluatedKey'):
+        result = pipeline_table.scan(ExclusiveStartKey=result['LastEvaluatedKey'])
+        items.extend(result.get('Items', []))
+
+    # 不要なケースを削除
+    deleted = 0
+    with pipeline_table.batch_writer() as batch:
+        for item in items:
+            key = f"{item['spec']}#{item['caseNo']}"
+            if key not in valid_set:
+                batch.delete_item(Key={'spec': item['spec'], 'caseNo': item['caseNo']})
+                deleted += 1
+
+    return response(200, {
+        'message': f'{deleted}件削除完了（{len(items) - deleted}件残留）',
+        'deleted': deleted,
+        'remaining': len(items) - deleted,
     })
