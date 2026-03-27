@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
 const path = require('path');
@@ -145,12 +145,8 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -406,7 +402,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     // -------------------------------------------------------------------------
     test('247: フィルタ一覧・管理UIが存在すること', async ({ page }) => {
         if (!tableId) {
-            throw new Error('テーブルIDが取得できていません（beforeAllの setupAllTypeTable が失敗した可能性があります）');
+            throw new Error('テーブルIDが取得できていません（beforeAllの getAllTypeTableId が失敗した可能性があります）');
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -432,7 +428,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     // -------------------------------------------------------------------------
     test('248: 高度な検索UIが表示され、複合条件を設定できること', async ({ page }) => {
         if (!tableId) {
-            throw new Error('テーブルIDが取得できていません（beforeAllの setupAllTypeTable が失敗した可能性があります）');
+            throw new Error('テーブルIDが取得できていません（beforeAllの getAllTypeTableId が失敗した可能性があります）');
         }
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);

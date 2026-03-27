@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable, createAllTypeData } = require('./helpers/table-setup');
+const { getAllTypeTableId, createAllTypeData } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
 const path = require('path');
@@ -236,8 +236,8 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         test.setTimeout(360000);
         await login(page, EMAIL, PASSWORD);
 
-        const { tableId } = await setupAllTypeTable(page);
-        expect(tableId).toBeTruthy();
+        const tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         saveTestTableId(tableId);
 
         // テスト224（JSONエクスポート）等でレコードのチェックが必要なためデータを作成する
@@ -255,8 +255,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         // テーブルに移動
         const testTableId = getTestTableId();
         expect(testTableId).toBeTruthy();
-        await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
-        await page.waitForLoadState('domcontentloaded');
+        await page.goto(BASE_URL + '/admin/dataset__' + testTableId, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
@@ -264,37 +263,89 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await openCsvUploadModal(page);
 
         // ヘッダー行なしのCSVファイルをアップロード（データ行のみ）
+        // PigeonCloudのCSVアップロードは非同期処理:
+        //   1. ファイルをS3にアップロードしキューに入る（即座に成功レスポンス）
+        //   2. バックグラウンドで処理される
+        //   3. 処理結果はCSV UP/DL履歴（/admin/csv）で確認可能
+        //   ヘッダーなしCSVの場合「ヘッダー（1行目）が一致しません。」で失敗する
         const csvContent = '1,テストデータ,2024-01-01\n2,テストデータ2,2024-01-02';
+        const csvFileName = 'no_header_55_1.csv';
         await page.locator('#inputCsv[accept="text/csv"]').setInputFiles({
-            name: 'no_header.csv',
+            name: csvFileName,
             mimeType: 'text/csv',
             buffer: Buffer.from('\uFEFF' + csvContent, 'utf8'), // BOM付きUTF-8（ヘッダーなし）
         });
         await page.waitForTimeout(500);
 
-        // アップロードボタンをクリック
+        // APIレスポンスを監視してCSV IDを取得する
+        const csvInfoPromise = page.waitForResponse(
+            resp => resp.url().includes('/api/admin/csv-info/') && resp.status() === 200,
+            { timeout: 30000 }
+        ).catch(() => null);
+
+        // アップロードボタンをクリック（非同期処理が開始される）
         await page.locator('.modal.show button:has-text("アップロード")').first().click();
-        await waitForAngular(page);
 
-        // エラーが発生することを確認（アップロード確認モーダルが出る場合は対応）
-        try {
-            const confirmModal = page.locator('.modal.show button:has-text("アップロード")');
-            const confirmCount = await confirmModal.count();
-            if (confirmCount > 0) {
-                await confirmModal.first().click();
-                await waitForAngular(page);
+        // csv-info APIレスポンスを待つ（アップロード成功の証拠）
+        const csvInfoResp = await csvInfoPromise;
+        let csvId = null;
+        if (csvInfoResp) {
+            try {
+                const body = await csvInfoResp.json();
+                csvId = body?.csv?.id;
+                console.log(`55-1: CSVアップロード完了 csvId=${csvId}, status=${body?.csv?.status}`);
+            } catch (e) {
+                console.log('55-1: csv-infoレスポンスのparse失敗:', e.message);
             }
-        } catch (e) {}
+        }
 
-        // エラーメッセージが表示されるか、またはモーダルが残っていることを確認
-        // ヘッダー行なしCSVのアップロードはエラーになるか、確認モーダルが残っていること
-        const errorAlert = page.locator('.alert-danger, .text-danger, .modal.show .error, [class*="error-message"]');
-        const modalStillOpen = page.locator('.modal.show');
-        const errorCount = await errorAlert.count();
-        const modalCount = await modalStillOpen.count();
-        // エラーアラートが表示されているか、モーダルが残っているかのどちらかであること
-        expect(errorCount + modalCount).toBeGreaterThan(0);
-        console.log('55-1: エラー表示確認 errorCount:', errorCount, 'modalCount:', modalCount);
+        // モーダルが閉じることを確認（アップロードがキューに入った証拠）
+        await expect(page.locator('.modal.show')).toHaveCount(0, { timeout: 30000 });
+        console.log('55-1: モーダル閉じ確認、CSV UP/DL履歴で処理結果を確認');
+
+        // CSV UP/DL履歴ページに移動して非同期処理結果を確認
+        await page.goto(BASE_URL + '/admin/csv', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForSelector('table', { timeout: 30000 }).catch(() => {});
+        await waitForAngular(page).catch(() => {});
+
+        // 処理完了まで待つ（最大90秒、5秒おきにリロード）
+        let found = false;
+        for (let i = 0; i < 18; i++) {
+            // テーブルの最初のデータ行（最新のCSV処理）を確認
+            const firstRow = page.locator('table tbody tr').first();
+            const rowExists = await firstRow.count() > 0;
+            if (rowExists) {
+                const rowText = await firstRow.innerText();
+                console.log(`55-1: CSV履歴 最新行 (${i * 5}秒後): ${rowText.replace(/\n/g, ' | ')}`);
+
+                // アップロードした行（csvFileNameまたはcsvId）を含む行で「失敗」を確認
+                if (rowText.includes('失敗') && rowText.includes('ヘッダー')) {
+                    found = true;
+                    // エラーメッセージを確認: 「ヘッダー（1行目）が一致しません。」
+                    expect(rowText).toContain('失敗');
+                    expect(rowText).toMatch(/ヘッダー.*一致しません/);
+                    console.log('55-1: ヘッダー不一致エラーを確認');
+                    break;
+                }
+                // 「処理前」「処理中」ならまだ待つ
+                if (rowText.includes('処理前') || rowText.includes('処理中')) {
+                    await page.waitForTimeout(5000);
+                    await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                    await page.waitForSelector('table', { timeout: 30000 }).catch(() => {});
+                    await waitForAngular(page).catch(() => {});
+                    continue;
+                }
+                // 「成功」かつアップロードした行の場合、テスト失敗
+                if (rowText.includes('成功') && rowText.includes('アップロード')) {
+                    throw new Error('55-1: ヘッダーなしCSVが成功してしまった — エラーが期待される');
+                }
+            }
+            await page.waitForTimeout(5000);
+            await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+            await page.waitForSelector('table', { timeout: 30000 }).catch(() => {});
+            await waitForAngular(page).catch(() => {});
+        }
+        expect(found).toBeTruthy();
         // ページが正常に表示されていることを確認（クラッシュしていない）
         await expect(page.locator('.navbar')).toBeVisible();
     });
@@ -1095,8 +1146,8 @@ test.describe('JSONエクスポート・インポート', () => {
         const page = await context.newPage();
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
-        const result = await setupAllTypeTable(page);
-        testTableId = result && result.tableId ? result.tableId : null;
+        testTableId = await getAllTypeTableId(page);
+        if (!testTableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // JSONエクスポートテストではレコード選択が必要なためデータを作成する
         if (testTableId) {
             await createAllTypeData(page, 3, 'fixed');

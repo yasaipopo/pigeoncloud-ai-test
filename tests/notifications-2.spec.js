@@ -3,7 +3,7 @@
 // notifications.spec.jsから分割 (line 2107〜末尾)
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { waitForEmail, deleteTestEmails } = require('./helpers/mail-checker');
 const { webhookUrl, resetWebhook, waitForWebhook } = require('./helpers/webhook-checker');
 const { setupSmtp: setupSmtpApi } = require('./helpers/debug-settings');
@@ -198,11 +198,8 @@ test.describe('メール配信', () => {
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
         const { context, page } = await createAuthContext(browser);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await context.close();
     });
 

@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable, deleteAllTypeTables, createAllTypeData } = require('./helpers/table-setup');
+const { getAllTypeTableId, deleteAllTypeTables, createAllTypeData } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
 const path = require('path');
@@ -410,12 +410,8 @@ test.describe('コメントメンション', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        const { tableId } = await setupAllTypeTable(page);
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        const tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         tableUrl = '/admin/dataset__' + tableId;
         // データが0件だとレコードviewURLが取得できないためデータ投入
         await createAllTypeData(page, 3).catch((e) => console.log('createAllTypeData error (ignored):', e.message));

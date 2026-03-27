@@ -1,7 +1,7 @@
 // @ts-check
 // fields-5.spec.js: フィールドテスト Part 5 (全フィールドタイプ表示条件追加オプション確認 850系)
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
@@ -129,9 +129,8 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
         const { context, page } = await createAuthContext(browser);
         await closeTemplateModal(page);
 
-        // setupAllTypeTable ヘルパーを使用（既存テーブル検出・ポーリング対応）
-        const setupResult = await setupAllTypeTable(page);
-        tableId = setupResult?.tableId || null;
+        // getAllTypeTableId でテーブルID取得（global-setupで作成済み）
+        tableId = await getAllTypeTableId(page);
 
         if (tableId) {
             editUrl = `${BASE_URL}/admin/dataset/edit/${tableId}`;

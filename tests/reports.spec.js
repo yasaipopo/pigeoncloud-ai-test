@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
+const { getAllTypeTableId, deleteAllTypeTables } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const path = require('path');
 const fs = require('fs');
@@ -154,12 +154,8 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });

@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
+const { getAllTypeTableId, deleteAllTypeTables } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
@@ -165,11 +165,8 @@ test.describe('公開フォーム・公開メールリンク', () => {
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
         const { context, page } = await createAuthContext(browser);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await context.close();
     });
 

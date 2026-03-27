@@ -2,7 +2,7 @@
 // chart-calendar-2.spec.js: チャート・カレンダーテスト Part 2 (describe #4〜#5: チャート基本機能/集計チャート詳細権限設定)
 // chart-calendar.spec.jsから分割 (line 1294〜末尾)
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;

@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
@@ -100,9 +100,9 @@ test.describe('RPA（コネクト）', () => {
         const auth = await createAuthContext(browser);
         sharedContext = auth.context;
         sharedPage = auth.page;
-        // ALLテストテーブルを準備
-        const result = await setupAllTypeTable(sharedPage);
-        tableId = result.tableId;
+        // ALLテストテーブルのID取得（global-setupで作成済み）
+        tableId = await getAllTypeTableId(sharedPage);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
     });
 
     test.afterAll(async () => {

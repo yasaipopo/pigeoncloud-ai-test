@@ -4,7 +4,7 @@ if (!process.env.BASE_URL) {
     process.env.BASE_URL = process.env.TEST_BASE_URL || '';
 }
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
@@ -514,12 +514,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });

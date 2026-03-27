@@ -13,6 +13,7 @@ require('dotenv').config();
 const { chromium } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const { setupAllTypeTable } = require('./helpers/table-setup');
 
 /**
  * ログイン済みのstorageState（クッキー）をキャッシュする
@@ -58,6 +59,41 @@ async function saveStorageStateIfNeeded(agentNum) {
     }
 }
 
+/**
+ * ALLテストテーブルが存在することを保証する
+ * storageStateを使ってログイン済みブラウザでsetupAllTypeTableを呼ぶ
+ */
+async function ensureAllTypeTable(agentNum) {
+    const baseUrl = process.env.TEST_BASE_URL || '';
+    const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
+    if (!baseUrl || !fs.existsSync(storageStatePath)) {
+        console.log(`[global-setup] ALLテストテーブル作成スキップ (baseUrl=${baseUrl}, storageState=${fs.existsSync(storageStatePath)})`);
+        return;
+    }
+
+    console.log(`[global-setup] ALLテストテーブル作成/確認中...`);
+    const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+    try {
+        const context = await browser.newContext({ storageState: storageStatePath });
+        const page = await context.newPage();
+        // ダッシュボードに遷移してセッション確認
+        await page.goto(baseUrl + '/admin/dashboard', { timeout: 30000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
+
+        const result = await setupAllTypeTable(page);
+        if (result.tableId) {
+            console.log(`[global-setup] ALLテストテーブル確認完了 (ID: ${result.tableId})`);
+        } else {
+            console.log(`[global-setup] ALLテストテーブル作成失敗 (テスト中にリトライされる可能性あり)`);
+        }
+        await context.close();
+    } catch (e) {
+        console.log(`[global-setup] ALLテストテーブル作成エラー (無視): ${e.message}`);
+    } finally {
+        await browser.close();
+    }
+}
+
 module.exports = async function globalSetup() {
     const currentUrl = process.env.TEST_BASE_URL || '';
 
@@ -76,12 +112,16 @@ module.exports = async function globalSetup() {
         console.log(`[global-setup] .test_env_runtimeから環境を読み込み: ${process.env.TEST_BASE_URL}`);
         // storageStateが未作成なら認証してキャッシュ保存
         await saveStorageStateIfNeeded(agentNum);
+        // ALLテストテーブルを作成/確認
+        await ensureAllTypeTable(agentNum);
         return;
     }
 
-    // 既に tmp-testai- 環境ならスキップ
+    // 既に tmp-testai- 環境ならstorageState + ALLテストテーブル確認のみ
     if (currentUrl.includes('tmp-testai-')) {
         console.log(`[global-setup] 既存テスト環境を使用: ${currentUrl}`);
+        await saveStorageStateIfNeeded(agentNum);
+        await ensureAllTypeTable(agentNum);
         return;
     }
 
@@ -222,6 +262,8 @@ module.exports = async function globalSetup() {
         // 新規環境のstorageState（認証クッキー）を作成してキャッシュ
         await browser.close();
         await saveStorageStateIfNeeded(agentNum);
+        // ALLテストテーブルを作成/確認（with_all_type_tableでリクエスト済みでもfallbackとして実行）
+        await ensureAllTypeTable(agentNum);
         return;
     } catch (err) {
         console.error('[global-setup] 環境作成失敗:', err.message);

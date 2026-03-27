@@ -28,7 +28,7 @@ async function waitForAngular(page, timeout = 15000) {
 }
 
 
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 
 /**
@@ -232,12 +232,8 @@ test.describe('文字列表示設定（145系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -299,12 +295,8 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -369,12 +361,8 @@ test.describe('列表示幅設定（191系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -423,12 +411,8 @@ test.describe('大量データ（211系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -469,12 +453,8 @@ test.describe('表示条件設定（250系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -576,12 +556,8 @@ test.describe('権限設定（262系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -662,12 +638,8 @@ test.describe('検索機能（270系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -709,12 +681,8 @@ test.describe('自動採番（273系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -793,12 +761,8 @@ test.describe('リッチテキスト（274系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -868,12 +832,8 @@ test.describe('日時フォーマット（275系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -945,12 +905,8 @@ test.describe('循環参照エラー（291系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -1012,12 +968,8 @@ test.describe('一括編集（312系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -1087,12 +1039,8 @@ test.describe('テーブル削除ロック（349系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -1229,12 +1177,8 @@ test.describe('CSVキャンセル（367系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // table要素を描画するためにレコードを追加（空テーブルはtableが描画されない）
         await createAllTypeData(page, 3).catch(() => {});
         await page.close();
@@ -1281,12 +1225,8 @@ test.describe('ヘッダー固定（370系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // 空テーブルは<table>要素が描画されないためレコードを追加
         await createAllTypeData(page, 3).catch(() => {});
         await page.waitForTimeout(500);
@@ -1332,12 +1272,8 @@ test.describe('桁数カンマ区切り（256系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -1373,12 +1309,8 @@ test.describe('スマートフォン表示（146系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -1419,12 +1351,8 @@ test.describe('子テーブル（325, 341系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
@@ -1502,12 +1430,8 @@ test.describe('一覧編集モード（324系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // 空テーブルは<table>要素が描画されないためレコードを追加
         await createAllTypeData(page, 3).catch(() => {});
         await page.waitForTimeout(500);
@@ -1579,20 +1503,11 @@ test.describe('未実装テスト（todo）', () => {
             const context = await createLoginContext(browser);
             const page = await context.newPage();
             await ensureLoggedIn(page);
-            // setupAllTypeTableでtableIdを取得
-            const result = await setupAllTypeTable(page);
-            tableId = result.tableId;
-            if (!tableId) {
-                // 後退処理: 直接テーブル作成を試みる
-                await createAllTypeTable(page);
-                await createAllTypeData(page, 5);
-                // 作成後にtableIdを再取得
-                const result2 = await setupAllTypeTable(page);
-                tableId = result2.tableId;
-            } else {
-                // 空テーブルは<table>要素が描画されないためレコードを追加
-                await createAllTypeData(page, 3).catch(() => {});
-            }
+            // getAllTypeTableIdでtableIdを取得（テーブルはglobal-setupで作成済み）
+            tableId = await getAllTypeTableId(page);
+            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
+            // 空テーブルは<table>要素が描画されないためレコードを追加
+            await createAllTypeData(page, 3).catch(() => {});
             await page.close();
             await context.close();
         } catch (e) {
@@ -2147,12 +2062,8 @@ test.describe('追加実装テスト（314-579系）', () => {
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });

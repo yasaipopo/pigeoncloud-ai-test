@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
+const { getAllTypeTableId, deleteAllTypeTables } = require('./helpers/table-setup');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -90,8 +90,8 @@ test.describe('ダッシュボード', () => {
         const page = await context.newPage();
         await page.goto(BASE_URL + '/admin/dashboard');
         await waitForAngular(page);
-        const result = await setupAllTypeTable(page);
-        _tableId = result.tableId;
+        _tableId = await getAllTypeTableId(page);
+        if (!_tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
 
         // DB-03〜DB-05のために事前にダッシュボードを作成しておく
         _createdDashboardName = `テストDB_${Date.now()}`;

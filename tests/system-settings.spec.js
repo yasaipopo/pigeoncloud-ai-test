@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
-const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
+const { getAllTypeTableId, deleteAllTypeTables } = require('./helpers/table-setup');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -339,9 +339,9 @@ async function getAdminSetting(page) {
 // =============================================================================
 
 // =============================================================================
-// テーブル定義一覧テスト（setupAllTypeTable不要 — 10-1, 10-2）
+// テーブル定義一覧テスト（ALLテストテーブル不要 — 10-1, 10-2）
 // =============================================================================
-test.describe('テーブル定義一覧（setupAllTypeTable不要）', () => {
+test.describe('テーブル定義一覧（ALLテストテーブル不要）', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000);
@@ -437,7 +437,7 @@ test.describe('テーブル定義一覧（setupAllTypeTable不要）', () => {
 });
 
 // =============================================================================
-// 共通設定・システム設定テスト（setupAllTypeTable必要 — 10-3以降）
+// 共通設定・システム設定テスト（ALLテストテーブル必要 — 10-3以降）
 // =============================================================================
 test.describe('共通設定・システム設定', () => {
 
@@ -447,11 +447,8 @@ test.describe('共通設定・システム設定', () => {
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
         const { context, page } = await createAuthContext(browser);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await context.close();
     });
 
@@ -967,10 +964,10 @@ test.describe('共通設定・システム設定', () => {
     // 9-1(A/B): 共通設定 - レコード追加
     // ---------------------------------------------------------------------------
     test('9-1: レコードの追加がエラーなく行えること', async ({ page }) => {
-        test.setTimeout(360000); // setupAllTypeTable(~90s) + beforeEach(~40s) + テスト本体のため延長
+        test.setTimeout(360000); // テーブル再作成(~90s) + beforeEach(~40s) + テスト本体のため延長
 
         // 7-4テストがdelete-all-type-tablesを呼んだ後に実行されるため、tableIdが無効になっている可能性がある
-        // その場合はsetupAllTypeTableで再作成してtableIdを更新する
+        // その場合はsetupAllTypeTableで再作成してtableIdを更新する（削除後の再作成が必要な特殊ケース）
         const statusCheck = await page.evaluate(async (baseUrl) => {
             try {
                 const res = await fetch(baseUrl + '/api/admin/debug/status', {
@@ -983,7 +980,8 @@ test.describe('共通設定・システム設定', () => {
         const tableStillExists = (statusCheck?.all_type_tables || []).some(t => String(t.id) === String(tableId));
         if (!tableStillExists) {
             console.log('[9-1] tableIdのテーブルが見つからないため再作成します... (tableId=', tableId, ')');
-            const result = await setupAllTypeTable(page);
+            const { setupAllTypeTable: _setupForRecreate } = require('./helpers/table-setup');
+            const result = await _setupForRecreate(page);
             tableId = result.tableId;
             console.log('[9-1] 再作成完了 tableId=', tableId);
 

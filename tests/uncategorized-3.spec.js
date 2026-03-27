@@ -16,7 +16,7 @@ async function waitForAngular(page, timeout = 15000) {
     await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
 }
 
-const { setupAllTypeTable } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 
 /**
@@ -233,11 +233,8 @@ test.describe('追加実装テスト（314-579系）', () => {
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
         const { context, page } = await createAuthContext(browser);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
         await createAllTypeData(page, 3).catch(() => {});
         await page.waitForTimeout(1000);
