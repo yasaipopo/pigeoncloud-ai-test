@@ -117,15 +117,15 @@ async function goToNotificationPage(page, tableId) {
  * IMAP_USER/IMAP_PASS が設定されている場合のみ実行（同じ sakura.ne.jp アカウントを SMTP にも使用）
  * 設定ページ: /admin/admin_setting/edit/1
  */
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 async function setupSmtp(page) {
     const smtpHost = process.env.SMTP_HOST || process.env.IMAP_HOST || 'www3569.sakura.ne.jp';
     const smtpPort = process.env.SMTP_PORT || '587';
     const smtpUser = process.env.SMTP_USER || process.env.IMAP_USER;
     const smtpPass = process.env.SMTP_PASS || process.env.IMAP_PASS;
-
-async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
-}
 
     if (!smtpUser || !smtpPass) {
         console.log('[setupSmtp] SMTP認証情報未設定のためスキップ');

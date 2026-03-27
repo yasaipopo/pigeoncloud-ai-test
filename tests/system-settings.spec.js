@@ -6,6 +6,10 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 /**
  * debug status APIからALLテストテーブルのIDを取得（最も確実な方法）
  */
@@ -808,10 +812,6 @@ test.describe('共通設定・システム設定', () => {
 
         const smtpUser = process.env.SMTP_USER || process.env.IMAP_USER;
         const smtpPass = process.env.SMTP_PASS || process.env.IMAP_PASS;
-
-async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
-}
 
         if (!smtpUser || !smtpPass) {
             test.skip(true, 'SMTP認証情報未設定のためスキップ');

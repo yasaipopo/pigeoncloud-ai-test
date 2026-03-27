@@ -38,6 +38,10 @@ async function login(page) {
 /**
  * storageStateを使ったブラウザコンテキストを作成する
  */
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
@@ -989,11 +993,6 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
-
-async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
-}
-
         await page.screenshot({ path: `${reportsDir}/screenshots/56-1-report-invalid-file.png`, fullPage: true });
     });
 

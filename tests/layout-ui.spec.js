@@ -56,12 +56,12 @@ async function login(page, email, password) {
 /**
  * storageStateを使ったブラウザコンテキストを作成する
  */
-async function createLoginContext(browser) {
-    const agentNum = process.env.AGENT_NUM || '1';
-
 async function waitForAngular(page, timeout = 15000) {
     await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
 }
+
+async function createLoginContext(browser) {
+    const agentNum = process.env.AGENT_NUM || '1';
 
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
