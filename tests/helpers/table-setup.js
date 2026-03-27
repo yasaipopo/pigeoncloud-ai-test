@@ -113,6 +113,10 @@ async function setupAllTypeTable(page, { pollIntervalMs = 2000, maxPolls = 60 } 
 async function getAllTypeTableId(page) {
     try {
         const baseUrl = process.env.TEST_BASE_URL || BASE_URL;
+        // about:blankからのfetchではcookiesが送られないため、先にページ遷移する
+        if (!page.url() || page.url() === 'about:blank') {
+            await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        }
         const status = await page.evaluate(async (baseUrl) => {
             const res = await fetch(baseUrl + '/api/admin/debug/status', {
                 credentials: 'include',
