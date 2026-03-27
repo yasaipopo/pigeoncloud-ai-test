@@ -9,7 +9,6 @@
   <style>
     body { background: #f8f9fa; }
     .case-row {
-      cursor: pointer;
       transition: background .1s;
     }
     .case-row:hover { background: #f0f0f0; }
@@ -213,19 +212,6 @@
         </thead>
         <tbody id="cases-tbody"></tbody>
       </table>
-    </div>
-  </div>
-</div>
-
-<!-- テストケース詳細モーダル -->
-<div class="modal fade" id="caseModal" tabindex="-1">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modal-title"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="modal-body"></div>
     </div>
   </div>
 </div>
@@ -483,23 +469,27 @@ function prependCases(newCases) {
     row.dataset.status = c.caseStatus;
     row.dataset.title = c.testTitle.toLowerCase();
     row.dataset.caseId = c.caseId;
-    row.onclick = () => openCaseModal(c);
 
     const hasVideo = !!c.videoKey;
     const hasScreenshot = c.screenshotKeys && c.screenshotKeys.length > 0;
+    const caseUrl = `case.html?runId=${encodeURIComponent(runId)}&caseId=${encodeURIComponent(c.caseId)}`;
 
     row.innerHTML = `
       <td>
         <span class="badge status-badge-${c.caseStatus}">${statusLabel(c.caseStatus)}</span>
       </td>
       <td>
-        <div class="fw-medium">${escHtml(c.testTitle)}</div>
-        ${c.errorMessage ? `<div class="error-preview">${escHtml(c.errorMessage.substring(0, 150))}</div>` : ''}
+        <a href="${escHtml(caseUrl)}" class="text-decoration-none text-dark d-block">
+          <div class="fw-medium">${escHtml(c.testTitle)}</div>
+          ${c.errorMessage ? `<div class="error-preview">${escHtml(c.errorMessage.substring(0, 150))}</div>` : ''}
+        </a>
       </td>
       <td class="text-end text-muted small">${formatDuration(parseInt(c.durationMs) || 0)}</td>
       <td class="text-center">
-        ${hasVideo ? '<i class="bi bi-play-circle text-primary me-1" title="動画あり"></i>' : ''}
-        ${hasScreenshot ? `<i class="bi bi-images text-info" title="スクショ ${c.screenshotKeys.length}枚"></i>` : ''}
+        <a href="${escHtml(caseUrl)}" class="text-decoration-none" tabindex="-1">
+          ${hasVideo ? '<i class="bi bi-play-circle text-primary me-1" title="動画あり"></i>' : ''}
+          ${hasScreenshot ? `<i class="bi bi-images text-info" title="スクショ ${c.screenshotKeys.length}枚"></i>` : ''}
+        </a>
       </td>`;
 
     // suiteヘッダー行があれば一番上のケース行の前、なければtbodyの先頭に挿入
@@ -622,60 +612,6 @@ async function loadCases() {
   document.getElementById('cases-container').classList.remove('d-none');
 
   renderCases(allCases);
-
-  // 動画・スクショのpresigned URLをバックグラウンドで先読み
-  preloadAssets();
-}
-
-/**
- * 全ケースの動画・スクショpresigned URLをバックグラウンドで先読み
- * 先読み済みならモーダルをクリック時に即表示できる
- */
-async function preloadAssets() {
-  const targets = allCases.filter(
-    c => (c.screenshotKeys && c.screenshotKeys.length > 0) || c.videoKey
-  );
-  for (let i = 0; i < targets.length; i += 3) {
-    await Promise.all(targets.slice(i, i + 3).map(c => fetchAssetUrls(c)));
-  }
-}
-
-/**
- * 1ケース分の動画・スクショURLを取得してキャッシュ
- */
-async function fetchAssetUrls(c) {
-  if (c._assetsLoaded) return;
-  c._assetsLoaded = true;
-
-  // スクリーンショット
-  if (c.screenshotKeys && c.screenshotKeys.length > 0) {
-    const urls = [];
-    await Promise.all(c.screenshotKeys.map(async key => {
-      try {
-        const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
-          method: 'POST', headers: authHeaders(), body: JSON.stringify({ key })
-        });
-        if (r.ok) {
-          const data = await r.json();
-          urls.push({ url: data.downloadUrl, filename: key.split('/').pop() });
-        }
-      } catch (e) {}
-    }));
-    c._screenshotUrls = urls;
-  }
-
-  // 動画
-  if (c.videoKey) {
-    try {
-      const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
-        method: 'POST', headers: authHeaders(), body: JSON.stringify({ key: c.videoKey })
-      });
-      if (r.ok) {
-        const data = await r.json();
-        c._videoUrl = data.downloadUrl;
-      }
-    } catch (e) {}
-  }
 }
 
 // =========================================
@@ -707,24 +643,28 @@ function renderCases(cases) {
       row.dataset.status = c.caseStatus;
       row.dataset.title = c.testTitle.toLowerCase();
       row.dataset.caseId = c.caseId;
-      row.onclick = () => openCaseModal(c);
       displayCount++;
 
       const hasVideo = !!c.videoKey;
       const hasScreenshot = c.screenshotKeys && c.screenshotKeys.length > 0;
+      const caseUrl = `case.html?runId=${encodeURIComponent(runId)}&caseId=${encodeURIComponent(c.caseId)}`;
 
       row.innerHTML = `
         <td>
           <span class="badge status-badge-${c.caseStatus}">${statusLabel(c.caseStatus)}</span>
         </td>
         <td>
-          <div class="fw-medium">${escHtml(c.testTitle)}</div>
-          ${c.errorMessage ? `<div class="error-preview">${escHtml(c.errorMessage.substring(0, 150))}</div>` : ''}
+          <a href="${escHtml(caseUrl)}" class="text-decoration-none text-dark d-block">
+            <div class="fw-medium">${escHtml(c.testTitle)}</div>
+            ${c.errorMessage ? `<div class="error-preview">${escHtml(c.errorMessage.substring(0, 150))}</div>` : ''}
+          </a>
         </td>
         <td class="text-end text-muted small">${formatDuration(parseInt(c.durationMs) || 0)}</td>
         <td class="text-center">
-          ${hasVideo ? '<i class="bi bi-play-circle text-primary me-1" title="動画あり"></i>' : ''}
-          ${hasScreenshot ? `<i class="bi bi-images text-info" title="スクショ ${c.screenshotKeys.length}枚"></i>` : ''}
+          <a href="${escHtml(caseUrl)}" class="text-decoration-none" tabindex="-1">
+            ${hasVideo ? '<i class="bi bi-play-circle text-primary me-1" title="動画あり"></i>' : ''}
+            ${hasScreenshot ? `<i class="bi bi-images text-info" title="スクショ ${c.screenshotKeys.length}枚"></i>` : ''}
+          </a>
         </td>`;
     });
   });
@@ -758,151 +698,6 @@ function applyFilters() {
   }
 
   renderCases(filtered);
-}
-
-// =========================================
-// テストケース詳細モーダル
-// =========================================
-async function openCaseModal(c) {
-  document.getElementById('modal-title').textContent = c.testTitle;
-
-  const statusClass = { passed: 'success', failed: 'danger', skipped: 'secondary' }[c.caseStatus];
-  let html = `
-    <div class="d-flex gap-3 mb-3">
-      <span class="badge bg-${statusClass} fs-6">${statusLabel(c.caseStatus)}</span>
-      <span class="text-muted">${formatDuration(parseInt(c.durationMs) || 0)}</span>
-      <span class="text-muted small">${escHtml(c.specFile || '')}</span>
-    </div>`;
-
-  if (c.errorMessage) {
-    html += `
-      <div class="mb-3">
-        <h6 class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>エラーメッセージ</h6>
-        <pre class="bg-danger bg-opacity-10 text-danger p-3 rounded" style="font-size:.8rem;white-space:pre-wrap;word-break:break-all">${escHtml(c.errorMessage)}</pre>
-      </div>`;
-  }
-  if (c.errorStack) {
-    html += `
-      <div class="mb-3">
-        <h6 class="text-secondary"><i class="bi bi-stack me-1"></i>スタックトレース</h6>
-        <pre class="bg-light p-3 rounded" style="font-size:.72rem;max-height:250px;overflow:auto;white-space:pre-wrap">${escHtml(c.errorStack)}</pre>
-      </div>`;
-  }
-
-  // テストステップHTML（動画・スクショの後ろに追加するため別変数で保持）
-  let stepsHtml = '';
-  if (c.steps && c.steps.length > 0) {
-    stepsHtml += `
-      <div class="mt-3">
-        <h6><i class="bi bi-list-check me-1"></i>テストステップ</h6>
-        <ul class="list-unstyled mb-0 ps-1" style="font-size:.83rem;line-height:1.7">`;
-    c.steps.forEach(s => {
-      const icon = s.ok ? '✅' : '❌';
-      const cls = s.ok ? 'text-dark' : 'text-danger fw-medium';
-      stepsHtml += `<li class="${cls}">${icon} ${escHtml(s.title)}</li>`;
-    });
-    stepsHtml += `</ul>
-      </div>`;
-  }
-
-  // 先読み済みなら即表示。まだなら「読み込み中」を出してモーダルを先に開く
-  // 表示順: エラー → 動画 → スクショ → ステップ
-  const alreadyLoaded = c._assetsLoaded;
-  document.getElementById('modal-body').innerHTML = html +
-    (alreadyLoaded
-      ? buildAssetsHtml(c) + stepsHtml
-      : '<div id="modal-assets-placeholder"><div class="text-center py-3"><div class="spinner-border spinner-border-sm text-secondary"></div></div></div>' + stepsHtml);
-
-  const modal = new bootstrap.Modal(document.getElementById('caseModal'));
-  modal.show();
-
-  // 先読みされていない場合だけ取得してから差し替え
-  if (!alreadyLoaded) {
-    await fetchAssetUrls(c);
-    const ph = document.getElementById('modal-assets-placeholder');
-    if (ph) ph.outerHTML = buildAssetsHtml(c);
-  }
-}
-
-/**
- * アセットHTMLを構築（動画 → スクショ → trace の順）
- */
-function buildAssetsHtml(c) {
-  let html = '';
-
-  // 動画
-  if (c._videoUrl) {
-    html += `
-      <div class="mb-3">
-        <h6><i class="bi bi-camera-video me-1"></i>テスト動画</h6>
-        <video controls class="w-100 rounded" style="max-height:480px;background:#000">
-          <source src="${escHtml(c._videoUrl)}" type="video/webm">
-          動画を再生できません
-        </video>
-      </div>`;
-  }
-
-  // スクリーンショット（複数枚対応）
-  if (c._screenshotUrls && c._screenshotUrls.length > 0) {
-    const shots = c._screenshotUrls;
-    html += `<div class="mb-3">
-      <h6><i class="bi bi-images me-1"></i>スクリーンショット
-        <span class="badge bg-secondary ms-1">${shots.length}枚</span>
-      </h6>
-      <div class="row g-2">`;
-    shots.forEach((item, idx) => {
-      html += `
-        <div class="col-12 col-md-6">
-          <img src="${escHtml(item.url)}" class="img-fluid rounded border"
-               style="cursor:zoom-in; max-height:360px; width:100%; object-fit:contain; background:#f8f9fa"
-               alt="${escHtml(item.filename)}"
-               onclick="openFullImage('${escHtml(item.url)}')">
-          <div class="text-muted small mt-1">${escHtml(item.filename)}</div>
-        </div>`;
-    });
-    html += '</div></div>';
-  }
-
-  // trace
-  if (c.traceKey) {
-    // traceはダウンロードURLを非同期で取得（fire and forget）
-    html += `<div class="mt-2" id="trace-dl-${escHtml(c.caseId)}">
-      <button class="btn btn-sm btn-outline-secondary"
-        onclick="loadTraceUrl('${escHtml(c.caseId)}','${escHtml(c.traceKey)}')">
-        <i class="bi bi-download me-1"></i>trace.zip をダウンロード
-      </button>
-    </div>`;
-  }
-
-  if (!html) {
-    html = '<div class="text-muted small py-2">添付ファイルはありません</div>';
-  }
-  return `<div id="modal-assets">${html}</div>`;
-}
-
-/**
- * 画像を新しいタブでフルサイズ表示
- */
-function openFullImage(url) {
-  window.open(url, '_blank');
-}
-
-/**
- * trace.zipのダウンロードURL取得ボタン押下
- */
-async function loadTraceUrl(caseId, traceKey) {
-  const btn = document.querySelector(`#trace-dl-${caseId} button`);
-  if (btn) btn.disabled = true;
-  try {
-    const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
-      method: 'POST', headers: authHeaders(), body: JSON.stringify({ key: traceKey })
-    });
-    if (r.ok) {
-      const data = await r.json();
-      window.open(data.downloadUrl, '_blank');
-    }
-  } catch (e) {}
-  if (btn) btn.disabled = false;
 }
 
 // =========================================
