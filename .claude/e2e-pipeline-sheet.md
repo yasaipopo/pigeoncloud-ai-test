@@ -45,6 +45,25 @@
 - 怒りくん: 「早期return検出」「タイトルと実装不一致」
 - チェックくん: 「環境依存でflaky」「プロダクトバグの疑い」
 
+## sheetが唯一の正（Single Source of Truth）
+
+**`.claude/pipeline-status.md` が全ての作業のソースオブトゥルース。**
+
+- 各agentは作業前にsheetを確認し、作業後にsheetを更新する
+- yamlやspec.jsの変更は、必ずsheetに反映する
+- sheetに記載がないテストケースは存在しないものとして扱う
+- sheetとyaml/spec.jsに矛盾がある場合、**sheetが正**
+
+### 不具合調査くんの作業フロー
+
+不具合や障害から新テストケースが必要な場合：
+1. `specs/*.yaml` にテストケースを追加
+2. `.claude/pipeline-status.md` に行を追加（①yaml=✅、②③④=空欄）
+3. 知見mdに不具合検知パターンを記録
+4. テスト修正くんに②の実装を依頼
+
+---
+
 ## 完了条件
 
 **全case_noの①〜④が全て✅になったらパイプライン完了。**

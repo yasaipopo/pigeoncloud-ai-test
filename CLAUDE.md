@@ -34,7 +34,7 @@ cat .claude/knowledge-e2e-angular.md
 - yaml変更 → ②③④ リセット
 - spec.js変更 → ③④ リセット
 
-**管理シート**: `.claude/pipeline-status.md`（①〜④のステータス + 備考）
+**管理シート**: `.claude/pipeline-status.md`（①〜④のステータス + 備考）— **唯一の正（Single Source of Truth）**
 **詳細**: `.claude/e2e-pipeline-sheet.md`
 
 | エージェント | スキル | 役割 |
