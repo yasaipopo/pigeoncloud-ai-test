@@ -9,13 +9,14 @@
 | キャラ | スキル | 役割 |
 |---|---|---|
 | **リーダー** | `/e2e` | パイプライン全体管理。TEST_NUMBER管理、agent起動、結果集計、シート更新、通知 |
-| **テスト作成君** | `/spec-create` | spec.jsを設計・修正する。MCP Playwrightで実UIを確認してからコードを書く。怒りくんのOKなしにコミット禁止。 |
+| **テスト修正くん** | `/spec-create` | `specs/*.yaml` のテスト内容（description/expected）通りにspec.jsを実装・修正する。MCP Playwrightで実UIを確認してからコードを書く。怒りくんのOKなしにコミット禁止。 |
 | **怒りくん** | `/check-specs` | テスト品質チェック。タイトルと実装の一致、早期return、スキップを厳格に判定。NG→テスト作成君に差し戻し。 |
 | **チェックくん** | `/check-run` | Playwright実行確認 + failedをPigeonCloudソースと照合してspecバグ/プロダクトバグ/環境依存に振り分け。 |
 | **詳細調査くん** | — | タイムアウト等の根本原因をCloudWatch/ECS/RDS/ソースコードから調査。 |
+| **不具合調査くん** | — | 問い合わせで発覚した不具合・PRを確認し、既存テストで検知できたか調査。検知できなければテストを追加。 |
 
 ```
-テスト作成君がspec.jsを修正（MCP Playwrightで実UI確認必須）
+テスト修正くんがspec.jsを修正（MCP Playwrightで実UI確認必須）
   → 怒りくんがレビュー（コード品質）
     → ✅ OK → チェックくんがPlaywright実行で動作確認
       → ✅ PASS → コミット
@@ -168,3 +169,23 @@ Nginx: `/api/` → PHP、`/` → Angular SPA。API呼び出しは `/api/admin/` 
 | `POST /api/admin/debug/create-user` | テストユーザー作成 |
 | `POST /api/admin/debug/settings` | admin_setting/setting テーブル更新 |
 | `POST /api/admin/create-trial` | テスト環境（テナント）作成。`with_all_type_table: true` でテーブル同時作成（staging要デプロイ） |
+
+---
+
+## 不具合検知パターン集
+
+### パターン1: Angular onValueChanged 非同期化リグレッション（2026-03-27発生）
+
+**障害概要**: `forms.component.ts` の `onValueChanged()` を `getSelectOptions().subscribe()` 内に移動した結果、全フィールドの値更新が非同期API完了待ちになり、API応答前に保存するとデータモデルに値が未反映でデータロスが発生。
+
+**検知に必要なテスト**:
+- 「値を入力 → 保存 → ページリロード/再遷移 → 値が保存されている」の End-to-End 検証
+- 特に**複数フィールドを同時編集して保存**するケースが重要（race conditionが顕在化しやすい）
+- テストは `records.spec.js` の `SAVE-01` ~ `SAVE-04` で実装済み
+
+**テスト設計のポイント**:
+1. 保存後に必ず**別のページに遷移して（またはリロードして）値を再取得**する。同じページ内でDOMの値を見るだけでは不十分（データモデルには値があってもDBに未保存の場合がある）
+2. Angular Reactive Forms に値を設定する際は Native Input Value Setter + `input`/`change` イベントのディスパッチが確実
+3. 「保存ボタンクリック後のURL遷移」を待つだけでは不十分。保存が実際にDBに到達したか確認するために、詳細画面で値を再表示する
+
+**対応テスト**: `tests/records.spec.js` の `SAVE-01` ~ `SAVE-04`

@@ -1289,3 +1289,366 @@ test.describe('編集ロック', () => {
         console.log('LOCK-03: 編集保存でロック解除確認OK');
     });
 });
+
+// =============================================================================
+// レコード保存・値の永続化テスト（onValueChanged非同期化リグレッション検知用）
+// 障害: PR #2823/#2843 で onValueChanged() を getSelectOptions().subscribe() 内に移動した結果、
+//       全フィールドの値更新が非同期API完了待ちになり、API応答前に保存するとデータロスが発生。
+// このテストは「値を入力→保存→リロード→値が保存されている」を検証する。
+// =============================================================================
+
+test.describe('レコード保存・値の永続化', () => {
+    test.describe.configure({ timeout: 180000 });
+
+    let tableId = null;
+    let recordId = null;
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(360000);
+        const context = await createLoginContext(browser);
+        const page = await context.newPage();
+        await ensureLoggedIn(page);
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
+        await createAllTypeData(page, 1, 'fixed');
+        // 一覧からレコードIDを取得
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+        await page.waitForSelector('tr[mat-row]', { timeout: 15000 }).catch(() => {});
+        const firstRow = page.locator('tr[mat-row]').first();
+        const dataRecordId = await firstRow.getAttribute('data-record-id', { timeout: 3000 }).catch(() => null);
+        if (dataRecordId) {
+            recordId = dataRecordId;
+        } else {
+            const firstCheckbox = page.locator('tr[mat-row] input[type="checkbox"]').first();
+            const checkboxVal = await firstCheckbox.getAttribute('value', { timeout: 5000 }).catch(() => null);
+            if (checkboxVal) recordId = checkboxVal;
+        }
+        // recordIdが取れなかった場合、button[data-record-url]のhrefから取得
+        if (!recordId) {
+            const btn = page.locator('button[data-record-url]').first();
+            const url = await btn.getAttribute('data-record-url', { timeout: 5000 }).catch(() => null);
+            if (url) {
+                const m = url.match(/\/view\/(\d+)/);
+                if (m) recordId = m[1];
+            }
+        }
+        await page.close();
+        await context.close();
+    });
+
+    test.beforeEach(async ({ page }) => {
+        await ensureLoggedIn(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * ヘルパー: ラベル名からフィールドの入力要素を特定する
+     * PigeonCloudのフォーム構造: ラベルの兄弟要素にinput/textarea/ng-selectがある
+     */
+    async function getFieldInputByLabel(page, labelText) {
+        // フォームグループ内のラベルテキストを含む要素を探し、その隣のinput/textareaを返す
+        const formGroup = page.locator(`div:has(> div:text-is("${labelText}")), div:has(> span:text-is("${labelText}"))`).first();
+        const input = formGroup.locator('input[type="text"], textarea').first();
+        return input;
+    }
+
+    /**
+     * ヘルパー: 編集画面に遷移する
+     */
+    async function goToEditPage(page) {
+        expect(tableId).not.toBeNull();
+        expect(recordId).not.toBeNull();
+        // 直接編集URLに遷移（editボタンクリックだとSPA遷移のタイミングが不安定）
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+        // 編集フォームが表示されるまで待機（テキストフィールドのinputが表示される）
+        await page.waitForSelector('[id^="field__"]', { timeout: 15000 });
+    }
+
+    /**
+     * ヘルパー: 更新ボタンをクリックして保存する
+     */
+    async function clickSaveButton(page) {
+        // 「更新」ボタン（type=submit, btn-primary, ladda）をクリック
+        const saveBtn = page.locator('button[type="submit"].btn-primary.btn-ladda, button[type="submit"].btn-primary.ladda-button').filter({ hasText: '更新' }).first();
+        await expect(saveBtn, '更新ボタンが表示されること').toBeVisible({ timeout: 8000 });
+        await saveBtn.click();
+        await page.waitForTimeout(1000);
+        // 確認ダイアログが出る場合があるので対応
+        const confirmBtn = page.locator('button:has-text("更新する")').first();
+        const hasConfirm = await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false);
+        if (hasConfirm) {
+            await confirmBtn.click();
+        }
+        // 保存完了を待つ（URLが /view/ に遷移するか、成功通知が表示される）
+        await page.waitForURL(/\/view\//, { timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+    }
+
+    /**
+     * ヘルパー: 詳細画面でフィールドの表示値を取得する
+     */
+    async function getDetailFieldValue(page, labelText) {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+        // 詳細画面のコンテンツが表示されるまで待機
+        await page.waitForSelector('h4, .detail-info, [class*="detail"]', { timeout: 15000 }).catch(() => {});
+        await page.waitForTimeout(2000); // Angular描画完了を待つ
+        // ラベルの隣の値セルのテキストを取得
+        // PigeonCloudの詳細画面: <div><div>ラベル</div><div>値</div></div> の構造
+        const value = await page.evaluate((label) => {
+            // まず完全一致で探す（「テキスト」と「テキストエリア」を区別するため）
+            const allEls = document.querySelectorAll('div, span, th, td');
+            for (const el of allEls) {
+                // 直接テキストノードの内容のみチェック（子要素のテキストを含まない）
+                const directText = Array.from(el.childNodes)
+                    .filter(n => n.nodeType === Node.TEXT_NODE)
+                    .map(n => n.textContent.trim())
+                    .join('');
+                if (directText === label) {
+                    // 兄弟要素の値を取得
+                    const sibling = el.nextElementSibling;
+                    if (sibling) return sibling.textContent.trim();
+                }
+            }
+            // フォールバック: textContent完全一致（子要素含む）
+            for (const el of allEls) {
+                if (el.textContent.trim() === label && el.children.length === 0) {
+                    const sibling = el.nextElementSibling;
+                    if (sibling) return sibling.textContent.trim();
+                }
+            }
+            return null;
+        }, labelText);
+        return value;
+    }
+
+    // -------------------------------------------------------------------------
+    // SAVE-01: テキストフィールドの値を編集→保存→再表示で値が永続化されていること
+    // -------------------------------------------------------------------------
+    test('SAVE-01: テキストフィールドの値を編集→保存→値が永続化されていること', async ({ page }) => {
+        const timestamp = Date.now().toString().slice(-6);
+        const newValue = `保存テスト_${timestamp}`;
+
+        // Step1: 編集画面に遷移
+        await goToEditPage(page);
+
+        // Step2: テキストフィールドの入力欄を特定（id^="field__"の最初のinput[type="text"]でplaceholderが「例：山田太郎」）
+        const textInput = page.locator('input[type="text"][placeholder="例：山田太郎"]').first();
+        const textInputFallback = page.locator('[id^="field__"]:not(ng-select)').first();
+        const targetInput = await textInput.isVisible({ timeout: 3000 }).catch(() => false) ? textInput : textInputFallback;
+        await expect(targetInput, 'テキストフィールドの入力欄が表示されること').toBeVisible({ timeout: 10000 });
+
+        // Step3: 値をクリアして新しい値を入力（Angular Reactive Formsに対応）
+        await targetInput.click();
+        await targetInput.fill('');
+        await targetInput.fill(newValue);
+        // Angularのchange検知を確実にするためblurイベントを発火
+        await targetInput.evaluate((el, val) => {
+            const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            nativeSet.call(el, val);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.dispatchEvent(new Event('blur', { bubbles: true }));
+        }, newValue);
+        await page.waitForTimeout(500);
+
+        // Step4: 更新ボタンをクリック
+        await clickSaveButton(page);
+
+        // Step5: 詳細画面でリロードして値を確認
+        const savedValue = await getDetailFieldValue(page, 'テキスト');
+        expect(savedValue, `テキストフィールドの値が「${newValue}」で保存されていること`).toContain(newValue);
+
+        console.log(`SAVE-01: テキストフィールド保存確認OK (値: ${newValue})`);
+    });
+
+    // -------------------------------------------------------------------------
+    // SAVE-02: テキストエリア（文章複数行）の値を編集→保存→値が永続化されていること
+    // -------------------------------------------------------------------------
+    test('SAVE-02: テキストエリアの値を編集→保存→値が永続化されていること', async ({ page }) => {
+        const timestamp = Date.now().toString().slice(-6);
+        const newValue = `テキストエリア保存テスト_${timestamp}\n改行テスト`;
+
+        // Step1: 編集画面に遷移
+        await goToEditPage(page);
+
+        // Step2: テキストエリアを特定（「テキストエリア」ラベルに対応するtextarea）
+        // ラベル「テキストエリア」の直後にあるtextareaを探す
+        const textarea = await page.evaluate(() => {
+            const divs = document.querySelectorAll('div');
+            for (const div of divs) {
+                const labelDiv = div.querySelector(':scope > div, :scope > span');
+                if (labelDiv && labelDiv.textContent.trim() === 'テキストエリア') {
+                    const ta = div.querySelector('textarea');
+                    if (ta) return true;
+                }
+            }
+            return false;
+        });
+
+        // テキストエリアをラベル近接で特定
+        const textareaLocator = page.locator('div:has(> div:text-is("テキストエリア")) textarea, div:has(> span:text-is("テキストエリア")) textarea').first();
+        let targetTextarea;
+        const taVisible = await textareaLocator.isVisible({ timeout: 3000 }).catch(() => false);
+        if (taVisible) {
+            targetTextarea = textareaLocator;
+        } else {
+            // フォールバック: 値が入っているtextareaを使う
+            targetTextarea = page.locator('textarea.form-control').nth(1);
+        }
+        await expect(targetTextarea, 'テキストエリアが表示されること').toBeVisible({ timeout: 10000 });
+
+        // Step3: 値を入力
+        await targetTextarea.click();
+        await targetTextarea.fill('');
+        await targetTextarea.fill(newValue);
+        await targetTextarea.evaluate((el, val) => {
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.dispatchEvent(new Event('blur', { bubbles: true }));
+        }, newValue);
+        await page.waitForTimeout(500);
+
+        // Step4: 更新ボタンをクリック
+        await clickSaveButton(page);
+
+        // Step5: 詳細画面で値を確認
+        const savedValue = await getDetailFieldValue(page, 'テキストエリア');
+        expect(savedValue, `テキストエリアの値が保存されていること`).toContain(`テキストエリア保存テスト_${timestamp}`);
+
+        console.log(`SAVE-02: テキストエリア保存確認OK`);
+    });
+
+    // -------------------------------------------------------------------------
+    // SAVE-03: 数値フィールドの値を編集→保存→値が永続化されていること
+    // -------------------------------------------------------------------------
+    test('SAVE-03: 数値フィールドの値を編集→保存→値が永続化されていること', async ({ page }) => {
+        const newValue = '9876';
+
+        // Step1: 編集画面に遷移
+        await goToEditPage(page);
+
+        // Step2: 数値_整数フィールドを特定
+        const numInput = page.locator('input.input-number[id^="field__"]').first();
+        await expect(numInput, '数値フィールドの入力欄が表示されること').toBeVisible({ timeout: 10000 });
+
+        // Step3: 値を入力
+        await numInput.click();
+        await numInput.fill('');
+        await numInput.fill(newValue);
+        await numInput.evaluate((el, val) => {
+            const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            nativeSet.call(el, val);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.dispatchEvent(new Event('blur', { bubbles: true }));
+        }, newValue);
+        await page.waitForTimeout(500);
+
+        // Step4: 更新ボタンをクリック
+        await clickSaveButton(page);
+
+        // Step5: 詳細画面で値を確認
+        const savedValue = await getDetailFieldValue(page, '数値_整数');
+        expect(savedValue, `数値フィールドの値が「${newValue}」で保存されていること`).toContain(newValue);
+
+        console.log(`SAVE-03: 数値フィールド保存確認OK (値: ${newValue})`);
+    });
+
+    // -------------------------------------------------------------------------
+    // SAVE-04: 複数フィールドを同時に編集→保存→全フィールドの値が正しく永続化されていること
+    // onValueChangedの非同期化バグでは、複数フィールドを同時に変更した場合に
+    // 一部のフィールドの値だけがデータモデルに未反映のまま保存される可能性が高い。
+    // -------------------------------------------------------------------------
+    test('SAVE-04: 複数フィールドを同時に編集→保存→全値が永続化されていること', async ({ page }) => {
+        const timestamp = Date.now().toString().slice(-6);
+        const textValue = `複数保存テスト_${timestamp}`;
+        const numValue = '5432';
+        const emailValue = `test${timestamp}@example.com`;
+
+        // Step1: 編集画面に遷移
+        await goToEditPage(page);
+
+        // Step2: テキストフィールド
+        const textInput = page.locator('input[type="text"][placeholder="例：山田太郎"]').first();
+        const textInputFallback = page.locator('[id^="field__"]:not(ng-select)').first();
+        const targetText = await textInput.isVisible({ timeout: 3000 }).catch(() => false) ? textInput : textInputFallback;
+        await targetText.click();
+        await targetText.fill('');
+        await targetText.fill(textValue);
+        await targetText.evaluate((el, val) => {
+            const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            nativeSet.call(el, val);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }, textValue);
+
+        // Step3: 数値フィールド
+        const numInput = page.locator('input.input-number[id^="field__"]').first();
+        await numInput.click();
+        await numInput.fill('');
+        await numInput.fill(numValue);
+        await numInput.evaluate((el, val) => {
+            const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            nativeSet.call(el, val);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }, numValue);
+
+        // Step4: メールフィールド
+        const emailInput = page.locator('input[type="text"][id^="field__"]').filter({ has: page.locator(':scope') });
+        // メールフィールドを探す（ラベル「メール」の近くのinput）
+        const emailField = await page.evaluate(() => {
+            const divs = document.querySelectorAll('div');
+            for (const div of divs) {
+                const children = div.children;
+                for (let i = 0; i < children.length; i++) {
+                    if (children[i].textContent.trim() === 'メール' && children[i].tagName === 'DIV') {
+                        const siblingDiv = children[i + 1] || children[i].nextElementSibling;
+                        if (siblingDiv) {
+                            const input = siblingDiv.querySelector('input[type="text"]');
+                            if (input && input.id) return input.id;
+                        }
+                    }
+                }
+            }
+            return null;
+        });
+        if (emailField) {
+            const mailInput = page.locator(`#${emailField}`);
+            await mailInput.click();
+            await mailInput.fill('');
+            await mailInput.fill(emailValue);
+            await mailInput.evaluate((el, val) => {
+                const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                nativeSet.call(el, val);
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }, emailValue);
+        }
+
+        await page.waitForTimeout(500);
+
+        // Step5: 更新ボタンをクリック
+        await clickSaveButton(page);
+
+        // Step6: 詳細画面で全フィールドの値を確認
+        // テキスト
+        const savedText = await getDetailFieldValue(page, 'テキスト');
+        expect(savedText, `テキストフィールドが「${textValue}」で保存されていること`).toContain(textValue);
+
+        // 数値_整数
+        const savedNum = await getDetailFieldValue(page, '数値_整数');
+        expect(savedNum, `数値フィールドが「${numValue}」で保存されていること`).toContain(numValue);
+
+        // メール（フィールドが見つかった場合のみ）
+        if (emailField) {
+            const savedEmail = await getDetailFieldValue(page, 'メール');
+            expect(savedEmail, `メールフィールドが「${emailValue}」で保存されていること`).toContain(emailValue);
+        }
+
+        console.log(`SAVE-04: 複数フィールド同時保存確認OK`);
+    });
+});

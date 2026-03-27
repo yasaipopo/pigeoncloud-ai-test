@@ -21,6 +21,33 @@ cat .claude/knowledge-e2e-angular.md
 
 調査で新しい知見が得られたら、作業終了前に必ず該当ファイルに追記すること。
 
+## 【パイプラインフロー】
+
+```
+① テスト内容チェック(/check-yaml): yaml品質・網羅性チェック（pigeon repo参照）
+  → ② テスト修正くん(/spec-create): yaml通りにspec.js実装・修正
+    → ③ 怒りくん(/check-specs): コード品質チェック
+      → ④ チェックくん(/check-run): Playwright実行 + failed振り分け
+```
+
+**前工程変更 → 後工程全リセット:**
+- yaml変更 → ②③④ リセット
+- spec.js変更 → ③④ リセット
+
+**管理シート**: `.claude/pipeline-status.md`（①〜④のステータス + 備考）
+**詳細**: `.claude/e2e-pipeline-sheet.md`
+
+| エージェント | スキル | 役割 |
+|---|---|---|
+| テスト内容チェック | `/check-yaml` | yaml品質・網羅性チェック（pigeon repo参照） |
+| テスト修正くん | `/spec-create` | yaml通りにspec.js実装・修正（MCP Playwright必須） |
+| 怒りくん | `/check-specs` | コード品質チェック（タイトル一致、早期return、スキップ判定） |
+| チェックくん | `/check-run` | Playwright実行確認 + failed振り分け（specバグ/プロダクトバグ/環境依存） |
+| 不具合調査くん | — | 障害・PRからテスト検知可否調査、テスト追加 |
+| 詳細調査くん | — | インフラ根本原因調査（CloudWatch/ECS/RDS） |
+
+---
+
 ## 【絶対守るルール】テスト設計
 
 1. **ALLテストテーブルは global-setup で1回だけ作成**。各specは `getAllTypeTableId` でID取得のみ。`setupAllTypeTable` は各specから呼ばない。
