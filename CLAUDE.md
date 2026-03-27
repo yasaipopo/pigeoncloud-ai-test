@@ -24,27 +24,40 @@ cat .claude/knowledge-e2e-angular.md
 ## 【パイプラインフロー】
 
 ```
-① テスト内容チェック(/check-yaml): yaml品質・網羅性チェック（pigeon repo参照）
-  → ② テスト修正くん(/spec-create): yaml通りにspec.js実装・修正
-    → ③ 怒りくん(/check-specs): コード品質チェック
-      → ④ チェックくん(/check-run): Playwright実行 + failed振り分け
+① テスト内容チェック (/check-yaml): yaml品質・網羅性（pigeon repo + Playwright MCP参照）
+  → ② テスト修正くん (/spec-create): yaml通りにspec.js実装・修正
+    → ③ チェックくん (/check-run): Playwright実行 + 問題あれば差し戻し
 ```
 
 **前工程変更 → 後工程全リセット:**
-- yaml変更 → ②③④ リセット
-- spec.js変更 → ③④ リセット
+- yaml変更 → ②③ リセット
+- spec.js変更 → ③ リセット
 
-**管理シート**: `.claude/pipeline-status.md`（①〜④のステータス + 備考）— **唯一の正（Single Source of Truth）**
+**管理DB**: チェックDB（DynamoDB + API）— **唯一の正（SSoT）**。DB未構築時は `.claude/pipeline-status.md` をフォールバック。
 **詳細**: `.claude/e2e-pipeline-sheet.md`
 
 | エージェント | スキル | 役割 |
 |---|---|---|
-| テスト内容チェック | `/check-yaml` | yaml品質・網羅性チェック（pigeon repo参照） |
-| テスト修正くん | `/spec-create` | yaml通りにspec.js実装・修正（MCP Playwright必須） |
-| 怒りくん | `/check-specs` | コード品質チェック（タイトル一致、早期return、スキップ判定） |
-| チェックくん | `/check-run` | Playwright実行確認 + failed振り分け（specバグ/プロダクトバグ/環境依存） |
-| 不具合調査くん | — | 障害・PRからテスト検知可否調査、テスト追加 |
+| テスト内容チェック | `/check-yaml` | yaml品質・網羅性チェック（pigeon repo + Playwright MCP参照） |
+| テスト修正くん | `/spec-create` | yaml通りにspec.jsを実装・修正（MCP Playwright必須） |
+| チェックくん | `/check-run` | Playwright実行 + failed振り分け + 差し戻し（環境依存の遅さは切り分け） |
+| 不具合調査くん | — | 障害・PRからyaml追加→DB更新→知見md |
 | 詳細調査くん | — | インフラ根本原因調査（CloudWatch/ECS/RDS） |
+
+---
+
+## 【URLベースのテストケース】
+
+yaml の description がURL（pigeon-cloud.com/pigeon-demo.com）のみのケースは**そのままPASSにしない**。
+URLは不具合修正依頼や機能追加依頼のページ。raw_query.js で依頼内容を取得してテストフローに書き直す。
+
+```bash
+# 例: https://loftal.pigeon-cloud.com/admin/dataset__90/view/583
+node /Users/yasaipopo/PhpStormProjects/PopoframeworkSlim/manage/raw_query.js \
+  popo "SELECT * FROM dataset__90 WHERE id = 583" --env=prod
+```
+
+詳細は `.claude/knowledge-e2e-angular.md` の「URLベースのテストケースの扱い」参照。
 
 ---
 

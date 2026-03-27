@@ -9,19 +9,19 @@
 | キャラ | スキル | 役割 |
 |---|---|---|
 | **リーダー** | `/e2e` | パイプライン全体管理。TEST_NUMBER管理、agent起動、結果集計、シート更新、通知 |
-| **テスト修正くん** | `/spec-create` | `specs/*.yaml` のテスト内容（description/expected）通りにspec.jsを実装・修正する。MCP Playwrightで実UIを確認してからコードを書く。怒りくんのOKなしにコミット禁止。 |
-| **怒りくん** | `/check-specs` | テスト品質チェック。タイトルと実装の一致、早期return、スキップを厳格に判定。NG→テスト作成君に差し戻し。 |
-| **チェックくん** | `/check-run` | Playwright実行確認 + failedをPigeonCloudソースと照合してspecバグ/プロダクトバグ/環境依存に振り分け。 |
+| **テスト修正くん** | `/spec-create` | `specs/*.yaml` のテスト内容（description/expected）通りにspec.jsを実装・修正する。MCP Playwrightで実UIを確認してからコードを書く。 |
+| **チェックくん** | `/check-run` | Playwright実行 + failedをPigeonCloudソースと照合してspecバグ/プロダクトバグ/環境依存に振り分け。環境依存の遅さは差し戻しにしない。 |
 | **詳細調査くん** | — | タイムアウト等の根本原因をCloudWatch/ECS/RDS/ソースコードから調査。 |
-| **不具合調査くん** | — | 問い合わせで発覚した不具合・PRを確認し、既存テストで検知できたか調査。検知できなければテストを追加。 |
+| **不具合調査くん** | — | 障害・PRからyaml追加→DB更新→知見md。 |
 
 ```
-テスト修正くんがspec.jsを修正（MCP Playwrightで実UI確認必須）
-  → 怒りくんがレビュー（コード品質）
-    → ✅ OK → チェックくんがPlaywright実行で動作確認
+① テスト内容チェック: yaml品質・網羅性（pigeon repo + Playwright MCP参照）
+  → ② テスト修正くん: yaml通りにspec.js実装・修正
+    → ③ チェックくん: Playwright実行 + 問題あれば差し戻し
       → ✅ PASS → コミット
-      → ❌ FAIL → テスト作成君へ差し戻し
-    → ❌ NG → テスト作成君へ差し戻し
+      → ❌ FAIL(specバグ) → ②に差し戻し
+      → ❌ FAIL(プロダクトバグ) → product-bugs.mdに記録
+      → ⚠️ FAIL(環境依存/遅さ) → 再実行（差し戻しにしない）
 ```
 
 ---
@@ -155,6 +155,34 @@ Nginx: `/api/` → PHP、`/` → Angular SPA。API呼び出しは `/api/admin/` 
 {"result":"success","id":4,"success":true,"email":"ishikawa+4@loftal.jp","password":"admin"}
 ```
 `id` フィールドで直接ユーザーIDを取得可能。
+
+---
+
+## URLベースのテストケースの扱い
+
+### 問題
+specs/*.yaml に約420件のテストケースが「URLのみ」で定義されている。
+例: `description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/583`
+
+これらのURLはPigeonCloudの不具合修正依頼や機能追加依頼のページ。URLだけではテスト内容が分からない。
+
+### ルール
+1. **URLベースのケースはPASSにしない**（①yamlチェックをOKにしない）
+2. URLから依頼内容を取得して、テストフローをyamlに書き直す
+3. 依頼内容の取得方法:
+   ```bash
+   # raw_query.js を使ってPigeonCloudから依頼内容を取得
+   # URL: https://loftal.pigeon-cloud.com/admin/dataset__90/view/583 の場合
+   # → db=popo, table=dataset__90, view=583 のレコードを取得
+   node /Users/yasaipopo/PhpStormProjects/PopoframeworkSlim/manage/raw_query.js \
+     popo "SELECT * FROM dataset__90 WHERE id = 583" --env=prod
+   ```
+4. 取得した依頼内容（不具合内容/機能追加内容）に基づいてテストフローを設計
+5. yamlの `description` と `expected` を具体的な操作手順と期待結果に書き換える
+
+### yamlチェック時の判定
+- URLのみの description → **❌ NG**（テストフローに書き直す必要あり）
+- URLを含むがテストフローも書かれている → **✅ OK**（参考URLとして許容）
 
 ---
 
