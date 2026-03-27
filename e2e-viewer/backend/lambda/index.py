@@ -15,6 +15,7 @@ from botocore.exceptions import ClientError
 # 環境変数
 RUNS_TABLE = os.environ.get('RUNS_TABLE', 'pigeon-e2e-viewer-runs')
 CASES_TABLE = os.environ.get('CASES_TABLE', 'pigeon-e2e-viewer-cases')
+PIPELINE_TABLE = os.environ.get('PIPELINE_TABLE', 'all-test-check-list')
 ASSETS_BUCKET = os.environ.get('ASSETS_BUCKET', '')
 REGION = os.environ.get('REGION', 'ap-northeast-1')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'pigeon-e2e-2026')
@@ -37,6 +38,7 @@ s3_client = boto3.client(
 )
 runs_table = dynamodb.Table(RUNS_TABLE)
 cases_table = dynamodb.Table(CASES_TABLE)
+pipeline_table = dynamodb.Table(PIPELINE_TABLE)
 
 # TTL: 90日後（DynamoDB自動削除）
 TTL_DAYS = 90
@@ -145,6 +147,29 @@ def handler(event, context):
         # PUT /specs - spec一覧更新（upload_specs.pyが呼ぶ）
         elif method == 'PUT' and path == '/specs':
             return put_specs(event)
+
+        # =========================================
+        # パイプラインチェックシート
+        # =========================================
+        # GET /pipeline/summary - サマリー取得
+        elif method == 'GET' and path == '/pipeline/summary':
+            return pipeline_summary(event)
+
+        # POST /pipeline/init - yamlから初期データ投入
+        elif method == 'POST' and path == '/pipeline/init':
+            return pipeline_init(event)
+
+        # POST /pipeline/bulk-update - 一括更新
+        elif method == 'POST' and path == '/pipeline/bulk-update':
+            return pipeline_bulk_update(event)
+
+        # GET /pipeline - 全件取得（specフィルタ可）
+        elif method == 'GET' and path == '/pipeline':
+            return pipeline_get(event)
+
+        # POST /pipeline - ステータス更新（1件 or バッチ）
+        elif method == 'POST' and path == '/pipeline':
+            return pipeline_update(event)
 
         else:
             return response(404, {'error': f'Not found: {method} {path}'})
@@ -556,3 +581,358 @@ def get_download_url(event):
     )
 
     return response(200, {'downloadUrl': url, 'key': key})
+
+
+# =========================================
+# パイプラインチェックシート API
+# =========================================
+
+def pipeline_get(event):
+    """
+    GET /pipeline - パイプラインチェック全件取得
+    クエリパラメータ:
+      - spec: specフィルタ（例: auth）
+    """
+    params = event.get('queryStringParameters') or {}
+    spec_filter = params.get('spec')
+
+    if spec_filter:
+        # spec指定時はQuery
+        result = pipeline_table.query(
+            KeyConditionExpression=Key('spec').eq(spec_filter)
+        )
+        items = result.get('Items', [])
+        # ページネーション対応
+        while result.get('LastEvaluatedKey'):
+            result = pipeline_table.query(
+                KeyConditionExpression=Key('spec').eq(spec_filter),
+                ExclusiveStartKey=result['LastEvaluatedKey']
+            )
+            items.extend(result.get('Items', []))
+    else:
+        # 全件Scan
+        items = []
+        result = pipeline_table.scan()
+        items.extend(result.get('Items', []))
+        while result.get('LastEvaluatedKey'):
+            result = pipeline_table.scan(
+                ExclusiveStartKey=result['LastEvaluatedKey']
+            )
+            items.extend(result.get('Items', []))
+
+    return response(200, {
+        'items': items,
+        'count': len(items)
+    })
+
+
+def pipeline_update(event):
+    """
+    POST /pipeline - ステータス更新（1件 or バッチ）
+    ボディ（1件）:
+      - spec, caseNo, field (yamlCheck/specCheck/runCheck), value, note, updatedBy
+    ボディ（バッチ）:
+      - updates: [{spec, caseNo, field, value, note, updatedBy}, ...]
+    """
+    body = json.loads(event.get('body') or '{}')
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    updates = body.get('updates')
+    if not updates:
+        # 1件モード
+        updates = [body]
+
+    results = []
+    for item in updates:
+        spec = item.get('spec')
+        case_no = item.get('caseNo')
+        field = item.get('field')
+        value = item.get('value')
+        note = item.get('note', '')
+        updated_by = item.get('updatedBy', 'unknown')
+
+        if not spec or not case_no or not field:
+            results.append({'spec': spec, 'caseNo': case_no, 'error': 'spec, caseNo, field は必須です'})
+            continue
+
+        # フィールド名のバリデーション
+        valid_fields = {
+            'yamlCheck': 'yamlCheckNote',
+            'specCheck': 'specCheckNote',
+            'runCheck': 'runCheckNote',
+        }
+        if field not in valid_fields:
+            results.append({'spec': spec, 'caseNo': case_no, 'error': f'不正なfield: {field}'})
+            continue
+
+        note_field = valid_fields[field]
+
+        try:
+            pipeline_table.update_item(
+                Key={'spec': spec, 'caseNo': case_no},
+                UpdateExpression=f'SET #f = :v, {note_field} = :n, updatedAt = :t, updatedBy = :u',
+                ExpressionAttributeNames={'#f': field},
+                ExpressionAttributeValues={
+                    ':v': value,
+                    ':n': note,
+                    ':t': now_iso,
+                    ':u': updated_by,
+                }
+            )
+            results.append({'spec': spec, 'caseNo': case_no, 'status': 'ok'})
+        except Exception as e:
+            results.append({'spec': spec, 'caseNo': case_no, 'error': str(e)})
+
+    return response(200, {'results': results, 'count': len(results)})
+
+
+def pipeline_summary(event):
+    """
+    GET /pipeline/summary - パイプラインサマリー
+    全ケースの ①yaml ②spec ③run のOK/NG/未チェック件数を返す
+    クエリパラメータ:
+      - spec: specフィルタ（省略時は全体）
+    """
+    params = event.get('queryStringParameters') or {}
+    spec_filter = params.get('spec')
+
+    # データ取得
+    if spec_filter:
+        result = pipeline_table.query(
+            KeyConditionExpression=Key('spec').eq(spec_filter)
+        )
+        items = result.get('Items', [])
+        while result.get('LastEvaluatedKey'):
+            result = pipeline_table.query(
+                KeyConditionExpression=Key('spec').eq(spec_filter),
+                ExclusiveStartKey=result['LastEvaluatedKey']
+            )
+            items.extend(result.get('Items', []))
+    else:
+        items = []
+        result = pipeline_table.scan()
+        items.extend(result.get('Items', []))
+        while result.get('LastEvaluatedKey'):
+            result = pipeline_table.scan(
+                ExclusiveStartKey=result['LastEvaluatedKey']
+            )
+            items.extend(result.get('Items', []))
+
+    total = len(items)
+
+    # 集計
+    summary = {
+        'total': total,
+        'yaml': {'ok': 0, 'ng': 0, 'unchecked': 0},
+        'spec': {'ok': 0, 'ng': 0, 'unchecked': 0},
+        'run': {'pass': 0, 'fail_spec': 0, 'fail_product': 0, 'fail_env': 0, 'unchecked': 0},
+    }
+
+    # spec別集計
+    by_spec = {}
+
+    for item in items:
+        spec_name = item.get('spec', '')
+
+        # yaml
+        yc = item.get('yamlCheck')
+        if yc == 'ok':
+            summary['yaml']['ok'] += 1
+        elif yc == 'ng':
+            summary['yaml']['ng'] += 1
+        else:
+            summary['yaml']['unchecked'] += 1
+
+        # spec
+        sc = item.get('specCheck')
+        if sc == 'ok':
+            summary['spec']['ok'] += 1
+        elif sc == 'ng':
+            summary['spec']['ng'] += 1
+        else:
+            summary['spec']['unchecked'] += 1
+
+        # run
+        rc = item.get('runCheck')
+        if rc == 'pass':
+            summary['run']['pass'] += 1
+        elif rc == 'fail_spec':
+            summary['run']['fail_spec'] += 1
+        elif rc == 'fail_product':
+            summary['run']['fail_product'] += 1
+        elif rc == 'fail_env':
+            summary['run']['fail_env'] += 1
+        else:
+            summary['run']['unchecked'] += 1
+
+        # spec別
+        if spec_name not in by_spec:
+            by_spec[spec_name] = {'total': 0, 'yaml_ok': 0, 'spec_ok': 0, 'run_pass': 0}
+        by_spec[spec_name]['total'] += 1
+        if yc == 'ok':
+            by_spec[spec_name]['yaml_ok'] += 1
+        if sc == 'ok':
+            by_spec[spec_name]['spec_ok'] += 1
+        if rc == 'pass':
+            by_spec[spec_name]['run_pass'] += 1
+
+    summary['bySpec'] = by_spec
+
+    return response(200, summary)
+
+
+def pipeline_init(event):
+    """
+    POST /pipeline/init - yamlから初期データ投入
+    ボディ:
+      - specs: [{spec: 'auth', cases: [{caseNo, feature, description, expected}, ...]}, ...]
+      - overwrite: true の場合既存データも上書き（デフォルト: false、既存はスキップ）
+    """
+    body = json.loads(event.get('body') or '{}')
+    specs_data = body.get('specs', [])
+    overwrite = body.get('overwrite', False)
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    total_count = 0
+    skip_count = 0
+
+    for spec_group in specs_data:
+        spec_name = spec_group.get('spec', '')
+        cases = spec_group.get('cases', [])
+
+        for case in cases:
+            case_no = case.get('caseNo', '')
+            if not spec_name or not case_no:
+                continue
+
+            if not overwrite:
+                # 既存チェック
+                try:
+                    existing = pipeline_table.get_item(
+                        Key={'spec': spec_name, 'caseNo': case_no}
+                    )
+                    if 'Item' in existing:
+                        skip_count += 1
+                        continue
+                except Exception:
+                    pass
+
+            item = {
+                'spec': spec_name,
+                'caseNo': case_no,
+                'feature': case.get('feature', ''),
+                'description': case.get('description', ''),
+                'expected': case.get('expected', ''),
+                'yamlCheck': case.get('yamlCheck') or None,
+                'yamlCheckNote': case.get('yamlCheckNote', ''),
+                'specCheck': case.get('specCheck') or None,
+                'specCheckNote': case.get('specCheckNote', ''),
+                'runCheck': case.get('runCheck') or None,
+                'runCheckNote': case.get('runCheckNote', ''),
+                'updatedAt': now_iso,
+                'updatedBy': 'pipeline_init',
+            }
+
+            # Noneの値を除去（DynamoDBはNoneを保存できない）
+            item = {k: v for k, v in item.items() if v is not None}
+
+            pipeline_table.put_item(Item=item)
+            total_count += 1
+
+    return response(200, {
+        'message': f'{total_count}件登録完了（{skip_count}件スキップ）',
+        'registered': total_count,
+        'skipped': skip_count,
+    })
+
+
+def pipeline_bulk_update(event):
+    """
+    POST /pipeline/bulk-update - 一括ステータス更新
+    ボディ:
+      - spec: spec名（省略時は全spec対象）
+      - field: yamlCheck / specCheck / runCheck
+      - value: 設定する値
+      - note: 備考（省略可）
+      - updatedBy: 更新者
+      - caseNos: 対象caseNoのリスト（省略時はspec内全件）
+      - onlyUnchecked: true の場合、未チェック（null/空）のケースのみ更新
+    """
+    body = json.loads(event.get('body') or '{}')
+    spec_filter = body.get('spec')
+    field = body.get('field')
+    value = body.get('value')
+    note = body.get('note', '')
+    updated_by = body.get('updatedBy', 'bulk_update')
+    case_nos = body.get('caseNos')
+    only_unchecked = body.get('onlyUnchecked', False)
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    if not field:
+        return response(400, {'error': 'field は必須です'})
+
+    valid_fields = {
+        'yamlCheck': 'yamlCheckNote',
+        'specCheck': 'specCheckNote',
+        'runCheck': 'runCheckNote',
+    }
+    if field not in valid_fields:
+        return response(400, {'error': f'不正なfield: {field}'})
+
+    note_field = valid_fields[field]
+
+    # 対象アイテム取得
+    if spec_filter:
+        result = pipeline_table.query(
+            KeyConditionExpression=Key('spec').eq(spec_filter)
+        )
+        items = result.get('Items', [])
+        while result.get('LastEvaluatedKey'):
+            result = pipeline_table.query(
+                KeyConditionExpression=Key('spec').eq(spec_filter),
+                ExclusiveStartKey=result['LastEvaluatedKey']
+            )
+            items.extend(result.get('Items', []))
+    else:
+        items = []
+        result = pipeline_table.scan()
+        items.extend(result.get('Items', []))
+        while result.get('LastEvaluatedKey'):
+            result = pipeline_table.scan(
+                ExclusiveStartKey=result['LastEvaluatedKey']
+            )
+            items.extend(result.get('Items', []))
+
+    # caseNosフィルタ
+    if case_nos:
+        case_nos_set = set(case_nos)
+        items = [i for i in items if i.get('caseNo') in case_nos_set]
+
+    # onlyUncheckedフィルタ
+    if only_unchecked:
+        items = [i for i in items if not i.get(field)]
+
+    # 一括更新
+    updated_count = 0
+    for item in items:
+        try:
+            pipeline_table.update_item(
+                Key={'spec': item['spec'], 'caseNo': item['caseNo']},
+                UpdateExpression=f'SET #f = :v, {note_field} = :n, updatedAt = :t, updatedBy = :u',
+                ExpressionAttributeNames={'#f': field},
+                ExpressionAttributeValues={
+                    ':v': value,
+                    ':n': note,
+                    ':t': now_iso,
+                    ':u': updated_by,
+                }
+            )
+            updated_count += 1
+        except Exception as e:
+            print(f'bulk-update error: {item["spec"]}#{item["caseNo"]}: {e}')
+
+    return response(200, {
+        'message': f'{updated_count}件更新完了',
+        'updated': updated_count,
+        'total_candidates': len(items),
+    })
