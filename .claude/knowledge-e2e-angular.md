@@ -136,7 +136,13 @@ if (hasTutorial) {
 }
 ```
 
-### 知見3: /admin/add/xxx は PHP に届かない
+### 知見3: about:blank から fetch すると cookies が送られない
+
+`createAuthContext(browser)` で作ったページは `about:blank`。この状態で `page.evaluate(fetch(...))` を呼ぶと、`credentials: 'include'` でもcookiesが送られない（オリジンが異なるため）。
+
+**対策**: fetch前に `page.goto(BASE_URL + '/admin/dashboard')` する。`getAllTypeTableId` には自動でこの処理が入っている。
+
+### 知見4: /admin/add/xxx は PHP に届かない
 Nginx: `/api/` → PHP、`/` → Angular SPA。API呼び出しは `/api/admin/` プレフィックスを使う。
 
 ### 知見4: パスワード変更フロー
