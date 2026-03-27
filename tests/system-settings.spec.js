@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAuthContext } = require('./helpers/auth-context');
 const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
 
 const BASE_URL = process.env.TEST_BASE_URL;
@@ -344,21 +345,20 @@ test.describe('共通設定・システム設定', () => {
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
+        const { context, page } = await createAuthContext(browser);
         ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
-            await page.close();
+            await context.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
-        await page.close();
+        await context.close();
     });
 
     test.afterAll(async ({ browser }) => {
         test.setTimeout(300000); // delete-all-type-tablesは時間がかかるため延長
         // afterAllでテーブルを一度だけ削除する
         try {
-            const page = await browser.newPage();
+            const { context, page } = await createAuthContext(browser);
             // パスワード変更を起こさない安全なlogin関数（afterAll専用）
             async function safeLoginForAfterAll(pw) {
                 await page.goto(BASE_URL + '/admin/login');
@@ -386,7 +386,7 @@ test.describe('共通設定・システム設定', () => {
                     const bodyText = await page.innerText('body').catch(() => '');
                     if (bodyText.includes('アカウントロック')) {
                         console.log('[afterAll] アカウントロック中。afterAll処理をスキップ');
-                        await page.close();
+                        await context.close();
                         return;
                     }
                 } catch (e2) {
@@ -395,7 +395,7 @@ test.describe('共通設定・システム設定', () => {
             }
             if (!loginSuccess) {
                 console.log('[afterAll] ログイン失敗。afterAll処理をスキップ');
-                await page.close();
+                await context.close();
                 return;
             }
             // pw_change_interval_daysを空にリセット（89-1テストの副作用除去）
@@ -410,7 +410,7 @@ test.describe('共通設定・システム設定', () => {
             // 利用規約が有効の場合は無効にしてからテーブル削除
             await updateAdminSetting(page, { setTermsAndConditions: 'false' }).catch(() => {});
             await deleteAllTypeTables(page);
-            await page.close();
+            await context.close();
         } catch (e) {
             console.log('[afterAll] エラー:', e.message);
         }

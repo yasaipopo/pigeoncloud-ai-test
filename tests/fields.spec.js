@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -274,12 +275,11 @@ async function assertFieldPageLoaded(page, tableId) {
 let _sharedTableId = null;
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(480000);
-    const page = await browser.newPage();
-    await login(page);
+    const { context, page } = await createAuthContext(browser);
     await createAllTypeTable(page);
     await createAllTypeData(page, 5);
     _sharedTableId = await getAllTypeTableId(page);
-    await page.close();
+    await context.close();
 });
 
 test.describe('フィールド - 日時（101）', () => {

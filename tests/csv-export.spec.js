@@ -115,41 +115,28 @@ async function applyQuickSearchFilter(page) {
 
 /**
  * ハンバーガードロップダウンを開く
+ * fa-barsアイコンのあるdropdown-toggleボタンを特定してクリック
  */
 async function openDropdownMenu(page) {
-    // Angularコンポーネントの描画を待機してからクリック
-    // まず btn-outline-primary.dropdown-toggle を試みる（データあり時）
-    const specificBtn = page.locator('button.btn-outline-primary.dropdown-toggle').first();
-    const generalBtn = page.locator('button.dropdown-toggle').first();
-
-    // 特定セレクターで待機
-    const found = await page.waitForSelector('button.dropdown-toggle', { timeout: 15000 }).catch(() => null);
-    await page.waitForTimeout(500);
+    // ハンバーガーメニュー（fa-barsアイコン）を特定
+    const hamburgerBtn = page.locator('button.dropdown-toggle:has(.fa-bars)').first();
+    const found = await hamburgerBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => true).catch(() => false);
 
     if (found) {
-        // btn-outline-primary.dropdown-toggle があればそれを優先
-        const specificCount = await specificBtn.count();
-        if (specificCount > 0 && await specificBtn.isVisible()) {
-            await specificBtn.click();
-        } else {
-            // なければ帳票以外のdropdown-toggleボタンをクリック
-            const allBtns = await page.locator('button.dropdown-toggle').all();
-            for (const btn of allBtns) {
-                if (await btn.isVisible()) {
-                    const txt = await btn.innerText();
-                    if (!txt.includes('帳票')) {
-                        await btn.click({ force: true });
-                        break;
-                    }
+        await hamburgerBtn.click();
+        await waitForAngular(page);
+    } else {
+        // フォールバック: 帳票以外のdropdown-toggleボタンをクリック
+        const allBtns = await page.locator('button.dropdown-toggle').all();
+        for (const btn of allBtns) {
+            if (await btn.isVisible()) {
+                const txt = await btn.innerText();
+                if (!txt.includes('帳票')) {
+                    await btn.click({ force: true });
+                    await waitForAngular(page);
+                    break;
                 }
             }
-        }
-    } else {
-        // フォールバック: CSVアップロードを直接探す
-        const csvUploadLink = page.locator('a:has-text("CSVアップロード"), button:has-text("CSVアップロード")').first();
-        if (await csvUploadLink.count() > 0) {
-            await csvUploadLink.click();
-            return; // モーダルが直接開くのでここで終了
         }
     }
     await page.waitForTimeout(500);
@@ -1171,51 +1158,41 @@ test.describe('JSONエクスポート・インポート', () => {
         await login(page, EMAIL, PASSWORD);
         await closeTemplateModal(page);
 
-        // /admin/dataset一覧に遷移してテーブルリンクをクリック（dataset_view=trueにするため）
+        // テーブル管理一覧（/admin/dataset）に遷移
+        // JSONエクスポートボタンは *ngIf="grant.edit && dataset_view" で制御されており、
+        // dataset_viewはテーブル管理一覧（/admin/dataset）でのみtrue
+        // テーブルレコード一覧（/admin/dataset__xxx）ではfalseになる
         await page.goto(BASE_URL + '/admin/dataset');
         await waitForAngular(page);
 
-        // testTableIdがあれば、そのテーブルのリンクをクリックしてレコード一覧へ
-        expect(testTableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
-        const tableLink = page.locator(`a[href*="dataset__${testTableId}"]`).first();
-        if (await tableLink.count() > 0) {
-            await tableLink.click();
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(2000);
-        } else {
-            // テーブルリンクが見つからない場合は直接遷移
-            await page.goto(BASE_URL + `/admin/dataset__${testTableId}`);
-            await waitForAngular(page);
-        }
+        // テーブル管理のツリービューでチェックボックスを選択
+        await page.waitForSelector('.admin-tree__check input[type="checkbox"]', { timeout: 15000 }).catch(() => {});
+        const firstCheckbox = page.locator('.admin-tree__check input[type="checkbox"]').first();
+        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 10000 });
+        await firstCheckbox.click();
+        await waitForAngular(page);
 
-        // レコードのチェックボックスを選択してJSONエクスポートボタンを表示させる
-        // Angularのテーブル描画を待機（最大15秒）
-        await page.waitForSelector('table tbody tr, table input[type="checkbox"]', { timeout: 15000 }).catch(() => {});
-        const firstCheckbox = page.locator('table input[type="checkbox"], td input[type="checkbox"]').first();
-        if (await firstCheckbox.count() > 0 && await firstCheckbox.isVisible().catch(() => false)) {
-            await firstCheckbox.click();
-            await waitForAngular(page);
-        }
-
-        // JSONエクスポートボタンをクリック
+        // JSONエクスポートボタンをクリック（exportAll()が呼ばれ、exportModalが開く）
         const exportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
         await expect(exportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await exportBtn.click();
         await waitForAngular(page);
 
-        // エクスポートモーダルが開いていることを確認
+        // エクスポートモーダルが開いていることを確認（exportModal = bsModal .modal.show）
         const modal = page.locator('.modal.show');
         await expect(modal).toBeVisible({ timeout: 10000 });
 
-        // 「データを含める」チェックボックスを探してオフにする
-        const dataCheckbox = page.locator('.modal.show input[name="export_data"], .modal.show input[type="checkbox"]').first();
-        if (await dataCheckbox.count() > 0) {
-            const isChecked = await dataCheckbox.isChecked().catch(() => false);
-            if (isChecked) {
-                await dataCheckbox.click();
-                await waitForAngular(page);
-            }
+        // 「データを含める」チェックボックスをオフにする
+        // admin.component.html: <input type="checkbox" name="export_data" (change)="export_data=!export_data"/>
+        const dataCheckbox = page.locator('.modal.show input[name="export_data"]');
+        await expect(dataCheckbox).toBeVisible({ timeout: 5000 });
+        const isChecked = await dataCheckbox.isChecked().catch(() => false);
+        if (isChecked) {
+            await dataCheckbox.click();
+            await waitForAngular(page);
         }
+        // チェックがオフであることを確認
+        await expect(dataCheckbox).not.toBeChecked();
 
         // エクスポートボタンが存在することを確認
         const execBtn = page.locator('.modal.show button:has-text("エクスポート")').filter({ visible: true });
@@ -1240,30 +1217,16 @@ test.describe('JSONエクスポート・インポート', () => {
         await login(page, EMAIL, PASSWORD);
         await closeTemplateModal(page);
 
-        // /admin/dataset一覧に遷移してテーブルリンクをクリック
+        // テーブル管理一覧（/admin/dataset）に遷移
         await page.goto(BASE_URL + '/admin/dataset');
         await waitForAngular(page);
 
-        expect(testTableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
-        const tableLink = page.locator(`a[href*="dataset__${testTableId}"]`).first();
-        if (await tableLink.count() > 0) {
-            await tableLink.click();
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(2000);
-        } else {
-            // テーブルリンクが見つからない場合は直接遷移
-            await page.goto(BASE_URL + `/admin/dataset__${testTableId}`);
-            await waitForAngular(page);
-        }
-
-        // レコードのチェックボックスを選択
-        // Angularのテーブル描画を待機（最大15秒）
-        await page.waitForSelector('table tbody tr, table input[type="checkbox"]', { timeout: 15000 }).catch(() => {});
-        const firstCheckbox = page.locator('table input[type="checkbox"], td input[type="checkbox"]').first();
-        if (await firstCheckbox.count() > 0 && await firstCheckbox.isVisible().catch(() => false)) {
-            await firstCheckbox.click();
-            await waitForAngular(page);
-        }
+        // テーブル管理のツリービューでチェックボックスを選択
+        await page.waitForSelector('.admin-tree__check input[type="checkbox"]', { timeout: 15000 }).catch(() => {});
+        const firstCheckbox = page.locator('.admin-tree__check input[type="checkbox"]').first();
+        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 10000 });
+        await firstCheckbox.click();
+        await waitForAngular(page);
 
         // JSONエクスポートボタンをクリック
         const exportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
@@ -1271,19 +1234,21 @@ test.describe('JSONエクスポート・インポート', () => {
         await exportBtn.click();
         await waitForAngular(page);
 
-        // エクスポートモーダルが開いていることを確認
+        // エクスポートモーダルが開いていることを確認（exportModal = bsModal .modal.show）
         const modal = page.locator('.modal.show');
         await expect(modal).toBeVisible({ timeout: 10000 });
 
         // 「データを含める」チェックボックスをオンにする
-        const dataCheckbox = page.locator('.modal.show input[name="export_data"], .modal.show input[type="checkbox"]').first();
-        if (await dataCheckbox.count() > 0) {
-            const isChecked = await dataCheckbox.isChecked().catch(() => false);
-            if (!isChecked) {
-                await dataCheckbox.click();
-                await waitForAngular(page);
-            }
+        // admin.component.html: <input type="checkbox" name="export_data" (change)="export_data=!export_data"/>
+        const dataCheckbox = page.locator('.modal.show input[name="export_data"]');
+        await expect(dataCheckbox).toBeVisible({ timeout: 5000 });
+        const isChecked = await dataCheckbox.isChecked().catch(() => false);
+        if (!isChecked) {
+            await dataCheckbox.click();
+            await waitForAngular(page);
         }
+        // チェックがオンであることを確認
+        await expect(dataCheckbox).toBeChecked();
 
         // エクスポートボタンが存在することを確認
         const execBtn = page.locator('.modal.show button:has-text("エクスポート")').filter({ visible: true });

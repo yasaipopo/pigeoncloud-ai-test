@@ -3,6 +3,7 @@
 // chart-calendar.spec.jsから分割 (line 1294〜末尾)
 const { test, expect } = require('@playwright/test');
 const { setupAllTypeTable } = require('./helpers/table-setup');
+const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -296,15 +297,14 @@ async function openTableMenu(page) {
 // ============================================================
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(600000);
-    const page = await browser.newPage();
-    await login(page);
+    const { context, page } = await createAuthContext(browser);
     const tableRes = await createAllTypeTable(page);
     if (tableRes.result !== 'success') {
-        await page.close();
+        await context.close();
         throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
     }
     await createAllTypeData(page, 10);
-    await page.close();
+    await context.close();
 });
 
 // チャート テスト

@@ -2,6 +2,7 @@
 // fields-3.spec.js: フィールドテスト Part 3 (describe #20〜#29: 日時フィールド種類変更/項目設定63系/項目名パディング追加/レイアウト2-4列追加/項目設定追加/計算式追加/項目機能追加/表示条件/大容量ファイル/ラジオボタン)
 // fields.spec.jsから分割 (line 1594〜末尾)
 const { test, expect } = require('@playwright/test');
+const { createAuthContext } = require('./helpers/auth-context');
 
 async function waitForAngular(page, timeout = 15000) {
     await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
@@ -260,12 +261,11 @@ let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(480000);
-    const page = await browser.newPage();
-    await login(page);
+    const { context, page } = await createAuthContext(browser);
     await createAllTypeTable(page);
     await createAllTypeData(page, 3);
     _sharedTableId = await getAllTypeTableId(page);
-    await page.close();
+    await context.close();
 });
 
 // =============================================================================

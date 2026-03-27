@@ -1,6 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
+const { createAuthContext } = require('./helpers/auth-context');
 
 // =============================================================================
 // 未分類テスト（580件）
@@ -231,17 +232,16 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
+        const { context, page } = await createAuthContext(browser);
         ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
-            await page.close();
+            await context.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
         // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
         await createAllTypeData(page, 3).catch(() => {});
         await page.waitForTimeout(1000);
-        await page.close();
+        await context.close();
     });
 
     test.beforeEach(async ({ page }) => {

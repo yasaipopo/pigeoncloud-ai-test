@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -513,8 +514,7 @@ let _testUser = null; // { email, password, id }
 
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(480000);
-    const page = await browser.newPage();
-    await login(page);
+    const { context: _fileCtx, page } = await createAuthContext(browser);
     await closeTemplateModal(page);
 
     // 古いWFTestテーブルを削除（テーブル蓄積による遅延防止）
@@ -558,7 +558,7 @@ test.beforeAll(async ({ browser }) => {
     }
     // テストユーザーを作成（承認者/申請者として使用）
     _testUser = await createTestUser(page);
-    await page.close();
+    await _fileCtx.close();
 });
 
 // =============================================================================
@@ -571,15 +571,14 @@ test.describe('ワークフロー設定（21系）', () => {
         test.setTimeout(300000);
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
-        const page = await browser.newPage();
+        const { context, page } = await createAuthContext(browser);
         try {
-            await login(page);
             await closeTemplateModal(page);
             await enableWorkflow(page, tableId);
         } catch (e) {
             console.log('[21系 beforeAll] enableWorkflow error (ignored):', e.message);
         } finally {
-            await page.close();
+            await context.close();
         }
     });
 
@@ -755,15 +754,14 @@ test.describe('ワークフロー基本動作（11系）', () => {
         test.setTimeout(300000);
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
-        const page = await browser.newPage();
+        const { context, page } = await createAuthContext(browser);
         try {
-            await login(page);
             await closeTemplateModal(page);
             await enableWorkflow(page, tableId);
         } catch (e) {
             console.log('[11系 beforeAll] enableWorkflow error (ignored):', e.message);
         } finally {
-            await page.close();
+            await context.close();
         }
     });
 
@@ -1065,15 +1063,14 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         test.setTimeout(300000);
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
-        const page = await browser.newPage();
+        const { context, page } = await createAuthContext(browser);
         try {
-            await login(page);
             await closeTemplateModal(page);
             await enableWorkflow(page, tableId);
         } catch (e) {
             console.log('[68系 beforeAll] enableWorkflow error (ignored):', e.message);
         } finally {
-            await page.close();
+            await context.close();
         }
     });
 
@@ -1310,15 +1307,14 @@ test.describe('引き上げ承認（106系）', () => {
         test.setTimeout(300000);
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
-        const page = await browser.newPage();
+        const { context, page } = await createAuthContext(browser);
         try {
-            await login(page);
             await closeTemplateModal(page);
             await enableWorkflow(page, tableId);
         } catch (e) {
             console.log('[106系 beforeAll] enableWorkflow error (ignored):', e.message);
         } finally {
-            await page.close();
+            await context.close();
         }
     });
 
@@ -1453,16 +1449,15 @@ test.describe('一括操作（111系）', () => {
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のため、beforeAllで1回だけ実行する
         // （ワークフローのON/OFF状態はテスト環境全体で永続するため使い回し可能）
-        const page = await browser.newPage();
+        const { context, page } = await createAuthContext(browser);
         try {
-            await login(page);
             await closeTemplateModal(page);
             await enableWorkflow(page, tableId);
         } catch (e) {
             // enableWorkflow失敗しても継続（テスト内でリトライ可能）
             console.log('[111系 beforeAll] enableWorkflow error (ignored):', e.message);
         } finally {
-            await page.close();
+            await context.close();
         }
     });
 
@@ -1724,11 +1719,10 @@ test.describe('承認者削除後の確認（28系）', () => {
         test.setTimeout(300000);
         tableId = _sharedTableId;
         // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
-        const page = await browser.newPage();
-        await login(page);
+        const { context, page } = await createAuthContext(browser);
         await closeTemplateModal(page);
         await enableWorkflow(page, tableId);
-        await page.close();
+        await context.close();
     });
 
     test.beforeEach(async ({ page }) => {

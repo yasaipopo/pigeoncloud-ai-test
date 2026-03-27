@@ -1,6 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { setupAllTypeTable } = require('./helpers/table-setup');
+const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -88,21 +89,24 @@ async function navigateToRpa(page) {
 test.describe('RPA（コネクト）', () => {
     /** @type {import('@playwright/test').Browser} */
     let browser;
+    /** @type {import('@playwright/test').BrowserContext} */
+    let sharedContext;
     /** @type {import('@playwright/test').Page} */
     let sharedPage;
     let tableId;
 
     test.beforeAll(async ({ browser: b }) => {
         browser = b;
-        sharedPage = await browser.newPage();
-        await login(sharedPage);
+        const auth = await createAuthContext(browser);
+        sharedContext = auth.context;
+        sharedPage = auth.page;
         // ALLテストテーブルを準備
         const result = await setupAllTypeTable(sharedPage);
         tableId = result.tableId;
     });
 
     test.afterAll(async () => {
-        await sharedPage.close().catch(() => {});
+        await sharedContext.close().catch(() => {});
     });
 
     test('RPA-01: コネクト管理画面が正常に表示されること', async ({ page }) => {

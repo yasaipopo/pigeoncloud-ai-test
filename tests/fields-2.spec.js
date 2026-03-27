@@ -2,6 +2,7 @@
 // fields-2.spec.js: フィールドテスト Part 2 (describe #11〜#19: 画像/YesNo/自動採番/固定テキスト/ファイル/列設定/文章複数行/文字列一行/フィールド追加詳細)
 // fields.spec.jsから分割 (line 887〜1595)
 const { test, expect } = require('@playwright/test');
+const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -259,12 +260,11 @@ let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(480000);
-    const page = await browser.newPage();
-    await login(page);
+    const { context, page } = await createAuthContext(browser);
     await createAllTypeTable(page);
     await createAllTypeData(page, 3);
     _sharedTableId = await getAllTypeTableId(page);
-    await page.close();
+    await context.close();
 });
 
 // =============================================================================

@@ -471,120 +471,196 @@ test.describe('チャート・集計 - オプション設定', () => {
 // =============================================================================
 
 /**
- * ALLテストテーブルにカレンダービューを作成するヘルパー関数
- * カレンダービューが存在しない場合、ビュー作成UIから作成する
- * 作成後にカレンダータブのセレクターを返す
+ * ALLテストテーブルでカレンダービューを有効にするヘルパー関数
+ *
+ * カレンダービューは「ビュー追加」ではなく、テーブル設定（歯車→テーブル設定→一覧画面タブ）で
+ * is_calendar_view_enabled を有効化する方式。
+ * 設定済みの場合はスキップする。
  */
 async function ensureCalendarView(page) {
     await navigateToAllTypeTable(page);
 
-    // カレンダービューのタブが既に存在するか確認
-    const calendarTab = page.locator(
-        'a[href*="calendar"], .nav-link:has-text("カレンダー"), button:has-text("カレンダー"), .view-switch-calendar'
+    // カレンダー表示ボタンが既に存在するか確認
+    const calendarBtn = page.locator(
+        'button:has-text("カレンダー表示")'
     ).first();
-    if (await calendarTab.count() > 0) {
-        // 既にカレンダービューが存在する
+    if (await calendarBtn.count() > 0) {
+        // 既にカレンダービューが有効
         return;
     }
 
-    // カレンダービューが存在しない場合、アクションメニューから「ビュー追加」を試みる
-    await openActionMenu(page);
+    // カレンダービューが無効の場合、テーブル設定ページで有効化する
 
-    // 「ビュー追加」または「カレンダー」メニューアイテムを探す
-    const viewAddMenu = page.locator(
-        '.dropdown-item:has-text("ビュー"), .dropdown-item:has-text("カレンダー"), .dropdown-item:has-text("ビューを追加")'
-    ).first();
-
-    if (await viewAddMenu.count() === 0) {
-        // ドロップダウンを閉じて、別の方法を試みる
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
-
-        // ビュー追加ボタンを探す（「+」ボタンやテーブルタブ近くのボタン）
-        const addViewBtn = page.locator(
-            'button:has-text("ビューを追加"), a:has-text("ビューを追加"), button[title*="ビュー"], .add-view-btn'
-        ).first();
-
-        if (await addViewBtn.count() === 0) {
-            throw new Error(
-                'カレンダービューが設定されておらず、ビュー追加UIも見つかりません。' +
-                'ALLテストテーブルにカレンダービューを手動で作成してください。'
-            );
-        }
-        await addViewBtn.click({ force: true });
-        await waitForAngular(page);
-    } else {
-        await viewAddMenu.click({ force: true });
-        await waitForAngular(page);
-    }
-
-    // カレンダー種別を選択するモーダル/パネルが開いたことを確認
-    // AngularのSPAで動的に生成されるため、モーダルの表示を待ってから確認
-    await page.waitForTimeout(1500);
-    const calendarOption = page.locator(
-        'label:has-text("カレンダー"), input[value*="calendar"], .view-type-calendar, li:has-text("カレンダー") input, ' +
-        '.modal label:has-text("カレンダー"), [class*="view-type"]:has-text("カレンダー"), ' +
-        'li label:has-text("カレンダー"), .list-group-item:has-text("カレンダー")'
-    ).first();
-
-    if (await calendarOption.count() === 0) {
-        // 現在のモーダル内容をログ出力してデバッグ
-        const modalContent = await page.evaluate(() => {
-            const modal = document.querySelector('.modal.show, .modal.fade.show, ngb-modal-window');
-            return modal ? modal.textContent?.substring(0, 300) : 'モーダルなし: ' + document.body.textContent?.substring(0, 200);
-        });
-        console.log('[ensureCalendarView] モーダル内容:', modalContent);
-        throw new Error(
-            'ビュー作成モーダルで「カレンダー」選択肢が見つかりません。' +
-            'UIが変更されている可能性があります。'
-        );
-    }
-
-    await calendarOption.click({ force: true });
+    // 1. 歯車ボタン（#table-setting-btn）をクリック
+    const gearBtn = page.locator('#table-setting-btn');
+    await expect(gearBtn).toBeVisible({ timeout: 10000 });
+    await gearBtn.click({ force: true });
     await waitForAngular(page);
 
-    // FROM/TOフィールドを選択する（日付フィールドがある場合）
-    // ALLテストテーブルには日付フィールドがあるはずなので選択する
-    const fromSelect = page.locator('select[name*="from"], select[ng-model*="from"], select').nth(0);
-    const toSelect = page.locator('select[name*="to"], select[ng-model*="to"], select').nth(1);
+    // 2. ドロップダウンから「テーブル設定」をクリック
+    const settingItem = page.locator('.dropdown-menu.show .dropdown-item:has-text("テーブル設定")').first();
+    await expect(settingItem).toBeVisible({ timeout: 5000 });
+    await settingItem.click({ force: true });
+    await waitForAngular(page);
 
-    // 最初の日付フィールドを選択（存在する場合のみ）
-    if (await fromSelect.count() > 0 && await fromSelect.isVisible()) {
-        const fromOptions = await fromSelect.locator('option').all();
-        for (const opt of fromOptions) {
-            const text = await opt.innerText();
-            if (text && !text.includes('選択') && !text.includes('--')) {
-                const val = await opt.getAttribute('value');
-                if (val) {
-                    await fromSelect.selectOption(val);
-                    break;
+    // テーブル設定ページに遷移したことを確認
+    await page.waitForURL('**/dataset/edit/**', { timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => {});
+    await waitForAngular(page);
+
+    // 3. 「一覧画面」タブをクリック
+    const listTab = page.locator('a[role=tab], .nav-link').filter({ hasText: '一覧画面' }).first();
+    await expect(listTab).toBeVisible({ timeout: 10000 });
+    await listTab.click({ force: true });
+    await waitForAngular(page);
+
+    // 4. 「カレンダー表示」スイッチをONにする
+    //    switch-input の中から「カレンダー表示」ラベルに対応するものを探す
+    const calendarSwitch = await page.evaluate(() => {
+        const switches = document.querySelectorAll('input.switch-input');
+        for (let i = 0; i < switches.length; i++) {
+            const row = switches[i].closest('.form-group, .row');
+            const label = row ? row.querySelector('label') : null;
+            if (label && label.textContent.trim().startsWith('カレンダー表示') && !label.textContent.includes('デフォルト')) {
+                if (!switches[i].checked) {
+                    switches[i].click();
+                    return { index: i, action: 'enabled' };
+                }
+                return { index: i, action: 'already_enabled' };
+            }
+        }
+        return null;
+    });
+    if (!calendarSwitch) {
+        throw new Error('カレンダー表示スイッチが見つかりません。テーブル設定の一覧画面タブにスイッチが存在するか確認してください。');
+    }
+    await page.waitForTimeout(500);
+
+    // 5. from/to形式をOFFにする（単一の日時フィールド参照にする）
+    await page.evaluate(() => {
+        const switches = document.querySelectorAll('input.switch-input');
+        for (let i = 0; i < switches.length; i++) {
+            const row = switches[i].closest('.form-group, .row');
+            const label = row ? row.querySelector('label') : null;
+            if (label && label.textContent.includes('from,toの形式にする') && switches[i].checked) {
+                switches[i].click();
+            }
+            // 「カレンダー表示をデフォルトにする」もOFFにする（テスト用にリスト表示がデフォルト）
+            if (label && label.textContent.includes('カレンダー表示をデフォルトにする') && switches[i].checked) {
+                switches[i].click();
+            }
+        }
+    });
+    await page.waitForTimeout(500);
+
+    // 6. 「参照する日時フィールド」ng-selectをPlaywrightネイティブクリックで開いて選択
+    //    （evaluate内のclickではng-selectのドロップダウンが開かないため、locator.click()を使う）
+    const dtNgSelectId = await page.evaluate(() => {
+        const labels = document.querySelectorAll('label');
+        for (const l of labels) {
+            if (l.textContent.trim() === '参照する日時フィールド') {
+                const row = l.closest('.form-group, .row');
+                if (row) {
+                    const ns = row.querySelector('ng-select');
+                    return ns ? (ns.id || '__no_id__') : null;
                 }
             }
         }
+        return null;
+    });
+
+    if (dtNgSelectId) {
+        // ng-selectのコンテナをPlaywrightネイティブクリックで開く
+        const ngSelectLocator = dtNgSelectId === '__no_id__'
+            ? page.locator('label:text-is("参照する日時フィールド")').locator('..').locator('..').locator('ng-select')
+            : page.locator('#' + dtNgSelectId);
+        await ngSelectLocator.locator('.ng-select-container').click({ force: true });
+        await page.waitForTimeout(500);
+
+        // ドロップダウンパネルから最初のオプションを選択
+        const dtOption = page.locator('ng-dropdown-panel .ng-option').first();
+        if (await dtOption.count() > 0) {
+            await dtOption.click({ force: true });
+        }
+        await page.waitForTimeout(300);
     }
 
-    // 保存ボタンをクリック
-    const saveBtn = page.locator(
-        'button:has-text("保存"), button:has-text("作成"), .btn-primary:has-text("OK"), .btn-primary'
-    ).first();
-
-    if (await saveBtn.count() > 0) {
-        await saveBtn.click({ force: true });
-        await waitForAngular(page);
+    // 7. 「カレンダーで表示するフィールド」に {ID} を入力（必須）
+    //    Playwrightネイティブのfillを使用（evaluateでは反映されないため）
+    const displayFieldInput = page.locator('input[placeholder*="表示したいフィールド名"]').first();
+    if (await displayFieldInput.count() > 0) {
+        const currentVal = await displayFieldInput.inputValue();
+        if (!currentVal) {
+            await displayFieldInput.fill('{ID}');
+        }
     }
 
-    // 再度カレンダービューのタブが表示されたことを確認
-    await page.waitForTimeout(2000);
+    // 8. フォーム内の他フィールドの必須バリデーションを一時的に無効化
+    //    （ALLテストテーブルの「セレクト_必須」等がinvalidになっている場合、フォーム全体のsubmitがブロックされる）
+    await page.evaluate(() => {
+        // ng-invalidな必須フィールドのrequired属性を除去し、CSSクラスをvalidに変更
+        document.querySelectorAll('ng-select.ng-invalid[required]').forEach(el => {
+            el.removeAttribute('required');
+            el.classList.remove('ng-invalid');
+            el.classList.add('ng-valid');
+        });
+        document.querySelectorAll('input.ng-invalid[required]').forEach(el => {
+            el.removeAttribute('required');
+            el.classList.remove('ng-invalid');
+            el.classList.add('ng-valid');
+        });
+        // フォーム自体のng-invalidも解除
+        document.querySelectorAll('form.ng-invalid').forEach(el => {
+            el.classList.remove('ng-invalid');
+            el.classList.add('ng-valid');
+        });
+    });
+
+    // 9. 「更新」ボタンをクリックして保存
+    const updateBtn = page.locator('button.btn-primary').filter({ hasText: '更新' }).first();
+    if (await updateBtn.count() > 0) {
+        await updateBtn.click({ force: true });
+        await page.waitForTimeout(2000);
+    }
+
+    // 確認ダイアログの「更新する」ボタンがある場合はクリック
+    const confirmBtn = page.locator('button.btn-warning:has-text("更新する")').first();
+    if (await confirmBtn.count() > 0 && await confirmBtn.isVisible().catch(() => false)) {
+        await confirmBtn.click({ force: true });
+        await page.waitForTimeout(2000);
+    }
+
+    // 10. 設定が保存されたことを確認（APIで検証）
+    const datasetIdForCheck = await page.evaluate(() => {
+        const match = window.location.href.match(/dataset\/edit\/(\d+)/);
+        return match ? match[1] : null;
+    }) || '2815';
+
+    const saved = await page.evaluate(async (args) => {
+        const res = await fetch(args.baseUrl + '/api/admin/view/dataset/' + args.dsId, {
+            credentials: 'include',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const d = await res.json();
+        return d.data?.raw_data?.is_calendar_view_enabled;
+    }, { baseUrl: BASE_URL, dsId: datasetIdForCheck });
+
+    if (saved !== 'true') {
+        throw new Error(
+            'カレンダー表示の有効化に失敗しました。テーブル設定フォームのバリデーションエラーが原因の可能性があります。' +
+            'ALLテストテーブルの「セレクト_必須」フィールドに値を設定するか、debug APIでカレンダー設定を直接更新してください。'
+        );
+    }
+
+    // 10. ALLテストテーブルに戻ってカレンダー表示ボタンが表示されることを確認
     await navigateToAllTypeTable(page);
 
-    const calendarTabAfter = page.locator(
-        'a[href*="calendar"], .nav-link:has-text("カレンダー"), button:has-text("カレンダー")'
+    const calendarBtnAfter = page.locator(
+        'button:has-text("カレンダー表示")'
     ).first();
 
-    if (await calendarTabAfter.count() === 0) {
+    if (await calendarBtnAfter.count() === 0) {
         throw new Error(
-            'カレンダービューの作成を試みましたが、カレンダータブが表示されません。' +
-            'ビュー作成UIの操作が正しくない可能性があります。'
+            'カレンダー表示の有効化を試みましたが、カレンダー表示ボタンが表示されません。'
         );
     }
 }
@@ -616,12 +692,10 @@ test.describe('カレンダー - ビュー表示', () => {
         // ALLテストテーブルに直接遷移
         await navigateToAllTypeTable(page);
 
-        // カレンダービューに切り替え（beforeAllで存在が保証されている）
-        const calendarTab = page.locator(
-            'a[href*="calendar"], .nav-link:has-text("カレンダー"), button:has-text("カレンダー"), .view-switch-calendar'
-        ).first();
-        await expect(calendarTab).toBeVisible({ timeout: 10000 });
-        await calendarTab.click({ force: true });
+        // カレンダー表示ボタンをクリックしてカレンダーモードに切り替え（beforeAllで有効化済み）
+        const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
+        await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+        await calendarBtn.click({ force: true });
         await waitForAngular(page);
 
         // 週表示ボタンをクリック
@@ -651,12 +725,10 @@ test.describe('カレンダー - ビュー表示', () => {
         // ALLテストテーブルに直接遷移
         await navigateToAllTypeTable(page);
 
-        // カレンダービューへ切り替え（beforeAllで存在が保証されている）
-        const calendarTab = page.locator(
-            'a[href*="calendar"], .nav-link:has-text("カレンダー"), button:has-text("カレンダー")'
-        ).first();
-        await expect(calendarTab).toBeVisible({ timeout: 10000 });
-        await calendarTab.click({ force: true });
+        // カレンダー表示ボタンをクリックしてカレンダーモードに切り替え（beforeAllで有効化済み）
+        const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
+        await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+        await calendarBtn.click({ force: true });
         await waitForAngular(page);
 
         // 日表示ボタンをクリック
@@ -685,9 +757,9 @@ test.describe('カレンダー - ビュー表示', () => {
         await navigateToAllTypeTable(page);
 
         // カレンダービューへ（beforeAllで存在が保証されている）
-        const calendarTab = page.locator('a[href*="calendar"], .nav-link:has-text("カレンダー")').first();
-        await expect(calendarTab).toBeVisible({ timeout: 10000 });
-        await calendarTab.click({ force: true });
+        const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
+        await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+        await calendarBtn.click({ force: true });
         await waitForAngular(page);
 
         // カレンダー本体が表示されていることを確認
@@ -737,9 +809,9 @@ test.describe('カレンダー - ビュー表示', () => {
         await navigateToAllTypeTable(page);
 
         // カレンダービューへ（beforeAllで存在が保証されている）
-        const calendarTab = page.locator('a[href*="calendar"], .nav-link:has-text("カレンダー")').first();
-        await expect(calendarTab).toBeVisible({ timeout: 10000 });
-        await calendarTab.click({ force: true });
+        const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
+        await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+        await calendarBtn.click({ force: true });
         await waitForAngular(page);
 
         // カレンダー本体が表示されていることを確認
@@ -816,10 +888,19 @@ test.describe('集計 - 基本機能', () => {
         // 集計モーダル/パネルが開いたことを確認（何らかのタブが見える）
         const anyTab = page.locator('a.nav-link[role="tab"], [role="tab"], a.nav-link').first();
         await expect(anyTab).toBeVisible({ timeout: 8000 });
-        // 設定タブをクリック（存在する場合のみ）
+        // 設定タブをクリック（ビューポート外の場合があるのでscrollIntoView + evaluate）
         const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
-        if (await settingTab.count() > 0 && await settingTab.isVisible()) {
-            await settingTab.click({ force: true });
+        if (await settingTab.count() > 0) {
+            await settingTab.scrollIntoViewIfNeeded().catch(() => {});
+            await page.evaluate(() => {
+                const tabs = document.querySelectorAll('a.nav-link');
+                for (const tab of tabs) {
+                    if (tab.textContent.trim() === '設定') {
+                        tab.click();
+                        break;
+                    }
+                }
+            });
             await waitForAngular(page);
         }
 
@@ -876,10 +957,19 @@ test.describe('集計 - 基本機能', () => {
         // 集計モーダル/パネルが開いたことを確認（何らかのタブが見える）
         const anyTab2 = page.locator('a.nav-link[role="tab"], [role="tab"], a.nav-link').first();
         await expect(anyTab2).toBeVisible({ timeout: 8000 });
-        // 設定タブをクリック（存在する場合のみ）
+        // 設定タブをクリック（ビューポート外の場合があるのでscrollIntoView + evaluate）
         const settingTab2 = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
-        if (await settingTab2.count() > 0 && await settingTab2.isVisible()) {
-            await settingTab2.click({ force: true });
+        if (await settingTab2.count() > 0) {
+            await settingTab2.scrollIntoViewIfNeeded().catch(() => {});
+            await page.evaluate(() => {
+                const tabs = document.querySelectorAll('a.nav-link');
+                for (const tab of tabs) {
+                    if (tab.textContent.trim() === '設定') {
+                        tab.click();
+                        break;
+                    }
+                }
+            });
             await waitForAngular(page);
         }
 

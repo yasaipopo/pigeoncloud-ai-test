@@ -1,6 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
+const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -163,14 +164,13 @@ test.describe('公開フォーム・公開メールリンク', () => {
     // テスト前: テーブルとデータを一度だけ作成
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
+        const { context, page } = await createAuthContext(browser);
         ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
-            await page.close();
+            await context.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
-        await page.close();
+        await context.close();
     });
 
     // テスト後: テーブルを削除

@@ -2,6 +2,7 @@
 // notifications-2.spec.js: 通知・メール配信テスト Part 2 (describe #2: メール配信)
 // notifications.spec.jsから分割 (line 2107〜末尾)
 const { test, expect } = require('@playwright/test');
+const { createAuthContext } = require('./helpers/auth-context');
 const { setupAllTypeTable } = require('./helpers/table-setup');
 const { waitForEmail, deleteTestEmails } = require('./helpers/mail-checker');
 const { webhookUrl, resetWebhook, waitForWebhook } = require('./helpers/webhook-checker');
@@ -196,14 +197,13 @@ test.describe('メール配信', () => {
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page, EMAIL, PASSWORD);
+        const { context, page } = await createAuthContext(browser);
         ({ tableId } = await setupAllTypeTable(page));
         if (!tableId) {
-            await page.close();
+            await context.close();
             throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
         }
-        await page.close();
+        await context.close();
     });
 
     test.beforeEach(async ({ page }) => {

@@ -2,6 +2,7 @@
 // fields-5.spec.js: フィールドテスト Part 5 (全フィールドタイプ表示条件追加オプション確認 850系)
 const { test, expect } = require('@playwright/test');
 const { setupAllTypeTable } = require('./helpers/table-setup');
+const { createAuthContext } = require('./helpers/auth-context');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -125,8 +126,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(480000);
-        const page = await browser.newPage();
-        await login(page);
+        const { context, page } = await createAuthContext(browser);
         await closeTemplateModal(page);
 
         // setupAllTypeTable ヘルパーを使用（既存テーブル検出・ポーリング対応）
@@ -175,17 +175,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
         }
 
         console.log(`[beforeAll] tableId=${tableId}, editUrl=${editUrl}`);
-
-        // login_max_devices対策: ページを閉じる前にログアウトしてサーバー側セッションを解放
-        await page.evaluate(async (baseUrl) => {
-            await fetch(baseUrl + '/api/admin/auth/logout', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                credentials: 'include',
-            }).catch(() => {});
-        }, BASE_URL).catch(() => {});
-        await page.waitForTimeout(500);
-        await page.close();
+        await context.close();
     });
 
     test.beforeEach(async ({ page }) => {
