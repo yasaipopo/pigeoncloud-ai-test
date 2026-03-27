@@ -30,10 +30,13 @@ OUTPUT_PATH = REPORTS_DIR / "results.json"
 
 # ステータスのマッピング（Playwright → シート用）
 STATUS_MAP = {
-    "passed":    "passed",
-    "failed":    "failed",
-    "skipped":   "skipped",
-    "timedOut":  "failed",
+    "passed":      "passed",
+    "expected":    "passed",
+    "flaky":       "passed",
+    "failed":      "failed",
+    "unexpected":  "failed",
+    "skipped":     "skipped",
+    "timedOut":    "failed",
     "interrupted": "failed",
 }
 
@@ -44,7 +47,7 @@ STATUS_MAP = {
 LOG_LINE_RE = re.compile(
     r"^\s*([✓✗✘×\-–])\s+\d+\s+\[chromium\]\s+›\s+tests/(\w[\w-]+)\.spec\.js:\d+:\d+\s+›\s+.*?›\s+(.+?)(?:\s+\(\d+(?:\.\d+)?[smh]\))?\s*$"
 )
-CASE_NO_RE = re.compile(r"^([\d]+-[\d]+(?:-[\d]+)*|[\d]+)\s*[：:]")
+CASE_NO_RE = re.compile(r"^([A-Za-z]*-?[\d]+-[\d]+(?:-[\d]+)*|[A-Za-z]*-?[\d]+)\s*[：:]")
 
 
 def parse_playwright_json(json_path: Path, spec_name: str) -> dict[str, str]:

@@ -338,86 +338,13 @@ async function getAdminSetting(page) {
 // 共通設定・システム設定・契約設定テスト
 // =============================================================================
 
-test.describe('共通設定・システム設定', () => {
-
-    // describeブロック全体で共有するテーブルID
-    let tableId = null;
-
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const { context, page } = await createAuthContext(browser);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await context.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await context.close();
-    });
-
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(300000); // delete-all-type-tablesは時間がかかるため延長
-        // afterAllでテーブルを一度だけ削除する
-        try {
-            const { context, page } = await createAuthContext(browser);
-            // パスワード変更を起こさない安全なlogin関数（afterAll専用）
-            async function safeLoginForAfterAll(pw) {
-                await page.goto(BASE_URL + '/admin/login');
-                await page.waitForLoadState('domcontentloaded');
-                await page.waitForSelector('#id', { timeout: 15000 }).catch(() => {});
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', pw);
-                await page.click('button[type=submit].btn-primary');
-                await waitForAngular(page);
-                return page.url();
-            }
-
-            let loginSuccess = false;
-            // パスワードは変わらないため同じパスワードのみ試みる
-            const candidates = [PASSWORD];
-            for (const pw of candidates) {
-                try {
-                    const url = await safeLoginForAfterAll(pw);
-                    if (url.includes('/admin/dashboard') || (url.includes('/admin/') && !url.includes('/admin/login'))) {
-                        loginSuccess = true;
-                        console.log('[afterAll] ログイン成功');
-                        break;
-                    }
-                    // パスワード変更画面が出た場合は次のパスワードで試みる（変更はしない）
-                    const bodyText = await page.innerText('body').catch(() => '');
-                    if (bodyText.includes('アカウントロック')) {
-                        console.log('[afterAll] アカウントロック中。afterAll処理をスキップ');
-                        await context.close();
-                        return;
-                    }
-                } catch (e2) {
-                    console.log('[afterAll] パスワード候補失敗:', e2.message);
-                }
-            }
-            if (!loginSuccess) {
-                console.log('[afterAll] ログイン失敗。afterAll処理をスキップ');
-                await context.close();
-                return;
-            }
-            // pw_change_interval_daysを空にリセット（89-1テストの副作用除去）
-            await page.evaluate(async (baseUrl) => {
-                const fd = new FormData();
-                fd.append('id', '1');
-                fd.append('pw_change_interval_days', '');
-                await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
-                    method: 'POST', body: fd, credentials: 'include',
-                }).catch(() => {});
-            }, BASE_URL).catch(() => {});
-            // 利用規約が有効の場合は無効にしてからテーブル削除
-            await updateAdminSetting(page, { setTermsAndConditions: 'false' }).catch(() => {});
-            await deleteAllTypeTables(page);
-            await context.close();
-        } catch (e) {
-            console.log('[afterAll] エラー:', e.message);
-        }
-    });
+// =============================================================================
+// テーブル定義一覧テスト（setupAllTypeTable不要 — 10-1, 10-2）
+// =============================================================================
+test.describe('テーブル定義一覧（setupAllTypeTable不要）', () => {
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(300000); // loginが遅い環境で120s超えることがあるため延長
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -505,6 +432,95 @@ test.describe('共通設定・システム設定', () => {
         const tableList = page.locator('table tbody tr, .dataset-list-item, [class*="table-row"], tr[ng-reflect], li[class*="list-group-item"]');
         const count = await tableList.count();
         console.log('テーブル一覧件数: ' + count);
+    });
+
+});
+
+// =============================================================================
+// 共通設定・システム設定テスト（setupAllTypeTable必要 — 10-3以降）
+// =============================================================================
+test.describe('共通設定・システム設定', () => {
+
+    // describeブロック全体で共有するテーブルID
+    let tableId = null;
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(360000);
+        const { context, page } = await createAuthContext(browser);
+        ({ tableId } = await setupAllTypeTable(page));
+        if (!tableId) {
+            await context.close();
+            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
+        }
+        await context.close();
+    });
+
+    test.afterAll(async ({ browser }) => {
+        test.setTimeout(300000); // delete-all-type-tablesは時間がかかるため延長
+        // afterAllでテーブルを一度だけ削除する
+        try {
+            const { context, page } = await createAuthContext(browser);
+            // パスワード変更を起こさない安全なlogin関数（afterAll専用）
+            async function safeLoginForAfterAll(pw) {
+                await page.goto(BASE_URL + '/admin/login');
+                await page.waitForLoadState('domcontentloaded');
+                await page.waitForSelector('#id', { timeout: 15000 }).catch(() => {});
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', pw);
+                await page.click('button[type=submit].btn-primary');
+                await waitForAngular(page);
+                return page.url();
+            }
+
+            let loginSuccess = false;
+            // パスワードは変わらないため同じパスワードのみ試みる
+            const candidates = [PASSWORD];
+            for (const pw of candidates) {
+                try {
+                    const url = await safeLoginForAfterAll(pw);
+                    if (url.includes('/admin/dashboard') || (url.includes('/admin/') && !url.includes('/admin/login'))) {
+                        loginSuccess = true;
+                        console.log('[afterAll] ログイン成功');
+                        break;
+                    }
+                    // パスワード変更画面が出た場合は次のパスワードで試みる（変更はしない）
+                    const bodyText = await page.innerText('body').catch(() => '');
+                    if (bodyText.includes('アカウントロック')) {
+                        console.log('[afterAll] アカウントロック中。afterAll処理をスキップ');
+                        await context.close();
+                        return;
+                    }
+                } catch (e2) {
+                    console.log('[afterAll] パスワード候補失敗:', e2.message);
+                }
+            }
+            if (!loginSuccess) {
+                console.log('[afterAll] ログイン失敗。afterAll処理をスキップ');
+                await context.close();
+                return;
+            }
+            // pw_change_interval_daysを空にリセット（89-1テストの副作用除去）
+            await page.evaluate(async (baseUrl) => {
+                const fd = new FormData();
+                fd.append('id', '1');
+                fd.append('pw_change_interval_days', '');
+                await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
+                    method: 'POST', body: fd, credentials: 'include',
+                }).catch(() => {});
+            }, BASE_URL).catch(() => {});
+            // 利用規約が有効の場合は無効にしてからテーブル削除
+            await updateAdminSetting(page, { setTermsAndConditions: 'false' }).catch(() => {});
+            await deleteAllTypeTables(page);
+            await context.close();
+        } catch (e) {
+            console.log('[afterAll] エラー:', e.message);
+        }
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(300000); // loginが遅い環境で120s超えることがあるため延長
+        await login(page);
+        await closeTemplateModal(page);
     });
 
     // ---------------------------------------------------------------------------
