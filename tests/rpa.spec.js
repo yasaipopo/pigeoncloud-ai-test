@@ -74,10 +74,15 @@ async function login(page) {
 
 /**
  * コネクト（RPA）一覧ページへ移動
+ * waitForAngularだけではAPIデータロード完了を保証できないため、
+ * .card-block（今月使用量エリア）が表示されるまで待機する
  */
 async function navigateToRpa(page) {
     await page.goto(BASE_URL + '/admin/rpa');
     await waitForAngular(page);
+    // コネクト一覧のコンテンツ（今月使用量テキスト）が表示されるまで待機
+    // .card-blockは複数存在するため、今月使用量テキストを持つ要素を待つ
+    await page.waitForSelector('b:text("今月使用量")', { timeout: 20000 });
 }
 
 test.describe('RPA（コネクト）', () => {
@@ -108,104 +113,117 @@ test.describe('RPA（コネクト）', () => {
         const title = await page.title();
         expect(title).not.toMatch(/エラー|Error|404|500/i);
 
-        // 「コネクト一覧」系タイトルが表示されること
+        // URLが /admin/rpa であること
         const url = page.url();
         expect(url).toContain('/admin/rpa');
 
-        // 新規追加ボタン（fa-plus）が存在すること
-        const addBtnCount = await page.locator('button.btn-outline-primary .fa-plus').count();
-        expect(addBtnCount).toBeGreaterThan(0);
+        // 新規追加ボタン（fa-plus を含む btn-outline-primary ボタン）が存在すること
+        // 実際のクラス: btn btn-sm btn-outline-primary pl-2 mr-2
+        const addBtnCount = await page.locator('button.btn-outline-primary:has(.fa-plus)').count();
+        expect(addBtnCount, '新規追加ボタン（fa-plus）が存在すること').toBeGreaterThan(0);
+
+        // 今月使用量が表示されること
+        // .card-blockは複数ある場合があるので first() で取得
+        const usageText = await page.locator('.card-block').first().textContent();
+        expect(usageText).toMatch(/今月使用量/);
     });
 
     test('RPA-02: 新しいコネクト（RPA）を作成できること', async ({ page }) => {
         await login(page);
         await navigateToRpa(page);
 
-        // 新規追加ボタンをクリック
-        await page.evaluate(() => {
-            const plusBtn = document.querySelector('button.btn-outline-primary .fa-plus');
-            if (plusBtn) plusBtn.closest('button').click();
-        });
-        await page.waitForTimeout(1500);
+        // 新規追加ボタンをクリック（:has(.fa-plus) で確実にターゲット）
+        await page.locator('button.btn-outline-primary:has(.fa-plus)').first().click();
 
         // 編集画面（/admin/rpa/edit/new）に遷移すること
-        await page.waitForURL('**/admin/rpa/edit/**', { timeout: 10000 }).catch(() => {});
-        const url = page.url();
-        expect(url).toContain('/admin/rpa');
+        await page.waitForURL('**/admin/rpa/edit/**', { timeout: 15000 });
+        await waitForAngular(page);
+
+        // RPA名入力フィールドが表示されるまで待機
+        await page.waitForSelector('input[placeholder="フロー名"]', { timeout: 15000 });
 
         // RPA名入力フィールドが存在すること
         const rpaNameInput = await page.locator('input[placeholder="フロー名"]').count();
-        expect(rpaNameInput).toBeGreaterThan(0);
+        expect(rpaNameInput, 'RPA名入力フィールドが存在すること').toBeGreaterThan(0);
 
         // テーブル選択フィールドが存在すること
-        const tableSelect = await page.locator('#select_table, ng-select#select_table, .ng-select').count();
-        expect(tableSelect).toBeGreaterThan(0);
+        // テーブル選択はmat-autocomplete（input[placeholder="テーブル名検索"]）またはng-select
+        const tableSelectCount = await page.locator('input[placeholder*="テーブル名"], ng-select, .ng-select').count();
+        expect(tableSelectCount, 'テーブル選択フィールドが存在すること').toBeGreaterThan(0);
 
         // RPA名を入力
         await page.fill('input[placeholder="フロー名"]', 'テストRPA_E2E');
         await waitForAngular(page);
 
-        // テーブルを選択（ALLテストテーブル）
-        await page.locator('ng-select, .ng-select').first().click();
-        await waitForAngular(page);
-
-        // 選択肢からALLテストテーブルを選ぶ
-        const allTestOption = page.locator('.ng-option').filter({ hasText: 'ALLテストテーブル' });
-        const optionCount = await allTestOption.count();
-        if (optionCount > 0) {
-            await allTestOption.first().click();
+        // テーブルを選択（ng-select使用 — input[placeholder="テーブル名検索"]は非表示のため
+        // ng-selectをクリックして内部のinput[type=text]で検索する）
+        const ngSelect = page.locator('ng-select, .ng-select').first();
+        if (await ngSelect.count() > 0) {
+            await ngSelect.click();
             await waitForAngular(page);
+            const ngInput = page.locator('ng-select input[type=text], .ng-select input[type=text]').first();
+            if (await ngInput.count() > 0) {
+                await ngInput.fill('ALLテスト');
+                await waitForAngular(page);
+                // role=option で ARIA ドロップダウン選択肢をクリック
+                const option = page.getByRole('option').filter({ hasText: 'ALLテストテーブル' });
+                await option.first().waitFor({ state: 'visible', timeout: 10000 });
+                await option.first().click();
+                await waitForAngular(page);
+            }
         }
 
-        // 作成ボタンをクリック（btn-primaryまたはvisibleなボタンを優先）
-        const createBtn = page.locator('button.btn-primary, button.btn-outline-primary:visible').filter({ hasText: /作成|保存|フローを作成/ });
-        const createBtnCount = await createBtn.count();
-        if (createBtnCount > 0) {
-            await createBtn.first().click({ force: true });
-            await waitForAngular(page);
-        } else {
-            // フォールバック: page.evaluateで作成ボタンをクリック
-            await page.evaluate(() => {
-                const btns = Array.from(document.querySelectorAll('button'));
-                const btn = btns.find(b => /作成|保存|フローを作成/.test(b.textContent?.trim()) && b.offsetParent !== null);
-                if (btn) btn.click();
-            });
-            await page.waitForTimeout(2000);
-        }
+        // テーブル選択後に「作成」ボタンが表示されるまで待機してクリック
+        // exact: true で「手動でテーブルを作成」ボタン（hidden）と区別する
+        const createBtn = page.getByRole('button', { name: '作成', exact: true });
+        await createBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await createBtn.click();
+        // 作成後にURL変更を待つ（/admin/rpa/edit/new → /admin/rpa/edit/{id}）
+        await page.waitForURL(/\/admin\/rpa\/edit\/(?!new)/, { timeout: 20000 });
 
-        // エラーが出ていないこと
-        const errorMsg = await page.locator('.alert-danger, .text-danger').count();
-        // 作成完了またはフロー編集画面に遷移していること（エラーがなければOK）
+        // 作成後にRPA編集画面（/admin/rpa/edit/{id}）に遷移していること（newではなくIDが付いている）
         const finalUrl = page.url();
-        expect(finalUrl).toContain('/admin/rpa');
+        expect(finalUrl).toContain('/admin/rpa/edit/');
+        expect(finalUrl).not.toContain('/admin/rpa/edit/new');
+        const errorCount = await page.locator('.alert-danger').count();
+        expect(errorCount, 'エラーが表示されていないこと').toBe(0);
     });
 
     test('RPA-03: コネクト（RPA）フロー編集画面が表示されること', async ({ page }) => {
         await login(page);
         await navigateToRpa(page);
 
-        // 新規作成画面に遷移
-        await page.evaluate(() => {
-            const plusBtn = document.querySelector('button.btn-outline-primary .fa-plus');
-            if (plusBtn) plusBtn.closest('button').click();
-        });
-        await page.waitForTimeout(1500);
+        // 新規作成ボタンをクリック
+        await page.locator('button.btn-outline-primary:has(.fa-plus)').first().click();
+        await page.waitForURL('**/admin/rpa/edit/**', { timeout: 15000 });
+        await waitForAngular(page);
 
-        // 編集画面が表示されること
+        // RPA名入力フィールドが表示されるまで待機
+        await page.waitForSelector('input[placeholder="フロー名"]', { timeout: 15000 });
+
+        // 編集URLに遷移していること
         const url = page.url();
-        expect(url).toContain('/admin/rpa');
+        expect(url).toContain('/admin/rpa/edit/');
 
-        // フロー編集エリアが存在すること（flow-container）
-        const flowContainer = await page.locator('.flow-container, flow, pfc-list').count();
-        expect(flowContainer).toBeGreaterThan(0);
-
-        // テーブル選択・RPA名入力フィールドが存在すること
+        // RPA名入力フィールドが存在すること
         const rpaNameInput = await page.locator('input[placeholder="フロー名"]').count();
-        expect(rpaNameInput).toBeGreaterThan(0);
+        expect(rpaNameInput, 'RPA名入力フィールドが存在すること').toBeGreaterThan(0);
+
+        // テーブル選択フィールドが存在すること
+        // 実際にはmat-autocomplete（input[placeholder="テーブル名検索"]）
+        const tableSelectCount = await page.locator('input[placeholder*="テーブル名"], ng-select, .ng-select').count();
+        expect(tableSelectCount, 'テーブル選択フィールドが存在すること').toBeGreaterThan(0);
+
+        // flow要素はテーブル選択後に表示されるため、まず「まずテーブルを選択」のガイドテキストを確認
+        const guideText = await page.locator('text=まずテーブルを選択').count();
+        // ガイドテキストがある → 正常な初期状態
+        // またはflowコンポーネントがある → テーブル選択済みの正常状態
+        const flowEl = await page.locator('flow, .flow-container').count();
+        expect(guideText + flowEl, 'フロー編集エリアまたはガイドテキストが表示されること').toBeGreaterThan(0);
 
         // エラーなし
         const errorText = await page.locator('.alert-danger').count();
-        expect(errorText).toBe(0);
+        expect(errorText, 'エラーが表示されていないこと').toBe(0);
     });
 
     test('RPA-04: コネクト一覧のテーブルヘッダーが正しいこと', async ({ page }) => {
@@ -238,9 +256,14 @@ test.describe('RPA（コネクト）', () => {
         await navigateToRpa(page);
 
         // 今月使用量の表示確認
-        const usageCard = await page.locator('.card-accent-primary, .card-block').filter({ hasText: /今月使用量|STEP/ });
+        // 実際のDOM: <b>今月使用量:</b> ... STEP の親が .card-block
+        const usageCard = await page.locator('.card-block').filter({ hasText: /今月使用量/ });
         const usageCount = await usageCard.count();
-        expect(usageCount).toBeGreaterThan(0);
+        expect(usageCount, '今月使用量カードが表示されること').toBeGreaterThan(0);
+
+        // 使用量テキストが "N STEP / N STEP" 形式で表示されること
+        const usageText = await usageCard.first().textContent();
+        expect(usageText).toMatch(/STEP/);
     });
 
     test('RPA-06: コネクト実行ログページへ遷移できること', async ({ page }) => {
