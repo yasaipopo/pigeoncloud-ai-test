@@ -79,13 +79,21 @@ test.describe('ダッシュボード', () => {
     let _createdDashboardName = null;
 
     test.beforeAll(async ({ browser }) => {
-        const page = await browser.newPage();
-        await login(page);
+        // storageStateを使って認証済みコンテキストを作成（per-testページと同等の動作にする）
+        // browser.newPage()だけでは cookies/localStorage が空になりAngularが正常動作しない
+        const fs = require('fs');
+        const agentNum = process.env.AGENT_NUM || '1';
+        const authStatePath = `.auth-state.${agentNum}.json`;
+        const context = await browser.newContext(
+            fs.existsSync(authStatePath) ? { storageState: authStatePath } : {}
+        );
+        const page = await context.newPage();
+        await page.goto(BASE_URL + '/admin/dashboard');
+        await waitForAngular(page);
         const result = await setupAllTypeTable(page);
         _tableId = result.tableId;
 
-        // DB-03〜DB-05のために事前にダッシュボードを作成しておく（API直接呼び出し）
-        // UIのAngularフォームは不安定なため、fetch APIで直接 /admin/add/dashboards/ にPOST
+        // DB-03〜DB-05のために事前にダッシュボードを作成しておく
         _createdDashboardName = `テストDB_${Date.now()}`;
 
         await page.goto(BASE_URL + '/admin/dashboard');
@@ -98,42 +106,74 @@ test.describe('ダッシュボード', () => {
             await waitForAngular(page);
         }
 
-        // fetch APIでダッシュボードを作成（UIフォームよりずっと信頼性が高い）
-        const createResult = await page.evaluate(async (name) => {
-            try {
-                const formData = new FormData();
-                formData.append('name', name);
-                const resp = await fetch('/admin/add/dashboards/', {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: formData
-                });
-                let result = null;
-                try {
-                    const text = await resp.text();
-                    result = text.slice(0, 300);
-                } catch(e) {}
-                return { status: resp.status, ok: resp.ok, redirected: resp.redirected, url: resp.url, result };
-            } catch(e) {
-                return { error: e.toString() };
+        // 「+」ボタン（dashboard-tab-add-btn）をクリック
+        const dashTablistBefore = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
+        const tabsBefore = await dashTablistBefore.locator('[role=tab]').count();
+        await dashTablistBefore.locator('button.dashboard-tab-add-btn').click({ force: true }).catch(async () => {
+            await dashTablistBefore.locator('button').first().click({ force: true }).catch(() => {});
+        });
+
+        // ダッシュボード作成モーダルが開くまでポーリング（getBoundingClientRectで可視確認）
+        await page.waitForFunction(() => {
+            const inputs = document.querySelectorAll('input#name');
+            for (const inp of inputs) {
+                const r = inp.getBoundingClientRect();
+                if (r.width > 0 && r.height > 0) return true;
+            }
+            return false;
+        }, null, { timeout: 10000 });
+
+        // ダッシュボード名をAngularモデルに書き込む（Native Input Value Setter）
+        await page.evaluate((name) => {
+            const inputs = document.querySelectorAll('input#name');
+            for (const input of inputs) {
+                const r = input.getBoundingClientRect();
+                if (r.width > 0 && r.height > 0) {
+                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                    nativeInputValueSetter.call(input, name);
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    return;
+                }
             }
         }, _createdDashboardName);
-        console.log('[beforeAll] API create result:', JSON.stringify(createResult));
+        await page.waitForTimeout(300);
 
-        // ページを再読み込みして新しいタブを確認
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await waitForAngular(page);
+        // 送信ボタンをクリック（表示中のbtn-primary ladda-buttonのみ対象）
+        await page.evaluate(() => {
+            const btns = document.querySelectorAll('button.btn-primary.ladda-button, button.btn-primary.btn-ladda');
+            for (const btn of btns) {
+                const r = btn.getBoundingClientRect();
+                if (r.width > 0 && r.height > 0 && btn.textContent.trim().includes('送信')) {
+                    btn.click();
+                    return;
+                }
+            }
+        });
 
+        // タブが増えるのを待つ
+        await page.waitForFunction(
+            (beforeCount) => {
+                const tablist = document.querySelector('[role=tablist]');
+                if (!tablist) return false;
+                return tablist.querySelectorAll('[role=tab]').length > beforeCount;
+            },
+            tabsBefore,
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(1500);
+
+        // タブが作成されたか確認
         const dashTablistCheck = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
         const newTab = dashTablistCheck.locator('[role=tab]').filter({ hasText: _createdDashboardName });
-        const tabFound = await newTab.isVisible({ timeout: 10000 }).catch(() => false);
+        const tabFound = await newTab.isVisible({ timeout: 8000 }).catch(() => false);
         console.log('[beforeAll] ダッシュボードタブ作成:', tabFound ? 'OK' : 'NG', '_createdDashboardName:', _createdDashboardName);
         if (!tabFound) {
             const tabs = await dashTablistCheck.locator('[role=tab]').allTextContents().catch(() => []);
             console.log('[beforeAll] 現在のタブ:', tabs);
             _createdDashboardName = null;
         }
-        await page.close();
+        await context.close();
     });
     test('DB-01: ダッシュボード画面が正常に表示されること', async ({ page }) => {
         await login(page);
