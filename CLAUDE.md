@@ -5,6 +5,24 @@
 
 ---
 
+## 【最初に必ず確認】知見ファイル
+
+E2Eテストの修正・作成を始める前に、以下の知見ファイルを**必ず全て読むこと**:
+
+```bash
+cat .claude/knowledge-e2e-performance.md
+cat .claude/knowledge-e2e-angular.md
+```
+
+| ファイル | 内容 |
+|---|---|
+| `.claude/knowledge-e2e-performance.md` | waitForTimeout, auto-waiting, 高速化施策 |
+| `.claude/knowledge-e2e-angular.md` | beforeAll/storageState, Reactive Forms, ダッシュボードUI, パスワード変更フロー等 |
+
+調査で新しい知見が得られたら、作業終了前に必ず該当ファイルに追記すること。
+
+---
+
 ## あなたの役割
 
 ### モードA: spec.js生成モード（メイン作業）
