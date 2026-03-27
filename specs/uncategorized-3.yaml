@@ -2,717 +2,836 @@ group: 未分類 Part3
 spec_file: tests/uncategorized-3.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: "674"
+- case_no: '674'
   feature: 各種画面
   description: |
     Yes/Noフィールドでラベルが空白のまま登録するとバリデーションエラーが発生すること
   expected: |
     Yes/Noフィールドでラベルが空白のまま登録するとバリデーションエラーが発生すること
-- case_no: "675"
+  movie: U301
+- case_no: '675'
   feature: 各種画面
   description: |
     詳細画面から関連レコードを削除してもエラーが発生しないこと
   expected: |
     詳細画面から関連レコードを削除してもエラーが発生しないこと
-- case_no: "676"
+  movie: U301
+- case_no: '676'
   feature: 各種画面
   description: |
     カレンダーに予定がない状態で簡易検索を行ってもエラーが発生しないこと
   expected: |
     カレンダーに予定がない状態で簡易検索を行ってもエラーが発生しないこと
-- case_no: "677"
+  movie: U301
+- case_no: '677'
   feature: 各種画面
   description: |
     カレンダー表示に切り替えてもエラーが発生しないこと
   expected: |
     カレンダー表示に切り替えてもエラーが発生しないこと
-- case_no: "678"
+  movie: U301
+- case_no: '678'
   feature: 各種画面
   description: |
     チャートのプレビュー画面でページ移動ボタンを押してもエラーが発生しないこと
   expected: |
     チャートのプレビュー画面でページ移動ボタンを押してもエラーが発生しないこと
-- case_no: "679"
+  movie: U301
+- case_no: '679'
   feature: 各種画面
   description: |
     集計ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "680"
+  movie: U301
+- case_no: '680'
   feature: 各種画面
   description: |
     ワークフロー設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "681"
+  movie: U301
+- case_no: '681'
   feature: 各種画面
   description: |
     テーブル一覧のヘッダー項目が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "682"
+  movie: U301
+- case_no: '682'
   feature: 各種画面
   description: |
     CSVダウンロード/アップロードに子テーブルも含める設定を有効にしてもエラーが発生しないこと
   expected: |
     CSVダウンロード/アップロードに子テーブルも含める設定を有効にしてもエラーが発生しないこと
-- case_no: "683"
+  movie: U301
+- case_no: '683'
   feature: 各種画面
   description: |
     テーブル一覧のフィールドヘッダーが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "684"
+  movie: U301
+- case_no: '684'
   feature: 各種画面
   description: |
     通知先組織に親組織を設定したとき通知設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "685"
+  movie: U301
+- case_no: '685'
   feature: 各種画面
   description: |
     ユーザー管理ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "686"
+  movie: U301
+- case_no: '686'
   feature: 各種画面
   description: |
     テーブル一覧のフィールドヘッダーがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "687"
+  movie: U301
+- case_no: '687'
   feature: 各種画面
   description: |
     CSVアップロード実行時にエラーが発生しないこと
   expected: |
     CSVアップロード実行時にエラーが発生しないこと
-- case_no: "688"
+  movie: U301
+- case_no: '688'
   feature: 各種画面
   description: |
     テーブル一覧ページでCSV操作関連の処理がエラーなく動作すること
   expected: |
     エラーが発生しないこと
-- case_no: "689"
+  movie: U301
+- case_no: '689'
   feature: 各種画面
   description: |
     集計ページでチャート設定の開始月を設定できることのエラーなし確認
   expected: |
     集計ページでチャート設定の開始月を設定できることのエラーなし確認
-- case_no: "690"
+  movie: U302
+- case_no: '690'
   feature: 各種画面
   description: |
     テーブル一覧のフィールドヘッダーがエラーなく表示されること（#issue1219）
   expected: |
     エラーが発生しないこと
-- case_no: "691"
+  movie: U302
+- case_no: '691'
   feature: 各種画面
   description: |
     メール通知制限の警告通知文言変更後に通知設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "692"
+  movie: U302
+- case_no: '692'
   feature: 各種画面
   description: |
     ユーザー権限でもリクエストログを確認できるようにしたときテーブル一覧が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "693"
+  movie: U302
+- case_no: '693'
   feature: 各種画面
   description: |
     公開フォーム機能を使用してもテーブル一覧ページがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "694"
+  movie: U302
+- case_no: '694'
   feature: 各種画面
   description: |
     関連レコード一覧の表示する条件に削除済み項目が設定されていてもテーブル一覧が正常表示されること
   expected: |
     関連レコード一覧の表示する条件に削除済み項目が設定されていてもテーブル一覧が正常表示されること
-- case_no: "695"
+  movie: U302
+- case_no: '695'
   feature: 各種画面
   description: |
     関連レコード一覧の表示する条件設定後にテーブル一覧が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "696"
+  movie: U302
+- case_no: '696'
   feature: 各種画面
   description: |
     テーブル一覧ページでCSV操作ボタンがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "697"
+  movie: U302
+- case_no: '697'
   feature: 各種画面
   description: |
     各項目の設定を変更してもテーブル一覧ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "698"
+  movie: U302
+- case_no: '698'
   feature: 各種画面
   description: |
     通知設定ページがエラーなく正常に表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "699"
+  movie: U302
+- case_no: '699'
   feature: 各種画面
   description: |
     テーブル設定で使用中の項目を削除したとき通知設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "700"
+  movie: U302
+- case_no: '700'
   feature: 各種画面
   description: |
     計算値の自動更新がOFFでもレコード更新時にテーブル一覧が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "701"
+  movie: U302
+- case_no: '701'
   feature: 各種画面
   description: |
     CSV空欄アップロードで複数値フィールドの値が削除される仕様変更後にテーブル一覧が正常表示されること
   expected: |
     CSV空欄アップロードで複数値フィールドの値が削除される仕様変更後にテーブル一覧が正常表示されること
-- case_no: "705"
+  movie: U302
+- case_no: '705'
   feature: 各種画面
   description: |
     関連レコード一覧を縦に表示したとき詳細・編集ボタンが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "706"
+  movie: U302
+- case_no: '706'
   feature: 各種画面
   description: |
     テーブルの上部メモへのファイル添付後もテーブル一覧ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "707"
+  movie: U302
+- case_no: '707'
   feature: 各種画面
   description: |
     自動採番フォーマット変更後にテーブル一覧のフィールドヘッダーが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "708"
+  movie: U303
+- case_no: '708'
   feature: 各種画面
   description: |
     関連レコード一覧がエラーなく正常に表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "709"
+  movie: U303
+- case_no: '709'
   feature: 各種画面
   description: |
     帳票のDLを別ブラウザで真っ白の画面開かずにDLできるように仕様変更
   expected: |
     帳票のDLを別ブラウザで真っ白の画面開かずにDLできるように仕様変更
-- case_no: "712"
+  movie: U303
+- case_no: '712'
   feature: 各種画面
   description: |
     テーブル一覧ページでCSV操作ボタンがエラーなく表示されること（#issue1314）
   expected: |
     エラーが発生しないこと
-- case_no: "713"
+  movie: U303
+- case_no: '713'
   feature: 各種画面
   description: |
     テーブル一覧ページでCSV操作機能がエラーなく動作すること（#issue1049）
   expected: |
     エラーが発生しないこと
-- case_no: "714"
+  movie: U303
+- case_no: '714'
   feature: 各種画面
   description: |
     チャート設定タブの期間単位設定後に集計ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "717"
+  movie: U303
+- case_no: '717'
   feature: 各種画面
   description: |
     コメントでメンションを入力しても通知設定ページがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "718"
+  movie: U303
+- case_no: '718'
   feature: 各種画面
   description: |
     複数値登録を許可した文字列項目での通知設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "719"
+  movie: U303
+- case_no: '719'
   feature: 各種画面
   description: |
     ビューの行に色を付ける機能を使用してもレコード一覧が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "720"
+  movie: U303
+- case_no: '720'
   feature: 各種画面
   description: |
     帳票設定ページがエラーなく正常に表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "721"
+  movie: U303
+- case_no: '721'
   feature: 各種画面
   description: |
     親子テーブル構成でテーブル一覧のフィールドヘッダーが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "722"
+  movie: U303
+- case_no: '722'
   feature: 各種画面
   description: |
     レコード詳細画面の関連レコード一覧の追加ボタンがエラーなく動作すること
   expected: |
     エラーが発生しないこと
-- case_no: "724"
+  movie: U303
+- case_no: '724'
   feature: 各種画面
   description: |
     他テーブル参照項目の選択用表示項目に親テーブルの項目を設定できてもテーブル一覧が正常表示されること
   expected: |
     他テーブル参照項目の選択用表示項目に親テーブルの項目を設定できてもテーブル一覧が正常表示されること
-- case_no: "725"
+  movie: U303
+- case_no: '725'
   feature: 各種画面
   description: |
     カレンダー機能を使用してもエラーが発生しないこと
   expected: |
     カレンダー機能を使用してもエラーが発生しないこと
-- case_no: "726"
+  movie: U303
+- case_no: '726'
   feature: 各種画面
   description: |
     地図機能を有効にしたテーブルのレコード一覧が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "728"
+  movie: U303
+- case_no: '728'
   feature: 各種画面
   description: |
     テーブル設定ページがエラーなく正常に表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "729"
+  movie: U304
+- case_no: '729'
   feature: 各種画面
   description: |
     帳票で子テーブルの情報を出力する際に帳票設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "730"
+  movie: U304
+- case_no: '730'
   feature: 各種画面
   description: |
     通知設定で通知先ユーザーを絞り込んでもデータが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "731"
+  movie: U304
+- case_no: '731'
   feature: 各種画面
   description: |
     CSVアップロードの進捗状況表示後もテーブル一覧ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "732"
+  movie: U304
+- case_no: '732'
   feature: 各種画面
   description: |
     ワークフローの一度承認後の再申請機能を有効にしてもワークフロー設定ページが正常表示されること
   expected: |
     ワークフローの一度承認後の再申請機能を有効にしてもワークフロー設定ページが正常表示されること
-- case_no: "735"
+  movie: U304
+- case_no: '735'
   feature: 各種画面
   description: |
     画像項目にサイズ制限を設定してもテーブル一覧のフィールドヘッダーが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "736"
+  movie: U304
+- case_no: '736'
   feature: 各種画面
   description: |
     CSVアップロードの主キー設定画面が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "737"
+  movie: U304
+- case_no: '737'
   feature: 各種画面
   description: |
     集計ページがエラーなく正常に表示されること（#issue1218）
   expected: |
     エラーが発生しないこと
-- case_no: "738"
+  movie: U304
+- case_no: '738'
   feature: 各種画面
   description: |
     テーブル一覧でCSV操作機能がエラーなく表示されること（#issue1323）
   expected: |
     エラーが発生しないこと
-- case_no: "739"
+  movie: U304
+- case_no: '739'
   feature: 各種画面
   description: |
     テーブル一覧の絞り込み機能がエラーなく動作すること
   expected: |
     エラーが発生しないこと
-- case_no: "742"
+  movie: U304
+- case_no: '742'
   feature: 各種画面
   description: |
     ワークフロー設定ページがエラーなく正常に表示されること（#issue1324）
   expected: |
     エラーが発生しないこと
-- case_no: "743"
+  movie: U304
+- case_no: '743'
   feature: 各種画面
   description: |
     帳票設定ページがエラーなく正常に表示されること（#issue1342）
   expected: |
     エラーが発生しないこと
-- case_no: "744"
+  movie: U304
+- case_no: '744'
   feature: 各種画面
   description: |
     複数値登録を許可した文字列項目が一覧・詳細画面で正常に表示されること
   expected: |
     複数値登録を許可した文字列項目が一覧・詳細画面で正常に表示されること
-- case_no: "745"
+  movie: U304
+- case_no: '745'
   feature: 各種画面
   description: |
     Yes/No項目にデフォルト値を設定してもテーブル一覧フィールドヘッダーが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "746"
+  movie: U304
+- case_no: '746'
   feature: 各種画面
   description: |
     他テーブル参照項目の表示項目に子テーブルを選択できてもユーザー管理ページが正常表示されること
   expected: |
     他テーブル参照項目の表示項目に子テーブルを選択できてもユーザー管理ページが正常表示されること
-- case_no: "748"
+  movie: U304
+- case_no: '748'
   feature: 各種画面
   description: |
     テーブル権限設定からCSVアップロード項目が除外されてもテーブル一覧が正常表示されること
   expected: |
     テーブル権限設定からCSVアップロード項目が除外されてもテーブル一覧が正常表示されること
-- case_no: "749"
+  movie: U305
+- case_no: '749'
   feature: 各種画面
   description: |
     関連レコード一覧にページネーションを設定してもレコード一覧が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "750"
+  movie: U305
+- case_no: '750'
   feature: 各種画面
   description: |
     関連レコード一覧のページネーション不具合修正後に帳票設定ページが正常表示されること
   expected: |
     関連レコード一覧のページネーション不具合修正後に帳票設定ページが正常表示されること
-- case_no: "751"
+  movie: U305
+- case_no: '751'
   feature: 各種画面
   description: |
     特定ユーザーでのログイン後に通知設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "752"
+  movie: U305
+- case_no: '752'
   feature: 各種画面
   description: |
     日時項目のCSVアップロード時にテーブル一覧ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "753"
+  movie: U305
+- case_no: '753'
   feature: 各種画面
   description: |
     テーブル一覧のフィールドヘッダーが正常に表示されること（#issue1363）
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "754"
+  movie: U305
+- case_no: '754'
   feature: 各種画面
   description: |
     通知設定ページがエラーなく正常に表示されること（#issue1247）
   expected: |
     エラーが発生しないこと
-- case_no: "761"
+  movie: U305
+- case_no: '761'
   feature: 各種画面
   description: |
     DATE_ADD関数を使用したテーブルのレコード一覧が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "762"
+  movie: U305
+- case_no: '762'
   feature: 各種画面
   description: |
     テーブルのカレンダービュー切り替えがエラーなく動作すること
   expected: |
     エラーが発生しないこと
-- case_no: "763"
+  movie: U305
+- case_no: '763'
   feature: 各種画面
   description: |
     テーブル一覧画面に「表示する条件」という誤ったテキストが表示されないこと
   expected: |
     テーブル一覧画面に「表示する条件」という誤ったテキストが表示されないこと
-- case_no: "770"
+  movie: U305
+- case_no: '770'
   feature: 各種画面
   description: |
     集計でチャート設定の開始月を設定できる機能が集計ページでエラーなく動作すること
   expected: |
     エラーが発生しないこと
-- case_no: "771"
+  movie: U305
+- case_no: '771'
   feature: 各種画面
   description: |
     テーブル一覧の絞り込み検索機能がエラーなく動作すること（#issue1175）
   expected: |
     エラーが発生しないこと
-- case_no: "773"
+  movie: U305
+- case_no: '773'
   feature: 各種画面
   description: |
     テーブル設定で他で参照されている項目を削除しても通知設定ページが正常表示されること
   expected: |
     テーブル設定で他で参照されている項目を削除しても通知設定ページが正常表示されること
-- case_no: "775"
+  movie: U305
+- case_no: '775'
   feature: 各種画面
   description: |
     テーブル設定ページがエラーなく正常に表示されること（#issue1349）
   expected: |
     エラーが発生しないこと
-- case_no: "776"
+  movie: U305
+- case_no: '776'
   feature: 各種画面
   description: |
     通知設定ページがエラーなく正常に表示されること（#issue1345）
   expected: |
     エラーが発生しないこと
-- case_no: "777"
+  movie: U305
+- case_no: '777'
   feature: 各種画面
   description: |
     日時項目の種類を時刻のみに設定してもテーブル一覧フィールドヘッダーが正常表示されること
   expected: |
     日時項目の種類を時刻のみに設定してもテーブル一覧フィールドヘッダーが正常表示されること
-- case_no: "778"
+  movie: U306
+- case_no: '778'
   feature: 各種画面
   description: |
     集計ページがエラーなく正常に表示されること（#issue1113）
   expected: |
     エラーが発生しないこと
-- case_no: "779"
+  movie: U306
+- case_no: '779'
   feature: 各種画面
   description: |
     テーブル設定で子テーブルの表示位置を変更してもテーブル設定ページが正常表示されること
   expected: |
     テーブル設定で子テーブルの表示位置を変更してもテーブル設定ページが正常表示されること
-- case_no: "781"
+  movie: U306
+- case_no: '781'
   feature: 各種画面
   description: |
     テーブル設定のカレンダー設定後にカレンダービューがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "782"
+  movie: U306
+- case_no: '782'
   feature: 各種画面
   description: |
     複数値登録を許可した画像項目を使用してもテーブル一覧が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "783"
+  movie: U306
+- case_no: '783'
   feature: 各種画面
   description: |
     集計結果を並び替えできる機能を有効にしても集計ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "784"
+  movie: U306
+- case_no: '784'
   feature: 各種画面
   description: |
     テーブル一覧のフィールドヘッダーがエラーなく表示されること（#issue944）
   expected: |
     エラーが発生しないこと
-- case_no: "785"
+  movie: U306
+- case_no: '785'
   feature: 各種画面
   description: |
     ワークフローが設定されているテーブルの通知設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "786"
+  movie: U306
+- case_no: '786'
   feature: 各種画面
   description: |
     数値項目で桁区切りを表示しない設定でテーブル一覧のフィールドヘッダーが正常表示されること
   expected: |
     数値項目で桁区切りを表示しない設定でテーブル一覧のフィールドヘッダーが正常表示されること
-- case_no: "787"
+  movie: U306
+- case_no: '787'
   feature: 各種画面
   description: |
     テーブル一覧のフィールドヘッダーが正常に表示されること（#issue1385）
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "788"
+  movie: U306
+- case_no: '788'
   feature: 各種画面
   description: |
     テーブル一覧でCSV操作機能がエラーなく動作すること（#issue1362）
   expected: |
     エラーが発生しないこと
-- case_no: "795"
+  movie: U306
+- case_no: '795'
   feature: 各種画面
   description: |
     集計ページがエラーなく正常に表示されること（#issue1360）
   expected: |
     エラーが発生しないこと
-- case_no: "798"
+  movie: U306
+- case_no: '798'
   feature: 各種画面
   description: |
     ファイル項目への添付後に帳票設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "799"
+  movie: U306
+- case_no: '799'
   feature: 各種画面
   description: |
     テーブル設定で他で参照されている項目を削除しても通知設定ページが正常表示されること（#issue967）
   expected: |
     テーブル設定で他で参照されている項目を削除しても通知設定ページが正常表示されること（#issue967）
-- case_no: "800"
+  movie: U306
+- case_no: '800'
   feature: 各種画面
   description: |
     一覧の表示幅設定とドラッグ伸縮の変更がフィールド設定ページで正常に表示されること
   expected: |
     一覧の表示幅設定とドラッグ伸縮の変更がフィールド設定ページで正常に表示されること
-- case_no: "801"
+  movie: U306
+- case_no: '801'
   feature: 各種画面
   description: |
     削除した項目名が変数「%s」のまま表示されるバグ修正後に通知設定ページが正常表示されること
   expected: |
     削除した項目名が変数「%s」のまま表示されるバグ修正後に通知設定ページが正常表示されること
-- case_no: "802"
+  movie: U307
+- case_no: '802'
   feature: 各種画面
   description: |
     ワークフローテンプレートの条件設定後にワークフロー設定ページが正常表示されること
   expected: |
     ワークフローテンプレートの条件設定後にワークフロー設定ページが正常表示されること
-- case_no: "803"
+  movie: U307
+- case_no: '803'
   feature: 各種画面
   description: |
     親テーブルコピー時に子テーブルがコピーされない修正後にテーブル一覧が正常表示されること
   expected: |
     親テーブルコピー時に子テーブルがコピーされない修正後にテーブル一覧が正常表示されること
-- case_no: "804"
+  movie: U307
+- case_no: '804'
   feature: 各種画面
   description: |
     テーブル一覧のフィールドヘッダーが正常に表示されること（#issue1381）
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "806"
+  movie: U307
+- case_no: '806'
   feature: 各種画面
   description: |
     集計ページがエラーなく正常に表示されること（#issue1455）
   expected: |
     エラーが発生しないこと
-- case_no: "808"
+  movie: U307
+- case_no: '808'
   feature: 各種画面
   description: |
     テーブル一覧でCSV操作機能がエラーなく動作すること（#issue1174）
   expected: |
     エラーが発生しないこと
-- case_no: "809"
+  movie: U307
+- case_no: '809'
   feature: 各種画面
   description: |
     テーブル権限設定の変更後にユーザー管理ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "810"
+  movie: U307
+- case_no: '810'
   feature: 各種画面
   description: |
     親テーブルから子テーブルのルックアップを行ってもユーザー管理ページが正常表示されること
   expected: |
     親テーブルから子テーブルのルックアップを行ってもユーザー管理ページが正常表示されること
-- case_no: "811"
+  movie: U307
+- case_no: '811'
   feature: 各種画面
   description: |
     親テーブルでワークフロー申請中のときワークフロー設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "812"
+  movie: U307
+- case_no: '812'
   feature: 各種画面
   description: |
     公開フォームリンクのURLパラメータで項目値を初期設定できてもテーブル一覧が正常表示されること
   expected: |
     公開フォームリンクのURLパラメータで項目値を初期設定できてもテーブル一覧が正常表示されること
-- case_no: "813"
+  movie: U307
+- case_no: '813'
   feature: 各種画面
   description: |
     テーブル設定のカレンダーフィールド設定後にカレンダービューがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "814"
+  movie: U307
+- case_no: '814'
   feature: 各種画面
   description: |
     詳細画面の関連レコード一覧で項目幅を手動変更してもフィールドヘッダーが正常表示されること
   expected: |
     詳細画面の関連レコード一覧で項目幅を手動変更してもフィールドヘッダーが正常表示されること
-- case_no: "815"
+  movie: U307
+- case_no: '815'
   feature: 各種画面
   description: |
     テーブル一覧のフィールドヘッダーがエラーなく表示されること（#issue1304）
   expected: |
     エラーが発生しないこと
-- case_no: "816"
+  movie: U307
+- case_no: '816'
   feature: 各種画面
   description: |
     特定ケースのバグ修正後に通知設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "817"
+  movie: U307
+- case_no: '817'
   feature: 各種画面
   description: |
     帳票を削除してもテーブル一覧ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "818"
+  movie: U307
+- case_no: '818'
   feature: 各種画面
   description: |
     APIテスト実施後にユーザー一覧ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "820"
+  movie: U308
+- case_no: '820'
   feature: 各種画面
   description: |
     通知設定でファイル項目を設定したときファイル名が正常に取得できること
   expected: |
     通知設定でファイル項目を設定したときファイル名が正常に取得できること
-- case_no: "821"
+  movie: U308
+- case_no: '821'
   feature: 各種画面
   description: |
     画像項目で複数値登録を許可している時にテーブル一覧フィールドヘッダーが正常表示されること
   expected: |
     画像項目で複数値登録を許可している時にテーブル一覧フィールドヘッダーが正常表示されること
-- case_no: "822"
+  movie: U308
+- case_no: '822'
   feature: 各種画面
   description: |
     集計ページがエラーなく正常に表示されること（#issue1427）
   expected: |
     エラーが発生しないこと
-- case_no: "823"
+  movie: U308
+- case_no: '823'
   feature: 各種画面
   description: |
     ワークフロー設定ページがエラーなく正常に表示されること（#issue1421）
   expected: |
     エラーが発生しないこと
-- case_no: "824"
+  movie: U308
+- case_no: '824'
   feature: 各種画面
   description: |
     集計ページがエラーなく正常に表示されること（#issue1359）
   expected: |
     エラーが発生しないこと
-- case_no: "825"
+  movie: U308
+- case_no: '825'
   feature: 各種画面
   description: |
     他人のリクエストログ閲覧制限後もユーザー管理ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "826"
+  movie: U308
+- case_no: '826'
   feature: 各種画面
   description: |
     通知設定で組織テーブルの他テーブル参照項目を通知先に選択できても通知設定ページが正常表示されること
   expected: |
     通知設定で組織テーブルの他テーブル参照項目を通知先に選択できても通知設定ページが正常表示されること
-- case_no: "827"
+  movie: U308
+- case_no: '827'
   feature: 各種画面
   description: |
     帳票に画像を出力する設定後に帳票設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "833"
+  movie: U308
+- case_no: '833'
   feature: 各種画面
   description: |
     カレンダー機能をオンにしているテーブルでカレンダービューがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "834"
+  movie: U308
+- case_no: '834'
   feature: 各種画面
   description: |
     複数値登録を許可した日時項目でテーブル一覧フィールドヘッダーが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "836"
+  movie: U308
+- case_no: '836'
   feature: 各種画面
   description: |
     他テーブル先が計算項目で自動反映ONのとき並び替えが正常に動作すること
   expected: |
     他テーブル先が計算項目で自動反映ONのとき並び替えが正常に動作すること
-- case_no: "837"
+  movie: U308
+- case_no: '837'
   feature: 各種画面
   description: |
     郵便番号フィールドをCSVダウンロードしたとき正常にデータが出力されること
   expected: |
     郵便番号フィールドをCSVダウンロードしたとき正常にデータが出力されること
-- case_no: "838"
+  movie: U308
+- case_no: '838'
   feature: 各種画面
   description: |
     ルックアップ表示した項目が一覧画面でレイアウト崩れなく正常に表示されること
   expected: |
     ルックアップ表示した項目が一覧画面でレイアウト崩れなく正常に表示されること
+  movie: U308

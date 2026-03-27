@@ -2,39 +2,45 @@ group: テンプレート
 spec_file: tests/templates.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: "TMPL-01"
+- case_no: TMPL-01
   feature: テンプレート
   description: |
     テンプレート一覧モーダルが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
-- case_no: "TMPL-02"
+  movie: TM01
+- case_no: TMPL-02
   feature: テンプレート
   description: |
     テンプレートの詳細を確認できること
   expected: |
     テンプレートの詳細を確認できること
-- case_no: "TMPL-03"
+  movie: TM01
+- case_no: TMPL-03
   feature: テンプレート
   description: |
     テンプレートインストールモーダルの「戻る」で一覧に戻れること
   expected: |
     テンプレートインストールモーダルの「戻る」で一覧に戻れること
-- case_no: "TMPL-04"
+  movie: TM01
+- case_no: TMPL-04
   feature: テンプレート
   description: |
     テンプレートをインストールできること
   expected: |
     テンプレートをインストールできること
-- case_no: "TMPL-05"
+  movie: TM01
+- case_no: TMPL-05
   feature: テンプレート
   description: |
     テンプレートモーダルを閉じられること
   expected: |
     テンプレートモーダルを閉じられること
-- case_no: "TMPL-06"
+  movie: TM01
+- case_no: TMPL-06
   feature: テンプレート
   description: |
     テンプレート一覧のテンプレート名が表示されていること
   expected: |
     テンプレート一覧のテンプレート名が表示されていること
+  movie: TM01

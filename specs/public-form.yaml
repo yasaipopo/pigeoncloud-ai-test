@@ -6,167 +6,126 @@ cases:
   sheet: B
   feature: 公開フォーム
   category: 公開フォームをメール配信
-  description: '・登録されてるユーザーのメールアドレス宛てに回答用URLを送信。
-
+  description: |-
+    ・登録されてるユーザーのメールアドレス宛てに回答用URLを送信。
     　URLは個別で、回答はユーザーに紐づく。（配信メールアドレスのテーブルがユーザーではない場合は、作成者はゲストです）
-
     ・回答は一人一回のみ。
-
-    ・送信前に「送信してよろしですか？」のポップアップ表示'
+    ・送信前に「送信してよろしですか？」のポップアップ表示
   expected: 左記が全て想定通りの動作となっていること。
+  movie: PF01
 - case_no: '170'
   sheet: B
   feature: 公開フォーム
   category: 公開フォームURL
-  description: '公開フォームURLが変更されたことを確認。
-
+  description: |-
+    公開フォームURLが変更されたことを確認。
 
     ＜変更内容＞
-
-    ・URLのアドレス長'
+    ・URLのアドレス長
   expected: ''
+  movie: PF01
 - case_no: '358'
   sheet: B
   feature: ''
-  description: '公開フォームで、子テーブル内でルックアップのコピーが出来ない。（動画参照）
-
+  description: |-
+    公開フォームで、子テーブル内でルックアップのコピーが出来ない。（動画参照）
     プログラムを選択したら、確認事項が子コピーされるようにしたいです。
 
 
-
     動画前半、問題なし（Pigeon内）。
-
     動画後半、確認事項が表示されない（公開フォーム）。
 
 
 
-
     対象テーブル：
-
     「2. 活動計画書」
-
-    https://n2wzgyultj.pigeon-cloud.com/admin/datas'
+    https://n2wzgyultj.pigeon-cloud.com/admin/datas
   expected: エラーなく正常に動作すること。(公開フォームで、子テーブル内でルックアップのコピーが出来ない。（動画参照） プログラムを選択したら、確認事項が子コピーされるようにしたいです。   動画前半、問題なし（Pigeon内）。 動画後半、確)
+  movie: PF01
 - case_no: '359'
   sheet: B
   feature: ''
-  description: '【機能改善確認】列を複数にしていると、公開フォームで項目が収まらない場合があります。
-
+  description: |-
+    【機能改善確認】列を複数にしていると、公開フォームで項目が収まらない場合があります。
     （添付参照）
-
 
     特定のテーブルというわけではなく、全体的にそうなのですが、例えば以下の公開フォームです。
 
-
     公開フォーム：
-
-    https://n2wzgyultj.pigeon-cloud.com/api/public/f/dataset__8/dcb37a781b/28'
+    https://n2wzgyultj.pigeon-cloud.com/api/public/f/dataset__8/dcb37a781b/28
   expected: 機能改善が正しく反映されていること。(列を複数にしていると、公開フォームで項目が収まらない場合があります。 （添付参照）  特定のテーブルというわけではなく、全体的にそうなのですが、例えば以下の公開フォームです。  公開フォーム： htt)
+  movie: PF01
 - case_no: '499'
   sheet: B
   feature: ''
-  description: '【バグ修正確認】子テーブルがビューで非表示に設定していても表示されてしまうため、表示されないようにしたい。
-
+  description: |-
+    【バグ修正確認】子テーブルがビューで非表示に設定していても表示されてしまうため、表示されないようにしたい。
     以下で表示されてしまっている。
-
     ・通常の編集画面、作成画面
-
     ・埋め込みフォーム
-
-    ・公開フォーム'
+    ・公開フォーム
   expected: バグが修正され、正常に動作すること。(子テーブルがビューで非表示に設定していても表示されてしまうため、表示されないようにしたい。 以下で表示されてしまっている。 ・通常の編集画面、作成画面 ・埋め込みフォーム ・公開フォーム)
+  movie: PF01
 - case_no: '547'
   sheet: B
   feature: ''
-  description: '【機能改善確認】ワンネットシステム株式会社
-
+  description: |-
+    【機能改善確認】ワンネットシステム株式会社
     DB: lete47hsig
 
-
     以下お客様のサイトにテストで埋め込みフォームを使っていますが、
-
     フッターまでの空白（送信ボタンとお問合せ窓口の間）を狭めることはできますか？
-
     （デフォルトでもう少し狭められるなら確かに見た目的に狭めたいです。）
 
-
-    <a href="https://1ns.co.jp/contact" target="_blank">http'
+    <a href="https://1ns.co.jp/contact" target="_blank">http
   expected: '機能改善が正しく反映されていること。(ワンネットシステム株式会社 DB: lete47hsig  以下お客様のサイトにテストで埋め込みフォームを使っていますが、 フッターまでの空白（送信ボタンとお問合せ窓口の間）を狭めることはできますか？)'
+  movie: PF01
 - case_no: '660'
   sheet: B
   feature: ''
-  description: '【機能改善確認】公開フォームリンク先の画面をスマホから見たとき、
-
-    通常のテーブル（添付画像）のように、スマホの画面サイズにぴったりおさまるようなデザインにしていただけますでしょうか。'
+  description: |-
+    【機能改善確認】公開フォームリンク先の画面をスマホから見たとき、
+    通常のテーブル（添付画像）のように、スマホの画面サイズにぴったりおさまるようなデザインにしていただけますでしょうか。
   expected: 機能改善が正しく反映されていること。(公開フォームリンク先の画面をスマホから見たとき、 通常のテーブル（添付画像）のように、スマホの画面サイズにぴったりおさまるようなデザインにしていただけますでしょうか。)
+  movie: PF01
 actual_steps:
 - case_no: '135'
   status: partial
-  steps: '1. beforeAll: create-all-type-table API呼び出し
-
-    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:''fixed'')
-
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
+    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:'fixed')
     3. beforeAll: create-user API呼び出し
-
     4. beforeAll: テーブルIDをサイドバーのリンクから取得
-
     5. /admin/dataset__{tableId}/publicform に遷移
-
     6. ページURLをconsole.log出力
-
     7. publicformページが admin URLを含むことを確認（緩い確認）
-
     8. スクリーンショット保存（reports/agent-1/screenshots/135-publicform-mail.png）
-
     9. 「公開フォーム」見出しまたはメール関連要素の存在確認（条件付き）
-
     10. afterAll: delete-all-type-tables API呼び出し
-
-    '
-  assertions: '- 「公開フォーム」見出しが存在すれば toBeVisible()（条件付き）
-
+  assertions: |
+    - 「公開フォーム」見出しが存在すれば toBeVisible()（条件付き）
     - 存在しない場合はannotationを追加してパス
-
-    '
-  gaps: '⚠️ YAMLでは「登録ユーザーのメールアドレス宛に個別URLを送信」「回答は一人一回のみ」「送信前に確認ポップアップ」の検証が期待されるが全く実装されていない
-
+  gaps: |
+    ⚠️ YAMLでは「登録ユーザーのメールアドレス宛に個別URLを送信」「回答は一人一回のみ」「送信前に確認ポップアップ」の検証が期待されるが全く実装されていない
     ⚠️ メール配信の実際の動作確認なし（メール送信・受信の確認不要としても、UI操作確認もない）
-
     ⚠️ 公開フォームの設定操作（メール配信設定・送信先選択等）なし
-
     ⚠️ 確認ポップアップの表示確認なし
-
     ⚠️ 「一人一回のみ」制限の検証なし
-
     ⚠️ ページへのアクセス確認のみで、機能の動作を全く検証していない
-
-    '
 - case_no: '170'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/publicform に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/publicform に遷移
     2. 現在のページURLをconsole.log出力
-
     3. スクリーンショット保存（reports/agent-1/screenshots/170-publicform-url.png）
-
     4. URLを含む要素（input[readonly][value*="pigeon"]など）を探す
-
     5. 存在すれば URLの長さが0より大きいことを確認
-
     6. 存在しなければ annotation を追加してパス
-
-    '
-  assertions: '- if (urlTextCount > 0) { expect(urlValue.length).toBeGreaterThan(0) }
-
+  assertions: |
+    - if (urlTextCount > 0) { expect(urlValue.length).toBeGreaterThan(0) }
     - 存在しない場合は annotation のみ（アサートなし）
-
-    '
-  gaps: '⚠️ YAMLでは「公開フォームURLのアドレス長が適切であること（以前より短い/長い形式への変更確認）」が期待されるが、URL長さが0より大きいかしか確認していない
-
+  gaps: |
+    ⚠️ YAMLでは「公開フォームURLのアドレス長が適切であること（以前より短い/長い形式への変更確認）」が期待されるが、URL長さが0より大きいかしか確認していない
     ⚠️ 以前のURLとの比較・変更確認なし
-
     ⚠️ URLの形式・文字数の具体的な基準値がない
-
     ⚠️ 公開フォームURLの要素が存在しない場合（UIの変更等）でもパスする
-
-    '

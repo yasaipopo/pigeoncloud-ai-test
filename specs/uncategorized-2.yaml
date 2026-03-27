@@ -2,795 +2,927 @@ group: 未分類 Part2
 spec_file: tests/uncategorized-2.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: "505"
+- case_no: '505'
   feature: 各種画面
   description: |
     親テーブルのルックアップフィールドが他テーブル参照の場合にテーブル一覧が正常表示されること
   expected: |
     親テーブルのルックアップフィールドが他テーブル参照の場合にテーブル一覧が正常表示されること
-- case_no: "506"
+  movie: U201
+- case_no: '506'
   feature: 各種画面
   description: |
     ワークフロー設定ページがエラーなく正常に表示されること（#issue819）
   expected: |
     エラーが発生しないこと
-- case_no: "507"
+  movie: U201
+- case_no: '507'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue791）
   expected: |
     エラーが発生しないこと
-- case_no: "508"
+  movie: U201
+- case_no: '508'
   feature: 各種画面
   description: |
     帳票設定ページがエラーなく正常に表示されること（#issue820）
   expected: |
     エラーが発生しないこと
-- case_no: "509"
+  movie: U201
+- case_no: '509'
   feature: 各種画面
   description: |
     数値項目で桁区切り表示設定が有効な場合に一覧画面で数値列に桁区切りが正しく表示されること
   expected: |
     数値項目で桁区切り表示設定が有効な場合に一覧画面で数値列に桁区切りが正しく表示されること
-- case_no: "510"
+  movie: U201
+- case_no: '510'
   feature: 各種画面
   description: |
     ワークフロー設定ページで承認者設定がエラーなく表示されること（#issue812）
   expected: |
     エラーが発生しないこと
-- case_no: "511"
+  movie: U201
+- case_no: '511'
   feature: 各種画面
   description: |
     SUM集計の関連テーブルで他テーブルを表示条件に使う場合にテーブル一覧が正常表示されること
   expected: |
     SUM集計の関連テーブルで他テーブルを表示条件に使う場合にテーブル一覧が正常表示されること
-- case_no: "512"
+  movie: U201
+- case_no: '512'
   feature: 各種画面
   description: |
     ワークフロー設定ページがエラーなく正常に表示されること（#issue795）
   expected: |
     エラーが発生しないこと
-- case_no: "513"
+  movie: U201
+- case_no: '513'
   feature: 各種画面
   description: |
     ワークフローのフロー固定時に承認者追加できる設定が有効の場合にワークフロー設定ページが正常表示されること（#issue818）
   expected: |
     ワークフローのフロー固定時に承認者追加できる設定が有効の場合にワークフロー設定ページが正常表示されること（#issue818）
-- case_no: "514"
+  movie: U201
+- case_no: '514'
   feature: 各種画面
   description: |
     ユーザー管理ページがエラーなく正常に表示されること（#issue826）
   expected: |
     エラーが発生しないこと
-- case_no: "515"
+  movie: U201
+- case_no: '515'
   feature: 各種画面
   description: |
     マスターユーザーから全ユーザーのUP/DL履歴をユーザー管理ページで確認できること（#issue673）
   expected: |
     マスターユーザーから全ユーザーのUP/DL履歴をユーザー管理ページで確認できること（#issue673）
-- case_no: "516"
+  movie: U201
+- case_no: '516'
   feature: 各種画面
   description: |
     1行に4項目以上入力できる問題の修正確認
   expected: |
     1行に4項目以上入力できる問題の修正確認
-- case_no: "517"
+  movie: U201
+- case_no: '517'
   feature: 各種画面
   description: |
     必須条件設定で他の項目を条件利用する場合にテーブル一覧がエラーなく正常表示されること（#issue834）
   expected: |
     エラーが発生しないこと
-- case_no: "518"
+  movie: U201
+- case_no: '518'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue740）
   expected: |
     エラーが発生しないこと
-- case_no: "520"
+  movie: U201
+- case_no: '520'
   feature: 各種画面
   description: |
     ワークフローのAND/OR並行承認で2人目以降の役職選択が正常に動作すること
   expected: |
     ワークフローのAND/OR並行承認で2人目以降の役職選択が正常に動作すること
-- case_no: "521"
+  movie: U201
+- case_no: '521'
   feature: 各種画面
   description: |
     複数操作を連続実行した後にダッシュボードでエラーが発生しないこと
   expected: |
     複数操作を連続実行した後にダッシュボードでエラーが発生しないこと
-- case_no: "522"
+  movie: U202
+- case_no: '522'
   feature: 各種画面
   description: |
     並行承認AND/ORで同一承認者スキップ有効時にテーブル一覧がエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "523"
+  movie: U202
+- case_no: '523'
   feature: 各種画面
   description: |
     カレンダー表示周り修正後にダッシュボードがエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "528"
+  movie: U202
+- case_no: '528'
   feature: 各種画面
   description: |
     親テーブル削除権限あり・子テーブル削除権限なしの場合に子テーブルの削除が禁止されること
   expected: |
     親テーブル削除権限あり・子テーブル削除権限なしの場合に子テーブルの削除が禁止されること
-- case_no: "529"
+  movie: U202
+- case_no: '529'
   feature: 各種画面
   description: |
     ワークフロー設定済みテーブルを子テーブルにしようとするとエラーになること
   expected: |
     ワークフロー設定済みテーブルを子テーブルにしようとするとエラーになること
-- case_no: "530"
+  movie: U202
+- case_no: '530'
   feature: 各種画面
   description: |
     テーブル管理者権限を持つ一般ユーザーが帳票の登録・編集を行えるようにユーザー管理ページが正常表示されること（#issue704）
   expected: |
     テーブル管理者権限を持つ一般ユーザーが帳票の登録・編集を行えるようにユーザー管理ページが正常表示されること（#issue704）
-- case_no: "531"
+  movie: U202
+- case_no: '531'
   feature: 各種画面
   description: |
     選択肢（複数項目）で型エラーが発生せずテーブル一覧が正常表示されること（#issue856）
   expected: |
     選択肢（複数項目）で型エラーが発生せずテーブル一覧が正常表示されること（#issue856）
-- case_no: "533"
+  movie: U202
+- case_no: '533'
   feature: 各種画面
   description: |
     ユーザー管理ページがエラーなく正常に表示されること（#issue866）
   expected: |
     エラーが発生しないこと
-- case_no: "534"
+  movie: U202
+- case_no: '534'
   feature: 各種画面
   description: |
     大分類・中分類・小分類で他テーブルを段階絞り込みする場合にテーブル一覧と新規作成画面が正常表示されること
   expected: |
     大分類・中分類・小分類で他テーブルを段階絞り込みする場合にテーブル一覧と新規作成画面が正常表示されること
-- case_no: "535"
+  movie: U202
+- case_no: '535'
   feature: 各種画面
   description: |
     高速化モードでもダッシュボードがエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "536"
+  movie: U202
+- case_no: '536'
   feature: 各種画面
   description: |
     ユーザー管理ページがエラーなく正常に表示されること（#issue837）
   expected: |
     エラーが発生しないこと
-- case_no: "537"
+  movie: U202
+- case_no: '537'
   feature: 各種画面
   description: |
     ワークフローステータス変更アクション時にカスタム通知内容が正しく送信されること
   expected: |
     ワークフローステータス変更アクション時にカスタム通知内容が正しく送信されること
-- case_no: "538"
+  movie: U202
+- case_no: '538'
   feature: 各種画面
   description: |
     自動反映OFFの計算項目がCSVで登録されテーブル一覧にCSVダウンロード機能が表示されること
   expected: |
     自動反映OFFの計算項目がCSVで登録されテーブル一覧にCSVダウンロード機能が表示されること
-- case_no: "539"
+  movie: U202
+- case_no: '539'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue742）
   expected: |
     エラーが発生しないこと
-- case_no: "544"
+  movie: U202
+- case_no: '544'
   feature: 各種画面
   description: |
     一覧画面でフィルタ後に一括編集するとフィルタ外の行まで更新されるバグが修正されていること
   expected: |
     一覧画面でフィルタ後に一括編集するとフィルタ外の行まで更新されるバグが修正されていること
-- case_no: "545"
+  movie: U202
+- case_no: '545'
   feature: 各種画面
   description: |
     複数ファイル項目で追加ボタン後にファイル未選択のまま登録するとバリデーションエラーになること（#issue869）
   expected: |
     複数ファイル項目で追加ボタン後にファイル未選択のまま登録するとバリデーションエラーになること（#issue869）
-- case_no: "547"
+  movie: U203
+- case_no: '547'
   feature: 各種画面
   description: |
     テーブル一覧画面がエラーなく正常に表示されること（#issue828）
   expected: |
     エラーが発生しないこと
-- case_no: "549"
+  movie: U203
+- case_no: '549'
   feature: 各種画面
   description: |
     ワークフローステータス変更をアクションにした通知設定ページがエラーなく表示されること（#issue898）
   expected: |
     エラーが発生しないこと
-- case_no: "550"
+  movie: U203
+- case_no: '550'
   feature: 各種画面
   description: |
     他テーブル参照でモーダル検索ボタンからテーブルを絞り込み検索できること
   expected: |
     他テーブル参照でモーダル検索ボタンからテーブルを絞り込み検索できること
-- case_no: "551"
+  movie: U203
+- case_no: '551'
   feature: 各種画面
   description: |
     フィルター・検索で絞り込み後の一括削除確認メッセージに正しい件数が表示されること
   expected: |
     フィルター・検索で絞り込み後の一括削除確認メッセージに正しい件数が表示されること
-- case_no: "552"
+  movie: U203
+- case_no: '552'
   feature: 各種画面
   description: |
     フィルターあり・なし・チェックあり・なし各パターンで一括削除件数が正しく表示されること
   expected: |
     フィルターあり・なし・チェックあり・なし各パターンで一括削除件数が正しく表示されること
-- case_no: "554"
+  movie: U203
+- case_no: '554'
   feature: 各種画面
   description: |
     フィルター条件で子テーブルを対象にしていない項目がある場合もテーブル一覧が正常表示されること
   expected: |
     フィルター条件で子テーブルを対象にしていない項目がある場合もテーブル一覧が正常表示されること
-- case_no: "555"
+  movie: U203
+- case_no: '555'
   feature: 各種画面
   description: |
     親テーブルに計算項目がない場合でも子テーブルがリアルタイム更新されること（#issue696）
   expected: |
     親テーブルに計算項目がない場合でも子テーブルがリアルタイム更新されること（#issue696）
-- case_no: "556"
+  movie: U203
+- case_no: '556'
   feature: 各種画面
   description: |
     新規追加した関数を使った計算設定でダッシュボードがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "557"
+  movie: U203
+- case_no: '557'
   feature: 各種画面
   description: |
     Excelのテーブル機能セルが含まれる帳票出力時にエラーが発生しないこと
   expected: |
     Excelのテーブル機能セルが含まれる帳票出力時にエラーが発生しないこと
-- case_no: "558"
+  movie: U203
+- case_no: '558'
   feature: 各種画面
   description: |
     子テーブルが親テーブル項目を使った計算を持つ場合に編集中もリアルタイム反映されること
   expected: |
     子テーブルが親テーブル項目を使った計算を持つ場合に編集中もリアルタイム反映されること
-- case_no: "559"
+  movie: U203
+- case_no: '559'
   feature: 各種画面
   description: |
     権限設定の変更が即時反映されユーザー管理ページが正常表示されること（#issue753）
   expected: |
     権限設定の変更が即時反映されユーザー管理ページが正常表示されること（#issue753）
-- case_no: "561"
+  movie: U203
+- case_no: '561'
   feature: 各種画面
   description: |
     集計で最大・最小の集計方法に日付・日時・時間項目が選択できること
   expected: |
     集計で最大・最小の集計方法に日付・日時・時間項目が選択できること
-- case_no: "564"
+  movie: U203
+- case_no: '564'
   feature: 各種画面
   description: |
     修正適用後にダッシュボードがエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "567"
+  movie: U203
+- case_no: '567'
   feature: 各種画面
   description: |
     ワークフロー設定ページがエラーなく正常に表示されること（#issue938）
   expected: |
     エラーが発生しないこと
-- case_no: "568"
+  movie: U203
+- case_no: '568'
   feature: 各種画面
   description: |
     帳票のExcelで画像型フィールドを指定して出力できテーブル一覧に画像列が表示されること
   expected: |
     帳票のExcelで画像型フィールドを指定して出力できテーブル一覧に画像列が表示されること
-- case_no: "573"
+  movie: U204
+- case_no: '573'
   feature: 各種画面
   description: |
     決済変更後に登録ユーザー数がユーザー管理画面へ即時反映されること
   expected: |
     決済変更後に登録ユーザー数がユーザー管理画面へ即時反映されること
-- case_no: "574"
+  movie: U204
+- case_no: '574'
   feature: 各種画面
   description: |
     ワークフロー承認者を無効ユーザーにした場合にワークフロー設定ページが正常表示されること（#issue990）
   expected: |
     ワークフロー承認者を無効ユーザーにした場合にワークフロー設定ページが正常表示されること（#issue990）
-- case_no: "575"
+  movie: U204
+- case_no: '575'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue913）
   expected: |
     エラーが発生しないこと
-- case_no: "576"
+  movie: U204
+- case_no: '576'
   feature: 各種画面
   description: |
     テーブル一覧画面がエラーなく正常に表示されること（#issue940）
   expected: |
     エラーが発生しないこと
-- case_no: "577"
+  movie: U204
+- case_no: '577'
   feature: 各種画面
   description: |
     ワークフロー設定ページがエラーなく正常に表示されること（#issue1003）
   expected: |
     エラーが発生しないこと
-- case_no: "578"
+  movie: U204
+- case_no: '578'
   feature: 各種画面
   description: |
     Excelシート下部でも帳票の${テーブル名.項目名}式が正しく反映されること（#issue983）
   expected: |
     Excelシート下部でも帳票の${テーブル名.項目名}式が正しく反映されること（#issue983）
-- case_no: "579"
+  movie: U204
+- case_no: '579'
   feature: 各種画面
   description: |
     帳票の子テーブル連番${子テーブル名.INDEX}がテーブル一覧ページでエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "581"
+  movie: U204
+- case_no: '581'
   feature: 各種画面
   description: |
     ダッシュボードがエラーなく正常表示されること（issueなし）
   expected: |
     エラーが発生しないこと
-- case_no: "582"
+  movie: U204
+- case_no: '582'
   feature: 各種画面
   description: |
     他テーブル参照の表示項目設定変更後にダッシュボードがエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "583"
+  movie: U204
+- case_no: '583'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue867）
   expected: |
     エラーが発生しないこと
-- case_no: "584"
+  movie: U204
+- case_no: '584'
   feature: 各種画面
   description: |
     帳票のExcelに複数シートある場合に全シートで$から始まる式が反映されること
   expected: |
     帳票のExcelに複数シートある場合に全シートで$から始まる式が反映されること
-- case_no: "587"
+  movie: U204
+- case_no: '587'
   feature: 各種画面
   description: |
     2段階認証ONのとき自分のマイページから2段階認証を設定できること
   expected: |
     2段階認証ONのとき自分のマイページから2段階認証を設定できること
-- case_no: "588"
+  movie: U204
+- case_no: '588'
   feature: 各種画面
   description: |
     ワークフロー申請時にワークフロー設定ページがエラーなく正常表示されること（#issue1040）
   expected: |
     エラーが発生しないこと
-- case_no: "589"
+  movie: U204
+- case_no: '589'
   feature: 各種画面
   description: |
     ユーザー管理ページがエラーなく正常に表示されること（#issue1025）
   expected: |
     エラーが発生しないこと
-- case_no: "590"
+  movie: U204
+- case_no: '590'
   feature: 各種画面
   description: |
     ユーザーテーブルから他テーブル参照のルックアップが正常に機能すること（#issue571）
   expected: |
     ユーザーテーブルから他テーブル参照のルックアップが正常に機能すること（#issue571）
-- case_no: "591"
+  movie: U205
+- case_no: '591'
   feature: 各種画面
   description: |
     CSVエクスポート・インポート機能がエラーなく正常に動作すること（#issue939）
   expected: |
     エラーが発生しないこと
-- case_no: "593"
+  movie: U205
+- case_no: '593'
   feature: 各種画面
   description: |
     データ削除後もワークフロー申請バッジ数が正しい値（NaN・undefinedでない）を表示すること
   expected: |
     データ削除後もワークフロー申請バッジ数が正しい値（NaN・undefinedでない）を表示すること
-- case_no: "594"
+  movie: U205
+- case_no: '594'
   feature: 各種画面
   description: |
     過去にワークフロー使用済みのテーブルでワークフロー設定ページが正常表示されること（#issue1035）
   expected: |
     過去にワークフロー使用済みのテーブルでワークフロー設定ページが正常表示されること（#issue1035）
-- case_no: "595"
+  movie: U205
+- case_no: '595'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue962）
   expected: |
     エラーが発生しないこと
-- case_no: "596"
+  movie: U205
+- case_no: '596'
   feature: 各種画面
   description: |
     カレンダービューへの切り替えがエラーなく正常に動作すること（#issue945）
   expected: |
     エラーが発生しないこと
-- case_no: "597"
+  movie: U205
+- case_no: '597'
   feature: 各種画面
   description: |
     ユーザーを無効・削除後もワークフロー履歴から名前が消えずに表示されること（#issue1029）
   expected: |
     ユーザーを無効・削除後もワークフロー履歴から名前が消えずに表示されること（#issue1029）
-- case_no: "599"
+  movie: U205
+- case_no: '599'
   feature: 各種画面
   description: |
     日時項目で時刻のみ選択・時間間隔を1分以外に設定した場合にテーブル一覧が正常表示されること（#issue1063）
   expected: |
     日時項目で時刻のみ選択・時間間隔を1分以外に設定した場合にテーブル一覧が正常表示されること（#issue1063）
-- case_no: "600"
+  movie: U205
+- case_no: '600'
   feature: 各種画面
   description: |
     ワークフローのCSVインポート機能がエラーなく正常に動作すること（#issue975）
   expected: |
     エラーが発生しないこと
-- case_no: "601"
+  movie: U205
+- case_no: '601'
   feature: 各種画面
   description: |
     数値項目に4桁以上の数字が入力されている場合に帳票設定ページが正常表示されること（#issue1013）
   expected: |
     数値項目に4桁以上の数字が入力されている場合に帳票設定ページが正常表示されること（#issue1013）
-- case_no: "602"
+  movie: U205
+- case_no: '602'
   feature: 各種画面
   description: |
     CSVエクスポート・インポート機能がエラーなく正常に動作すること（#issue982）
   expected: |
     エラーが発生しないこと
-- case_no: "603"
+  movie: U205
+- case_no: '603'
   feature: 各種画面
   description: |
     コネクトのトリガーにワークフロー完了タイミングが追加されワークフロー設定ページが正常表示されること（#issue1044）
   expected: |
     コネクトのトリガーにワークフロー完了タイミングが追加されワークフロー設定ページが正常表示されること（#issue1044）
-- case_no: "605"
+  movie: U205
+- case_no: '605'
   feature: 各種画面
   description: |
     ユーザー管理テーブルのCSVエクスポート・インポートが正常に動作すること（#issue769）
   expected: |
     ユーザー管理テーブルのCSVエクスポート・インポートが正常に動作すること（#issue769）
-- case_no: "606"
+  movie: U205
+- case_no: '606'
   feature: 各種画面
   description: |
     ユーザー管理ページがエラーなく正常に表示されること（#issue881）
   expected: |
     エラーが発生しないこと
-- case_no: "607"
+  movie: U205
+- case_no: '607'
   feature: 各種画面
   description: |
     テーブル一覧画面がエラーなく正常に表示されること（#issue1074）
   expected: |
     エラーが発生しないこと
-- case_no: "608"
+  movie: U205
+- case_no: '608'
   feature: 各種画面
   description: |
     他テーブル参照で複数値登録を許可した項目をCSVダウンロードしてもエラーが発生しないこと（#issue1065）
   expected: |
     他テーブル参照で複数値登録を許可した項目をCSVダウンロードしてもエラーが発生しないこと（#issue1065）
-- case_no: "609"
+  movie: U206
+- case_no: '609'
   feature: 各種画面
   description: |
     FTP処理失敗・一部成功時にどのテーブルのエラーかを通知設定ページで確認できること（#issue1093）
   expected: |
     FTP処理失敗・一部成功時にどのテーブルのエラーかを通知設定ページで確認できること（#issue1093）
-- case_no: "610"
+  movie: U206
+- case_no: '610'
   feature: 各種画面
   description: |
     別タブで他テーブルの表示項目を削除後に元タブでテーブルを更新してもエラーが発生しないこと
   expected: |
     別タブで他テーブルの表示項目を削除後に元タブでテーブルを更新してもエラーが発生しないこと
-- case_no: "611"
+  movie: U206
+- case_no: '611'
   feature: 各種画面
   description: |
     CSVエクスポート・インポート機能がエラーなく正常に動作すること（#issue936）
   expected: |
     エラーが発生しないこと
-- case_no: "612"
+  movie: U206
+- case_no: '612'
   feature: 各種画面
   description: |
     ビュー設定タブの権限デフォルトが「自分のみ表示」に変更されテーブルページが正常表示されること
   expected: |
     ビュー設定タブの権限デフォルトが「自分のみ表示」に変更されテーブルページが正常表示されること
-- case_no: "613"
+  movie: U206
+- case_no: '613'
   feature: 各種画面
   description: |
     サイドメニューでテーブル名が省略表示されている場合でもサイドナビに正しくテーブル名が表示されること
   expected: |
     サイドメニューでテーブル名が省略表示されている場合でもサイドナビに正しくテーブル名が表示されること
-- case_no: "614"
+  movie: U206
+- case_no: '614'
   feature: 各種画面
   description: |
     チャートのデータ項目に多数の種類がある場合もダッシュボードがエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "615"
+  movie: U206
+- case_no: '615'
   feature: 各種画面
   description: |
     チャートの凡例が6個以上あってもダッシュボードがエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "616"
+  movie: U206
+- case_no: '616'
   feature: 各種画面
   description: |
     チャートにデータ項目・Y軸の並び替え機能が追加されテーブル一覧の列ヘッダーが正常表示されること
   expected: |
     チャートにデータ項目・Y軸の並び替え機能が追加されテーブル一覧の列ヘッダーが正常表示されること
-- case_no: "617"
+  movie: U206
+- case_no: '617'
   feature: 各種画面
   description: |
     全データ選択時の一括削除・一括編集ポップアップに赤字で全データ削除の注意書きが表示されること
   expected: |
     全データ選択時の一括削除・一括編集ポップアップに赤字で全データ削除の注意書きが表示されること
-- case_no: "618"
+  movie: U206
+- case_no: '618'
   feature: 各種画面
   description: |
     バグ修正後にダッシュボードがエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "619"
+  movie: U206
+- case_no: '619'
   feature: 各種画面
   description: |
     子テーブルでCSVにテーブル名を含めるオプション有効時にCSVダウンロードが正常に動作すること（#issue991）
   expected: |
     子テーブルでCSVにテーブル名を含めるオプション有効時にCSVダウンロードが正常に動作すること（#issue991）
-- case_no: "620"
+  movie: U206
+- case_no: '620'
   feature: 各種画面
   description: |
     ログイン画面のパスワードリセット機能追加後にユーザー管理ページが正常表示されること（#issue950）
   expected: |
     ログイン画面のパスワードリセット機能追加後にユーザー管理ページが正常表示されること（#issue950）
-- case_no: "621"
+  movie: U206
+- case_no: '621'
   feature: 各種画面
   description: |
     ワークフロー設定ページがエラーなく正常に表示されること（#issue1030）
   expected: |
     エラーが発生しないこと
-- case_no: "622"
+  movie: U206
+- case_no: '622'
   feature: 各種画面
   description: |
     テーブル絞り込みフィルター機能がエラーなく正常に動作すること（#issue1023）
   expected: |
     エラーが発生しないこと
-- case_no: "623"
+  movie: U206
+- case_no: '623'
   feature: 各種画面
   description: |
     他テーブル参照（複数）から文字列一行（複数）へのルックアップが正常動作すること（#issue1108）
   expected: |
     他テーブル参照（複数）から文字列一行（複数）へのルックアップが正常動作すること（#issue1108）
-- case_no: "624"
+  movie: U207
+- case_no: '624'
   feature: 各種画面
   description: |
     親テーブルでの絞り込みフィルター機能がエラーなく正常に動作すること（#issue949）
   expected: |
     エラーが発生しないこと
-- case_no: "625"
+  movie: U207
+- case_no: '625'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1005）
   expected: |
     エラーが発生しないこと
-- case_no: "626"
+  movie: U207
+- case_no: '626'
   feature: 各種画面
   description: |
     ユーザーテーブルのCSVダウンロードが正常に動作すること（#issue1109）
   expected: |
     ユーザーテーブルのCSVダウンロードが正常に動作すること（#issue1109）
-- case_no: "627"
+  movie: U207
+- case_no: '627'
   feature: 各種画面
   description: |
     ユーザー管理画面のテーブル一覧で役職が正しく表示されること（#issue892）
   expected: |
     ユーザー管理画面のテーブル一覧で役職が正しく表示されること（#issue892）
-- case_no: "628"
+  movie: U207
+- case_no: '628'
   feature: 各種画面
   description: |
     計算式にnextWeekDay関数が追加されテーブル一覧が正常表示されること（#issue706）
   expected: |
     計算式にnextWeekDay関数が追加されテーブル一覧が正常表示されること（#issue706）
-- case_no: "629"
+  movie: U207
+- case_no: '629'
   feature: 各種画面
   description: |
     コメント追加時のメール通知設定がある場合に通知設定ページが正常表示されること（#issue970）
   expected: |
     コメント追加時のメール通知設定がある場合に通知設定ページが正常表示されること（#issue970）
-- case_no: "630"
+  movie: U207
+- case_no: '630'
   feature: 各種画面
   description: |
     同時ログイン数が上限に達している場合でもユーザー管理ページが正常表示されること（#issue519）
   expected: |
     同時ログイン数が上限に達している場合でもユーザー管理ページが正常表示されること（#issue519）
-- case_no: "631"
+  movie: U207
+- case_no: '631'
   feature: 各種画面
   description: |
     集計ページでチャートと同様に開始月を設定できること（#issue553）
   expected: |
     集計ページでチャートと同様に開始月を設定できること（#issue553）
-- case_no: "633"
+  movie: U207
+- case_no: '633'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1139）
   expected: |
     エラーが発生しないこと
-- case_no: "634"
+  movie: U207
+- case_no: '634'
   feature: 各種画面
   description: |
     複数パターンの一覧操作後もチェックボックスとテーブル行が正常表示されること
   expected: |
     複数パターンの一覧操作後もチェックボックスとテーブル行が正常表示されること
-- case_no: "635"
+  movie: U207
+- case_no: '635'
   feature: 各種画面
   description: |
     ユーザー管理ページがエラーなく正常に表示されること（#issue1140）
   expected: |
     エラーが発生しないこと
-- case_no: "636"
+  movie: U207
+- case_no: '636'
   feature: 各種画面
   description: |
     コピー環境で重複データに対してエラーが出て登録できないことを確認できること（#issue732）
   expected: |
     コピー環境で重複データに対してエラーが出て登録できないことを確認できること（#issue732）
-- case_no: "637"
+  movie: U207
+- case_no: '637'
   feature: 各種画面
   description: |
     数字のみの項目名が計算式で使用されてもNaNや計算エラーが発生しないこと
   expected: |
     数字のみの項目名が計算式で使用されてもNaNや計算エラーが発生しないこと
-- case_no: "639"
+  movie: U207
+- case_no: '639'
   feature: 各種画面
   description: |
     ブラウザのタブ名がPigeonCloud固定でなくページごとに異なるタイトルになること（#issue961）
   expected: |
     ブラウザのタブ名がPigeonCloud固定でなくページごとに異なるタイトルになること（#issue961）
-- case_no: "640"
+  movie: U207
+- case_no: '640'
   feature: 各種画面
   description: |
     チャートおよび集計の絞り込みで日時項目の相対値選択が正常に動作すること（#issue932）
   expected: |
     チャートおよび集計の絞り込みで日時項目の相対値選択が正常に動作すること（#issue932）
-- case_no: "642"
+  movie: U208
+- case_no: '642'
   feature: 各種画面
   description: |
     主キーの複数項目設定がCSVアップ以外でも機能するようになりCSVエクスポートが正常動作すること（#issue1162）
   expected: |
     主キーの複数項目設定がCSVアップ以外でも機能するようになりCSVエクスポートが正常動作すること（#issue1162）
-- case_no: "643"
+  movie: U208
+- case_no: '643'
   feature: 各種画面
   description: |
     主キー設定の上限が5項目以上に拡張されてテーブル一覧が正常表示されること（#issue1163）
   expected: |
     主キー設定の上限が5項目以上に拡張されてテーブル一覧が正常表示されること（#issue1163）
-- case_no: "645"
+  movie: U208
+- case_no: '645'
   feature: 各種画面
   description: |
     ワークフローの左メニューに表示される申請バッジ数が正しい値であること（#issue1129）
   expected: |
     ワークフローの左メニューに表示される申請バッジ数が正しい値であること（#issue1129）
-- case_no: "646"
+  movie: U208
+- case_no: '646'
   feature: 各種画面
   description: |
     他テーブル参照で複数値登録を許可する設定が有効の場合にテーブル一覧が正常表示されること（#issue1028）
   expected: |
     他テーブル参照で複数値登録を許可する設定が有効の場合にテーブル一覧が正常表示されること（#issue1028）
-- case_no: "647"
+  movie: U208
+- case_no: '647'
   feature: 各種画面
   description: |
     月末日の日付計算処理でダッシュボードがエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "650"
+  movie: U208
+- case_no: '650'
   feature: 各種画面
   description: |
     CSVインポート時にも通知が来るよう修正後にテーブル一覧がエラーなく正常表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "651"
+  movie: U208
+- case_no: '651'
   feature: 各種画面
   description: |
     SMTP設定が正常に動作しダッシュボードがエラーなく表示されること
   expected: |
     エラーが発生しないこと
-- case_no: "652"
+  movie: U208
+- case_no: '652'
   feature: 各種画面
   description: |
     関連テーブルの表示条件が他テーブルを参照する場合に編集フォームが正常表示されること
   expected: |
     関連テーブルの表示条件が他テーブルを参照する場合に編集フォームが正常表示されること
-- case_no: "653"
+  movie: U208
+- case_no: '653'
   feature: 各種画面
   description: |
     コメントで組織へメンションする際にエラーメッセージが出ないことをテーブル一覧で確認できること（#issue974）
   expected: |
     コメントで組織へメンションする際にエラーメッセージが出ないことをテーブル一覧で確認できること（#issue974）
-- case_no: "654"
+  movie: U208
+- case_no: '654'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue984）
   expected: |
     エラーが発生しないこと
-- case_no: "655"
+  movie: U208
+- case_no: '655'
   feature: 各種画面
   description: |
     帳票設定ページがエラーなく正常に表示されること（#issue1107）
   expected: |
     エラーが発生しないこと
-- case_no: "656"
+  movie: U208
+- case_no: '656'
   feature: 各種画面
   description: |
     CSVダウンロードで現在のフィルタを反映するオプションが正常に動作すること（#issue1191）
   expected: |
     CSVダウンロードで現在のフィルタを反映するオプションが正常に動作すること（#issue1191）
-- case_no: "657"
+  movie: U208
+- case_no: '657'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1047）
   expected: |
     エラーが発生しないこと
-- case_no: "658"
+  movie: U208
+- case_no: '658'
   feature: 各種画面
   description: |
     通知設定の通知先にログインユーザーのメールアドレスを指定できること（#issue1197）
   expected: |
     通知設定の通知先にログインユーザーのメールアドレスを指定できること（#issue1197）
-- case_no: "659"
+  movie: U208
+- case_no: '659'
   feature: 各種画面
   description: |
     集計ページのフィルター機能がエラーなく正常に動作すること（#issue1201）
   expected: |
     エラーが発生しないこと
-- case_no: "660"
+  movie: U209
+- case_no: '660'
   feature: 各種画面
   description: |
     公開フォームリンク先をスマホから閲覧した場合にエラーなく正常表示されること（#issue976）
   expected: |
     エラーが発生しないこと
-- case_no: "661"
+  movie: U209
+- case_no: '661'
   feature: 各種画面
   description: |
     チャートプレビュー画面の前後切り替えボタンが正常に動作すること（#issue1032）
   expected: |
     チャートプレビュー画面の前後切り替えボタンが正常に動作すること（#issue1032）
-- case_no: "662"
+  movie: U209
+- case_no: '662'
   feature: 各種画面
   description: |
     子テーブルのSUMIF計算がNaNや計算エラーなく正常に動作すること
   expected: |
     エラーが発生しないこと
-- case_no: "663"
+  movie: U209
+- case_no: '663'
   feature: 各種画面
   description: |
     誤操作防止のために一括否認・一括削除ボタンを非表示にする設定ができること（#issue1198）
   expected: |
     誤操作防止のために一括否認・一括削除ボタンを非表示にする設定ができること（#issue1198）
-- case_no: "664"
+  movie: U209
+- case_no: '664'
   feature: 各種画面
   description: |
     テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1115）
   expected: |
     エラーが発生しないこと
-- case_no: "665"
+  movie: U209
+- case_no: '665'
   feature: 各種画面
   description: |
     他テーブルで日時を参照する場合に表示フォーマットが他テーブル先と同じになりCSVアップも正常動作すること
   expected: |
     他テーブルで日時を参照する場合に表示フォーマットが他テーブル先と同じになりCSVアップも正常動作すること
-- case_no: "666"
+  movie: U209
+- case_no: '666'
   feature: 各種画面
   description: |
     CSVエクスポート・インポート機能がエラーなく正常に動作すること（#issue1214）
   expected: |
     エラーが発生しないこと
-- case_no: "667"
+  movie: U209
+- case_no: '667'
   feature: 各種画面
   description: |
     CSVアップロード前にデータをリセットする機能が正常に動作すること（#issue1216）
   expected: |
     CSVアップロード前にデータをリセットする機能が正常に動作すること（#issue1216）
-- case_no: "668"
+  movie: U209
+- case_no: '668'
   feature: 各種画面
   description: |
     他の項目で値の絞り込みを行う機能がエラーなく正常に動作すること（#issue1217）
   expected: |
     エラーが発生しないこと
-- case_no: "669"
+  movie: U209
+- case_no: '669'
   feature: 各種画面
   description: |
     画像項目でファイルサイズや画素数が表示される機能追加後にテーブル一覧が正常表示されること（#issue1195）
   expected: |
     画像項目でファイルサイズや画素数が表示される機能追加後にテーブル一覧が正常表示されること（#issue1195）
-- case_no: "670"
+  movie: U209
+- case_no: '670'
   feature: 各種画面
   description: |
     受信メール取込み機能の強化版追加後に通知設定ページが正常表示されること（#issue1196）
   expected: |
     受信メール取込み機能の強化版追加後に通知設定ページが正常表示されること（#issue1196）
+  movie: U209

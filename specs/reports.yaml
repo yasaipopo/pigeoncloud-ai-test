@@ -8,444 +8,356 @@ cases:
   category: 関連テーブル出力
   description: 関連テーブルを帳票出力に入れ込めるように変更
   expected: 帳票へ関連テーブルが出力されていること。
+  movie: RP01
 - case_no: '198'
   sheet: B
   feature: 帳票
   category: ファイル項目への生成
   description: ・ファイル項目へExcelおよびPDFのファイル生成を行う
   expected: Excel／PDFともにファイル生成できること
+  movie: RP01
 - case_no: '205'
   sheet: B
   feature: 帳票
   category: Excel出力
   description: Excelファイルにて帳票出力
   expected: エラーなく帳票出力ができ、項目の出力も行えていること。
+  movie: RP01
 - case_no: '206'
   sheet: B
   feature: 帳票
   category: PDF出力
   description: PDFファイルにて帳票出力
   expected: エラーなく帳票出力ができ、項目の出力も行えていること。
+  movie: RP01
 - case_no: '207'
   sheet: B
   feature: 帳票
   category: Excel出力(ファイル名変更)
-  description: '・事前に帳票の「出力ファイル名フォーマット」の設定を行う。
-
+  description: |-
+    ・事前に帳票の「出力ファイル名フォーマット」の設定を行う。
     ※出力ファイル名フォーマットの指定は　%m-%d　とする
-
-    ・Excelファイルにて帳票出力'
-  expected: '・エラーなく帳票出力ができ、項目の出力も行えていること。
-
+    ・Excelファイルにて帳票出力
+  expected: |-
+    ・エラーなく帳票出力ができ、項目の出力も行えていること。
 
     ・「YYYY-MM.xlsx」のファイル名でローカルPCへダウンロードされること。
-
     例）2025-03.xlsx
 
-
-    https://henmi021.pigeon-demo.com/admin/dataset__56'
+    https://henmi021.pigeon-demo.com/admin/dataset__56
+  movie: RP01
 - case_no: '208'
   sheet: B
   feature: 帳票
   category: PDF出力(ファイル名変更)
-  description: '・事前に帳票の「出力ファイル名フォーマット」の設定を行う。
-
+  description: |-
+    ・事前に帳票の「出力ファイル名フォーマット」の設定を行う。
     ※出力ファイル名フォーマットの指定は　%m-%d　とする
-
-    ・PDFファイルにて帳票出力'
-  expected: '・エラーなく帳票出力ができ、項目の出力も行えていること。
-
+    ・PDFファイルにて帳票出力
+  expected: |-
+    ・エラーなく帳票出力ができ、項目の出力も行えていること。
 
     ・「YYYY-MM.pdf」のファイル名でローカルPCへダウンロードされること。
-
     例）2025-03.pdf
 
-
-    https://henmi021.pigeon-demo.com/admin/dataset__56'
+    https://henmi021.pigeon-demo.com/admin/dataset__56
+  movie: RP01
 - case_no: '216'
   sheet: B
   feature: 帳票
   category: アイコン
   description: 帳票登録後、メニューからの帳票登録のリスト表示した際のアイコン表示を確認する。
   expected: ・アイコンが歯車アイコンとなっていること。
+  movie: RP01
 - case_no: '230'
   sheet: B
   feature: 帳票
   category: ユーザーテーブルの帳票出力
-  description: 'ユーザーテーブルについては、以下項目は出力されない
-
+  description: |-
+    ユーザーテーブルについては、以下項目は出力されない
     ・通知先メールアドレス
-
     ・パスワード
-
     ・アクセス許可IP
-
     ・状態
-
     ・組織
-
-    ・役職'
+    ・役職
   expected: 想定通りの結果となること
+  movie: RP01
 - case_no: '236'
   sheet: B
   feature: 帳票
   category: 帳票出力
   description: 子テーブルの設定を行い、帳票にはAA列以降の指定も行う
   expected: AA列以降も帳票出力されること
+  movie: RP01
 - case_no: '253'
   sheet: B
   feature: 帳票ダウンロード
-  category: 'ファイル項目
-
-    画像項目'
+  category: |-
+    ファイル項目
+    画像項目
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/294
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__18'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__18
+  movie: RP01
 - case_no: 56-1
   sheet: B
   feature: 帳票登録
   category: 帳票ファイル以外の登録(異常系)
   description: ①Excelファイル以外のファイル形式のファイルで、帳票アップロードする。
   expected: 帳票登録エラーが発生すること。
+  movie: RP01
 - case_no: '264'
   sheet: B
   feature: ''
-  description: '【バグ修正確認】帳票のダウンロードをするとエラーになるそうで、コピー環境でも再現されました。こちら、原因は何か、ご確認いただいてもよいでしょうか。
-
+  description: |-
+    【バグ修正確認】帳票のダウンロードをするとエラーになるそうで、コピー環境でも再現されました。こちら、原因は何か、ご確認いただいてもよいでしょうか。
     帳票雛形に間違いがあっても、データが反映されないだけで、帳票のダウンロード自体にエラーは発生しない仕様だったと思うので、何かしらのエラーでしょうか。
 
-
     対応: 子テーブル要素を取得するときのstartとendの位置関係によりエラーが出ていました。
-
     正確にはN22とK24の
-
     $START{新オリジナル卸委託管理.明細} AS 明細
-
     と
-
     $END{新オリジナル卸委託管理.明細}
-
     の位置関係で、STARTの方が右にあることが原因です。
-
     おそらく今回は
-
     A22とK24
-
     N22とX24
-
-    のペアのつもりだったと思うのですが、システムでその認識ができ'
+    のペアのつもりだったと思うのですが、システムでその認識ができ
   expected: バグが修正され、正常に動作すること。(帳票のダウンロードをするとエラーになるそうで、コピー環境でも再現されました。こちら、原因は何か、ご確認いただいてもよいでしょうか。 帳票雛形に間違いがあっても、データが反映されないだけで、帳票のダウン)
+  movie: RP02
 - case_no: '272'
   sheet: B
   feature: ''
-  description: '【機能改善確認】テーブル作成権限のあるユーザー様に対し、ExcelやJSONから作成できるよう修正希望。
-
-    「早ければ8/27（日）、遅くとも9/24（日）の定期アップデートの際に修正をさせていただきます。」とお伝えしております。'
+  description: |-
+    【機能改善確認】テーブル作成権限のあるユーザー様に対し、ExcelやJSONから作成できるよう修正希望。
+    「早ければ8/27（日）、遅くとも9/24（日）の定期アップデートの際に修正をさせていただきます。」とお伝えしております。
   expected: 機能改善が正しく反映されていること。(テーブル作成権限のあるユーザー様に対し、ExcelやJSONから作成できるよう修正希望。 「早ければ8/27（日）、遅くとも9/24（日）の定期アップデートの際に修正をさせていただきます。」とお伝えし)
+  movie: RP02
 - case_no: '310'
   sheet: B
   feature: ''
-  description: '【バグ修正確認】帳票出力後、添付のように＜p＞が反映されてしまっています。
-
+  description: |-
+    【バグ修正確認】帳票出力後、添付のように＜p＞が反映されてしまっています。
     PDFでもExcelでも試しましたが、どちらも反映されてしまっています。
 
 
-
     対象テーブル：ES広場（社会貢献活動投稿フォーム）
-
     　　　　　　　（dataset__2162）
-
 
     レコードID：288　（一例）
 
-
-    項目は、文章(複数行)でリッチテキストになっています。'
+    項目は、文章(複数行)でリッチテキストになっています。
   expected: バグが修正され、正常に動作すること。(帳票出力後、添付のように＜p＞が反映されてしまっています。 PDFでもExcelでも試しましたが、どちらも反映されてしまっています。   対象テーブル：ES広場（社会貢献活動投稿フォーム） 　　　　　)
+  movie: RP02
 - case_no: '530'
   sheet: B
   feature: ''
-  description: '【機能改善確認】テーブル管理者の場合は、一般ユーザーでも帳票の登録や編集が行えるようにしていただけますでしょうか。
-
+  description: |-
+    【機能改善確認】テーブル管理者の場合は、一般ユーザーでも帳票の登録や編集が行えるようにしていただけますでしょうか。
     （現在帳票の設定はマスターユーザーのみ可能です）
 
-
-    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1708153763775189'
+    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1708153763775189
   expected: 機能改善が正しく反映されていること。(テーブル管理者の場合は、一般ユーザーでも帳票の登録や編集が行えるようにしていただけますでしょうか。 （現在帳票の設定はマスターユーザーのみ可能です）  https://loftal.slack.com)
+  movie: RP02
 - case_no: '557'
   sheet: B
   feature: ''
-  description: "【バグ修正確認】帳票の元Excelに登録したデータに、タブが2つ以上あると、\nダウンロードができないようですので、修正いただけますでしょうか。\nダウンロードのボタンを押すと下記のようなエラーが出るようです。\n\n  {\"result\":\"error\",\"error_type\":null,\"error_a\":[\"不明なエラーが発生しました。\"],\"\
-    error_debug_a\":[\"請求書!B13 -> For"
+  description: |-
+    【バグ修正確認】帳票の元Excelに登録したデータに、タブが2つ以上あると、
+    ダウンロードができないようですので、修正いただけますでしょうか。
+    ダウンロードのボタンを押すと下記のようなエラーが出るようです。
+
+      {"result":"error","error_type":null,"error_a":["不明なエラーが発生しました。"],"error_debug_a":["請求書!B13 -> For
   expected: バグが修正され、正常に動作すること。(帳票の元Excelに登録したデータに、タブが2つ以上あると、 ダウンロードができないようですので、修正いただけますでしょうか。 ダウンロードのボタンを押すと下記のようなエラーが出るようです。    {)
+  movie: RP02
 - case_no: '568'
   sheet: B
   feature: ''
-  description: '### 要件名
-
+  description: |-
+    ### 要件名
     * 帳票に画像を指定できる
 
-
     ### 要件
-
     * 帳票を出力するためのexcelにて、画像型のフィールドを指定できる
-
     * 帳票出力時に、画像型のフィールドが指定されたセルに画像が埋め込まれる (excel、pdfのどちらも)
-
     * セルに埋め込まれた画像はセルの高さに対して100%になる (widthはauto)
 
-
     ### 参照
-
-    * https://www.notio'
+    * https://www.notio
   expected: 'エラーなく正常に動作すること。(### 要件名 * 帳票に画像を指定できる  ### 要件 * 帳票を出力するためのexcelにて、画像型のフィールドを指定できる * 帳票出力時に、画像型のフィールドが指定されたセルに画像が埋め込ま)'
+  movie: RP02
 - case_no: '579'
   sheet: B
   feature: ''
-  description: '【機能改善確認】現在、帳票で子テーブルに連番を振るには${子テーブル名.INDEX}を入力すればできますが、
-
+  description: |-
+    【機能改善確認】現在、帳票で子テーブルに連番を振るには${子テーブル名.INDEX}を入力すればできますが、
     これと同じことを、${関連レコード一覧名.INDEX}と入れれば関連レコード一覧でも行えるようにしていただきたいです。
 
-
-    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1712112449327109'
+    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1712112449327109
   expected: 機能改善が正しく反映されていること。(現在、帳票で子テーブルに連番を振るには${子テーブル名.INDEX}を入力すればできますが、 これと同じことを、${関連レコード一覧名.INDEX}と入れれば関連レコード一覧でも行えるようにしていただ)
+  movie: RP02
 - case_no: '584'
   sheet: B
   feature: ''
-  description: '【バグ修正確認】帳票の元Excelに、シートが2枚以上あるとき、$から始まる式が反映されるのは1枚目のシートだけなのですが、
-
+  description: |-
+    【バグ修正確認】帳票の元Excelに、シートが2枚以上あるとき、$から始まる式が反映されるのは1枚目のシートだけなのですが、
     これを、2枚目以降のシートにも$から始まる式がある場合、反映されるように修正いただけますでしょうか。
 
-
-    https://loftal.slack.com/archives/C05EZQC8UJW/p1714629873959709'
+    https://loftal.slack.com/archives/C05EZQC8UJW/p1714629873959709
   expected: バグが修正され、正常に動作すること。(帳票の元Excelに、シートが2枚以上あるとき、$から始まる式が反映されるのは1枚目のシートだけなのですが、 これを、2枚目以降のシートにも$から始まる式がある場合、反映されるように修正いただけますで)
+  movie: RP02
 - case_no: '601'
   sheet: B
   feature: ''
-  description: '【機能改善確認】数値項目で、4桁以上の数字が入力されていて、
-
+  description: |-
+    【機能改善確認】数値項目で、4桁以上の数字が入力されていて、
     「桁区切りを表示しない」がONの状態だと、
-
     帳票出力した際にセル内の数値にカンマが入って、文字列として認識されてしまうようです。
-
     数値項目を帳票出力する際には、カンマや単位等は出力させず、純粋に数字のみ出力されるように修正いただけますでしょうか。
 
-
-    https://loftal.slack.com/archives/C05C2V0C5QQ/p'
+    https://loftal.slack.com/archives/C05C2V0C5QQ/p
   expected: 機能改善が正しく反映されていること。(数値項目で、4桁以上の数字が入力されていて、 「桁区切りを表示しない」がONの状態だと、 帳票出力した際にセル内の数値にカンマが入って、文字列として認識されてしまうようです。 数値項目を帳票出力する際)
+  movie: RP02
 - case_no: '729'
   sheet: B
   feature: ''
-  description: '【バグ修正確認】帳票で、子テーブルの情報を出力する際、
-
+  description: |-
+    【バグ修正確認】帳票で、子テーブルの情報を出力する際、
     子テーブルが入っていないレコードで出力すると、
-
     $STARTおよび$ENDがそのまま表示されてしまうため、修正いただけますでしょうか。
 
-
-    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1722219212802169'
+    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1722219212802169
   expected: バグが修正され、正常に動作すること。(帳票で、子テーブルの情報を出力する際、 子テーブルが入っていないレコードで出力すると、 $STARTおよび$ENDがそのまま表示されてしまうため、修正いただけますでしょうか。  https://lof)
+  movie: RP02
 actual_steps:
 - case_no: 144-01
   status: partial
-  steps: '1. beforeAll: create-all-type-table API呼び出し
-
-    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:''fixed'')
-
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
+    2. beforeAll: create-all-type-data API呼び出し (count:3, pattern:'fixed')
     3. テーブルIDをAPIステータスから取得
-
     4. 帳票設定ページ（/admin/dataset__{tableId}/report）に遷移
-
     5. ナビバーの表示確認
-
     6. ページURLが admin を含むことを確認
-
     7. スクリーンショット保存
-
     8. afterAll: delete-all-type-tables API呼び出し
-
-    '
-  assertions: '- await expect(page.locator(''.navbar'')).toBeVisible()
-
-    - expect(pageUrl).toContain(''admin'')
-
-    '
-  gaps: '⚠️ YAMLには「帳票設定の追加・編集・削除」操作が期待されるが、ページの表示確認のみ
-
+  assertions: |
+    - await expect(page.locator('.navbar')).toBeVisible()
+    - expect(pageUrl).toContain('admin')
+  gaps: |
+    ⚠️ YAMLには「帳票設定の追加・編集・削除」操作が期待されるが、ページの表示確認のみ
     ⚠️ 帳票テンプレートのアップロード操作なし
-
     ⚠️ 帳票設定の保存・確認なし
-
-    '
 - case_no: '198'
   status: partial
-  steps: '1. 帳票設定ページに遷移
-
+  steps: |
+    1. 帳票設定ページに遷移
     2. ナビバーの表示確認
-
     3. スクリーンショット保存
-
-    '
-  assertions: '- await expect(page.locator(''.navbar'')).toBeVisible()
-
-    '
-  gaps: '⚠️ 帳票プレビューの確認なし
-
-    '
+  assertions: |
+    - await expect(page.locator('.navbar')).toBeVisible()
+  gaps: |
+    ⚠️ 帳票プレビューの確認なし
 - case_no: '205'
   status: partial
-  steps: '1. テーブル一覧ページに遷移
-
+  steps: |
+    1. テーブル一覧ページに遷移
     2. ハンバーガーメニューボタンをクリック
-
     3. 帳票メニューの存在確認（条件付き）
-
     4. スクリーンショット保存
-
-    '
-  assertions: '- 帳票メニューが存在すれば toBeVisible()（条件付き）
-
-    '
-  gaps: '⚠️ 帳票ダウンロードの実際の実行・ファイル内容確認なし
-
+  assertions: |
+    - 帳票メニューが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ 帳票ダウンロードの実際の実行・ファイル内容確認なし
     ⚠️ メニューが存在しない場合でもパスする（条件付きアサーション）
-
-    '
 - case_no: '206'
   status: partial
-  steps: '1. テーブル一覧ページに遷移
-
+  steps: |
+    1. テーブル一覧ページに遷移
     2. ハンバーガーメニューをクリック
-
     3. 帳票メニューの存在確認（条件付き）
-
-    '
-  assertions: '- 帳票メニューが存在すれば toBeVisible()（条件付き）
-
-    '
-  gaps: '⚠️ 205と同様
-
-    '
+  assertions: |
+    - 帳票メニューが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ 205と同様
 - case_no: '207'
   status: partial
-  steps: '1. 帳票設定ページに遷移
-
+  steps: |
+    1. 帳票設定ページに遷移
     2. ファイル名フォーマット入力欄に「%m-%d」を入力
-
     3. 入力値が設定されたことを確認
-
     4. スクリーンショット保存
-
-    '
-  assertions: '- await expect(fileNameInput).toHaveValue(''%m-%d'')（または類似）
-
-    '
-  gaps: '⚠️ 実際の帳票ダウンロード後にファイル名フォーマットが反映されることの確認なし
-
+  assertions: |
+    - await expect(fileNameInput).toHaveValue('%m-%d')（または類似）
+  gaps: |
+    ⚠️ 実際の帳票ダウンロード後にファイル名フォーマットが反映されることの確認なし
     ⚠️ ファイル名の実際の形式確認なし
-
-    '
 - case_no: '208'
   status: partial
-  steps: '1. 帳票設定ページに遷移
-
+  steps: |
+    1. 帳票設定ページに遷移
     2. ファイル名フォーマット入力欄の確認
-
-    '
-  assertions: '- 入力欄の存在確認のみ
-
-    '
-  gaps: '⚠️ 207と同様
-
-    '
+  assertions: |
+    - 入力欄の存在確認のみ
+  gaps: |
+    ⚠️ 207と同様
 - case_no: '216'
   status: partial
-  steps: '1. テーブル一覧ページに遷移
-
+  steps: |
+    1. テーブル一覧ページに遷移
     2. 歯車アイコンの存在確認（条件付き）
-
     3. スクリーンショット保存
-
-    '
-  assertions: '- 歯車アイコンが存在すれば toBeVisible()（条件付き）
-
-    '
-  gaps: '⚠️ 歯車アイコンが存在しない場合でもパスする（条件付きアサーション）
-
+  assertions: |
+    - 歯車アイコンが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ 歯車アイコンが存在しない場合でもパスする（条件付きアサーション）
     ⚠️ 帳票設定へのアクセス確認なし
-
-    '
 - case_no: '230'
   status: partial
-  steps: '1. 帳票設定ページに遷移
-
+  steps: |
+    1. 帳票設定ページに遷移
     2. ナビバーの表示確認
-
     3. ページURLが admin を含むことを確認
-
     4. スクリーンショット保存
-
-    '
-  assertions: '- await expect(page.locator(''.navbar'')).toBeVisible()
-
-    - expect(pageUrl).toContain(''admin'')
-
-    '
-  gaps: '⚠️ ユーザーテーブル参照設定後の帳票出力確認なし
-
-    '
+  assertions: |
+    - await expect(page.locator('.navbar')).toBeVisible()
+    - expect(pageUrl).toContain('admin')
+  gaps: |
+    ⚠️ ユーザーテーブル参照設定後の帳票出力確認なし
 - case_no: '236'
   status: partial
-  steps: '1. 帳票設定ページに遷移
-
+  steps: |
+    1. 帳票設定ページに遷移
     2. 列指定入力欄の存在確認（条件付き）
-
     3. スクリーンショット保存
-
-    '
-  assertions: '- 入力欄が存在すれば toBeVisible()（条件付き）
-
-    '
-  gaps: '⚠️ AA列以降の列指定の実際のダウンロード確認なし
-
+  assertions: |
+    - 入力欄が存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ AA列以降の列指定の実際のダウンロード確認なし
     ⚠️ 入力欄が存在しない場合でもパスする
-
-    '
 - case_no: '253'
   status: skip
-  steps: 'test.skip(''手動確認推奨'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ ファイル・画像項目を含む帳票のダウンロード確認は手動テストのみ
-
-    '
+  steps: |
+    test.skip('手動確認推奨')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ ファイル・画像項目を含む帳票のダウンロード確認は手動テストのみ
 - case_no: 56-1
   status: partial
-  steps: '1. 帳票設定ページに遷移
-
+  steps: |
+    1. 帳票設定ページに遷移
     2. ファイルアップロードボタンの存在確認
-
     3. 存在する場合は一時テキストファイルを作成して setInputFiles
-
     4. 送信ボタンをクリック
-
     5. エラーメッセージの存在確認（条件付き）
-
     6. 一時ファイルを削除
-
     7. スクリーンショット保存
-
-    '
-  assertions: '- エラーメッセージが存在すれば toBeVisible()（条件付き）
-
-    '
-  gaps: '⚠️ エラーが表示されない場合でもパスする（条件付きアサーション）
-
+  assertions: |
+    - エラーメッセージが存在すれば toBeVisible()（条件付き）
+  gaps: |
+    ⚠️ エラーが表示されない場合でもパスする（条件付きアサーション）
     ⚠️ エラーメッセージの内容確認なし
-
     ⚠️ ファイルアップロードボタンが存在しない場合でもパスする
-
-    '

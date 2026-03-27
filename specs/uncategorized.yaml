@@ -7,704 +7,755 @@ cases:
   feature: ''
   description: 「文字列(一行)」にて、一覧表示文字数を設定した場合、設定した文字数以上は「...」で表示される
   expected: ''
+  movie: UC01
 - case_no: '128'
   sheet: B
   feature: 追加オプション→その他
-  description: '①テーブル管理を開く。
-
+  description: |-
+    ①テーブル管理を開く。
     ②該当テーブルを選択し、編集アイコンをクリックする。
-
     ③「追加オプション」の「埋め込みフォームをONにする」の「有効」にチェックを入れる。
-
     ④上記設定したテーブルを開き、メニューより「埋め込みフォームのURL」を選択し、該当のソースをコピーする。
-
     ⑤④でコピーしたソースをHTMLファイルへ反映。
-
-    ⑥⑤で作成したファイルを開き、データ登録が可能な事を確認する。'
+    ⑥⑤で作成したファイルを開き、データ登録が可能な事を確認する。
   expected: HTMLファイルから、問題なく該当データベースへの「登録」が実施可能なこと。
+  movie: UC01
 - case_no: '129'
   sheet: B
   feature: 追加オプション→その他
-  description: '①テーブル管理を開く。※対象のテーブルは全種類の項目が設定されたテーブルとする
-
+  description: |-
+    ①テーブル管理を開く。※対象のテーブルは全種類の項目が設定されたテーブルとする
     ②該当テーブルを選択し、編集アイコンをクリックする。
-
     ③「追加オプション」の「公開フォームをONにする」の「有効」にチェックを入れ「公開フォームのタイトル」／「公開フォームの詳細」を入力し保存。
-
     ④上記設定したテーブルを開き、メニューより「公開フォームのURL」を選択し、該当のURLをコピーする。
-
     ⑤④でコピーしたURLを開く。
-
-    ⑥⑤のURLより、データ登録 が可能な事を確認する。'
+    ⑥⑤のURLより、データ登録 が可能な事を確認する。
   expected: URLから、問題なく該当データベースへの「登録」が実施可能なこと。
+  movie: UC01
 - case_no: 146-01
   sheet: B
   feature: ''
   description: スマートフォンの表示で、選択肢をタップした際にズームがされないよう修正
   expected: ''
+  movie: UC01
 - case_no: '191'
   sheet: B
   feature: 表示幅の設定
   description: ①UI上から列の表示幅の設定を行う
   expected: エラーなく表示幅の設定が行えること。
+  movie: UC01
 - case_no: '211'
   sheet: B
   feature: 大量データ
   description: ・10万件データを登録したテーブルに対してキャッシュ周りのテストを実施する。
   expected: ・全てエラーなく処理が完了すること
+  movie: UC01
 - case_no: '245'
   sheet: B
   feature: ''
   description: 最終更新者を、作成者と同じくテーブルに追加
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '250'
   sheet: B
   feature: ''
   description: "項目を消す時、\r\n①その項目が他の項目の 表示条件設定に紐づけられてるとき、その旨がモーダルに表示される\r\n②そのまま消した場合、表示条件設定には !!存在しない項目!! と表示される\r\nの2点の仕様追加"
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '251'
   sheet: B
   feature: ''
-  description: '①ユーザー管理テーブルの「ログイン状態」の列をクリックしてソート
-
+  description: |-
+    ①ユーザー管理テーブルの「ログイン状態」の列をクリックしてソート
     ②ログイン数ユーザーの契約は一定のログイン数以上のユーザーはログイン出来ないようになっている
-
     ③マスターユーザーは強制ログアウトさせることが出来る
-
-    ④ログアウトすると、すぐにログアウト状態になる。'
+    ④ログアウトすると、すぐにログアウト状態になる。
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '262'
   sheet: B
   feature: ''
   description: "テーブル権限設定のところで、「テーブル権限設定」のみですと問題ないですが\r\n「テーブル権限設定」＋「【高度な設定】項目権限設定」を行うと\r\n権限設定が一旦リセットされてしまうような状態になっている"
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '267'
   sheet: B
   feature: ''
   description: 2段階認証を設定しようとしてるユーザーのログインIDが、メールでない場合は2段階認証を設定できない(adminのままの場合はエラーとする)
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '270'
   sheet: B
   feature: ''
   description: 複数項目の複数項目を許可してるその他テーブルの簡易検索と、項目名の虫眼鏡からの検索
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '273'
   sheet: B
   feature: ''
   description: 自動採番のフォーマットが空のときは、ID-{YYYY}-{MM}-{ID:4:0000}の形式で採番される
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '274'
   sheet: B
   feature: ''
   description: リッチテキストのとき追加オプション設定が開かないバグを修正
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '275'
   sheet: B
   feature: ''
   description: 日時項目で、一度でも表示フォーマットを入力したら、その後 表示フォーマットを指定する のチェックを外してもフォーマットされていたのを修正
   expected: 想定通りの結果となること。
+  movie: UC01
 - case_no: '276'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/390
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '282'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1690728219881779
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '283'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1690268567975139
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '288'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1692941364105629
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '290'
   sheet: B
   feature: ''
-  description: '先方のおっしゃる通り、「問い合わせ内容」フォーム内(文章複数行の項目)でエンターキーを押し続けたところ、画面が上に上がる現象が起きました。
-
+  description: |-
+    先方のおっしゃる通り、「問い合わせ内容」フォーム内(文章複数行の項目)でエンターキーを押し続けたところ、画面が上に上がる現象が起きました。
     エンターキーを55回押すと画面が上に上がり、
-
-    その後スクロールで画面をフォームに戻しても、文字を打つと画面が勝手に上がってしまいます。'
+    その後スクロールで画面をフォームに戻しても、文字を打つと画面が勝手に上がってしまいます。
   expected: 先事象が発生しないこと。
+  movie: UC02
 - case_no: '291'
   sheet: B
   feature: ''
   description: A→B→C→Aのように、その他参照テーブルが循環するように設定する。
   expected: エラー出力となること。
+  movie: UC02
 - case_no: '292'
   sheet: B
   feature: ''
-  description: 'カレンダーページに複数スケジュールを登録を行い、設定したカレンダーページを印刷する。
-
-    ※印刷はブラウザの機能を利用して印刷'
+  description: |-
+    カレンダーページに複数スケジュールを登録を行い、設定したカレンダーページを印刷する。
+    ※印刷はブラウザの機能を利用して印刷
   expected: 登録したスケジュールが問題なく印刷されること。色など含めて印刷された内容に問題がないこと。
+  movie: UC02
 - case_no: '293'
   sheet: B
   feature: ''
   description: ダッシュボードを複数作成出来るように。またダッシュボードごとの権限設定も可能
   expected: ''
+  movie: UC02
 - case_no: '294'
   sheet: B
   feature: ''
-  description: '同一ユーザー(1ユーザー)で4端末からログインを行う。
+  description: |-
+    同一ユーザー(1ユーザー)で4端末からログインを行う。
+    ※端末ログイン後はログイン状態を維持する。
+  expected: |-
+    4端末目のログインの際、「4端末目のログインのため、最初の端末が自動ログアウトされました」のエラーが出力されログインできること。
 
-    ※端末ログイン後はログイン状態を維持する。'
-  expected: '4端末目のログインの際、「4端末目のログインのため、最初の端末が自動ログアウトされました」のエラーが出力されログインできること。
-
-
-    最初の端末は自動ログアウトさていること。'
+    最初の端末は自動ログアウトさていること。
+  movie: UC02
 - case_no: '308'
   sheet: B
   feature: ''
   description: 親テーブル編集画面の、子テーブルの計算項目のリアルタイム表示
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '312'
   sheet: B
   feature: ''
   description: 一括編集のモーダルで、idを選択してる場合は更新されるid を確認できるようになって、選択したidのレコードのみが更新されるようになった
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '315'
   sheet: B
   feature: ''
   description: ダッシュボードに集計を表示させたとき、、集計に対する絞り込みの条件が考慮されていなかったので修正しました。集計に対する絞り込みも考慮されてダッシュボードの集計がでることのテスト
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '316'
   sheet: B
   feature: ''
-  description: 'クロス集計で、添付みたいな設定で、
-
+  description: |-
+    クロス集計で、添付みたいな設定で、
     データ項目2の乗り場面は複数可の他テーブル参照です
-
     このとき、集計結果の左端が空白だったのですが、出るように修正
-
-    https://loftal.slack.com/archives/C04J1D90QJY/p1695294565055499'
+    https://loftal.slack.com/archives/C04J1D90QJY/p1695294565055499
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '319'
   sheet: B
   feature: ''
-  description: 'SMTP認証を行うチェックとプルダウンから「LOGIN」「PLAIN」「CRAM-MD5」が選べるようになっています。
-
+  description: |-
+    SMTP認証を行うチェックとプルダウンから「LOGIN」「PLAIN」「CRAM-MD5」が選べるようになっています。
     SMTP設定で、上記を選択できるようアップデート。
-
-    選択なしでも指定なしでもメール送送信可※設定するサーバーが対応していればどれでもメール送信可能'
+    選択なしでも指定なしでもメール送送信可※設定するサーバーが対応していればどれでもメール送信可能
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '320'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/440
   expected: 想定通りの結果となること。
+  movie: UC02
 - case_no: '323'
   sheet: B
   feature: ''
   description: "フィルターの混合のとき、\r\n・混合のときは、一律で絞り込み、集計、項目、並び順、行に色をつける、設定、デフォルト設定\r\nの6つのタブにした\r\n・チャートの時は混合を押せないようにした"
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '324'
   sheet: B
   feature: ''
   description: 一覧編集モードで編集した際に、詳細画面でその項目の値が消えてないことを確認
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '325'
   sheet: B
   feature: ''
   description: 子テーブルが子テーブルを設定しようとするとエラーがでるようにアップデート
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '326'
   sheet: B
   feature: ''
-  description: '①編集権限なし →当然編集条件もなし
-
+  description: |-
+    ①編集権限なし →当然編集条件もなし
     ②編集権限あり→編集条件もあり
-
-    この条件のとき、すべての編集権限がないユーザーもレコードを編集できてしまっていたので、修正'
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__93'
+    この条件のとき、すべての編集権限がないユーザーもレコードを編集できてしまっていたので、修正
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__93
+  movie: UC03
 - case_no: '330'
   sheet: B
   feature: ''
-  description: '・グループ並び替え機能
-
+  description: |-
+    ・グループ並び替え機能
     ・前期比のチャートを表示出来るように修正
-
-    ・ユーザーのパスワード再発行機能（オプション）'
+    ・ユーザーのパスワード再発行機能（オプション）
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '341'
   sheet: B
   feature: ''
   description: 子テーブルを設定し、レコード詳細画面を表示
   expected: 子テーブルの表示に余計な空白欄が表示されないこと
+  movie: UC03
 - case_no: '342'
   sheet: B
   feature: ''
   description: テーブルJSONエクスポート時、添付ファイルがあったら、インポートしたときくるくるが出ていたのを、出ないようにした
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '349'
   sheet: B
   feature: ''
-  description: 'テーブルの削除ロック機能の追加
-
-    ※チェックが入っていると、テーブル削除ができないような仕様'
+  description: |-
+    テーブルの削除ロック機能の追加
+    ※チェックが入っていると、テーブル削除ができないような仕様
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '352'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/494
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__132'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__132
+  movie: UC03
 - case_no: '355'
   sheet: B
   feature: ''
-  description: '領収書ダウンロード機能の追加
-
+  description: |-
+    領収書ダウンロード機能の追加
     ※契約設定が行えるdemo環境でのテストが必要
-
     ※契約済みの場合、「請求情報」のメニューが表示されるようになり請求書のダウンロードが可能
-
-    ※全項目帳票印字されるか確認する'
+    ※全項目帳票印字されるか確認する
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '357'
   sheet: B
   feature: ''
   description: ログイン時に、失敗した時に、IPベースだったような気がして、メールアドレスベースで失敗回数をカウントし、１日１０回以上失敗したらその日はログイン出来ないように仕様変更
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '360'
   sheet: B
   feature: ''
   description: ユーザーテーブルの編集不可項目(デフォルト項目)が効かないバグがあったので修正
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '361'
   sheet: B
   feature: ''
-  description: 'メニュー並び替えを押してテーブルの並び替えしようとするのですがフォルダ内の約30テーブルほどしか表示されずそれより下に存在するテーブルの操作ができません。ブラウザの問題かと思い、ChromeとEdgeにて試しましたが両方ともNGでしたフォルダ内をすべて表示させるにはどのような操作を行えばいいでしょうか？
+  description: |-
+    メニュー並び替えを押してテーブルの並び替えしようとするのですがフォルダ内の約30テーブルほどしか表示されずそれより下に存在するテーブルの操作ができません。ブラウザの問題かと思い、ChromeとEdgeにて試しましたが両方ともNGでしたフォルダ内をすべて表示させるにはどのような操作を行えばいいでしょうか？
 
-
-    上記問い合わせを修正'
+    上記問い合わせを修正
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '362'
   sheet: B
   feature: ''
   description: "テーブルの編集条件が設定されている権限がある\r\nかつ\r\n他の権限設定で別の編集条件が設定されている\r\n場合にどちらのユーザーも編集ができるバグがあったので修正"
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '365'
   sheet: B
   feature: ''
   description: テストケース101-7のバグ修正
   expected: 想定通りの結果となること。
+  movie: UC03
 - case_no: '367'
   sheet: B
   feature: ''
   description: csvのアップロード、ダウンロードともに、終わるまでならcsvのログの詳細画面からキャンセルできるように変更
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '370'
   sheet: B
   feature: ''
   description: テーブル一覧の「ヘッダー1行目」を固定する機能
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '371'
   sheet: B
   feature: ''
   description: メール通知、配信の機能を少しアップデートし、今まではsendgrid（外部メール配信サービス）に送処理を送ったタイミングで完了にしていましたが、sendgrid上で配信された場合にのみ完了にするよう変更。メール配信機能では、今までは配信済みと表示されていた部分が、“開封済み“, “クリック済み” も追加し、細かくわかるように変更。こちらの機能はSMTP設定されてない場合のみ。
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '373'
   sheet: B
   feature: ''
   description: PigionAIの動作確認
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '381'
   sheet: B
   feature: ''
-  description: '過去に、関連レコードのその他テーブルを計算で使えるようにしたのですが、バグがあったので修正。その関連テーブルのソートにIDが入ってるケースでバグがあったので、再発しないかのテスト。
-
-    その他計算周りのテスト'
+  description: |-
+    過去に、関連レコードのその他テーブルを計算で使えるようにしたのですが、バグがあったので修正。その関連テーブルのソートにIDが入ってるケースでバグがあったので、再発しないかのテスト。
+    その他計算周りのテスト
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '390'
   sheet: B
   feature: ''
   description: 以前通知設定は、通知設定に対してslack, メアドなどを設定して、さらに個別通知設定／リマインダ設定で、テーブルを設定していましたが、これだと権限設定などで通知設定内のテーブルが１つは権限あって、１つは無いとかになる際に面倒なので、通知設定自体にテーブルをセットする形に変更
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '391'
   sheet: B
   feature: ''
   description: その他設定に、“アラートを自動で閉じない”という設定を追加
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '398'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/551
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '401'
   sheet: B
   feature: ''
-  description: 'ユーザーテーブルに計算項目があるとき、
-
-    csvダウンロードで組織がidになっていたので、修正'
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/admin'
+  description: |-
+    ユーザーテーブルに計算項目があるとき、
+    csvダウンロードで組織がidになっていたので、修正
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/admin
+  movie: UC04
 - case_no: '402'
   sheet: B
   feature: ''
   description: "今、テーブルAの権限設定を、高度な設定の項目設定も例えばユーザーAに対して行って、\r\nそのテーブルをテーブルBとしてコピーして、高度な設定の項目設定の権限グループを編集すると、テーブルA のグループも変わってしまう問題\r\nこのような問題があったので修正しますが、過去にコピーされた分を直すテストが重要です。\r\n現時点で、demo環境で高度な設定がついたテーブルをいくつかコピーして、\r\
     \nコピー元とコピー先で高度な設定の権限グループが連動してしまうことの確認していただけますか？\r\nあと、どの高度な権限設定でどのような権限グループを設定したかメモしておいていただけますか？\r\n修正後、\r\n①それらが連動しないこと\r\n②変な権限設定に変わっていないこと"
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '403'
   sheet: B
   feature: ''
-  description: '一覧画面から詳細に飛んだ際に、左右のキーで次・前の詳細画面に行けるように仕様変更。
-
-    ※本機能廃止のためテスト不要'
+  description: |-
+    一覧画面から詳細に飛んだ際に、左右のキーで次・前の詳細画面に行けるように仕様変更。
+    ※本機能廃止のためテスト不要
   expected: 一覧画面で検索している際や、ページングまたいでもちゃんと詳細が出るかどうかテスト
+  movie: UC04
 - case_no: '411'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/551
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '419'
   sheet: B
   feature: ''
-  description: 'ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。リロードしても同じです。ログアウトして、またログインしたら、利用不可です。
-
-    そのissues修正完了致しました。テストお願い致します。'
+  description: |-
+    ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。リロードしても同じです。ログアウトして、またログインしたら、利用不可です。
+    そのissues修正完了致しました。テストお願い致します。
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '420'
   sheet: B
   feature: ''
   description: "お客様からのご指摘ではなく気づいた点なのですが、項目を追加した時に場所を変更する際の挙動が少しやりづらいので、UI改善につなげていただければ幸いです。\r\n事象：項目をドラッグして移動先へ移動させている途中に、移動可能であることを示す水色の枠が最初は表示されるが、移動しているうちに表示されない\r\n（もしくはテーブル全体を囲む枠のみ表示される）ため、その時点でドロップしても、また元の位置に戻ってしまい、移動ができない。\r\
     \n上の状態をテストする途中で、画像の状態にもなってます。"
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '422'
   sheet: B
   feature: ''
-  description: 'テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グループの削除ボタンをつけることは可能でしょうか。
-
+  description: |-
+    テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グループの削除ボタンをつけることは可能でしょうか。
     こちらですが、一覧画面のグループのところに削除アイコンつけて、削除したら中のテーブルは全部グループの外に出る（グループ無し）になるようにしました。
-
     ただ、グループ１の中にグループ２がある場合、グループ２を消したら、その中のテーブルはグループ１になるようにしました。
-
     AAAのグループを削除すると、次の画面が添付画像のようにまっさらの状態になってしまいます。テーブルを消す時も、その状態になってます。F5更新で元に戻りますが、はじめからF5更新後の画面に行くようにしました。
-
-    こちらの、修正完了致しました。テストお願い致します。'
+    こちらの、修正完了致しました。テストお願い致します。
   expected: 想定通りの結果となること。
+  movie: UC04
 - case_no: '424'
   sheet: B
   feature: ''
   description: "https://loftal.slack.com/archives/C05CK6Z7YDQ/p1702920982265599?thread_ts=1701737040.391339&cid=C05CK6Z7YDQ\r\nこれのテストお願いします！\r\nただ、新しく作った権限グループにはバリデーションはできておらず、\r\n①今すでに同じ権限グループがあって、更新を押したとき\r\
     \n②既存の権限グループを変更して、他のと同じになるとき\r\nのにバリデーションをつけてます"
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '427'
   sheet: B
   feature: ''
-  description: 'https://loftal.slack.com/archives/C05CK6Z7YDQ/p1706493446865749
-
+  description: |-
+    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1706493446865749
     ・日時項目の = 条件で正しく検索できること
-
     ・関連テーブルの表示条件に 日時項目の条件があるとき、正しく関連テーブルが取得できて表示されること
-
-    ・日時項目の簡易検索と、絞り込みでの検索で、時間も設定が正しく動作すること'
+    ・日時項目の簡易検索と、絞り込みでの検索で、時間も設定が正しく動作すること
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '429'
   sheet: B
   feature: ''
   description: リクエストログにテーブル名が入るのかのチェック
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '442'
   sheet: B
   feature: ''
   description: 一覧画面で全選択のチェックを行って一括削除を行った際、削除処理後もチェックされたままの状態となっていたので、処理後は全選択のチェックが外れるよう修正。一括更新の際も同様の処理を行うよう修正。
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '443'
   sheet: B
   feature: ''
   description: https://www.notion.so/csv-6e68e9b4ed004087883138dd0117d2b6
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '448'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/603
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '450'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/646
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '453'
   sheet: B
   feature: ''
   description: zipでの画像アップロードができないバグがあったので修正
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '459'
   sheet: B
   feature: ''
   description: フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修正
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__130'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__130
+  movie: UC05
 - case_no: '460'
   sheet: B
   feature: ''
-  description: '関連テーブルの表示条件で、
-
+  description: |-
+    関連テーブルの表示条件で、
     自分の項目 = 関連テーブル先の項目
-
     と設定すると思いますが、
-
     文字列 = 文字列
-
     や
-
     数値 = 数値、他テーブル = 他テーブル、他テーブル = 文字列、年月 =年月、日時 = 日時や、ルックアップ = 何か
-
-    などなど、さまざまな種類のテスト'
+    などなど、さまざまな種類のテスト
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '465'
   sheet: B
   feature: ''
   description: ワークフローの下書き後、編集画面から申請が行えるかのテスト
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '466'
   sheet: B
   feature: ''
-  description: '下記スレッドの内容で、
-
+  description: |-
+    下記スレッドの内容で、
     ワークフローの承認済みのワークフローのスキップですが、
-
     組織や項目にも対応したので、テストお願いします！
-
     組織の一人や、組織の全員など、色々なパターンのテストをお願いします
-
-    https://loftal.slack.com/archives/C050ZRN4PNC/p1709101199322299?thread_ts=1706706253.225909&cid=C050ZRN4PNC'
+    https://loftal.slack.com/archives/C050ZRN4PNC/p1709101199322299?thread_ts=1706706253.225909&cid=C050ZRN4PNC
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '470'
   sheet: B
   feature: ''
   description: "以下事象が発生しないことを確認する\n\r\n１．該当のレコードでワークフローを否認する\r\n　　a. データを編集しても、最初のワークフローのままで条件に合ったワークフローに切り替わらない\r\n    b. テンプレート/組織のselect boxが表示されない\r\n\r\n2．該当のレコードでワークフローを取り下げる\r\n    a.データを編集しても、最初のワークフローのままで条件に合ったワークフローに切り替わらない\r\
     \n    b.テンプレート/組織のselect boxが表示されない\r\n\r\n3．該当のレコードを一度下書き保存した上で、編集画面を開き、申請する\r\n    a.添付画像のように申請フローがずっと読み込む中になる"
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '474'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1709662404402039
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '475'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1709662438016639
   expected: 想定通りの結果となること。
+  movie: UC05
 - case_no: '482'
   sheet: B
   feature: ''
-  description: 'https://loftal.slack.com/archives/C04J1D90QJY/p1707550109873849
-
+  description: |-
+    https://loftal.slack.com/archives/C04J1D90QJY/p1707550109873849
     こちらテストお願いします！
-
     全件テストには追加いただいてると思いますが、
-
     下記のバグがあって、一旦消していたので、下記のバグが再発していないことも含めてテストお願いします！
-
     ・  CSVダウンロード/アップロードに子テーブルも含める に チェックなし で親テーブルでダウンロードしてアップロード
-
     親テーブル：複数文字列影響なし、複数画像が消える
-
     子テーブル：影響なし
-
     ・CSVダウンロード/アップロードに子テーブルも含める にチェックありで親テーブルでダウンロードとアップロード
-
     親テーブル：影響なし
-
-    子テーブル：複数文字列、複数画像ともに消える、単数は消えない'
+    子テーブル：複数文字列、複数画像ともに消える、単数は消えない
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '487'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/738
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '489'
   sheet: B
   feature: ''
-  description: '①viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条件が保存されていることの確認
-
+  description: |-
+    ①viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条件が保存されていることの確認
     ②複数の条件で色をつけて、それぞれ色が変わっていることの確認(全体が一色になっておらず、条件によって色分けされる)
-
-    ③日時項目の現在時刻を条件にした色付けについても確認'
-  expected: '想定通りの結果となること。
-
-    https://henmi019.pigeon-demo.com/admin/dataset__57'
+    ③日時項目の現在時刻を条件にした色付けについても確認
+  expected: |-
+    想定通りの結果となること。
+    https://henmi019.pigeon-demo.com/admin/dataset__57
+  movie: UC06
 - case_no: '498'
   sheet: B
   feature: ''
-  description: '・複数項目に対して、空検索ができなかった問題修正
-
-    ・編集権限無し、削除権限ありの場合に、削除ができなかった問題修正'
+  description: |-
+    ・複数項目に対して、空検索ができなかった問題修正
+    ・編集権限無し、削除権限ありの場合に、削除ができなかった問題修正
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '501'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1711940028344739
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__5'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__5
+  movie: UC06
 - case_no: '503'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1712026386247199
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '504'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1712026435704059
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '508'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/820
-  expected: '想定通りの結果となること。
-
-    https://henmi008.pigeon-demo.com/admin/dataset__35'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi008.pigeon-demo.com/admin/dataset__35
+  movie: UC06
 - case_no: '509'
   sheet: B
   feature: ''
-  description: '・不具合内容
-
+  description: |-
+    ・不具合内容
     数値項目の設定で「桁区切りを表示しない」が無効でも桁区切りが表示されていないようなので、修正いただけますでしょうか。
-
     テストお願いします！
-
-    数値が100000000000000以上のとき桁区切りで出ませんでした'
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__84'
+    数値が100000000000000以上のとき桁区切りで出ませんでした
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__84
+  movie: UC06
 - case_no: '516'
   sheet: B
   feature: ''
   description: "https://loftal.slack.com/archives/C06LF4G88FM/p1712737429769959\n項目が4個以上入力出来るようになって問題です。\r\n今回の修正は項目を入力する時、1行に4個以上入力出来るという問題の修正です。4個以上入力出来ないように修正したものです。"
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '519'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1713220148929019
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '520'
   sheet: B
   feature: ''
   description: ワークフローのAND/ORにて2人目以降で役職を選択しても役職がない状態になっているところを修正
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '521'
   sheet: B
   feature: ''
-  description: 'https://loftal.slack.com/archives/C050ZRN4PNC/p1713485676817669?thread_ts=1713451435.976919&cid=C050ZRN4PNC
-
+  description: |-
+    https://loftal.slack.com/archives/C050ZRN4PNC/p1713485676817669?thread_ts=1713451435.976919&cid=C050ZRN4PNC
 
     以下オペレーションを行い、「2.」の後にエラーが発生しないこと
 
-
     １．「自身の組織」を選択した状態で、画面上部の「組織」を未選択で申請
-
     　　  a.エラーが表示される
-
-    ２．画面上部の「組織」を選択し、申請する'
+    ２．画面上部の「組織」を選択し、申請する
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '522'
   sheet: B
   feature: ''
-  description: '下記修正してます
-
+  description: |-
+    下記修正してます
     https://www.notion.so/2024-04-19-0dafe1ce8c294103a82a8b74ef10c08f
-
     の
-
     ①並行承認 (AND/OR) 且つ同一承認者の承認スキップ機能が有効の時にエラーダイアログが表示される
-
     ②過去に承認者としてアサインされたレコードを閲覧できてしまう
-
     ③並行承認のAND/ORをバツアイコンで削除できてしまう
-
     上記に加えて
-
-    ・ワークフローの編集でフローやAND ORを消しても反映されなかったので修正'
+    ・ワークフローの編集でフローやAND ORを消しても反映されなかったので修正
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '524'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1714374606946719
   expected: 想定通りの結果となること。
+  movie: UC06
 - case_no: '525'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1714374742329029
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '526'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1714374824927099
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '527'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1714450887856129
   expected: https://henmi008.pigeon-demo.com/admin/dataset__35
+  movie: UC07
 - case_no: '528'
   sheet: B
   feature: ''
   description: "https://loftal.slack.com/archives/C06LF4G88FM/p1714450955084249\n親削除権限あり & 子削除権限無し => 子削除禁止\r\n親削除権限無し & 子削除権限無し => 子削除禁止\r\n親削除権限あり & 子削除権限あり => 子削除可能\r\n親削除権限無し & 子削除権限あり => 子削除可能"
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '529'
   sheet: B
   feature: ''
   description: 子テーブルに対してworkflowを設定したり、workflowが設定されているテーブルを子テーブルにしようとしたらエラーになるように実装
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '532'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1714720431836839
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '533'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/866
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '534'
   sheet: B
   feature: ''
   description: 大分類＝＞中分類＝＞小分類などで、他テーブルだんだんカテゴリを絞っていくロジックを少し変更したので、テスト
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '537'
   sheet: B
   feature: ''
-  description: '確認いたしました。仰る通り、アクションがワークフローステータス変更時のとき、
-
+  description: |-
+    確認いたしました。仰る通り、アクションがワークフローステータス変更時のとき、
     メールタイトルは設定したものに、通知内容がデフォルトのままになってしまっているようでした
-
-    通知設定に内容が入っていればそれを、なければデフォルトを使うようにしたのでテストお願いします！'
+    通知設定に内容が入っていればそれを、なければデフォルトを使うようにしたのでテストお願いします！
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '540'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1715227952798419
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '541'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1715228368521819
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '542'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1715228465406949
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__56'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__56
+  movie: UC07
 - case_no: '543'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1715251012610299
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '544'
   sheet: B
   feature: ''
@@ -715,2133 +766,2163 @@ cases:
     \n  →全件更新される\r\n・フィルタを保存して、簡易検索フォームから絞り込みを行ったケース\r\n  →フィルタ分が更新される\r\n・フィルタを保存せず表示のみして、簡易検索フォームから絞り込みを行ったケース\r\n →全件更新される\r\n・集計機能から絞り込みを行ったケース\r\n →全件更新される\r\n・フィルタを保存して、集計機能から絞り込みを行ったケース\r\n →全件更新される\r\
     \n・フィルタを保存せず表示のみして、集計機能から絞り込みを行ったケース\r\n →全件更新される"
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '546'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C050ZRN4PNC/p1715603876626359
   expected: 想定通りの結果となること。
+  movie: UC07
 - case_no: '548'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1716796521196049
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '549'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/898
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '550'
   sheet: B
   feature: ''
   description: 他テーブル参照で、検索ボタンでテーブルをモーダル表示して検索する場合に、検索ができるかの確認
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '551'
   sheet: B
   feature: ''
   description: "フィルターや検索の該当が一件以上の時、下記バグがあるので、テストに追記いただけますか？\r\n「一括削除」ボタンを押したときの確認メッセージについて、\r\n①簡易検索で検索してデータの絞り込みを行った時\r\n②フィルタ / 集計でデータの絞り込みをしてフィルタの表示または保存して表示を行った時\r\nこの状態で、テーブル一覧画面左上の全件チェックにチェックを入れて「一括削除」ボタンを押すと、\r\
     \n確認メッセージには絞り込んだデータの件数が出てきますが、\r\n実際には全ページの全データが対象になり、削除されてしまうため、\r\n確認メッセージには、全ページ全データの件数を表示するように修正いただけますでしょうか。"
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '552'
   sheet: B
   feature: ''
   description: "こちら修正したので、上記以外のパターンで\r\n・フィルターをつけてるつけてない\r\n・一括チェックいれてるいれてない\r\nなども含めて、削除件数がおかしい箇所がないかテストいただけますか？"
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '553'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1717058355105259
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '554'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/896
-
-    いずれかの項目で、子テーブルを対象としていなかった'
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__121;_filter_id=23;_view_id=null;t=1750143076707'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/896
+    いずれかの項目で、子テーブルを対象としていなかった
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__121;_filter_id=23;_view_id=null;t=1750143076707
+  movie: UC08
 - case_no: '560'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1717645803334259
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '561'
   sheet: B
   feature: ''
   description: "https://loftal.slack.com/archives/C06LF4G88FM/p1717645912267469\n集計の際に、\r\n集計方法は最大・最小のときは、日付・日時・時間項目も選べるようにして下さい。"
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '562'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1717645964711769
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '563'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1717733684866629
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '564'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/912
-
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/912
     テストお願いします！
-
-    ただ手元で再現しないので、お客様の手元でもこれで治るか微妙です...'
+    ただ手元で再現しないので、お客様の手元でもこれで治るか微妙です...
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '565'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1718079848744149
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '566'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1718079915151679
   expected: 想定通りの結果となること。
+  movie: UC08
 - case_no: '567'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/938
-
-    https://loftal.slack.com/archives/C04J1D90QJY/p1718402830099329'
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__90/view/2'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/938
+    https://loftal.slack.com/archives/C04J1D90QJY/p1718402830099329
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__90/view/2
+  movie: UC08
 - case_no: '569'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF7QBKA6/p1718869966510019
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '570'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1719303164259589
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '571'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1719984869456059
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__28'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__28
+  movie: UC09
 - case_no: '572'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1720070829233459
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '573'
   sheet: B
   feature: ''
-  description: '伝えたか忘れましたが、今のdevelopから、決済が即時反映され、すぐに登録ユーザー数が変わるので、そちらもテストいただきたいです。
-
-    （現在のユーザー以下にした場合にエラーになるか、増やした場合、即時反映になるかなど）'
+  description: |-
+    伝えたか忘れましたが、今のdevelopから、決済が即時反映され、すぐに登録ユーザー数が変わるので、そちらもテストいただきたいです。
+    （現在のユーザー以下にした場合にエラーになるか、増やした場合、即時反映になるかなど）
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '576'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/940
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '577'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1003
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__96/view/11'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__96/view/11
+  movie: UC09
 - case_no: '578'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/983
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__121/view/15'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__121/view/15
+  movie: UC09
 - case_no: '581'
   sheet: B
   feature: ''
   description: https://www.notion.so/33994765980a49bea69f0c91f75686a2
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '585'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1722415419346759
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__100/view/4'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__100/view/4
+  movie: UC09
 - case_no: '586'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1722415497803639
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '588'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1040
-
-    https://loftal.slack.com/archives/C050ZRN4PNC/p1722323100309159?thread_ts=1721810843.273969&cid=C050ZRN4PNC'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1040
+    https://loftal.slack.com/archives/C050ZRN4PNC/p1722323100309159?thread_ts=1721810843.273969&cid=C050ZRN4PNC
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '589'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1025
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '591'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/939
-
-    https://loftal.slack.com/archives/C050ZRN4PNC/p1720684413717809?thread_ts=1720413283.596839&cid=C050ZRN4PNC'
-  expected: '想定通りの結果となること。
-
-    https://henmi019.pigeon-demo.com/admin/dataset__57'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/939
+    https://loftal.slack.com/archives/C050ZRN4PNC/p1720684413717809?thread_ts=1720413283.596839&cid=C050ZRN4PNC
+  expected: |-
+    想定通りの結果となること。
+    https://henmi019.pigeon-demo.com/admin/dataset__57
+  movie: UC09
 - case_no: '592'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1723694222491269
   expected: 想定通りの結果となること。
+  movie: UC09
 - case_no: '593'
   sheet: B
   feature: ''
-  description: '本番運用に向けてデータの削除等をしたが、ワークフローの申請が来ているバッジ数の表示が0にならず残り続けてしまうとのことです。
-
+  description: |-
+    本番運用に向けてデータの削除等をしたが、ワークフローの申請が来ているバッジ数の表示が0にならず残り続けてしまうとのことです。
     おそらく過去に申請フローのデータが残り続けていて、それがカウントされている気がしておりまして、
-
     こちら修正 or 以下の対象ユーザーの分のデータの削除をお願いできないでしょうか？
-
     これ修正したのでテストお願いします！
-
     編集可能にしたら取り下げなくても削除できるので、
-
-    申請中のまま削除したときばっじがそのままになってました！'
+    申請中のまま削除したときばっじがそのままになってました！
   expected: 想定通りの結果となること。
+  movie: UC10
 - case_no: '594'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1035
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__55'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__55
+  movie: UC10
 - case_no: '595'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/962
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__83'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__83
+  movie: UC10
 - case_no: '598'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1724387774802349
   expected: 想定通りの結果となること。
+  movie: UC10
 - case_no: '599'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1063
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__54'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__54
+  movie: UC10
 - case_no: '602'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/982
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/dataset__47'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/dataset__47
+  movie: UC10
 - case_no: '603'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1044
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/rpa/edit/1?return_url=%252Fadmin%252Frpa'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/rpa/edit/1?return_url=%252Fadmin%252Frpa
+  movie: UC10
 - case_no: '604'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1725081311858439
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__65'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__65
+  movie: UC10
 - case_no: '606'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/881
-  expected: '想定通りの結果となること。
-
-    https://henmi018.pigeon-demo.com/admin/dataset__41'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi018.pigeon-demo.com/admin/dataset__41
+  movie: UC10
 - case_no: '607'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1074
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/dataset__44/view/1'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/dataset__44/view/1
+  movie: UC10
 - case_no: '608'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1065
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/dataset__43'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/dataset__43
+  movie: UC10
 - case_no: '609'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1093
   expected: 想定通りの結果となること。
+  movie: UC10
 - case_no: '610'
   sheet: B
   feature: ''
   description: "https://loftal.pigeon-cloud.com/admin/dataset__90/view/1043\nタブを２個開いて、\r\n①片方で表示項目でAを選ぶ\r\n②他方で他テーブル先からAを消す\r\n③Aを選んだままテーブル更新\r\nの導線で表示項目が空になったので、バリデーションを入れた"
   expected: 想定通りの結果となること。
+  movie: UC10
 - case_no: '612'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1078
-
-    ビューの設定タブの権限で、「全員に表示」がデフォルトになっているところを、「自分のみ表示」をデフォルトにするよう修正いただけますでしょうか。'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1078
+    ビューの設定タブの権限で、「全員に表示」がデフォルトになっているところを、「自分のみ表示」をデフォルトにするよう修正いただけますでしょうか。
   expected: 想定通りの結果となること。
+  movie: UC10
 - case_no: '614'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1010
-
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1010
     testing video
-
     チャートのデータ項目1に設定した項目の種類が多数ある時（添付画像一枚目）、
-
     ダッシュボードにそのチャートを表示させると、ダッシュボードの表示サイズやブラウザの拡大率によってはグラフが見えなくなってしまうので（添付画像二枚目）、
-
-    ダッシュボードでグラフが隠れてしまう場合、グラフをスクロールできるようにしていただきたいです。'
+    ダッシュボードでグラフが隠れてしまう場合、グラフをスクロールできるようにしていただきたいです。
   expected: 想定通りの結果となること。
+  movie: UC10
 - case_no: '615'
   sheet: B
   feature: ''
-  description: 'テストお願いいたします。:おじぎ_女性:
-
+  description: |-
+    テストお願いいたします。:おじぎ_女性:
     https://loftal.pigeon-cloud.com/admin/dataset__90/view/1011
-
     testing video
-
     チャート機能の凡例（添付画像赤枠部分）が6個以上ある場合、
-
-    「6個以上の場合は凡例を表示しない」という設定ができるようにしていただきたいです。'
-  expected: '想定通りの結果となること。
-
+    「6個以上の場合は凡例を表示しない」という設定ができるようにしていただきたいです。
+  expected: |-
+    想定通りの結果となること。
     https://henmi024.pigeon-demo.com/admin/dataset__63
 
-
-    https://henmi024.pigeon-demo.com/admin/dataset__99'
+    https://henmi024.pigeon-demo.com/admin/dataset__99
+  movie: UC11
 - case_no: '617'
   sheet: B
   feature: ''
-  description: '下記テストお願いします！
-
-    チェックして消す場合、全データが選択されている場合は、一括削除・一括編集のポップアップで、赤文字で全データが削除されます と大きく注意書きしてもらえますか？'
+  description: |-
+    下記テストお願いします！
+    チェックして消す場合、全データが選択されている場合は、一括削除・一括編集のポップアップで、赤文字で全データが削除されます と大きく注意書きしてもらえますか？
   expected: 想定通りの結果となること。
+  movie: UC11
 - case_no: '619'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/991
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/dataset__135'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/dataset__135
+  movie: UC11
 - case_no: '622'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1023
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/dataset__10'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/dataset__10
+  movie: UC11
 - case_no: '623'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1108
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/dataset__130/edit/new'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/dataset__130/edit/new
+  movie: UC11
 - case_no: '625'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1005
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/dataset__6'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/dataset__6
+  movie: UC11
 - case_no: '626'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1109
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/admin'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/admin
+  movie: UC11
 - case_no: '632'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1729725214503969
-  expected: '想定通りの結果となること。
-
-    https://henmi018.pigeon-demo.com/admin/dataset__40'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi018.pigeon-demo.com/admin/dataset__40
+  movie: UC11
 - case_no: '633'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1139
   expected: 想定通りの結果となること。
+  movie: UC11
 - case_no: '635'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1140
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__53'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__53
+  movie: UC11
 - case_no: '637'
   sheet: B
   feature: ''
   description: "360\r\nという数字だけの項目名があると思いますが、\r\nこれが計算で使われてるのが悪さしてそうなので、\r\nこれに適当の文字を加えて数字だけではないようにして\r\n360(金額)\r\nという項目の計算を修正して\r\n再度テーブル更新してみていただけますか？ （編集済み）\r\nというバグがありました。\r\n項目名が0~6のときは引き続きバグがありますが、それ以外の数字のときは問題ないようにしたはずなのでテストお願いします！"
   expected: 想定通りの結果となること。
+  movie: UC11
 - case_no: '638'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1730609155740139
   expected: 想定通りの結果となること。
+  movie: UC11
 - case_no: '639'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/961
   expected: 想定通りの結果となること。
+  movie: UC11
 - case_no: '641'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1730795737236149
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/info/management'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/info/management
+  movie: UC11
 - case_no: '642'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1162
   expected: 想定通りの結果となること。
+  movie: UC11
 - case_no: '643'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1163
   expected: 想定通りの結果となること。
+  movie: UC12
 - case_no: '644'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1731051049815249
-  expected: '想定通りの結果となること。
-
-    https://henmi013.pigeon-demo.com/admin/dataset__126'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi013.pigeon-demo.com/admin/dataset__126
+  movie: UC12
 - case_no: '647'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1086
-
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1086
     テストお願いします！
-
-    ただ次は12月31日か1月31日しか確認できないかもです'
+    ただ次は12月31日か1月31日しか確認できないかもです
   expected: 想定通りの結果となること。
+  movie: UC12
 - case_no: '648'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1731299240466769
   expected: 想定通りの結果となること。
+  movie: UC12
 - case_no: '649'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1731299322273539
   expected: 想定通りの結果となること。
+  movie: UC12
 - case_no: '650'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1123
-
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1123
     テストお願いします！
-
-    CSVのときこなかったのでくるようにしました'
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__60'
+    CSVのときこなかったのでくるようにしました
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__60
+  movie: UC12
 - case_no: '651'
   sheet: B
   feature: ''
-  description: 'https://loftal.slack.com/archives/C050ZRN4PNC/p1731920540210149
-
+  description: |-
+    https://loftal.slack.com/archives/C050ZRN4PNC/p1731920540210149
     テストお願いします！
-
-    SMTPが問題なく動くか確認していただきたいです'
+    SMTPが問題なく動くか確認していただきたいです
   expected: 想定通りの結果となること。
+  movie: UC12
 - case_no: '652'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1187
-
-    テストお願いします！関連テーブル先の表示条件が、他テーブルだったとき動いてなかったです'
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__55'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1187
+    テストお願いします！関連テーブル先の表示条件が、他テーブルだったとき動いてなかったです
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__55
+  movie: UC12
 - case_no: '655'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1107
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__57/view/1'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__57/view/1
+  movie: UC12
 - case_no: '656'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1191
   expected: 想定通りの結果となること。
+  movie: UC12
 - case_no: '657'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1047
   expected: 想定通りの結果となること。
+  movie: UC12
 - case_no: '658'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1197
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/notification/view/2'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/notification/view/2
+  movie: UC12
 - case_no: '659'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1201
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__50'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__50
+  movie: UC12
 - case_no: '661'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1032
   expected: 想定通りの結果となること。
+  movie: UC12
 - case_no: '662'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1206
-
-    子テーブルのsumifができなかったので修正しました！'
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__53'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1206
+    子テーブルのsumifができなかったので修正しました！
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__53
+  movie: UC12
 - case_no: '663'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1198
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__48'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__48
+  movie: UC13
 - case_no: '664'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1115
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__46'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__46
+  movie: UC13
 - case_no: '665'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1106
-
-    他テーブルに日時指定したときも、表示フォーマットは他テーブル先の項目と同じになって、そのままcsvアップロードもできるはずです'
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__44'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1106
+    他テーブルに日時指定したときも、表示フォーマットは他テーブル先の項目と同じになって、そのままcsvアップロードもできるはずです
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__44
+  movie: UC13
 - case_no: '666'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1214
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__68'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__68
+  movie: UC13
 - case_no: '667'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1216
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__67'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__67
+  movie: UC13
 - case_no: '668'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1217
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__40/edit/new'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__40/edit/new
+  movie: UC13
 - case_no: '669'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1195
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/dataset__126'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/dataset__126
+  movie: UC13
 - case_no: '670'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1196
   expected: 想定通りの結果となること。
+  movie: UC13
 - case_no: '671'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1733816939337199
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__55'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__55
+  movie: UC13
 - case_no: '672'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1724294489902929
-  expected: '想定通りの結果となること。
-
-    https://henmi015.pigeon-demo.com/admin/rpa_executes'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi015.pigeon-demo.com/admin/rpa_executes
+  movie: UC13
 - case_no: '673'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C050ZRN4PNC/p1733205093440009
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__26'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__26
+  movie: UC13
 - case_no: '674'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1180
-
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1180
     これの
-
-    Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました！'
+    Yes/No項目がありますが、すべてラベルが空白で登録できてしまっているようです。これだけできないようにしました！
   expected: 想定通りの結果となること。
+  movie: UC13
 - case_no: '675'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1053
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__53'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__53
+  movie: UC13
 - case_no: '678'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1032
   expected: 想定通りの結果となること。
+  movie: UC13
 - case_no: '679'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1230
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__47'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__47
+  movie: UC13
 - case_no: '680'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1238
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__34'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__34
+  movie: UC14
 - case_no: '681'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1183
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__30'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__30
+  movie: UC14
 - case_no: '682'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1235
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__28'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__28
+  movie: UC14
 - case_no: '683'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1118
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__26'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__26
+  movie: UC14
 - case_no: '684'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/964
-  expected: '想定通りの結果となること。
-
-    https://henmi019.pigeon-demo.com/admin/notification/edit/1?return_url=%252Fadmin%252Fnotification'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi019.pigeon-demo.com/admin/notification/edit/1?return_url=%252Fadmin%252Fnotification
+  movie: UC14
 - case_no: '685'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1132
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__25'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__25
+  movie: UC14
 - case_no: '686'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1165
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__23'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__23
+  movie: UC14
 - case_no: '687'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1205
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__21'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__21
+  movie: UC14
 - case_no: '688'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1211
   expected: 想定通りの結果となること。
+  movie: UC14
 - case_no: '690'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1219
   expected: https://henmi017.pigeon-demo.com/admin/dataset__18
+  movie: UC14
 - case_no: '691'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1246
   expected: 想定通りの結果となること。
+  movie: UC14
 - case_no: '692'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1212
   expected: 想定通りの結果となること。
+  movie: UC14
 - case_no: '694'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1141
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset/edit/23'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset/edit/23
+  movie: UC14
 - case_no: '695'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1203
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi011.pigeon-dev.com/admin/dataset__51
 
-
-    https://henmi023.pigeon-demo.com/admin/dataset__92'
+    https://henmi023.pigeon-demo.com/admin/dataset__92
+  movie: UC14
 - case_no: '696'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1251
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi011.pigeon-dev.com/admin/dataset__53
-
-    https://henmi023.pigeon-demo.com/admin/dataset__87'
+    https://henmi023.pigeon-demo.com/admin/dataset__87
+  movie: UC14
 - case_no: '698'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1269
   expected: 想定通りの結果となること。
+  movie: UC15
 - case_no: '699'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/967
   expected: 想定通りの結果となること。
+  movie: UC15
 - case_no: '700'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1210
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__4'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__4
+  movie: UC15
 - case_no: '701'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1270
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__3'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__3
+  movie: UC15
 - case_no: '702'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1738802545186909
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__112'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__112
+  movie: UC15
 - case_no: '703'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1737881017605909?thread_ts=1733981177.144699&cid=C05CK6Z7YDQ
-  expected: '想定通りの結果となること。
-
-    https://henmi018.pigeon-demo.com/admin/dataset__9'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi018.pigeon-demo.com/admin/dataset__9
+  movie: UC15
 - case_no: '704'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p17392159423660399
-  expected: '想定通りの結果となること。
-
-    ※Dev環境(dev1 ~ dev5)でテスト実施'
+  expected: |-
+    想定通りの結果となること。
+    ※Dev環境(dev1 ~ dev5)でテスト実施
+  movie: UC15
 - case_no: '705'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1287
-  expected: '想定通りの結果となること。
-
-    https://henmi017.pigeon-demo.com/admin/dataset__109'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi017.pigeon-demo.com/admin/dataset__109
+  movie: UC15
 - case_no: '706'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1192
-  expected: '想定通りの結果となること。
-
-    https://henmi018.pigeon-demo.com/admin/dataset__30'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi018.pigeon-demo.com/admin/dataset__30
+  movie: UC15
 - case_no: '707'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1190
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__2'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__2
+  movie: UC15
 - case_no: '708'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1213
   expected: 想定通りの結果となること。
+  movie: UC15
 - case_no: '709'
   sheet: B
   feature: ''
   description: 帳票のDLを別ブラウザで真っ白の画面開かずにDLできるように仕様変更
   expected: 想定通りの結果となること。
+  movie: UC15
 - case_no: '710'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1740639950439849?thread_ts=1740518165.554519&cid=C06LF4G88FM
   expected: 想定通りの結果となること。
+  movie: UC15
 - case_no: '711'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1741029567350709
   expected: 想定通りの結果となること。
+  movie: UC15
 - case_no: '712'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1314
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__21'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__21
+  movie: UC15
 - case_no: '713'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1049
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__65'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__65
+  movie: UC16
 - case_no: '715'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1741121853202309
   expected: 想定通りの結果となること。
+  movie: UC16
 - case_no: '716'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1741342790381319
   expected: 想定通りの結果となること。
+  movie: UC16
 - case_no: '717'
   sheet: B
   feature: ''
-  description: 'https://loftal.slack.com/archives/C06LF4G88FM/p1741343489222159
-
-    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1290'
+  description: |-
+    https://loftal.slack.com/archives/C06LF4G88FM/p1741343489222159
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1290
   expected: 想定通りの結果となること。
+  movie: UC16
 - case_no: '718'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1256
-  expected: '想定通りの結果となること。
-
-    https://henmi019.pigeon-demo.com/admin/dataset__44'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi019.pigeon-demo.com/admin/dataset__44
+  movie: UC16
 - case_no: '719'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1181
   expected: 想定通りの結果となること。
+  movie: UC16
 - case_no: '720'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1279
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi019.pigeon-demo.com/admin/dataset__37
-
-    https://henmi024.pigeon-demo.com/admin/dataset__90'
+    https://henmi024.pigeon-demo.com/admin/dataset__90
+  movie: UC16
 - case_no: '721'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/958
   expected: 想定通りの結果となること。
+  movie: UC16
 - case_no: '722'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1225
-  expected: '想定通りの結果となること。
-
-    https://henmi019.pigeon-demo.com/admin/dataset__39'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi019.pigeon-demo.com/admin/dataset__39
+  movie: UC16
 - case_no: '723'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1741465769936279
   expected: 想定通りの結果となること。
+  movie: UC16
 - case_no: '724'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1226
-  expected: '想定通りの結果となること。
-
-    https://henmi019.pigeon-demo.com/admin/dataset__41'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi019.pigeon-demo.com/admin/dataset__41
+  movie: UC16
 - case_no: '725'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1098
-  expected: '想定通りの結果となること。
-
-    https://henmi019.pigeon-demo.com/admin/dataset__63'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi019.pigeon-demo.com/admin/dataset__63
+  movie: UC16
 - case_no: '726'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1257
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     テスト環境
-
     https://t-20250320-67dbda1da45a9.pigeon-demo.com/admin/dataset__27
-
     ID: admin
-
-    PW: 1qazse4r'
+    PW: 1qazse4r
+  movie: UC16
 - case_no: '727'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1742012570253099
   expected: 想定通りの結果となること。
+  movie: UC16
 - case_no: '728'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/882
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__63'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__63
+  movie: UC16
 - case_no: '730'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1298
   expected: 想定通りの結果となること。
+  movie: UC17
 - case_no: '731'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1258
   expected: 想定通りの結果となること。
+  movie: UC17
 - case_no: '732'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1253
   expected: 想定通りの結果となること。
+  movie: UC17
 - case_no: '733'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1742718204814239
   expected: 想定通りの結果となること。
+  movie: UC17
 - case_no: '734'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1742746013359439
   expected: 想定通りの結果となること。
+  movie: UC17
 - case_no: '735'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1117
-  expected: '想定通りの結果となること。
-
-    https://henmi024.pigeon-demo.com/admin/dataset__16/edit/new'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi024.pigeon-demo.com/admin/dataset__16/edit/new
+  movie: UC17
 - case_no: '736'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1294
   expected: 想定通りの結果となること。
+  movie: UC17
 - case_no: '737'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1218
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__12;_filter_id=18;_view_id=null;t=1746833536879'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__12;_filter_id=18;_view_id=null;t=1746833536879
+  movie: UC17
 - case_no: '738'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1323
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__61/view/3'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__61/view/3
+  movie: UC17
 - case_no: '739'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1321
-  expected: '想定通りの結果となること。
-
-    https://henmi009.pigeon-dev.com/admin/dataset__21'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi009.pigeon-dev.com/admin/dataset__21
+  movie: UC17
 - case_no: '740'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1743189135930149
   expected: 想定通りの結果となること。
+  movie: UC17
 - case_no: '741'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1743269506563609
   expected: 想定通りの結果となること。
+  movie: UC17
 - case_no: '742'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1324
-  expected: '想定通りの結果となること。
-
-    https://henmi009.pigeon-dev.com/admin/rpa/edit/1?return_url=%252Fadmin%252Frpa'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi009.pigeon-dev.com/admin/rpa/edit/1?return_url=%252Fadmin%252Frpa
+  movie: UC17
 - case_no: '743'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1342
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://t-20250320-67dbda1da45a9.pigeon-demo.com/admin/dataset__27
-
     ID: admin
-
     PW: 1qazse4r
-
-    https://henmi022.pigeon-demo.com/admin/dataset__111'
+    https://henmi022.pigeon-demo.com/admin/dataset__111
+  movie: UC17
 - case_no: '744'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1278
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__11'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__11
+  movie: UC17
 - case_no: '745'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1289
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__54'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__54
+  movie: UC18
 - case_no: '746'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1286
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset/edit/55'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset/edit/55
+  movie: UC18
 - case_no: '747'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1743823534568559
   expected: 想定通りの結果となること。
+  movie: UC18
 - case_no: '748'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1327
   expected: 想定通りの結果となること。
+  movie: UC18
 - case_no: '749'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1318
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__52/view/1'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__52/view/1
+  movie: UC18
 - case_no: '750'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1319
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__52/view/1'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__52/view/1
+  movie: UC18
 - case_no: '752'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1292
-  expected: '想定通りの結果となること。
-
-    https://henmi009.pigeon-dev.com/admin/dataset__145'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi009.pigeon-dev.com/admin/dataset__145
+  movie: UC18
 - case_no: '753'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1363
-  expected: '想定通りの結果となること。
-
-    https://henmi021.pigeon-demo.com/admin/dataset__7'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi021.pigeon-demo.com/admin/dataset__7
+  movie: UC18
 - case_no: '754'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1247
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/notification/edit/9?return_url=%252Fadmin%252Fnotification'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/notification/edit/9?return_url=%252Fadmin%252Fnotification
+  movie: UC18
 - case_no: '755'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745811344393479
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__52/view/1'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__52/view/1
+  movie: UC18
 - case_no: '756'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745805429246679
   expected: 想定通りの結果となること。
+  movie: UC18
 - case_no: '757'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745811344393479
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__52/view/1'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__52/view/1
+  movie: UC18
 - case_no: '758'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745812828365939
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__123'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__123
+  movie: UC18
 - case_no: '759'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745820707419929
   expected: 想定通りの結果となること。
+  movie: UC18
 - case_no: '760'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1745837695920219
   expected: 想定通りの結果となること。
+  movie: UC18
 - case_no: '762'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1284
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__58'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__58
+  movie: UC19
 - case_no: '763'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1224
-
-    ※「表示する条件」ではなく「表示する項目」が正しい'
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__59'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1224
+    ※「表示する条件」ではなく「表示する項目」が正しい
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__59
+  movie: UC19
 - case_no: '764'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1747108063122459
   expected: 想定通りの結果となること。
+  movie: UC19
 - case_no: '765'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1747118435740169
   expected: 想定通りの結果となること。
+  movie: UC19
 - case_no: '766'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1747118525319649
   expected: 想定通りの結果となること。
+  movie: UC19
 - case_no: '767'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1747119649950799
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__80'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__80
+  movie: UC19
 - case_no: '768'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1747385266631289?thread_ts=1747108063.122459&cid=C04J1D90QJY
   expected: 想定通りの結果となること。
+  movie: UC19
 - case_no: '769'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1747768709177359
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__100'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__100
+  movie: UC19
 - case_no: '772'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1747199333346399
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi009.pigeon-dev.com/admin/dataset__164
-
-    https://henmi023.pigeon-demo.com/admin/dataset__83'
+    https://henmi023.pigeon-demo.com/admin/dataset__83
+  movie: UC19
 - case_no: '773'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/967
   expected: 想定通りの結果となること。
+  movie: UC19
 - case_no: '774'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1749046197365429
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset/edit/76'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset/edit/76
+  movie: UC19
 - case_no: '775'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1349
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__100'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__100
+  movie: UC19
 - case_no: '776'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1345
   expected: 想定通りの結果となること。
+  movie: UC19
 - case_no: '777'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1015
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__105/edit/new'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__105/edit/new
+  movie: UC19
 - case_no: '778'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1113
   expected: 想定通りの結果となること。
+  movie: UC19
 - case_no: '779'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1307
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__106'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__106
+  movie: UC20
 - case_no: '780'
   sheet: B
   feature: ''
-  description: 'https://loftal.slack.com/archives/C04J1D90QJY/p1749582078594599
-
-    ※一括編集ではなく編集モードからの編集'
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__48'
+  description: |-
+    https://loftal.slack.com/archives/C04J1D90QJY/p1749582078594599
+    ※一括編集ではなく編集モードからの編集
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__48
+  movie: UC20
 - case_no: '781'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1412
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset/edit/76'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset/edit/76
+  movie: UC20
 - case_no: '782'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1336
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__14'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__14
+  movie: UC20
 - case_no: '783'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1022
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi009.pigeon-dev.com/admin/dataset__2
-
-    https://henmi023.pigeon-demo.com/admin/dataset__17'
+    https://henmi023.pigeon-demo.com/admin/dataset__17
+  movie: UC20
 - case_no: '785'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/927
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__82'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__82
+  movie: UC20
 - case_no: '786'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1079
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset/edit/18'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset/edit/18
+  movie: UC20
 - case_no: '787'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1385
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__135/view/1'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__135/view/1
+  movie: UC20
 - case_no: '788'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1362
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__80'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__80
+  movie: UC20
 - case_no: '789'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1750875885479779
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi024.pigeon-demo.com/admin/rpa/view/1
 
-
-    https://henmi024.pigeon-demo.com/admin/rpa/edit/5?return_url=%2Fadmin%2Frpa%2Fview%2F5'
+    https://henmi024.pigeon-demo.com/admin/rpa/edit/5?return_url=%2Fadmin%2Frpa%2Fview%2F5
+  movie: UC20
 - case_no: '790'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1750763065092929
   expected: 想定通りの結果となること。
+  movie: UC20
 - case_no: '791'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1752211650748159
   expected: 想定通りの結果となること。
+  movie: UC20
 - case_no: '792'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1752211434013469
   expected: 想定通りの結果となること。
+  movie: UC20
 - case_no: '793'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1752211499109039
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__141'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset__141
+  movie: UC20
 - case_no: '794'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1752211557325949
   expected: 想定通りの結果となること。
+  movie: UC20
 - case_no: '795'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1360
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__77'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__77
+  movie: UC21
 - case_no: '796'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C06LF4G88FM/p1753383953585199
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__60'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__60
+  movie: UC21
 - case_no: '797'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1754500272365939
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__56'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__56
+  movie: UC21
 - case_no: '798'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1374
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi011.pigeon-dev.com/admin/dataset__88
-
-    https://henmi023.pigeon-demo.com/admin/dataset__57'
+    https://henmi023.pigeon-demo.com/admin/dataset__57
+  movie: UC21
 - case_no: '799'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/967
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi011.pigeon-dev.com/admin/dataset/edit/57
-
-    https://henmi023.pigeon-demo.com/admin/dataset/edit/78'
+    https://henmi023.pigeon-demo.com/admin/dataset/edit/78
+  movie: UC21
 - case_no: '800'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1375
-
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1375
     以下①～③の対応を行うと即時反映されるかも確認する
-
     ①一覧の表示幅(px)は【300】で設定
-
     ②項目の幅をドラッグで伸縮
-
-    ③テーブル設定より一覧の表示幅(px)【300】のまま変更せずで再度設定保存'
+    ③テーブル設定より一覧の表示幅(px)【300】のまま変更せずで再度設定保存
   expected: 想定通りの結果となること。
+  movie: UC21
 - case_no: '801'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1376
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset/edit/134'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset/edit/134
+  movie: UC21
 - case_no: '802'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1306
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__12'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__12
+  movie: UC21
 - case_no: '803'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1344
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi023.pigeon-demo.com/admin/dataset__95
-
-    https://henmi024.pigeon-demo.com/admin/dataset__12'
+    https://henmi024.pigeon-demo.com/admin/dataset__12
+  movie: UC21
 - case_no: '804'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1381
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__102'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__102
+  movie: UC21
 - case_no: '805'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1754368311795019?thread_ts=1753710210.146859&cid=C04J1D90QJY
   expected: 想定通りの結果となること。
+  movie: UC21
 - case_no: '806'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1455
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi011.pigeon-dev.com/admin/dashboard
-
-    https://henmi023.pigeon-demo.com/admin/dashboard'
+    https://henmi023.pigeon-demo.com/admin/dashboard
+  movie: UC21
 - case_no: '807'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1756823153701649?thread_ts=1756549205.786739&cid=C05CK6Z7YDQ
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__123'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__123
+  movie: UC21
 - case_no: '809'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1302
-  expected: '想定通りの結果となること。
-
-    https://henmi024.pigeon-demo.com/admin/dataset__9'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi024.pigeon-demo.com/admin/dataset__9
+  movie: UC21
 - case_no: '810'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1358
-  expected: '想定通りの結果となること。
-
-    https://henmi024.pigeon-demo.com/admin/dataset__86'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi024.pigeon-demo.com/admin/dataset__86
+  movie: UC21
 - case_no: '811'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1311
-  expected: '想定通りの結果となること。
-
-    https://henmi023.pigeon-demo.com/admin/dataset__135'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi023.pigeon-demo.com/admin/dataset__135
+  movie: UC22
 - case_no: '812'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1399
-  expected: '想定通りの結果となること。
-
+  expected: |-
+    想定通りの結果となること。
     https://henmi011.pigeon-dev.com/admin/dataset__103
-
 
     https://henmi024.pigeon-demo.com/admin/dataset__82
 
 
-
     ●単項目の場合の公開フォームURL
-
     https://henmi024.pigeon-demo.com/api/public/f/dataset__82/e25dfc898e/36?文字列(一行)-テ=test&文字列(一行)-メ=test@test.co.jp&
-
     文字列(一行)-U=https://google.com&文章(複数行)-通常=TEST&文章(複数行)-リッチ=TEST&選択肢(単一選択)=選択肢2&選択肢(複数選択)=選択肢1,選択肢2&他テーブル=ピジョン花子
 
-
     ●複数項目の場合の公開フォームURL
-
-    https://henmi024.pigeon-demo.com/api/public/f/dataset__84/5c62cdd3bb/37?文字列(一行)-テキスト=AAAA,BBBB'
+    https://henmi024.pigeon-demo.com/api/public/f/dataset__84/5c62cdd3bb/37?文字列(一行)-テキスト=AAAA,BBBB
+  movie: UC22
 - case_no: '813'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1412
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset/edit/76'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi022.pigeon-demo.com/admin/dataset/edit/76
+  movie: UC22
 - case_no: '814'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1429
-  expected: '想定通りの結果となること。
-
-    https://henmi011.pigeon-dev.com/admin/dataset__106'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi011.pigeon-dev.com/admin/dataset__106
+  movie: UC22
 - case_no: '815'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1304
-  expected: '想定通りの結果となること。
-
-    https://henmi024.pigeon-demo.com/admin/dataset__67'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi024.pigeon-demo.com/admin/dataset__67
+  movie: UC22
 - case_no: '816'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1389
-  expected: '想定通りの結果となること。
-
-    https://henmi009.pigeon-dev.com/admin/notification/edit/20?return_url=%252Fadmin%252Fnotification'
+  expected: |-
+    想定通りの結果となること。
+    https://henmi009.pigeon-dev.com/admin/notification/edit/20?return_url=%252Fadmin%252Fnotification
+  movie: UC22
 - case_no: '817'
   sheet: B
   feature: ''
   description: 帳票の削除を実施
   expected: エラーなく帳票削除が完了すること
+  movie: UC22
 - case_no: '818'
   sheet: B
   feature: ''
-  description: 'APIテストの実施
-
-    ※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する'
+  description: |-
+    APIテストの実施
+    ※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する
   expected: ※シート「APIテスト(邊見)」を実施しエラーが発生しないこと
+  movie: UC22
 - case_no: '819'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C04J1D90QJY/p1759256897527249
-  expected: '想定通りの結果となること
-
-    https://henmi024.pigeon-demo.com/admin/dataset__19'
+  expected: |-
+    想定通りの結果となること
+    https://henmi024.pigeon-demo.com/admin/dataset__19
+  movie: UC22
 - case_no: '820'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1442
-  expected: '想定通りの結果となっていること
-
+  expected: |-
+    想定通りの結果となっていること
     https://henmi011.pigeon-dev.com/admin/dataset__115
 
-
-    https://henmi024.pigeon-demo.com/admin/dataset__79'
+    https://henmi024.pigeon-demo.com/admin/dataset__79
+  movie: UC22
 - case_no: '821'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1443
-  expected: '想定通りの結果となっていること。
-
-    https://henmi024.pigeon-demo.com/admin/dataset__107'
+  expected: |-
+    想定通りの結果となっていること。
+    https://henmi024.pigeon-demo.com/admin/dataset__107
+  movie: UC22
 - case_no: '822'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1427
-  expected: '想定通りの結果となっていること。
-
-    https://henmi011.pigeon-dev.com/admin/dataset__116'
+  expected: |-
+    想定通りの結果となっていること。
+    https://henmi011.pigeon-dev.com/admin/dataset__116
+  movie: UC22
 - case_no: '823'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1421
-  expected: '想定通りの結果ｔなっていること。
-
+  expected: |-
+    想定通りの結果ｔなっていること。
     https://henmi011.pigeon-dev.com/admin/dataset__117
-
-    https://henmi024.pigeon-demo.com/admin/dataset__78'
+    https://henmi024.pigeon-demo.com/admin/dataset__78
+  movie: UC22
 - case_no: '824'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1359
-  expected: '想定通りの結果となっていること。
-
+  expected: |-
+    想定通りの結果となっていること。
     https://henmi011.pigeon-dev.com/admin/dataset__118
-
-    https://henmi024.pigeon-demo.com/admin/dataset__77'
+    https://henmi024.pigeon-demo.com/admin/dataset__77
+  movie: UC22
 - case_no: '825'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1407
   expected: 想定通りの結果となっていること。
+  movie: UC22
 - case_no: '826'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1330
   expected: 想定通りの結果となっていること。
+  movie: UC23
 - case_no: '827'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1432
-  expected: '想定通りの結果となっていること。
-
-    https://henmi025.pigeon-demo.com/admin/dataset__21/view/1'
+  expected: |-
+    想定通りの結果となっていること。
+    https://henmi025.pigeon-demo.com/admin/dataset__21/view/1
+  movie: UC23
 - case_no: '828'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769589479320439
   expected: 想定通りの結果となっていること。
+  movie: UC23
 - case_no: '829'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769574891296539
   expected: 想定通りの結果となっていること。
+  movie: UC23
 - case_no: '830'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769398139056169
   expected: 想定通りの結果となっていること。
+  movie: UC23
 - case_no: '831'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769320662869579
   expected: 想定通りの結果となっていること。
+  movie: UC23
 - case_no: '832'
   sheet: B
   feature: ''
   description: https://loftal.slack.com/archives/C05C2V0C5QQ/p1769308501903709
   expected: 想定通りの結果となっていること。
+  movie: UC23
 - case_no: '833'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1516
   expected: 想定通りの結果となっていること。
+  movie: UC23
 - case_no: '834'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1546
-  expected: '想定通りの結果となっていること。
-
-    https://henmi027.pigeon-demo.com/admin/dataset__7'
+  expected: |-
+    想定通りの結果となっていること。
+    https://henmi027.pigeon-demo.com/admin/dataset__7
+  movie: UC23
 - case_no: '835'
   sheet: B
   feature: ''
-  description: 'https://loftal.slack.com/archives/C05CK6Z7YDQ/p1761884423226249
-
-    テーブル内の区分の項目の設定を必須にはしていないのですが、新規作成すると区分の横に必須マークが出るようになった'
-  expected: '想定通りの結果となっていること。
-
-    https://henmi027.pigeon-demo.com/admin/dataset__6'
+  description: |-
+    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1761884423226249
+    テーブル内の区分の項目の設定を必須にはしていないのですが、新規作成すると区分の横に必須マークが出るようになった
+  expected: |-
+    想定通りの結果となっていること。
+    https://henmi027.pigeon-demo.com/admin/dataset__6
+  movie: UC23
 - case_no: '836'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1549
-
-    ※他テーブル先が計算項目、自動反映ONのとき、並び替えがうまくいってない'
-  expected: '想定通りの結果となっていること。
-
-    https://henmi027.pigeon-demo.com/admin/dataset__4'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1549
+    ※他テーブル先が計算項目、自動反映ONのとき、並び替えがうまくいってない
+  expected: |-
+    想定通りの結果となっていること。
+    https://henmi027.pigeon-demo.com/admin/dataset__4
+  movie: UC23
 - case_no: '837'
   sheet: B
   feature: ''
   description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1540
-  expected: '想定通りの結果となっていること。
-
-    https://henmi027.pigeon-demo.com/admin/dataset__8'
+  expected: |-
+    想定通りの結果となっていること。
+    https://henmi027.pigeon-demo.com/admin/dataset__8
+  movie: UC23
 - case_no: '838'
   sheet: B
   feature: ''
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/1532
-
-    ※ルックアップ表示したも項目の表示がずれる'
-  expected: '想定通りの結果となっていること。
-
-    https://henmi027.pigeon-demo.com/admin/dataset__9'
+  description: |-
+    https://loftal.pigeon-cloud.com/admin/dataset__90/view/1532
+    ※ルックアップ表示したも項目の表示がずれる
+  expected: |-
+    想定通りの結果となっていること。
+    https://henmi027.pigeon-demo.com/admin/dataset__9
+  movie: UC23
 actual_steps:
 - case_no: 145-01
   status: partial
-  steps: '1. beforeAll: createAllTypeTable() でALLテストテーブル作成（既存の場合は再利用）
-
+  steps: |
+    1. beforeAll: createAllTypeTable() でALLテストテーブル作成（既存の場合は再利用）
     2. beforeAll: createAllTypeData(page, 5) でテストデータ5件作成
-
     3. beforeAll: getAllTypeTableId() でテーブルID取得
-
-    4. /admin/dataset__{tableId} に遷移（tableIdがない場合は ''ALL'' で代替）
-
+    4. /admin/dataset__{tableId} に遷移（tableIdがない場合は 'ALL' で代替）
     5. ページテキストに「Internal Server Error」「404」が含まれないことを確認
-
     6. afterAll: deleteAllTypeTables()
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    - expect(pageText).not.toContain(''404'')
-
-    '
-  gaps: '⚠️ YAMLには「一覧表示文字数設定超過分が「...」で表示される」が期待されるが、「...」表示の確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+    - expect(pageText).not.toContain('404')
+  gaps: |
+    ⚠️ YAMLには「一覧表示文字数設定超過分が「...」で表示される」が期待されるが、「...」表示の確認なし
     ⚠️ フィールド設定で文字数制限を設定する操作なし
-
     ⚠️ ページ表示確認のみで機能動作を全く検証していない
-
-    '
 - case_no: 145-01-B
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 「全文字表示設定時に折り返して全表示される」の確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 「全文字表示設定時に折り返して全表示される」の確認なし
     ⚠️ ページ表示確認のみ
-
-    '
 - case_no: '128'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/setting に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/setting に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 埋め込みフォーム設定の実際の操作確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 埋め込みフォーム設定の実際の操作確認なし
     ⚠️ 設定ページへの遷移確認のみ
-
-    '
 - case_no: '129'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/setting に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/setting に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 公開フォーム設定の実際の操作確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 公開フォーム設定の実際の操作確認なし
     ⚠️ 設定ページへの遷移確認のみ
-
-    '
 - case_no: '191'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 列幅設定の実際の操作（マウスドラッグによるリサイズ）なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 列幅設定の実際の操作（マウスドラッグによるリサイズ）なし
     ⚠️ ページ表示確認のみ
-
-    '
 - case_no: '211'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移（5件のデータ）
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移（5件のデータ）
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ YAMLには「大量データでのキャッシュテスト」が期待されるが、テストデータは5件のみ（大量ではない）
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ YAMLには「大量データでのキャッシュテスト」が期待されるが、テストデータは5件のみ（大量ではない）
     ⚠️ キャッシュ動作（レスポンスタイム改善など）の確認なし
-
-    '
 - case_no: '250'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/field に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/field に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 表示条件設定に使用中の項目削除でモーダル警告表示の確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 表示条件設定に使用中の項目削除でモーダル警告表示の確認なし
     ⚠️ フィールド削除操作・警告モーダルの表示確認なし
-
-    '
 - case_no: '251'
   status: partial
-  steps: '1. /admin/user に遷移
-
+  steps: |
+    1. /admin/user に遷移
     2. ページテキストに「Internal Server Error」「404」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    - expect(pageText).not.toContain(''404'')
-
-    '
-  gaps: '⚠️ ログイン状態列でのソート操作の確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+    - expect(pageText).not.toContain('404')
+  gaps: |
+    ⚠️ ログイン状態列でのソート操作の確認なし
     ⚠️ ページ表示確認のみ
-
-    '
 - case_no: '262'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/permission に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/permission に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ テーブル権限設定と項目権限設定の組み合わせ操作なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ テーブル権限設定と項目権限設定の組み合わせ操作なし
     ⚠️ 権限ページへの遷移確認のみ
-
-    '
 - case_no: '267'
   status: partial
-  steps: '1. /admin/system に遷移
-
+  steps: |
+    1. /admin/system に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ メール形式でないログインIDの場合に2段階認証設定ができないことの確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ メール形式でないログインIDの場合に2段階認証設定ができないことの確認なし
     ⚠️ システム設定ページへの遷移確認のみ
-
-    '
 - case_no: '270'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移
     2. 検索フォームの要素を取得（アサートなし）
-
     3. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 検索フォームが存在するかの確認なし（locatorのみで count/isVisible の確認なし）
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 検索フォームが存在するかの確認なし（locatorのみで count/isVisible の確認なし）
     ⚠️ 複数項目の簡易検索・虫眼鏡検索の実際の操作確認なし
-
-    '
 - case_no: '273'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/field に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/field に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 自動採番フォーマット空時のデフォルト採番形式確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 自動採番フォーマット空時のデフォルト採番形式確認なし
     ⚠️ フィールド設定ページへの遷移確認のみ
-
-    '
 - case_no: '274'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/field に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/field に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ リッチテキストフィールド選択時に追加オプション設定が開くかの確認なし
-
-    '
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ リッチテキストフィールド選択時に追加オプション設定が開くかの確認なし
 - case_no: '275'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/field に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/field に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 日時フォーマット指定チェックを外した後の動作確認なし
-
-    '
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 日時フォーマット指定チェックを外した後の動作確認なし
 - case_no: '291'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/field に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/field に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ A→B→C→A の循環参照設定をするとエラーが出ることの確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ A→B→C→A の循環参照設定をするとエラーが出ることの確認なし
     ⚠️ 複数テーブル間の参照設定操作なし
-
-    '
 - case_no: '312'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 一括編集でIDを選択して対象レコードのみ更新されることの確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 一括編集でIDを選択して対象レコードのみ更新されることの確認なし
     ⚠️ 一括編集モーダルの操作なし
-
-    '
 - case_no: '315'
   status: partial
-  steps: '1. /admin/dashboard に遷移
-
+  steps: |
+    1. /admin/dashboard に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ ダッシュボード集計で絞り込み条件が考慮されていることの確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ダッシュボード集計で絞り込み条件が考慮されていることの確認なし
     ⚠️ ダッシュボードページへの遷移確認のみ
-
-    '
 - case_no: '349'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/setting に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/setting に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ テーブルの削除ロック機能の実際の操作確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ テーブルの削除ロック機能の実際の操作確認なし
     ⚠️ 設定ページへの遷移確認のみ
-
-    '
 - case_no: '357'
   status: partial
-  steps: '1. /admin/system に遷移
-
+  steps: |
+    1. /admin/system に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ ログイン失敗カウントがメールアドレスベースで行われることの確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ログイン失敗カウントがメールアドレスベースで行われることの確認なし
     ⚠️ システム設定ページへの遷移確認のみ
-
-    '
 - case_no: '361'
   status: partial
-  steps: '1. /admin/dataset に遷移
-
+  steps: |
+    1. /admin/dataset に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ メニュー並び替え画面で全テーブルが表示されることの確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ メニュー並び替え画面で全テーブルが表示されることの確認なし
     ⚠️ 並び替え操作の確認なし
-
-    '
 - case_no: '367'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ CSVアップロード/ダウンロード処理中のキャンセル機能の確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ CSVアップロード/ダウンロード処理中のキャンセル機能の確認なし
     ⚠️ CSVログページへのアクセスすら行っていない
-
-    '
 - case_no: '370'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移（テストデータ5件）
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移（テストデータ5件）
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ ヘッダー1行目が固定表示されていることのスクロール動作確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ ヘッダー1行目が固定表示されていることのスクロール動作確認なし
     ⚠️ ページ表示確認のみ
-
-    '
 - case_no: '256'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 数値フィールドでカンマ区切りが適用されているかの確認なし
-
-    '
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 数値フィールドでカンマ区切りが適用されているかの確認なし
 - case_no: 146-01
   status: partial
-  steps: '1. ビューポートを 375×812（スマートフォンサイズ）に変更
-
+  steps: |
+    1. ビューポートを 375×812（スマートフォンサイズ）に変更
     2. /admin/dataset__{tableId} に遷移
-
     3. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 選択肢タップ時にズームされないことの確認なし（viewport-meta content確認なし）
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 選択肢タップ時にズームされないことの確認なし（viewport-meta content確認なし）
     ⚠️ スマートフォン表示でのUIレイアウト確認なし
-
-    '
 - case_no: '325'
   status: partial
-  steps: '1. /admin/dataset__{tableId}/field に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId}/field に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 子テーブルに子テーブルを設定しようとするとエラーが出ることの確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 子テーブルに子テーブルを設定しようとするとエラーが出ることの確認なし
     ⚠️ フィールド設定ページへの遷移確認のみ
-
-    '
 - case_no: '341'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移
     2. 最初のレコードの詳細リンクをクリック（条件付き）
-
     3. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 子テーブルが設定されていることが前提だが、テスト用テーブルに子テーブルが設定されているかの確認なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 子テーブルが設定されていることが前提だが、テスト用テーブルに子テーブルが設定されているかの確認なし
     ⚠️ 詳細画面で子テーブルが表示されているかの確認なし
-
-    '
 - case_no: '324'
   status: partial
-  steps: '1. /admin/dataset__{tableId} に遷移
-
+  steps: |
+    1. /admin/dataset__{tableId} に遷移
     2. ページテキストに「Internal Server Error」が含まれないことを確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ 一覧編集モードで値を編集して詳細画面で確認する操作なし
-
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ 一覧編集モードで値を編集して詳細画面で確認する操作なし
     ⚠️ ページ表示確認のみ
-
-    '
 - case_no: '245'
   status: skip
-  steps: 'test.skip(true, ''todo'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ 最終更新者をテーブルに追加する機能の動作確認なし（未実装）
-
-    '
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 最終更新者をテーブルに追加する機能の動作確認なし（未実装）
 - case_no: '246'
   status: skip
-  steps: 'test.skip(true, ''todo'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ 内容不明のまま test.skip
-
-    '
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 内容不明のまま test.skip
 - case_no: '282'
   status: skip
-  steps: 'test.skip(true, ''todo'') - Slack連携仕様確認
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ Slack連携のテストは外部サービス連携のため未実装
-
-    '
+  steps: |
+    test.skip(true, 'todo') - Slack連携仕様確認
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ Slack連携のテストは外部サービス連携のため未実装
 - case_no: '290'
   status: skip
-  steps: 'test.skip(true, ''todo'') - 文章複数行でエンターキーを押し続けたときに画面が上がる現象
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ キーボード連続押下による表示不具合の確認は自動化困難のため未実装
-
-    '
+  steps: |
+    test.skip(true, 'todo') - 文章複数行でエンターキーを押し続けたときに画面が上がる現象
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ キーボード連続押下による表示不具合の確認は自動化困難のため未実装
 - case_no: '293'
   status: skip
-  steps: 'test.skip(true, ''todo'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ ダッシュボードを複数作成できることの確認なし
-
-    '
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ ダッシュボードを複数作成できることの確認なし
 - case_no: '294'
   status: skip
-  steps: 'test.skip(true, ''todo'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ 同一ユーザーで4端末からログインした場合のセッション管理テストは複数ブラウザセッションが必要のため未実装
-
-    '
+  steps: |
+    test.skip(true, 'todo')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 同一ユーザーで4端末からログインした場合のセッション管理テストは複数ブラウザセッションが必要のため未実装
 - case_no: '319'
   status: skip
-  steps: 'test.skip(true, ''todo'') - SMTP認証設定
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ SMTPサーバー設定のテストは外部依存のため未実装
-
-    '
+  steps: |
+    test.skip(true, 'todo') - SMTP認証設定
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ SMTPサーバー設定のテストは外部依存のため未実装
 - case_no: '323'
   status: skip
-  steps: 'test.skip(true, ''todo'') - フィルターの混合設定
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ フィルター設定の組み合わせテスト未実装
-
-    '
+  steps: |
+    test.skip(true, 'todo') - フィルターの混合設定
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ フィルター設定の組み合わせテスト未実装
