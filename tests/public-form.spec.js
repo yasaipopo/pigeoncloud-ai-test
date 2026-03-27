@@ -11,27 +11,58 @@ async function waitForAngular(page, timeout = 15000) {
 }
 
 /**
- * ログイン共通関数
+ * ログイン共通関数（APIログイン優先方式）
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded' });
+    // Angular が ready になるまで待つ（タイムアウトを延長）
+    await waitForAngular(page, 40000);
+
+    // APIログインを優先（Angular SPAでのdetach問題を回避）
+    const loginResult = await page.evaluate(async ({ email, password }) => {
+        try {
+            const csrfResp = await fetch('/api/csrf_token');
+            const csrf = await csrfResp.json();
+            const loginResp = await fetch('/api/login/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email, password,
+                    admin_table: 'admin',
+                    csrf_name: csrf.csrf_name,
+                    csrf_value: csrf.csrf_value,
+                    login_type: 'user',
+                    auth_token: null,
+                    isManageLogin: false
+                })
+            });
+            return await loginResp.json();
+        } catch (e) {
+            return { result: 'error', error: e.toString() };
+        }
+    }, { email: EMAIL, password: PASSWORD });
+
+    if (loginResult.result === 'success') {
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded' });
+        await waitForAngular(page, 40000);
+        return;
+    }
+
+    // APIログイン失敗 — セッションCookieが設定されている場合はダッシュボードにいる可能性
+    const currentUrl = page.url();
+    if (!currentUrl.includes('/admin/login')) {
+        // ログインページ以外にいる（すでにログイン済み）
+        await waitForAngular(page, 15000).catch(() => {});
+        return;
+    }
+
+    // フォールバック: フォームログイン（#id が表示されるまで待つ）
+    await page.waitForSelector('#id', { timeout: 30000 });
     await page.fill('#id', EMAIL);
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
-    try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-    } catch (e) {
-        if (page.url().includes('/admin/login')) {
-            await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-        }
-    }
+    await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(1000);
 }
 
 /**
@@ -54,19 +85,17 @@ async function closeTemplateModal(page) {
 /**
  * テーブル設定の「その他」タブを開く
  * Angular SPAのためdispatchEventを使用してタブ切り替え
- * @returns {Promise<string>} 「その他」タブパネルのIDまたは識別子
  */
 async function openOtherTab(page, tableId) {
-    await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
-    await waitForAngular(page);
+    await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded' });
+    await waitForAngular(page, 40000);
 
-    // Angular ngb-navのタブをJSでクリック（SPAルーティング問題回避）
-    await page.evaluate(() => {
-        const tabs = document.querySelectorAll('[role="tab"]');
-        const otherTab = Array.from(tabs).find(t => t.textContent.trim().includes('その他'));
-        if (otherTab) otherTab.click();
-    });
-    await page.waitForTimeout(1500);
+    // Playwright の click() で Angular のイベントを正しく発火させる
+    // page.evaluate() の DOM click は ngb-nav のタブ切替を起動しない
+    const otherTabLocator = page.getByRole('tab', { name: /その他/ });
+    await otherTabLocator.waitFor({ state: 'visible', timeout: 15000 });
+    await otherTabLocator.click();
+    await waitForAngular(page);
 }
 
 /**
@@ -116,17 +145,9 @@ async function enablePublicForm(page, tableId) {
     }
 
     if (!pubFormPanel.isChecked) {
-        // スイッチをONにする（動的IDを使わずテキストで検索）
-        await page.evaluate(() => {
-            const allFormGroups = document.querySelectorAll('.form-group.row.admin-forms');
-            for (const group of allFormGroups) {
-                if (group.textContent.includes('公開フォームをONにする')) {
-                    const handle = group.querySelector('.switch-handle');
-                    if (handle) handle.click();
-                    break;
-                }
-            }
-        });
+        // Playwright click でスイッチをON（Angular イベントを正しく発火）
+        const switchHandle = page.locator('.form-group.row.admin-forms:has-text("公開フォームをONにする") .switch-handle').first();
+        await switchHandle.click();
         await page.waitForTimeout(3000); // 自動保存待機
     }
     return true;
@@ -201,17 +222,8 @@ test.describe('公開フォーム・公開メールリンク', () => {
         // Step 2: 公開フォームをONにする（スイッチをクリック）
         const isChecked = await switchInput.isChecked();
         if (!isChecked) {
-            // 動的IDを使わずテキストで検索してクリック
-            await page.evaluate(() => {
-                const allFormGroups = document.querySelectorAll('.form-group.row.admin-forms');
-                for (const group of allFormGroups) {
-                    if (group.textContent.includes('公開フォームをONにする')) {
-                        const handle = group.querySelector('.switch-handle');
-                        if (handle) handle.click();
-                        break;
-                    }
-                }
-            });
+            // Playwright click でスイッチをON（Angular イベントを正しく発火）
+            await switchHandle.click();
             await page.waitForTimeout(3000); // 自動保存待機
 
             // スイッチがONになったことを確認
