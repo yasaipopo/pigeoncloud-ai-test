@@ -304,6 +304,77 @@ async function openTableMenu(page) {
 // チャート・カレンダー・集計 テスト
 // =============================================================================
 
+/**
+ * ALLテストテーブルのsummarize（集計）権限が有効かチェックし、
+ * 無効の場合はテーブルを再作成してgrant設定をリセットする。
+ *
+ * grant.summarize が false だとドロップダウンに「集計」「チャート」が表示されず、
+ * 105-02, 15-1, 15-2, 65-1 等のテストが失敗する。
+ */
+async function ensureSummarizeGrant(page) {
+    // ALLテストテーブルに遷移してドロップダウンメニューを確認
+    await navigateToAllTypeTable(page);
+
+    // ドロップダウンを開いて「集計」メニューが表示されるか確認
+    await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
+    const buttons = await page.locator('button.dropdown-toggle').all();
+    let hasSummarize = false;
+    for (const btn of buttons) {
+        if (await btn.isVisible()) {
+            const text = await btn.innerText();
+            if (!text.includes('帳票')) {
+                await btn.click({ force: true });
+                await waitForAngular(page);
+                const menuItem = page.locator('.dropdown-item:has-text("集計"), .dropdown-item:has-text("チャート")').first();
+                hasSummarize = await menuItem.isVisible().catch(() => false);
+                await page.keyboard.press('Escape');
+                await waitForAngular(page);
+                if (hasSummarize) break;
+            }
+        }
+    }
+
+    if (hasSummarize) {
+        console.log('[ensureSummarizeGrant] summarize権限OK — 集計/チャートメニュー表示確認済み');
+        return;
+    }
+
+    // summarize権限が無い場合: テーブル再作成でgrant設定をリセット
+    console.warn('[ensureSummarizeGrant] summarize権限が不足 — テーブルを再作成してgrant設定をリセットします');
+    await deleteAllTypeTables(page);
+    // 削除完了を待つ
+    await page.waitForTimeout(3000);
+    const recreateRes = await createAllTypeTable(page);
+    if (recreateRes.result !== 'success') {
+        throw new Error('[ensureSummarizeGrant] テーブル再作成に失敗しました');
+    }
+    await createAllTypeData(page, 10);
+
+    // 再作成後に再度確認
+    await navigateToAllTypeTable(page);
+    await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
+    const buttons2 = await page.locator('button.dropdown-toggle').all();
+    let hasSummarize2 = false;
+    for (const btn of buttons2) {
+        if (await btn.isVisible()) {
+            const text = await btn.innerText();
+            if (!text.includes('帳票')) {
+                await btn.click({ force: true });
+                await waitForAngular(page);
+                const menuItem = page.locator('.dropdown-item:has-text("集計"), .dropdown-item:has-text("チャート")').first();
+                hasSummarize2 = await menuItem.isVisible().catch(() => false);
+                await page.keyboard.press('Escape');
+                await waitForAngular(page);
+                if (hasSummarize2) break;
+            }
+        }
+    }
+    if (!hasSummarize2) {
+        throw new Error('[ensureSummarizeGrant] テーブル再作成後もsummarize権限が有効になりません。テスト環境のgrant設定を手動で確認してください。');
+    }
+    console.log('[ensureSummarizeGrant] テーブル再作成後、summarize権限OK');
+}
+
 // ============================================================
 // ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
 // ============================================================
@@ -319,6 +390,10 @@ test.beforeAll(async ({ browser }) => {
         throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
     }
     await createAllTypeData(page, 10);
+
+    // summarize（集計/チャート）権限が有効か確認し、不足なら再作成
+    await ensureSummarizeGrant(page);
+
     await page.close();
     await context.close();
 });

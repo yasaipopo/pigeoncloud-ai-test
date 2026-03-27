@@ -46,7 +46,7 @@ async function reloginIfNeeded(page) {
  * @param {number} [options.maxPolls=20] - 最大ポーリング回数（20×10秒=200秒）
  * @returns {Promise<{result: string, tableId: string|null}>} 成功時 {result: 'success', tableId: string}、失敗時 {result: 'failure', tableId: null}
  */
-async function setupAllTypeTable(page, { pollIntervalMs = 10000, maxPolls = 20 } = {}) {
+async function setupAllTypeTable(page, { pollIntervalMs = 2000, maxPolls = 60 } = {}) {
     // 1. まず既存テーブルを確認（deleteしない）
     const existingId = await getAllTypeTableId(page);
     if (existingId === LOGIN_ERROR_SENTINEL) {
