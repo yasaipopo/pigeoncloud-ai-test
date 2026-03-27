@@ -2,30 +2,124 @@ group: 認証（ログイン・ログアウト・パスワード変更）
 spec_file: tests/auth.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: AUTH-FULL
-  feature: 認証・ログイン総合
-  category: 動画単位
-  description: |
-    ①マスターユーザーでログイン・ログアウトを行う
-    ②通常ユーザーでログイン・ログアウトを行う
-    ③誤ったパスワードでログインを試み、エラーメッセージを確認する
-    ④推奨ブラウザ以外でのアクセスを確認する
-    ⑤Googleログインの動作を確認する
-    ⑥同時ログインプランの制限・自動ログアウト・セッション管理を確認する
-    ⑦パスワード変更フローを確認する
-  expected: |
-    各ユーザータイプのログイン/ログアウト・エラー処理・Googleログイン・同時ログイン制限・パスワード変更が全て正常に動作すること
-  includes:
-  - 1-1
-  - 1-2
-  - 38-1
-  - 144-01
-  - '176'
-  - 212-1
-  - 212-2
-  - 212-3
-  - 212-4
-  - '295'
+- case_no: 144-01
+  sheet: A
+  feature: 推奨ブラウザ
+  category: 警告出力
+  description: 推奨ブラウザ以外で、PigeonCloudを開く。
+  expected: 警告メッセージが出力されること
+- case_no: 1-1
+  sheet: A
+  feature: ログイン／ログアウト
+  category: '-'
+  description: ユーザータイプが「マスター」のユーザーでログイン、ログアウトを行う。
+  expected: エラーなくログインログアウトが完了すること。
+- case_no: 1-2
+  sheet: A
+  feature: ログイン／ログアウト
+  category: '-'
+  description: ユーザータイプが「ユーザー」のユーザーでログイン、ログアウトを行う。
+  expected: エラーなくログインログアウトが完了すること。
+- case_no: 38-1
+  sheet: A
+  feature: ログイン
+  category: パスワード入力(異常系)
+  description: ①ログイン画面にて、該当のユーザーで誤ったパスワードを入力すること。
+  expected: ログインエラーが発生すること。
+- case_no: '176'
+  sheet: B
+  feature: ログイン
+  category: google　login
+  description: 'https://demo-popo7.pigeon-demo.com/　のサイトより、Googleログインを実施。
+
+    アカウント／パスワードは以下の通り
+
+
+    ID: test-login@loftal.jp
+
+    password: 2IiPK9Yg'
+  expected: Googleログインできること。
+- case_no: 212-1
+  sheet: B
+  feature: 同時ログインプラン
+  category: 同時ログイン制御
+  description: '●テスト環境URL
+
+    https://demo-user-num.pigeon-demo.com
+
+
+    ●ID／PW
+
+    admin
+
+    1rxKLot98PUE
+
+
+    ・同時ログイン制御機能、設定人数まで同時ログイン可能。それ以上はログイン不可'
+  expected: ・想定通りの結果となること
+- case_no: 212-2
+  sheet: B
+  feature: 同時ログインプラン
+  category: 強制ログアウト
+  description: '●テスト環境URL
+
+    https://demo-user-num.pigeon-demo.com
+
+
+    ●ID／PW
+
+    admin
+
+    1rxKLot98PUE
+
+
+    ・マスターユーザーはユーザーをユーザー一覧から強制ログアウト可能'
+  expected: ・マスターユーザーにてユーザーの強制ログアウトが可能なこと
+- case_no: 212-3
+  sheet: B
+  feature: 同時ログインプラン
+  category: 自動ログアウト時間を設定
+  description: '●テスト環境URL
+
+    https://demo-user-num.pigeon-demo.com
+
+
+    ●ID／PW
+
+    admin
+
+    1rxKLot98PUE
+
+
+    ・自動ログアウト時間を設定を「60」と設定'
+  expected: ・1時間後に自動ログアウトされること。
+- case_no: 212-4
+  sheet: B
+  feature: 同時ログインプラン
+  category: 全端末からログアウト
+  description: '●テスト環境URL
+
+    https://demo-user-num.pigeon-demo.com
+
+
+    ●ID／PW
+
+    admin
+
+    1rxKLot98PUE
+
+
+    ・同一アカウントで複数端末でログイン
+
+    ・1つの端末からログアウト実施'
+  expected: ・全端末ログアウトすること
+- case_no: '295'
+  sheet: B
+  feature: パスワード変更
+  category: '-'
+  description: "https://loftal.pigeon-cloud.com/admin/dataset__90/view/265\n\n※注意事項\n\
+    ・設定ＯＮで有効になるのは、自分自身のパスワード変更時のみ\r\n・マスターユーザーが一般ユーザーのパスワード変更する際は、本機能は対象外となる"
+  expected: 想定通りの結果となること。
 actual_steps:
 - case_no: 1-1
   status: passed

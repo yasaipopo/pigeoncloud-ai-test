@@ -2,22 +2,39 @@ group: テンプレート
 spec_file: tests/templates.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: TMPL-FULL
-  feature: テンプレート総合
-  category: 動画単位
+- case_no: "TMPL-01"
+  feature: テンプレート
   description: |
-    ①テンプレート一覧モーダルが正常に表示されることを確認する
-    ②テンプレートの詳細を確認する
-    ③テンプレートインストールモーダルの「戻る」で一覧に戻れることを確認する
-    ④テンプレートをインストールし、テーブルが作成されることを確認する
-    ⑤インストール済みテンプレートの動作を確認する
-    ⑥テンプレート関連のUI全般を確認する
+    テンプレート一覧モーダルが正常に表示されること
   expected: |
-    テンプレートの一覧・詳細・インストール・戻る操作が全て正常に動作すること
-  includes:
-  - TMPL-01
-  - TMPL-02
-  - TMPL-03
-  - TMPL-04
-  - TMPL-05
-  - TMPL-06
+    エラーなくページが正常に表示されること
+- case_no: "TMPL-02"
+  feature: テンプレート
+  description: |
+    テンプレートの詳細を確認できること
+  expected: |
+    テンプレートの詳細を確認できること
+- case_no: "TMPL-03"
+  feature: テンプレート
+  description: |
+    テンプレートインストールモーダルの「戻る」で一覧に戻れること
+  expected: |
+    テンプレートインストールモーダルの「戻る」で一覧に戻れること
+- case_no: "TMPL-04"
+  feature: テンプレート
+  description: |
+    テンプレートをインストールできること
+  expected: |
+    テンプレートをインストールできること
+- case_no: "TMPL-05"
+  feature: テンプレート
+  description: |
+    テンプレートモーダルを閉じられること
+  expected: |
+    テンプレートモーダルを閉じられること
+- case_no: "TMPL-06"
+  feature: テンプレート
+  description: |
+    テンプレート一覧のテンプレート名が表示されていること
+  expected: |
+    テンプレート一覧のテンプレート名が表示されていること
