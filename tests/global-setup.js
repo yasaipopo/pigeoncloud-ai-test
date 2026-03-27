@@ -168,6 +168,42 @@ module.exports = async function globalSetup() {
             newPassword = result.pw;
         }
 
+        // with_all_type_table で作成リクエスト済みの場合、テーブル完成をポーリング待機
+        if (result.all_type_table_requested) {
+            console.log(`[global-setup] ALLテストテーブル作成待機中...`);
+            const pollBrowser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+            const pollPage = await pollBrowser.newPage();
+            try {
+                // 新テナントにログインしてstatus APIでテーブル完成を確認
+                await pollPage.goto(actualUrl + '/admin/login', { timeout: 30000 });
+                await pollPage.fill('#id', 'admin');
+                await pollPage.fill('#password', newPassword);
+                await pollPage.click('button[type=submit].btn-primary');
+                await pollPage.waitForURL('**/admin/dashboard', { timeout: 40000 });
+
+                for (let i = 0; i < 30; i++) { // 最大300秒
+                    await pollPage.waitForTimeout(10000);
+                    const status = await pollPage.evaluate(async (url) => {
+                        const res = await fetch(url + '/api/admin/debug/status', {
+                            credentials: 'include',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        });
+                        return res.json();
+                    }, actualUrl);
+                    const table = (status?.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+                    if (table) {
+                        console.log(`[global-setup] ALLテストテーブル作成完了 (ID: ${table.id})`);
+                        break;
+                    }
+                    if (i === 29) console.log(`[global-setup] ALLテストテーブル作成タイムアウト（テスト中に完了する可能性あり）`);
+                }
+            } catch (e) {
+                console.log(`[global-setup] ALLテストテーブル待機エラー (無視): ${e.message}`);
+            } finally {
+                await pollBrowser.close();
+            }
+        }
+
         // 環境変数を更新（このプロセスとspec.jsで参照される）
         process.env.TEST_BASE_URL = actualUrl;
         process.env.TEST_EMAIL    = 'admin';
