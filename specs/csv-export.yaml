@@ -168,259 +168,616 @@ cases:
   category: CSVファイル以外のファイルをアップロードする(異常系)
   description: ①CSV以外のファイルをアップロードする。
   expected: インポートエラーが発生すること。
+- case_no: '246'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】JSONエクスポートできない。（添付ファイル参照）
 
-# =============================================================================
-# actual_steps: spec.jsが実際に行っている手順（逆引きチェック用）
-# =============================================================================
+
+    （階層になっているのは関係ありますか？）
+
+
+    対応: テーブルが重すぎて時間がかかりすぎてjsonエクスポートできなかったと思われる。
+
+    バッググラウンドで動くよう(JOB化)に仕様変更して対応
+
+    https://github.com/Loftal/pigeon_cloud/pull/261'
+  expected: バグが修正され、正常に動作すること。(JSONエクスポートできない。（添付ファイル参照）  （階層になっているのは関係ありますか？）)
+- case_no: '309'
+  sheet: B
+  feature: ''
+  description: '【機能改善確認】CSVアップロードの際、一行目（項目行）が異なっていたり、項目内に選択肢として存在しないワードが含まれている場合に、内容がわかるようなエラーメッセージを出していただきたいです。
+
+    「選択肢にない場合に自動で追加する」がOFFの場合はエラーを出してほしいです。'
+  expected: 機能改善が正しく反映されていること。(CSVアップロードの際、一行目（項目行）が異なっていたり、項目内に選択肢として存在しないワードが含まれている場合に、内容がわかるようなエラーメッセージを出していただきたいです。 「選択肢にない場合に自)
+- case_no: '313'
+  sheet: B
+  feature: ''
+  description: '【機能改善確認】CSVアップロードの際の注意書きに、
+
+    「更新日時、作成日時は自動更新されます。」
+
+    とありますが、
+
+    ここに作成者、最終更新者も追加していただき、
+
+    「作成者、最終更新者、更新日時、作成日時は自動更新されます。」
+
+    としていただきたいです。'
+  expected: 機能改善が正しく反映されていること。(CSVアップロードの際の注意書きに、 「更新日時、作成日時は自動更新されます。」 とありますが、 ここに作成者、最終更新者も追加していただき、 「作成者、最終更新者、更新日時、作成日時は自動更新されま)
+- case_no: '337'
+  sheet: B
+  feature: ''
+  description: 【バグ修正確認】CSVダウンロードの際、固定テキストはダウンロード項目に含まれないように修正希望です。
+  expected: バグが修正され、正常に動作すること。(CSVダウンロードの際、固定テキストはダウンロード項目に含まれないように修正希望です。)
+- case_no: '347'
+  sheet: B
+  feature: ''
+  description: 【バグ修正確認】案件管理をデータ含めてJSON export / importするとエラーになったため修正を希望です。
+  expected: バグが修正され、正常に動作すること。(案件管理をデータ含めてJSON export / importするとエラーになったため修正を希望です。)
+- case_no: '372'
+  sheet: B
+  feature: ''
+  description: 【バグ修正確認】ユーザー管理テーブルで、ユーザー作成のためCSVアップロードを行うと、組織が反映されないため修正を希望です。
+  expected: バグが修正され、正常に動作すること。(ユーザー管理テーブルで、ユーザー作成のためCSVアップロードを行うと、組織が反映されないため修正を希望です。)
+- case_no: '378'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】ログをクロス集計したフィルタでCSVダウンロードしようとすると、
+
+    添付画像のエラーが発生しダウンロードできないため、修正を希望です。
+
+
+    対応: memo
+
+    これも
+
+
+    https://loftal.slack.com/archives/C05CK6Z7YDQ/p1701154237570519?thread_ts=1701153082.141629&cid=C05CK6Z7YDQ'
+  expected: バグが修正され、正常に動作すること。(ログをクロス集計したフィルタでCSVダウンロードしようとすると、 添付画像のエラーが発生しダウンロードできないため、修正を希望です。)
+- case_no: '379'
+  sheet: B
+  feature: ''
+  description: CSVログは、自分がUP/DLした分だけは全ユーザー見られるようにしていただきたいです。
+  expected: エラーなく正常に動作すること。(CSVログは、自分がUP/DLした分だけは全ユーザー見られるようにしていただきたいです。)
+- case_no: '393'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】文字列（１行）に、例えば「1-03」と入力してあるものを、
+
+    CSVでダウンロードしたときに「１月３日」とせずそのまま「1-03」でダウンロードできるように修正希望です。'
+  expected: バグが修正され、正常に動作すること。(文字列（１行）に、例えば「1-03」と入力してあるものを、 CSVでダウンロードしたときに「１月３日」とせずそのまま「1-03」でダウンロードできるように修正希望です。)
+- case_no: '438'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】テーブル作成者以外のユーザーは、テーブル管理者であっても
+
+    子テーブルのCSVダウンロードができないようですので修正いただけますでしょうか。'
+  expected: バグが修正され、正常に動作すること。(テーブル作成者以外のユーザーは、テーブル管理者であっても 子テーブルのCSVダウンロードができないようですので修正いただけますでしょうか。)
+- case_no: '444'
+  sheet: B
+  feature: ''
+  description: '他テーブル参照で、参照先が文字列（一行）だった場合、
+
+    「1-03」と入力してあるものを、
+
+    CSVでダウンロードしたときに「１月３日」とせずそのまま「1-03」でダウンロードできるように修正希望です。'
+  expected: エラーなく正常に動作すること。(他テーブル参照で、参照先が文字列（一行）だった場合、 「1-03」と入力してあるものを、 CSVでダウンロードしたときに「１月３日」とせずそのまま「1-03」でダウンロードできるように修正希望です。)
+- case_no: '447'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】テーブル名：工事日報（dataset__14）
+
+
+    こちらコピー環境で再現されました。
+
+    CSVの「工種」の部分に「1」など数値が入っており、値がずれているため、修正いただけますでしょうか。。
+
+    親テーブルと子テーブルすべてのテーブル更新をお願いしたのですが、解消されませんでした。'
+  expected: バグが修正され、正常に動作すること。(テーブル名：工事日報（dataset__14）  こちらコピー環境で再現されました。 CSVの「工種」の部分に「1」など数値が入っており、値がずれているため、修正いただけますでしょうか。。 親テーブル)
+- case_no: '483'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】「PigeonCloud実装依頼・FB」にてテストステータス、記入者ステータスなど変更が必要な項目のみ入力して他を空白にした状態でCSVアップロードしたところ、空白にした項目が全て空欄になってしまいました。
+
+    仕様としては、「アップロードするCSVデータの項目が空の部分は、既存データを更新せずに維持する」というものだと思いますので、修正いただけますでしょうか。
+
+    実際にアップロードしたCSVを添付'
+  expected: バグが修正され、正常に動作すること。(「PigeonCloud実装依頼・FB」にてテストステータス、記入者ステータスなど変更が必要な項目のみ入力して他を空白にした状態でCSVアップロードしたところ、空白にした項目が全て空欄になってしまいま)
+- case_no: '485'
+  sheet: B
+  feature: ''
+  description: '【機能改善確認】テーブル名：議案書管理台帳（dataset__75）
+
+    項目名：伝票№（文字列(一行)）
+
+
+    現状、文字列(一行)項目で、「複数の値の登録を許可する」を有効にしている場合、
+
+    CSVダウンロードしたとき、登録されている数字が全て連なってしまうようです。
+
+
+    例：
+
+    123456
+
+    456789
+
+    と登録があった場合、CSVダウンロードすると、同セル内に
+
+    123456456789
+
+    となってし'
+  expected: 機能改善が正しく反映されていること。(テーブル名：議案書管理台帳（dataset__75） 項目名：伝票№（文字列(一行)）  現状、文字列(一行)項目で、「複数の値の登録を許可する」を有効にしている場合、 CSVダウンロードしたとき、登)
+- case_no: '495'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】動画をご確認いただければと思います。
+
+
+    CSVアップロードで数値項目で「0」を入れても認識されないです。
+
+    数値項目で小数点0.0まで表示するように設定しています。
+
+
+    CSV側で「0.0」を入れる⇒Pigeonで「0.0」と表示される。
+
+    CSV側で「0」を入れる⇒Pigeonで空欄になります。（他の項目に値が無い場合は、空欄ではなく、レコードが作成されません。）
+
+
+    「0」は0として認'
+  expected: バグが修正され、正常に動作すること。(動画をご確認いただければと思います。  CSVアップロードで数値項目で「0」を入れても認識されないです。 数値項目で小数点0.0まで表示するように設定しています。  CSV側で「0.0」を入れる⇒Pi)
+- case_no: '538'
+  sheet: B
+  feature: ''
+  description: "【バグ修正確認】テーブル：https://l-akahori.pigeon-cloud.com/admin/dataset__120\nID：admin\tPW：dM4ApAcjDXC9\n項目：計算\n\n・不具合内容\n計算項目で「値の重複を禁止する」を有効にしても、\nCSVアップロードでレコードの登録を行うと、重複した値でも登録ができてしまうため、以下の仕様に変更していただけますでしょうか。\n\
+    \n・計算項"
+  expected: "バグが修正され、正常に動作すること。(テーブル：https://l-akahori.pigeon-cloud.com/admin/dataset__120 ID：admin\tPW：dM4ApAcjDXC9 項目：計算  ・不具合内容 計算)"
+- case_no: '605'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】ユーザー管理テーブルにて、
+
+    同組織を複数設定している場合、CSVダウンロードで一つしかダウンロードされず、
+
+    そのままアップロードすると組織が一つ分になってしまうのですが、修正いただけますでしょうか。
+
+
+    例：ユーザーAは組織1の部長、組織1のマネージャーを兼任。
+
+    CSVダウンロードすると、ユーザーAの組織欄は組織1としか入力されていない状態。
+
+    そのままアップロードすると、組織1の部長のみ'
+  expected: バグが修正され、正常に動作すること。(ユーザー管理テーブルにて、 同組織を複数設定している場合、CSVダウンロードで一つしかダウンロードされず、 そのままアップロードすると組織が一つ分になってしまうのですが、修正いただけますでしょうか。 )
+- case_no: '611'
+  sheet: B
+  feature: ''
+  description: '### 要件名
+
+    * 登録/編集フォームの子テーブルでcsv or excelでの一括登録ができる
+
+
+    ### 要件
+
+    * レコードの登録/編集フォームの子テーブルにて、csvやexcelのデータをインポートして一括で登録できる
+
+    * できれば、フロント側でcsv/excelを読み込んで、子テーブルの読み込み結果が表示されるようにしたい
+
+
+    ### 参照
+
+    * slack : https://'
+  expected: 'エラーなく正常に動作すること。(### 要件名 * 登録/編集フォームの子テーブルでcsv or excelでの一括登録ができる  ### 要件 * レコードの登録/編集フォームの子テーブルにて、csvやexcelのデータをインポー)'
+- case_no: '808'
+  sheet: B
+  feature: ''
+  description: '【バグ修正確認】テーブル：営業活動記録（dataset__119）
+
+    フィルタ：札幌抽出
+
+
+    該当フィルタは、添付画像一枚目のような設定がされています。
+
+
+    フィルタの結果件数は添付画像二枚目のように7件です（2024/11/15現在）が、
+
+    この状態で「CSVに現在のフィルタを反映する」にチェックを入れてCSVダウンロードをすると、
+
+    18件のデータがダウンロードされます。
+
+
+    通常のフィルタであれば反映'
+  expected: バグが修正され、正常に動作すること。(テーブル：営業活動記録（dataset__119） フィルタ：札幌抽出  該当フィルタは、添付画像一枚目のような設定がされています。  フィルタの結果件数は添付画像二枚目のように7件です（2024/1)
 actual_steps:
 - case_no: 55-1
   status: partial
-  steps: |
-    1. test.describe.configure({ mode: 'serial' }) でシリアル実行
+  steps: '1. test.describe.configure({ mode: ''serial'' }) でシリアル実行
+
     2. セットアップテストでcreate-all-type-table API呼び出し
+
     3. テーブルIDを /tmp/csv_export_test_table_id.txt に保存
+
     4. テーブルページに遷移
+
     5. CSVアップロードモーダルを開く（openCsvUploadModal関数）
+
     6. ヘッダー行なしの一時CSVファイルを /tmp/test-no-header.csv として作成
+
     7. fileInput.setInputFiles() でファイルをセット
+
     8. アップロードボタンをクリック
+
     9. 結果をconsole.logに出力
-  assertions: |
-    - expect(page.locator('.navbar')).toBeVisible()
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
     - エラーメッセージの存在を console.log するのみ（アサートなし）
-  gaps: |
-    ⚠️ YAMLでは「インポートエラーが発生すること」が期待されているが、spec.jsはエラーの発生をアサートしていない
+
+    '
+  gaps: '⚠️ YAMLでは「インポートエラーが発生すること」が期待されているが、spec.jsはエラーの発生をアサートしていない
+
     ⚠️ エラーメッセージの内容確認なし（console.logのみ）
+
     ⚠️ try/catchでエラーを無視している可能性あり
 
+    '
 - case_no: 55-2
   status: partial
-  steps: |
-    1. CSVアップロードモーダルを開く
+  steps: '1. CSVアップロードモーダルを開く
+
     2. CSV以外のファイル（テキストファイル）を作成して setInputFiles
+
     3. アップロードボタンをクリック
+
     4. 結果確認
-  assertions: |
-    - expect(page.locator('.navbar')).toBeVisible()
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
     - エラーメッセージ存在の console.log のみ
-  gaps: |
-    ⚠️ 55-1と同様、エラーが実際に発生することをアサートしていない
+
+    '
+  gaps: '⚠️ 55-1と同様、エラーが実際に発生することをアサートしていない
+
     ⚠️ ファイル形式バリデーションが機能しているかの検証なし
 
+    '
 - case_no: 148-01
   status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動（navigateToEditCsvTab）
+  steps: '1. テーブル編集画面のCSVタブに移動（navigateToEditCsvTab）
+
     2. 子テーブルCSVラベルの存在確認（console.log）
+
     3. スイッチ7番目（use_child_on_csv）をONにして保存
+
     4. テーブル一覧に戻りCSVアップロードモーダルを開く
+
     5. ドロップダウンにCSVダウンロード項目が存在することを確認
-  assertions: |
-    - expect(csvDlItem.first()).toBeVisible()
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ 子テーブル含むCSVを実際にダウンロードして内容確認するステップなし
+
+    '
+  assertions: '- expect(csvDlItem.first()).toBeVisible()
+
+    - expect(await page.locator(''.alert-danger'').count()).toBe(0)
+
+    '
+  gaps: '⚠️ 子テーブル含むCSVを実際にダウンロードして内容確認するステップなし
+
     ⚠️ 子テーブルのデータがCSVに含まれているかの検証なし
+
     ⚠️ スイッチが7番目にない場合は条件付きでスキップされる
 
+    '
 - case_no: 148-02
   status: partial
-  steps: |
-    1. 148-01〜03が1つのテストにまとめられている
+  steps: '1. 148-01〜03が1つのテストにまとめられている
+
     2. CSVダウンロード（空）ボタンの確認も同テスト内
-  assertions: |
-    - expect(emptyDlBtn.first()).toBeVisible()
-  gaps: |
-    ⚠️ 148-02（子テーブル含むCSVをダウンロード→内容確認）の個別実装なし
+
+    '
+  assertions: '- expect(emptyDlBtn.first()).toBeVisible()
+
+    '
+  gaps: '⚠️ 148-02（子テーブル含むCSVをダウンロード→内容確認）の個別実装なし
+
     ⚠️ 実際のCSVダウンロードと内容確認なし
 
+    '
 - case_no: 148-03
   status: partial
-  steps: |
-    1. 148-01〜03が1つのテストにまとめられている
-    2. 「CSVダウンロード（空）」ボタンの表示確認
-  assertions: |
-    - expect(emptyDlBtn.first()).toBeVisible()
-  gaps: |
-    ⚠️ ダウンロードした空CSVのフォーマット確認なし
+  steps: '1. 148-01〜03が1つのテストにまとめられている
 
+    2. 「CSVダウンロード（空）」ボタンの表示確認
+
+    '
+  assertions: '- expect(emptyDlBtn.first()).toBeVisible()
+
+    '
+  gaps: '⚠️ ダウンロードした空CSVのフォーマット確認なし
+
+    '
 - case_no: 161
   status: partial
-  steps: |
-    1. テーブルに遷移
+  steps: '1. テーブルに遷移
+
     2. テーブルヘッダーをクリックしてソート実行
+
     3. applyQuickSearchFilter()でフィルター適用
+
     4. openCsvDownloadModal()でCSVダウンロードモーダルを開く
+
     5. モーダルが表示されることを確認
+
     6. ダウンロードボタンが存在することを確認
+
     7. モーダルを閉じる
-  assertions: |
-    - await expect(csvModal).toBeVisible()
+
+    '
+  assertions: '- await expect(csvModal).toBeVisible()
+
     - await expect(downloadBtn).toBeVisible()
-  gaps: |
-    ⚠️ YAMLでは「ソート順がCSVに反映される」ことの確認が期待されるが、実際のCSVダウンロード・内容確認なし
+
+    '
+  gaps: '⚠️ YAMLでは「ソート順がCSVに反映される」ことの確認が期待されるが、実際のCSVダウンロード・内容確認なし
+
     ⚠️ ソートが適用されているかの確認なし
 
+    '
 - case_no: 173
   status: partial
-  steps: |
-    1. データセット一覧画面（/admin/dataset）に遷移
+  steps: '1. データセット一覧画面（/admin/dataset）に遷移
+
     2. ドロップダウンボタンをクリック
+
     3. 「エクセルから追加」メニューアイテムの存在確認
+
     4. 存在する場合はクリックしてExcelインポートUIを開く
+
     5. .navbar の表示確認
-  assertions: |
-    - await expect(page.locator('.navbar')).toBeVisible()
+
+    '
+  assertions: '- await expect(page.locator(''.navbar'')).toBeVisible()
+
     - if (menuCount > 0) の条件付きでクリック
-  gaps: |
-    ⚠️ YAMLには「Excelファイルをアップロードして項目名変更UI確認」が期待されるが未実装
+
+    '
+  gaps: '⚠️ YAMLには「Excelファイルをアップロードして項目名変更UI確認」が期待されるが未実装
+
     ⚠️ Excelファイルの実際アップロードなし
+
     ⚠️ メニューが表示されない場合（管理者権限確認コメント）でもパスする
 
+    '
 - case_no: 181
   status: partial
-  steps: |
-    1. テーブルに遷移
+  steps: '1. テーブルに遷移
+
     2. CSVアップロードモーダルを開く
+
     3. モーダルのタイトルが「CSVアップロード」を含むことを確認
+
     4. ガイドテキスト（.text-danger）の表示確認
+
     5. ファイル入力（#inputCsv）の存在確認
+
     6. 「CSVダウンロード」ボタンの表示確認
+
     7. モーダルを閉じる
-  assertions: |
-    - await expect(modal).toBeVisible()
-    - await expect(modalTitle).toContainText('CSVアップロード')
+
+    '
+  assertions: '- await expect(modal).toBeVisible()
+
+    - await expect(modalTitle).toContainText(''CSVアップロード'')
+
     - await expect(guideText).toBeVisible()
+
     - await expect(fileInput).toBeAttached()
+
     - await expect(csvDlBtn).toBeVisible()
-  gaps: |
-    ⚠️ YAMLでは「複数選択最低数設定後のCSVアップロード」の検証が期待されるが、実際のCSVアップロードなし
+
+    '
+  gaps: '⚠️ YAMLでは「複数選択最低数設定後のCSVアップロード」の検証が期待されるが、実際のCSVアップロードなし
+
     ⚠️ 複数選択最低数の設定操作なし
+
     ⚠️ アップロード後のデータ検証なし
 
+    '
 - case_no: 193-1
   status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動
+  steps: '1. テーブル編集画面のCSVタブに移動
+
     2. スイッチ4番目（必須項目空許可ON）の状態確認
+
     3. OFFの場合はONにしてスイッチをクリック
+
     4. 更新ボタンをクリックして保存
+
     5. .alert-danger が0件であることを確認
-  assertions: |
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ YAMLでは「必須項目を空白にしたCSVをアップロードしてエラー確認/許可確認」が期待されるが未実装
+
+    '
+  assertions: '- expect(await page.locator(''.alert-danger'').count()).toBe(0)
+
+    '
+  gaps: '⚠️ YAMLでは「必須項目を空白にしたCSVをアップロードしてエラー確認/許可確認」が期待されるが未実装
+
     ⚠️ スイッチON後の実際のCSVアップロードによる動作確認なし
+
     ⚠️ スイッチが4番目にない場合（switchCount < 5）はcsvTab.lengthの確認のみ
 
+    '
 - case_no: 193-2
   status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動
-    2. スイッチ4番目をOFFにして保存
-    3. .alert-danger が0件であることを確認
-  assertions: |
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ 193-1と同様、OFFにした場合の実際のCSVアップロードによる動作確認なし
+  steps: '1. テーブル編集画面のCSVタブに移動
 
+    2. スイッチ4番目をOFFにして保存
+
+    3. .alert-danger が0件であることを確認
+
+    '
+  assertions: '- expect(await page.locator(''.alert-danger'').count()).toBe(0)
+
+    '
+  gaps: '⚠️ 193-1と同様、OFFにした場合の実際のCSVアップロードによる動作確認なし
+
+    '
 - case_no: 194-1
   status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動
+  steps: '1. テーブル編集画面のCSVタブに移動
+
     2. スイッチ6番目（選択肢自動追加ON）の状態確認
+
     3. OFFの場合はONにして保存
+
     4. .alert-danger が0件であることを確認
-  assertions: |
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ 選択肢自動追加が実際に機能するかの確認なし
+
+    '
+  assertions: '- expect(await page.locator(''.alert-danger'').count()).toBe(0)
+
+    '
+  gaps: '⚠️ 選択肢自動追加が実際に機能するかの確認なし
+
     ⚠️ 実際のCSVアップロードで選択肢が自動追加されるか未検証
 
+    '
 - case_no: 194-2
   status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動
-    2. スイッチ6番目をOFFにして保存
-    3. .alert-danger が0件であることを確認
-  assertions: |
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ 194-1と同様
+  steps: '1. テーブル編集画面のCSVタブに移動
 
+    2. スイッチ6番目をOFFにして保存
+
+    3. .alert-danger が0件であることを確認
+
+    '
+  assertions: '- expect(await page.locator(''.alert-danger'').count()).toBe(0)
+
+    '
+  gaps: '⚠️ 194-1と同様
+
+    '
 - case_no: 224
   status: partial
-  steps: |
-    1. データセット一覧（/admin/dataset）から対象テーブルリンクをクリックして遷移
+  steps: '1. データセット一覧（/admin/dataset）から対象テーブルリンクをクリックして遷移
+
     2. テーブルデータのチェックボックスを1件チェック
+
     3. 「JSONエクスポート」ボタンをクリック
+
     4. エクスポートモーダルが表示されることを確認
+
     5. 「ダウンロードオプション」タイトルの表示確認
+
     6. データ・権限・フィルタ・通知の4チェックボックスが存在することを確認
+
     7. 各チェックボックスをクリック
+
     8. エクスポートボタンの表示確認
+
     9. モーダルを閉じる
-  assertions: |
-    - await expect(exportModal).toBeVisible()
+
+    '
+  assertions: '- await expect(exportModal).toBeVisible()
+
     - await expect(optionTitle).toBeVisible()
+
     - await expect(dataCheckbox).toBeAttached()
+
     - await expect(grantCheckbox).toBeAttached()
+
     - await expect(filterCheckbox).toBeAttached()
+
     - await expect(notificationCheckbox).toBeAttached()
+
     - await expect(exportExecuteBtn).toBeVisible()
-  gaps: |
-    ⚠️ 実際のJSONエクスポートを実行してダウンロードファイルの内容確認なし
+
+    '
+  gaps: '⚠️ 実際のJSONエクスポートを実行してダウンロードファイルの内容確認なし
+
     ⚠️ チェックボックスのON/OFFによるエクスポート内容の変化確認なし
 
+    '
 - case_no: 231
   status: partial
-  steps: |
-    1. テーブル編集画面で数値フィールドの存在確認（console.log）
+  steps: '1. テーブル編集画面で数値フィールドの存在確認（console.log）
+
     2. テーブルに遷移
+
     3. applyQuickSearchFilter()でフィルター適用
+
     4. openCsvDownloadModal()でCSVダウンロードモーダルを開く
+
     5. モーダルの表示確認
+
     6. ダウンロードボタンの表示確認
+
     7. モーダルを閉じる
-  assertions: |
-    - await expect(modal).toBeVisible()
+
+    '
+  assertions: '- await expect(modal).toBeVisible()
+
     - await expect(downloadBtn).toBeVisible()
-  gaps: |
-    ⚠️ YAMLでは「数値フィールドのカンマ区切り設定をしたCSVをダウンロードして内容確認」が期待されるが未実装
+
+    '
+  gaps: '⚠️ YAMLでは「数値フィールドのカンマ区切り設定をしたCSVをダウンロードして内容確認」が期待されるが未実装
+
     ⚠️ 実際のCSVダウンロードと数値フォーマット確認なし
 
+    '
 - case_no: 233
   status: partial
-  steps: |
-    1. テーブルに遷移
+  steps: '1. テーブルに遷移
+
     2. CSVアップロードモーダルを開く
+
     3. モーダルの注意書き（.text-danger）の表示確認
+
     4. モーダルボディのHTML長さが0より大きいことを確認
+
     5. ファイル入力の存在確認
+
     6. モーダルを閉じる
-  assertions: |
-    - await expect(warningText).toBeVisible()
+
+    '
+  assertions: '- await expect(warningText).toBeVisible()
+
     - expect(modalBody.length).toBeGreaterThan(0)
+
     - await expect(fileInput).toBeAttached()
-  gaps: |
-    ⚠️ 実際のCSVアップロード（他テーブル参照・数値・単位記号含む）の動作確認なし
+
+    '
+  gaps: '⚠️ 実際のCSVアップロード（他テーブル参照・数値・単位記号含む）の動作確認なし
+
     ⚠️ アップロード後のデータ検証なし
 
+    '
 - case_no: 255
   status: partial
-  steps: |
-    1. テーブルに遷移
+  steps: '1. テーブルに遷移
+
     2. applyQuickSearchFilter()でフィルター適用
+
     3. openCsvDownloadModal()でCSVダウンロードモーダルを開く
+
     4. モーダルが表示されることを確認
+
     5. ダウンロードボタンが表示されることを確認
+
     6. ダウンロードボタンをクリックしてダウンロードイベントを待機
+
     7. ダウンロードが開始された場合はファイル名を確認
-  assertions: |
-    - await expect(csvModal).toBeVisible()
+
+    '
+  assertions: '- await expect(csvModal).toBeVisible()
+
     - await expect(downloadBtn).toBeVisible()
+
     - if (download) { expect(fileName).toBeTruthy() }
-  gaps: |
-    ⚠️ ダウンロードイベントが取れない場合でもパスする（条件付きアサーション）
+
+    '
+  gaps: '⚠️ ダウンロードイベントが取れない場合でもパスする（条件付きアサーション）
+
     ⚠️ CSVの実際の内容（データ行数・フォーマット等）確認なし
+
     ⚠️ ファイル名の形式確認が不十分（Truthyチェックのみ）
+
+    '
