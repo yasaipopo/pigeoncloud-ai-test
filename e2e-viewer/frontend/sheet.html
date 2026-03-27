@@ -19,6 +19,10 @@
     .summary-card .num { font-size: 1.8rem; font-weight: bold; line-height: 1.1; }
     .summary-card .lbl { font-size: .72rem; color: #6c757d; }
 
+    /* 振り分け済みケースのハイライト */
+    tr.sorted-case { background: #fff8e1; }
+    tr.sorted-case td:first-child::before { content: '🔀 '; }
+
     /* パイプラインテーブル */
     .pipeline-table th { white-space: nowrap; font-size: .82rem; }
     .pipeline-table td { vertical-align: middle; font-size: .85rem; }
@@ -221,6 +225,7 @@
     <div class="d-flex gap-2">
       <button class="btn btn-sm btn-outline-secondary active" data-status-filter="all" onclick="setStatusFilter('all', this)">すべて</button>
       <button class="btn btn-sm btn-outline-warning" data-status-filter="unchecked" onclick="setStatusFilter('unchecked', this)">未チェック</button>
+      <button class="btn btn-sm btn-outline-info" data-status-filter="sorted" onclick="setStatusFilter('sorted', this)">🔀振り分け済み</button>
       <button class="btn btn-sm btn-outline-success" data-status-filter="ok" onclick="setStatusFilter('ok', this)">OK/PASSのみ</button>
       <button class="btn btn-sm btn-outline-danger" data-status-filter="ng" onclick="setStatusFilter('ng', this)">NG/FAILのみ</button>
     </div>
@@ -240,6 +245,7 @@
       <table class="table table-hover table-sm pipeline-table mb-0">
         <thead class="table-dark">
           <tr>
+            <th style="width:60px">動画</th>
             <th style="width:80px">No</th>
             <th style="width:120px">機能</th>
             <th>テスト内容</th>
@@ -498,6 +504,11 @@ function applyFilters() {
     filtered = filtered.filter(i =>
       (i.yamlCheck === 'ok' || i.specCheck === 'ok' || i.runCheck === 'pass')
     );
+  } else if (currentStatusFilter === 'sorted') {
+    filtered = filtered.filter(i => {
+      const d = i.description || '';
+      return d.includes('【バグ修正確認】') || d.includes('【機能改善確認】') || d.includes('【実装確認】');
+    });
   } else if (currentStatusFilter === 'ng') {
     filtered = filtered.filter(i =>
       i.yamlCheck === 'ng' || i.specCheck === 'ng' ||
@@ -550,6 +561,11 @@ function renderRow(tbody, item) {
   const row = tbody.insertRow();
   row.dataset.spec = item.spec;
   row.dataset.caseNo = item.caseNo;
+  // 振り分け済みケース（【バグ修正確認】【機能改善確認】【実装確認】）をハイライト
+  const desc = item.description || '';
+  if (desc.includes('【バグ修正確認】') || desc.includes('【機能改善確認】') || desc.includes('【実装確認】')) {
+    row.classList.add('sorted-case');
+  }
 
   const yamlBadge = checkBadge(item.yamlCheck, 'yaml');
   const specBadge = checkBadge(item.specCheck, 'spec');
@@ -569,6 +585,7 @@ function renderRow(tbody, item) {
   const runNote = item.runCheckNote ? `<i class="bi bi-chat-dots note-indicator has-note" title="${escHtml(item.runCheckNote)}"></i>` : '';
 
   row.innerHTML = `
+    <td style="white-space:nowrap;font-size:.75rem;color:#6c757d">${escHtml(item.movie || '')}</td>
     <td class="case-no">${escHtml(item.caseNo)}</td>
     <td class="feature-col" title="${escHtml(item.feature || '')}">${escHtml(item.feature || '')}</td>
     <td class="desc-col" onclick="openDetailModal('${escHtml(item.spec)}','${escHtml(item.caseNo)}','${escAttr(item.description || '')}','${escAttr(item.expected || '')}','${escAttr(item.feature || '')}')" title="${escHtml(item.description || '')}">${escHtml(item.description || '')}</td>
