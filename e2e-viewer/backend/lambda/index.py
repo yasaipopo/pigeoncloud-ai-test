@@ -159,6 +159,10 @@ def handler(event, context):
         elif method == 'POST' and path == '/pipeline/init':
             return pipeline_init(event)
 
+        # POST /pipeline/sync-results - E2Eビューアーの実行結果を同期
+        elif method == 'POST' and path == '/pipeline/sync-results':
+            return pipeline_sync_results(event)
+
         # POST /pipeline/bulk-update - 一括更新
         elif method == 'POST' and path == '/pipeline/bulk-update':
             return pipeline_bulk_update(event)
@@ -667,17 +671,46 @@ def pipeline_update(event):
 
         note_field = valid_fields[field]
 
+        # 追加フィールド（stagingResult, mainResult, screenshotUrl, videoUrl等）
+        extra_updates = []
+        extra_names = {}
+        extra_values = {}
+        extra_idx = 0
+        extra_field_whitelist = [
+            'stagingResult', 'stagingRunId', 'stagingNote',
+            'mainResult', 'mainRunId', 'mainNote',
+            'screenshotUrl', 'videoUrl',
+        ]
+        for ef in extra_field_whitelist:
+            if ef in item:
+                extra_idx += 1
+                attr_name = f'#ef{extra_idx}'
+                attr_val = f':ev{extra_idx}'
+                extra_updates.append(f'{attr_name} = {attr_val}')
+                extra_names[attr_name] = ef
+                extra_values[attr_val] = item[ef]
+
         try:
+            update_parts = [f'#f = :v', f'{note_field} = :n', 'updatedAt = :t', 'updatedBy = :u']
+            update_parts.extend(extra_updates)
+            update_expr = 'SET ' + ', '.join(update_parts)
+
+            attr_names = {'#f': field}
+            attr_names.update(extra_names)
+
+            attr_values = {
+                ':v': value,
+                ':n': note,
+                ':t': now_iso,
+                ':u': updated_by,
+            }
+            attr_values.update(extra_values)
+
             pipeline_table.update_item(
                 Key={'spec': spec, 'caseNo': case_no},
-                UpdateExpression=f'SET #f = :v, {note_field} = :n, updatedAt = :t, updatedBy = :u',
-                ExpressionAttributeNames={'#f': field},
-                ExpressionAttributeValues={
-                    ':v': value,
-                    ':n': note,
-                    ':t': now_iso,
-                    ':u': updated_by,
-                }
+                UpdateExpression=update_expr,
+                ExpressionAttributeNames=attr_names,
+                ExpressionAttributeValues=attr_values
             )
             results.append({'spec': spec, 'caseNo': case_no, 'status': 'ok'})
         except Exception as e:
@@ -726,6 +759,8 @@ def pipeline_summary(event):
         'yaml': {'ok': 0, 'ng': 0, 'unchecked': 0},
         'spec': {'ok': 0, 'ng': 0, 'unchecked': 0},
         'run': {'pass': 0, 'fail_spec': 0, 'fail_product': 0, 'fail_env': 0, 'unchecked': 0},
+        'staging': {'pass': 0, 'fail': 0, 'skip': 0, 'unchecked': 0},
+        'main': {'pass': 0, 'fail': 0, 'skip': 0, 'unchecked': 0},
     }
 
     # spec別集計
@@ -935,4 +970,179 @@ def pipeline_bulk_update(event):
         'message': f'{updated_count}件更新完了',
         'updated': updated_count,
         'total_candidates': len(items),
+    })
+
+
+def pipeline_sync_results(event):
+    """
+    POST /pipeline/sync-results - E2Eビューアーの実行結果をパイプラインシートに同期
+    /runs/{runId}/cases から全ケースの結果を取得し、
+    all-test-check-list テーブルの stagingResult/mainResult/screenshotUrl/videoUrl を更新する。
+
+    ボディ:
+      - runId: E2Eビューアーの実行ID（例: agent30）
+      - env: 'staging' or 'main'（結果の書き込み先を決定）
+    """
+    body = json.loads(event.get('body') or '{}')
+    run_id = body.get('runId')
+    env = body.get('env', 'staging')
+
+    if not run_id:
+        return response(400, {'error': 'runId は必須です'})
+
+    if env not in ('staging', 'main'):
+        return response(400, {'error': 'env は staging または main のみ有効です'})
+
+    # 1. E2Eビューアーからケース結果を取得（全件）
+    all_cases = []
+    result = cases_table.query(
+        KeyConditionExpression=Key('runId').eq(run_id)
+    )
+    all_cases.extend(result.get('Items', []))
+    while result.get('LastEvaluatedKey'):
+        result = cases_table.query(
+            KeyConditionExpression=Key('runId').eq(run_id),
+            ExclusiveStartKey=result['LastEvaluatedKey']
+        )
+        all_cases.extend(result.get('Items', []))
+
+    if not all_cases:
+        return response(404, {'error': f'runId={run_id} のケースが見つかりません'})
+
+    # 2. ケースをspec+caseNoにマッピング
+    #    caseId形式: "spec-name__case-no" or specFile から推測
+    now_iso = datetime.now(timezone.utc).isoformat()
+    result_field = 'stagingResult' if env == 'staging' else 'mainResult'
+    run_id_field = 'stagingRunId' if env == 'staging' else 'mainRunId'
+    note_field = 'stagingNote' if env == 'staging' else 'mainNote'
+
+    updated_count = 0
+    skipped_count = 0
+    errors = []
+
+    for case in all_cases:
+        case_status = case.get('caseStatus', '')
+        spec_file = case.get('specFile', '')
+        case_id = case.get('caseId', '')
+        test_title = case.get('testTitle', '')
+
+        # specファイル名からspec名を抽出（例: tests/auth.spec.js → auth）
+        spec_name = spec_file.replace('tests/', '').replace('.spec.js', '').replace('.spec.ts', '')
+
+        # caseNoの推測:
+        # testTitleに "1-1:" のようなパターンがある場合はそれを使う
+        # caseIdが "1-1__description" 形式ならハイフン含む先頭部分
+        case_no = ''
+
+        # testTitleから "数字-数字" パターンを抽出
+        import re
+        title_match = re.match(r'^(\d+-\d+)', test_title)
+        if title_match:
+            case_no = title_match.group(1)
+        else:
+            # caseIdから試行（"1-1__..." or "1-1-..."）
+            case_id_match = re.match(r'^(\d+-\d+)', case_id)
+            if case_id_match:
+                case_no = case_id_match.group(1)
+
+        if not spec_name or not case_no:
+            skipped_count += 1
+            continue
+
+        # statusマッピング: passed → pass, failed → fail, skipped → skip
+        mapped_status = {
+            'passed': 'pass',
+            'failed': 'fail',
+            'skipped': 'skip',
+        }.get(case_status, case_status)
+
+        # screenshotUrl / videoUrl の取得
+        screenshot_keys = case.get('screenshotKeys', [])
+        video_key = case.get('videoKey', '')
+
+        # S3署名付きURLを生成（キーがある場合のみ）
+        screenshot_url = ''
+        video_url = ''
+        if ASSETS_BUCKET:
+            if screenshot_keys and len(screenshot_keys) > 0:
+                try:
+                    screenshot_url = s3_client.generate_presigned_url(
+                        'get_object',
+                        Params={'Bucket': ASSETS_BUCKET, 'Key': screenshot_keys[0]},
+                        ExpiresIn=86400 * 7  # 7日間
+                    )
+                except Exception:
+                    pass
+            if video_key:
+                try:
+                    video_url = s3_client.generate_presigned_url(
+                        'get_object',
+                        Params={'Bucket': ASSETS_BUCKET, 'Key': video_key},
+                        ExpiresIn=86400 * 7  # 7日間
+                    )
+                except Exception:
+                    pass
+
+        # 3. パイプラインテーブルを更新
+        try:
+            update_parts = [
+                f'#rf = :rv',
+                f'#ri = :rid',
+                'updatedAt = :t',
+                'updatedBy = :u',
+            ]
+            attr_names = {
+                '#rf': result_field,
+                '#ri': run_id_field,
+            }
+            attr_values = {
+                ':rv': mapped_status,
+                ':rid': run_id,
+                ':t': now_iso,
+                ':u': f'sync:{run_id}',
+            }
+
+            # エラーメッセージがあればnoteに記録
+            error_msg = case.get('errorMessage', '')
+            if error_msg:
+                update_parts.append(f'#nf = :nv')
+                attr_names['#nf'] = note_field
+                attr_values[':nv'] = error_msg[:500]  # 500文字に制限
+
+            # S3キーを直接保存（URLは表示時に生成する方が安全）
+            if screenshot_keys and len(screenshot_keys) > 0:
+                update_parts.append('screenshotKey = :sk')
+                attr_values[':sk'] = screenshot_keys[0]
+            if video_key:
+                update_parts.append('videoKey = :vk')
+                attr_values[':vk'] = video_key
+
+            pipeline_table.update_item(
+                Key={'spec': spec_name, 'caseNo': case_no},
+                UpdateExpression='SET ' + ', '.join(update_parts),
+                ExpressionAttributeNames=attr_names,
+                ExpressionAttributeValues=attr_values,
+                ConditionExpression='attribute_exists(spec)',  # 存在するアイテムのみ更新
+            )
+            updated_count += 1
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                skipped_count += 1  # パイプラインに未登録のケース
+            else:
+                errors.append(f'{spec_name}/{case_no}: {str(e)}')
+        except Exception as e:
+            errors.append(f'{spec_name}/{case_no}: {str(e)}')
+
+    result_msg = f'{updated_count}件同期完了（{skipped_count}件スキップ）'
+    if errors:
+        result_msg += f'、{len(errors)}件エラー'
+
+    return response(200, {
+        'message': result_msg,
+        'updated': updated_count,
+        'skipped': skipped_count,
+        'errors': errors[:20],  # エラーは最大20件
+        'totalCases': len(all_cases),
+        'runId': run_id,
+        'env': env,
     })

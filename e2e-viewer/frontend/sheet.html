@@ -24,7 +24,8 @@
     .pipeline-table td { vertical-align: middle; font-size: .85rem; }
     .pipeline-table .case-no { white-space: nowrap; font-weight: 600; }
     .pipeline-table .feature-col { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .pipeline-table .desc-col { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pipeline-table .desc-col { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+    .pipeline-table .desc-col:hover { background: #e9ecef; }
 
     /* ステータスバッジ */
     .check-cell { text-align: center; cursor: pointer; min-width: 48px; }
@@ -53,6 +54,28 @@
 
     /* フィルタバー */
     .filter-bar { background: #fff; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; }
+
+    /* テスト結果バッジ */
+    .result-pass { background: #198754; color: #fff; }
+    .result-fail { background: #dc3545; color: #fff; }
+    .result-skip { background: #6c757d; color: #fff; }
+    .result-empty { background: #f8f9fa; color: #adb5bd; border: 1px dashed #dee2e6; }
+    .result-cell { text-align: center; min-width: 56px; }
+
+    /* メディアアイコン */
+    .media-cell { text-align: center; min-width: 40px; }
+    .media-icon { cursor: pointer; font-size: 1.1rem; opacity: .5; }
+    .media-icon:hover { opacity: 1; }
+    .media-icon.has-media { opacity: 1; color: #0d6efd; }
+
+    /* メディアモーダル */
+    #mediaModal .modal-dialog { max-width: 90vw; }
+    #mediaModal .modal-body { text-align: center; background: #000; padding: 0; }
+    #mediaModal .modal-body img { max-width: 100%; max-height: 80vh; object-fit: contain; }
+    #mediaModal .modal-body video { max-width: 100%; max-height: 80vh; }
+
+    /* 同期ボタン */
+    .sync-btn { font-size: .75rem; }
   </style>
 </head>
 <body>
@@ -64,6 +87,9 @@
       <i class="bi bi-arrow-left me-2"></i>PigeonCloud E2E ビューアー
     </a>
     <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-success sync-btn" onclick="openSyncModal()" title="E2E実行結果をシートに同期">
+        <i class="bi bi-arrow-repeat me-1"></i>結果同期
+      </button>
       <button class="btn btn-sm btn-outline-info" onclick="initFromYaml()" title="yamlから初期データ投入">
         <i class="bi bi-cloud-upload me-1"></i>初期化
       </button>
@@ -181,6 +207,10 @@
             <th style="width:64px" class="text-center">1.YAML</th>
             <th style="width:64px" class="text-center">2.Spec</th>
             <th style="width:64px" class="text-center">3.Run</th>
+            <th style="width:64px" class="text-center">Staging</th>
+            <th style="width:64px" class="text-center">Main</th>
+            <th style="width:40px" class="text-center" title="スクリーンショット">📸</th>
+            <th style="width:40px" class="text-center" title="動画">🎬</th>
             <th style="width:140px">更新</th>
           </tr>
         </thead>
@@ -436,7 +466,7 @@ function renderTable(items) {
     orderedSpecs.forEach(spec => {
       // グループヘッダー
       const headerRow = tbody.insertRow();
-      headerRow.innerHTML = `<td colspan="8" class="p-0 border-0">
+      headerRow.innerHTML = `<td colspan="12" class="p-0 border-0">
         <div style="background:#e9ecef;font-size:.82rem;font-weight:600;padding:4px 12px;border-radius:4px;margin:8px 0 4px;color:#495057;">
           ${escHtml(spec)} <span style="font-weight:normal;color:#6c757d">(${groups[spec].length}件)</span>
         </div>
@@ -456,6 +486,10 @@ function renderRow(tbody, item) {
   const yamlBadge = checkBadge(item.yamlCheck, 'yaml');
   const specBadge = checkBadge(item.specCheck, 'spec');
   const runBadge = runCheckBadge(item.runCheck);
+  const stagingBadge = resultBadge(item.stagingResult, item.stagingRunId);
+  const mainBadge = resultBadge(item.mainResult, item.mainRunId);
+  const screenshotIcon = mediaIcon(item.screenshotKey, 'screenshot', item.spec, item.caseNo);
+  const videoIcon = mediaIcon(item.videoKey, 'video', item.spec, item.caseNo);
 
   const updatedInfo = item.updatedAt
     ? `<span class="text-muted" style="font-size:.72rem">${new Date(item.updatedAt).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
@@ -469,8 +503,8 @@ function renderRow(tbody, item) {
   row.innerHTML = `
     <td class="case-no">${escHtml(item.caseNo)}</td>
     <td class="feature-col" title="${escHtml(item.feature || '')}">${escHtml(item.feature || '')}</td>
-    <td class="desc-col" title="${escHtml(item.description || '')}">${escHtml(item.description || '')}</td>
-    <td class="desc-col" title="${escHtml(item.expected || '')}">${escHtml(item.expected || '')}</td>
+    <td class="desc-col" onclick="openDetailModal('${escHtml(item.spec)}','${escHtml(item.caseNo)}','${escAttr(item.description || '')}','${escAttr(item.expected || '')}','${escAttr(item.feature || '')}')" title="${escHtml(item.description || '')}">${escHtml(item.description || '')}</td>
+    <td class="desc-col" onclick="openDetailModal('${escHtml(item.spec)}','${escHtml(item.caseNo)}','${escAttr(item.description || '')}','${escAttr(item.expected || '')}','${escAttr(item.feature || '')}')" title="${escHtml(item.expected || '')}">${escHtml(item.expected || '')}</td>
     <td class="check-cell" onclick="openEdit('${escAttr(item.spec)}','${escAttr(item.caseNo)}','yamlCheck','${escAttr(item.yamlCheck||'')}','${escAttr(item.yamlCheckNote||'')}')">
       ${yamlBadge} ${yamlNote}
     </td>
@@ -480,6 +514,10 @@ function renderRow(tbody, item) {
     <td class="check-cell" onclick="openEdit('${escAttr(item.spec)}','${escAttr(item.caseNo)}','runCheck','${escAttr(item.runCheck||'')}','${escAttr(item.runCheckNote||'')}')">
       ${runBadge} ${runNote}
     </td>
+    <td class="result-cell">${stagingBadge}</td>
+    <td class="result-cell">${mainBadge}</td>
+    <td class="media-cell">${screenshotIcon}</td>
+    <td class="media-cell">${videoIcon}</td>
     <td>${updatedInfo}</td>
   `;
 }
@@ -499,6 +537,93 @@ function runCheckBadge(val) {
   if (val === 'fail_product') return '<span class="badge badge-fail-product">F:Prod</span>';
   if (val === 'fail_env') return '<span class="badge badge-fail-env">F:Env</span>';
   return '<span class="badge badge-unchecked">-</span>';
+}
+
+function resultBadge(val, runId) {
+  if (!val) return '<span class="badge result-empty">-</span>';
+  const title = runId ? `title="runId: ${escHtml(runId)}"` : '';
+  if (val === 'pass') return `<span class="badge result-pass" ${title}>PASS</span>`;
+  if (val === 'fail') return `<span class="badge result-fail" ${title}>FAIL</span>`;
+  if (val === 'skip') return `<span class="badge result-skip" ${title}>SKIP</span>`;
+  return `<span class="badge result-empty">${escHtml(val)}</span>`;
+}
+
+function mediaIcon(key, type, spec, caseNo) {
+  if (!key) return '<span class="text-muted" style="font-size:.7rem">-</span>';
+  const icon = type === 'screenshot' ? 'bi-camera' : 'bi-play-circle';
+  return `<i class="bi ${icon} media-icon has-media" onclick="openMedia('${escAttr(key)}','${type}','${escAttr(spec)}','${escAttr(caseNo)}')"></i>`;
+}
+
+async function openMedia(key, type, spec, caseNo) {
+  const modal = new bootstrap.Modal(document.getElementById('mediaModal'));
+  const body = document.getElementById('mediaModalBody');
+  const title = document.getElementById('mediaModalTitle');
+  title.textContent = `${spec} / ${caseNo} - ${type === 'screenshot' ? 'スクリーンショット' : '動画'}`;
+  body.innerHTML = '<div class="text-white p-5"><div class="spinner-border"></div></div>';
+  modal.show();
+
+  try {
+    // S3署名付きURLを取得
+    const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ key: key })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    const url = data.downloadUrl;
+
+    if (type === 'screenshot') {
+      body.innerHTML = `<img src="${url}" alt="screenshot" style="max-width:100%;max-height:80vh">`;
+    } else {
+      body.innerHTML = `<video src="${url}" controls autoplay style="max-width:100%;max-height:80vh"></video>`;
+    }
+  } catch (e) {
+    body.innerHTML = `<div class="text-white p-3">読み込みエラー: ${escHtml(e.message)}</div>`;
+  }
+}
+
+// =========================================
+// 結果同期
+// =========================================
+function openSyncModal() {
+  document.getElementById('syncRunId').value = '';
+  document.getElementById('syncEnv').value = 'staging';
+  document.getElementById('syncResult').innerHTML = '';
+  new bootstrap.Modal(document.getElementById('syncModal')).show();
+}
+
+async function executeSyncResults() {
+  const runId = document.getElementById('syncRunId').value.trim();
+  const env = document.getElementById('syncEnv').value;
+  const resultEl = document.getElementById('syncResult');
+
+  if (!runId) {
+    resultEl.innerHTML = '<div class="alert alert-warning py-1">Run IDを入力してください</div>';
+    return;
+  }
+
+  resultEl.innerHTML = '<div class="text-center py-2"><div class="spinner-border spinner-border-sm"></div> 同期中...</div>';
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/pipeline/sync-results`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ runId: runId, env: env })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    resultEl.innerHTML = `<div class="alert alert-success py-1">${escHtml(data.message)}</div>`;
+
+    // データリロード
+    setTimeout(() => {
+      bootstrap.Modal.getInstance(document.getElementById('syncModal')).hide();
+      loadPipeline();
+      loadSummary();
+    }, 1500);
+  } catch (e) {
+    resultEl.innerHTML = `<div class="alert alert-danger py-1">エラー: ${escHtml(e.message)}</div>`;
+  }
 }
 
 // =========================================
@@ -651,8 +776,90 @@ function escAttr(str) {
   return String(str || '')
     .replace(/\\/g, '\\\\')
     .replace(/'/g, "\\'")
-    .replace(/"/g, '\\"');
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '');
 }
 </script>
+<!-- メディア表示モーダル -->
+<div class="modal fade" id="mediaModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h6 class="modal-title" id="mediaModalTitle">メディア</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0" id="mediaModalBody" style="background:#000;text-align:center;min-height:200px">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 結果同期モーダル -->
+<div class="modal fade" id="syncModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title"><i class="bi bi-arrow-repeat me-1"></i>E2E実行結果の同期</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted">E2Eビューアーの実行結果をこのチェックシートに反映します。</p>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Run ID</label>
+          <input class="form-control form-control-sm" id="syncRunId" placeholder="例: agent30">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">環境</label>
+          <select class="form-select form-select-sm" id="syncEnv">
+            <option value="staging">Staging</option>
+            <option value="main">Main（本番）</option>
+          </select>
+        </div>
+        <div id="syncResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">キャンセル</button>
+        <button type="button" class="btn btn-success btn-sm" onclick="executeSyncResults()">
+          <i class="bi bi-arrow-repeat me-1"></i>同期実行
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- テスト内容詳細モーダル -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailModalTitle">テスト内容詳細</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <tr><th style="width:120px">Spec</th><td id="detailSpec"></td></tr>
+          <tr><th>Case No</th><td id="detailCaseNo"></td></tr>
+          <tr><th>機能名</th><td id="detailFeature"></td></tr>
+          <tr><th>テスト内容</th><td id="detailDescription" style="white-space:pre-wrap"></td></tr>
+          <tr><th>期待結果</th><td id="detailExpected" style="white-space:pre-wrap"></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDetailModal(spec, caseNo, description, expected, feature) {
+  document.getElementById('detailModalTitle').textContent = `${spec} / ${caseNo}`;
+  document.getElementById('detailSpec').textContent = spec;
+  document.getElementById('detailCaseNo').textContent = caseNo;
+  document.getElementById('detailFeature').textContent = feature.replace(/\\n/g, "\n");
+  document.getElementById('detailDescription').textContent = description.replace(/\\n/g, "\n");
+  document.getElementById('detailExpected').textContent = expected.replace(/\\n/g, "\n");
+  new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+</script>
+
 </body>
 </html>
