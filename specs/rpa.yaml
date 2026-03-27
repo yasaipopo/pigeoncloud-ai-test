@@ -2,39 +2,22 @@ group: RPA（コネクト）
 spec_file: tests/rpa.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: "RPA-01"
-  feature: RPA
+- case_no: RPA-FULL
+  feature: コネクト(RPA)総合
+  category: 動画単位
   description: |
-    コネクト管理画面が正常に表示されること
+    ①コネクト管理画面が正常に表示されることを確認する
+    ②新しいコネクト（RPA）を作成する
+    ③コネクトフロー編集画面が表示されることを確認する
+    ④コネクト一覧のテーブルヘッダーが正しいことを確認する
+    ⑤コネクト一覧の今月使用量が表示されることを確認する
+    ⑥コネクト実行ログページへ遷移できることを確認する
   expected: |
-    エラーなくページが正常に表示されること
-- case_no: "RPA-02"
-  feature: RPA
-  description: |
-    新しいコネクト（RPA）を作成できること
-  expected: |
-    新しいコネクト（RPA）を作成できること
-- case_no: "RPA-03"
-  feature: RPA
-  description: |
-    コネクト（RPA）フロー編集画面が表示されること
-  expected: |
-    コネクト（RPA）フロー編集画面が表示されること
-- case_no: "RPA-04"
-  feature: RPA
-  description: |
-    コネクト一覧のテーブルヘッダーが正しいこと
-  expected: |
-    コネクト一覧のテーブルヘッダーが正しいこと
-- case_no: "RPA-05"
-  feature: RPA
-  description: |
-    コネクト一覧の今月使用量が表示されること
-  expected: |
-    コネクト一覧の今月使用量が表示されること
-- case_no: "RPA-06"
-  feature: RPA
-  description: |
-    コネクト実行ログページへ遷移できること
-  expected: |
-    コネクト実行ログページへ遷移できること
+    コネクト(RPA)の管理画面・作成・フロー編集・一覧・使用量・ログが全て正常に動作すること
+  includes:
+  - RPA-01
+  - RPA-02
+  - RPA-03
+  - RPA-04
+  - RPA-05
+  - RPA-06

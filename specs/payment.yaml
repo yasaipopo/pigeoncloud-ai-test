@@ -2,39 +2,22 @@ group: 支払い・プラン管理
 spec_file: tests/payment.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: "PAY-01"
-  feature: 支払い
+- case_no: PAY-FULL
+  feature: 支払い機能総合
+  category: 動画単位
   description: |
-    支払いページが表示されること
+    ①支払いページが表示されることを確認する
+    ②プラン変更フォームと料金情報が表示されることを確認する
+    ③Stripe checkoutのiframeが存在することを確認する
+    ④テストカードでStripe支払いフォームに入力できることを確認する
+    ⑤ユーザー数の範囲外入力でバリデーションエラーが表示されることを確認する
+    ⑥支払い履歴APIエンドポイントが存在することを確認する
   expected: |
-    支払いページが表示されること
-- case_no: "PAY-02"
-  feature: 支払い
-  description: |
-    プラン変更フォームと料金情報が表示されること
-  expected: |
-    プラン変更フォームと料金情報が表示されること
-- case_no: "PAY-03"
-  feature: 支払い
-  description: |
-    Stripe checkoutの関連iframeが存在すること
-  expected: |
-    Stripe checkoutの関連iframeが存在すること
-- case_no: "PAY-04"
-  feature: 支払い
-  description: |
-    テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
-  expected: |
-    テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
-- case_no: "PAY-05"
-  feature: 支払い
-  description: |
-    ユーザー数の範囲外入力でバリデーションエラーが表示されること
-  expected: |
-    ユーザー数の範囲外入力でバリデーションエラーが表示されること
-- case_no: "PAY-06"
-  feature: 支払い
-  description: |
-    支払い履歴APIエンドポイントが存在すること
-  expected: |
-    支払い履歴APIエンドポイントが存在すること
+    支払いページの表示・プラン変更・Stripe連携・バリデーション・APIが全て正常に動作すること
+  includes:
+  - PAY-01
+  - PAY-02
+  - PAY-03
+  - PAY-04
+  - PAY-05
+  - PAY-06

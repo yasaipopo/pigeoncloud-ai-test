@@ -2,189 +2,36 @@ group: 帳票
 spec_file: tests/reports.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 144-01
-  sheet: B
-  feature: 帳票
-  category: 関連テーブル出力
-  description: 関連テーブルを帳票出力に入れ込めるように変更
-  expected: 帳票へ関連テーブルが出力されていること。
-- case_no: '198'
-  sheet: B
-  feature: 帳票
-  category: ファイル項目への生成
-  description: ・ファイル項目へExcelおよびPDFのファイル生成を行う
-  expected: Excel／PDFともにファイル生成できること
-- case_no: '205'
-  sheet: B
-  feature: 帳票
-  category: Excel出力
-  description: Excelファイルにて帳票出力
-  expected: エラーなく帳票出力ができ、項目の出力も行えていること。
-- case_no: '206'
-  sheet: B
-  feature: 帳票
-  category: PDF出力
-  description: PDFファイルにて帳票出力
-  expected: エラーなく帳票出力ができ、項目の出力も行えていること。
-- case_no: '207'
-  sheet: B
-  feature: 帳票
-  category: Excel出力(ファイル名変更)
-  description: '・事前に帳票の「出力ファイル名フォーマット」の設定を行う。
-
-    ※出力ファイル名フォーマットの指定は　%m-%d　とする
-
-    ・Excelファイルにて帳票出力'
-  expected: '・エラーなく帳票出力ができ、項目の出力も行えていること。
-
-
-    ・「YYYY-MM.xlsx」のファイル名でローカルPCへダウンロードされること。
-
-    例）2025-03.xlsx
-
-
-    https://henmi021.pigeon-demo.com/admin/dataset__56'
-- case_no: '208'
-  sheet: B
-  feature: 帳票
-  category: PDF出力(ファイル名変更)
-  description: '・事前に帳票の「出力ファイル名フォーマット」の設定を行う。
-
-    ※出力ファイル名フォーマットの指定は　%m-%d　とする
-
-    ・PDFファイルにて帳票出力'
-  expected: '・エラーなく帳票出力ができ、項目の出力も行えていること。
-
-
-    ・「YYYY-MM.pdf」のファイル名でローカルPCへダウンロードされること。
-
-    例）2025-03.pdf
-
-
-    https://henmi021.pigeon-demo.com/admin/dataset__56'
-- case_no: '216'
-  sheet: B
-  feature: 帳票
-  category: アイコン
-  description: 帳票登録後、メニューからの帳票登録のリスト表示した際のアイコン表示を確認する。
-  expected: ・アイコンが歯車アイコンとなっていること。
-- case_no: '230'
-  sheet: B
-  feature: 帳票
-  category: ユーザーテーブルの帳票出力
-  description: 'ユーザーテーブルについては、以下項目は出力されない
-
-    ・通知先メールアドレス
-
-    ・パスワード
-
-    ・アクセス許可IP
-
-    ・状態
-
-    ・組織
-
-    ・役職'
-  expected: 想定通りの結果となること
-- case_no: '236'
-  sheet: B
-  feature: 帳票
-  category: 帳票出力
-  description: 子テーブルの設定を行い、帳票にはAA列以降の指定も行う
-  expected: AA列以降も帳票出力されること
-- case_no: '253'
-  sheet: B
-  feature: 帳票ダウンロード
-  category: 'ファイル項目
-
-    画像項目'
-  description: 'https://loftal.pigeon-cloud.com/admin/dataset__90/view/294
-
-    ①帳票のダウンロードをするとエラーになるそうで、コピー環境でも再現されました。こちら、原因は何か、ご確認いただいてもよいでしょうか。（#264 バグ修正確認）
-
-    ②帳票の元Excelに登録したデータに、タブが2つ以上あると、（#557 バグ修正確認）
-
-    '
-  expected: '想定通りの結果となること。
-
-    https://henmi022.pigeon-demo.com/admin/dataset__18
-
-    #264の修正確認含む、#557の修正確認含む
-
-    '
-  includes:
-  - '264'
-  - '557'
-- case_no: 56-1
-  sheet: B
-  feature: 帳票登録
-  category: 帳票ファイル以外の登録(異常系)
-  description: ①Excelファイル以外のファイル形式のファイルで、帳票アップロードする。
-  expected: 帳票登録エラーが発生すること。
-- case_no: '568'
-  sheet: B
-  feature: ''
-  description: '### 要件名
-
-    * 帳票に画像を指定できる
-
-
-    ### 要件
-
-    * 帳票を出力するためのexcelにて、画像型のフィールドを指定できる
-
-    * 帳票出力時に、画像型のフィールドが指定されたセルに画像が埋め込まれる (excel、pdfのどちらも)
-
-    * セルに埋め込まれた画像はセルの高さに対して100%になる (widthはauto)
-
-
-    ### 参照
-
-    * https://www.notio'
-  expected: 'エラーなく正常に動作すること。(### 要件名 * 帳票に画像を指定できる  ### 要件 * 帳票を出力するためのexcelにて、画像型のフィールドを指定できる * 帳票出力時に、画像型のフィールドが指定されたセルに画像が埋め込ま)'
-- case_no: RPT-CHILD
-  feature: 帳票子テーブル
-  category: 帳票での子テーブル出力
+- case_no: RPT-FULL
+  feature: 帳票機能総合
+  category: 動画単位
   description: |
-    ①子テーブル情報を含む帳票を出力する
-    ②子テーブルが空のレコードで$STARTおよび$ENDがそのまま表示されないことを確認（#729 バグ修正確認）
+    ①帳票テンプレートを登録する
+    ②帳票を出力し、フォーマット（数値桁区切り・連番・子テーブル情報等）を確認する
+    ③テーブル作成権限ユーザーでExcel/JSONからテーブル作成できることを確認する
+    ④テーブル管理者（一般ユーザー）で帳票の登録・編集が可能であることを確認する
+    ⑤子テーブルが空のレコードで$START/$ENDがそのまま表示されないことを確認
+    ⑥帳票ダウンロードの動作を確認する
+    ⑦各種バグ修正確認
   expected: |
-    子テーブルが空の場合でもテンプレートタグが正しく処理されること
+    帳票テンプレート・出力フォーマット・権限・子テーブル・ダウンロードが全て正常に動作すること
   includes:
-  - '729'
-- case_no: RPT-FORMAT
-  feature: 帳票フォーマット
-  category: 帳票のExcel/JSON作成・数値形式
-  description: |
-    ①テーブル作成権限のあるユーザーでExcel/JSONからテーブル作成できることを確認（#272 機能改善確認）
-    ②数値項目で「桁区切り表示しない」がONの場合、帳票出力でカンマが付かないことを確認（#601 機能改善確認）
-  expected: |
-    帳票のフォーマット設定が正しく反映されること
-  includes:
-  - '272'
-  - '310'
-  - '584'
-  - '601'
-- case_no: RPT-INDEX
-  feature: 帳票連番
-  category: 帳票の連番(INDEX)機能
-  description: |
-    ①帳票テンプレートに${関連レコード一覧名.INDEX}を設定する
-    ②出力された帳票で関連レコードに連番が振られていることを確認（#579 機能改善確認）
-  expected: |
-    帳票で関連レコードのINDEX連番が正しく出力されること
-  includes:
-  - '579'
-- case_no: RPT-PERMISSION
-  feature: 帳票権限
-  category: 帳票の権限設定
-  description: |
-    ①テーブル管理者（一般ユーザー）で帳票の登録・編集画面にアクセスする
-    ②帳票の登録・編集が可能であることを確認（#530 機能改善確認）
-  expected: |
-    テーブル管理者権限で帳票の登録・編集が可能なこと
-  includes:
-  - '530'
+  - RPT-CHILD
+  - RPT-FORMAT
+  - RPT-INDEX
+  - RPT-PERMISSION
+  - 56-1
+  - 144-01
+  - '198'
+  - '205'
+  - '206'
+  - '207'
+  - '208'
+  - '216'
+  - '230'
+  - '236'
+  - '253'
+  - '568'
 actual_steps:
 - case_no: 144-01
   status: partial

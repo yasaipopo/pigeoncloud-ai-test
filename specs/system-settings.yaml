@@ -2,261 +2,73 @@ group: 共通設定・システム設定・契約設定
 spec_file: tests/system-settings.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 10-1
-  sheet: A
-  feature: 共通設定
-  category: テーブル
-  description: テーブルの順番入れ替えを行う。
-  expected: エラーなくテーブルの順番変更が行えること。
-- case_no: 10-2
-  sheet: A
-  feature: 共通設定
-  category: テーブル
-  description: テーブル情報詳細表示を行う。
-  expected: エラーなくテーブル詳細情報の表示が行えること。
-- case_no: 10-3
-  sheet: A
-  feature: 共通設定
-  category: テーブル
-  description: テーブル定義の変更を行う。
-  expected: エラーなくテーブル定義の変更が行えること。
-- case_no: 10-4
-  sheet: A
-  feature: 共通設定
-  category: テーブル
-  description: テーブルの削除を行う。
-  expected: エラーなくテーブルの削除が行えること。
-- case_no: 24-1
-  sheet: A
-  feature: その他設定
-  category: 新規ユーザーログイン時のパスワードリセット
-  description: '①「その他設定」より「新規ユーザーのログイン時のパスワードリセットをOFFにする」にチェックを入れて「更新」ボタンをクリック
-
-
-    ②新規ユーザーを作成
-
-
-    ③新規ユーザーでログイン'
-  expected: 新規ユーザーで初回ログイン時、パスワード変更が画面が表示されないこと。
-- case_no: 24-2
-  sheet: A
-  feature: その他設定
-  category: 新規ユーザーログイン時のパスワードリセット
-  description: '①「その他設定」より「新規ユーザーのログイン時のパスワードリセットをOFFにする」にチェックを入れずに「更新」ボタンをクリック
-
-
-    ②新規ユーザーを作成
-
-
-    ③新規ユーザーでログイン'
-  expected: 新規ユーザーで初回ログイン時、パスワード変更が画面が表示されること。
-- case_no: 58-1
-  sheet: A
-  feature: その他設定
-  category: ログイン時に利用規約を表示する
-  description: '①「その他設定」より、「初回ログイン時に利用規約を表示する」の有効にチェックを入れ「更新」ボタンをクリック。
-
-    ②「マスターユーザー」でログインする。
-
-    ③「通常ユーザー」でログインする。'
-  expected: マスターユーザー／通常ユーザーともにログイン時に利用規約が表示されること。
-- case_no: 58-2
-  sheet: A
-  feature: その他設定
-  category: ログイン時に利用規約を表示しない
-  description: '①「その他設定」より、「初回ログイン時に利用規約を表示する」の有効にチェックを外し「更新」ボタンをクリック。
-
-    ②「マスターユーザー」でログインする。
-
-    ③「通常ユーザー」でログインする。'
-  expected: マスターユーザー／通常ユーザーともにログイン時に利用規約が表示されなくなること。
-- case_no: 7-1
-  sheet: A
-  feature: システム利用状況
-  category: '-'
-  description: ユーザー数を増やす。
-  expected: システム利用状況のユーザー数の表示が増えること。
-- case_no: 7-2
-  sheet: A
-  feature: システム利用状況
-  category: '-'
-  description: ユーザー数を減らす。
-  expected: システム利用状況のユーザー数の表示が減ること。
-- case_no: 7-3
-  sheet: A
-  feature: システム利用状況
-  category: '-'
-  description: テーブル数を増やす。
-  expected: システム利用状況のテーブル数の表示が増えること。
-- case_no: 7-4
-  sheet: A
-  feature: システム利用状況
-  category: '-'
-  description: テーブル数を減らす。
-  expected: システム利用状況のテーブル数の表示が減ること。
-- case_no: 7-5
-  sheet: A
-  feature: システム利用状況
-  category: '-'
-  description: メール通知を実施する。
-  expected: システム利用状況のメール通知数の表示が増えること。
-- case_no: 8-1
-  sheet: A
-  feature: その他設定
-  category: 二段階認証
-  description: 二段階認証を有効化する。
-  expected: 2段階認証の設定が行われること。
-- case_no: 8-2
-  sheet: A
-  feature: その他設定
-  category: 二段階認証
-  description: 二段階認証を無効化する。
-  expected: 2段階認証の設定が解除されること。
-- case_no: 9-10
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: レコードの詳細情報表示を行う。
-  expected: エラーなくレコードの詳細情報表示が行えること。
-- case_no: 9-11
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: レコード編集を行う。
-  expected: エラーなくレコードの編集が行えること。
-- case_no: 9-12
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: レコード削除を行う。
-  expected: エラーなくレコードの削除が行えること。
-- case_no: 9-1
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: 追加を選択しレコードの追加を行う。
-  expected: エラーなくレコード追加が可能なこと。
-- case_no: 9-4
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: 全てのデータ削除を選択する。
-  expected: エラーなく該当テーブルのレコード情報が全て削除されること。
-- case_no: 9-5
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: 集計を選択しデータ集計を行う。
-  expected: エラーなく設定した情報が集計し表示されること。
-- case_no: 9-6
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: チャート追加を行う。
-  expected: エラーなく設定した内容でチャート追加が行われること。
-- case_no: 9-8
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: データ検索を行う。
-  expected: エラーなく検索結果に基づいた内容でレコード検索が行えること。
-- case_no: 9-9
-  sheet: A
-  feature: 共通設定
-  category: レコード
-  description: データ編集を行う。
-  expected: エラーなくレコード編集が行えること。
-- case_no: 130-01
-  sheet: B
-  feature: 契約設定
-  category: 'Paypal支払い
-
-    ※機能変更に伴い本テスト不要'
-  description: '①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET
-    PAYMENT DONE」が表示されることを確認する。
-
-    →契約設定がリセットされる事を確認する。
-
-    ② メニューより、「契約設定」→「Paypalサブスクリプション登録」を選択する。
-
-    ③PaypalではID/パスワードはテスト用の以下にて手続きを進める。
-
-    　ID：ishikawa-buyer@loftal.jp ／password:testtest'
-  expected: 契約が問題なく完了すること。
-- case_no: 131-02
-  sheet: B
-  feature: 契約設定
-  category: 'カード支払い
-
-    ※機能変更に伴い本テスト不要'
-  description: '①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET
-    PAYMENT DONE」が表示されることを確認する。
-
-    →契約設定がリセットされる事を確認する。
-
-    ② メニューより、「契約設定」→「デビットカードまたはクレジットカード」を選択する。
-
-    ③「国地域」→「日本」、「カード」を選択する。
-
-    ④カード番号にはVISAを選択し、カード番号は以下サイトより取得したテスト用のカード番号を利用する。
-
-    　https://www.getcreditcardnumbers.com/
-
-    ⑤その他、情報についてはテスト用に自由に登録し、「PayPalアカウントを作成しますか? (すぐに完了します。)」は「いいえ」を選択し、「同意して定期購入」をクリックする。
-
-    　※(注)カードの有効期限については未来日付にすること。'
-  expected: 契約が問題なく完了すること。
-- case_no: 284-1
-  sheet: B
-  feature: 契約設定
-  category: クレジットカード払い(Stripe)
-  description: "①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET\
-    \ PAYMENT DONE」が表示されることを確認する。 \n→契約設定がリセットされる事を確認する。 \n② メニューより、「契約設定」→「クレジットカード支払い」を選択する。\n\
-    ③以下URLよりテスト用のクレカ番号を確認し、契約内容入力後手続きを進める。\nhttps://stripe.com/docs/testing#cards\n\
-    ④契約が完了したを確認する。\n⑤メニューより、「契約設定」を選択する。\n\nhttps://henmi022.pigeon-demo.com/api/admin/debug-reset-payment"
-  expected: 現在のプランの表示が契約通りの内容となること。
-- case_no: 89-1
-  sheet: B
-  feature: その他設定
-  category: パスワードの定期変更を促す機能
-  description: '①その他設定より、「パスワード強制変更画面表示の間隔日数」を1と設定して保存する。
-
-    　
-
-    　※その他設定の他設定箇所は以下の通り設定する。
-
-    　　・「二段階認証を有効にする」　有効
-
-    　　・「新規ユーザーのログイン時のパスワードリセットをOFFにする」　有効
-
-    　　・初回ログイン時に利用規約を表示する　有効
-
-    　　・通知の送信メールアドレスをSMTPで指定　無効
-
-    　　・ロック自動解除時間(分)　5分'
-  expected: '設定通りの処理となること。
-
-    また、他の「その他設定」の設定項目へ無影響であることを確認する。'
-- case_no: 9-2
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: CSVダウンロードを選択する。
-  expected: エラーなく該当テーブルのレコード情報がCSV形式のファイルでダウンロードされること。
-- case_no: 9-3
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: CSVアップロードを選択する。
-  expected: エラーなくCSV形式のファイルでレコード情報へアップロードできること。
-- case_no: 9-7
-  sheet: B
-  feature: 共通設定
-  category: レコード
-  description: 帳票登録を行う。
-  expected: 'エラーなく帳票登録が行えること。
-
-    帳票登録後、レコード詳細を表示すると「帳票出力」ボタンが表示されること。'
+- case_no: SYS-TABLE
+  feature: テーブル管理・レコード操作
+  category: 動画単位
+  description: |
+    ①テーブルの順番入れ替えを行う
+    ②テーブル情報詳細表示を行う
+    ③テーブル定義の変更を行う
+    ④テーブルの削除を行う
+    ⑤レコードの追加・詳細表示・編集・削除を行う
+    ⑥全てのデータ削除を実行する
+    ⑦集計・チャート追加・データ検索を行う
+    ⑧CSVダウンロード・アップロードを行う
+    ⑨帳票登録を行う
+  expected: |
+    テーブル管理のCRUD・レコード操作・集計・CSV・帳票が全て正常に動作すること
+  includes:
+  - 9-1
+  - 9-2
+  - 9-3
+  - 9-4
+  - 9-5
+  - 9-6
+  - 9-7
+  - 9-8
+  - 9-9
+  - 9-10
+  - 9-11
+  - 9-12
+  - 10-1
+  - 10-2
+  - 10-3
+  - 10-4
+- case_no: SYS-SETTINGS
+  feature: システム設定・その他設定
+  category: 動画単位
+  description: |
+    ①「その他設定」でパスワードリセットON/OFFを切り替え、新規ユーザーのログイン動作を確認する
+    ②利用規約表示の有効/無効を切り替え、各ユーザータイプのログイン時の動作を確認する
+    ③二段階認証の有効化・無効化を確認する
+    ④パスワード強制変更画面表示の間隔日数を設定し動作を確認する
+    ⑤システム利用状況（ユーザー数増減・テーブル数増減・メール通知）を確認する
+    ⑥契約設定の表示・操作を確認する
+  expected: |
+    その他設定・二段階認証・パスワード強制変更・利用状況・契約設定が全て正常に動作すること
+  includes:
+  - 7-1
+  - 7-2
+  - 7-3
+  - 7-4
+  - 7-5
+  - 8-1
+  - 8-2
+  - 24-1
+  - 24-2
+  - 58-1
+  - 58-2
+  - 89-1
+  - 130-01
+  - 131-02
+  - 284-1
+  - 839-1
+  - 839-2
+  - 840-1
+  - 841-1
+  - 843-1
+  - 844-1
+  - 845-1
 actual_steps:
 - case_no: 7-1
   status: partial
@@ -653,54 +465,67 @@ actual_steps:
   sheet: A
   feature: SSO設定
   category: セキュリティ
-  description: |
-    システム設定よりSSO設定ページにアクセスし、Google SAMLの設定項目が表示されること。
+  description: 'システム設定よりSSO設定ページにアクセスし、Google SAMLの設定項目が表示されること。
+
     設定項目（識別子・応答URL・メタデータXMLアップロード）が存在することを確認する。
+
+    '
   expected: SSO設定ページが正常に表示され、Google/Microsoft SAML設定UIが確認できること。
 - case_no: 839-2
   sheet: A
   feature: SSO設定
   category: セキュリティ
-  description: |
-    SSO設定ページで「識別子（エンティティID）」と「応答URL」のクリップボードコピーボタンが存在すること。
+  description: 'SSO設定ページで「識別子（エンティティID）」と「応答URL」のクリップボードコピーボタンが存在すること。
+
+    '
   expected: コピーボタンが表示されること。
 - case_no: 840-1
   sheet: A
   feature: クライアント証明書管理
   category: セキュリティ
-  description: |
-    ユーザー管理または設定ページからクライアント証明書管理にアクセスし、
+  description: 'ユーザー管理または設定ページからクライアント証明書管理にアクセスし、
+
     証明書発行・一覧表示・失効のUIが表示されること。
+
+    '
   expected: クライアント証明書管理ページが正常に表示されること。
 - case_no: 841-1
   sheet: A
   feature: ログアーカイブ
   category: ログ
-  description: |
-    左メニューよりログアーカイブ画面にアクセスし、
+  description: '左メニューよりログアーカイブ画面にアクセスし、
+
     ログの一覧が表示されること。
+
+    '
   expected: ログアーカイブページが正常に表示され、アーカイブ済みログの一覧が確認できること。
 - case_no: 843-1
   sheet: A
   feature: Googleマップフィールド
   category: フィールド連携
-  description: |
-    GoogleマップフィールドをALLテストテーブルで確認し、
+  description: 'GoogleマップフィールドをALLテストテーブルで確認し、
+
     地図UIが表示されること。住所入力欄または地図コンポーネントが存在すること。
+
+    '
   expected: Googleマップフィールドの地図UI・入力欄が正常に表示されること。
 - case_no: 844-1
   sheet: A
   feature: API公開設定
   category: 外部連携
-  description: |
-    テーブル設定の「公開設定」タブまたは「API設定」からAPI公開ON/OFFの設定UIを確認する。
+  description: 'テーブル設定の「公開設定」タブまたは「API設定」からAPI公開ON/OFFの設定UIを確認する。
+
     APIキーまたはエンドポイントURLが表示されること。
+
+    '
   expected: API公開設定UIが正常に表示されること。
 - case_no: 845-1
   sheet: A
   feature: freee連携設定
   category: 外部連携
-  description: |
-    システム設定またはテーブル設定からfreee連携設定UIへアクセスし、
+  description: 'システム設定またはテーブル設定からfreee連携設定UIへアクセスし、
+
     連携設定フォームが表示されること。
+
+    '
   expected: freee連携設定UIが確認できること（または機能が存在しない場合はskipとなること）。
