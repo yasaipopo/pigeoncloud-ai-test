@@ -11,30 +11,50 @@ async function waitForAngular(page, timeout = 15000) {
 
 /**
  * ログイン共通関数
- * SPA環境ではURLが /admin/login のまま変わらない場合があるため .navbar で待機
+ * APIログインを優先し、失敗時はフォームログインにフォールバック
  */
 async function login(page, email, password) {
-    // 最大3回リトライ（CSRF失敗などの間欠的エラーに対応）
-    for (let attempt = 1; attempt <= 3; attempt++) {
-        await page.goto(BASE_URL + '/admin/login');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500); // フォーム初期化待機
-        await page.fill('#id', email || EMAIL);
-        await page.fill('#password', password || PASSWORD);
-        await page.click('button[type=submit].btn-primary');
+    await page.goto(BASE_URL + '/admin/login');
+    await waitForAngular(page);
+
+    // APIログインを優先（Angular SPA環境でのdetach問題を回避）
+    const loginResult = await page.evaluate(async ({ email, password }) => {
         try {
-            await page.waitForSelector('.navbar', { timeout: 40000 });
-            await page.waitForTimeout(1000);
-            return; // ログイン成功
+            const csrfResp = await fetch('/api/csrf_token');
+            const csrf = await csrfResp.json();
+            const loginResp = await fetch('/api/login/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email, password,
+                    admin_table: 'admin',
+                    csrf_name: csrf.csrf_name,
+                    csrf_value: csrf.csrf_value,
+                    login_type: 'user',
+                    auth_token: null,
+                    isManageLogin: false
+                })
+            });
+            return await loginResp.json();
         } catch (e) {
-            if (attempt < 3) {
-                // 次のリトライ前に少し待機
-                await page.waitForTimeout(2000);
-            } else {
-                throw new Error(`ログイン失敗（3回試行）: ${e.message}`);
-            }
+            return { result: 'error', error: e.toString() };
         }
+    }, { email: email || EMAIL, password: password || PASSWORD });
+
+    if (loginResult.result === 'success') {
+        await page.goto(BASE_URL + '/admin/dashboard');
+        await waitForAngular(page);
+        return;
     }
+
+    // APIログイン失敗時はフォームログイン（フォールバック）
+    await page.goto(BASE_URL + '/admin/login');
+    await waitForAngular(page);
+    await page.waitForSelector('#id', { timeout: 30000 });
+    await page.fill('#id', email || EMAIL);
+    await page.fill('#password', password || PASSWORD);
+    await page.click('button[type=submit].btn-primary');
+    await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
 }
 
 /**
@@ -603,36 +623,33 @@ test.describe('項目名パディング（92, 93, 94系）', () => {
     test('93-1: 項目名の前後に半角スペースを入力してもトリミングされて登録されること', async ({ page }) => {
         test.setTimeout(120000);
         await navigateToFieldPage(page, tableId);
-        await expect(page.locator('.navbar')).toBeVisible();
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
+        await waitForAngular(page);
 
-        // フィールド設定ページにいる場合のみ実行（テーブル一覧ページにリダイレクトされた場合はスキップ）
+        // フィールド設定ページ（/admin/dataset/edit/）に到達していることを確認
         if (!page.url().includes('/admin/dataset/edit/')) {
-            // テーブル一覧ページ: エラーなし確認のみ
-            expect(pageText).not.toContain('Internal Server Error');
-            return;
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
         }
 
-        // 「項目を追加する」ボタンをクリック（btn-success クラス）
-        const addBtn = page.locator('button.btn-success:has-text("項目を追加する"), button:has-text("項目を追加する"), button:has-text("項目を追加")').first();
+        // 「項目を追加する」ボタンをクリック
+        const addBtn = page.locator('button:has-text("項目を追加する")').first();
         await expect(addBtn).toBeVisible({ timeout: 10000 });
         await addBtn.click({ force: true });
         await waitForAngular(page);
 
-        // フィールドタイプ選択モーダルが開く → 「文字列(一行)」を選択
-        const textTypeBtn = page.locator('.modal button:has-text("文字列(一行)"), .modal .btn-light-gray:has-text("文字列")').first();
+        // フィールドタイプ選択ダイアログが開く → 「文字列(一行)」を選択
+        // UIは .modal.show 内にタイプボタンが表示される（Bootstrapモーダル）
+        const textTypeBtn = page.locator('.modal.show button:has-text("文字列(一行)")').first();
         await expect(textTypeBtn).toBeVisible({ timeout: 10000 });
         await textTypeBtn.click({ force: true });
         await waitForAngular(page);
 
-        // 項目名入力フォーム（name="label"）に半角スペースを含む文字列を入力
-        const fieldNameInput = page.locator('.modal input[name="label"]').first();
+        // 項目名入力フォームに半角スペースを含む文字列を入力
+        const fieldNameInput = page.locator('.modal.show input').first();
         await expect(fieldNameInput).toBeVisible({ timeout: 10000 });
         await fieldNameInput.fill(' テストフィールド93 ');
 
-        // 保存ボタン（data-testid="field-save-btn" または btn-primary）をクリック
-        const saveBtn = page.locator('[data-testid="field-save-btn"], .modal-footer button.btn-primary').first();
+        // 「追加する」ボタンをクリック
+        const saveBtn = page.locator('.modal.show button:has-text("追加する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 5000 });
         await saveBtn.click({ force: true });
         await waitForAngular(page);
@@ -650,36 +667,33 @@ test.describe('項目名パディング（92, 93, 94系）', () => {
     test('94-1: 項目名の前後にタブを入力してもトリミングされて登録されること', async ({ page }) => {
         test.setTimeout(120000);
         await navigateToFieldPage(page, tableId);
-        await expect(page.locator('.navbar')).toBeVisible();
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
+        await waitForAngular(page);
 
-        // フィールド設定ページにいる場合のみ実行（テーブル一覧ページにリダイレクトされた場合はスキップ）
+        // フィールド設定ページ（/admin/dataset/edit/）に到達していることを確認
         if (!page.url().includes('/admin/dataset/edit/')) {
-            // テーブル一覧ページ: エラーなし確認のみ
-            expect(pageText).not.toContain('Internal Server Error');
-            return;
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
         }
 
-        // 「項目を追加する」ボタンをクリック（btn-success クラス）
-        const addBtn = page.locator('button.btn-success:has-text("項目を追加する"), button:has-text("項目を追加する"), button:has-text("項目を追加")').first();
+        // 「項目を追加する」ボタンをクリック
+        const addBtn = page.locator('button:has-text("項目を追加する")').first();
         await expect(addBtn).toBeVisible({ timeout: 10000 });
         await addBtn.click({ force: true });
         await waitForAngular(page);
 
-        // フィールドタイプ選択モーダルが開く → 「文字列(一行)」を選択
-        const textTypeBtn = page.locator('.modal button:has-text("文字列(一行)"), .modal .btn-light-gray:has-text("文字列")').first();
+        // フィールドタイプ選択ダイアログが開く → 「文字列(一行)」を選択
+        // UIは .modal.show 内にタイプボタンが表示される（Bootstrapモーダル）
+        const textTypeBtn = page.locator('.modal.show button:has-text("文字列(一行)")').first();
         await expect(textTypeBtn).toBeVisible({ timeout: 10000 });
         await textTypeBtn.click({ force: true });
         await waitForAngular(page);
 
-        // 項目名入力フォーム（name="label"）にタブを含む文字列を入力
-        const fieldNameInput = page.locator('.modal input[name="label"]').first();
+        // 項目名入力フォームにタブを含む文字列を入力
+        const fieldNameInput = page.locator('.modal.show input').first();
         await expect(fieldNameInput).toBeVisible({ timeout: 10000 });
         await fieldNameInput.fill('\tテストフィールド94\t');
 
-        // 保存ボタン（data-testid="field-save-btn" または btn-primary）をクリック
-        const saveBtn = page.locator('[data-testid="field-save-btn"], .modal-footer button.btn-primary').first();
+        // 「追加する」ボタンをクリック
+        const saveBtn = page.locator('.modal.show button:has-text("追加する")').first();
         await expect(saveBtn).toBeVisible({ timeout: 5000 });
         await saveBtn.click({ force: true });
         await waitForAngular(page);
