@@ -61,6 +61,37 @@ git -C src/pigeon_cloud diff HEAD~5..HEAD --name-only
 spec修正が必要と判断した場合：
 1. 影響を受けるspecファイルを特定して修正
 
+### Step 2.5: テスト開始前の必須確認（ユーザーへの通知）
+
+**サブエージェント起動前に必ずユーザーに以下を報告すること:**
+
+```
+▶ 第{N}回テストを開始します。
+
+📋 確認事項:
+- TEST_NUMBER: {N}（{上書き有無: 既存の第N回を上書きします / 新規作成}）
+- screenshot: {on / only-on-failure / off} → {'on'であること確認済み' / '⚠️ on に変更が必要'}
+- video: {on / only-on-failure / off} → {'on'であること確認済み' / '⚠️ on に変更が必要'}
+```
+
+**TEST_NUMBERの決め方:**
+1. `.env` の `TEST_NUMBER` を確認する
+2. E2E API でセッション一覧を確認して最新番号を取得する:
+   ```bash
+   curl -s 'https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com/runs' | python3 -m json.tool | grep sessionId | sort -t'"' -k4 -n | tail -5
+   ```
+3. 最新番号 + 1 を TEST_NUMBER として使う（同じ番号は「上書き」になる）
+4. 同じ番号を使う場合はその旨をユーザーに明示する
+
+**screenshot / video の確認:**
+```bash
+grep -E 'screenshot|video' playwright.config.js | grep -v '//'
+```
+- `'on'` であれば OK
+- `'only-on-failure'` / `'retain-on-failure'` になっていたら `'on'` に修正してから進む
+
+---
+
 ### Step 3: サブエージェント並列起動
 
 **Dockerは使わない。Agent toolでサブエージェントを直接ホストで並列起動する。**

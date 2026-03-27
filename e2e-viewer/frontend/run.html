@@ -430,17 +430,37 @@ async function refreshCases() {
     );
     if (!r.ok) return;
     const data = await r.json();
-    const newCases = (data.items || []).filter(c => !knownCaseIds.has(c.caseId));
-    if (newCases.length === 0) return;
+    const fetchedCases = data.items || [];
+    const newCases = fetchedCases.filter(c => !knownCaseIds.has(c.caseId));
 
     // 新規ケースをallCasesに追加
     newCases.forEach(c => {
-      allCases.unshift(c); // 最新が先頭
+      allCases.unshift(c);
       knownCaseIds.add(c.caseId);
     });
 
-    // テーブルの先頭にケース行を追加（フィルタ条件を考慮）
-    prependCases(newCases);
+    if (newCases.length > 0) {
+      prependCases(newCases);
+    }
+
+    // 既存ケースのscreenshotKeys/videoKeyが後から追加された場合も反映
+    fetchedCases.forEach(updated => {
+      const existing = allCases.find(c => c.caseId === updated.caseId);
+      if (!existing) return;
+      const hadScreenshot = existing.screenshotKeys && existing.screenshotKeys.length > 0;
+      const hasScreenshot = updated.screenshotKeys && updated.screenshotKeys.length > 0;
+      if (!hadScreenshot && hasScreenshot) {
+        existing.screenshotKeys = updated.screenshotKeys;
+        // テーブル行のアイコンを更新
+        const row = document.querySelector(`tr.case-row[data-case-id="${CSS.escape(existing.caseId)}"]`);
+        if (row) {
+          const iconCell = row.querySelector('td:last-child');
+          if (iconCell && !iconCell.querySelector('.bi-images')) {
+            iconCell.insertAdjacentHTML('beforeend', `<i class="bi bi-images text-info" title="スクショ ${updated.screenshotKeys.length}枚"></i>`);
+          }
+        }
+      }
+    });
   } catch (e) {
     // 無視
   }

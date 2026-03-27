@@ -491,7 +491,7 @@ def get_download_url(event):
             'Bucket': ASSETS_BUCKET,
             'Key': key
         },
-        ExpiresIn=3600
+        ExpiresIn=86400  # 24時間（元1時間→動画がloading状態になる問題を修正）
     )
 
     return response(200, {'downloadUrl': url, 'key': key})

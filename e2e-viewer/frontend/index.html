@@ -586,7 +586,9 @@ function renderRuns(items, clear) {
   );
 
   sessions.forEach((sess, idx) => {
-    const sessionNo = sessions.length - idx; // 古いほど小さい番号
+    // sessionIdが数値ならその値をそのまま使う（TEST_NUMBER=5なら第5回）
+    // 旧データ(runId形式)の場合のみ通し番号にフォールバック
+    const sessionNo = /^\d+$/.test(sess.sid) ? parseInt(sess.sid) : (sessions.length - idx);
     if (renderedSids.has(sess.sid)) {
       // 既存カードはdata属性だけ更新（ポーリング時に updateSessionCard が使う）
       return;

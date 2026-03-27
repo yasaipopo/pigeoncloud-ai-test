@@ -291,7 +291,7 @@ class E2EViewerReporter {
       // 無視
     }
 
-    // ② S3アップロード: onEndで await するためPromiseをキューに積む
+    // ② S3アップロード: アップロード完了次第リアルタイムでDynamoDBをPATCH
     const uploadPromises = (result.attachments || [])
       .filter(att => att.path && existsSync(att.path))
       .map(att => {
@@ -308,6 +308,19 @@ class E2EViewerReporter {
             caseData.traceKey = s3Key;
           } else {
             (caseData.screenshotKeys ??= []).push(s3Key);
+          }
+          // アップロード完了後すぐにDynamoDBをPATCH（リアルタイム反映）
+          const patch = {};
+          if (caseData.videoKey) patch.videoKey = caseData.videoKey;
+          if (caseData.screenshotKeys?.length) patch.screenshotKeys = caseData.screenshotKeys;
+          if (caseData.traceKey) patch.traceKey = caseData.traceKey;
+          if (Object.keys(patch).length > 0) {
+            return this._patch(
+              `/runs/${this.runId}/cases/${encodeURIComponent(caseData.caseId)}`,
+              patch
+            ).catch(e => {
+              process.stdout.write(`[E2EViewer] realtime patch失敗 (${att.name}): ${e.message}\n`);
+            });
           }
         }).catch(e => {
           process.stdout.write(`[E2EViewer] upload failed (${att.name}): ${e.message}\n`);
