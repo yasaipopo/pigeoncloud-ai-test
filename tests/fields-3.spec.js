@@ -3,6 +3,10 @@
 // fields.spec.jsから分割 (line 1594〜末尾)
 const { test, expect } = require('@playwright/test');
 
+async function waitForAngular(page, timeout = 15000) {
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+}
+
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
@@ -2135,10 +2139,6 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
 
         // スクリーンショット保存
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
-
-async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
-}
 
         await page.screenshot({ path: `${reportsDir}/screenshots/260-1-radio-display-condition.png`, fullPage: false });
     });
