@@ -127,6 +127,19 @@ aws --profile "${AWS_PROFILE}" --region "${AWS_REGION}" s3 sync \
 echo "  フロントエンドアップロード完了"
 
 # =========================================
+# Step 3.5: spec一覧をアップロード
+# =========================================
+echo ""
+echo "[3.5/4] spec一覧をアップロード中..."
+cd "${SCRIPT_DIR}/.."
+if E2E_API_URL="${LAMBDA_URL}" E2E_API_PASSWORD="${ADMIN_PASSWORD}" python3 e2e-viewer/upload_specs.py 2>&1; then
+  echo "  spec一覧アップロード完了"
+else
+  echo "  WARNING: spec一覧アップロード失敗（スキップ）"
+fi
+cd - > /dev/null
+
+# =========================================
 # Step 4: CloudFrontキャッシュ無効化
 # =========================================
 echo ""

@@ -138,6 +138,14 @@ def handler(event, context):
         elif method == 'POST' and path == '/assets/download-url':
             return get_download_url(event)
 
+        # GET /specs - spec一覧取得
+        elif method == 'GET' and path == '/specs':
+            return get_specs()
+
+        # PUT /specs - spec一覧更新（upload_specs.pyが呼ぶ）
+        elif method == 'PUT' and path == '/specs':
+            return put_specs(event)
+
         else:
             return response(404, {'error': f'Not found: {method} {path}'})
 
@@ -442,6 +450,59 @@ def patch_case(run_id, case_id, event):
         ExpressionAttributeValues=expr_values
     )
     return response(200, {'message': '更新完了'})
+
+
+SPECS_S3_KEY = 'specs/all.json'
+
+
+def get_specs():
+    """
+    GET /specs - spec一覧取得
+    S3の specs/all.json を読み込んで返す。
+    """
+    if not ASSETS_BUCKET:
+        return response(503, {'error': 'ASSETS_BUCKET が設定されていません'})
+
+    try:
+        obj = s3_client.get_object(Bucket=ASSETS_BUCKET, Key=SPECS_S3_KEY)
+        data = json.loads(obj['Body'].read().decode('utf-8'))
+        return response(200, data)
+    except s3_client.exceptions.NoSuchKey:
+        return response(404, {'error': 'spec一覧がまだアップロードされていません。upload_specs.pyを実行してください。'})
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+
+def put_specs(event):
+    """
+    PUT /specs - spec一覧更新
+    ボディ: specs.json の内容
+    S3の specs/all.json に保存する。
+    """
+    if not ASSETS_BUCKET:
+        return response(503, {'error': 'ASSETS_BUCKET が設定されていません'})
+
+    body = event.get('body') or '{}'
+    try:
+        # JSONバリデーション
+        data = json.loads(body)
+        if 'specs' not in data:
+            return response(400, {'error': 'specsフィールドが必要です'})
+    except json.JSONDecodeError as e:
+        return response(400, {'error': f'JSONパースエラー: {e}'})
+
+    s3_client.put_object(
+        Bucket=ASSETS_BUCKET,
+        Key=SPECS_S3_KEY,
+        Body=body.encode('utf-8'),
+        ContentType='application/json'
+    )
+
+    return response(200, {
+        'message': 'spec一覧を保存しました',
+        'specsCount': len(data.get('specs', [])),
+        'generatedAt': data.get('generatedAt', '')
+    })
 
 
 def get_upload_url(event):

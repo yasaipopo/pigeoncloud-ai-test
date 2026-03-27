@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テスト一覧 - PigeonCloud E2E</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+
+    .spec-card {
+      border-radius: 10px;
+      border: 1px solid #dee2e6;
+      background: #fff;
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: box-shadow .15s;
+    }
+    .spec-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+
+    .spec-header {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      user-select: none;
+    }
+    .spec-header:hover { background: #f8f9fa; }
+
+    .spec-filename {
+      font-family: monospace;
+      font-weight: 700;
+      font-size: .95rem;
+      color: #212529;
+    }
+    .spec-meta { font-size: .75rem; color: #6c757d; }
+    .spec-counts { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: .75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .cb-total  { background: #e9ecef; color: #495057; }
+    .cb-skip   { background: #fff3cd; color: #856404; }
+
+    .test-list {
+      padding: 0 8px 8px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .test-item {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: .82rem;
+    }
+    .test-item:hover { background: #f0f0f0; }
+    .test-item.skip-item { color: #6c757d; }
+    .test-item.skip-item .ti-skip-badge {
+      font-size: .65rem;
+      background: #e9ecef;
+      color: #6c757d;
+      padding: 1px 5px;
+      border-radius: 8px;
+    }
+    .suite-divider {
+      font-size: .72rem;
+      font-weight: 700;
+      color: #6c757d;
+      padding: 6px 8px 2px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .ti-num {
+      font-family: monospace;
+      font-size: .75rem;
+      color: #adb5bd;
+      flex-shrink: 0;
+      min-width: 40px;
+    }
+    .ti-title { flex: 1; }
+
+    .search-bar {
+      position: relative;
+    }
+    .search-bar .bi-search {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #adb5bd;
+    }
+    .search-bar input {
+      padding-left: 36px;
+    }
+
+    .summary-bar {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      border: 1px solid #dee2e6;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .sum-item { text-align: center; }
+    .sum-item .num { font-size: 1.6rem; font-weight: bold; line-height: 1; }
+    .sum-item .lbl { font-size: .7rem; color: #6c757d; }
+
+    .generated-at {
+      font-size: .75rem;
+      color: #adb5bd;
+    }
+
+    .spec-grid {
+      columns: 1;
+    }
+    @media (min-width: 1200px) {
+      /* 大画面では2列 */
+    }
+
+    #no-results { display: none; text-align: center; padding: 60px; color: #adb5bd; }
+
+    .collapse-icon { transition: transform .2s; color: #adb5bd; }
+    .spec-header.open .collapse-icon { transform: rotate(180deg); }
+
+    .last-mod-badge {
+      font-size: .7rem;
+      background: #e8f4fd;
+      color: #0c63a4;
+      padding: 1px 6px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ナビゲーションバー -->
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container">
+    <div class="d-flex align-items-center gap-3">
+      <a href="index.html" class="text-white text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i>
+      </a>
+      <span class="navbar-brand mb-0">
+        <i class="bi bi-list-check me-2"></i>テスト一覧
+      </span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-secondary small generated-at" id="generated-at-label"></span>
+      <button class="btn btn-sm btn-outline-secondary" onclick="doLogout()">
+        <i class="bi bi-box-arrow-right me-1"></i>ログアウト
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <!-- ローディング -->
+  <div id="loading" class="text-center py-5">
+    <div class="spinner-border text-secondary" role="status"></div>
+    <div class="mt-2 text-secondary small">読み込み中...</div>
+  </div>
+
+  <!-- エラー -->
+  <div id="error-panel" style="display:none" class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <span id="error-message"></span>
+    <div class="mt-2 small text-muted">
+      <code>python e2e-viewer/upload_specs.py</code> を実行してspec一覧を生成してください。
+    </div>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div id="main" style="display:none">
+
+    <!-- サマリー -->
+    <div class="summary-bar">
+      <div class="sum-item">
+        <div class="num text-primary" id="total-specs">0</div>
+        <div class="lbl">spec ファイル</div>
+      </div>
+      <div class="sum-item">
+        <div class="num" id="total-tests">0</div>
+        <div class="lbl">テスト合計</div>
+      </div>
+      <div class="sum-item">
+        <div class="num text-warning" id="total-skipped">0</div>
+        <div class="lbl">スキップ</div>
+      </div>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <!-- 更新ボタン -->
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadSpecs()">
+          <i class="bi bi-arrow-clockwise me-1"></i>更新
+        </button>
+        <!-- 全展開/折りたたみ -->
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleAll(true)">
+          <i class="bi bi-chevron-double-down me-1"></i>全展開
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
+          <i class="bi bi-chevron-double-up me-1"></i>全折りたたみ
+        </button>
+      </div>
+    </div>
+
+    <!-- 検索 -->
+    <div class="search-bar mb-3">
+      <i class="bi bi-search"></i>
+      <input type="text" class="form-control" id="search-input" placeholder="テスト名・spec名で絞り込み..." oninput="filterSpecs(this.value)">
+    </div>
+
+    <!-- spec一覧 -->
+    <div id="spec-list"></div>
+    <div id="no-results">
+      <i class="bi bi-search fs-2 mb-2 d-block"></i>
+      一致するテストが見つかりません
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// =========================================
+// 設定（deploy.sh で __API_URL__ を置換）
+// =========================================
+const CONFIG = {
+  apiUrl: '__API_URL__',
+};
+
+// =========================================
+// 認証チェック
+// =========================================
+const _token = localStorage.getItem('e2e_auth_token');
+if (!_token) {
+  location.href = 'login.html';
+}
+
+function authHeaders() {
+  return {
+    'Authorization': `Bearer ${localStorage.getItem('e2e_auth_token')}`,
+    'Content-Type': 'application/json'
+  };
+}
+
+function doLogout() {
+  localStorage.removeItem('e2e_auth_token');
+  location.href = 'login.html';
+}
+
+// =========================================
+// グローバル状態
+// =========================================
+let allSpecs = [];
+
+// =========================================
+// 日時フォーマット
+// =========================================
+function fmtDate(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffDays = Math.floor(diffMs / 86400000);
+  const jst = new Date(d.getTime() + 9 * 3600000);
+  const ymd = `${jst.getUTCFullYear()}/${String(jst.getUTCMonth()+1).padStart(2,'0')}/${String(jst.getUTCDate()).padStart(2,'0')}`;
+  const hm = `${String(jst.getUTCHours()).padStart(2,'0')}:${String(jst.getUTCMinutes()).padStart(2,'0')}`;
+  if (diffDays === 0) return `今日 ${hm}`;
+  if (diffDays === 1) return `昨日 ${hm}`;
+  return `${ymd} ${hm}`;
+}
+
+function fmtDateShort(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  const jst = new Date(d.getTime() + 9 * 3600000);
+  const md = `${jst.getUTCMonth()+1}/${jst.getUTCDate()}`;
+  const hm = `${String(jst.getUTCHours()).padStart(2,'0')}:${String(jst.getUTCMinutes()).padStart(2,'0')}`;
+  return `${md} ${hm}`;
+}
+
+// =========================================
+// spec一覧読み込み
+// =========================================
+async function loadSpecs() {
+  document.getElementById('loading').style.display = '';
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('error-panel').style.display = 'none';
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/specs`, { headers: authHeaders() });
+    if (r.status === 401) { doLogout(); return; }
+    if (r.status === 404) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-message').textContent = 'spec一覧がまだアップロードされていません。';
+      document.getElementById('error-panel').style.display = '';
+      return;
+    }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    renderSpecs(data);
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error-message').textContent = `読み込みエラー: ${e.message}`;
+    document.getElementById('error-panel').style.display = '';
+  }
+}
+
+// =========================================
+// レンダリング
+// =========================================
+function renderSpecs(data) {
+  allSpecs = data.specs || [];
+
+  const genAt = data.generatedAt ? `最終生成: ${fmtDate(data.generatedAt)}` : '';
+  document.getElementById('generated-at-label').textContent = genAt;
+
+  const totalTests = allSpecs.reduce((s, sp) => s + (sp.totalTests || 0), 0);
+  const totalSkipped = allSpecs.reduce((s, sp) => s + (sp.skippedTests || 0), 0);
+  document.getElementById('total-specs').textContent = allSpecs.length;
+  document.getElementById('total-tests').textContent = totalTests.toLocaleString();
+  document.getElementById('total-skipped').textContent = totalSkipped.toLocaleString();
+
+  renderList(allSpecs);
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main').style.display = '';
+}
+
+function renderList(specs) {
+  const container = document.getElementById('spec-list');
+  container.innerHTML = '';
+
+  if (specs.length === 0) {
+    document.getElementById('no-results').style.display = '';
+    return;
+  }
+  document.getElementById('no-results').style.display = 'none';
+
+  specs.forEach(spec => {
+    container.appendChild(buildSpecCard(spec));
+  });
+}
+
+function buildSpecCard(spec, highlightText) {
+  const card = document.createElement('div');
+  card.className = 'spec-card';
+  card.dataset.filename = spec.file;
+
+  const lastMod = spec.lastModified ? fmtDateShort(spec.lastModified) : '';
+
+  const header = document.createElement('div');
+  header.className = 'spec-header';
+  header.innerHTML = `
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <span class="spec-filename"><i class="bi bi-file-code me-2 text-secondary"></i>${escHtml(spec.file)}</span>
+      ${lastMod ? `<span class="last-mod-badge"><i class="bi bi-clock me-1"></i>${escHtml(lastMod)}</span>` : ''}
+    </div>
+    <div class="spec-counts">
+      <span class="count-badge cb-total"><i class="bi bi-check2-all"></i>${spec.totalTests || 0}件</span>
+      ${spec.skippedTests > 0 ? `<span class="count-badge cb-skip"><i class="bi bi-skip-forward"></i>skip ${spec.skippedTests}</span>` : ''}
+      <i class="bi bi-chevron-down collapse-icon"></i>
+    </div>
+  `;
+  header.addEventListener('click', () => toggleCard(card, header, body));
+
+  const body = document.createElement('div');
+  body.className = 'test-list';
+  body.style.display = 'none';
+
+  const suites = spec.suites || [];
+  suites.forEach(suite => {
+    if (suite.name) {
+      const div = document.createElement('div');
+      div.className = 'suite-divider';
+      div.textContent = suite.name;
+      body.appendChild(div);
+    }
+    (suite.tests || []).forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'test-item' + (t.skip ? ' skip-item' : '');
+      item.innerHTML = `
+        <span class="ti-num">${escHtml(t.caseNo || '')}</span>
+        <span class="ti-title">${highlightText ? highlight(t.title, highlightText) : escHtml(t.title)}</span>
+        ${t.skip ? '<span class="ti-skip-badge">skip</span>' : ''}
+      `;
+      body.appendChild(item);
+    });
+  });
+
+  card.appendChild(header);
+  card.appendChild(body);
+  return card;
+}
+
+function toggleCard(card, header, body) {
+  const isOpen = body.style.display !== 'none';
+  if (isOpen) {
+    body.style.display = 'none';
+    header.classList.remove('open');
+  } else {
+    body.style.display = '';
+    header.classList.add('open');
+  }
+}
+
+function toggleAll(open) {
+  document.querySelectorAll('.spec-card').forEach(card => {
+    const header = card.querySelector('.spec-header');
+    const body = card.querySelector('.test-list');
+    if (!header || !body) return;
+    if (open) {
+      body.style.display = '';
+      header.classList.add('open');
+    } else {
+      body.style.display = 'none';
+      header.classList.remove('open');
+    }
+  });
+}
+
+// =========================================
+// 検索・フィルタ
+// =========================================
+function filterSpecs(query) {
+  const q = query.trim().toLowerCase();
+
+  if (!q) {
+    renderList(allSpecs);
+    return;
+  }
+
+  // spec名 or テスト名でマッチするものを残す
+  const filtered = allSpecs
+    .map(spec => {
+      if (spec.file.toLowerCase().includes(q)) return spec;
+
+      // テストレベルでフィルタ
+      const filteredSuites = (spec.suites || [])
+        .map(suite => ({
+          ...suite,
+          tests: (suite.tests || []).filter(t => t.title.toLowerCase().includes(q))
+        }))
+        .filter(s => s.tests.length > 0);
+
+      if (filteredSuites.length === 0) return null;
+      return {
+        ...spec,
+        suites: filteredSuites,
+        totalTests: filteredSuites.reduce((s, su) => s + su.tests.length, 0),
+        skippedTests: filteredSuites.reduce((s, su) => s + su.tests.filter(t => t.skip).length, 0),
+      };
+    })
+    .filter(Boolean);
+
+  const container = document.getElementById('spec-list');
+  container.innerHTML = '';
+
+  if (filtered.length === 0) {
+    document.getElementById('no-results').style.display = '';
+    return;
+  }
+  document.getElementById('no-results').style.display = 'none';
+
+  filtered.forEach(spec => {
+    const card = buildSpecCard(spec, q);
+    // フィルタ時は展開済みで表示
+    const body = card.querySelector('.test-list');
+    const header = card.querySelector('.spec-header');
+    if (body && header) {
+      body.style.display = '';
+      header.classList.add('open');
+    }
+    container.appendChild(card);
+  });
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function highlight(text, query) {
+  const escaped = escHtml(text);
+  const escapedQ = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(escapedQ, 'gi'), m => `<mark>${m}</mark>`);
+}
+
+// =========================================
+// 起動
+// =========================================
+loadSpecs();
+</script>
+</body>
+</html>
