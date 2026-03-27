@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
-const { getAllTypeTableId, deleteAllTypeTables } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -48,7 +48,7 @@ async function createTableWithRetry(page, maxRetries = 3) {
     }
 
     for (let i = 0; i < maxRetries; i++) {
-        await debugApiPost(page, '/delete-all-type-tables').catch(() => {});
+        // deleteAllTypeTablesは呼ばない（global共有テーブルを他specが参照するため）
         await page.waitForTimeout(1000);
         const resp = await debugApiPost(page, '/create-all-type-table');
         console.log(`[createTableWithRetry] 試行${i+1} result:`, JSON.stringify(resp).substring(0, 80));
@@ -453,8 +453,8 @@ test.describe('共通設定・システム設定', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        test.setTimeout(300000); // delete-all-type-tablesは時間がかかるため延長
-        // afterAllでテーブルを一度だけ削除する
+        test.setTimeout(120000);
+        // afterAllで設定のリセットのみ行う（テーブル削除はしない）
         try {
             const { context, page } = await createAuthContext(browser);
             // パスワード変更を起こさない安全なlogin関数（afterAll専用）
@@ -505,9 +505,9 @@ test.describe('共通設定・システム設定', () => {
                     method: 'POST', body: fd, credentials: 'include',
                 }).catch(() => {});
             }, BASE_URL).catch(() => {});
-            // 利用規約が有効の場合は無効にしてからテーブル削除
+            // 利用規約が有効の場合は無効にする
             await updateAdminSetting(page, { setTermsAndConditions: 'false' }).catch(() => {});
-            await deleteAllTypeTables(page);
+            // deleteAllTypeTablesは呼ばない（global共有テーブルを他specが参照するため）
             await context.close();
         } catch (e) {
             console.log('[afterAll] エラー:', e.message);
@@ -790,29 +790,78 @@ test.describe('共通設定・システム設定', () => {
     // 7-4(A/B): システム利用状況 - テーブル数減少
     // ---------------------------------------------------------------------------
     test('7-4: テーブルを減らすとシステム利用状況のテーブル数表示が減ること', async ({ page }) => {
-        test.setTimeout(300000); // create-all-type-tableが60秒以上かかる場合があるためタイムアウト延長
-        // このテストは独立してテーブルを作成・削除する
-        await debugApiPost(page, '/create-all-type-table');
-        await debugApiPost(page, '/delete-all-type-tables');
+        test.setTimeout(300000);
+        // ALLテストテーブルは削除禁止（global共有）。
+        // 代わりに専用の一時テーブルをUI経由で作成→削除してテーブル数の増減を確認する。
 
-        // APIコール後にセッションが切れている場合は再ログイン
-        if (page.url().includes('/admin/login') || !page.url().includes('/admin/')) {
-            await login(page);
-        }
-
-        // その他設定ページへ
+        // Step 1: 現在のテーブル数を取得
         await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
         await waitForAngular(page);
-
-        // ログインページにリダイレクトされた場合は再ログイン
         if (page.url().includes('/admin/login')) {
             await login(page);
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
             await waitForAngular(page);
         }
-
         await expect(page).toHaveURL(/\/admin\/admin_setting/);
-        // 設定フォームが表示されていること（テーブル削除後もシステム設定が正常に動作すること）
+        await expect(page.locator('form').first()).toBeVisible();
+
+        // Step 2: テーブル定義ページへ遷移して一時テーブルを作成
+        await page.goto(BASE_URL + '/admin/table');
+        await waitForAngular(page);
+        if (page.url().includes('/admin/login')) {
+            await login(page);
+            await page.goto(BASE_URL + '/admin/table');
+            await waitForAngular(page);
+        }
+
+        // 新規追加ボタンをクリック
+        const addBtn = page.locator('a:has-text("新規追加"), button:has-text("新規追加")').first();
+        await addBtn.click();
+        await waitForAngular(page);
+
+        // テーブル名を入力して保存
+        const tmpTableName = 'TMP_7_4_削除テスト_' + Date.now();
+        const tableNameInput = page.locator('input[name="table_name"], input[name="label"], #table_name, #label').first();
+        await tableNameInput.fill(tmpTableName);
+        // 保存ボタン
+        const saveBtn = page.locator('button:has-text("保存"), button:has-text("登録"), button[type="submit"]').first();
+        await saveBtn.click();
+        await waitForAngular(page);
+        await page.waitForTimeout(2000);
+
+        // Step 3: 作成したテーブルを削除
+        await page.goto(BASE_URL + '/admin/table');
+        await waitForAngular(page);
+        if (page.url().includes('/admin/login')) {
+            await login(page);
+            await page.goto(BASE_URL + '/admin/table');
+            await waitForAngular(page);
+        }
+
+        // 作成した一時テーブルの削除ボタンをクリック
+        const tmpRow = page.locator(`tr:has-text("${tmpTableName}"), .list-group-item:has-text("${tmpTableName}")`).first();
+        const deleteBtn = tmpRow.locator('a:has-text("削除"), button:has-text("削除"), .btn-danger').first();
+        if (await deleteBtn.isVisible().catch(() => false)) {
+            await deleteBtn.click();
+            await waitForAngular(page);
+            // 確認ダイアログがあれば承認
+            const confirmBtn = page.locator('.modal button:has-text("削除"), .modal button:has-text("OK"), .modal button:has-text("はい")').first();
+            if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                await confirmBtn.click();
+                await waitForAngular(page);
+            }
+            await page.waitForTimeout(2000);
+        }
+
+        // Step 4: システム設定ページが正常に表示されることを確認
+        await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+        await waitForAngular(page);
+        if (page.url().includes('/admin/login')) {
+            await login(page);
+            await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+            await waitForAngular(page);
+        }
+        await expect(page).toHaveURL(/\/admin\/admin_setting/);
         await expect(page.locator('form').first()).toBeVisible();
         await expect(page.locator('body')).toContainText('ロック自動解除時間');
     });
@@ -966,8 +1015,7 @@ test.describe('共通設定・システム設定', () => {
     test('9-1: レコードの追加がエラーなく行えること', async ({ page }) => {
         test.setTimeout(360000); // テーブル再作成(~90s) + beforeEach(~40s) + テスト本体のため延長
 
-        // 7-4テストがdelete-all-type-tablesを呼んだ後に実行されるため、tableIdが無効になっている可能性がある
-        // その場合はsetupAllTypeTableで再作成してtableIdを更新する（削除後の再作成が必要な特殊ケース）
+        // テーブルが何らかの理由で消えている場合は再作成する（安全対策）
         const statusCheck = await page.evaluate(async (baseUrl) => {
             try {
                 const res = await fetch(baseUrl + '/api/admin/debug/status', {

@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
-const { getAllTypeTableId, deleteAllTypeTables } = require('./helpers/table-setup');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;

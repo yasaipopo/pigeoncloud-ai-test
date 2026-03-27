@@ -21,6 +21,16 @@ cat .claude/knowledge-e2e-angular.md
 
 調査で新しい知見が得られたら、作業終了前に必ず該当ファイルに追記すること。
 
+## 【絶対守るルール】テスト設計
+
+1. **ALLテストテーブルは global-setup で1回だけ作成**。各specは `getAllTypeTableId` でID取得のみ。`setupAllTypeTable` は各specから呼ばない。
+2. **テスト途中で `deleteAllTypeTables` を呼ばない**（他specが同じテーブルを使う）。テーブル削除テストは専用の一時テーブルで。
+3. **`browser.newPage()` 禁止** → `createAuthContext(browser)` を使う（storageState必須）。
+4. **MCP Playwright (`mcp__playwright__*`) で実UI確認してからコードを書く**。
+5. **テスト間のデータ状態に依存しない**。各テストが必要なデータは自身のsetupで作成。
+6. **Laddaボタン**: `setInputFiles` 後に `dispatchEvent(new Event('change'))` を手動発火。
+7. **CSVアップロードは非同期**。結果は `/admin/csv` 履歴ページで確認。
+
 ---
 
 ## あなたの役割

@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { getAllTypeTableId, deleteAllTypeTables, createAllTypeData } = require('./helpers/table-setup');
+const { getAllTypeTableId, createAllTypeData } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
 const path = require('path');
@@ -105,11 +105,10 @@ async function debugApiPost(page, path, body = {}) {
  * @returns {Promise<string>} 作成されたテーブルのURL（例: /admin/dataset__7）
  */
 async function setupTestTable(page) {
-    // 既存のALLテストテーブルをすべて削除（データが別テーブルに入る問題を防ぐ）
-    await debugApiPost(page, '/delete-all-type-tables', {});
-    await page.waitForTimeout(1000);
+    // global共有テーブルは削除しない（他specが参照するため）
+    // テーブルが存在しない場合のみ作成する
 
-    // テーブル作成（504でもバックエンドは処理継続するため、ポーリングで完了確認）
+    // テーブル作成（既存テーブルがある場合はスキップされる。504でもバックエンドは処理継続するため、ポーリングで完了確認）
     debugApiPost(page, '/create-all-type-table', {}).catch(() => {});
 
     // テーブル作成完了をポーリングで確認（最大300秒）
@@ -169,14 +168,10 @@ async function setupTestTable(page) {
 }
 
 /**
- * ALLテストテーブルを全削除する（teardown用）
+ * teardown: global共有テーブルは削除しない（テナントごと破棄される）
  */
 async function teardownTestTable(page) {
-    try {
-        await debugApiPost(page, '/delete-all-type-tables', {});
-    } catch (e) {
-        // teardownエラーは無視
-    }
+    // no-op: ALLテストテーブルの削除は禁止（他specが参照するため）
 }
 
 /**

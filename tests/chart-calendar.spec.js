@@ -339,18 +339,29 @@ async function ensureSummarizeGrant(page) {
         return;
     }
 
-    // summarize権限が無い場合: テーブル再作成でgrant設定をリセット
-    console.warn('[ensureSummarizeGrant] summarize権限が不足 — テーブルを再作成してgrant設定をリセットします');
-    await deleteAllTypeTables(page);
-    // 削除完了を待つ
-    await page.waitForTimeout(3000);
-    const recreateRes = await createAllTypeTable(page);
-    if (recreateRes.result !== 'success') {
-        throw new Error('[ensureSummarizeGrant] テーブル再作成に失敗しました');
-    }
-    await createAllTypeData(page, 10);
+    // summarize権限が無い場合: global共有テーブルは削除禁止のため、
+    // grant設定をAPI経由で直接修正する
+    console.warn('[ensureSummarizeGrant] summarize権限が不足 — grant設定のリセットを試みます');
 
-    // 再作成後に再度確認
+    // debug APIでgrant設定をリセットする（テーブル再作成せずに権限を修正）
+    const grantResetResult = await page.evaluate(async (baseUrl) => {
+        // create-all-type-tableを呼ぶと既存テーブルのgrant設定も再設定される（テーブルが既に存在する場合は再作成せずgrantのみ更新）
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/create-all-type-table', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({}),
+                credentials: 'include',
+            });
+            return await res.json().catch(() => ({ result: 'timeout' }));
+        } catch (e) {
+            return { error: e.message };
+        }
+    }, BASE_URL);
+    console.log('[ensureSummarizeGrant] grant再設定結果:', JSON.stringify(grantResetResult));
+    await page.waitForTimeout(3000);
+
+    // 再設定後に再度確認
     await navigateToAllTypeTable(page);
     await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
     const buttons2 = await page.locator('button.dropdown-toggle').all();

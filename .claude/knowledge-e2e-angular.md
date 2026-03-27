@@ -1,4 +1,6 @@
-# E2Eテスト 知見（Angular・エージェント体制）
+# E2Eテスト 知見（Angular・エージェント体制・テスト設計ルール）
+
+最終更新: 2026-03-28
 
 ---
 
@@ -6,12 +8,14 @@
 
 | キャラ | スキル | 役割 |
 |---|---|---|
+| **リーダー** | `/e2e` | パイプライン全体管理。TEST_NUMBER管理、agent起動、結果集計、シート更新、通知 |
 | **テスト作成君** | `/spec-create` | spec.jsを設計・修正する。MCP Playwrightで実UIを確認してからコードを書く。怒りくんのOKなしにコミット禁止。 |
 | **怒りくん** | `/check-specs` | テスト品質チェック。タイトルと実装の一致、早期return、スキップを厳格に判定。NG→テスト作成君に差し戻し。 |
-| **チェックくん** | — | テスト作成君が完了したspec.jsを、実際にPlaywrightで実行して問題なく動くかチェック。failedテストはPigeonCloudのソースを読んで「specバグ／プロダクトバグ／環境依存」に振り分ける。 |
+| **チェックくん** | `/check-run` | Playwright実行確認 + failedをPigeonCloudソースと照合してspecバグ/プロダクトバグ/環境依存に振り分け。 |
+| **詳細調査くん** | — | タイムアウト等の根本原因をCloudWatch/ECS/RDS/ソースコードから調査。 |
 
 ```
-テスト作成君がspec.jsを修正
+テスト作成君がspec.jsを修正（MCP Playwrightで実UI確認必須）
   → 怒りくんがレビュー（コード品質）
     → ✅ OK → チェックくんがPlaywright実行で動作確認
       → ✅ PASS → コミット
@@ -21,61 +25,92 @@
 
 ---
 
-作成: 2026-03-27
+## 【最重要】テスト設計ルール
 
----
+### ルール1: ALLテストテーブルは global-setup で1回だけ作成
 
-## 知見1: beforeAll で browser.newPage() を使うと storageState が効かない
+```
+global-setup.js → ensureAllTypeTable() → テーブル作成（1回だけ）
+各spec.js → getAllTypeTableId(page) → ID取得のみ（作成しない）
+```
 
-### 問題
+**禁止事項:**
+- ❌ 各specのbeforeAllで `setupAllTypeTable()` を呼ぶ（global-setupの責務）
+- ❌ テスト途中で `deleteAllTypeTables()` を呼ぶ（他specが同じテーブルを使う）
+- ❌ afterAllで `deleteAllTypeTables()` を呼ぶ（後続specが影響を受ける）
+
+**テーブル削除テストが必要な場合:**
+- 専用の一時テーブルを作成→削除する（ALLテストテーブルは触らない）
+
+### ルール2: browser.newPage() ではなく createAuthContext(browser) を使う
+
 ```javascript
-// ❌ 悪いパターン: browser.newPage() は cookies/localStorage が空
-test.beforeAll(async ({ browser }) => {
-    const page = await browser.newPage();
-    await login(page);  // ←ログイン必要
+// ❌ 悪いパターン
+const page = await browser.newPage(); // storageStateが効かない
+
+// ✅ 良いパターン
+const { createAuthContext } = require('./helpers/auth-context');
+const { context, page } = await createAuthContext(browser);
+// ... 処理 ...
+await context.close();
+```
+
+### ルール3: テスト間のデータ状態に依存しない
+
+- 各テストは**他のテストが作成/変更/削除したデータに依存しない**設計にする
+- テストが必要なデータは**そのテスト自身のsetupで作成**する
+- ALLテストテーブルのレコード件数を前提にしない（他テストが追加/削除する可能性）
+
+### ルール4: MCP Playwright で実UI確認してからコードを書く
+
+テスト作成君は必ず：
+1. `mcp__playwright__browser_navigate` で対象ページを開く
+2. `mcp__playwright__browser_snapshot` でDOM構造を確認
+3. セレクター・ボタン名・URL遷移を確認してからspec.jsに書く
+
+### ルール5: Laddaボタンのdisabled対策
+
+`[ladda]='sending'` バインディングがボタンにdisabled属性を付与する。
+`setInputFiles` では Angular の change イベントが発火しない場合がある。
+
+```javascript
+// ファイル選択後にchangeイベントを手動ディスパッチ
+await page.setInputFiles('input[type=file]', filePath);
+await page.evaluate(() => {
+    document.querySelector('input[type=file]').dispatchEvent(new Event('change', { bubbles: true }));
 });
 ```
 
-### 原因
-- `test({ page })` で渡されるページは `playwright.config.js` の `use.storageState` が適用される
-- `browser.newPage()` はその設定が**無視**される → Angular の初期化が失敗しやすい
-- storageState には cookies（PHPSESSID, browser_token）と localStorage（admin_table）が必要
+### ルール6: CSVアップロードは非同期処理
 
-### 正しい書き方
-```javascript
-// ✅ 良いパターン: newContext で storageState を明示的に渡す
-test.beforeAll(async ({ browser }) => {
-    const fs = require('fs');
-    const agentNum = process.env.AGENT_NUM || '1';
-    const authStatePath = `.auth-state.${agentNum}.json`;
-    const context = await browser.newContext(
-        fs.existsSync(authStatePath) ? { storageState: authStatePath } : {}
-    );
-    const page = await context.newPage();
-    // ログイン不要 — storageState で認証済み
-    await page.goto(BASE_URL + '/admin/dashboard');
-    await waitForAngular(page);
-    // ... setup処理 ...
-    await context.close();  // page.close() ではなく context.close()
-});
-```
+PigeonCloudのCSVアップロードは非同期（S3→キュー→バックグラウンド処理）。
+モーダル内にエラーは表示されない。結果は `/admin/csv`（CSV UP/DL履歴）で確認する。
 
 ---
 
-## 知見2: Angular Reactive Forms ([formControl]) に fill() が効かない
+## インフラ知見
 
-### 問題
-```javascript
-// ❌ 悪いパターン: Angular FormControl には値が入らない
-await page.fill('#new_password', 'NewPass9876!');
-// → ng-pristine のままで送信時バリデーションエラー
-```
+### ALB idle_timeout = 60秒
+- `create-all-type-table` APIは60秒超えるため504が返る
+- バックエンドは処理を継続するが、フロントはエラーを受け取る
+- 対策: global-setupでfire-and-forget + ポーリング待機
 
-### 原因
-Angular の `[formControl]` / `[(ngModel)]` はネイティブDOMイベントを監視するが、
-Playwright の `fill()` は React/Angular のイベント処理と相性が悪い場合がある。
+### RDSがボトルネック
+- ECS CPU: 平均4%（I/Oバウンド）
+- RDS CPU: テスト集中時に45%まで上昇
+- 97フィールドのVIEW作成/JOINクエリが重い
+- 対策: テーブル作成を1回に集約（global-setup）、中期でフィールド数軽量化
 
-### 正しい書き方（2通り）
+### ECS Auto Scaling
+- CPUベース（しきい値55%）だがCPUが上がらないためスケールアウトしない
+- Web: Max=2, 現在1タスク / Queue: Max=3
+- PHPはI/Oバウンドのため、リクエスト数ベースのスケーリングが適切
+
+---
+
+## Angular固有の知見
+
+### 知見1: Reactive Forms ([formControl]) に fill() が効かない場合
 
 **方法A: Native Input Value Setter（確実）**
 ```javascript
@@ -88,32 +123,9 @@ await page.evaluate((value) => {
 }, 'テストDB_12345');
 ```
 
-**方法B: ng.getComponent で直接 setValue（Angular専用）**
+### 知見2: チュートリアルモーダル
+新しいテスト環境で `/admin/dashboard` を開くと「テンプレートからインストール」モーダルが自動表示される。
 ```javascript
-await page.evaluate(() => {
-    const el = document.querySelector('[ng-version]') || document.querySelector('app-root');
-    // Angularコンポーネントを探してFormControlに直接setValue
-    const comp = ng.getComponent(el);
-    if (comp && comp.myForm) {
-        comp.myForm.controls['new_password'].setValue('NewPass9876!');
-    }
-});
-```
-
----
-
-## 知見3: チュートリアルモーダルが初回訪問時に自動表示される
-
-### 問題
-新しいテスト環境で `/admin/dashboard` を開くと「テンプレートからインストール」モーダルが表示され、
-次の操作（+ ボタンクリック等）が失敗する。
-
-### 原因
-PigeonCloud はテナント作成後の初回ダッシュボード訪問でチュートリアルモーダルを表示する。
-
-### 対処
-```javascript
-// ダッシュボードページでtutorialモーダルが出たら閉じる
 const hasTutorial = await page.locator('.modal.show')
     .filter({ hasText: 'テンプレートからインストール' })
     .isVisible({ timeout: 3000 }).catch(() => false);
@@ -124,77 +136,29 @@ if (hasTutorial) {
 }
 ```
 
----
+### 知見3: /admin/add/xxx は PHP に届かない
+Nginx: `/api/` → PHP、`/` → Angular SPA。API呼び出しは `/api/admin/` プレフィックスを使う。
 
-## 知見4: ダッシュボード作成の + ボタンは `.dashboard-tab-add-btn`
+### 知見4: パスワード変更フロー
+`password_changed='false'` + `ignore_new_pw_input='false'` でフォーム表示。
+`create-user` レスポンスに `id` が含まれる（list/admin不要）。
 
-### UI情報（2026-03-27確認）
-- タブリスト: `[role=tablist]` → 複数ある場合は `.filter({ hasText: 'HOME' })` で絞り込む
-- + ボタン: `button.dashboard-tab-add-btn`
-- 作成モーダルの入力欄: `input#name`（edit.component.htmlのフォーム）
-- 送信ボタン: `button.btn-primary.btn-ladda`（Laddaがinit後は `.ladda-button` も付く）
-
-### 注意
-- `input#name` は tutorialModal の中にはない（tutorialModal は `input` を持たない）
-- `btn-ladda` はHTMLソースの class、`ladda-button` はLadda JSがinit時に付与するclass
-- 両方に対応: `button.btn-primary.ladda-button, button.btn-primary.btn-ladda`
-
----
-
-## 知見5: /admin/add/dashboards/ は PHP に届かない
-
-### 問題
-```javascript
-// ❌ fetch で直接API呼び出ししても Angular HTML が返ってくる
-const res = await fetch(BASE_URL + '/admin/add/dashboards/', { method: 'POST', ... });
-// → Nginx が / → angular_app にルーティングするため
+### 知見5: create-user のレスポンス
+```json
+{"result":"success","id":4,"success":true,"email":"ishikawa+4@loftal.jp","password":"admin"}
 ```
-
-### 原因
-- Nginx の設定: `/api/` → PHP backend、`/` → Angular SPA
-- Angular の API 呼び出しは `http://takasaki-hanahanastreet.com` (別ドメイン) に送信される
-  （`environment.prod.ts`: `api_url: 'http://takasaki-hanahanastreet.com'`）
-- テスト環境から直接 `/admin/add/xxx` にfetchしても Angular index.html が返る
-
-### 正しいアプローチ
-- **UIで操作する**（ボタンクリック → Angularが別ドメインに送信）
-- または **`/api/admin/` プレフィックスのAPIを使う**（これはPHPに届く）
+`id` フィールドで直接ユーザーIDを取得可能。
 
 ---
 
-## 知見6: パスワード変更フロー（295テスト）の条件
+## debug API一覧
 
-### Angular の条件（login-base.component.ts）
-```typescript
-if ((!_user.password_changed && this.userinfo['ignore_new_pw_input'] == 'false') || ...)
-```
-
-パスワード変更フォームが表示される条件:
-1. `admin` テーブルの `password_changed = 'false'`（DBはstring）
-2. `admin_setting` テーブルの `ignore_new_pw_input = 'false'`
-
-### debug API での設定方法
-```javascript
-// 1. ignore_new_pw_input を false に
-await fetch(BASE_URL + '/api/admin/debug/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-    body: JSON.stringify({ table: 'admin_setting', data: { ignore_new_pw_input: 'false' } }),
-    credentials: 'include',
-});
-
-// 2. create-user でユーザー作成（レスポンスに id が含まれる）
-// レスポンス: {"result":"success","id":4,"success":true,"email":"ishikawa+4@loftal.jp","password":"admin"}
-// → create-user は password_changed='true' で作成するため、edit/admin/{id} で変更が必要
-
-// 3. edit/admin/{id} で password_changed='false' に変更
-await fetch(BASE_URL + '/api/admin/edit/admin/' + userId, {
-    method: 'POST',
-    body: JSON.stringify({ id: String(userId), name: email, email, password_changed: 'false', ... }),
-    credentials: 'include',
-});
-```
-
-### ハマりポイント
-- `create-user` のレスポンスには `id` フィールドが含まれる → `list/admin` で検索不要
-- `edit/admin/{id}` に `type` や `state` を含めると権限エラーになる場合がある → 除外すること
+| エンドポイント | 用途 |
+|---|---|
+| `POST /api/admin/debug/create-all-type-table` | ALLテストテーブル作成（重い、60秒超） |
+| `POST /api/admin/debug/delete-all-type-tables` | ALLテストテーブル全削除 |
+| `POST /api/admin/debug/create-all-type-data` | テストデータ投入 |
+| `GET /api/admin/debug/status` | 環境ステータス（テーブル一覧含む） |
+| `POST /api/admin/debug/create-user` | テストユーザー作成 |
+| `POST /api/admin/debug/settings` | admin_setting/setting テーブル更新 |
+| `POST /api/admin/create-trial` | テスト環境（テナント）作成。`with_all_type_table: true` でテーブル同時作成（staging要デプロイ） |

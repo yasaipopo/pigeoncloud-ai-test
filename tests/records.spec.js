@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { getAllTypeTableId, deleteAllTypeTables, createAllTypeData } = require('./helpers/table-setup');
+const { getAllTypeTableId, createAllTypeData } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
 const path = require('path');

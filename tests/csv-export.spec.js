@@ -1110,24 +1110,8 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
     });
 
     // =========================================================================
-    // クリーンアップ: テーブルを削除
+    // クリーンアップ: 不要（global共有テーブルはテナントごと破棄される）
     // =========================================================================
-    test('クリーンアップ: ALLタイプテーブルを削除', async ({ page }) => {
-        await login(page, EMAIL, PASSWORD);
-        await closeTemplateModal(page);
-
-        const result = await debugApiPost(page, '/delete-all-type-tables');
-        console.log('クリーンアップ結果:', JSON.stringify(result));
-
-        // 削除APIが成功したことを確認（result: 'success' または timeout(サーバー側処理完了)）
-        expect(result).toBeTruthy();
-        const isSuccess = result.result === 'success' || result.result === 'timeout' || result.success === true;
-        expect(isSuccess).toBe(true);
-
-        // ページが正常に表示されていることを確認
-        await expect(page.locator('.navbar')).toBeVisible();
-        console.log('クリーンアップ完了');
-    });
 });
 
 // =============================================================================
