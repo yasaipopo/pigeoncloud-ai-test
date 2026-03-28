@@ -136,7 +136,7 @@ module.exports = async function globalSetup() {
         pad(now.getHours()), pad(now.getMinutes()), pad(now.getSeconds()),
     ].join('');
 
-    const domain   = `tmptestai${dateStr}${agentNum}`;
+    const domain   = `t${Date.now()}${agentNum}`;
     // ADMIN_BASE_URL から base ドメインを抽出（pigeon-demo.com or pigeon-cloud.com）
     const adminHost = adminBaseUrl.replace(/^https?:\/\/[^.]+\./, '');
     const newUrl    = `https://${domain}.${adminHost}`;
@@ -162,15 +162,15 @@ module.exports = async function globalSetup() {
         // create-trial API を page.evaluate(fetch) で呼び出し
         // page.request.post() はCSRFトークンが含まれず CLIENT ADD ERROR になるため
         let actualUrl, newPassword;
-        const result = await page.evaluate(async ({ url, dom }) => {
-            const r = await fetch(url + '/api/admin/create-trial', {
+        const result = await page.evaluate(async (dom) => {
+            const r = await fetch('/api/admin/create-trial', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({ domain: dom, email: 'admin', with_all_type_table: true }),
+                body: JSON.stringify({ domain: dom, email: 'admin' }),
                 credentials: 'include',
             });
             return r.json();
-        }, { url: adminBaseUrl, dom: domain });
+        }, domain);
         console.log(`[global-setup] create-trial API 応答:`, JSON.stringify(result));
 
         if (!result.url || !result.pw) {
