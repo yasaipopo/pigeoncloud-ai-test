@@ -4,43 +4,101 @@ base_url: '{{ TEST_BASE_URL }}'
 cases:
 - case_no: RPA-01
   feature: RPA
-  description: |
-    コネクト管理画面が正常に表示されること
-  expected: |
-    エラーなくページが正常に表示されること
+  description: 'コネクト管理画面が正常に表示されること
+
+    '
+  expected: 'エラーなくページが正常に表示されること
+
+    '
   movie: RA01
 - case_no: RPA-02
   feature: RPA
-  description: |
-    新しいコネクト（RPA）を作成できること
-  expected: |
-    新しいコネクト（RPA）を作成できること
+  description: '新しいコネクト（RPA）を作成できること
+
+    '
+  expected: '新しいコネクト（RPA）を作成できること
+
+    '
   movie: RA01
 - case_no: RPA-03
   feature: RPA
-  description: |
-    コネクト（RPA）フロー編集画面が表示されること
-  expected: |
-    コネクト（RPA）フロー編集画面が表示されること
+  description: 'コネクト（RPA）フロー編集画面が表示されること
+
+    '
+  expected: 'コネクト（RPA）フロー編集画面が表示されること
+
+    '
   movie: RA01
 - case_no: RPA-04
   feature: RPA
-  description: |
-    コネクト一覧のテーブルヘッダーが正しいこと
-  expected: |
-    コネクト一覧のテーブルヘッダーが正しいこと
+  description: 'コネクト一覧のテーブルヘッダーが正しいこと
+
+    '
+  expected: 'コネクト一覧のテーブルヘッダーが正しいこと
+
+    '
   movie: RA01
 - case_no: RPA-05
   feature: RPA
-  description: |
-    コネクト一覧の今月使用量が表示されること
-  expected: |
-    コネクト一覧の今月使用量が表示されること
+  description: 'コネクト一覧の今月使用量が表示されること
+
+    '
+  expected: 'コネクト一覧の今月使用量が表示されること
+
+    '
   movie: RA01
 - case_no: RPA-06
   feature: RPA
-  description: |
-    コネクト実行ログページへ遷移できること
-  expected: |
-    コネクト実行ログページへ遷移できること
+  description: 'コネクト実行ログページへ遷移できること
+
+    '
+  expected: 'コネクト実行ログページへ遷移できること
+
+    '
   movie: RA01
+- case_no: '603'
+  sheet: B
+  feature: コネクト
+  description: '①コネクトでトリガー「WF完了」を設定し、コピー先テーブルに重複禁止フィールドを設定する
+
+    ②WFの承認を完了させる
+
+    ③重複データの場合、適切なエラーメッセージが表示されることを確認する（[object object]が表示されないこと）
+
+    ④画面がローディングのまま固まらないことを確認する'
+  expected: コネクトのWF完了トリガーでコピー先の重複禁止エラー時に適切なエラーメッセージが表示され、画面が固まらないこと
+  movie: UC10
+- case_no: '609'
+  sheet: B
+  feature: FTP連携
+  description: '①FTP連携を設定し、実行する
+
+    ②FTP処理で「失敗」または「一部成功」が発生した場合のエラー通知を確認する
+
+    ③どのテーブルで発生したエラーかが通知に含まれていることを確認する'
+  expected: FTP処理の失敗・一部成功時にどのテーブルのエラーかが通知に含まれること
+  movie: UC10
+- case_no: '672'
+  sheet: B
+  feature: RPA実行履歴
+  description: '①RPA実行画面を開く
+
+    ②RPAを設定・実行する
+
+    ③RPA実行履歴画面（/admin/rpa_executes）で実行結果が正しく表示されることを確認する'
+  expected: RPA実行後、実行履歴画面に実行結果が正しく記録・表示されること
+  movie: UC13
+- case_no: '789'
+  sheet: B
+  feature: RPAビュー・編集
+  description: '①RPAビュー画面（/admin/rpa/view/）を開く
+
+    ②RPA設定が正しく表示されることを確認する
+
+    ③RPA編集画面（/admin/rpa/edit/）を開く
+
+    ④設定を変更して保存する
+
+    ⑤変更内容が正しく反映されていることを確認する'
+  expected: RPAのビュー表示と編集・保存が正常に動作すること
+  movie: UC20

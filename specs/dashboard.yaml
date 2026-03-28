@@ -4,43 +4,67 @@ base_url: '{{ TEST_BASE_URL }}'
 cases:
 - case_no: DB-01
   feature: ダッシュボード
-  description: |
-    ダッシュボード画面が正常に表示されること
-  expected: |
-    エラーなくページが正常に表示されること
+  description: 'ダッシュボード画面が正常に表示されること
+
+    '
+  expected: 'エラーなくページが正常に表示されること
+
+    '
   movie: DB01
 - case_no: DB-02
   feature: ダッシュボード
-  description: |
-    新しいダッシュボードタブを作成できること
-  expected: |
-    新しいダッシュボードタブを作成できること
+  description: '新しいダッシュボードタブを作成できること
+
+    '
+  expected: '新しいダッシュボードタブを作成できること
+
+    '
   movie: DB01
 - case_no: DB-03
   feature: ダッシュボード
-  description: |
-    ダッシュボードにビューコンテンツを追加できること
-  expected: |
-    ダッシュボードにビューコンテンツを追加できること
+  description: 'ダッシュボードにビューコンテンツを追加できること
+
+    '
+  expected: 'ダッシュボードにビューコンテンツを追加できること
+
+    '
   movie: DB01
 - case_no: DB-04
   feature: ダッシュボード
-  description: |
-    ダッシュボードに掲示板コンテンツを追加できること
-  expected: |
-    ダッシュボードに掲示板コンテンツを追加できること
+  description: 'ダッシュボードに掲示板コンテンツを追加できること
+
+    '
+  expected: 'ダッシュボードに掲示板コンテンツを追加できること
+
+    '
   movie: DB01
 - case_no: DB-05
   feature: ダッシュボード
-  description: |
-    ダッシュボードタブを削除できること
-  expected: |
-    ダッシュボードタブを削除できること
+  description: 'ダッシュボードタブを削除できること
+
+    '
+  expected: 'ダッシュボードタブを削除できること
+
+    '
   movie: DB01
 - case_no: DB-06
   feature: ダッシュボード
-  description: |
-    デフォルトダッシュボード（HOMEタブ）が表示されること
-  expected: |
-    デフォルトダッシュボード（HOMEタブ）が表示されること
+  description: 'デフォルトダッシュボード（HOMEタブ）が表示されること
+
+    '
+  expected: 'デフォルトダッシュボード（HOMEタブ）が表示されること
+
+    '
   movie: DB01
+- case_no: '806'
+  sheet: B
+  feature: ダッシュボード集計
+  description: '①ダッシュボードに集計ウィジェットを配置する
+
+    ②ダッシュボード上で集計結果の並び替えボタンを確認する
+
+    ③並び替えボタンをクリックする
+
+    ④集計結果が正しく並び替えられることを確認する'
+  expected: ダッシュボードに配置した集計結果の並び替えが正常に動作すること
+  movie: UC21

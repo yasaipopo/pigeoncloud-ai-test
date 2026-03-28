@@ -34,44 +34,48 @@ cases:
   sheet: A
   feature: その他設定
   category: 新規ユーザーログイン時のパスワードリセット
-  description: |-
-    ①「その他設定」より「新規ユーザーのログイン時のパスワードリセットをOFFにする」にチェックを入れて「更新」ボタンをクリック
+  description: '①「その他設定」より「新規ユーザーのログイン時のパスワードリセットをOFFにする」にチェックを入れて「更新」ボタンをクリック
+
 
     ②新規ユーザーを作成
 
-    ③新規ユーザーでログイン
+
+    ③新規ユーザーでログイン'
   expected: 新規ユーザーで初回ログイン時、パスワード変更が画面が表示されないこと。
   movie: SS01
 - case_no: 24-2
   sheet: A
   feature: その他設定
   category: 新規ユーザーログイン時のパスワードリセット
-  description: |-
-    ①「その他設定」より「新規ユーザーのログイン時のパスワードリセットをOFFにする」にチェックを入れずに「更新」ボタンをクリック
+  description: '①「その他設定」より「新規ユーザーのログイン時のパスワードリセットをOFFにする」にチェックを入れずに「更新」ボタンをクリック
+
 
     ②新規ユーザーを作成
 
-    ③新規ユーザーでログイン
+
+    ③新規ユーザーでログイン'
   expected: 新規ユーザーで初回ログイン時、パスワード変更が画面が表示されること。
   movie: SS01
 - case_no: 58-1
   sheet: A
   feature: その他設定
   category: ログイン時に利用規約を表示する
-  description: |-
-    ①「その他設定」より、「初回ログイン時に利用規約を表示する」の有効にチェックを入れ「更新」ボタンをクリック。
+  description: '①「その他設定」より、「初回ログイン時に利用規約を表示する」の有効にチェックを入れ「更新」ボタンをクリック。
+
     ②「マスターユーザー」でログインする。
-    ③「通常ユーザー」でログインする。
+
+    ③「通常ユーザー」でログインする。'
   expected: マスターユーザー／通常ユーザーともにログイン時に利用規約が表示されること。
   movie: SS01
 - case_no: 58-2
   sheet: A
   feature: その他設定
   category: ログイン時に利用規約を表示しない
-  description: |-
-    ①「その他設定」より、「初回ログイン時に利用規約を表示する」の有効にチェックを外し「更新」ボタンをクリック。
+  description: '①「その他設定」より、「初回ログイン時に利用規約を表示する」の有効にチェックを外し「更新」ボタンをクリック。
+
     ②「マスターユーザー」でログインする。
-    ③「通常ユーザー」でログインする。
+
+    ③「通常ユーザー」でログインする。'
   expected: マスターユーザー／通常ユーザーともにログイン時に利用規約が表示されなくなること。
   movie: SS01
 - case_no: 7-1
@@ -189,32 +193,41 @@ cases:
 - case_no: 130-01
   sheet: B
   feature: 契約設定
-  category: |-
-    Paypal支払い
-    ※機能変更に伴い本テスト不要
-  description: |-
-    ①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET PAYMENT DONE」が表示されることを確認する。
+  category: 'Paypal支払い
+
+    ※機能変更に伴い本テスト不要'
+  description: '①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET PAYMENT DONE」が表示されることを確認する。
+
     →契約設定がリセットされる事を確認する。
+
     ② メニューより、「契約設定」→「Paypalサブスクリプション登録」を選択する。
+
     ③PaypalではID/パスワードはテスト用の以下にて手続きを進める。
-    　ID：ishikawa-buyer@loftal.jp ／password:testtest
+
+    　ID：ishikawa-buyer@loftal.jp ／password:testtest'
   expected: 契約が問題なく完了すること。
   movie: SS05
 - case_no: 131-02
   sheet: B
   feature: 契約設定
-  category: |-
-    カード支払い
-    ※機能変更に伴い本テスト不要
-  description: |-
-    ①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET PAYMENT DONE」が表示されることを確認する。
+  category: 'カード支払い
+
+    ※機能変更に伴い本テスト不要'
+  description: '①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET PAYMENT DONE」が表示されることを確認する。
+
     →契約設定がリセットされる事を確認する。
+
     ② メニューより、「契約設定」→「デビットカードまたはクレジットカード」を選択する。
+
     ③「国地域」→「日本」、「カード」を選択する。
+
     ④カード番号にはVISAを選択し、カード番号は以下サイトより取得したテスト用のカード番号を利用する。
+
     　https://www.getcreditcardnumbers.com/
+
     ⑤その他、情報についてはテスト用に自由に登録し、「PayPalアカウントを作成しますか? (すぐに完了します。)」は「いいえ」を選択し、「同意して定期購入」をクリックする。
-    　※(注)カードの有効期限については未来日付にすること。
+
+    　※(注)カードの有効期限については未来日付にすること。'
   expected: 契約が問題なく完了すること。
   movie: SS05
 - case_no: 284-1
@@ -229,18 +242,24 @@ cases:
   sheet: B
   feature: その他設定
   category: パスワードの定期変更を促す機能
-  description: |-
-    ①その他設定より、「パスワード強制変更画面表示の間隔日数」を1と設定して保存する。
+  description: '①その他設定より、「パスワード強制変更画面表示の間隔日数」を1と設定して保存する。
+
     　
+
     　※その他設定の他設定箇所は以下の通り設定する。
+
     　　・「二段階認証を有効にする」　有効
+
     　　・「新規ユーザーのログイン時のパスワードリセットをOFFにする」　有効
+
     　　・初回ログイン時に利用規約を表示する　有効
+
     　　・通知の送信メールアドレスをSMTPで指定　無効
-    　　・ロック自動解除時間(分)　5分
-  expected: |-
-    設定通りの処理となること。
-    また、他の「その他設定」の設定項目へ無影響であることを確認する。
+
+    　　・ロック自動解除時間(分)　5分'
+  expected: '設定通りの処理となること。
+
+    また、他の「その他設定」の設定項目へ無影響であることを確認する。'
   movie: SS01
 - case_no: 9-2
   sheet: B
@@ -261,331 +280,481 @@ cases:
   feature: 共通設定
   category: レコード
   description: 帳票登録を行う。
-  expected: |-
-    エラーなく帳票登録が行えること。
-    帳票登録後、レコード詳細を表示すると「帳票出力」ボタンが表示されること。
+  expected: 'エラーなく帳票登録が行えること。
+
+    帳票登録後、レコード詳細を表示すると「帳票出力」ボタンが表示されること。'
   movie: SS02
+- case_no: '391'
+  sheet: B
+  feature: その他設定
+  description: '①システム設定のその他設定を開く
+
+    ②「アラートを自動で閉じない」設定を有効にする
+
+    ③保存する
+
+    ④レコードを登録し、成功アラートが表示されることを確認する
+
+    ⑤アラートが自動で消えずに表示され続けることを確認する'
+  expected: 「アラートを自動で閉じない」設定を有効にした場合、アラートが自動で閉じずに表示され続けること
+  movie: UC04
 actual_steps:
 - case_no: 7-1
   status: partial
-  steps: |
-    1. beforeAll: create-all-type-table API呼び出し
+  steps: '1. beforeAll: create-all-type-table API呼び出し
+
     2. ユーザー管理ページ（/admin/user）に遷移
+
     3. ユーザー一覧が表示されることを確認
+
     4. afterAll: delete-all-type-tables API呼び出し
-  assertions: |
-    - expect(page).toHaveURL(/\/admin\/user/)
-  gaps: |
-    ⚠️ YAMLには「ユーザー追加」操作が期待されるが、ユーザー管理ページの表示確認のみ
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ YAMLには「ユーザー追加」操作が期待されるが、ユーザー管理ページの表示確認のみ
+
     ⚠️ ユーザー新規作成操作・確認なし
+
+    '
 - case_no: 7-2
   status: partial
-  steps: |
-    1. debugApiPost('/create-user') でユーザーをAPIで作成
+  steps: '1. debugApiPost(''/create-user'') でユーザーをAPIで作成
+
     2. ユーザー管理ページに遷移
+
     3. ページURLの確認
-  assertions: |
-    - expect(page).toHaveURL(/\/admin\/user/)
-  gaps: |
-    ⚠️ YAMLには「ユーザー数の表示確認」が期待されるが、ページ表示確認のみ
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ YAMLには「ユーザー数の表示確認」が期待されるが、ページ表示確認のみ
+
     ⚠️ 作成したユーザーがリストに表示されることの確認なし
+
     ⚠️ ユーザー数の変化確認なし（作成前後の比較なし）
+
+    '
 - case_no: 7-3
   status: partial
-  steps: |
-    1. ユーザー管理ページに遷移
+  steps: '1. ユーザー管理ページに遷移
+
     2. ページ表示確認
-  assertions: |
-    - expect(page).toHaveURL(/\/admin\/user/)
-  gaps: |
-    ⚠️ ユーザー編集操作の確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ ユーザー編集操作の確認なし
+
+    '
 - case_no: 7-4
   status: partial
-  steps: |
-    1. ユーザー管理ページに遷移
+  steps: '1. ユーザー管理ページに遷移
+
     2. ページ表示確認
-  assertions: |
-    - expect(page).toHaveURL(/\/admin\/user/)
-  gaps: |
-    ⚠️ ユーザー削除操作の確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
+
+    '
+  gaps: '⚠️ ユーザー削除操作の確認なし
+
+    '
 - case_no: 7-5
   status: skip
-  steps: |
-    test.skip(true, '実際のメール送信が必要')
-  assertions: |
-    なし
-  gaps: |
-    ⚠️ メール送信確認は手動テストのみ
+  steps: 'test.skip(true, ''実際のメール送信が必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ メール送信確認は手動テストのみ
+
+    '
 - case_no: 8-1
   status: partial
-  steps: |
-    1. その他設定ページ（/admin/setting）に遷移
+  steps: '1. その他設定ページ（/admin/setting）に遷移
+
     2. ページ表示確認
+
     3. 二段階認証設定フォームの存在確認（console.log）
-  assertions: |
-    - expect(page).toHaveURL(/\/admin\/setting/)
-  gaps: |
-    ⚠️ 二段階認証の有効化・無効化の実際の操作なし
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
+
+    '
+  gaps: '⚠️ 二段階認証の有効化・無効化の実際の操作なし
+
     ⚠️ 設定保存後の動作確認なし
+
+    '
 - case_no: 8-2
   status: partial
-  steps: |
-    1. その他設定ページに遷移
+  steps: '1. その他設定ページに遷移
+
     2. ページ表示確認
-  assertions: |
-    - expect(page).toHaveURL(/\/admin\/setting/)
-  gaps: |
-    ⚠️ 8-1と同様
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
+
+    '
+  gaps: '⚠️ 8-1と同様
+
+    '
 - case_no: 9-1
   status: partial
-  steps: |
-    1. テーブル一覧ページ（/admin/dataset__{tableId}/list）に遷移
+  steps: '1. テーブル一覧ページ（/admin/dataset__{tableId}/list）に遷移
+
     2. ページURLの確認
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ レコード追加操作の確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ レコード追加操作の確認なし
+
+    '
 - case_no: 9-2
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. CSVダウンロードボタンの確認（console.log）
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ 実際のCSVダウンロード確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際のCSVダウンロード確認なし
+
+    '
 - case_no: 9-3
   status: skip
-  steps: |
-    test.skip('CSVファイルのアップロードが必要')
-  assertions: |
-    なし
-  gaps: |
-    ⚠️ CSVアップロードは手動テストのみ
+  steps: 'test.skip(''CSVファイルのアップロードが必要'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ CSVアップロードは手動テストのみ
+
+    '
 - case_no: 9-4
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. ページURLの確認
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ 全データ削除操作の確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 全データ削除操作の確認なし
+
+    '
 - case_no: 9-5
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. 集計ボタンの確認（console.log）
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ 集計の実際の操作確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 集計の実際の操作確認なし
+
+    '
 - case_no: 9-6
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. ページURLの確認
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ チャート追加操作の確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ チャート追加操作の確認なし
+
+    '
 - case_no: 9-7
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. ページURLの確認
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ 帳票登録操作の確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 帳票登録操作の確認なし
+
+    '
 - case_no: 9-8
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. 検索フィールドの確認（console.log）
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ 実際の検索操作・結果確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際の検索操作・結果確認なし
+
+    '
 - case_no: 9-9
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. 編集ボタンの確認（console.log）
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ 実際の編集操作確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際の編集操作確認なし
+
+    '
 - case_no: 9-10
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. レコード行の確認（console.log）
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ レコード詳細画面への遷移・表示確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ レコード詳細画面への遷移・表示確認なし
+
+    '
 - case_no: 9-11
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. ページURLの確認
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ 実際のレコード編集操作確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際のレコード編集操作確認なし
+
+    '
 - case_no: 9-12
   status: partial
-  steps: |
-    1. テーブル一覧ページに遷移
+  steps: '1. テーブル一覧ページに遷移
+
     2. ページURLの確認
-  assertions: |
-    - expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))
-  gaps: |
-    ⚠️ 実際のレコード削除操作確認なし
+
+    '
+  assertions: '- expect(page).toHaveURL(new RegExp(''/admin/dataset__'' + tableId))
+
+    '
+  gaps: '⚠️ 実際のレコード削除操作確認なし
+
+    '
 - case_no: 10-1
   status: skip
-  steps: |
-    test.skip(true, 'D&D操作')
-  assertions: |
-    なし
-  gaps: |
-    ⚠️ テーブル並び替えはD&D操作のためスキップ
+  steps: 'test.skip(true, ''D&D操作'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ テーブル並び替えはD&D操作のためスキップ
+
+    '
 - case_no: 10-4
   status: partial
-  steps: |
-    1. テーブル削除をAPIで試みる
+  steps: '1. テーブル削除をAPIで試みる
+
     2. 削除結果の確認（console.log）
+
     3. ナビバーの表示確認
-  assertions: |
-    - expect(page.locator('.navbar')).toBeVisible()
-  gaps: |
-    ⚠️ テーブルが実際に削除されたことの確認なし（一覧から消えることの確認なし）
+
+    '
+  assertions: '- expect(page.locator(''.navbar'')).toBeVisible()
+
+    '
+  gaps: '⚠️ テーブルが実際に削除されたことの確認なし（一覧から消えることの確認なし）
+
+    '
 - case_no: 24-1
   status: partial
-  steps: |
-    1. /admin/setting に遷移
+  steps: '1. /admin/setting に遷移
+
     2. パスワードリセットチェックボックスの確認（console.log）
+
     3. フォームの表示確認
-  assertions: |
-    - expect(page).toHaveURL(/\/admin\/setting/)
-  gaps: |
-    ⚠️ パスワードリセット設定をOFFにして保存する操作なし
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
+
+    '
+  gaps: '⚠️ パスワードリセット設定をOFFにして保存する操作なし
+
     ⚠️ 新規ユーザーログイン時にパスワード変更画面が表示されないことの確認なし
+
+    '
 - case_no: 24-2
   status: partial
-  steps: |
-    1. /admin/setting に遷移
+  steps: '1. /admin/setting に遷移
+
     2. ページ表示確認
-  assertions: |
-    - expect(settingContent.first()).toBeVisible()
-  gaps: |
-    ⚠️ 24-1と同様
+
+    '
+  assertions: '- expect(settingContent.first()).toBeVisible()
+
+    '
+  gaps: '⚠️ 24-1と同様
+
+    '
 - case_no: 58-1
   status: partial
-  steps: |
-    1. /admin/setting に遷移
+  steps: '1. /admin/setting に遷移
+
     2. 利用規約チェックボックスの確認（console.log）
-  assertions: |
-    - expect(page).toHaveURL(/\/admin\/setting/)
-  gaps: |
-    ⚠️ 利用規約設定を有効にして保存・確認する操作なし
+
+    '
+  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
+
+    '
+  gaps: '⚠️ 利用規約設定を有効にして保存・確認する操作なし
+
     ⚠️ 新規ログイン時に利用規約が表示されることの確認なし
+
+    '
 - case_no: 58-2
   status: partial
-  steps: |
-    1. /admin/setting に遷移
+  steps: '1. /admin/setting に遷移
+
     2. ページ表示確認
-  assertions: |
-    - expect(settingContent.first()).toBeVisible()
-  gaps: |
-    ⚠️ 58-1と同様
+
+    '
+  assertions: '- expect(settingContent.first()).toBeVisible()
+
+    '
+  gaps: '⚠️ 58-1と同様
+
+    '
 - case_no: 89-1
   status: partial
-  steps: |
-    1. /admin/setting に遷移
+  steps: '1. /admin/setting に遷移
+
     2. パスワード変更間隔フィールドの確認（console.log）
+
     3. ページ表示確認
-  assertions: |
-    - expect(settingContent.first()).toBeVisible()
-  gaps: |
-    ⚠️ パスワード変更間隔の設定・保存・動作確認なし
+
+    '
+  assertions: '- expect(settingContent.first()).toBeVisible()
+
+    '
+  gaps: '⚠️ パスワード変更間隔の設定・保存・動作確認なし
+
+    '
 - case_no: 130-01
   status: skip
-  steps: |
-    test.skip('機能変更に伴い不要・外部サービス連携')
-  assertions: |
-    なし
-  gaps: |
-    ⚠️ 機能変更に伴い不要とコメントあり
+  steps: 'test.skip(''機能変更に伴い不要・外部サービス連携'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 機能変更に伴い不要とコメントあり
+
+    '
 - case_no: 131-02
   status: skip
-  steps: |
-    test.skip('機能変更に伴い不要・外部サービス連携')
-  assertions: |
-    なし
-  gaps: |
-    ⚠️ 機能変更に伴い不要とコメントあり
+  steps: 'test.skip(''機能変更に伴い不要・外部サービス連携'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ 機能変更に伴い不要とコメントあり
+
+    '
 - case_no: 284-1
   status: skip
-  steps: |
-    test.skip('外部サービス連携（Stripe）')
-  assertions: |
-    なし
-  gaps: |
-    ⚠️ Stripe外部サービス連携のため手動確認のみ
+  steps: 'test.skip(''外部サービス連携（Stripe）'')
+
+    '
+  assertions: 'なし
+
+    '
+  gaps: '⚠️ Stripe外部サービス連携のため手動確認のみ
+
+    '
 - case_no: 839-1
   sheet: A
   feature: SSO設定
   category: セキュリティ
-  description: |
-    システム設定よりSSO設定ページにアクセスし、Google SAMLの設定項目が表示されること。
+  description: 'システム設定よりSSO設定ページにアクセスし、Google SAMLの設定項目が表示されること。
+
     設定項目（識別子・応答URL・メタデータXMLアップロード）が存在することを確認する。
+
+    '
   expected: SSO設定ページが正常に表示され、Google/Microsoft SAML設定UIが確認できること。
 - case_no: 839-2
   sheet: A
   feature: SSO設定
   category: セキュリティ
-  description: |
-    SSO設定ページで「識別子（エンティティID）」と「応答URL」のクリップボードコピーボタンが存在すること。
+  description: 'SSO設定ページで「識別子（エンティティID）」と「応答URL」のクリップボードコピーボタンが存在すること。
+
+    '
   expected: コピーボタンが表示されること。
 - case_no: 840-1
   sheet: A
   feature: クライアント証明書管理
   category: セキュリティ
-  description: |
-    ユーザー管理または設定ページからクライアント証明書管理にアクセスし、
+  description: 'ユーザー管理または設定ページからクライアント証明書管理にアクセスし、
+
     証明書発行・一覧表示・失効のUIが表示されること。
+
+    '
   expected: クライアント証明書管理ページが正常に表示されること。
 - case_no: 841-1
   sheet: A
   feature: ログアーカイブ
   category: ログ
-  description: |
-    左メニューよりログアーカイブ画面にアクセスし、
+  description: '左メニューよりログアーカイブ画面にアクセスし、
+
     ログの一覧が表示されること。
+
+    '
   expected: ログアーカイブページが正常に表示され、アーカイブ済みログの一覧が確認できること。
 - case_no: 843-1
   sheet: A
   feature: Googleマップフィールド
   category: フィールド連携
-  description: |
-    GoogleマップフィールドをALLテストテーブルで確認し、
+  description: 'GoogleマップフィールドをALLテストテーブルで確認し、
+
     地図UIが表示されること。住所入力欄または地図コンポーネントが存在すること。
+
+    '
   expected: Googleマップフィールドの地図UI・入力欄が正常に表示されること。
 - case_no: 844-1
   sheet: A
   feature: API公開設定
   category: 外部連携
-  description: |
-    テーブル設定の「公開設定」タブまたは「API設定」からAPI公開ON/OFFの設定UIを確認する。
+  description: 'テーブル設定の「公開設定」タブまたは「API設定」からAPI公開ON/OFFの設定UIを確認する。
+
     APIキーまたはエンドポイントURLが表示されること。
+
+    '
   expected: API公開設定UIが正常に表示されること。
 - case_no: 845-1
   sheet: A
   feature: freee連携設定
   category: 外部連携
-  description: |
-    システム設定またはテーブル設定からfreee連携設定UIへアクセスし、
+  description: 'システム設定またはテーブル設定からfreee連携設定UIへアクセスし、
+
     連携設定フォームが表示されること。
+
+    '
   expected: freee連携設定UIが確認できること（または機能が存在しない場合はskipとなること）。
