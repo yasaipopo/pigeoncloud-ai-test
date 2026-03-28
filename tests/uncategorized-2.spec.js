@@ -232,7 +232,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });

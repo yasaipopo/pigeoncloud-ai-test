@@ -230,7 +230,7 @@ test.describe('文字列表示設定（145系）', () => {
     // afterAll: 次のテストグループ（128系）もALLテストテーブルを使うためここでは削除しない
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -291,7 +291,7 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -357,7 +357,7 @@ test.describe('列表示幅設定（191系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -407,7 +407,7 @@ test.describe('大量データ（211系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -449,7 +449,7 @@ test.describe('表示条件設定（250系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -511,7 +511,7 @@ test.describe('表示条件設定（250系）', () => {
 
 test.describe('ユーザー管理（251系）', () => {
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -552,7 +552,7 @@ test.describe('権限設定（262系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -594,7 +594,7 @@ test.describe('権限設定（262系）', () => {
 
 test.describe('2段階認証（267系）', () => {
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -634,7 +634,7 @@ test.describe('検索機能（270系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -677,7 +677,7 @@ test.describe('自動採番（273系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -757,7 +757,7 @@ test.describe('リッチテキスト（274系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -828,7 +828,7 @@ test.describe('日時フォーマット（275系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -901,7 +901,7 @@ test.describe('循環参照エラー（291系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -964,7 +964,7 @@ test.describe('一括編集（312系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -995,7 +995,7 @@ test.describe('一括編集（312系）', () => {
 
 test.describe('ダッシュボード集計（315系）', () => {
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1035,7 +1035,7 @@ test.describe('テーブル削除ロック（349系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1108,7 +1108,7 @@ test.describe('テーブル削除ロック（349系）', () => {
 
 test.describe('ログイン失敗制限（357系）', () => {
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1133,7 +1133,7 @@ test.describe('ログイン失敗制限（357系）', () => {
 
 test.describe('メニュー並び替え（361系）', () => {
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1175,7 +1175,7 @@ test.describe('CSVキャンセル（367系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1224,7 +1224,7 @@ test.describe('ヘッダー固定（370系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1268,7 +1268,7 @@ test.describe('桁数カンマ区切り（256系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1305,7 +1305,7 @@ test.describe('スマートフォン表示（146系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1347,7 +1347,7 @@ test.describe('子テーブル（325, 341系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1429,7 +1429,7 @@ test.describe('一覧編集モード（324系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1477,7 +1477,7 @@ test.describe('未実装テスト（todo）', () => {
     let tableId = null;
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -2058,7 +2058,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(30000); // storageState利用により大幅短縮
+        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
