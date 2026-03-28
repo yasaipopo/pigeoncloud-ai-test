@@ -13,7 +13,12 @@ const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+    try {
+        await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
+    } catch {
+        // data-ng-readyが設定されないケースがある: networkidleで代替
+        await page.waitForLoadState('networkidle').catch(() => {});
+    }
 }
 
 const { getAllTypeTableId } = require('./helpers/table-setup');
@@ -196,8 +201,8 @@ async function checkPage(page, path) {
     // Angular SPAのデータ読み込み完了を待機（テーブルまたはコンテンツが表示されるまで）
     // /admin/dataset__XXX 系ページではtableが表示されるまで待機
     if (path.includes('/admin/dataset__') && !path.includes('/setting') && !path.includes('/edit')) {
-        // サーバー負荷により読み込みが遅くなる場合があるため35秒待機
-        const tableFound = await page.waitForSelector('table', { timeout: 35000 }).then(() => true).catch(() => false);
+        // サーバー負荷により読み込みが遅くなる場合があるため待機（60秒timeout内に収まるよう20秒に制限）
+        const tableFound = await page.waitForSelector('table', { timeout: 20000 }).then(() => true).catch(() => false);
         if (tableFound) {
             // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
             await page.waitForSelector('table thead th', { timeout: 10000 }).catch(() => {});
@@ -225,7 +230,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         tableId = await getAllTypeTableId(page);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
-        await createAllTypeData(page, 3).catch(() => {});
+        await createAllTypeData(page, 3).catch(e => {
+            console.error('[beforeAll] createAllTypeData失敗:', e.message);
+        });
         await page.waitForTimeout(1000);
         await context.close();
     });

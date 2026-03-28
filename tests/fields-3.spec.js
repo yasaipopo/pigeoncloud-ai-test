@@ -5,7 +5,12 @@ const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
 
 async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+    try {
+        await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
+    } catch {
+        // data-ng-readyが設定されないケースがある: networkidleで代替
+        await page.waitForLoadState('networkidle').catch(() => {});
+    }
 }
 
 const BASE_URL = process.env.TEST_BASE_URL;
