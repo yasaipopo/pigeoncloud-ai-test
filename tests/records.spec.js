@@ -19,8 +19,12 @@ async function waitForAngular(page, timeout = 15000) {
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
-    if (fs.existsSync(authStatePath)) {
-        return await browser.newContext({ storageState: authStatePath });
+    try {
+        if (fs.existsSync(authStatePath)) {
+            return await browser.newContext({ storageState: authStatePath });
+        }
+    } catch (e) {
+        console.log(`[records] auth-state読み込み失敗 (${e.message}), 新規コンテキストを作成`);
     }
     return await browser.newContext();
 }
@@ -1333,6 +1337,16 @@ test.describe('レコード保存・値の永続化', () => {
                 if (m) recordId = m[1];
             }
         }
+        // それでも取れない場合、viewリンクのhrefから取得
+        if (!recordId) {
+            const viewLink = page.locator('a[href*="/view/"]').first();
+            const viewHref = await viewLink.getAttribute('href', { timeout: 5000 }).catch(() => null);
+            if (viewHref) {
+                const m = viewHref.match(/\/view\/(\d+)/);
+                if (m) recordId = m[1];
+            }
+        }
+        console.log(`[レコード保存テスト] tableId=${tableId}, recordId=${recordId}`);
         await page.close();
         await context.close();
     });

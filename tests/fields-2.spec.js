@@ -9,7 +9,7 @@ const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout, state: 'attached' });
 }
 
 /**
@@ -192,25 +192,25 @@ async function getAllTypeTableId(page) {
 async function navigateToFieldPage(page, tableId) {
     const tid = tableId || 'ALL';
     // フィールド設定ページは /admin/dataset/edit/:id （テーブル設定ページ）
-    await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
+    // ALLテストテーブルは102フィールドがあるため読み込みに時間がかかる
+    await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`, { timeout: 120000 });
     try {
-        // networkidleはタイムアウトする可能性があるため短めに設定（フレイキー対策で10秒）
-        await page.waitForLoadState('networkidle', { timeout: 10000 });
+        await page.waitForLoadState('networkidle', { timeout: 15000 });
     } catch(e) {
-        // networkidleにならない場合はdomcontentloadedで続行
-        await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+        await page.waitForLoadState('domcontentloaded', { timeout: 60000 });
     }
-    await waitForAngular(page);
+    // ALLテストテーブルは102フィールドのためAngular初期化に時間がかかる
+    await waitForAngular(page, 180000);
     // ログインページにリダイレクトされた場合は再ログインして再遷移
     if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
         await login(page);
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`, { timeout: 120000 });
         try {
-            await page.waitForLoadState('networkidle', { timeout: 10000 });
+            await page.waitForLoadState('networkidle', { timeout: 15000 });
         } catch(e) {
-            await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+            await page.waitForLoadState('domcontentloaded', { timeout: 60000 });
         }
-        await waitForAngular(page);
+        await waitForAngular(page, 180000);
     }
 }
 
@@ -283,7 +283,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -327,7 +327,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -372,7 +372,7 @@ test.describe('自動採番フィールド（216系）', () => {
 
     test.beforeEach(async ({ page }) => {
         // フレイキー対策: beforeEachのタイムアウトを延長（前のdescribeのafterAllが長い場合の対応）
-        test.setTimeout(90000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -405,7 +405,7 @@ test.describe('固定テキストフィールド（230系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -438,7 +438,7 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -482,7 +482,7 @@ test.describe('列設定（122系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -526,7 +526,7 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -570,7 +570,7 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -599,7 +599,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         await closeTemplateModal(page);
     });

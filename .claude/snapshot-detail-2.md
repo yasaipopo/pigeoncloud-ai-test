@@ -1,0 +1,491 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - text: 
+    - generic [ref=e4]:
+      - generic [ref=e5] [cursor=pointer]: 
+      - link "Pigeon Cloud" [ref=e41] [cursor=pointer]:
+        - /url: /admin/dashboard
+    - list [ref=e7]:
+      - listitem [ref=e8]:
+        - link "☰" [ref=e9] [cursor=pointer]:
+          - /url: javascript:void(0)
+    - list [ref=e10]:
+      - listitem [ref=e11]:
+        - button "" [ref=e12] [cursor=pointer]:
+          - generic [ref=e13]: 
+      - listitem [ref=e14]:
+        - button [ref=e15] [cursor=pointer]:
+          - generic [ref=e42]: 
+      - listitem
+  - generic [ref=e16]:
+    - generic:      
+    - generic:  
+    - navigation [ref=e18]:
+      - list [ref=e44]:
+        - listitem [ref=e45]:
+          - generic [ref=e46]:  ALLTEST
+          - list [ref=e49]:
+            - listitem [ref=e50]:
+              - link "ALLテスト_選択肢マスタ" [ref=e51] [cursor=pointer]:
+                - /url: /admin/dataset__2810
+                - generic [ref=e52]: 
+                - text: ALLテスト_選択肢マスタ
+            - listitem [ref=e53]:
+              - link "ALLテスト_大カテゴリ" [ref=e54] [cursor=pointer]:
+                - /url: /admin/dataset__2811
+                - generic [ref=e55]: 
+                - text: ALLテスト_大カテゴリ
+            - listitem [ref=e56]:
+              - link "ALLテスト_中カテゴリ" [ref=e57] [cursor=pointer]:
+                - /url: /admin/dataset__2812
+                - generic [ref=e58]: 
+                - text: ALLテスト_中カテゴリ
+            - listitem [ref=e59]:
+              - link "ALLテスト_小カテゴリ" [ref=e60] [cursor=pointer]:
+                - /url: /admin/dataset__2813
+                - generic [ref=e61]: 
+                - text: ALLテスト_小カテゴリ
+            - listitem [ref=e62]:
+              - link "ALLテストテーブル" [ref=e63] [cursor=pointer]:
+                - /url: /admin/dataset__2815
+                - generic [ref=e64]: 
+                - text: ALLテストテーブル
+        - listitem [ref=e65]:
+          - generic [ref=e66]:  ログ
+          - list [ref=e68]:
+            - listitem [ref=e69]:
+              - link "ログ" [ref=e70] [cursor=pointer]:
+                - /url: /admin/logs
+                - generic [ref=e71]: 
+                - text: ログ
+            - listitem [ref=e72]:
+              - link "CSV UP/DL履歴" [ref=e73] [cursor=pointer]:
+                - /url: /admin/csv
+                - generic [ref=e74]: 
+                - text: CSV UP/DL履歴
+            - listitem [ref=e75]:
+              - link "リクエストログ" [ref=e76] [cursor=pointer]:
+                - /url: /admin/job_logs
+                - generic [ref=e77]: 
+                - text: リクエストログ
+            - listitem [ref=e78]:
+              - link "通知ログ" [ref=e79] [cursor=pointer]:
+                - /url: /admin/notification_log
+                - generic [ref=e80]: 
+                - text: 通知ログ
+        - listitem [ref=e81]:
+          - generic [ref=e82]:  コネクト
+          - list [ref=e84]:
+            - listitem [ref=e85]:
+              - link "コネクト" [ref=e86] [cursor=pointer]:
+                - /url: /admin/rpa
+                - generic [ref=e87]: 
+                - text: コネクト
+            - listitem [ref=e88]:
+              - link "コネクト実行ログ" [ref=e89] [cursor=pointer]:
+                - /url: /admin/rpa_executes
+                - generic [ref=e90]: 
+                - text: コネクト実行ログ
+      - list [ref=e19]:
+        - listitem [ref=e20]
+        - listitem [ref=e91] [cursor=pointer]:
+          - generic [ref=e92]: 
+    - main [ref=e21]:
+      - list [ref=e23]:
+        - listitem [ref=e24]:
+          - link / [ref=e25] [cursor=pointer]:
+            - /url: /admin/group/root
+            - generic [ref=e26]: 
+            - text: /
+          - text: 
+        - listitem [ref=e93]:
+          - link "ALLTEST" [ref=e94] [cursor=pointer]:
+            - /url: /admin/group/group__1
+          - text: 
+        - listitem [ref=e95]:
+          - link "ALLテストテーブル" [ref=e96] [cursor=pointer]:
+            - /url: /admin/dataset__2815
+          - text: 
+        - listitem [ref=e97]: "詳細 (ID: 1)"
+      - generic [ref=e27]:
+        - generic [ref=e99]:
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - heading "詳細情報" [level=4] [ref=e105]
+              - generic [ref=e106]:
+                - button " 前のレコード" [ref=e108] [cursor=pointer]:
+                  - generic [ref=e109]: 
+                  - text: 前のレコード
+                - button "" [ref=e110] [cursor=pointer]:
+                  - generic [ref=e111]: 
+            - generic [ref=e115]:
+              - generic [ref=e118]: 関連テーブルが存在しない、または権限がありません
+              - generic [ref=e120]:
+                - generic [ref=e121]: ID
+                - link "1" [ref=e125] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - generic [ref=e127]:
+                - generic [ref=e128]: テキスト
+                - generic [ref=e131]: テスト太郎
+              - generic [ref=e133]:
+                - generic [ref=e134]: 数値_整数
+                - generic [ref=e138]: "42"
+              - generic [ref=e140]:
+                - generic [ref=e141]: 数値_小数
+                - generic [ref=e145]: 123.45円
+              - generic [ref=e147]:
+                - generic [ref=e148]: セレクト
+                - generic [ref=e151]: 選択肢A
+              - generic [ref=e153]:
+                - generic [ref=e154]: チェックボックス
+                - generic [ref=e157]: チェックA,チェックB
+              - generic [ref=e159]:
+                - generic [ref=e160]: ラジオ
+                - generic [ref=e163]: ラジオA
+              - generic [ref=e166]: ラジオ_表示条件テキスト
+              - generic [ref=e169]:
+                - generic [ref=e170]: ブール
+                - generic [ref=e173]: 有効
+              - generic [ref=e175]:
+                - generic [ref=e176]: 日付
+                - generic [ref=e179]: 2026年01月15日
+              - generic [ref=e181]:
+                - generic [ref=e182]: 日時
+                - generic [ref=e185]: 2026年01月15日 09:00
+              - generic [ref=e187]:
+                - generic [ref=e188]: 時間
+                - generic [ref=e191]: 09:00
+              - generic [ref=e193]:
+                - generic [ref=e194]: 年月
+                - generic [ref=e197]: 2026年1月
+              - generic [ref=e199]:
+                - generic [ref=e200]: テキストエリア
+                - generic [ref=e203]: 固定テストデータ1 テスト太郎の備考
+              - generic [ref=e205]:
+                - generic [ref=e206]: リッチテキスト
+                - paragraph [ref=e210]: 固定テスト太郎
+              - generic [ref=e212]:
+                - generic [ref=e213]: メール
+                - link "taro@example.com" [ref=e217] [cursor=pointer]:
+                  - /url: mailto:taro@example.com
+              - generic [ref=e219]:
+                - generic [ref=e220]: URL
+                - link "https://example.com/taro" [ref=e225] [cursor=pointer]:
+                  - /url: https://example.com/taro
+              - generic [ref=e227]:
+                - generic [ref=e228]: カラー
+                - generic [ref=e231]: "#FF0000"
+              - generic [ref=e234]: 画像
+              - generic [ref=e240]: ファイル
+              - generic [ref=e244]: 自動採番
+              - generic [ref=e248]: テキスト_複数
+              - generic [ref=e252]: 数値_複数
+              - generic [ref=e256]: セレクト_複数
+              - generic [ref=e260]: 日付_複数
+              - generic [ref=e264]: 画像_複数
+              - generic [ref=e270]: ファイル_複数
+              - generic [ref=e274]: テキストエリア_複数
+              - generic [ref=e278]: チェックボックス_複数
+              - generic [ref=e281]:
+                - generic [ref=e282]: 参照_admin
+                - link "マスターユーザー" [ref=e286] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e287]: マスターユーザー
+              - generic [ref=e289]:
+                - generic [ref=e290]: 参照_division
+                - link "組織1" [ref=e294] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e295]: 組織1
+              - generic [ref=e297]:
+                - generic [ref=e298]: 参照_マスタ
+                - link "マスタ項目1" [ref=e302] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e303]: マスタ項目1
+              - generic [ref=e306]:
+                - heading "子テーブル" [level=4] [ref=e307]
+                - button " 一括編集" [ref=e309] [cursor=pointer]:
+                  - generic [ref=e310]: 
+                  - text: 一括編集
+                - table [ref=e312]:
+                  - rowgroup [ref=e313]:
+                    - row "品名 数量 単価 小計 アクション" [ref=e314]:
+                      - columnheader "品名" [ref=e315]
+                      - columnheader "数量" [ref=e316]
+                      - columnheader "単価" [ref=e317]
+                      - columnheader "小計" [ref=e318]
+                      - columnheader "アクション" [ref=e319]
+                  - rowgroup [ref=e320]:
+                    - row "ノートPC 2 150,000 300,000   " [ref=e321]:
+                      - cell "ノートPC" [ref=e322]:
+                        - generic [ref=e326]: ノートPC
+                      - cell "2" [ref=e327]:
+                        - generic [ref=e332]: "2"
+                      - cell "150,000" [ref=e333]:
+                        - generic [ref=e338]: 150,000
+                      - cell "300,000" [ref=e339]:
+                        - generic [ref=e343]: 300,000
+                      - cell "  " [ref=e344]:
+                        - button "" [ref=e345] [cursor=pointer]:
+                          - generic [ref=e346]: 
+                        - button "" [ref=e347] [cursor=pointer]:
+                          - generic [ref=e348]: 
+                        - button "" [ref=e349] [cursor=pointer]:
+                          - generic [ref=e350]: 
+                    - row "マウス 5 3,000 15,000   " [ref=e351]:
+                      - cell "マウス" [ref=e352]:
+                        - generic [ref=e356]: マウス
+                      - cell "5" [ref=e357]:
+                        - generic [ref=e362]: "5"
+                      - cell "3,000" [ref=e363]:
+                        - generic [ref=e368]: 3,000
+                      - cell "15,000" [ref=e369]:
+                        - generic [ref=e373]: 15,000
+                      - cell "  " [ref=e374]:
+                        - button "" [ref=e375] [cursor=pointer]:
+                          - generic [ref=e376]: 
+                        - button "" [ref=e377] [cursor=pointer]:
+                          - generic [ref=e378]: 
+                        - button "" [ref=e379] [cursor=pointer]:
+                          - generic [ref=e380]: 
+              - generic [ref=e382]:
+                - generic [ref=e383]: ルックアップ_コピー先_名称
+                - generic [ref=e386]: マスタ項目1
+              - generic [ref=e388]:
+                - generic [ref=e389]: ルックアップ_コピー先_数値
+                - generic [ref=e393]: "100"
+              - generic [ref=e395]:
+                - generic [ref=e396]: ルックアップ_マスタ
+                - link "マスタ項目1" [ref=e400] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e401]: マスタ項目1
+              - heading "計算式セクション" [level=3] [ref=e405]
+              - generic [ref=e407]:
+                - generic [ref=e408]: 計算_加算
+                - generic [ref=e412]: "142"
+              - generic [ref=e414]:
+                - generic [ref=e415]: 計算_乗算
+                - generic [ref=e419]: 5,185
+              - generic [ref=e421]:
+                - generic [ref=e422]: 計算_文字結合
+                - generic [ref=e425]: テスト太郎_suffix
+              - generic [ref=e427]:
+                - generic [ref=e428]: 計算_日付フォーマット
+                - generic [ref=e431]: 2026年01月15日
+              - generic [ref=e433]:
+                - generic [ref=e434]: 計算_日付差分
+                - generic [ref=e438]: "71"
+              - generic [ref=e440]:
+                - generic [ref=e441]: 計算_IF分岐
+                - generic [ref=e444]: 小
+              - generic [ref=e446]:
+                - generic [ref=e447]: 計算_ルックアップ利用
+                - generic [ref=e451]: 4,200
+              - generic [ref=e453]:
+                - generic [ref=e454]: テキスト_文字数制限
+                - generic [ref=e457]: 固定テスト太郎ABC
+              - generic [ref=e459]:
+                - generic [ref=e460]: テキスト_正規表現
+                - generic [ref=e463]: AB-1234
+              - generic [ref=e465]:
+                - generic [ref=e466]: テキスト_ユニーク
+                - generic [ref=e469]: FIXED-001
+              - generic [ref=e472]: テキスト_デフォルト値
+              - generic [ref=e475]:
+                - generic [ref=e476]: 数値_範囲制限
+                - generic [ref=e480]: "50"
+              - generic [ref=e482]:
+                - generic [ref=e483]: 数値_小数3桁
+                - generic [ref=e487]: "1.234"
+              - generic [ref=e489]:
+                - generic [ref=e490]: セレクト_必須
+                - generic [ref=e493]: 必須A
+              - generic [ref=e495]:
+                - generic [ref=e496]: チェック_選択数制限
+                - generic [ref=e499]: 制限A,制限B
+              - generic [ref=e501]:
+                - generic [ref=e502]: 数値_マイナス赤字
+                - generic [ref=e506]: "-500"
+              - generic [ref=e508]:
+                - generic [ref=e509]: 数値_マイナス三角
+                - generic [ref=e513]: ▲300
+              - generic [ref=e515]:
+                - generic [ref=e516]: 数値_先頭単位
+                - generic [ref=e520]: ¥10000
+              - generic [ref=e522]:
+                - generic [ref=e523]: ブール_スイッチ
+                - generic [ref=e526]: ON/OFF
+              - generic [ref=e528]:
+                - generic [ref=e529]: ラジオ_縦並び
+                - generic [ref=e532]: 縦A
+              - generic [ref=e534]:
+                - generic [ref=e535]: チェック_プルダウン
+                - generic [ref=e538]: PD-A,PD-B
+              - generic [ref=e540]:
+                - generic [ref=e541]: チェック_縦並び
+                - generic [ref=e544]: 縦チェA,縦チェC
+              - generic [ref=e546]:
+                - generic [ref=e547]: 日付_フォーマット指定
+                - generic [ref=e550]: 2026年01月15日(木)
+              - generic [ref=e552]:
+                - generic [ref=e553]: 日時_フォーマット指定
+                - generic [ref=e556]: 2026/01/15 10:00
+              - generic [ref=e558]:
+                - generic [ref=e559]: 時間_業務時間
+                - generic [ref=e562]: 10:00
+              - generic [ref=e565]: 年月_デフォルト現在
+              - generic [ref=e568]:
+                - generic [ref=e569]: 日時_5分間隔
+                - generic [ref=e572]: 2026年01月15日 10:15
+              - generic [ref=e575]: 画像_全オプション
+              - generic [ref=e581]: 自動採番_数値ソート
+              - generic [ref=e584]:
+                - generic [ref=e585]: メール_ユニーク
+                - link "fixed001@example.com" [ref=e589] [cursor=pointer]:
+                  - /url: mailto:fixed001@example.com
+              - generic [ref=e592]: テキスト_編集不可
+              - generic [ref=e596]: テキスト_編集非表示
+              - heading "ルックアップ全タイプテスト" [level=3] [ref=e601]
+              - generic [ref=e603]:
+                - generic [ref=e604]: LK先_数値小数
+                - generic [ref=e608]: "10.50"
+              - generic [ref=e610]:
+                - generic [ref=e611]: LK先_日付
+                - generic [ref=e614]: 2026-01-15
+              - generic [ref=e616]:
+                - generic [ref=e617]: LK先_日時
+                - generic [ref=e620]: 2026-01-15 09:00:00
+              - generic [ref=e622]:
+                - generic [ref=e623]: LK先_時間
+                - generic [ref=e626]: 09:00:00
+              - generic [ref=e628]:
+                - generic [ref=e629]: LK先_年月
+                - generic [ref=e632]: 2026-01-01
+              - generic [ref=e634]:
+                - generic [ref=e635]: LK先_メール
+                - generic [ref=e638]: master1@example.com
+              - generic [ref=e640]:
+                - generic [ref=e641]: LK先_URL
+                - link "https://example.com/1" [ref=e644] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - generic [ref=e646]:
+                - generic [ref=e647]: LK先_カラー
+                - generic [ref=e650]: "#FF0000"
+              - generic [ref=e652]:
+                - generic [ref=e653]: LK先_セレクト
+                - generic [ref=e656]: マスタ選択A
+              - generic [ref=e658]:
+                - generic [ref=e659]: LK先_ラジオ
+                - generic [ref=e662]: マスタラジオA
+              - generic [ref=e664]:
+                - generic [ref=e665]: LK先_チェックボックス
+                - generic [ref=e668]: マスタチェA,マスタチェB
+              - generic [ref=e670]:
+                - generic [ref=e671]: LK先_ブール
+                - generic [ref=e674]: "true"
+              - generic [ref=e676]:
+                - generic [ref=e677]: LK先_テキストエリア
+                - generic [ref=e680]: メモ1
+              - generic [ref=e682]:
+                - generic [ref=e683]: LK先_リッチテキスト
+                - paragraph [ref=e687]: リッチ1
+              - generic [ref=e689]:
+                - generic [ref=e690]: 参照_カスタムラベル
+                - link "CODE1" [ref=e694] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e695]: CODE1
+              - generic [ref=e697]:
+                - generic [ref=e698]: 参照_検索のみ
+                - link "マスタ項目1" [ref=e702] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e703]: マスタ項目1
+              - generic [ref=e705]:
+                - generic [ref=e706]: 計算_自動更新OFF
+                - generic [ref=e710]: "165"
+              - generic [ref=e712]:
+                - generic [ref=e713]: 計算_四捨五入
+                - generic [ref=e717]: "136"
+              - generic [ref=e719]:
+                - generic [ref=e720]: 計算_年齢
+                - generic [ref=e724]: "0"
+              - generic [ref=e726]:
+                - generic [ref=e727]: 計算_日付加算
+                - generic [ref=e730]: 2026年02月14日
+              - generic [ref=e732]:
+                - generic [ref=e733]: 計算_子テーブル合計
+                - generic [ref=e737]: 315,000
+              - generic [ref=e739]:
+                - generic [ref=e740]: 計算_子テーブル件数
+                - generic [ref=e744]: "2"
+              - generic [ref=e746]:
+                - generic [ref=e747]: 計算_最大値比較
+                - generic [ref=e751]: "100"
+              - generic [ref=e753]:
+                - generic [ref=e754]: 計算_文字切出し
+                - generic [ref=e757]: テスト
+              - generic [ref=e759]:
+                - generic [ref=e760]: 計算_LK複合
+                - generic [ref=e764]: "123"
+              - heading "連動プルダウンテスト（大→中→小カテゴリ）" [level=3] [ref=e768]
+              - generic [ref=e770]:
+                - generic [ref=e771]: 大カテゴリ
+                - link "電子機器" [ref=e775] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e776]: 電子機器
+              - generic [ref=e778]:
+                - generic [ref=e779]: 中カテゴリ
+                - link "スマホ" [ref=e783] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e784]: スマホ
+              - generic [ref=e786]:
+                - generic [ref=e787]: 小カテゴリ
+                - link "iPhone" [ref=e791] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e792]: iPhone
+              - generic [ref=e794]:
+                - generic [ref=e795]: テキスト_一覧20文字
+                - generic [ref=e798]: テスト太郎の一覧表示テスト用テキストデータです
+              - generic [ref=e800]:
+                - generic [ref=e801]: テキストエリア_一覧30文字
+                - generic [ref=e804]: テスト太郎のテキストエリア一覧表示テスト用データ 改行あり
+              - generic [ref=e806]:
+                - generic [ref=e807]: リッチテキスト_一覧15文字
+                - paragraph [ref=e811]: 太郎のリッチテキスト一覧テストデータ
+              - generic [ref=e813]:
+                - generic [ref=e814]: 作成者
+                - link "マスターユーザー" [ref=e818] [cursor=pointer]:
+                  - /url: javascript:void(0)
+                  - generic [ref=e819]: マスターユーザー
+              - generic [ref=e822]: 最終更新者
+              - generic [ref=e825]:
+                - generic [ref=e826]: 更新日時
+                - generic [ref=e829]: 2026年03月25日 16:09
+              - generic [ref=e831]:
+                - generic [ref=e832]: 作成日時
+                - generic [ref=e835]: 2026年03月25日 16:09
+            - generic [ref=e837]:
+              - button "戻る" [ref=e838] [cursor=pointer]
+              - button "複製" [ref=e839] [cursor=pointer]
+              - button "編集" [ref=e840] [cursor=pointer]
+              - button "削除" [ref=e841] [cursor=pointer]
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+        - text: 
+    - generic:
+      - complementary [ref=e28]:
+        - button "" [ref=e30] [cursor=pointer]:
+          - generic [ref=e31]: 
+        - generic [ref=e32]:
+          - tablist "Tabs" [ref=e33]:
+            - listitem [ref=e34]:
+              - tab "" [selected] [ref=e35] [cursor=pointer]:
+                - generic [ref=e36]: 
+            - listitem [ref=e37]:
+              - tab "" [ref=e38] [cursor=pointer]:
+                - generic [ref=e39]: 
+          - tabpanel [ref=e842]:
+            - button "送信" [ref=e847] [cursor=pointer]: 送信
+      - generic: 
+  - generic: 

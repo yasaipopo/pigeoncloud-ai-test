@@ -184,18 +184,7 @@ async function deleteAllTypeTables(page) {
     }
 }
 
-/**
- * ALLテストテーブルのIDを取得する
- */
-async function getAllTypeTableId(page) {
-    const status = await page.evaluate(async (baseUrl) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-        return res.json();
-    }, BASE_URL);
-    const mainTable = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
-    // APIは {id, label, count} の形式で返す（table_idとidの両方に対応）
-    return mainTable ? (mainTable.table_id || mainTable.id) : null;
-}
+// getAllTypeTableId は helpers/table-setup からインポート済み
 
 /**
  * ページアクセス確認ヘルパー

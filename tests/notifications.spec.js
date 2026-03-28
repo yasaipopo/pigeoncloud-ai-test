@@ -5,6 +5,7 @@ const { getAllTypeTableId } = require('./helpers/table-setup');
 const { waitForEmail, deleteTestEmails } = require('./helpers/mail-checker');
 const { webhookUrl, resetWebhook, waitForWebhook } = require('./helpers/webhook-checker');
 const { setupSmtp: setupSmtpApi } = require('./helpers/debug-settings');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 // メール通知テスト用の受信アドレス（.envのIMAP_USERと同じ）
@@ -199,8 +200,9 @@ test.describe('通知設定', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(300000); // loginが90s×2+overhead=200s超えることがあるため延長
-        await login(page, EMAIL, PASSWORD);
+        test.setTimeout(300000);
+        // storageStateが有効ならensureLoggedInで高速化（5秒以内）
+        await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
 

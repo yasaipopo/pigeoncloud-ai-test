@@ -1,79 +1,88 @@
-# E2Eテスト パイプラインシート
+# E2Eテスト パイプライン
 
-## フロー（前工程→後工程）
+## フロー（3ステップ）
 
 ```
-① テスト内容チェック（yaml品質・網羅性）
-  → ② テスト修正くん（yaml通りにspec.js実装）
-    → ③ 怒りくん（コード品質チェック）
-      → ④ チェックくん（Playwright実行 + failed振り分け）
+① テスト内容チェック (/check-yaml)
+   yaml品質・網羅性をpigeon repo + Playwright MCPで確認
+   → OK → DBに ①✅
+
+② テスト修正くん (/spec-create)
+   yaml通りにspec.jsを実装・修正（MCP Playwright必須）
+   → OK → DBに ②✅
+   → yamlが間違っていたら①に差し戻し
+
+③ チェックくん (/check-run)
+   Playwright実行 + 問題あれば差し戻し
+   → PASS → DBに ③✅
+   → FAIL(specバグ) → ②に差し戻し
+   → FAIL(プロダクトバグ) → product-bugs.mdに記録
+   → FAIL(環境依存/一時的な遅さ) → 再実行（差し戻しにしない）
 ```
 
 ## 前工程変更時のルール
 
-**前工程を変更したら、後工程は全てリセット（チェックを外す）。**
+**前工程を変更したら、後工程は全てリセット。**
 
 | 変更対象 | リセットされる工程 |
 |---------|-----------------|
-| yaml変更 | ② spec実装 → ③ コード品質 → ④ 実行確認 を全てリセット |
-| spec.js変更 | ③ コード品質 → ④ 実行確認 をリセット |
-| コード品質NG修正 | ④ 実行確認 をリセット |
+| yaml変更 | ② spec実装 → ③ 実行確認 を全てリセット |
+| spec.js変更 | ③ 実行確認 をリセット |
 
-## シート構造
+## チェックDB（Single Source of Truth）
 
-`.claude/pipeline-status.md` に以下の形式で管理:
+E2Eビューアーと同じ方式（DynamoDB + API）でチェック状況を管理する。
+mdファイルではなくDBが正。各agentはAPIでステータスを読み書きする。
 
-```markdown
-| spec | case_no | ①yaml | ②spec | ③品質 | ④実行 | 備考 |
-|------|---------|-------|-------|-------|-------|------|
-| auth | 1-1 | ✅ | ✅ | ✅ | ✅ | |
-| auth | 1-2 | ✅ | ✅ | ✅ | ⚠️SKIP | test.skip(外部依存) |
-| auth | 295 | ✅ | ✅ | ✅ | ✅ | |
-| fields | 93-1 | ⚠️ | | | | expected が曖昧 |
+### テーブル構造
+
+```
+pipeline-checks テーブル
+- PK: spec#case_no (例: "auth#1-1")
+- yaml_check: "ok" | "ng" | null
+- yaml_check_note: string (備考)
+- spec_check: "ok" | "ng" | null
+- spec_check_note: string
+- run_check: "pass" | "fail_spec" | "fail_product" | "fail_env" | null
+- run_check_note: string
+- updated_at: timestamp
+- updated_by: string (agent名)
 ```
 
-### ステータス記号
-- ✅ OK
-- ❌ NG（修正必要）
-- ⚠️ 条件付きOK / 要確認
-- 空欄 = 未チェック / リセット済み
+### API
 
-### 備考欄
-各agentが自由に記載可能:
-- テスト内容チェック: 「descriptionが曖昧」「機能カバー不足」
-- テスト修正くん: 「セレクター変更のため修正」「UIが前提と異なる」
-- 怒りくん: 「早期return検出」「タイトルと実装不一致」
-- チェックくん: 「環境依存でflaky」「プロダクトバグの疑い」
+```
+GET  /pipeline?spec=auth          → そのspecの全ケースのチェック状況
+POST /pipeline                    → ステータス更新
+GET  /pipeline/summary            → 全体サマリー（①②③のOK/NG/未チェック件数）
+```
 
-## sheetが唯一の正（Single Source of Truth）
+→ **チェックDB作成は別途実施**。それまでは `.claude/pipeline-status.md` をフォールバックとして使用。
 
-**`.claude/pipeline-status.md` が全ての作業のソースオブトゥルース。**
+## 既存PASSの扱い
 
-- 各agentは作業前にsheetを確認し、作業後にsheetを更新する
-- yamlやspec.jsの変更は、必ずsheetに反映する
-- sheetに記載がないテストケースは存在しないものとして扱う
-- sheetとyaml/spec.jsに矛盾がある場合、**sheetが正**
+直近のテスト実行でPASSしているケースは ①②③ を一括✅にする。
+failed/skipのケースのみ①からチェックし直す。
 
-### 不具合調査くんの作業フロー
+## エージェント体制
 
-不具合や障害から新テストケースが必要な場合：
-1. `specs/*.yaml` にテストケースを追加
-2. `.claude/pipeline-status.md` に行を追加（①yaml=✅、②③④=空欄）
-3. 知見mdに不具合検知パターンを記録
-4. テスト修正くんに②の実装を依頼
+| キャラ | スキル | 役割 |
+|---|---|---|
+| **リーダー** | `/e2e` | パイプライン管理、テスト実行（npx playwright直接）、集計、通知 |
+| **テスト内容チェック** | `/check-yaml` | yaml品質・網羅性チェック（pigeon repo + Playwright MCP参照） |
+| **テスト修正くん** | `/spec-create` | yaml通りにspec.jsを実装・修正（MCP Playwright必須） |
+| **チェックくん** | `/check-run` | Playwright実行 + failed振り分け + 差し戻し |
+| **不具合調査くん** | — | 障害・PRからyaml追加→DB更新→知見md |
+| **詳細調査くん** | — | インフラ根本原因調査（CloudWatch/ECS/RDS） |
 
----
+## テスト環境
+
+- `create-trial` API に `with_all_type_table: true` を渡す（stagingデプロイ済み）
+- global-setup.js でテナント作成 + ALLテストテーブル作成を1回で完了
+- 各specは `getAllTypeTableId(page)` でID取得のみ（テーブル作成しない）
+- `deleteAllTypeTables` は呼ばない（共有テーブルを壊さない）
 
 ## 完了条件
 
-**全case_noの①〜④が全て✅になったらパイプライン完了。**
-⚠️SKIP（外部依存等）は許容。❌と空欄が0になること。
-
-## 繰り返し実行
-
-シートが埋まるまで以下を繰り返す:
-1. ①が未チェックのyamlをテスト内容チェックagentでチェック
-2. ①✅で②が未チェックのケースをテスト修正くんで実装
-3. ②✅で③が未チェックのケースを怒りくんでレビュー
-4. ③✅で④が未チェックのケースをチェックくんで実行確認
-5. ④で❌が出たら原因に応じて①〜③に差し戻し
+全ケースの①②③が ✅ or ⚠️SKIP（外部依存）になること。
+❌と空欄が0になること。

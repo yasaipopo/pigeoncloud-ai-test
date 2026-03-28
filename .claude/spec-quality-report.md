@@ -16,7 +16,7 @@
 
 | ファイル | 修正前NG | 修正後状態 | 主な問題 |
 |---------|---------|-----------|---------|
-| auth.spec.js | なし | ✅ PASS | 176（Google OAuth）はSKIP_OK |
+| auth.spec.js | なし | ✅ PASS | 176（Google OAuth）はSKIP_OK / 212-4・295: 2026-03-27修正済 |
 | chart-calendar.spec.js | なし | ✅ PASS | returnはヘルパー関数内のみ |
 | chart-calendar-2.spec.js | なし | ✅ PASS | returnはヘルパー関数内のみ |
 | comments-logs.spec.js | なし | ✅ PASS | returnはヘルパー関数内のみ |
