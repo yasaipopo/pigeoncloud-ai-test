@@ -763,7 +763,7 @@ def pipeline_summary(event):
         'total': total,
         'yaml': {'ok': 0, 'ng': 0, 'unchecked': 0},
         'spec': {'ok': 0, 'ng': 0, 'unchecked': 0},
-        'run': {'pass': 0, 'fail_spec': 0, 'fail_product': 0, 'fail_env': 0, 'unchecked': 0},
+        'run': {'pass': 0, 'fail_spec': 0, 'fail_product': 0, 'fail_env': 0, 'timeout': 0, 'unchecked': 0},
         'staging': {'pass': 0, 'fail': 0, 'skip': 0, 'unchecked': 0},
         'main': {'pass': 0, 'fail': 0, 'skip': 0, 'unchecked': 0},
     }

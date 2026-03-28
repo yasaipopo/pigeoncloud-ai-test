@@ -621,6 +621,7 @@ function runCheckBadge(val) {
   if (val === 'fail_spec') return '<span class="badge badge-fail-spec">F:Spec</span>';
   if (val === 'fail_product') return '<span class="badge badge-fail-product">F:Prod</span>';
   if (val === 'fail_env') return '<span class="badge badge-fail-env">F:Env</span>';
+  if (val === 'timeout') return '<span class="badge" style="background:#ff9800;color:#fff">⏱RETRY</span>';
   return '<span class="badge badge-unchecked">-</span>';
 }
 

@@ -55,7 +55,7 @@ module.exports = defineConfig({
         // storageStateがあればログイン済みクッキーを再利用（login()呼び出し頻度を大幅削減）
         ...(fs.existsSync(authStatePath) ? { storageState: authStatePath } : {}),
         launchOptions: {
-            args: ['--no-sandbox', '--disable-dev-shm-usage'],
+            args: ['--no-sandbox', '--disable-dev-shm-usage', `--test-agent=${agentNum}`],
             // Docker(Linux)はシステムパス、ホストmacOSはデフォルトパス（Playwrightが自動解決）
             ...(process.platform === 'linux' ? {
                 executablePath: process.env.PLAYWRIGHT_BROWSERS_PATH
