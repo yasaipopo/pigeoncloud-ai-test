@@ -16,9 +16,18 @@ async function waitForAngular(page, timeout = 15000) {
 // ============================================================
 
 async function login(page, email, password) {
-    await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('#id', { timeout: 30000 });
+    // ネットワーク一時切断からの回復のため、gotoを最大3回リトライ
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            await page.goto(BASE_URL + '/admin/login', { timeout: 60000, waitUntil: 'domcontentloaded' });
+            break;
+        } catch (e) {
+            console.log(`[login] goto attempt ${attempt}/3 failed: ${e.message.split('\n')[0]}`);
+            if (attempt === 3) throw e;
+            await page.waitForTimeout(5000); // 5秒待ってリトライ
+        }
+    }
+    await page.waitForSelector('#id', { timeout: 60000 });
     await page.fill('#id', email || EMAIL);
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
