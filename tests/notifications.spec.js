@@ -113,6 +113,34 @@ async function goToNotificationPage(page, tableId) {
 }
 
 /**
+ * 通知設定の新規追加ページ（/admin/notification/edit/new）へ遷移し、
+ * Angularのレンダリングが完了するまで確実に待機するヘルパー。
+ *
+ * 従来の「読み込み中が消えるまで待つ」ネガティブチェック + .catch(() => {}) は、
+ * DOMに「読み込み中」が現れる前にチェックが通過してしまうレースコンディションがあった。
+ * → ポジティブチェック（「通知設定」テキストが表示されるまで待つ）に変更。
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [expectedText] - 表示を待つテキスト（デフォルト: '通知設定'）
+ */
+async function gotoNotificationEditNew(page, expectedText = '通知設定') {
+    await page.goto(BASE_URL + '/admin/notification/edit/new', {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000,
+    });
+    await waitForAngular(page);
+    // ポジティブチェック: 期待テキストが表示されるまで待つ
+    await page.waitForFunction(
+        (text) => {
+            const body = document.body.innerText;
+            return body.includes(text) && !body.includes('読み込み中');
+        },
+        expectedText,
+        { timeout: 30000 }
+    );
+}
+
+/**
  * SMTP設定を管理画面から自動設定するヘルパー
  * IMAP_USER/IMAP_PASS が設定されている場合のみ実行（同じ sakura.ne.jp アカウントを SMTP にも使用）
  * 設定ページ: /admin/admin_setting/edit/1
@@ -218,8 +246,7 @@ test.describe('通知設定', () => {
         console.log('通知設定ページURL: ' + url);
 
         // 新規追加ページへ直接遷移（"+"ボタンはfa-plusアイコンのみでテキストなし）
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
         console.log('通知新規追加ページURL: ' + page.url());
 
         // 登録ボタンをクリック（テーブル・通知名などの必須項目が空のまま）
@@ -245,13 +272,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('54-2: 通知設定のリマインダ設定でリマインドテキスト未入力のまま登録するとエラーが発生すること', async ({ page }) => {
         // 通知設定の新規追加ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -280,13 +301,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('54-3: 通知設定のリマインダ設定でタイミング未入力のまま登録するとエラーが発生すること', async ({ page }) => {
         // 通知設定の新規追加ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -322,8 +337,7 @@ test.describe('通知設定', () => {
         expect(page.url()).toContain('/admin/');
 
         // ② 通知設定追加（直接新規登録ページへ遷移）
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
         console.log('6-1 通知新規追加ページURL:', page.url());
 
         // アクション「作成」を選択
@@ -379,13 +393,7 @@ test.describe('通知設定', () => {
         test.setTimeout(120000);
 
         // 通知設定新規作成ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -416,13 +424,7 @@ test.describe('通知設定', () => {
         test.setTimeout(120000);
 
         // 通知設定新規作成ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -447,13 +449,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('6-4: 通知設定でアクション「ワークフローステータス変更時」を設定して通知が行われること', async ({ page }) => {
         // 通知設定新規作成ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -483,13 +479,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('6-5: 通知先組織に対して通知設定を行い通知が行われること', async ({ page }) => {
         // 通知設定新規作成ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -703,13 +693,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('62-1: 通知設定で通知先メールアドレスを追加すると設定されたアドレスに通知が行われること', async ({ page }) => {
         // 通知設定新規作成ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -738,13 +722,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('62-2: 通知設定で通知先メールアドレスを更新すると変更後のアドレスに通知が行われること', async ({ page }) => {
         // 通知設定新規作成ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -787,13 +765,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('62-4: ワークフロー承認時に通知先メールアドレスに通知が行われること', async ({ page }) => {
         // 通知設定新規作成ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -819,13 +791,7 @@ test.describe('通知設定', () => {
         // 通知設定の新規作成ページでリマインダ設定UIが使用できることを確認する
         // ※実際のリマインダ発火（〇分後に通知が届く）は時間経過が必要なため手動確認が必要
 
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         // 通知設定ページが表示されることを確認
         expect(page.url()).toContain('/admin/notification');
@@ -859,13 +825,7 @@ test.describe('通知設定', () => {
         // 通知設定の新規作成ページでリマインダ設定フォームが利用できることを確認する
         // ※実際のワークフロー申請中リマインダ発火は時間経過が必要なため手動確認が必要
 
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         // 通知設定ページが表示されることを確認
         expect(page.url()).toContain('/admin/notification');
@@ -893,14 +853,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('81-1: 通知設定の表示項目で「テーブル名」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
         // 通知設定新規作成ページで表示項目設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        // Angular SPAのレンダリング完了を待つ（「通知設定」テキストが表示されるまで）
-        await page.waitForFunction(
-            () => document.body.innerText.includes('通知設定') && !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -919,13 +872,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('81-2: 通知設定の表示項目で「URL」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
         // 通知設定新規作成ページで表示項目設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -944,13 +891,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('81-3: 通知設定の表示項目で「作成(更新)データ」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
         // 通知設定新規作成ページで表示項目設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -966,13 +907,7 @@ test.describe('通知設定', () => {
 
     test('81-4: 通知設定の表示項目で「更新者」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
         // 通知設定新規作成ページで表示項目設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -988,14 +923,7 @@ test.describe('通知設定', () => {
 
     test('81-5: 通知設定の表示項目で「PigeonCloudフッター」のみチェックすると設定通りの通知内容で通知されること', async ({ page }) => {
         // 通知設定新規作成ページで表示項目設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        // Angular SPAのレンダリング完了を待つ（「通知設定」テキストが表示されるまで）
-        await page.waitForFunction(
-            () => document.body.innerText.includes('通知設定') && !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -1011,14 +939,7 @@ test.describe('通知設定', () => {
 
     test('81-6: 通知設定の表示項目で設定なしの場合も設定通りの通知内容で通知されること', async ({ page }) => {
         // 通知設定新規作成ページで表示項目設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        // Angular SPAのレンダリング完了を待つ（「通知設定」テキストが表示されるまで）
-        await page.waitForFunction(
-            () => document.body.innerText.includes('通知設定') && !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -1038,18 +959,7 @@ test.describe('通知設定', () => {
     test('84-1: 通知設定でワークフロー条件「申請中(要確認)」を設定すると設定通りの通知が行われること', async ({ page }) => {
         test.setTimeout(120000); // ログイン+ページロードに時間がかかる場合があるため延長
         // 通知設定新規作成ページでワークフロー条件設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        // 通知設定フォームのレンダリング完了を待機
-        await page.waitForFunction(
-            () => document.body.innerText.includes('通知設定') || document.body.innerText.includes('通知名'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -1107,8 +1017,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('102-1: 通知設定でワークフロー「申請時」チェック時に申請時に通知が行われること', async ({ page }) => {
         // 通知新規追加ページでワークフローステータス変更時アクションの設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
         expect(page.url()).toContain('/admin/notification');
         // アクション選択肢にワークフロー関連が存在することを確認
         const actionOptions = page.locator('select option, [data-option], label');
@@ -1160,8 +1069,7 @@ test.describe('通知設定', () => {
 
     test('102-6: 通知設定でワークフロー「全てチェック」時に各ステータス変更時に通知が行われること', async ({ page }) => {
         // 通知新規追加ページでワークフロー全ステータスに対する通知設定UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
         expect(page.url()).toContain('/admin/notification');
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -1389,13 +1297,7 @@ test.describe('通知設定', () => {
         console.log('133-01: 通知設定リンク数:', await notifLink.count());
 
         // 新規作成ページで有効/無効トグルUIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -1413,13 +1315,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('133-02: 通知設定で有効OFFに設定すると該当の通知設定が無効になること（リマインダも停止すること）', async ({ page }) => {
         // 通知設定新規作成ページで有効/無効UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -1444,13 +1340,7 @@ test.describe('通知設定', () => {
         // 通知設定の新規作成ページで日後リマインダ設定UIが使用できることを確認する
         // ※実際の発火（設定した日の8時に通知）は日付経過が必要なため手動確認が必要
 
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         // 通知設定ページが表示されることを確認
         expect(page.url()).toContain('/admin/notification');
@@ -1534,13 +1424,7 @@ test.describe('通知設定', () => {
         expect(page.url()).toContain('/admin/');
 
         // 通知設定新規作成ページへ遷移
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         // ページが表示されることを確認
         expect(page.url()).toContain('/admin/notification');
@@ -1589,13 +1473,7 @@ test.describe('通知設定', () => {
         }
 
         // 通知設定新規作成ページでコメント通知UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -1793,13 +1671,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('190: 通知設定の追加の通知先対象項目に設定値を指定すると通知内容に含まれること', async ({ page }) => {
         // 通知設定新規作成ページで追加通知先対象項目UIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -1822,8 +1694,7 @@ test.describe('通知設定', () => {
         expect(page.url()).toContain('/admin/');
 
         // 通知新規追加ページへ（フッター設定はdisplay_keysで制御）
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         const url = page.url();
         expect(url).toContain('/admin/notification');
@@ -1845,13 +1716,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('210: 通知設定でフッターをオンにするとメール通知の内容にフッター情報が含まれること', async ({ page }) => {
         // 通知新規追加ページへ（フッター設定はdisplay_keysで制御）
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -1961,13 +1826,7 @@ test.describe('通知設定', () => {
     // ---------------------------------------------------------------------------
     test('221: 通知設定を無効にすると通知後リマインダ通知も停止すること', async ({ page }) => {
         // 通知設定新規作成ページで有効/無効UIとリマインダUIを確認
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForFunction(
-            () => !document.body.innerText.includes('読み込み中'),
-            { timeout: 30000 }
-        ).catch(() => {});
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
@@ -2003,8 +1862,7 @@ test.describe('通知設定', () => {
         }
 
         // 通知新規追加ページへ
-        await page.goto(BASE_URL + '/admin/notification/edit/new');
-        await waitForAngular(page);
+        await gotoNotificationEditNew(page);
 
         expect(page.url()).toContain('/admin/notification');
 
