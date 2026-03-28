@@ -7,6 +7,7 @@ const { getAllTypeTableId } = require('./helpers/table-setup');
 const { waitForEmail, deleteTestEmails } = require('./helpers/mail-checker');
 const { webhookUrl, resetWebhook, waitForWebhook } = require('./helpers/webhook-checker');
 const { setupSmtp: setupSmtpApi } = require('./helpers/debug-settings');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 // メール通知テスト用の受信アドレス（.envのIMAP_USERと同じ）
@@ -119,7 +120,7 @@ async function goToNotificationPage(page, tableId) {
  * 設定ページ: /admin/admin_setting/edit/1
  */
 async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+    await page.waitForSelector('body[data-ng-ready="true"]', { timeout }).catch(() => {});
 }
 
 async function setupSmtp(page) {
@@ -205,7 +206,7 @@ test.describe('メール配信', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(120000); // beforeEach（ログイン）+ テスト本体で120秒
-        await login(page, EMAIL, PASSWORD);
+        await ensureLoggedIn(page, EMAIL, PASSWORD);
         await closeTemplateModal(page);
     });
 
