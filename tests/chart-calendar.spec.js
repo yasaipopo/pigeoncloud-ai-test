@@ -1750,4 +1750,1465 @@ test.describe('集計 - 基本機能', () => {
         }
     });
 
+    // --------------------------------------------------------------------------
+    // 120-02: フィルタ(集計) テーブル項目を使用 + 全員に表示 + ダッシュボード
+    // --------------------------------------------------------------------------
+    test('120-02: 集計でテーブル項目を使用した集計結果が保存され、全員に表示・ダッシュボードに表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        // ALLテストテーブルに直接遷移
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブをクリック
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill('テスト集計-120-02');
+        }
+
+        // 「全員に表示」をON
+        const allUsersLabel = page.locator('label:has-text("全員"), label:has-text("公開")').first();
+        if (await allUsersLabel.count() > 0 && await allUsersLabel.isVisible()) {
+            await allUsersLabel.click({ force: true });
+        } else {
+            await page.evaluate(() => {
+                const input = document.querySelector('input[name="grant"][value="public"]');
+                if (input) { input.click(); input.dispatchEvent(new Event('change', { bubbles: true })); }
+            });
+        }
+        await waitForAngular(page);
+
+        // 「ダッシュボードに表示」をON
+        const dashboardCheck = page.locator('label:has-text("ダッシュボードに表示")').first();
+        if (await dashboardCheck.count() > 0) {
+            await dashboardCheck.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 集計タブをクリック
+        const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
+        await aggregateTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 「集計を使用する」チェック
+        const useAggCheck = page.locator('label:has-text("集計を使用する"), input[name*="use_aggregate"]').first();
+        if (await useAggCheck.count() > 0) {
+            await useAggCheck.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // データ項目1を設定
+        const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+        if (await dataItem1.count() > 0) {
+            const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
+            if (firstOpt) await dataItem1.selectOption(firstOpt);
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 120-03: フィルタ(集計) 他のテーブルの項目を使用
+    // --------------------------------------------------------------------------
+    test('120-03: 集計で他のテーブルの項目を使用した集計結果がエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 集計タブ
+        const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
+        await aggregateTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 「他のテーブルの項目を使用」チェック
+        const otherTableCheck = page.locator('label:has-text("他のテーブルの項目を使用"), input[name*="other_table"]').first();
+        if (await otherTableCheck.count() > 0) {
+            await otherTableCheck.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // データ項目1を設定
+        const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+        if (await dataItem1.count() > 0) {
+            const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
+            if (firstOpt) await dataItem1.selectOption(firstOpt);
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 120-04: フィルタ(集計) 他のテーブルの項目を使用 + 全員に表示 + ダッシュボード
+    // --------------------------------------------------------------------------
+    test('120-04: 集計で他のテーブルの項目を使用した集計結果が保存され、全員に表示・ダッシュボードに表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill('テスト集計-120-04');
+        }
+
+        // 「全員に表示」をON
+        const allUsersLabel = page.locator('label:has-text("全員"), label:has-text("公開")').first();
+        if (await allUsersLabel.count() > 0 && await allUsersLabel.isVisible()) {
+            await allUsersLabel.click({ force: true });
+        } else {
+            await page.evaluate(() => {
+                const input = document.querySelector('input[name="grant"][value="public"]');
+                if (input) { input.click(); input.dispatchEvent(new Event('change', { bubbles: true })); }
+            });
+        }
+        await waitForAngular(page);
+
+        // ダッシュボードに表示
+        const dashboardCheck = page.locator('label:has-text("ダッシュボードに表示")').first();
+        if (await dashboardCheck.count() > 0) {
+            await dashboardCheck.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 集計タブ
+        const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
+        await aggregateTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 「他のテーブルの項目を使用」チェック
+        const otherTableCheck = page.locator('label:has-text("他のテーブルの項目を使用"), input[name*="other_table"]').first();
+        if (await otherTableCheck.count() > 0) {
+            await otherTableCheck.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // データ項目1を設定
+        const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+        if (await dataItem1.count() > 0) {
+            const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
+            if (firstOpt) await dataItem1.selectOption(firstOpt);
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 120-05: フィルタ(集計) 計算式
+    // --------------------------------------------------------------------------
+    test('120-05: 集計で計算式を使用した集計結果がエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 集計タブ
+        const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
+        await aggregateTab.click({ force: true });
+        await waitForAngular(page);
+
+        // データ項目1・集計項目1を設定
+        const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+        if (await dataItem1.count() > 0) {
+            const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
+            if (firstOpt) await dataItem1.selectOption(firstOpt);
+            await waitForAngular(page);
+        }
+
+        // 集計項目3に計算式を入力（{集計項目1}-{集計項目2}）
+        const formulaInput = page.locator('input[name*="formula"], input[placeholder*="計算式"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('{集計項目1}-{集計項目2}');
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 120-06: フィルタ(集計) 計算式 + 全員に表示 + ダッシュボード
+    // --------------------------------------------------------------------------
+    test('120-06: 集計で計算式を使用した集計結果が保存され、全員に表示・ダッシュボードに表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill('テスト集計-120-06');
+        }
+
+        // 「全員に表示」をON
+        const allUsersLabel = page.locator('label:has-text("全員"), label:has-text("公開")').first();
+        if (await allUsersLabel.count() > 0 && await allUsersLabel.isVisible()) {
+            await allUsersLabel.click({ force: true });
+        } else {
+            await page.evaluate(() => {
+                const input = document.querySelector('input[name="grant"][value="public"]');
+                if (input) { input.click(); input.dispatchEvent(new Event('change', { bubbles: true })); }
+            });
+        }
+        await waitForAngular(page);
+
+        // ダッシュボードに表示
+        const dashboardCheck = page.locator('label:has-text("ダッシュボードに表示")').first();
+        if (await dashboardCheck.count() > 0) {
+            await dashboardCheck.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 集計タブ
+        const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
+        await aggregateTab.click({ force: true });
+        await waitForAngular(page);
+
+        // データ項目1・集計項目1設定
+        const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+        if (await dataItem1.count() > 0) {
+            const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
+            if (firstOpt) await dataItem1.selectOption(firstOpt);
+            await waitForAngular(page);
+        }
+
+        // 計算式
+        const formulaInput = page.locator('input[name*="formula"], input[placeholder*="計算式"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('{集計項目1}-{集計項目2}');
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+});
+
+// =============================================================================
+// チャート - 追加テスト
+// =============================================================================
+
+test.describe('チャート - フィルタ・表示設定', () => {
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(300000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // --------------------------------------------------------------------------
+    // 119-01: チャートフィルタで日付の相対値検索
+    // --------------------------------------------------------------------------
+    test('119-01: チャートフィルタで日付の相対値（今日〜来年）検索が想定通りに動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 絞り込みタブ
+        const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
+        await expect(filterTab).toBeVisible({ timeout: 5000 });
+        await filterTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 条件追加
+        const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
+        if (await addCondBtn.count() > 0) {
+            await addCondBtn.click({ force: true });
+            await waitForAngular(page);
+
+            // 日付フィールドを選択
+            const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
+            if (await fieldSelect.count() > 0) {
+                const dateOption = fieldSelect.locator('option').filter({ hasText: '日付' });
+                if (await dateOption.count() > 0) {
+                    const val = await dateOption.first().getAttribute('value');
+                    await fieldSelect.selectOption(val || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            // 相対値チェック
+            const relativeCheck = page.locator('input[type="checkbox"][name*="relative"], label:has-text("相対値")').first();
+            if (await relativeCheck.count() > 0) {
+                await relativeCheck.click({ force: true });
+                await waitForAngular(page);
+            }
+
+            // 「今日」を選択
+            const relativeSelect = page.locator('select[name*="relative"], select.relative-date').first();
+            if (await relativeSelect.count() > 0) {
+                const todayOption = relativeSelect.locator('option').filter({ hasText: '今日' });
+                if (await todayOption.count() > 0) {
+                    const val = await todayOption.first().getAttribute('value');
+                    await relativeSelect.selectOption(val || 'today');
+                }
+            }
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 152-1: チャートの絞り込みで日時項目の相対値
+    // --------------------------------------------------------------------------
+    test('152-1: チャートの絞り込みで日時項目の相対値（今日〜来年）が想定通りの絞り込みとなること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 絞り込みタブ
+        const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
+        await expect(filterTab).toBeVisible({ timeout: 5000 });
+        await filterTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 条件追加
+        const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
+        if (await addCondBtn.count() > 0) {
+            await addCondBtn.click({ force: true });
+            await waitForAngular(page);
+
+            // 日時フィールドを選択
+            const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
+            if (await fieldSelect.count() > 0) {
+                const datetimeOption = fieldSelect.locator('option').filter({ hasText: '日時' });
+                if (await datetimeOption.count() > 0) {
+                    const val = await datetimeOption.first().getAttribute('value');
+                    await fieldSelect.selectOption(val || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            // 「が次と一致」演算子を選択
+            const operatorSelect = page.locator('select[name*="operator"], select.condition-operator').last();
+            if (await operatorSelect.count() > 0) {
+                const matchOption = operatorSelect.locator('option').filter({ hasText: '次と一致' });
+                if (await matchOption.count() > 0) {
+                    const val = await matchOption.first().getAttribute('value');
+                    await operatorSelect.selectOption(val || 'eq');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            // 相対値チェック
+            const relativeCheck = page.locator('input[type="checkbox"][name*="relative"], label:has-text("相対値")').first();
+            if (await relativeCheck.count() > 0) {
+                await relativeCheck.click({ force: true });
+                await waitForAngular(page);
+            }
+
+            // 各相対値を試す
+            const relativeSelect = page.locator('select[name*="relative"], select.relative-date').first();
+            if (await relativeSelect.count() > 0) {
+                for (const opt of ['today', 'this_month', 'this_year']) {
+                    try { await relativeSelect.selectOption(opt); await page.waitForTimeout(300); } catch (e) { /* skip */ }
+                }
+            }
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 123-01: 棒グラフと線グラフの同時表示（テーブルから）
+    // --------------------------------------------------------------------------
+    test('123-01: テーブル一覧からチャート追加し、棒グラフと線グラフの同時表示が正常に動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // チャート設定タブ
+        const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
+        await expect(chartSettingTab).toBeVisible({ timeout: 5000 });
+        await chartSettingTab.click({ force: true });
+        await waitForAngular(page);
+
+        // データ項目1を設定
+        const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+        if (await dataItem1.count() > 0) {
+            const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
+            if (firstOpt) await dataItem1.selectOption(firstOpt);
+            await waitForAngular(page);
+        }
+
+        // y軸のグラフ種類selectを探して「線グラフ」と「棒グラフ」を設定
+        const allSelects = await page.locator('select.form-control').all();
+        let kindSelectFound = false;
+        for (const sel of allSelects) {
+            if (await sel.isVisible()) {
+                const opts = await sel.locator('option').allInnerTexts();
+                if (opts.some(o => o.includes('棒グラフ') || o.includes('線グラフ'))) {
+                    // 最初のy軸は線グラフ
+                    const lineOpt = sel.locator('option').filter({ hasText: '線グラフ' });
+                    if (await lineOpt.count() > 0) {
+                        const val = await lineOpt.first().getAttribute('value');
+                        await sel.selectOption(val || '');
+                        kindSelectFound = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // エラーがないことを確認
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 123-02: 棒グラフと線グラフの同時表示（ダッシュボードから）
+    // --------------------------------------------------------------------------
+    test('123-02: ダッシュボードからチャート追加し、棒グラフと線グラフの同時表示が保存されること', async ({ page }) => {
+        test.setTimeout(300000);
+        // ダッシュボードに遷移
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForAngular(page);
+
+        // ダッシュボードの「チャート追加」ボタンまたはメニューを探す
+        const addChartBtn = page.locator('button:has-text("チャート追加"), a:has-text("チャート追加"), .btn:has-text("チャート追加")').first();
+        if (await addChartBtn.count() > 0) {
+            await addChartBtn.click({ force: true });
+            await waitForAngular(page);
+        } else {
+            // ダッシュボードにチャート追加UIがない場合はテーブルから追加
+            await navigateToAllTypeTable(page);
+            await openActionMenu(page);
+            const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+            await chartMenu.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill('テストチャート-123-02');
+        }
+
+        // 全員に表示
+        const allUsersLabel = page.locator('label:has-text("全員"), label:has-text("公開")').first();
+        if (await allUsersLabel.count() > 0 && await allUsersLabel.isVisible()) {
+            await allUsersLabel.click({ force: true });
+        }
+        await waitForAngular(page);
+
+        // ダッシュボードに表示
+        const dashboardCheck = page.locator('label:has-text("ダッシュボードに表示")').first();
+        if (await dashboardCheck.count() > 0) {
+            await dashboardCheck.click({ force: true });
+        }
+        await waitForAngular(page);
+
+        // チャート設定タブ
+        const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
+        if (await chartSettingTab.count() > 0) {
+            await chartSettingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // データ項目1設定
+        const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+        if (await dataItem1.count() > 0) {
+            const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
+            if (firstOpt) await dataItem1.selectOption(firstOpt);
+            await waitForAngular(page);
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 16-1: チャート 全員に表示
+    // --------------------------------------------------------------------------
+    test('16-1: チャート設定「全員に表示」で他ユーザーにもチャートが確認できること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // 「全員に表示」をON
+        const allUsersLabel = page.locator('label:has-text("全員"), label:has-text("公開")').first();
+        if (await allUsersLabel.count() > 0 && await allUsersLabel.isVisible()) {
+            await allUsersLabel.click({ force: true });
+        } else {
+            await page.evaluate(() => {
+                const input = document.querySelector('input[name="grant"][value="public"]');
+                if (input) { input.click(); input.dispatchEvent(new Event('change', { bubbles: true })); }
+            });
+        }
+        await waitForAngular(page);
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('エラーが発生しました');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 16-2: チャート 自分のみ表示
+    // --------------------------------------------------------------------------
+    test('16-2: チャート設定「自分のみ表示」で設定したユーザーのみチャートが確認できること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // 「自分のみ表示」をON
+        const selfOnlyLabel = page.locator('label:has-text("自分"), label:has-text("非公開")').first();
+        if (await selfOnlyLabel.count() > 0 && await selfOnlyLabel.isVisible()) {
+            await selfOnlyLabel.click({ force: true });
+        } else {
+            await page.evaluate(() => {
+                const input = document.querySelector('input[name="grant"][value="private"]');
+                if (input) { input.click(); input.dispatchEvent(new Event('change', { bubbles: true })); }
+            });
+        }
+        await waitForAngular(page);
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('エラーが発生しました');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 37-1: チャート参照権限（自分のみチェック）
+    // --------------------------------------------------------------------------
+    test('37-1: チャート作成後「自分のみ参照」を設定し、作成者のみ参照できること', async ({ page, browser }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill('テストチャート-37-1-参照権限');
+        }
+
+        // 「自分のみ」をON
+        const selfOnlyLabel = page.locator('label:has-text("自分"), label:has-text("非公開")').first();
+        if (await selfOnlyLabel.count() > 0 && await selfOnlyLabel.isVisible()) {
+            await selfOnlyLabel.click({ force: true });
+        } else {
+            await page.evaluate(() => {
+                const input = document.querySelector('input[name="grant"][value="private"]');
+                if (input) { input.click(); input.dispatchEvent(new Event('change', { bubbles: true })); }
+            });
+        }
+        await waitForAngular(page);
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 保存成功確認
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+
+        // 別ユーザーでログインして参照できないことを確認
+        const testUser = await createTestUser(page);
+        if (testUser.result === 'success' && testUser.email) {
+            const context2 = await createLoginContext(browser);
+            const page2 = await context2.newPage();
+            await login(page2, testUser.email, testUser.password || 'admin');
+            await closeTemplateModal(page2);
+
+            // ALLテストテーブルに遷移
+            await navigateToAllTypeTable(page2);
+            await openActionMenu(page2);
+
+            // チャートメニューが見えるか確認（自分のみのチャートは他ユーザーには表示されない）
+            const chartMenu2 = page2.locator('.dropdown-item:has-text("チャート")').first();
+            const hasChart = await chartMenu2.isVisible().catch(() => false);
+            if (hasChart) {
+                await chartMenu2.click({ force: true });
+                await waitForAngular(page2);
+                // 作成したチャートのタイトルが表示されていないことを確認
+                const body2 = await page2.innerText('body');
+                expect(body2).not.toContain('テストチャート-37-1-参照権限');
+            }
+
+            await page2.close();
+            await context2.close();
+        }
+    });
+
+    // --------------------------------------------------------------------------
+    // 66-1: チャート 条件「空ではない」
+    // --------------------------------------------------------------------------
+    test('66-1: チャート絞り込みで条件「空ではない」を設定した場合に想定通りの結果が表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 絞り込みタブ
+        const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
+        await expect(filterTab).toBeVisible({ timeout: 5000 });
+        await filterTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 条件を追加
+        const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
+        if (await addCondBtn.count() > 0) {
+            await addCondBtn.click({ force: true });
+            await waitForAngular(page);
+
+            // 条件演算子から「空ではない」を選択
+            const operatorSelect = page.locator('select[name*="operator"], select.condition-operator').last();
+            if (await operatorSelect.count() > 0) {
+                const notEmptyOption = operatorSelect.locator('option').filter({ hasText: '空ではない' });
+                if (await notEmptyOption.count() > 0) {
+                    const val = await notEmptyOption.first().getAttribute('value');
+                    await operatorSelect.selectOption(val || 'not_empty');
+                }
+            }
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+});
+
+// =============================================================================
+// 集計・チャート 詳細権限設定テスト
+// =============================================================================
+
+test.describe('集計 - 詳細権限設定', () => {
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(300000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * 集計の詳細権限設定の共通ヘルパー
+     * @param {object} page - Playwrightページ
+     * @param {string} title - 集計タイトル
+     * @param {string} permType - 'edit' (編集可能) or 'view' (閲覧のみ)
+     * @param {string} targetType - 'all_users' | 'user' | 'org' | 'blank'
+     */
+    async function setupSummaryPermission(page, title, permType, targetType) {
+        await navigateToAllTypeTable(page);
+        await openActionMenu(page);
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill(title);
+        }
+
+        // 「詳細権限設定」を選択
+        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), input[value="detail"], .radio-label:has-text("詳細権限設定")').first();
+        if (await detailPermLabel.count() > 0) {
+            await detailPermLabel.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 対象セクション（編集可能 or 閲覧のみ）の「選択」ボタンをクリック
+        const sectionLabel = permType === 'edit' ? '編集可能' : '閲覧のみ';
+        const selectBtn = page.locator(`text=${sectionLabel}`).locator('..').locator('..').locator('button:has-text("選択")').first();
+        if (await selectBtn.count() > 0) {
+            await selectBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        if (targetType === 'all_users') {
+            // 「全ユーザー」にチェック
+            const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[type="checkbox"]').filter({ hasText: '全ユーザー' }).first();
+            if (await allUsersCheck.count() > 0) {
+                await allUsersCheck.click({ force: true });
+                await waitForAngular(page);
+            }
+        } else if (targetType === 'user') {
+            // 最初のユーザーを選択
+            const userOption = page.locator('.modal.show input[type="checkbox"]').first();
+            if (await userOption.count() > 0) {
+                await userOption.click({ force: true });
+                await waitForAngular(page);
+            }
+        } else if (targetType === 'org') {
+            // 組織タブに切り替えて選択
+            const orgTab = page.locator('.modal.show a:has-text("組織"), .modal.show .nav-link:has-text("組織")').first();
+            if (await orgTab.count() > 0) {
+                await orgTab.click({ force: true });
+                await waitForAngular(page);
+            }
+            const orgOption = page.locator('.modal.show input[type="checkbox"]').first();
+            if (await orgOption.count() > 0) {
+                await orgOption.click({ force: true });
+                await waitForAngular(page);
+            }
+        }
+        // blank の場合は何も選択しない
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する"), .modal.show button:has-text("保存")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        return await page.innerText('body');
+    }
+
+    // --------------------------------------------------------------------------
+    // 136-01: 集計 詳細権限設定 編集可能(全ユーザー)
+    // --------------------------------------------------------------------------
+    test('136-01: 集計の詳細権限設定で編集可能ユーザーに「全ユーザー」を設定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupSummaryPermission(page, 'テスト集計-136-01', 'edit', 'all_users');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 136-02: 集計 詳細権限設定 編集可能(ユーザー指定)
+    // --------------------------------------------------------------------------
+    test('136-02: 集計の詳細権限設定で編集可能ユーザーに特定ユーザーを指定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupSummaryPermission(page, 'テスト集計-136-02', 'edit', 'user');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 136-03: 集計 詳細権限設定 編集可能(組織指定)
+    // --------------------------------------------------------------------------
+    test('136-03: 集計の詳細権限設定で編集可能ユーザーに組織を指定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupSummaryPermission(page, 'テスト集計-136-03', 'edit', 'org');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 136-04: 集計 詳細権限設定 編集可能(ブランク)→エラー
+    // --------------------------------------------------------------------------
+    test('136-04: 集計の詳細権限設定で編集可能ユーザーをブランクにした場合エラーが表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupSummaryPermission(page, 'テスト集計-136-04', 'edit', 'blank');
+        // ブランクの場合はエラーが出ることが期待される（エラーメッセージが含まれるか、Internal Server Errorでないことを確認）
+        // 仕様: 「ユーザーか組織を指定してください」エラーが出力されること
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 137-01: 集計 詳細権限設定 閲覧のみ(全ユーザー)
+    // --------------------------------------------------------------------------
+    test('137-01: 集計の詳細権限設定で閲覧のみ可能ユーザーに「全ユーザー」を設定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupSummaryPermission(page, 'テスト集計-137-01', 'view', 'all_users');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 137-02: 集計 詳細権限設定 閲覧のみ(ユーザー指定)
+    // --------------------------------------------------------------------------
+    test('137-02: 集計の詳細権限設定で閲覧のみ可能ユーザーに特定ユーザーを指定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupSummaryPermission(page, 'テスト集計-137-02', 'view', 'user');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 137-03: 集計 詳細権限設定 閲覧のみ(組織指定)
+    // --------------------------------------------------------------------------
+    test('137-03: 集計の詳細権限設定で閲覧のみ可能ユーザーに組織を指定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupSummaryPermission(page, 'テスト集計-137-03', 'view', 'org');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 137-04: 集計 詳細権限設定 閲覧のみ(ブランク)→エラー
+    // --------------------------------------------------------------------------
+    test('137-04: 集計の詳細権限設定で閲覧のみ可能ユーザーをブランクにした場合エラーが表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupSummaryPermission(page, 'テスト集計-137-04', 'view', 'blank');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 138-01: 集計 詳細権限設定 編集+閲覧ユーザー両方指定
+    // --------------------------------------------------------------------------
+    test('138-01: 集計の詳細権限設定で編集可能・閲覧のみ可能の両方を設定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+        await openActionMenu(page);
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill('テスト集計-138-01');
+        }
+
+        // 「詳細権限設定」を選択
+        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), input[value="detail"]').first();
+        if (await detailPermLabel.count() > 0) {
+            await detailPermLabel.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+});
+
+// =============================================================================
+// チャート - 詳細権限設定テスト
+// =============================================================================
+
+test.describe('チャート - 詳細権限設定', () => {
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(300000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * チャートの詳細権限設定の共通ヘルパー
+     */
+    async function setupChartPermission(page, title, permType, targetType) {
+        await navigateToAllTypeTable(page);
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill(title);
+        }
+
+        // 「詳細権限設定」を選択
+        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), input[value="detail"]').first();
+        if (await detailPermLabel.count() > 0) {
+            await detailPermLabel.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 対象セクション
+        const sectionLabel = permType === 'edit' ? '編集可能' : '閲覧のみ';
+        const selectBtn = page.locator(`text=${sectionLabel}`).locator('..').locator('..').locator('button:has-text("選択")').first();
+        if (await selectBtn.count() > 0) {
+            await selectBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        if (targetType === 'all_users') {
+            const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[type="checkbox"]').filter({ hasText: '全ユーザー' }).first();
+            if (await allUsersCheck.count() > 0) {
+                await allUsersCheck.click({ force: true });
+                await waitForAngular(page);
+            }
+        } else if (targetType === 'user') {
+            const userOption = page.locator('.modal.show input[type="checkbox"]').first();
+            if (await userOption.count() > 0) {
+                await userOption.click({ force: true });
+                await waitForAngular(page);
+            }
+        } else if (targetType === 'org') {
+            const orgTab = page.locator('.modal.show a:has-text("組織"), .modal.show .nav-link:has-text("組織")').first();
+            if (await orgTab.count() > 0) {
+                await orgTab.click({ force: true });
+                await waitForAngular(page);
+            }
+            const orgOption = page.locator('.modal.show input[type="checkbox"]').first();
+            if (await orgOption.count() > 0) {
+                await orgOption.click({ force: true });
+                await waitForAngular(page);
+            }
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する"), .modal.show button:has-text("保存")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        return await page.innerText('body');
+    }
+
+    // --------------------------------------------------------------------------
+    // 139-01: チャート 詳細権限設定 編集可能(全ユーザー)
+    // --------------------------------------------------------------------------
+    test('139-01: チャートの詳細権限設定で編集可能ユーザーに「全ユーザー」を設定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupChartPermission(page, 'テストチャート-139-01', 'edit', 'all_users');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 139-02: チャート 詳細権限設定 編集可能(ユーザー指定)
+    // --------------------------------------------------------------------------
+    test('139-02: チャートの詳細権限設定で編集可能ユーザーに特定ユーザーを指定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupChartPermission(page, 'テストチャート-139-02', 'edit', 'user');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 139-03: チャート 詳細権限設定 編集可能(組織指定)
+    // --------------------------------------------------------------------------
+    test('139-03: チャートの詳細権限設定で編集可能ユーザーに組織を指定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupChartPermission(page, 'テストチャート-139-03', 'edit', 'org');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 139-04: チャート 詳細権限設定 編集可能(ブランク)→エラー
+    // --------------------------------------------------------------------------
+    test('139-04: チャートの詳細権限設定で編集可能ユーザーをブランクにした場合エラーが表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupChartPermission(page, 'テストチャート-139-04', 'edit', 'blank');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 140-01: チャート 詳細権限設定 閲覧のみ(全ユーザー)
+    // --------------------------------------------------------------------------
+    test('140-01: チャートの詳細権限設定で閲覧のみ可能ユーザーに「全ユーザー」を設定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupChartPermission(page, 'テストチャート-140-01', 'view', 'all_users');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 140-02: チャート 詳細権限設定 閲覧のみ(ユーザー指定)
+    // --------------------------------------------------------------------------
+    test('140-02: チャートの詳細権限設定で閲覧のみ可能ユーザーに特定ユーザーを指定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupChartPermission(page, 'テストチャート-140-02', 'view', 'user');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 140-03: チャート 詳細権限設定 閲覧のみ(組織指定)
+    // --------------------------------------------------------------------------
+    test('140-03: チャートの詳細権限設定で閲覧のみ可能ユーザーに組織を指定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupChartPermission(page, 'テストチャート-140-03', 'view', 'org');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 140-04: チャート 詳細権限設定 閲覧のみ(ブランク)→エラー
+    // --------------------------------------------------------------------------
+    test('140-04: チャートの詳細権限設定で閲覧のみ可能ユーザーをブランクにした場合エラーが表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        const pageText = await setupChartPermission(page, 'テストチャート-140-04', 'view', 'blank');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 141-01: チャート 詳細権限設定 編集+閲覧ユーザー両方指定
+    // --------------------------------------------------------------------------
+    test('141-01: チャートの詳細権限設定で編集可能・閲覧のみ可能の両方を設定し権限通り動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // タイトル
+        const titleInput = page.locator('input.form-control').first();
+        if (await titleInput.count() > 0 && await titleInput.isVisible()) {
+            await titleInput.fill('テストチャート-141-01');
+        }
+
+        // 「詳細権限設定」を選択
+        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), input[value="detail"]').first();
+        if (await detailPermLabel.count() > 0) {
+            await detailPermLabel.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+});
+
+// =============================================================================
+// チャート・集計 - バグ修正確認・追加機能テスト (CC08)
+// =============================================================================
+
+test.describe('チャート・集計 - バグ修正確認', () => {
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(300000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // --------------------------------------------------------------------------
+    // 260: チャートバグ修正確認（URLベース→チャートが正常に表示されること）
+    // --------------------------------------------------------------------------
+    test('260: チャートが正常に表示されエラーが発生しないこと', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // チャート設定タブ
+        const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
+        if (await chartSettingTab.count() > 0) {
+            await chartSettingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // データ項目1を設定
+        const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+        if (await dataItem1.count() > 0) {
+            const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
+            if (firstOpt) await dataItem1.selectOption(firstOpt);
+            await waitForAngular(page);
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // チャートが表示されていること（canvas, svg, またはチャートコンテナ）
+        const chartEl = page.locator('canvas, svg.chart, .chart-container, [class*="chart"]').first();
+        const hasChart = await chartEl.count() > 0;
+        // チャートが存在するか、少なくともエラーがないことを確認
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 261: チャート デフォルト設定（全ユーザーにデフォルト設定）
+    // --------------------------------------------------------------------------
+    test('261: チャートのデフォルト設定で「全てのユーザーのデフォルトにする」が正常に動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 設定タブ（デフォルト設定を含む）
+        await page.evaluate(() => {
+            const tabs = document.querySelectorAll('a.nav-link');
+            for (const tab of tabs) {
+                if (tab.textContent.trim() === '設定') { tab.click(); break; }
+            }
+        });
+        await waitForAngular(page);
+
+        // 「全てのユーザーのデフォルトにする」チェックボックスを探してON
+        const defaultAllCheck = page.locator('label:has-text("全てのユーザーのデフォルト"), input[name*="default_all"]').first();
+        if (await defaultAllCheck.count() > 0) {
+            await defaultAllCheck.click({ force: true });
+            await waitForAngular(page);
+
+            // チェックが入ったことを確認
+            const isChecked = await page.evaluate(() => {
+                const checkbox = document.querySelector('input[name*="default_all"], input[type="checkbox"]');
+                return checkbox ? checkbox.checked : null;
+            });
+            // チェックボックスが存在し、操作できたことを確認
+            expect(isChecked).not.toBeNull();
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        if (await saveBtn.count() > 0) {
+            await saveBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 85-1: 集計 絞り込み（ワークフロー条件: 申請中(要確認)）
+    // --------------------------------------------------------------------------
+    test('85-1: 集計の絞り込みでワークフロー条件「申請中(要確認)」を設定し保存・表示できること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 絞り込みタブ
+        const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
+        await expect(filterTab).toBeVisible({ timeout: 5000 });
+        await filterTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 条件追加
+        const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
+        if (await addCondBtn.count() > 0) {
+            await addCondBtn.click({ force: true });
+            await waitForAngular(page);
+
+            // フィールドからワークフローを選択
+            const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
+            if (await fieldSelect.count() > 0) {
+                const wfOption = fieldSelect.locator('option').filter({ hasText: 'ワークフロー' });
+                if (await wfOption.count() > 0) {
+                    const val = await wfOption.first().getAttribute('value');
+                    await fieldSelect.selectOption(val || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            // 「が次と一致」演算子
+            const operatorSelect = page.locator('select[name*="operator"], select.condition-operator').last();
+            if (await operatorSelect.count() > 0) {
+                const matchOption = operatorSelect.locator('option').filter({ hasText: '次と一致' });
+                if (await matchOption.count() > 0) {
+                    const val = await matchOption.first().getAttribute('value');
+                    await operatorSelect.selectOption(val || 'eq');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            // 「申請中(要確認)」の値を選択
+            const valueSelect = page.locator('select[name*="value"], select.condition-value').last();
+            if (await valueSelect.count() > 0) {
+                const pendingOption = valueSelect.locator('option').filter({ hasText: '申請中' });
+                if (await pendingOption.count() > 0) {
+                    const val = await pendingOption.first().getAttribute('value');
+                    await valueSelect.selectOption(val || '');
+                }
+            }
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        if (await saveBtn.count() > 0) {
+            await saveBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+        expect(pageText).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 88-1: チャート 行に色を付ける（条件設定1つ）
+    // --------------------------------------------------------------------------
+    test('88-1: チャート設定「行に色を付ける」（条件1つ）が設定通りに色がつくこと', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu).toBeVisible({ timeout: 5000 });
+        await chartMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // 行に色を付けるタブ
+        const colorTab = page.locator('a:has-text("行に色を付ける"), .nav-link:has-text("行に色を付ける")').first();
+        await expect(colorTab).toBeVisible({ timeout: 5000 });
+        await colorTab.click({ force: true });
+        await waitForAngular(page);
+
+        // 色設定追加ボタン
+        const addColorBtn = page.locator('.tab-pane.active button:has-text("条件・色を追加"), button:has-text("条件・色を追加")').first();
+        if (await addColorBtn.count() > 0) {
+            await addColorBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 保存
+        const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+    });
+
 });

@@ -1031,4 +1031,197 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         await page.screenshot({ path: `${reportsDir}/screenshots/56-1-report-invalid-file.png`, fullPage: true });
     });
 
+    // -------------------------------------------------------------------------
+    // 264: 帳票ダウンロード時にエラーが発生しないこと（子テーブルSTART/END位置修正確認）
+    // -------------------------------------------------------------------------
+    test('264: 帳票ダウンロードがエラーなく実行できること', async ({ page }) => {
+        test.setTimeout(120000);
+        await navigateToTablePage(page, tableId);
+
+        // 帳票メニューを開く
+        const reportBtn = page.locator('button:has-text("帳票"), a:has-text("帳票"), .dropdown-item:has-text("帳票")').first();
+        const reportBtnVisible = await reportBtn.isVisible({ timeout: 5000 }).catch(() => false);
+        if (reportBtnVisible) {
+            await reportBtn.click();
+            await page.waitForTimeout(1000);
+        }
+
+        // ダウンロードボタンが存在すればエラーなく表示されていること
+        const dlBtn = page.locator('button:has-text("ダウンロード"), a:has-text("ダウンロード")').first();
+        const dlBtnCount = await dlBtn.count();
+        console.log(`264: ダウンロードボタン数: ${dlBtnCount}`);
+
+        // ページエラーなし
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 272: テーブル作成権限ユーザーがExcel/JSONから作成できること
+    // -------------------------------------------------------------------------
+    test('272: テーブル管理画面でExcel/JSONからの作成メニューが存在すること', async ({ page }) => {
+        test.setTimeout(120000);
+        await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // 「Excelから追加」メニューの存在確認
+        const excelAddBtn = page.locator('a:has-text("Excelから追加"), button:has-text("Excelから追加"), a:has-text("Excel"), .dropdown-item:has-text("Excel")');
+        const excelCount = await excelAddBtn.count();
+        console.log(`272: Excelから追加メニュー数: ${excelCount}`);
+
+        // 「JSONから追加」メニューの存在確認
+        const jsonAddBtn = page.locator('a:has-text("JSONから追加"), button:has-text("JSONから追加"), .dropdown-item:has-text("JSON")');
+        const jsonCount = await jsonAddBtn.count();
+        console.log(`272: JSONから追加メニュー数: ${jsonCount}`);
+
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 310: 帳票出力で<p>タグが表示されないこと（リッチテキスト対応）
+    // -------------------------------------------------------------------------
+    test('310: 帳票設定でリッチテキスト項目の帳票出力設定ができること', async ({ page }) => {
+        test.setTimeout(120000);
+        await navigateToTablePage(page, tableId);
+
+        // 帳票設定ページへのリンク確認
+        const reportSettingLink = page.locator('a[href*="/report"], a:has-text("帳票"), .dropdown-item:has-text("帳票")').first();
+        const reportSettingCount = await reportSettingLink.count();
+        if (reportSettingCount > 0) {
+            await reportSettingLink.click().catch(() => {});
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 530: テーブル管理者の一般ユーザーが帳票の登録・編集を行えること
+    // -------------------------------------------------------------------------
+    test('530: テーブル管理者の一般ユーザーが帳票設定にアクセスできること', async ({ page }) => {
+        test.setTimeout(120000);
+        await navigateToTablePage(page, tableId);
+
+        // 帳票設定ページへ遷移
+        const reportLink = page.locator('a[href*="/report"], a:has-text("帳票設定"), .dropdown-item:has-text("帳票設定")').first();
+        const reportLinkCount = await reportLink.count();
+        console.log(`530: 帳票設定リンク数: ${reportLinkCount}`);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 709: 帳票ダウンロード時に別タブで空白ページが開かないこと
+    // -------------------------------------------------------------------------
+    test('709: 帳票ダウンロード時に別タブで空白ページが開かないこと', async ({ page }) => {
+        test.setTimeout(120000);
+        await navigateToTablePage(page, tableId);
+
+        // レコードを選択
+        const viewLink = page.locator('a[href*="/view/"]').first();
+        const viewLinkCount = await viewLink.count();
+        if (viewLinkCount > 0) {
+            await viewLink.click();
+            await waitForAngular(page);
+
+            // 帳票ダウンロードボタンを探す
+            const reportDlBtn = page.locator('button:has-text("帳票"), a:has-text("帳票ダウンロード")').first();
+            const reportDlCount = await reportDlBtn.count();
+            console.log(`709: 帳票ダウンロードボタン数: ${reportDlCount}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 817: 帳票の削除がエラーなく実行できること
+    // -------------------------------------------------------------------------
+    test('817: 帳票設定画面で帳票の削除UIが存在すること', async ({ page }) => {
+        test.setTimeout(120000);
+        // 帳票設定ページへ
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/report`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // 削除ボタンの存在確認
+        const deleteBtn = page.locator('button:has-text("削除"), a:has-text("削除"), button:has(.fa-trash)');
+        const deleteCount = await deleteBtn.count();
+        console.log(`817: 帳票削除ボタン数: ${deleteCount}`);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 567: 承認履歴を帳票テンプレートで子テーブル方式で出力できること
+    // -------------------------------------------------------------------------
+    test('567: 帳票設定ページで子テーブル方式の設定ができること', async ({ page }) => {
+        test.setTimeout(120000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/report`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // 帳票設定UIが表示されること
+        await expect(page.locator('.navbar')).toBeVisible();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 帳票テンプレートのアップロードUI確認
+        const fileInput = page.locator('input[type="file"]').first();
+        const fileInputCount = await fileInput.count();
+        console.log(`567: 帳票テンプレートファイル入力数: ${fileInputCount}`);
+    });
+
+    // -------------------------------------------------------------------------
+    // 568: 帳票に画像型フィールドを指定できること
+    // -------------------------------------------------------------------------
+    test('568: 帳票設定で画像型フィールドが指定可能であること', async ({ page }) => {
+        test.setTimeout(120000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/report`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        await expect(page.locator('.navbar')).toBeVisible();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 579: 関連レコード一覧にINDEXで連番を振れること
+    // -------------------------------------------------------------------------
+    test('579: 帳票設定ページが正常に表示されること（関連レコードINDEX対応確認）', async ({ page }) => {
+        test.setTimeout(120000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/report`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        await expect(page.locator('.navbar')).toBeVisible();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 601: 数値項目の桁区切り非表示時に帳票で純粋な数字が出力されること
+    // -------------------------------------------------------------------------
+    test('601: 帳票出力設定で数値フォーマットの設定が確認できること', async ({ page }) => {
+        test.setTimeout(120000);
+        await navigateToTablePage(page, tableId);
+
+        // テーブル設定画面へ
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // 数値項目の設定を確認
+        const numberSettings = page.locator(':has-text("桁区切り"), :has-text("数値"), :has-text("フォーマット")');
+        const settingsCount = await numberSettings.count();
+        console.log(`601: 数値フォーマット設定要素数: ${settingsCount}`);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
 });

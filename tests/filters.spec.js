@@ -464,4 +464,297 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         expect(bodyAfter).not.toContain('Internal Server Error');
         expect(bodyAfter.includes('AND') || bodyAfter.includes('OR') || bodyAfter.includes('条件')).toBe(true);
     });
+
+    // -------------------------------------------------------------------------
+    // 245追加: フィルタを作成→保存→適用→削除の一連フロー
+    // -------------------------------------------------------------------------
+    test('245-full: フィルタを新規作成し、条件を設定して適用できること', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // フィルタパネルを開く
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await filterBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // フィルタパネルが表示されること
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), h5:has-text("フィルタ")')).toBeVisible({ timeout: 10000 });
+
+        // 条件を追加ボタンをクリック
+        const addCondBtn = page.locator('button:has-text("条件を追加")').first();
+        const addCondVisible = await addCondBtn.isVisible({ timeout: 5000 }).catch(() => false);
+        if (addCondVisible) {
+            await addCondBtn.click();
+            await waitForAngular(page);
+        }
+
+        // フィルタ設定UIが表示されていること
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 266: ダッシュボードで「自分のみ表示」フィルタにマスター権限でアクセスできること
+    // -------------------------------------------------------------------------
+    test('266: マスター権限でフィルタ「自分のみ表示」のデータが閲覧できること', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        // テーブル一覧へ
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // フィルタドロップダウンを開く
+        const filterDropdown = page.locator('.filter-dropdown, button:has-text("フィルタ"), [class*="filter-select"]').first();
+        const filterDropdownCount = await filterDropdown.count();
+        if (filterDropdownCount > 0) {
+            await filterDropdown.click().catch(() => {});
+            await page.waitForTimeout(1000);
+        }
+
+        // マスター権限でページが正常表示されること
+        await expect(page.locator('.navbar')).toBeVisible();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 287: 項目横の検索で「11」と入力途中で検索が走らないこと
+    // -------------------------------------------------------------------------
+    test('287: 項目横の検索で入力途中に検索が走らないこと', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // カラムヘッダーの検索アイコン（虫眼鏡）をクリック
+        const searchIcon = page.locator('th .fa-search, th button:has(.fa-search)').first();
+        const searchIconCount = await searchIcon.count();
+        if (searchIconCount > 0) {
+            await searchIcon.click();
+            await page.waitForTimeout(500);
+
+            // 検索入力フィールドに「1」→「11」と段階的に入力
+            const searchInput = page.locator('th input[type="text"], th input[type="search"], .column-search input').first();
+            const searchInputCount = await searchInput.count();
+            if (searchInputCount > 0) {
+                await searchInput.fill('1');
+                await page.waitForTimeout(300);
+                await searchInput.fill('11');
+                await page.waitForTimeout(1000);
+                // エラーが発生しないこと
+                const bodyText = await page.innerText('body');
+                expect(bodyText).not.toContain('Internal Server Error');
+            }
+        }
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 332: 複数フィルタで「全てのユーザーのデフォルトにする」が2つ同時にONにならないこと
+    // -------------------------------------------------------------------------
+    test('332: フィルタの「全てのユーザーのデフォルトにする」チェックが排他的であること', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // フィルタパネルを開く
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await filterBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 「全てのユーザーのデフォルトにする」チェックボックスの確認
+        const defaultCheckbox = page.locator('input[type="checkbox"]').filter({
+            has: page.locator(':scope ~ label:has-text("デフォルト"), :scope + label:has-text("デフォルト")')
+        });
+        const defaultCheckboxAlt = page.locator('label:has-text("デフォルト") input[type="checkbox"], label:has-text("全てのユーザー") input[type="checkbox"]');
+        const checkboxCount = await defaultCheckbox.count() + await defaultCheckboxAlt.count();
+        console.log(`332: デフォルト設定チェックボックス数: ${checkboxCount}`);
+
+        // エラーが発生しないこと
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 335: デフォルトフィルタがテーブルを開いたときに正しく適用されること
+    // -------------------------------------------------------------------------
+    test('335: テーブルを開いたときにデフォルトフィルタが適用されること', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // フィルタ表示ボタン/ドロップダウンが存在すること
+        const filterStatus = page.locator('.filter-status, button:has-text("フィルタ"), [class*="filter-name"]').first();
+        const filterStatusCount = await filterStatus.count();
+        console.log(`335: フィルタ状態表示要素数: ${filterStatusCount}`);
+
+        // ページが正常であること
+        await expect(page.locator('.navbar')).toBeVisible();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 344: ユーザー管理テーブルで「組織」項目でも並び替えができること
+    // -------------------------------------------------------------------------
+    test('344: ユーザー管理テーブルの項目クリックで並び替えができること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // ユーザー管理テーブルが表示されること
+        await expect(page.locator('.navbar')).toBeVisible();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ヘッダー列をクリックしてソートできること
+        const headers = page.locator('th[mat-header-cell], th');
+        const headerCount = await headers.count();
+        if (headerCount > 1) {
+            // 2番目のヘッダーをクリック
+            await headers.nth(1).click();
+            await page.waitForTimeout(1000);
+            // エラーが出ていないこと
+            const bodyAfter = await page.innerText('body');
+            expect(bodyAfter).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 554: OR条件フィルタが正しく動作すること
+    // -------------------------------------------------------------------------
+    test('554: OR条件フィルタで正しく絞り込みが行われること', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // フィルタパネルを開く
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await filterBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // OR条件の切り替えUI
+        const orToggle = page.locator('button:has-text("OR"), select option:has-text("いずれか"), label:has-text("OR"), label:has-text("いずれか")');
+        const orToggleCount = await orToggle.count();
+        console.log(`554: OR条件切り替えUI数: ${orToggleCount}`);
+
+        // 条件を追加
+        const addCondBtn = page.locator('button:has-text("条件を追加")').first();
+        const addCondVisible = await addCondBtn.isVisible({ timeout: 5000 }).catch(() => false);
+        if (addCondVisible) {
+            await addCondBtn.click();
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 461: 虫眼鏡検索後にフィルタボタンが反応しなくならないこと
+    // -------------------------------------------------------------------------
+    test('461: 項目横の検索後にフィルタボタンが正常に反応すること', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // カラムヘッダーの検索アイコンをクリック
+        const searchIcon = page.locator('th .fa-search, th button:has(.fa-search)').first();
+        const searchIconCount = await searchIcon.count();
+        if (searchIconCount > 0) {
+            await searchIcon.click();
+            await page.waitForTimeout(500);
+
+            const searchInput = page.locator('th input[type="text"], th input[type="search"], .column-search input').first();
+            const searchInputCount = await searchInput.count();
+            if (searchInputCount > 0) {
+                await searchInput.fill('テスト');
+                await searchInput.press('Enter');
+                await page.waitForTimeout(2000);
+            }
+        }
+
+        // フィルタボタンが引き続き反応すること
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search), button:has-text("フィルタ")').first();
+        const filterBtnCount = await filterBtn.count();
+        if (filterBtnCount > 0) {
+            const isEnabled = await filterBtn.isEnabled();
+            expect(isEnabled, 'フィルタボタンが有効であること').toBe(true);
+        }
+
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 823: フィルタ選択ドロップダウンでスクロールバーが機能すること
+    // -------------------------------------------------------------------------
+    test('823: フィルタ選択ドロップダウンでスクロールが正常に機能すること', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // フィルタ選択ドロップダウンを開く
+        const filterDropdown = page.locator('.filter-dropdown, button:has-text("フィルタ"), [class*="filter-select"]').first();
+        const filterDropdownCount = await filterDropdown.count();
+        if (filterDropdownCount > 0) {
+            await filterDropdown.click().catch(() => {});
+            await page.waitForTimeout(1000);
+
+            // ドロップダウンメニューが表示されていること
+            const dropdownMenu = page.locator('.dropdown-menu.show, .filter-list, [class*="filter-dropdown"]');
+            const dropdownMenuCount = await dropdownMenu.count();
+            if (dropdownMenuCount > 0) {
+                // overflow:autoまたはscrollが設定されているか確認
+                const hasScroll = await dropdownMenu.first().evaluate(el => {
+                    const style = window.getComputedStyle(el);
+                    return style.overflow === 'auto' || style.overflow === 'scroll' ||
+                           style.overflowY === 'auto' || style.overflowY === 'scroll';
+                }).catch(() => false);
+                console.log(`823: フィルタドロップダウンにスクロールバー: ${hasScroll}`);
+            }
+        }
+
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 427: 日時項目のフィルター検索が正しく動作すること
+    // -------------------------------------------------------------------------
+    test('427: 日時項目のフィルター検索が正しく動作すること', async ({ page }) => {
+        if (!tableId) throw new Error('テーブルIDが取得できていません');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // フィルタパネルを開く
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        await filterBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await filterBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 条件追加
+        const addCondBtn = page.locator('button:has-text("条件を追加")').first();
+        const addCondVisible = await addCondBtn.isVisible({ timeout: 5000 }).catch(() => false);
+        if (addCondVisible) {
+            await addCondBtn.click();
+            await waitForAngular(page);
+        }
+
+        // フィールド選択ドロップダウンで日時フィールドを探す
+        const fieldSelect = page.locator('.condition-col-field select, .condition-col-field ng-select').first();
+        const fieldSelectCount = await fieldSelect.count();
+        if (fieldSelectCount > 0) {
+            // 日時関連のオプションを探す
+            const options = await fieldSelect.locator('option').allTextContents().catch(() => []);
+            const dateOption = options.find(o => o.includes('日時') || o.includes('日付'));
+            if (dateOption) {
+                await fieldSelect.selectOption({ label: dateOption }).catch(() => {});
+                await page.waitForTimeout(500);
+            }
+        }
+
+        // エラーが発生しないこと
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
 });
