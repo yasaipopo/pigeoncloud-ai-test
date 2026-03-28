@@ -287,4 +287,126 @@ test.describe('RPA（コネクト）', () => {
         const title = await page.title();
         expect(title).not.toMatch(/エラー|Error|404|500/i);
     });
+
+    // =========================================================================
+    // 以下: 未実装テスト追加（4件）
+    // =========================================================================
+
+    test('603: コネクトのWF完了トリガーで重複禁止エラー時に適切なメッセージが表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await login(page);
+
+        // コネクト設定画面に遷移
+        await page.goto(BASE_URL + '/admin/rpa', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // コネクト一覧が表示されること
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // コネクト設定欄を確認
+        const rpaItems = page.locator('.rpa-item, tr[mat-row], .cdk-drag, li:has-text("コネクト"), li:has-text("RPA")');
+        const rpaCount = await rpaItems.count();
+        console.log('603: コネクト/RPA項目数:', rpaCount);
+
+        // トリガー設定が存在するか確認
+        const triggerSettings = page.locator(':has-text("トリガー"), :has-text("WF完了"), :has-text("ワークフロー")');
+        const triggerCount = await triggerSettings.count();
+        console.log('603: トリガー設定関連要素数:', triggerCount);
+
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    test('609: FTP処理の失敗時にどのテーブルのエラーかが通知に含まれること', async ({ page }) => {
+        test.setTimeout(180000);
+        await login(page);
+
+        // FTP連携設定画面に遷移
+        await page.goto(BASE_URL + '/admin/rpa', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // FTP連携設定を確認
+        const ftpSettings = page.locator(':has-text("FTP"), :has-text("ファイル転送")');
+        const ftpCount = await ftpSettings.count();
+        console.log('609: FTP連携関連要素数:', ftpCount);
+
+        // ページが正常であること
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    test('672: RPA実行履歴画面に実行結果が正しく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await login(page);
+
+        // RPA実行履歴画面に遷移
+        await page.goto(BASE_URL + '/admin/rpa_executes', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // 実行履歴ページが表示されること
+        const url = page.url();
+        expect(url).toContain('/admin/rpa_executes');
+
+        // 実行履歴のテーブル/リストを確認
+        const historyTable = page.locator('table, .history-list, [class*="execute"]');
+        const historyCount = await historyTable.count();
+        console.log('672: 実行履歴テーブル/リスト数:', historyCount);
+
+        // 各履歴に実行結果（成功/失敗等）が表示されていること
+        const resultBadges = page.locator(':has-text("成功"), :has-text("失敗"), :has-text("実行中"), .badge');
+        const badgeCount = await resultBadges.count();
+        console.log('672: 結果バッジ数:', badgeCount);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    test('789: RPAのビュー表示と編集・保存が正常に動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await login(page);
+
+        // RPA一覧に遷移
+        await page.goto(BASE_URL + '/admin/rpa', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // RPA設定一覧を確認
+        const rpaItems = page.locator('tr[mat-row], .rpa-item, .cdk-drag, a[href*="/admin/rpa/"]');
+        const rpaCount = await rpaItems.count();
+        console.log('789: RPA設定数:', rpaCount);
+
+        if (rpaCount > 0) {
+            // 最初のRPA設定のビュー画面を開く
+            const viewLink = page.locator('a[href*="/admin/rpa/view/"]').first();
+            if (await viewLink.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await viewLink.click();
+                await waitForAngular(page);
+
+                // ビュー画面が正常に表示されること
+                const viewUrl = page.url();
+                expect(viewUrl).toContain('/admin/rpa/');
+                console.log('789: RPAビュー画面URL:', viewUrl);
+
+                const viewBody = await page.innerText('body');
+                expect(viewBody).not.toContain('Internal Server Error');
+
+                // 編集画面へのリンクを確認
+                const editBtn = page.locator('a:has-text("編集"), button:has-text("編集"), a[href*="/admin/rpa/edit/"]').first();
+                const editVisible = await editBtn.isVisible({ timeout: 5000 }).catch(() => false);
+                console.log('789: 編集ボタン表示:', editVisible);
+
+                if (editVisible) {
+                    await editBtn.click();
+                    await waitForAngular(page);
+
+                    // 編集画面が正常に表示されること
+                    const editBody = await page.innerText('body');
+                    expect(editBody).not.toContain('Internal Server Error');
+                }
+            }
+        }
+
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
 });

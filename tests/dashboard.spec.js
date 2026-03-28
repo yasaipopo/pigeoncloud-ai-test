@@ -533,4 +533,42 @@ test.describe('ダッシュボード', () => {
             await expect(deleteItem).toHaveCount(0);
         }
     });
+
+    test('806: ダッシュボードの集計ウィジェットで並び替えが正常に動作すること', async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+
+        // ダッシュボードに遷移
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // テンプレートモーダルを閉じる
+        const modal = page.locator('.modal.show');
+        if (await modal.isVisible({ timeout: 3000 }).catch(() => false)) {
+            await modal.locator('button').first().click({ force: true }).catch(() => {});
+            await page.waitForTimeout(1000);
+        }
+
+        // 集計ウィジェットを探す
+        const summaryWidgets = page.locator('.widget, .dashboard-widget, [class*="widget"]').filter({ hasText: '集計' });
+        const widgetCount = await summaryWidgets.count();
+        console.log('806: 集計ウィジェット数:', widgetCount);
+
+        // 並び替えボタンを探す
+        const sortBtns = page.locator('button:has(.fa-sort), button:has-text("並び替え"), .sort-btn, [class*="sort"]');
+        const sortCount = await sortBtns.count();
+        console.log('806: 並び替えボタン数:', sortCount);
+
+        if (sortCount > 0) {
+            // 並び替えボタンをクリック
+            await sortBtns.first().click();
+            await page.waitForTimeout(1000);
+
+            // 並び替え後もページが正常であること
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
 });

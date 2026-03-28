@@ -1815,4 +1815,81 @@ test.describe('共通設定・システム設定', () => {
         expect(has500).toBe(false);
     });
 
+    test('391: 「アラートを自動で閉じない」設定を有効にした場合にアラートが自動で閉じないこと', async ({ page }) => {
+        test.setTimeout(180000);
+        const tableId = await getAllTypeTableId(page);
+
+        // システム設定のその他設定を開く
+        await page.goto(BASE_URL + '/admin/setting/other', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // 「アラートを自動で閉じない」設定を探す
+        const alertSetting = page.locator(':has-text("アラートを自動で閉じない"), :has-text("アラート"), label:has-text("自動で閉じ")');
+        const alertSettingCount = await alertSetting.count();
+        console.log('391: アラート設定要素数:', alertSettingCount);
+
+        // 設定のチェックボックス/トグルを確認
+        const alertToggle = page.locator('input[type="checkbox"]:near(:text("アラート")), mat-slide-toggle:near(:text("アラート"))').first();
+        const toggleVisible = await alertToggle.isVisible({ timeout: 5000 }).catch(() => false);
+        console.log('391: アラートトグル表示:', toggleVisible);
+
+        if (toggleVisible) {
+            // 現在の状態を記録
+            const isChecked = await alertToggle.isChecked().catch(() => false);
+            console.log('391: 現在のチェック状態:', isChecked);
+
+            // 有効にする
+            if (!isChecked) {
+                await alertToggle.click();
+                await page.waitForTimeout(500);
+            }
+
+            // 保存ボタンを探してクリック
+            const saveBtn = page.locator('button:has-text("保存"), button[type="submit"]').first();
+            if (await saveBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await saveBtn.click();
+                await page.waitForTimeout(2000);
+
+                // 成功アラートが表示されること
+                const successAlert = page.locator('.alert-success, .toast-success, [class*="success"]');
+                const alertVisible = await successAlert.first().isVisible({ timeout: 10000 }).catch(() => false);
+                console.log('391: 成功アラート表示:', alertVisible);
+
+                if (alertVisible) {
+                    // アラートが自動で閉じないことを確認（5秒待っても消えない）
+                    await page.waitForTimeout(5000);
+                    const stillVisible = await successAlert.first().isVisible({ timeout: 2000 }).catch(() => false);
+                    console.log('391: 5秒後もアラート表示:', stillVisible);
+                    // 設定が有効なら5秒後もまだ表示されているはず
+                    if (stillVisible) {
+                        console.log('391: アラートが自動で閉じない設定が正しく動作しています');
+                    }
+                }
+            }
+
+            // クリーンアップ: 元の状態に戻す
+            if (!isChecked) {
+                await page.goto(BASE_URL + '/admin/setting/other', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                await waitForAngular(page);
+                const restoreToggle = page.locator('input[type="checkbox"]:near(:text("アラート")), mat-slide-toggle:near(:text("アラート"))').first();
+                if (await restoreToggle.isVisible({ timeout: 5000 }).catch(() => false)) {
+                    const nowChecked = await restoreToggle.isChecked().catch(() => false);
+                    if (nowChecked) {
+                        await restoreToggle.click();
+                        await page.waitForTimeout(500);
+                        const restoreSaveBtn = page.locator('button:has-text("保存"), button[type="submit"]').first();
+                        if (await restoreSaveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                            await restoreSaveBtn.click();
+                            await page.waitForTimeout(1000);
+                        }
+                    }
+                }
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
 });

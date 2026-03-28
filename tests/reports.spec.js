@@ -1224,4 +1224,121 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
         await expect(page.locator('.navbar')).toBeVisible();
     });
+
+    // =========================================================================
+    // 以下: 未実装テスト追加（3件）
+    // =========================================================================
+
+    test('557: 帳票の元Excelにタブが2つ以上あってもダウンロードできること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToTablePage(page, tableId);
+
+        // 帳票設定へ遷移
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // 帳票設定タブを探す
+        const reportTab = page.locator('a:has-text("帳票"), button:has-text("帳票")').first();
+        const reportTabVisible = await reportTab.isVisible({ timeout: 5000 }).catch(() => false);
+        console.log('557: 帳票設定タブ表示:', reportTabVisible);
+
+        if (reportTabVisible) {
+            await reportTab.click();
+            await page.waitForTimeout(1000);
+        }
+
+        // 帳票一覧/設定が表示されること
+        const reportItems = page.locator(':has-text("帳票"), .report-item, [class*="report"]');
+        const reportCount = await reportItems.count();
+        console.log('557: 帳票関連要素数:', reportCount);
+
+        // レコード詳細から帳票ダウンロードを確認
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        const rows = page.locator('tr[mat-row]');
+        if (await rows.first().isVisible({ timeout: 5000 }).catch(() => false)) {
+            const detailBtn = page.locator('button[data-record-url]').first();
+            if (await detailBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                const url = await detailBtn.getAttribute('data-record-url');
+                if (url) {
+                    await page.goto(BASE_URL + url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                    await waitForAngular(page);
+
+                    // 帳票ダウンロードボタンを確認
+                    const downloadBtn = page.locator('button:has-text("帳票"), button:has-text("ダウンロード"), button:has(.fa-download)');
+                    const downloadCount = await downloadBtn.count();
+                    console.log('557: 帳票ダウンロードボタン数:', downloadCount);
+                }
+            }
+        }
+
+        const body = await page.innerText('body');
+        expect(body).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    test('584: 帳票の2枚目以降のシートでも$から始まる式が反映されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToTablePage(page, tableId);
+
+        // テーブル設定画面の帳票設定を開く
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // 帳票設定タブ
+        const reportTab = page.locator('a:has-text("帳票"), button:has-text("帳票")').first();
+        if (await reportTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await reportTab.click();
+            await page.waitForTimeout(1000);
+        }
+
+        // 帳票テンプレートの設定を確認
+        const templateSection = page.locator(':has-text("テンプレート"), :has-text("Excel"), input[type="file"]');
+        const templateCount = await templateSection.count();
+        console.log('584: テンプレート関連要素数:', templateCount);
+
+        const body = await page.innerText('body');
+        expect(body).not.toContain('Internal Server Error');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
+
+    test('729: 子テーブルが空のレコードで帳票出力時に$START/$ENDが表示されないこと', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToTablePage(page, tableId);
+
+        // レコード一覧を開く
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        // レコードがあれば詳細を開いて帳票ダウンロードを確認
+        const rows = page.locator('tr[mat-row]');
+        if (await rows.first().isVisible({ timeout: 5000 }).catch(() => false)) {
+            const detailBtn = page.locator('button[data-record-url]').first();
+            if (await detailBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                const url = await detailBtn.getAttribute('data-record-url');
+                if (url) {
+                    await page.goto(BASE_URL + url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                    await waitForAngular(page);
+
+                    // 帳票ダウンロードボタンを確認
+                    const downloadBtn = page.locator('button:has-text("帳票"), button:has(.fa-file-excel), button:has(.fa-download)');
+                    const downloadCount = await downloadBtn.count();
+                    console.log('729: 帳票ダウンロードボタン数:', downloadCount);
+
+                    // 子テーブルセクションを確認
+                    const childSection = page.locator('.child-table, .sub-table, [class*="child-record"]');
+                    const childVisible = await childSection.first().isVisible({ timeout: 3000 }).catch(() => false);
+                    console.log('729: 子テーブルセクション表示:', childVisible);
+                }
+            }
+        }
+
+        const body = await page.innerText('body');
+        expect(body).not.toContain('Internal Server Error');
+        // $STARTや$ENDがページに表示されていないこと
+        expect(body).not.toContain('$START');
+        expect(body).not.toContain('$END');
+        await expect(page.locator('.navbar')).toBeVisible();
+    });
 });

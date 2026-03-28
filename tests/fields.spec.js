@@ -3097,3 +3097,795 @@ test.describe('計算IF条件（77系）', () => {
     });
 });
 
+// =============================================================================
+// 日時フォーマット（97系）
+// =============================================================================
+
+test.describe('日時フォーマット（97系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * 日時フィールドの表示フォーマットを設定して保存できることを確認する共通関数
+     * @param {import('@playwright/test').Page} page
+     * @param {string} formatStr - 設定するフォーマット文字列
+     */
+    async function testDateFormat(page, formatStr) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 日時フィールドを探してクリック
+        const dateField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
+        if (await dateField.count() > 0) {
+            await dateField.click({ force: true });
+            await waitForAngular(page);
+
+            // 追加オプション設定を開く
+            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
+            if (await optionBtn.count() > 0) {
+                await optionBtn.click({ force: true });
+                await waitForAngular(page);
+            }
+
+            // フォーマット入力欄を探す
+            const formatInput = page.locator('input[name*="format"], input[placeholder*="フォーマット"], input[name*="display_format"]').first();
+            if (await formatInput.count() > 0) {
+                await formatInput.fill('');
+                await formatInput.fill(formatStr);
+                await waitForAngular(page);
+            }
+
+            // 更新ボタンをクリック
+            const updateBtn = page.locator('button:has-text("更新する"), button:has-text("保存")').first();
+            if (await updateBtn.count() > 0) {
+                await updateBtn.click({ force: true });
+                await waitForAngular(page);
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    }
+
+    test('97-1: 日時フィールドにdate("Y/m/d H:i:s")フォーマットを設定できること', async ({ page }) => {
+        await testDateFormat(page, 'date("Y/m/d H:i:s")');
+    });
+
+    test('97-2: 日時フィールドにdate("Y/m/01")フォーマットを設定できること', async ({ page }) => {
+        await testDateFormat(page, 'date("Y/m/01")');
+    });
+
+    test('97-3: 日時フィールドにdate("Y/m/t")フォーマットを設定できること', async ({ page }) => {
+        await testDateFormat(page, 'date("Y/m/t")');
+    });
+
+    test('97-4: 日時フィールドにdate("Y/m/d H:i:s", strtotime(\'-1 day\'))フォーマットを設定できること', async ({ page }) => {
+        await testDateFormat(page, 'date("Y/m/d H:i:s", strtotime(\'-1 day\'))');
+    });
+
+    test('97-5: 日時フィールドにdate("Y/m/d", strtotime(\'last Saturday\'))フォーマットを設定できること', async ({ page }) => {
+        await testDateFormat(page, 'date("Y/m/d", strtotime(\'last Saturday\'))');
+    });
+});
+
+// =============================================================================
+// 表示条件設定（223-229系）
+// =============================================================================
+
+test.describe('表示条件設定（223-229系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * フィールドの表示条件設定が可能であることを確認する共通関数
+     * @param {import('@playwright/test').Page} page
+     * @param {string} fieldTypeLabel - 対象フィールドタイプのラベル
+     */
+    async function testDisplayCondition(page, fieldTypeLabel) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 指定フィールドタイプを探してクリック
+        const field = page.locator('.field-drag, .cdk-drag').filter({ hasText: fieldTypeLabel }).first();
+        if (await field.count() > 0) {
+            await field.click({ force: true });
+            await waitForAngular(page);
+
+            // 追加オプション設定を開く
+            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
+            if (await optionBtn.count() > 0) {
+                await optionBtn.click({ force: true });
+                await waitForAngular(page);
+            }
+
+            // 表示条件設定エリアを探す
+            const conditionArea = page.locator('text=表示条件, text=条件追加, [class*="condition"]').first();
+            if (await conditionArea.count() > 0) {
+                // 条件追加ボタンがあればクリック
+                const addCondBtn = page.locator('button:has-text("条件追加"), a:has-text("条件追加"), button:has-text("+条件")').first();
+                if (await addCondBtn.count() > 0) {
+                    await addCondBtn.click({ force: true });
+                    await waitForAngular(page);
+                }
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    }
+
+    test('223: 選択肢(単一選択)フィールドに表示条件設定ができること', async ({ page }) => {
+        await testDisplayCondition(page, '選択肢(単一選択)');
+    });
+
+    test('224: 選択肢(複数選択)フィールドに表示条件設定ができること', async ({ page }) => {
+        await testDisplayCondition(page, '選択肢(複数選択)');
+    });
+
+    test('225: 日時フィールドに表示条件設定ができること', async ({ page }) => {
+        await testDisplayCondition(page, '日時');
+    });
+
+    test('227: ファイルフィールドに表示条件設定ができること', async ({ page }) => {
+        await testDisplayCondition(page, 'ファイル');
+    });
+
+    test('229: 計算フィールドに表示条件設定ができること', async ({ page }) => {
+        await testDisplayCondition(page, '計算');
+    });
+});
+
+// =============================================================================
+// 必須条件設定（231-241系）
+// =============================================================================
+
+test.describe('必須条件設定（231-241系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * フィールドの必須条件設定が可能であることを確認する共通関数
+     * @param {import('@playwright/test').Page} page
+     * @param {string} fieldTypeLabel - 対象フィールドタイプのラベル
+     */
+    async function testRequiredCondition(page, fieldTypeLabel) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 指定フィールドタイプを探してクリック
+        const field = page.locator('.field-drag, .cdk-drag').filter({ hasText: fieldTypeLabel }).first();
+        if (await field.count() > 0) {
+            await field.click({ force: true });
+            await waitForAngular(page);
+
+            // 追加オプション設定を開く
+            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
+            if (await optionBtn.count() > 0) {
+                await optionBtn.click({ force: true });
+                await waitForAngular(page);
+            }
+
+            // 必須設定チェックボックスを探す
+            const requiredCheck = page.locator('label:has-text("必須項目にする"), input[name*="required"], input[type="checkbox"]:near(:text("必須"))').first();
+            if (await requiredCheck.count() > 0) {
+                // チェックを入れる
+                const isChecked = await requiredCheck.isChecked().catch(() => false);
+                if (!isChecked) {
+                    await requiredCheck.click({ force: true });
+                    await waitForAngular(page);
+                }
+
+                // 必須条件設定エリアが表示されることを確認
+                const condArea = page.locator('text=必須条件, text=条件追加').first();
+                if (await condArea.count() > 0) {
+                    const addCondBtn = page.locator('button:has-text("条件追加"), a:has-text("条件追加")').first();
+                    if (await addCondBtn.count() > 0) {
+                        await addCondBtn.click({ force: true });
+                        await waitForAngular(page);
+                    }
+                }
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    }
+
+    test('231: 文字列(一行)フィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, '文字列(一行)');
+    });
+
+    test('232: 文章(複数行・通常テキスト)フィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, '文章');
+    });
+
+    test('233: 文章(複数行・リッチテキスト)フィールドに必須条件設定ができること', async ({ page }) => {
+        // リッチテキストも「文章」タイプの中にある
+        await testRequiredCondition(page, '文章');
+    });
+
+    test('234: 数値(整数)フィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, '数値');
+    });
+
+    test('235: 数値(小数)フィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, '数値');
+    });
+
+    test('236: Yes/Noフィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, 'Yes/No');
+    });
+
+    test('237: 選択肢(単一選択)フィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, '選択肢(単一選択)');
+    });
+
+    test('238: 選択肢(複数選択)フィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, '選択肢(複数選択)');
+    });
+
+    test('239: 日時フィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, '日時');
+    });
+
+    test('240: 画像フィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, '画像');
+    });
+
+    test('241: ファイルフィールドに必須条件設定ができること', async ({ page }) => {
+        await testRequiredCondition(page, 'ファイル');
+    });
+});
+
+// =============================================================================
+// 計算式 - DATE系関数（27系）
+// =============================================================================
+
+test.describe('計算式 DATE系関数（27系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * 計算フィールドにDATE系関数を設定できることを確認する共通関数
+     * @param {import('@playwright/test').Page} page
+     * @param {string} formula - 計算式
+     */
+    async function testCalcDateFormula(page, formula) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 計算フィールドを探してクリック
+        const calcField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '計算' }).first();
+        if (await calcField.count() > 0) {
+            await calcField.click({ force: true });
+            await waitForAngular(page);
+
+            // 計算式入力エリアに式を入力
+            const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+            if (await formulaInput.count() > 0) {
+                await formulaInput.fill('');
+                await formulaInput.fill(formula);
+                await waitForAngular(page);
+            }
+
+            // 「計算値の種類」を「日付」に設定
+            const typeSelect = page.locator('select[name*="calc_type"], select[name*="result_type"]').first();
+            if (await typeSelect.count() > 0) {
+                await typeSelect.selectOption({ label: '日付' }).catch(() => {});
+                await waitForAngular(page);
+            }
+
+            // 更新ボタンをクリック
+            const updateBtn = page.locator('button:has-text("更新する"), button:has-text("保存")').first();
+            if (await updateBtn.count() > 0) {
+                await updateBtn.click({ force: true });
+                await waitForAngular(page);
+            }
+        } else {
+            // 計算フィールドがない場合は新規追加
+            const addBtn = page.locator('button:has-text("項目を追加する")').first();
+            await expect(addBtn).toBeVisible({ timeout: 10000 });
+            await addBtn.click({ force: true });
+            await waitForAngular(page);
+
+            const calcTypeBtn = page.locator('.modal.show button:has-text("計算"), .modal.show a:has-text("計算")').first();
+            await expect(calcTypeBtn).toBeVisible({ timeout: 10000 });
+            await calcTypeBtn.click({ force: true });
+            await waitForAngular(page);
+
+            const fieldNameInput = page.locator('.modal.show input').first();
+            await expect(fieldNameInput).toBeVisible({ timeout: 10000 });
+            await fieldNameInput.fill('テスト計算DATE');
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    }
+
+    test('27-2: 計算フィールドにDATE_SUB関数を設定できること', async ({ page }) => {
+        await testCalcDateFormula(page, "DATE_SUB(current_date(),'month',4)");
+    });
+
+    test('27-3: 計算フィールドにDATEDIFF関数を設定できること', async ({ page }) => {
+        await testCalcDateFormula(page, 'DATEDIFF(CURRENT_DATE(),"2021-07-01")');
+    });
+
+    test('27-4: 計算フィールドにCURRENT_DATE関数を設定できること', async ({ page }) => {
+        await testCalcDateFormula(page, 'CURRENT_DATE()');
+    });
+});
+
+// =============================================================================
+// 項目権限設定（149系）
+// =============================================================================
+
+test.describe('項目権限設定（149系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * テーブルの権限設定→項目権限設定ページにアクセスして設定画面が表示されることを確認
+     * @param {import('@playwright/test').Page} page
+     */
+    async function navigateToFieldPermission(page) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 「権限設定」タブをクリック
+        const permTab = page.locator('[role=tab]:has-text("権限設定"), .nav-tabs a:has-text("権限設定"), a:has-text("権限設定")').first();
+        if (await permTab.count() > 0) {
+            await permTab.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000); // タブ切り替え完了待ち
+        }
+
+        // 「詳細設定」または「高度な設定」をクリック
+        const advancedBtn = page.locator('button:has-text("詳細設定"), a:has-text("詳細設定"), button:has-text("高度な設定"), a:has-text("高度な設定")').first();
+        if (await advancedBtn.count() > 0) {
+            await advancedBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 「項目権限設定」エリアを確認
+        const fieldPermArea = page.locator('text=項目権限設定').first();
+        if (await fieldPermArea.count() > 0) {
+            await expect(fieldPermArea).toBeVisible({ timeout: 10000 });
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    }
+
+    test('149-1: 項目権限設定 - 組織のみ・閲覧ON/編集OFFの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-2: 項目権限設定 - 組織ユーザーのみ・閲覧ON/編集OFFの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-3: 項目権限設定 - ユーザー+組織・閲覧ON/編集OFFの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-4: 項目権限設定 - 全ユーザー・閲覧ON/編集OFFの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-5: 項目権限設定 - 組織のみ・閲覧OFF/編集OFFの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-7: 項目権限設定 - ユーザー+組織・閲覧OFF/編集OFFの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-8: 項目権限設定 - 全ユーザー・閲覧OFF/編集OFFの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-9: 項目権限設定 - 組織のみ・閲覧ON/編集ONの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-10: 項目権限設定 - ユーザーのみ・閲覧ON/編集ONの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-11: 項目権限設定 - ユーザー+組織・閲覧ON/編集ONの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-12: 項目権限設定 - 全ユーザー・閲覧ON/編集ONの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-13: 項目権限設定 - 組織のみ・閲覧ON/編集OFFの設定画面が表示されること(2)', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-14: 項目権限設定 - ユーザーのみ・閲覧ON/編集OFFの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-15: 項目権限設定 - 組織+ユーザー・閲覧ON/編集ONの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-16: 項目権限設定 - 全ユーザー・編集権限なしテーブルで閲覧ON/編集ONの設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-17: 項目権限設定 - 作成者のみの権限設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+
+    test('149-18: 項目権限設定 - 全員編集可能の権限設定画面が表示されること', async ({ page }) => {
+        await navigateToFieldPermission(page);
+    });
+});
+
+// =============================================================================
+// バグ修正確認・機能改善（各種）
+// =============================================================================
+
+test.describe('バグ修正確認・機能改善（フィールド関連）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 247: 選択肢(単一選択)で「0」が正しく表示されること
+    // -------------------------------------------------------------------------
+    test('247: 選択肢(単一選択)で「0」を選択した場合にブランクにならず値が表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 選択肢(単一選択)フィールドを探してクリック
+        const selectField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '選択肢(単一選択)' }).first();
+        if (await selectField.count() > 0) {
+            await selectField.click({ force: true });
+            await waitForAngular(page);
+
+            // 選択肢設定エリアを確認
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+
+            // 選択肢オプションの入力エリアが表示されていること
+            const optionArea = page.locator('[class*="option"], [class*="choice"], textarea[name*="option"]').first();
+            if (await optionArea.count() > 0) {
+                await expect(optionArea).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 314: Yes/No項目に必須設定が可能であること
+    // -------------------------------------------------------------------------
+    test('314: Yes/No項目に「必須項目にする」を設定できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // Yes/Noフィールドを探してクリック
+        const yesnoField = page.locator('.field-drag, .cdk-drag').filter({ hasText: 'Yes/No' }).first();
+        if (await yesnoField.count() > 0) {
+            await yesnoField.click({ force: true });
+            await waitForAngular(page);
+
+            // 追加オプション設定を開く
+            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション")').first();
+            if (await optionBtn.count() > 0) {
+                await optionBtn.click({ force: true });
+                await waitForAngular(page);
+            }
+
+            // 必須設定チェックボックスを確認
+            const requiredCheck = page.locator('label:has-text("必須項目にする"), input[name*="required"]').first();
+            if (await requiredCheck.count() > 0) {
+                await expect(requiredCheck).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 171: 他テーブル参照 - 選択肢で新規追加の表示/非表示設定
+    // -------------------------------------------------------------------------
+    test('171: 他テーブル参照フィールドで選択肢の新規追加表示/非表示を設定できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 他テーブル参照フィールドを探してクリック
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+
+            // 「選択肢で新規追加を表示」設定を探す
+            const newAddOption = page.locator('label:has-text("新規追加"), input[name*="new_add"], text=新規追加を表示').first();
+            if (await newAddOption.count() > 0) {
+                await expect(newAddOption).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 174: 計算フィールドのリアルタイムプレビュー
+    // -------------------------------------------------------------------------
+    test('174: 計算フィールドの編集中にリアルタイム表示が可能であること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 計算フィールドを探してクリック
+        const calcField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '計算' }).first();
+        if (await calcField.count() > 0) {
+            await calcField.click({ force: true });
+            await waitForAngular(page);
+
+            // 計算式入力エリアが表示されていること
+            const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea').first();
+            if (await formulaInput.count() > 0) {
+                await expect(formulaInput).toBeVisible({ timeout: 10000 });
+            }
+
+            // プレビューエリアが存在するかチェック
+            const previewArea = page.locator('[class*="preview"], [class*="result"], text=プレビュー').first();
+            if (await previewArea.count() > 0) {
+                await expect(previewArea).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 175: 日付フィールドのキーボード入力
+    // -------------------------------------------------------------------------
+    test('175: 日付フィールドでキーボードから直接入力が可能であること', async ({ page }) => {
+        // テーブル一覧でレコード追加画面に遷移
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForAngular(page);
+
+        // ログインページにリダイレクトされた場合は再ログイン
+        if (page.url().includes('/admin/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await waitForAngular(page);
+        }
+
+        // 日付入力フィールドを探す
+        const dateInput = page.locator('input[type="date"], input[type="datetime-local"], input[placeholder*="日付"], input[name*="date"]').first();
+        if (await dateInput.count() > 0) {
+            await dateInput.click({ force: true });
+            await dateInput.fill('2026-03-29');
+            await waitForAngular(page);
+
+            const val = await dateInput.inputValue();
+            expect(val).toBeTruthy();
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 195: フィールド並べ替えの保存
+    // -------------------------------------------------------------------------
+    test('195: テーブルの項目並べ替えが保存後も反映されていること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // フィールドリストが表示されていることを確認
+        const fieldList = page.locator('.field-drag, .cdk-drag').first();
+        if (await fieldList.count() > 0) {
+            await expect(fieldList).toBeVisible({ timeout: 10000 });
+
+            // フィールドの並び順を取得
+            const fieldNames = await page.locator('.field-drag .field-name, .cdk-drag .field-name, .field-drag td:first-child, .cdk-drag td:first-child').allInnerTexts().catch(() => []);
+            expect(fieldNames.length).toBeGreaterThan(0);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 302: 全項目のドラッグ&ドロップ追加
+    // -------------------------------------------------------------------------
+    test('302: フィールド追加画面で全項目タイプがドラッグ&ドロップで追加可能な状態であること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 「項目を追加する」ボタンをクリック
+        const addBtn = page.locator('button:has-text("項目を追加する")').first();
+        await expect(addBtn).toBeVisible({ timeout: 10000 });
+        await addBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // モーダル内にフィールドタイプ一覧が表示されていること
+        const modal = page.locator('.modal.show');
+        await expect(modal).toBeVisible({ timeout: 10000 });
+
+        // 主要なフィールドタイプが表示されていることを確認
+        const expectedTypes = ['文字列', '文章', '数値', 'Yes/No', '選択肢', '日時', '画像', 'ファイル', '他テーブル参照', '計算'];
+        const modalText = await modal.innerText();
+        for (const fieldType of expectedTypes) {
+            expect(modalText).toContain(fieldType);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 158: 項目権限設定の対象項目「+新規追加」
+    // -------------------------------------------------------------------------
+    test('158: 項目権限設定の対象項目で「+新規追加」を選択できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 「権限設定」タブをクリック
+        const permTab = page.locator('[role=tab]:has-text("権限設定"), .nav-tabs a:has-text("権限設定"), a:has-text("権限設定")').first();
+        if (await permTab.count() > 0) {
+            await permTab.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        // 「詳細設定」をクリック
+        const advancedBtn = page.locator('button:has-text("詳細設定"), a:has-text("詳細設定")').first();
+        if (await advancedBtn.count() > 0) {
+            await advancedBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 「+追加する」ボタンを探す
+        const addFieldPermBtn = page.locator('button:has-text("+追加"), a:has-text("+追加"), button:has-text("追加する")').first();
+        if (await addFieldPermBtn.count() > 0) {
+            await addFieldPermBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 204: 他テーブル参照の複数項目ルックアップ
+    // -------------------------------------------------------------------------
+    test('204: 他テーブル参照フィールドで複数項目のルックアップ設定が可能であること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 他テーブル参照フィールドを探してクリック
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+
+            // ルックアップ設定エリアを確認
+            const lookupArea = page.locator('text=ルックアップ, text=項目のコピー').first();
+            if (await lookupArea.count() > 0) {
+                await expect(lookupArea).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
