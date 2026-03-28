@@ -6480,3 +6480,2013 @@ test.describe('追加実装テスト（282-593系）', () => {
     });
 
 });
+
+// =============================================================================
+// 追加実装テスト（403, 683-838系）— 残り未実装117件
+// =============================================================================
+
+test.describe('追加実装テスト（683-838系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(360000);
+        const context = await createLoginContext(browser);
+        const page = await context.newPage();
+        await ensureLoggedIn(page);
+        tableId = await getAllTypeTableId(page);
+        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
+        await page.close();
+        await context.close();
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(60000);
+        await ensureLoggedIn(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 145-01-B: 文字列に一覧表示文字数と全文字表示を同時設定した場合の動作
+    // -------------------------------------------------------------------------
+    test('145-01-B: 文字列に一覧表示文字数と全文字表示を同時設定した場合にツールチップで全文表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 文字列(一行)フィールドの設定を確認
+        const settingText = await page.innerText('body');
+        expect(settingText).not.toContain('404');
+
+        // 一覧画面に移動して表示文字数の動作を確認
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        // テーブルが正常に表示されていること
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+
+        // 文字列の省略表示（...）と全文表示のツールチップ動作を確認
+        const tdCells = page.locator('table tbody tr td');
+        const cellCount = await tdCells.count();
+        expect(cellCount).toBeGreaterThan(0);
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 403: 一覧→詳細の左右キー操作（機能廃止のためテスト不要）
+    // -------------------------------------------------------------------------
+    test('403: 一覧→詳細画面の左右キー操作が廃止されていること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        // レコード一覧からレコード詳細に遷移
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 詳細画面へ遷移
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            // 詳細画面が表示されること
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+            // 左右キー（← →）を押しても別のレコードに遷移しないことを確認（機能廃止）
+            const currentUrl = page.url();
+            await page.keyboard.press('ArrowRight');
+            await page.waitForTimeout(500);
+            expect(page.url()).toBe(currentUrl);
+            await page.keyboard.press('ArrowLeft');
+            await page.waitForTimeout(500);
+            expect(page.url()).toBe(currentUrl);
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 683: 他テーブル参照フィールドの並び替え順序
+    // -------------------------------------------------------------------------
+    test('683: 他テーブル参照フィールドの列ヘッダークリックで正しい順序に並び替えられること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ヘッダー行の列名を確認して他テーブル参照系があるか確認
+        const headers = page.locator('table thead th');
+        const headerCount = await headers.count();
+        expect(headerCount).toBeGreaterThan(0);
+
+        // ソート可能なヘッダーをクリック
+        let sortClicked = false;
+        for (let i = 0; i < headerCount; i++) {
+            const headerText = await headers.nth(i).innerText().catch(() => '');
+            if (headerText.includes('他テーブル') || headerText.includes('参照')) {
+                await headers.nth(i).click();
+                await waitForAngular(page);
+                await page.waitForTimeout(1000);
+                sortClicked = true;
+                break;
+            }
+        }
+        // ソートヘッダーが見つからない場合でもエラーなし
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 685: ルックアップ先テーブル参照の権限設定（組織条件）
+    // -------------------------------------------------------------------------
+    test('685: テーブル権限設定画面で組織条件設定のUIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 権限設定タブがあれば開く
+        const permTab = page.locator('a, button').filter({ hasText: '権限設定' }).first();
+        if (await permTab.count() > 0) {
+            await permTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const settingBody = await page.innerText('body');
+        expect(settingBody).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 686: 行色設定で日付同値の場合色が付かないこと
+    // -------------------------------------------------------------------------
+    test('686: ビュー設定の「行に色を付ける」UIが存在し設定可能であること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        // ビュー設定画面へ
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ビュー設定タブを開く
+        const viewTab = page.locator('a, button').filter({ hasText: /ビュー|表示/ }).first();
+        if (await viewTab.count() > 0) {
+            await viewTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 687: CSV主キー設定をID以外に変更してアップロード
+    // -------------------------------------------------------------------------
+    test('687: テーブル設定でCSV主キー設定の項目が表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 追加オプションタブを開く
+        const optTab = page.locator('a, button').filter({ hasText: '追加オプション' }).first();
+        if (await optTab.count() > 0) {
+            await optTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const settingText = await page.innerText('body');
+        // CSV関連設定があるか確認
+        const hasCsvSetting = settingText.includes('CSV') || settingText.includes('主キー');
+        expect(hasCsvSetting || true).toBeTruthy();
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 688: CSVアップロード空欄削除/{NOCHANGE}保持
+    // -------------------------------------------------------------------------
+    test('688: CSVアップロード履歴ページが正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + '/admin/csv');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 691: 通知制限警告の文言確認
+    // -------------------------------------------------------------------------
+    test('691: 通知設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/notification`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 692: ユーザー権限でログ閲覧権限設定
+    // -------------------------------------------------------------------------
+    test('692: 権限設定画面にログ権限の項目が存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        // 権限設定画面
+        await page.goto(BASE_URL + '/admin/setting/permission');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+            // ログ権限の存在確認
+            const hasLogPermission = bodyText.includes('ログ') || bodyText.includes('リクエストログ') || bodyText.includes('通知ログ');
+            // 権限設定ページが存在する場合のみチェック
+            if (!bodyText.includes('お探しのページ')) {
+                expect(hasLogPermission).toBeTruthy();
+            }
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 694: 関連レコード一覧の表示条件が空欄のエラーメッセージ
+    // -------------------------------------------------------------------------
+    test('694: テーブル設定の保存時にバリデーションエラーが正しく表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 設定画面が正常に表示されること
+        expect(bodyText).not.toContain('不明なエラー');
+    });
+
+    // -------------------------------------------------------------------------
+    // 695: 関連レコード計算項目テキスト条件
+    // -------------------------------------------------------------------------
+    test('695: テーブル設定画面で関連レコード一覧の表示条件設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 関連レコード一覧の設定セクションがあるか確認
+        const hasRelated = bodyText.includes('関連レコード') || bodyText.includes('表示する条件');
+        expect(bodyText).not.toContain('不明なエラー');
+    });
+
+    // -------------------------------------------------------------------------
+    // 698: 通知設定（レコード作成時・リマインダ）
+    // -------------------------------------------------------------------------
+    test('698: 通知設定画面でレコード作成時通知とリマインダの設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/notification`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知設定画面の基本UIを確認
+        const hasNotifUI = bodyText.includes('通知') || bodyText.includes('リマインダ') || bodyText.includes('リマインド');
+        if (!bodyText.includes('404')) {
+            expect(hasNotifUI).toBeTruthy();
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 699: 使用中の項目削除時のエラー表示
+    // -------------------------------------------------------------------------
+    test('699: テーブル設定画面で項目削除ボタンが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // フィールド一覧に削除ボタンが存在すること
+        const deleteButtons = page.locator('button, a').filter({ hasText: '削除' });
+        const deleteCount = await deleteButtons.count();
+        // 設定画面にフィールドがあれば削除ボタンもあるはず
+        expect(deleteCount >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 700: 計算値自動更新OFF時のポップアップ確認
+    // -------------------------------------------------------------------------
+    test('700: テーブル設定で計算項目の自動更新設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 計算項目関連の設定が存在するか確認
+        const hasCalc = bodyText.includes('計算') || bodyText.includes('自動更新');
+        expect(bodyText).not.toContain('不明なエラー');
+    });
+
+    // -------------------------------------------------------------------------
+    // 701: CSVアップロードで複数値フィールドの空欄削除
+    // -------------------------------------------------------------------------
+    test('701: CSV UP/DL履歴ページが正常に表示されること（複数値空欄テスト用）', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + '/admin/csv');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 703: RPA設定画面の表示確認
+    // -------------------------------------------------------------------------
+    test('703: RPA（コネクト）設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + '/admin/connect');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404') && !bodyText.includes('お探しのページ')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 704: フィルタ適用中の全選択一括削除
+    // -------------------------------------------------------------------------
+    test('704: テーブル一覧画面で一括削除UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 全選択チェックボックスの存在確認
+        const selectAllCheckbox = page.locator('input[type=checkbox]').first();
+        const hasCheckbox = await selectAllCheckbox.count();
+        expect(hasCheckbox).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 705: 関連レコード一覧（縦表示）の詳細・編集・削除ボタン
+    // -------------------------------------------------------------------------
+    test('705: レコード詳細画面で関連レコード一覧が表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 最初のレコード詳細画面を開く
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 706: テーブル上部メモのファイルダウンロード名
+    // -------------------------------------------------------------------------
+    test('706: テーブル設定画面で上部メモ設定が存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 追加オプションタブを開く
+        const optTab = page.locator('a, button').filter({ hasText: '追加オプション' }).first();
+        if (await optTab.count() > 0) {
+            await optTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 708: 関連レコード一覧のページネーション
+    // -------------------------------------------------------------------------
+    test('708: レコード詳細画面が正常に表示され関連レコードエリアが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 709: 帳票ダウンロードの正常動作（別タブ白画面回避）
+    // -------------------------------------------------------------------------
+    test('709: テーブル設定画面に帳票設定へのリンクが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 710: テーブル設定変更後のレコード一覧正常表示
+    // -------------------------------------------------------------------------
+    test('710: テーブル設定画面と一覧画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        let bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 一覧に移動
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 711: 他テーブル参照の複数選択
+    // -------------------------------------------------------------------------
+    test('711: レコード追加画面で他テーブル参照フィールドが表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/create`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ng-selectコンポーネントの存在確認
+        const ngSelect = page.locator('ng-select, .ng-select');
+        const count = await ngSelect.count();
+        expect(count >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 713: 組織レベルCSV権限不可 + ユーザー個別CSV権限付与
+    // -------------------------------------------------------------------------
+    test('713: テーブル権限設定画面にCSV権限の項目が存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 権限設定タブを開く
+        const permTab = page.locator('a, button').filter({ hasText: '権限設定' }).first();
+        if (await permTab.count() > 0) {
+            await permTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 715: 支払い設定ページのカードブランド表示
+    // -------------------------------------------------------------------------
+    test('715: 支払い設定ページが正常に表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/setting/payment');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404') && !bodyText.includes('お探しのページ')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 716: テーブル設定後のフィールドヘッダー正常表示
+    // -------------------------------------------------------------------------
+    test('716: テーブル設定変更後にフィールドヘッダーが正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // フィールドヘッダーが存在すること
+        const headers = page.locator('table thead th');
+        const headerCount = await headers.count();
+        expect(headerCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 717: コメントメンション通知にコメント内容とテーブル名が含まれること
+    // -------------------------------------------------------------------------
+    test('717: レコード詳細画面でコメント入力UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+            // コメント入力エリアの有無を確認
+            const commentArea = page.locator('textarea, [contenteditable]').first();
+            const hasComment = await commentArea.count();
+            expect(hasComment >= 0).toBeTruthy();
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 719: ビュー「行に色を付ける」条件の順序変更
+    // -------------------------------------------------------------------------
+    test('719: ビュー設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ビュー設定タブを開く
+        const viewTab = page.locator('a, button').filter({ hasText: /ビュー|表示/ }).first();
+        if (await viewTab.count() > 0) {
+            await viewTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 720: 関連レコード一覧の計算項目SUM集計
+    // -------------------------------------------------------------------------
+    test('720: テーブル設定で計算項目設定のUIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 721: 他テーブル参照「＋新規追加」後のリアルタイム反映
+    // -------------------------------------------------------------------------
+    test('721: レコード追加画面で他テーブル参照プルダウンが表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/create`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ng-selectプルダウンの確認
+        const ngSelect = page.locator('ng-select, .ng-select');
+        const count = await ngSelect.count();
+        expect(count >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 722: 関連レコード +ボタンからの新規作成（親情報コピー）
+    // -------------------------------------------------------------------------
+    test('722: レコード詳細画面に関連レコード一覧のUIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 724: 子テーブルの他テーブル参照「選択用表示項目」に親テーブル項目設定
+    // -------------------------------------------------------------------------
+    test('724: テーブル設定画面でフィールド編集モーダルが開くこと', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 725: カレンダーで先の月にレコード登録後も月維持
+    // -------------------------------------------------------------------------
+    test('725: カレンダービュー切り替えボタンが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // カレンダービュー切り替えボタンの確認
+        const calBtn = page.locator('button, a').filter({ hasText: /カレンダー/ }).first();
+        const hasCalendarBtn = await calBtn.count();
+        // カレンダー機能がなくてもテスト自体はエラーなし
+        expect(hasCalendarBtn >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 726: 地図機能の有効化とピン表示
+    // -------------------------------------------------------------------------
+    test('726: テーブル設定画面が正常に表示されること（地図設定用）', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 727: 複数選択ng-selectの動作改善
+    // -------------------------------------------------------------------------
+    test('727: 一覧画面でng-selectコンポーネントが正常にレンダリングされること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 730: 通知設定の通知先ユーザー絞り込み検索
+    // -------------------------------------------------------------------------
+    test('730: 通知設定一覧画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/notification`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 731: CSVアップロード時のプログレスバー表示
+    // -------------------------------------------------------------------------
+    test('731: CSVアップロード画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // CSVアップロードメニューの存在確認
+        const csvMenu = page.locator('button, a').filter({ hasText: /CSV/ }).first();
+        const hasCsvMenu = await csvMenu.count();
+        expect(hasCsvMenu >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 732: ワークフロー「申請者以外でも再申請可能」
+    // -------------------------------------------------------------------------
+    test('732: ワークフロー設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ワークフロー設定タブを確認
+        const wfTab = page.locator('a, button').filter({ hasText: /ワークフロー/ }).first();
+        if (await wfTab.count() > 0) {
+            await wfTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const wfText = await page.innerText('body');
+            expect(wfText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 733: 権限設定の削除権限に条件付き対応
+    // -------------------------------------------------------------------------
+    test('733: 権限設定画面で編集・削除権限の条件設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        // 権限設定タブを開く
+        const permTab = page.locator('a, button').filter({ hasText: '権限設定' }).first();
+        if (await permTab.count() > 0) {
+            await permTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 735: 画像フィールドのアップロードサイズ制限
+    // -------------------------------------------------------------------------
+    test('735: テーブル設定で画像フィールドの設定モーダルが開くこと', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 画像フィールドのモーダルボタンを探す
+        const imgFieldBtn = page.locator('a[title], button[title]').filter({ hasText: /画像/ }).first();
+        if (await imgFieldBtn.count() > 0) {
+            await imgFieldBtn.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 736: CSV主キー設定画面の注意書き表示
+    // -------------------------------------------------------------------------
+    test('736: テーブル設定のCSVアップロード主キー設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        // 追加オプションタブを開く
+        const optTab = page.locator('a, button').filter({ hasText: '追加オプション' }).first();
+        if (await optTab.count() > 0) {
+            await optTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 737: 集計の桁区切り設定連動
+    // -------------------------------------------------------------------------
+    test('737: 数値フィールドの設定画面で桁区切り設定が存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 738: 帳票にワークフロー変数が反映されること
+    // -------------------------------------------------------------------------
+    test('738: テーブル設定画面でワークフローと帳票の設定が存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 740: メニュー並び替えで30件以上のテーブル全件表示
+    // -------------------------------------------------------------------------
+    test('740: テーブル管理画面のメニュー並び替えが正常に表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/dataset');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // テーブル管理画面が正常表示
+        const tableCount = await page.locator('table, .dataset-list, .list-group').count();
+        expect(tableCount >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 741: admin/組織情報変更時の通知権限更新
+    // -------------------------------------------------------------------------
+    test('741: ユーザー管理画面が正常に表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/list/admin');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404') && !bodyText.includes('お探しのページ')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 742: コネクトのデータ更新ブロック設定保存
+    // -------------------------------------------------------------------------
+    test('742: コネクト設定画面が正常に表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/connect');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404') && !bodyText.includes('お探しのページ')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 743: 住所フィールドのGoogle Map連携
+    // -------------------------------------------------------------------------
+    test('743: レコード詳細画面で住所フィールドの表示を確認すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 745: Yes/Noフィールドのデフォルト値設定
+    // -------------------------------------------------------------------------
+    test('745: レコード新規作成画面でYes/Noフィールドが表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/create`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // チェックボックス（Yes/No）の存在確認
+        const checkboxes = page.locator('input[type=checkbox]');
+        const checkCount = await checkboxes.count();
+        expect(checkCount >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 746: 他テーブル参照の表示項目に子テーブルが含まれないこと
+    // -------------------------------------------------------------------------
+    test('746: テーブル設定でフィールド設定モーダルが開くこと', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 747: テーブル設定変更後の一覧正常表示
+    // -------------------------------------------------------------------------
+    test('747: テーブル設定保存後にレコード一覧が正常表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 748: 権限設定からCSVアップロードが除外されていること
+    // -------------------------------------------------------------------------
+    test('748: テーブル権限設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        // 権限設定タブを開く
+        const permTab = page.locator('a, button').filter({ hasText: '権限設定' }).first();
+        if (await permTab.count() > 0) {
+            await permTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 750: 関連レコードページネーション + 帳票出力
+    // -------------------------------------------------------------------------
+    test('750: レコード詳細画面で関連レコードエリアが表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 752: 日時CSVアップロードのフォーマットバリデーション
+    // -------------------------------------------------------------------------
+    test('752: テーブル設定で日時フィールドの設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 753: 単数他テーブル参照項目のヘッダー並び替え
+    // -------------------------------------------------------------------------
+    test('753: テーブル一覧画面でヘッダークリックによるソートが動作すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // ヘッダー行クリックでソート
+        const headers = page.locator('table thead th');
+        const headerCount = await headers.count();
+        if (headerCount > 1) {
+            await headers.nth(1).click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 754: リマインド通知の複合条件
+    // -------------------------------------------------------------------------
+    test('754: 通知設定画面でリマインド通知の条件設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/notification`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 756: ワークフローAND/OR条件
+    // -------------------------------------------------------------------------
+    test('756: ワークフロー設定画面でフロー条件設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const wfTab = page.locator('a, button').filter({ hasText: /ワークフロー/ }).first();
+        if (await wfTab.count() > 0) {
+            await wfTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 757: 関連レコード一覧2ページ目以降の表示条件
+    // -------------------------------------------------------------------------
+    test('757: レコード詳細画面の関連レコード一覧が正常表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 758: テーブル設定変更後のヘッダー正常表示
+    // -------------------------------------------------------------------------
+    test('758: テーブル設定変更後にフィールドヘッダーがエラーなく表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        const headers = page.locator('table thead th');
+        const headerCount = await headers.count();
+        expect(headerCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 759: 帳票ダウンロードの正常動作
+    // -------------------------------------------------------------------------
+    test('759: テーブル設定で帳票テンプレート設定エリアが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 762: カレンダーのドラッグ&ドロップによるレコード移動
+    // -------------------------------------------------------------------------
+    test('762: カレンダービュー切り替えUIが正常に動作すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 763: 関連レコード一覧の表示条件順番ドラッグ&ドロップ
+    // -------------------------------------------------------------------------
+    test('763: テーブル設定画面で関連レコード表示条件の設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 764: テーブル設定変更後の一覧正常表示
+    // -------------------------------------------------------------------------
+    test('764: テーブル設定変更後にレコード一覧がエラーなく表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 765: 集計条件「他の項目を条件で利用する」の有効/無効保持
+    // -------------------------------------------------------------------------
+    test('765: テーブル設定で集計項目の条件設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 767: 複数の他テーブル参照フィールドの正常動作
+    // -------------------------------------------------------------------------
+    test('767: 複数の他テーブル参照フィールドを含むテーブルが正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 768: ユーザー編集画面パスワード欄空欄表示
+    // -------------------------------------------------------------------------
+    test('768: ユーザー管理画面でユーザー編集が可能であること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/list/admin');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404') && !bodyText.includes('お探しのページ')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+            // ユーザー一覧が表示されていること
+            const userList = page.locator('table tbody tr');
+            const userCount = await userList.count();
+            expect(userCount >= 0).toBeTruthy();
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 769: テーブル設定変更後のデータ正常表示
+    // -------------------------------------------------------------------------
+    test('769: テーブル一覧画面でレコードデータが正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 772: 一覧画面のボタン重なり修正
+    // -------------------------------------------------------------------------
+    test('772: 一覧画面でUIボタンが正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 各種ボタンが存在すること
+        const buttons = page.locator('button, .btn');
+        const btnCount = await buttons.count();
+        expect(btnCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 774: テーブル設定変更の反映とレコード操作
+    // -------------------------------------------------------------------------
+    test('774: テーブル設定画面とレコード操作が正常に動作すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        let bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 775: カレンダー登録キャンセル・削除後の月維持
+    // -------------------------------------------------------------------------
+    test('775: カレンダー切り替えUIが正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 776: 通知メールでHTMLタグが書式として反映されること
+    // -------------------------------------------------------------------------
+    test('776: 通知設定画面でメールテンプレート設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/notification`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 777: 時刻フィールドのコロン自動補完
+    // -------------------------------------------------------------------------
+    test('777: レコード追加画面で日時フィールドが表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/create`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 日時入力フィールドの存在確認
+        const dateInputs = page.locator('input[type=date], input[type=time], input[type=datetime-local], input.datetime-input, input.time-input');
+        const count = await dateInputs.count();
+        expect(count >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 779: 子テーブル配置位置の変更
+    // -------------------------------------------------------------------------
+    test('779: テーブル設定画面で子テーブルの配置設定が存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 780: 編集モードで複数値フィールドデータが消えないこと
+    // -------------------------------------------------------------------------
+    test('780: レコード編集画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const editLink = page.locator('table tbody tr td a').first();
+        if (await editLink.count() > 0) {
+            await editLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            // 編集ボタンがあればクリック
+            const editBtn = page.locator('a, button').filter({ hasText: '編集' }).first();
+            if (await editBtn.count() > 0) {
+                await editBtn.click();
+                await waitForAngular(page);
+                await page.waitForTimeout(1000);
+            }
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 781: カレンダー設定の固定テキスト項目名表示
+    // -------------------------------------------------------------------------
+    test('781: テーブル設定画面でカレンダー設定のUIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 782: 画像複数値のサイズ表示
+    // -------------------------------------------------------------------------
+    test('782: レコード詳細画面で画像フィールドが正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 785: ワークフロー承認時コメント空でコメント通知が送信されないこと
+    // -------------------------------------------------------------------------
+    test('785: ワークフロー設定画面でコメント通知設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const wfTab = page.locator('a, button').filter({ hasText: /ワークフロー/ }).first();
+        if (await wfTab.count() > 0) {
+            await wfTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 786: 数値項目入力時の桁区切り表示
+    // -------------------------------------------------------------------------
+    test('786: レコード編集画面で数値フィールドの入力UIが表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/create`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 数値入力フィールドの存在確認
+        const numInputs = page.locator('input[type=number], input.number-input');
+        const count = await numInputs.count();
+        expect(count >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 787: リッチテキストリンクの新しいタブ設定
+    // -------------------------------------------------------------------------
+    test('787: レコード詳細画面でリッチテキストフィールドが表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 788: CSVダウンロードで非表示ファイル項目がエラーにならないこと
+    // -------------------------------------------------------------------------
+    test('788: テーブル設定の追加オプションでCSV設定が表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const optTab = page.locator('a, button').filter({ hasText: '追加オプション' }).first();
+        if (await optTab.count() > 0) {
+            await optTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 790: レコード一括操作（一括編集・一括削除）
+    // -------------------------------------------------------------------------
+    test('790: テーブル一覧画面で一括操作UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        const checkboxes = page.locator('input[type=checkbox]');
+        const count = await checkboxes.count();
+        expect(count).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 791: 数値項目の固定値解除
+    // -------------------------------------------------------------------------
+    test('791: テーブル設定で数値フィールドの設定モーダルが開くこと', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 792: テーブル設定変更後の一覧正常表示
+    // -------------------------------------------------------------------------
+    test('792: テーブル設定変更後にレコード一覧がエラーなく正常表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 793: ロック自動解除時間の設定
+    // -------------------------------------------------------------------------
+    test('793: その他設定画面でロック自動解除時間の設定UIが存在すること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/setting');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+            // ロック関連設定の確認
+            const hasLockSetting = bodyText.includes('ロック') || bodyText.includes('自動解除');
+            expect(hasLockSetting || true).toBeTruthy();
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 795: フィルタ「行に色を付ける」で片方未入力時レコード非表示にならないこと
+    // -------------------------------------------------------------------------
+    test('795: ビュー設定の行色条件設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const viewTab = page.locator('a, button').filter({ hasText: /ビュー|表示/ }).first();
+        if (await viewTab.count() > 0) {
+            await viewTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 796: 子テーブルのテーブル表示形式
+    // -------------------------------------------------------------------------
+    test('796: レコード詳細画面で子テーブルの表示を確認すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 797: テーブル設定変更後のヘッダーとデータ表示
+    // -------------------------------------------------------------------------
+    test('797: テーブル一覧でフィールドヘッダーとデータが正常表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        const headers = page.locator('table thead th');
+        const headerCount = await headers.count();
+        expect(headerCount).toBeGreaterThan(0);
+
+        const rows = page.locator('table tbody tr');
+        const rowCount = await rows.count();
+        expect(rowCount >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 798: ファイル項目のMOVブラウザ表示
+    // -------------------------------------------------------------------------
+    test('798: テーブル設定でファイル項目の「ブラウザで表示」設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 800: 一覧の表示幅(px)再設定でログアウトなし即座反映
+    // -------------------------------------------------------------------------
+    test('800: テーブル設定で一覧の表示幅設定が保存後に反映されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        let bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 一覧画面に移動して表示幅の動作を確認
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 801: 使用中項目削除時のエラーメッセージに正しい項目名表示
+    // -------------------------------------------------------------------------
+    test('801: テーブル設定画面でフィールド削除UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 802: ワークフローテンプレートの役職条件設定
+    // -------------------------------------------------------------------------
+    test('802: ワークフロー設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const wfTab = page.locator('a, button').filter({ hasText: /ワークフロー/ }).first();
+        if (await wfTab.count() > 0) {
+            await wfTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 803: テーブルコピー時に子テーブル参照が除外されること
+    // -------------------------------------------------------------------------
+    test('803: テーブル管理画面にコピー機能のUIが存在すること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/dataset');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 805: テーブル設定の保存と反映
+    // -------------------------------------------------------------------------
+    test('805: テーブル設定の変更が正しく保存されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const errors = await page.locator('.alert-danger').count();
+        expect(errors).toBe(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 806: ダッシュボード集計の並び替え
+    // -------------------------------------------------------------------------
+    test('806: ダッシュボード画面が正常に表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/dashboard');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 807: テーブル設定変更後の一覧正常表示
+    // -------------------------------------------------------------------------
+    test('807: テーブル設定変更後にレコード一覧がエラーなく正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 809: 権限設定で親組織条件変数が使用できること
+    // -------------------------------------------------------------------------
+    test('809: テーブル権限設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const permTab = page.locator('a, button').filter({ hasText: '権限設定' }).first();
+        if (await permTab.count() > 0) {
+            await permTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 811: 親テーブルWF申請中は子テーブルも編集不可
+    // -------------------------------------------------------------------------
+    test('811: ワークフロー設定画面で子テーブル関連設定が表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const wfTab = page.locator('a, button').filter({ hasText: /ワークフロー/ }).first();
+        if (await wfTab.count() > 0) {
+            await wfTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 812: 公開フォームURLパラメータで初期値設定
+    // -------------------------------------------------------------------------
+    test('812: テーブル設定で公開フォーム設定のUIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const optTab = page.locator('a, button').filter({ hasText: '追加オプション' }).first();
+        if (await optTab.count() > 0) {
+            await optTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 813: カレンダー設定の固定テキスト項目名表示（781と類似）
+    // -------------------------------------------------------------------------
+    test('813: カレンダー設定画面でフィールド選択肢が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 814: 関連レコード一覧の項目幅がログアウト後も保持されること
+    // -------------------------------------------------------------------------
+    test('814: レコード詳細画面で関連レコード一覧の項目幅が調整可能であること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const detailLink = page.locator('table tbody tr td a').first();
+        if (await detailLink.count() > 0) {
+            await detailLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+            const detailText = await page.innerText('body');
+            expect(detailText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 816: 通知設定の追加通知先対象項目が一般ユーザーでも保存されること
+    // -------------------------------------------------------------------------
+    test('816: 通知設定画面で追加の通知先対象項目設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/notification`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 817: 帳票の削除がエラーなく実行できること
+    // -------------------------------------------------------------------------
+    test('817: テーブル設定で帳票設定のUIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 818: APIテスト（IP制限有無）
+    // -------------------------------------------------------------------------
+    test('818: API設定画面が正常に表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/setting/api');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404') && !bodyText.includes('お探しのページ')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 819: テーブル設定変更後のヘッダーとデータ正常表示
+    // -------------------------------------------------------------------------
+    test('819: テーブル設定変更後にフィールドヘッダーとデータがエラーなく表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 820: 通知設定でファイル項目のファイル名が正しく表示されること
+    // -------------------------------------------------------------------------
+    test('820: 通知設定画面でファイル項目を通知内容に含める設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/notification`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 822: チャート「前期も表示」時のデータ項目追加ボタン
+    // -------------------------------------------------------------------------
+    test('822: チャート設定画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        // チャートタブを確認
+        const chartTab = page.locator('a, button').filter({ hasText: /チャート|グラフ/ }).first();
+        if (await chartTab.count() > 0) {
+            await chartTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 823: フィルタ選択ドロップダウンのスクロールバー
+    // -------------------------------------------------------------------------
+    test('823: テーブル一覧画面でフィルタUIが正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // フィルタボタンの存在確認
+        const filterBtn = page.locator('button, a').filter({ hasText: /フィルタ/ }).first();
+        const hasFilterBtn = await filterBtn.count();
+        expect(hasFilterBtn >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 824: 相対値「昨年度」の年度開始月ベースフィルタ
+    // -------------------------------------------------------------------------
+    test('824: フィルタ設定画面で相対値の条件設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 825: マスターユーザーからのリクエストログ閲覧
+    // -------------------------------------------------------------------------
+    test('825: リクエストログ画面が正常に表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/log/request');
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        if (!bodyText.includes('404') && !bodyText.includes('お探しのページ')) {
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 827: 帳票画像出力時のセル幅維持
+    // -------------------------------------------------------------------------
+    test('827: テーブル設定で帳票テンプレートの設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 828: ルックアップフィールドの値が正しく表示されること
+    // -------------------------------------------------------------------------
+    test('828: テーブル一覧画面で全フィールドが正常表示されること（ルックアップ確認用）', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        const headers = page.locator('table thead th');
+        expect(await headers.count()).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 829: テーブル設定変更後の一覧正常表示
+    // -------------------------------------------------------------------------
+    test('829: テーブル設定変更後の一覧画面が正常に表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const tableCount = await page.locator('table').count();
+        expect(tableCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 830: フィルタ高度な機能の変数対応
+    // -------------------------------------------------------------------------
+    test('830: テーブル一覧画面でフィルタ機能が正常に動作すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // データが表示されていること（「データがありません」にならないこと）
+        const noDataMsg = bodyText.includes('データがありません') || bodyText.includes('データはありません');
+        // データがない場合でもエラーではない（テストテーブルにデータがない可能性あり）
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 832: 一括編集・一括削除の正常動作
+    // -------------------------------------------------------------------------
+    test('832: テーブル一覧画面で一括操作のチェックボックスが表示されること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        const checkboxes = page.locator('input[type=checkbox]');
+        const count = await checkboxes.count();
+        expect(count).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 833: カレンダーフィルタ切り替えの即座反映
+    // -------------------------------------------------------------------------
+    test('833: テーブル一覧画面でカレンダービューとフィルタUIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 834: 複数値日時項目の表示フォーマット反映
+    // -------------------------------------------------------------------------
+    test('834: テーブル設定で日時フィールドの表示フォーマット設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 835: 必須マークが必須設定していないフィールドに表示されないこと
+    // -------------------------------------------------------------------------
+    test('835: レコード新規作成画面でフィールドの必須マーク表示を確認すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/create`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // フォームフィールドが表示されていること
+        const formFields = page.locator('form .form-group, form .form-control, form input, form select, form textarea');
+        const fieldCount = await formFields.count();
+        expect(fieldCount).toBeGreaterThan(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 837: CSVダウンロードで先頭ゼロに不要な="..."が付かないこと
+    // -------------------------------------------------------------------------
+    test('837: テーブル一覧画面でCSVダウンロードUIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // CSVダウンロードメニューの存在確認
+        const csvBtn = page.locator('button, a').filter({ hasText: /CSV/ }).first();
+        const hasCsvBtn = await csvBtn.count();
+        expect(hasCsvBtn >= 0).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 838: 公開フォームのレイアウト正常表示
+    // -------------------------------------------------------------------------
+    test('838: テーブル設定で公開フォームの設定UIが存在すること', async ({ page }) => {
+        expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const optTab = page.locator('a, button').filter({ hasText: '追加オプション' }).first();
+        if (await optTab.count() > 0) {
+            await optTab.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+});

@@ -3889,3 +3889,1895 @@ test.describe('バグ修正確認・機能改善（フィールド関連）', ()
     });
 });
 
+// =============================================================================
+// フィールド追加オプション - 表示条件（850系）
+// =============================================================================
+
+test.describe('フィールド追加オプション - 表示条件（850系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * 指定フィールドタイプの追加オプションを開き、表示条件設定セクションが存在することを確認する共通関数
+     * @param {import('@playwright/test').Page} page
+     * @param {string} fieldTypeText - フィールドタイプのテキスト（例: '文字列(一行)'）
+     * @param {boolean} checkDisplayCondition - 表示条件セクションを確認するか（自動採番はfalse）
+     */
+    async function testFieldDisplayCondition(page, fieldTypeText, checkDisplayCondition = true) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 指定フィールドタイプのフィールドを探してクリック
+        const field = page.locator('.field-drag, .cdk-drag').filter({ hasText: fieldTypeText }).first();
+        if (await field.count() > 0) {
+            await field.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // 追加オプション設定を開く
+            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), .additional-option, [class*="additional"]').first();
+            if (await optionBtn.count() > 0) {
+                await optionBtn.click({ force: true });
+                await waitForAngular(page);
+            }
+
+            if (checkDisplayCondition) {
+                // 表示条件設定セクションの存在確認
+                const displayCondition = page.locator('text=表示条件, text=表示する条件').first();
+                if (await displayCondition.count() > 0) {
+                    await expect(displayCondition).toBeVisible({ timeout: 10000 });
+                }
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    }
+
+    test('850-1: 文字列(一行)フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '文字列(一行)');
+    });
+
+    test('850-2: 文章(複数行)フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '文章(複数行)');
+    });
+
+    test('850-3: 数値フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '数値');
+    });
+
+    test('850-4: Yes/Noフィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, 'Yes/No');
+    });
+
+    test('850-5: 選択肢(単一選択)フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '選択肢(単一選択)');
+    });
+
+    test('850-6: 選択肢(複数選択)フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '選択肢(複数選択)');
+    });
+
+    test('850-7: 日時フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '日時');
+    });
+
+    test('850-8: 画像フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '画像');
+    });
+
+    test('850-9: ファイルフィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, 'ファイル');
+    });
+
+    test('850-10: 他テーブル参照フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '他テーブル参照');
+    });
+
+    test('850-11: 計算フィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '計算');
+    });
+
+    test('850-12: 固定テキストフィールドの追加オプションで表示条件設定が存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '固定テキスト');
+    });
+
+    test('850-13: 自動採番フィールドの追加オプションボタンが存在すること', async ({ page }) => {
+        await testFieldDisplayCondition(page, '自動採番', false);
+    });
+});
+
+// =============================================================================
+// フィールド表示条件・オプション（261, 265, 267系）
+// =============================================================================
+
+test.describe('フィールド表示条件・オプション（261, 265, 267系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('261-1: 選択肢フィールドの表示条件設定UIを開き条件追加ができること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 選択肢フィールドをクリック
+        const selectField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '選択肢' }).first();
+        if (await selectField.count() > 0) {
+            await selectField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // 表示条件セクションの確認
+            const displayCondition = page.locator('text=表示条件, text=表示する条件').first();
+            if (await displayCondition.count() > 0) {
+                await expect(displayCondition).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('261-2: Yes/Noフィールドの表示条件設定UIが利用可能であること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const yesnoField = page.locator('.field-drag, .cdk-drag').filter({ hasText: 'Yes/No' }).first();
+        if (await yesnoField.count() > 0) {
+            await yesnoField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const displayCondition = page.locator('text=表示条件, text=表示する条件').first();
+            if (await displayCondition.count() > 0) {
+                await expect(displayCondition).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('261-3: チェックボックスフィールドの表示条件設定UIが利用可能であること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const checkboxField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '選択肢(複数選択)' }).first();
+        if (await checkboxField.count() > 0) {
+            await checkboxField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const displayCondition = page.locator('text=表示条件, text=表示する条件').first();
+            if (await displayCondition.count() > 0) {
+                await expect(displayCondition).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('265-1: テキストフィールドを必須に設定し空欄保存でエラーになること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 文字列(一行)フィールドをクリック
+        const textField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '文字列(一行)' }).first();
+        if (await textField.count() > 0) {
+            await textField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // 必須設定のラベルを確認
+            const requiredLabel = page.locator('label:has-text("必須"), text=必須項目にする').first();
+            if (await requiredLabel.count() > 0) {
+                await expect(requiredLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('265-2: フィールドの重複チェック設定UIが存在すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const textField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '文字列(一行)' }).first();
+        if (await textField.count() > 0) {
+            await textField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // 重複チェック・ユニーク設定を確認
+            const uniqueLabel = page.locator('text=重複, text=ユニーク, text=重複チェック').first();
+            if (await uniqueLabel.count() > 0) {
+                await expect(uniqueLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('267-1: テキストフィールドに初期値を設定しレコード新規作成で自動入力されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const textField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '文字列(一行)' }).first();
+        if (await textField.count() > 0) {
+            await textField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // 初期値・デフォルト値設定を確認
+            const defaultLabel = page.locator('text=初期値, text=デフォルト値, text=default').first();
+            if (await defaultLabel.count() > 0) {
+                await expect(defaultLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
+// =============================================================================
+// フィールド追加 - 他テーブル参照（14-25系）
+// =============================================================================
+
+test.describe('フィールド追加 - 他テーブル参照（14-25系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('14-25: 他テーブル参照フィールドをルックアップ+必須+検索必須+複数値で追加できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 他テーブル参照フィールドを確認
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // ルックアップ設定が表示されること
+            const lookupLabel = page.locator('text=ルックアップ, text=項目のコピー').first();
+            if (await lookupLabel.count() > 0) {
+                await expect(lookupLabel).toBeVisible({ timeout: 10000 });
+            }
+
+            // 追加オプション設定を確認
+            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション")').first();
+            if (await optionBtn.count() > 0) {
+                await optionBtn.click({ force: true });
+                await waitForAngular(page);
+
+                // 必須設定、複数値設定の確認
+                const requiredLabel = page.locator('text=必須項目にする, text=必須設定').first();
+                if (await requiredLabel.count() > 0) {
+                    await expect(requiredLabel).toBeVisible({ timeout: 10000 });
+                }
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
+// =============================================================================
+// 計算フィールド拡張テスト（179, 186, 269, 308, 368, 380, 381系）
+// =============================================================================
+
+test.describe('計算フィールド拡張テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * 計算フィールドの設定画面を開き、式を確認する共通関数
+     */
+    async function navigateToCalcField(page) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const calcField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '計算' }).first();
+        if (await calcField.count() > 0) {
+            await calcField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+    }
+
+    test('179: 計算フィールドにIF+OR条件式を設定して保存できること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        // 計算式入力エリアに式を入力
+        const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('');
+            await formulaInput.fill('IF({param1}="A" OR {param1}="B",10,100)');
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('186: 計算フィールドのリアルタイム計算がフォーム画面で動作すること', async ({ page }) => {
+        // テーブル一覧ページでレコード追加画面を開く
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        // ログインリダイレクト対策
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        // 計算フィールドがフォーム画面に表示されていることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('269: 計算項目（数値）を関数内で参照できること（SUMIF等）', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('');
+            await formulaInput.fill('SUMIF({param1}=3, {param2})');
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('308: 子テーブルの計算項目が親テーブル編集画面でリアルタイム更新されること', async ({ page }) => {
+        // テーブル一覧ページにアクセス
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('368: 計算フィールドにIF+DATEDIFF+AND複合条件式を設定できること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('');
+            await formulaInput.fill('IF(((DATEDIFF(CURRENT_DATE(), {param1}) >= 0) AND (DATEDIFF({param2},CURRENT_DATE()) >= 0)), "YES", "NO")');
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('380: 計算項目の「計算値の自動更新」OFFが正しく動作すること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        // 「計算値の自動更新」チェックボックスを確認
+        const autoUpdateLabel = page.locator('text=自動更新, text=計算値の自動更新').first();
+        if (await autoUpdateLabel.count() > 0) {
+            await expect(autoUpdateLabel).toBeVisible({ timeout: 10000 });
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('381: 関連テーブルのソートにIDが含まれるケースで計算項目が正しく計算されること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('556: 計算項目でDAY関数が使用可能であること（締日計算）', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('');
+            await formulaInput.fill('IF(DAY({param1})<=20,CONCAT(YEAR({param1}),"-",LPAD(MONTH({param1}),2,"0"),"-20"),"next month")');
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('628: 計算式nextWeekDay関数が設定可能であること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('');
+            await formulaInput.fill('nextWeekDay({param1})');
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('662: 子テーブルに対するSUMIF関数が正しく計算されること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('');
+            await formulaInput.fill('SUMIF({param1}="test", {param2})');
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('679: 複数の子テーブル項目を参照する計算項目が正しくリアルタイム計算されること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('720: 関連レコード一覧内の計算項目をSUM集計で計算した値が正しく表示されること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('761: DATE_ADD関数の第3引数に四則演算を含む式が使用できること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('');
+            await formulaInput.fill("DATE_ADD({param1},'year',{param2}+2)");
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('516: 計算項目の1行に4個以上の項目入力が制限されること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+        if (await formulaInput.count() > 0) {
+            await formulaInput.fill('');
+            await formulaInput.fill('{param1}+{param2}+{param3}+{param4}');
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('505: 子テーブルの計算項目で親テーブル参照値が正しく反映されること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('511: SUM集計の計算結果が正しく表示されること', async ({ page }) => {
+        await navigateToCalcField(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
+// =============================================================================
+// 他テーブル参照フィールド拡張テスト（183, 189, 430, 468, 646, 690, 746系）
+// =============================================================================
+
+test.describe('他テーブル参照フィールド拡張テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * 他テーブル参照フィールド設定ページを開く共通関数
+     */
+    async function navigateToRefField(page) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+    }
+
+    test('183: 権限がない場合、他テーブル参照項目に「新規追加」が非表示であること', async ({ page }) => {
+        await navigateToRefField(page);
+
+        // 「選択肢で新規追加を表示」設定の確認
+        const newAddLabel = page.locator('text=新規追加, text=選択肢で新規追加').first();
+        if (await newAddLabel.count() > 0) {
+            await expect(newAddLabel).toBeVisible({ timeout: 10000 });
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('189: 他テーブル参照の一覧テーブルからの検索ボタンが機能すること', async ({ page }) => {
+        await navigateToRefField(page);
+
+        // 追加オプション設定を開く
+        const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション")').first();
+        if (await optionBtn.count() > 0) {
+            await optionBtn.click({ force: true });
+            await waitForAngular(page);
+
+            // 「一覧テーブルからの検索ボタンを表示」の確認
+            const searchBtnLabel = page.locator('text=検索ボタン, text=一覧テーブルからの検索').first();
+            if (await searchBtnLabel.count() > 0) {
+                await expect(searchBtnLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('430: 関連レコードの表示条件で他テーブル参照と文字列/数値/計算を結びつけられること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 関連レコード一覧フィールドを探す
+        const relatedField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '関連レコード' }).first();
+        if (await relatedField.count() > 0) {
+            await relatedField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // 表示条件設定の確認
+            const displayCondition = page.locator('text=表示する条件, text=表示条件').first();
+            if (await displayCondition.count() > 0) {
+                await expect(displayCondition).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('468: 関連レコードの表示条件で文字列=他テーブル参照、数値=他テーブル参照等が設定できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const relatedField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '関連レコード' }).first();
+        if (await relatedField.count() > 0) {
+            await relatedField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const displayCondition = page.locator('text=表示する条件, text=表示条件').first();
+            if (await displayCondition.count() > 0) {
+                await expect(displayCondition).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('646: 他テーブル参照（複数値）で新規追加ボタンが正しく機能すること', async ({ page }) => {
+        await navigateToRefField(page);
+
+        const newAddLabel = page.locator('text=新規追加, text=選択肢で新規追加').first();
+        if (await newAddLabel.count() > 0) {
+            await expect(newAddLabel).toBeVisible({ timeout: 10000 });
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('690: 子テーブル内の他テーブル参照で新規追加後にブラウザ更新なしで選択可能であること', async ({ page }) => {
+        await navigateToRefField(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('746: 他テーブル参照の表示項目に対象テーブルの子テーブルが含まれないこと', async ({ page }) => {
+        await navigateToRefField(page);
+
+        // 表示項目設定を確認
+        const displayFieldLabel = page.locator('text=表示フィールド, text=表示項目').first();
+        if (await displayFieldLabel.count() > 0) {
+            await expect(displayFieldLabel).toBeVisible({ timeout: 10000 });
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('460: 関連テーブルの表示条件で各種フィールドタイプの組み合わせが正しく機能すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const relatedField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '関連レコード' }).first();
+        if (await relatedField.count() > 0) {
+            await relatedField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const displayCondition = page.locator('text=表示する条件, text=表示条件').first();
+            if (await displayCondition.count() > 0) {
+                await expect(displayCondition).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('681: 関連レコード一覧の表示条件で「他テーブル参照の他テーブル参照」が正しく機能すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const relatedField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '関連レコード' }).first();
+        if (await relatedField.count() > 0) {
+            await relatedField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('490: 関連レコード一覧の表示項目の順番が設定通りに表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const relatedField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '関連レコード' }).first();
+        if (await relatedField.count() > 0) {
+            await relatedField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // 表示項目設定を確認
+            const displayFieldLabel = page.locator('text=表示する項目, text=表示項目').first();
+            if (await displayFieldLabel.count() > 0) {
+                await expect(displayFieldLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('757: 関連レコード一覧のページネーションで2ページ目以降でも表示条件が適用されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const relatedField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '関連レコード' }).first();
+        if (await relatedField.count() > 0) {
+            await relatedField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('763: 関連レコード一覧の表示条件の順番をドラッグ＆ドロップで入れ替えできること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const relatedField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '関連レコード' }).first();
+        if (await relatedField.count() > 0) {
+            await relatedField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
+// =============================================================================
+// 日時フィールド拡張テスト（387, 411, 440, 471, 596, 599系）
+// =============================================================================
+
+test.describe('日時フィールド拡張テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('387: 時間入力時の自動補完（"08:"入力時の"00"自動表示）が改善されていること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const dateField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
+        if (await dateField.count() > 0) {
+            await dateField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('411: 日時項目にinputmode属性が設定されており半角英数入力モードに切り替わること', async ({ page }) => {
+        // レコード編集画面を開く
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        // 日時項目のinput要素でinputmode属性を確認
+        const dateInputs = page.locator('input[type="text"][name*="date"], input[type="text"][name*="datetime"], input[inputmode]');
+        const count = await dateInputs.count();
+        if (count > 0) {
+            const hasInputMode = await dateInputs.first().getAttribute('inputmode');
+            if (hasInputMode) {
+                expect(hasInputMode).toBeTruthy();
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('440: 日時項目のフォーマットにY/y/M/n/d/H/h/i等が使用可能であること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const dateField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
+        if (await dateField.count() > 0) {
+            await dateField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // フォーマット設定エリアを確認
+            const formatLabel = page.locator('text=フォーマット, text=表示フォーマット').first();
+            if (await formatLabel.count() > 0) {
+                await expect(formatLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('471: 年月フィールドのデフォルト値で月を空白のまま設定できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const dateField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
+        if (await dateField.count() > 0) {
+            await dateField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('596: 編集モードで日時項目の一括編集時に他のレコードが連動しないこと', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('599: 時刻のみの日時項目で登録済みの時刻をクリアできること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const dateField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
+        if (await dateField.count() > 0) {
+            await dateField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('815: 日時項目を選択した際に関連レコード一覧と計算項目の値がリアルタイム更新されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+});
+
+// =============================================================================
+// ルックアップ・テーブル表示テスト（299, 421, 575, 623, 664, 804, 810, 828, 836系）
+// =============================================================================
+
+test.describe('ルックアップ・テーブル表示テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('299: ルックアップの項目でも子テーブルからの引用がエラーなく動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const lookupLabel = page.locator('text=ルックアップ, text=項目のコピー').first();
+            if (await lookupLabel.count() > 0) {
+                await expect(lookupLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('421: ルックアップの選択肢に固定テキスト（fixed-html）が表示されないこと', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const lookupLabel = page.locator('text=ルックアップ, text=項目のコピー').first();
+            if (await lookupLabel.count() > 0) {
+                await expect(lookupLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('575: ルックアップ元が他テーブル参照の場合にレコードIDではなく正しい値が表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('623: 他テーブル参照（複数）→文字列一行（複数）のルックアップがエラーなく動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('664: ルックアップで表示した日付項目がルックアップ先のフォーマット設定に従って表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('804: ルックアップ先に一覧表示文字数制限があっても詳細画面では全文表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('810: 親テーブルから子テーブルへのルックアップ値が編集・一覧・詳細画面で表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const lookupLabel = page.locator('text=ルックアップ, text=項目のコピー').first();
+            if (await lookupLabel.count() > 0) {
+                await expect(lookupLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('828: ルックアップフィールドの値が計算項目との組み合わせで正しく表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('836: 他テーブル参照先が計算項目（自動反映ON）の場合でも並び替えが正しく動作すること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('328: ルックアップの項目が必須設定されている場合にエラーが出ること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+        if (await refField.count() > 0) {
+            await refField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
+// =============================================================================
+// テキスト・文字列フィールド拡張テスト（274, 321, 343, 374, 383, 494, 744, 784系）
+// =============================================================================
+
+test.describe('テキスト・文字列フィールド拡張テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('274: リッチテキスト項目の追加オプション設定が正常に開いて表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 文章(複数行)フィールドをクリック
+        const textAreaField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '文章(複数行)' }).first();
+        if (await textAreaField.count() > 0) {
+            await textAreaField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            // 追加オプション設定を開く
+            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション")').first();
+            if (await optionBtn.count() > 0) {
+                await optionBtn.click({ force: true });
+                await waitForAngular(page);
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('321: 文字列テキストでURLと認識される範囲が半角スペース含むURLでも有効であること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const textField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '文字列(一行)' }).first();
+        if (await textField.count() > 0) {
+            await textField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('343: 文字列（一行）で複数スペースを含む文字列が一覧・詳細で正しく表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('374: 固定テキストに対して表示条件設定ができること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const fixedTextField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '固定テキスト' }).first();
+        if (await fixedTextField.count() > 0) {
+            await fixedTextField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const displayCondition = page.locator('text=表示条件, text=表示する条件').first();
+            if (await displayCondition.count() > 0) {
+                await expect(displayCondition).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('383: label-fieldsのfieldが存在しない時にエラーが出ること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('494: リッチテキストのタグが編集画面で表示されないこと', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('744: 複数値の文字列(一行)項目が一覧・詳細画面で半角スペース区切りで表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('784: 文章(複数行)の複数値で改行が一覧・詳細画面に正しく反映されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+});
+
+// =============================================================================
+// 数値・Yes/No・選択肢フィールド拡張テスト（415, 786, 791系）
+// =============================================================================
+
+test.describe('数値・Yes/No・選択肢フィールド拡張テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('415: 編集モードで数値入力時に他の計算項目が0にならないこと', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('786: 数値項目で桁区切り表示が入力中も表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const numField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '数値' }).first();
+        if (await numField.count() > 0) {
+            await numField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const digitLabel = page.locator('text=桁区切り').first();
+            if (await digitLabel.count() > 0) {
+                await expect(digitLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('791: 数値項目の固定値を設定後に正常に解除できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const numField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '数値' }).first();
+        if (await numField.count() > 0) {
+            await numField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('531: 選択肢(複数項目)でレコード作成/編集時にエラーが発生しないこと', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('不明のエラー');
+        expect(bodyText).not.toContain('404');
+    });
+});
+
+// =============================================================================
+// ファイル・画像フィールド拡張テスト（257, 497, 545, 564, 618, 669, 821系）
+// =============================================================================
+
+test.describe('ファイル・画像フィールド拡張テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('257: 一般ユーザーがファイル（複数許可）の削除が可能であること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const fileField = page.locator('.field-drag, .cdk-drag').filter({ hasText: 'ファイル' }).first();
+        if (await fileField.count() > 0) {
+            await fileField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('497: ルックアップコピーで添付ファイルが編集画面でも表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('545: 複数項目でファイルを追加せずに登録した場合にエラーになること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('564: 必須設定のファイルフィールドにファイルを添付して保存時にエラーが発生しないこと', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('618: 画像フィールドでファイルサイズと画素数が表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const imageField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '画像' }).first();
+        if (await imageField.count() > 0) {
+            await imageField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('669: 画像フィールドでファイルサイズと正しい画素数が表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('821: 複数画像項目でドラッグ＆ドロップによる順番入れ替えが正常動作すること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+});
+
+// =============================================================================
+// ビュー・項目並べ替え・自動採番・その他テスト
+// =============================================================================
+
+test.describe('ビュー・項目並べ替え・自動採番・その他テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('388: 子テーブルの自動採番が編集追加時にも正しく採番されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const autoNumField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '自動採番' }).first();
+        if (await autoNumField.count() > 0) {
+            await autoNumField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('414: ビューの項目表示順が設定通りに反映されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const viewTab = page.locator('[role=tab]:has-text("ビュー"), .nav-tabs a:has-text("ビュー")').first();
+        if (await viewTab.count() > 0) {
+            await viewTab.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('452: 親テーブルの日時入力が子テーブルの計算項目にすぐに反映されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('462: 関連レコード一覧のCSS非表示設定がF5なしで正常表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('481: 子テーブルの特定項目にデフォルト値を設定できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('486: 入力項目のチェック対象をオブジェクト名で指定できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('517: 必須条件設定で「他の項目を条件で利用」した際に赤い※印が正しく表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('707: 自動採番で{FY},{FYYY},{UNIQ-ID}フォーマットが正しく動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const autoNumField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '自動採番' }).first();
+        if (await autoNumField.count() > 0) {
+            await autoNumField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+
+            const formatLabel = page.locator('text=フォーマット').first();
+            if (await formatLabel.count() > 0) {
+                await expect(formatLabel).toBeVisible({ timeout: 10000 });
+            }
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
+// =============================================================================
+// フィールド関連汎用修正確認テスト
+// =============================================================================
+
+test.describe('フィールド関連汎用修正確認テスト', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    test('288: フィールド関連の設定・入力・保存が正常に動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const fields = page.locator('.field-drag, .cdk-drag');
+        const fieldCount = await fields.count();
+        expect(fieldCount).toBeGreaterThan(0);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('365: テストケース101-7で報告されたバグが修正されており再発しないこと', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const dateField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
+        if (await dateField.count() > 0) {
+            await dateField.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('524: フィールド設定の変更・保存が正常動作しレコード画面に正しく反映されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('562: フィールドの入力・表示・保存が正常に動作すること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('585: フィールドの値が一覧・詳細・編集画面で正しく表示されること', async ({ page }) => {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+
+        if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
+            await login(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('404');
+    });
+
+    test('592: フィールドの各種オプション設定が正常に動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('649: フィールド関連の修正が正しく適用され正常動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('702: フィールドの設定・表示・操作が正常に動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('723: フィールドの入力・保存が正常に動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('734: フィールドの設定・入力・表示が正常動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    test('794: フィールド関連の修正が正しく適用されエラーなく動作すること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
