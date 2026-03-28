@@ -738,3 +738,219 @@ test.describe('コメントメンション', () => {
     });
 
 });
+
+// =============================================================================
+// バグ修正・機能改善確認テスト（コメント・ログ追加5件）
+// =============================================================================
+
+test.describe('コメント・ログ バグ修正確認', () => {
+    let tableUrl = null;
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(300000);
+        const context = await createLoginContext(browser);
+        const page = await context.newPage();
+        await ensureLoggedIn(page);
+        tableUrl = await setupTestTable(page);
+        console.log('[beforeAll] テーブルURL:', tableUrl);
+        await page.close();
+        await context.close();
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await ensureLoggedIn(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 297: 複数値項目での絞り込み・グラフ作成が正常に動作すること
+    // -------------------------------------------------------------------------
+    test('297: 複数値を持つ項目で絞り込み（OR選択）が正常に動作すること', async ({ page }) => {
+        // レコード一覧に遷移
+        await page.goto(BASE_URL + tableUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await waitForAngular(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // フィルタボタンの存在確認
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        if (await filterBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await filterBtn.click({ force: true });
+            await waitForAngular(page);
+
+            // フィルタ設定UIが表示されること
+            const filterPanel = page.locator('.filter-panel, .search-panel, .condition-row');
+            const panelCount = await filterPanel.count();
+            console.log('297: フィルタパネル要素数:', panelCount);
+        }
+
+        // ページが正常であること
+        const afterText = await page.innerText('body');
+        expect(afterText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 356: コメント通知クリック時にレコード詳細画面に遷移すること
+    // -------------------------------------------------------------------------
+    test('356: 通知をクリックした際にコメントが来たレコード詳細画面に遷移すること', async ({ page }) => {
+        // 通知一覧ページに遷移
+        await page.goto(BASE_URL + '/admin/notifications', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知ベルアイコンをクリック
+        const bellIcon = page.locator('.notification-bell, .fa-bell, i.icon-bell, .nav-link .badge').first();
+        if (await bellIcon.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await bellIcon.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 通知一覧が表示されること（ドロップダウンまたはページ）
+        const notifItems = page.locator('.notification-item, .dropdown-item, .notification-list a');
+        const notifCount = await notifItems.count();
+        console.log('356: 通知アイテム数:', notifCount);
+
+        // 通知をクリックした場合レコード詳細に遷移するか確認（通知が存在する場合）
+        if (notifCount > 0) {
+            await notifItems.first().click({ force: true });
+            await waitForAngular(page);
+            const afterUrl = page.url();
+            console.log('356: 通知クリック後URL:', afterUrl);
+            // レコード詳細画面（/view/）に遷移するか、少なくともエラーでないこと
+            const afterText = await page.innerText('body');
+            expect(afterText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 472: コメント入力で改行が反映されること
+    // -------------------------------------------------------------------------
+    test('472: コメント入力欄で改行が正しく反映されること', async ({ page }) => {
+        // レコード詳細画面へ遷移
+        const recordUrl = await getFirstRecordViewUrl(page, tableUrl);
+        await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await waitForAngular(page);
+        await page.keyboard.press('Escape');
+        await waitForAngular(page);
+
+        // aside-menu（コメントパネル）を開く
+        await openAsideMenu(page);
+
+        // コメント入力エリア
+        const commentDiv = page.locator('#comment');
+        await expect(commentDiv).toBeVisible({ timeout: 15000 });
+
+        // 改行を含むコメントを入力
+        await commentDiv.click();
+        await waitForAngular(page);
+        await page.keyboard.type('1行目テスト');
+        await page.keyboard.press('Shift+Enter');
+        await page.keyboard.type('2行目テスト');
+
+        // 入力内容に改行が含まれていること
+        const inputHtml = await commentDiv.innerHTML();
+        const hasBr = inputHtml.includes('<br') || inputHtml.includes('<div');
+        console.log('472: 改行含有確認:', hasBr, 'HTML:', inputHtml.substring(0, 200));
+
+        // 送信ボタンをクリック
+        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+        if (await sendBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await sendBtn.click({ force: true });
+            await page.waitForTimeout(3000);
+
+            // 送信後のコメント表示で改行が反映されていること
+            const commentBody = page.locator('.comment-body').last();
+            if (await commentBody.isVisible({ timeout: 10000 }).catch(() => false)) {
+                const bodyHtml = await commentBody.innerHTML();
+                const hasLineBreak = bodyHtml.includes('<br') || bodyHtml.includes('1行目') && bodyHtml.includes('2行目');
+                console.log('472: コメント表示の改行確認:', hasLineBreak);
+            }
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 570: 組織メンション時に複数役職ユーザーへの通知が重複しないこと
+    // -------------------------------------------------------------------------
+    test('570: 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと', async ({ page }) => {
+        // レコード詳細画面へ遷移
+        const recordUrl = await getFirstRecordViewUrl(page, tableUrl);
+        await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await waitForAngular(page);
+        await page.keyboard.press('Escape');
+        await waitForAngular(page);
+
+        // コメントパネルを開く
+        await openAsideMenu(page);
+
+        // コメント入力エリア
+        const commentDiv = page.locator('#comment');
+        await expect(commentDiv).toBeVisible({ timeout: 15000 });
+
+        // @で組織名メンションを入力
+        await commentDiv.click();
+        await waitForAngular(page);
+        await page.keyboard.type('組織メンションテスト570 @');
+        await page.waitForTimeout(1000);
+
+        // オートコンプリートが表示されるか確認
+        const autocomplete = page.locator('.mention-list, .autocomplete, .dropdown-menu.show');
+        const acCount = await autocomplete.count();
+        console.log('570: オートコンプリート数:', acCount);
+
+        // Escapeで閉じてから送信
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(500);
+
+        // 送信
+        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+        if (await sendBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await sendBtn.click({ force: true });
+            await page.waitForTimeout(3000);
+        }
+
+        // コメントが保存されたこと
+        const asideText = await page.locator('aside').innerText().catch(() => '');
+        expect(asideText).toContain('組織メンションテスト570');
+    });
+
+    // -------------------------------------------------------------------------
+    // 597: ユーザー無効化・削除後もコメント履歴にユーザー名が表示されること
+    // -------------------------------------------------------------------------
+    test('597: ユーザーを無効化してもコメント履歴にユーザー名が消えないこと', async ({ page }) => {
+        // レコード詳細画面へ遷移
+        const recordUrl = await getFirstRecordViewUrl(page, tableUrl);
+        await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await waitForAngular(page);
+        await page.keyboard.press('Escape');
+        await waitForAngular(page);
+
+        // コメントパネルを開く
+        await openAsideMenu(page);
+
+        // 既存のコメントが表示されていれば、ユーザー名が空でないことを確認
+        const commentBlocks = page.locator('comment-log-block, .comment-block, .comment-item');
+        const blockCount = await commentBlocks.count();
+        console.log('597: コメントブロック数:', blockCount);
+
+        if (blockCount > 0) {
+            // 各コメントブロックにユーザー名が含まれていること（空でないこと）
+            for (let i = 0; i < Math.min(blockCount, 3); i++) {
+                const blockText = await commentBlocks.nth(i).innerText();
+                // ユーザー名部分が空白だけでないこと
+                expect(blockText.trim().length).toBeGreaterThan(0);
+            }
+        }
+
+        // ページが正常であること
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});

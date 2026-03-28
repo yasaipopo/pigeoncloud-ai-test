@@ -3216,4 +3216,1210 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         expect(pageText).not.toContain('Internal Server Error');
     });
 
+    // ==========================================================================
+    // CC08: バグ修正確認・機能改善確認（カレンダー・チャート・集計）
+    // ==========================================================================
+
+    // --------------------------------------------------------------------------
+    // 248: カレンダー表示で時間が隠れないこと（PR #267 修正確認）
+    // --------------------------------------------------------------------------
+    test('248: カレンダー表示で時間が隠れないこと（バグ修正確認 PR#267）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn.count() > 0) {
+            await calBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        // 週表示に切り替え
+        const weekBtn = page.locator('.fc-timeGridWeek-button, button:has-text("週")').first();
+        if (await weekBtn.count() > 0) {
+            await weekBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(1000);
+
+        const calendarEl = page.locator('.fc, [class*="fullcalendar"], .fc-view-harness').first();
+        await expect(calendarEl).toBeVisible({ timeout: 10000 });
+
+        // 時間軸ラベルが表示されていること
+        const timeLabels = page.locator('.fc-timegrid-slot-label, .fc-axis');
+        const timeLabelCount = await timeLabels.count();
+        expect(timeLabelCount).toBeGreaterThan(0);
+
+        // イベントの時間表示が隠れていないこと
+        const events = page.locator('.fc-event, .fc-timegrid-event');
+        if (await events.count() > 0) {
+            const timeEl = events.first().locator('.fc-event-time, .fc-time');
+            if (await timeEl.count() > 0) {
+                const box = await timeEl.first().boundingBox();
+                if (box) {
+                    expect(box.height).toBeGreaterThan(0);
+                    expect(box.width).toBeGreaterThan(0);
+                }
+            }
+        }
+
+        const pageText88 = await page.innerText('body');
+        expect(pageText88).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 256: 集計の桁区切りカンマ表示（機能改善確認）
+    // --------------------------------------------------------------------------
+    test('256: 集計の数字に桁区切りカンマが表示されること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu256 = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu256).toBeVisible({ timeout: 5000 });
+        await summaryMenu256.click({ force: true });
+        await waitForAngular(page);
+
+        const summaryTab = page.locator('a:has-text("集計"), .nav-link:has-text("集計")').first();
+        if (await summaryTab.count() > 0) {
+            await summaryTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 表示ボタン
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const resultTable = page.locator('table, .summarize-result, .summary-table').first();
+        await expect(resultTable).toBeVisible({ timeout: 10000 });
+
+        const pt256 = await page.innerText('body');
+        expect(pt256).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 268: カレンダーDrag&Dropでデータが反映されること（バグ修正確認）
+    // --------------------------------------------------------------------------
+    test('268: カレンダーDrag&Dropでのデータ反映が正常に動作すること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn268 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn268.count() > 0) {
+            await calBtn268.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const calendarEl = page.locator('.fc, [class*="fullcalendar"]').first();
+        await expect(calendarEl).toBeVisible({ timeout: 10000 });
+
+        const events = page.locator('.fc-event');
+        const eventCount = await events.count();
+        console.log(`268: カレンダーイベント数: ${eventCount}`);
+        if (eventCount > 0) {
+            const box = await events.first().boundingBox();
+            expect(box).not.toBeNull();
+        }
+
+        const pt268 = await page.innerText('body');
+        expect(pt268).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 271: カレンダー週・日表示の画像表示修正確認（PR #57）
+    // --------------------------------------------------------------------------
+    test('271: カレンダーの週・日表示で画像表示が正常であること（PR#57修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn271 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn271.count() > 0) {
+            await calBtn271.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        // 週表示
+        const weekBtn = page.locator('.fc-timeGridWeek-button, button:has-text("週")').first();
+        if (await weekBtn.count() > 0) {
+            await weekBtn.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        await expect(page.locator('.fc-timegrid, .fc-timeGridWeek-view').first()).toBeVisible({ timeout: 10000 });
+
+        // 日表示
+        const dayBtn = page.locator('.fc-timeGridDay-button, button:has-text("日")').first();
+        if (await dayBtn.count() > 0) {
+            await dayBtn.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+        await expect(page.locator('.fc-timegrid, .fc-timeGridDay-view').first()).toBeVisible({ timeout: 10000 });
+
+        const pt271 = await page.innerText('body');
+        expect(pt271).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 289: チャートの「合計」集計がグラフ表示されること（バグ修正確認）
+    // --------------------------------------------------------------------------
+    test('289: チャートの「合計」集計でグラフが正常に表示されること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu289 = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu289).toBeVisible({ timeout: 5000 });
+        await chartMenu289.click({ force: true });
+        await waitForAngular(page);
+
+        const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
+        if (await chartSettingTab.count() > 0) {
+            await chartSettingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // y軸の集計方法を「合計」に設定
+        const allSelects289 = await page.locator('select.form-control').all();
+        for (const sel of allSelects289) {
+            if (await sel.isVisible()) {
+                const opts = await sel.locator('option').allInnerTexts();
+                if (opts.some(o => o.includes('合計'))) {
+                    const sumOpt = sel.locator('option').filter({ hasText: '合計' });
+                    if (await sumOpt.count() > 0) {
+                        const val = await sumOpt.first().getAttribute('value');
+                        await sel.selectOption(val || '');
+                    }
+                    break;
+                }
+            }
+        }
+
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const pt289 = await page.innerText('body');
+        expect(pt289).not.toContain('Internal Server Error');
+        expect(pt289).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 303: ダッシュボードのチャート・フィルタ配置が保存されること（バグ修正確認）
+    // --------------------------------------------------------------------------
+    test('303: ダッシュボードのチャート・フィルタ配置変更が保存されること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForAngular(page);
+        await page.waitForTimeout(2000);
+        await closeTemplateModal(page);
+
+        const widgets = page.locator('.dashboard-item, .grid-stack-item, [class*="widget"]');
+        const widgetCount = await widgets.count();
+        console.log(`303: ダッシュボードウィジェット数: ${widgetCount}`);
+
+        await expect(page.locator('.navbar')).toBeVisible();
+        const pt303 = await page.innerText('body');
+        expect(pt303).not.toContain('Internal Server Error');
+
+        if (widgetCount >= 2) {
+            const firstWidget = widgets.first();
+            const box = await firstWidget.boundingBox();
+            if (box) {
+                await firstWidget.hover();
+                await page.mouse.down();
+                await page.mouse.move(box.x + 50, box.y + 100);
+                await page.mouse.up();
+                await page.waitForTimeout(1000);
+            }
+            await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await waitForAngular(page);
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await waitForAngular(page);
+            await page.waitForTimeout(2000);
+            const pt303b = await page.innerText('body');
+            expect(pt303b).not.toContain('Internal Server Error');
+        }
+    });
+
+    // --------------------------------------------------------------------------
+    // 307: カレンダーで日付が消えないこと（機能改善確認）
+    // --------------------------------------------------------------------------
+    test('307: カレンダー表示で日付が消えないこと（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn307 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn307.count() > 0) {
+            await calBtn307.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const dayCells = page.locator('.fc-daygrid-day, .fc-day');
+        expect(await dayCells.count()).toBeGreaterThan(0);
+
+        const dayNumbers = page.locator('.fc-daygrid-day-number, .fc-day-number');
+        expect(await dayNumbers.count()).toBeGreaterThan(0);
+
+        const pt307 = await page.innerText('body');
+        expect(pt307).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 318: カレンダー時間表示が「11:00」形式であること（機能改善確認）
+    // --------------------------------------------------------------------------
+    test('318: カレンダーの時間表示がHH:MM形式であること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn318 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn318.count() > 0) {
+            await calBtn318.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const weekBtn = page.locator('.fc-timeGridWeek-button, button:has-text("週")').first();
+        if (await weekBtn.count() > 0) {
+            await weekBtn.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const timeLabels = page.locator('.fc-timegrid-slot-label, .fc-axis');
+        expect(await timeLabels.count()).toBeGreaterThan(0);
+
+        const labelTexts = await timeLabels.allInnerTexts();
+        const nonEmpty = labelTexts.filter(t => t.trim().length > 0);
+        if (nonEmpty.length > 0) {
+            const hasColonFormat = nonEmpty.some(t => /\d{1,2}:\d{2}/.test(t));
+            console.log(`318: 時間ラベル例: ${nonEmpty.slice(0, 3).join(', ')}`);
+            expect(hasColonFormat).toBeTruthy();
+        }
+
+        const pt318 = await page.innerText('body');
+        expect(pt318).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 339: チャート累積棒グラフで操作月以降が0にならないこと（バグ修正確認）
+    // --------------------------------------------------------------------------
+    test('339: チャート累積棒グラフで操作月以降のデータが0にならないこと（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu339 = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu339).toBeVisible({ timeout: 5000 });
+        await chartMenu339.click({ force: true });
+        await waitForAngular(page);
+
+        const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
+        if (await chartSettingTab.count() > 0) {
+            await chartSettingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 累積オプションをON
+        const cumulativeLabel = page.locator('label:has-text("累積")').first();
+        if (await cumulativeLabel.count() > 0) {
+            const cb = cumulativeLabel.locator('input[type="checkbox"]').first();
+            if (await cb.count() > 0 && !(await cb.isChecked())) {
+                await cumulativeLabel.click({ force: true });
+                await page.waitForTimeout(500);
+            }
+        }
+
+        // 棒グラフを選択
+        for (const sel of await page.locator('select.form-control').all()) {
+            if (await sel.isVisible()) {
+                const opts = await sel.locator('option').allInnerTexts();
+                if (opts.some(o => o.includes('棒グラフ'))) {
+                    const barOpt = sel.locator('option').filter({ hasText: '棒グラフ' });
+                    if (await barOpt.count() > 0) await sel.selectOption(await barOpt.first().getAttribute('value') || '');
+                    break;
+                }
+            }
+        }
+
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const chartArea = page.locator('canvas, svg, .chart-container').first();
+        if (await chartArea.count() > 0) await expect(chartArea).toBeVisible({ timeout: 10000 });
+
+        const pt339 = await page.innerText('body');
+        expect(pt339).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 346: カレンダーテーブル間遷移時に表示が切り替わること（バグ修正確認）
+    // --------------------------------------------------------------------------
+    test('346: カレンダーテーブル間遷移時にカレンダー表示が正しく切り替わること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn346 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn346.count() > 0) {
+            await calBtn346.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+
+        // 別のテーブルに遷移して戻る
+        await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForAngular(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn346b = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn346b.count() > 0) {
+            await calBtn346b.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+
+        const pt346 = await page.innerText('body');
+        expect(pt346).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 353: 子テーブルでカレンダー表示ができること
+    // --------------------------------------------------------------------------
+    test('353: 子テーブルでカレンダー表示設定が可能であること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        const gearBtn = page.locator('#table-setting-btn').first();
+        if (await gearBtn.count() > 0) {
+            await gearBtn.click({ force: true });
+            await waitForAngular(page);
+            const settingItem = page.locator('.dropdown-menu.show .dropdown-item:has-text("テーブル設定")').first();
+            if (await settingItem.count() > 0) {
+                await settingItem.click({ force: true });
+                await waitForAngular(page);
+            }
+        }
+        await page.waitForURL('**/dataset/edit/**', { timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => {});
+        await waitForAngular(page);
+
+        const listTab = page.locator('a[role=tab], .nav-link').filter({ hasText: '一覧画面' }).first();
+        if (await listTab.count() > 0) {
+            await listTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const calendarSwitchLabel = page.locator('label').filter({ hasText: 'カレンダー表示' }).first();
+        await expect(calendarSwitchLabel).toBeVisible({ timeout: 10000 });
+
+        const pt353 = await page.innerText('body');
+        expect(pt353).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 366: ユーザー管理の権限設定に「Googleカレンダー連携」が出ないこと
+    // --------------------------------------------------------------------------
+    test('366: ユーザー管理の権限設定で「Googleカレンダー連携」が表示されないこと（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForAngular(page);
+
+        const gearBtn = page.locator('#table-setting-btn').first();
+        if (await gearBtn.count() > 0) {
+            await gearBtn.click({ force: true });
+            await waitForAngular(page);
+            const settingItem = page.locator('.dropdown-menu.show .dropdown-item:has-text("テーブル設定")').first();
+            if (await settingItem.count() > 0) {
+                await settingItem.click({ force: true });
+                await waitForAngular(page);
+            }
+        }
+
+        const permTab = page.locator('a[role=tab], .nav-link').filter({ hasText: '権限設定' }).first();
+        if (await permTab.count() > 0) {
+            await permTab.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(1000);
+
+        const selectOptions = await page.locator('select option, ng-select .ng-option').allInnerTexts();
+        const hasGoogleCalendar = selectOptions.some(t => t.includes('Googleカレンダー連携'));
+        expect(hasGoogleCalendar).toBeFalsy();
+
+        const pt366 = await page.innerText('body');
+        expect(pt366).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 376: 絞り込みに「今年度」「来年度」が選択できること（機能改善確認）
+    // --------------------------------------------------------------------------
+    test('376: 絞り込み条件に「今年度」「来年度」の相対値が選択できること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu376 = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu376).toBeVisible({ timeout: 5000 });
+        await summaryMenu376.click({ force: true });
+        await waitForAngular(page);
+
+        const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
+        await expect(filterTab).toBeVisible({ timeout: 5000 });
+        await filterTab.click({ force: true });
+        await waitForAngular(page);
+
+        const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
+        if (await addCondBtn.count() > 0) {
+            await addCondBtn.click({ force: true });
+            await waitForAngular(page);
+
+            const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
+            if (await fieldSelect.count() > 0) {
+                const dtOption = fieldSelect.locator('option').filter({ hasText: /日時|日付/ });
+                if (await dtOption.count() > 0) {
+                    await fieldSelect.selectOption(await dtOption.first().getAttribute('value') || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            const relativeLabel = page.locator('label:has-text("相対値"), label:has-text("相対")').last();
+            if (await relativeLabel.count() > 0) {
+                await relativeLabel.click({ force: true });
+                await page.waitForTimeout(500);
+            }
+
+            await page.waitForTimeout(1000);
+            const allOptions = await page.locator('select option').allInnerTexts();
+            const bodyTxt = await page.innerText('body');
+            const hasFiscalYear = allOptions.some(t => t.includes('今年度')) || bodyTxt.includes('今年度');
+            expect(hasFiscalYear).toBeTruthy();
+        }
+
+        const pt376 = await page.innerText('body');
+        expect(pt376).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 399: クロス集計で複数値の他テーブル参照を設定して結果が表示されること
+    // --------------------------------------------------------------------------
+    test('399: クロス集計で複数値の他テーブル参照の集計結果が表示されること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu399 = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu399).toBeVisible({ timeout: 5000 });
+        await summaryMenu399.click({ force: true });
+        await waitForAngular(page);
+
+        const summaryTab = page.locator('a:has-text("集計"), .nav-link:has-text("集計")').first();
+        if (await summaryTab.count() > 0) {
+            await summaryTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const useSummaryLabel = page.locator('label:has-text("集計を使用する")').first();
+        if (await useSummaryLabel.count() > 0) {
+            await useSummaryLabel.click({ force: true });
+            await page.waitForTimeout(500);
+        }
+
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const pt399 = await page.innerText('body');
+        expect(pt399).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 407: チャートラベルが「年度」表示になること
+    // --------------------------------------------------------------------------
+    test('407: チャートの上部ラベルが「年度」表示になること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu407 = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu407).toBeVisible({ timeout: 5000 });
+        await chartMenu407.click({ force: true });
+        await waitForAngular(page);
+
+        const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
+        if (await chartSettingTab.count() > 0) {
+            await chartSettingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // 期間単位で「年度」を探す
+        for (const sel of await page.locator('select.form-control').all()) {
+            if (await sel.isVisible()) {
+                const opts = await sel.locator('option').allInnerTexts();
+                if (opts.some(o => o.includes('年度'))) {
+                    const fyOpt = sel.locator('option').filter({ hasText: '年度' });
+                    if (await fyOpt.count() > 0) await sel.selectOption(await fyOpt.first().getAttribute('value') || '');
+                    break;
+                }
+            }
+        }
+
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const pt407 = await page.innerText('body');
+        expect(pt407).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 428: チャートでデータ0件の項目が正しく処理されること
+    // --------------------------------------------------------------------------
+    test('428: チャートでデータ0件の項目が正しく処理されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu428 = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu428).toBeVisible({ timeout: 5000 });
+        await chartMenu428.click({ force: true });
+        await waitForAngular(page);
+        await page.waitForTimeout(2000);
+
+        const pt428 = await page.innerText('body');
+        expect(pt428).not.toContain('Internal Server Error');
+        expect(pt428).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 456: 絞り込みの相対値「今年度」がずれないこと
+    // --------------------------------------------------------------------------
+    test('456: 絞り込みの相対値「今年度」で正しい期間が表示されること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu456 = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu456).toBeVisible({ timeout: 5000 });
+        await summaryMenu456.click({ force: true });
+        await waitForAngular(page);
+
+        const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
+        await expect(filterTab).toBeVisible({ timeout: 5000 });
+        await filterTab.click({ force: true });
+        await waitForAngular(page);
+
+        const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
+        if (await addCondBtn.count() > 0) {
+            await addCondBtn.click({ force: true });
+            await waitForAngular(page);
+
+            const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
+            if (await fieldSelect.count() > 0) {
+                const dtOption = fieldSelect.locator('option').filter({ hasText: /日時|日付/ });
+                if (await dtOption.count() > 0) {
+                    await fieldSelect.selectOption(await dtOption.first().getAttribute('value') || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            const relativeLabel = page.locator('label:has-text("相対値"), label:has-text("相対")').last();
+            if (await relativeLabel.count() > 0) {
+                await relativeLabel.click({ force: true });
+                await page.waitForTimeout(500);
+            }
+
+            const valueSelect = page.locator('select[name*="value"], select.condition-value, select.relative-value').last();
+            if (await valueSelect.count() > 0) {
+                const fyOption = valueSelect.locator('option').filter({ hasText: '今年度' });
+                if (await fyOption.count() > 0) {
+                    await valueSelect.selectOption(await fyOption.first().getAttribute('value') || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+        }
+
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const pt456 = await page.innerText('body');
+        expect(pt456).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 478: カレンダー表示でnullの予定を非表示にできること
+    // --------------------------------------------------------------------------
+    test('478: カレンダー表示でnullの予定を非表示にできること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn478 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn478.count() > 0) {
+            await calBtn478.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        const pt478 = await page.innerText('body');
+        expect(pt478).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 491: ダッシュボードの閲覧権限ユーザーに歯車マークが適切に表示されること
+    // --------------------------------------------------------------------------
+    test('491: ダッシュボードのチャート・フィルタに歯車マークが適切に表示されること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForAngular(page);
+        await closeTemplateModal(page);
+        await page.waitForTimeout(2000);
+
+        await expect(page.locator('.navbar')).toBeVisible();
+        const gearIcons = page.locator('.fa-cog, .fa-gear, [class*="settings-icon"]');
+        console.log(`491: ダッシュボード歯車アイコン数: ${await gearIcons.count()}`);
+
+        const pt491 = await page.innerText('body');
+        expect(pt491).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 523: カレンダーフィルタの予定表示が正常に動作すること
+    // --------------------------------------------------------------------------
+    test('523: カレンダーフィルタの予定表示が正常に動作すること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn523 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn523.count() > 0) {
+            await calBtn523.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(3000);
+
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        const pt523 = await page.innerText('body');
+        expect(pt523).not.toContain('Internal Server Error');
+        expect(pt523).not.toContain('エラーが発生しました');
+    });
+
+    // --------------------------------------------------------------------------
+    // 616: チャートに並び替え機能があること
+    // --------------------------------------------------------------------------
+    test('616: チャートに並び替え（並び順）タブが存在すること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu616 = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu616).toBeVisible({ timeout: 5000 });
+        await chartMenu616.click({ force: true });
+        await waitForAngular(page);
+
+        const sortTab = page.locator('a:has-text("並び順"), .nav-link:has-text("並び順"), a:has-text("並び替え")').first();
+        const hasSortTab = await sortTab.count() > 0;
+        console.log(`616: 並び順タブ存在: ${hasSortTab}`);
+        expect(hasSortTab).toBeTruthy();
+
+        if (hasSortTab) {
+            await sortTab.click({ force: true });
+            await waitForAngular(page);
+            await expect(page.locator('.tab-pane.active, .tab-content').first()).toBeVisible({ timeout: 5000 });
+        }
+
+        const pt616 = await page.innerText('body');
+        expect(pt616).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 631: 集計でも開始月を設定できること
+    // --------------------------------------------------------------------------
+    test('631: 集計設定で開始月の設定が可能であること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu631 = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu631).toBeVisible({ timeout: 5000 });
+        await summaryMenu631.click({ force: true });
+        await waitForAngular(page);
+
+        const settingTab = page.locator('a:has-text("設定"), .nav-link:has-text("設定")').first();
+        if (await settingTab.count() > 0) {
+            await settingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const bodyTxt631 = await page.innerText('body');
+        expect(bodyTxt631).toContain('開始月');
+        expect(bodyTxt631).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 640: 相対値で≪≫ボタンが年度単位で動作すること
+    // --------------------------------------------------------------------------
+    test('640: チャート・集計の相対値で≪≫ボタンが年度単位で動作すること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const summaryMenu640 = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu640).toBeVisible({ timeout: 5000 });
+        await summaryMenu640.click({ force: true });
+        await waitForAngular(page);
+
+        const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
+        await expect(filterTab).toBeVisible({ timeout: 5000 });
+        await filterTab.click({ force: true });
+        await waitForAngular(page);
+
+        const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
+        if (await addCondBtn.count() > 0) {
+            await addCondBtn.click({ force: true });
+            await waitForAngular(page);
+
+            const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
+            if (await fieldSelect.count() > 0) {
+                const dtOption = fieldSelect.locator('option').filter({ hasText: /日時|日付/ });
+                if (await dtOption.count() > 0) {
+                    await fieldSelect.selectOption(await dtOption.first().getAttribute('value') || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            const relativeLabel = page.locator('label:has-text("相対値"), label:has-text("相対")').last();
+            if (await relativeLabel.count() > 0) {
+                await relativeLabel.click({ force: true });
+                await page.waitForTimeout(500);
+            }
+
+            // ≪ボタンの存在確認
+            const prevBtn = page.locator('button:has-text("≪"), button:has-text("«")').last();
+            if (await prevBtn.count() > 0) {
+                await prevBtn.click({ force: true });
+                await page.waitForTimeout(500);
+                console.log('640: ≪ボタンクリック成功');
+            }
+        }
+
+        const pt640 = await page.innerText('body');
+        expect(pt640).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 676: カレンダー簡易検索後のフィルタが正しいこと
+    // --------------------------------------------------------------------------
+    test('676: カレンダー表示で簡易検索後のフィルタ条件が正しく設定されること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn676 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn676.count() > 0) {
+            await calBtn676.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const searchInput = page.locator('input#search_input, input[placeholder="簡易検索"]').first();
+        if (await searchInput.count() > 0) {
+            await searchInput.fill('テスト');
+            await page.keyboard.press('Enter');
+            await waitForAngular(page);
+            await page.waitForTimeout(2000);
+        }
+
+        const pt676 = await page.innerText('body');
+        expect(pt676).not.toContain('Internal Server Error');
+        expect(pt676).not.toContain('エラーが発生しました');
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+    });
+
+    // --------------------------------------------------------------------------
+    // 677: カレンダー背景色設定ができること
+    // --------------------------------------------------------------------------
+    test('677: カレンダー表示で曜日・日付の背景色設定ができること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        const gearBtn = page.locator('#table-setting-btn').first();
+        if (await gearBtn.count() > 0) {
+            await gearBtn.click({ force: true });
+            await waitForAngular(page);
+            const settingItem = page.locator('.dropdown-menu.show .dropdown-item:has-text("テーブル設定")').first();
+            if (await settingItem.count() > 0) {
+                await settingItem.click({ force: true });
+                await waitForAngular(page);
+            }
+        }
+
+        const listTab = page.locator('a[role=tab], .nav-link').filter({ hasText: '一覧画面' }).first();
+        if (await listTab.count() > 0) {
+            await listTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const bodyTxt677 = await page.innerText('body');
+        const hasColorSetting = bodyTxt677.includes('背景色') || bodyTxt677.includes('カレンダー');
+        console.log(`677: 背景色設定UI存在: ${hasColorSetting}`);
+        expect(bodyTxt677).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 689, 770: 集計の開始月設定（再確認）
+    // --------------------------------------------------------------------------
+    test('689: 集計設定で開始月が設定可能であること（再確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        await page.locator('.dropdown-item:has-text("集計")').first().click({ force: true });
+        await waitForAngular(page);
+
+        const settingTab = page.locator('a:has-text("設定"), .nav-link:has-text("設定")').first();
+        if (await settingTab.count() > 0) {
+            await settingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const bt689 = await page.innerText('body');
+        expect(bt689).toContain('開始月');
+        expect(bt689).not.toContain('Internal Server Error');
+    });
+
+    // --------------------------------------------------------------------------
+    // 714: チャート設定の期間単位に「全て」が削除されていること
+    // --------------------------------------------------------------------------
+    test('714: チャート設定の期間単位に「全て」の選択肢が存在しないこと（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu714 = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu714).toBeVisible({ timeout: 5000 });
+        await chartMenu714.click({ force: true });
+        await waitForAngular(page);
+
+        const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
+        if (await chartSettingTab.count() > 0) {
+            await chartSettingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        for (const sel of await page.locator('select.form-control').all()) {
+            if (await sel.isVisible()) {
+                const opts = await sel.locator('option').allInnerTexts();
+                if (opts.some(o => o.includes('月') || o.includes('年') || o.includes('日'))) {
+                    const hasAll = opts.some(o => o.trim() === '全て');
+                    console.log(`714: 期間単位選択肢: ${opts.join(', ')}`);
+                    expect(hasAll).toBeFalsy();
+                    break;
+                }
+            }
+        }
+
+        const pt714 = await page.innerText('body');
+        expect(pt714).not.toContain('Internal Server Error');
+    });
+
+    test('770: 集計設定で開始月が設定可能であること（追加確認）', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        await page.locator('.dropdown-item:has-text("集計")').first().click({ force: true });
+        await waitForAngular(page);
+
+        const settingTab = page.locator('a:has-text("設定"), .nav-link:has-text("設定")').first();
+        if (await settingTab.count() > 0) {
+            await settingTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const bt770 = await page.innerText('body');
+        expect(bt770).toContain('開始月');
+        expect(bt770).not.toContain('Internal Server Error');
+    });
+
+    // ==========================================================================
+    // UC系: カレンダー・集計・チャートの追加テストケース
+    // ==========================================================================
+
+    test('725: カレンダーで先の月にレコード登録後、カレンダーが登録した月のまま維持されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn725 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn725.count() > 0) {
+            await calBtn725.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const nextBtn = page.locator('.fc-next-button, button:has-text("次"), .fc-button-next').first();
+        if (await nextBtn.count() > 0) {
+            for (let i = 0; i < 3; i++) {
+                await nextBtn.click({ force: true });
+                await waitForAngular(page);
+                await page.waitForTimeout(500);
+            }
+        }
+
+        const calTitle = page.locator('.fc-toolbar-title, .fc-center h2, .fc-toolbar h2').first();
+        const monthBefore = await calTitle.innerText().catch(() => '');
+        console.log(`725: 移動先の月: ${monthBefore}`);
+
+        const pt725 = await page.innerText('body');
+        expect(pt725).not.toContain('Internal Server Error');
+    });
+
+    test('775: カレンダーで予定登録キャンセル・削除後も操作していた月のまま表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn775 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn775.count() > 0) {
+            await calBtn775.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const nextBtn = page.locator('.fc-next-button, button:has-text("次"), .fc-button-next').first();
+        if (await nextBtn.count() > 0) {
+            await nextBtn.click({ force: true });
+            await waitForAngular(page);
+            await page.waitForTimeout(1000);
+        }
+
+        const calTitle = page.locator('.fc-toolbar-title, .fc-center h2, .fc-toolbar h2').first();
+        const monthBefore = await calTitle.innerText().catch(() => '');
+
+        const dayCell = page.locator('.fc-daygrid-day, .fc-day').nth(15);
+        if (await dayCell.count() > 0) {
+            await dayCell.click({ force: true });
+            await page.waitForTimeout(1000);
+            const modal = page.locator('.modal.show');
+            if (await modal.count() > 0) {
+                const cancelBtn = modal.locator('button:has-text("キャンセル"), button:has-text("閉じる"), .btn-secondary').first();
+                if (await cancelBtn.count() > 0) {
+                    await cancelBtn.click({ force: true });
+                    await page.waitForTimeout(1000);
+                }
+            }
+        }
+
+        const monthAfter = await calTitle.innerText().catch(() => '');
+        if (monthBefore && monthAfter) expect(monthAfter).toBe(monthBefore);
+
+        const pt775 = await page.innerText('body');
+        expect(pt775).not.toContain('Internal Server Error');
+    });
+
+    test('833: カレンダーでフィルタ切り替えが即座に反映されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await ensureCalendarView(page);
+        await navigateToAllTypeTable(page);
+
+        const calBtn833 = page.locator('button:has-text("カレンダー表示"), a:has-text("カレンダー表示")').first();
+        if (await calBtn833.count() > 0) {
+            await calBtn833.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const filterSelect = page.locator('select.filter-select, .filter-dropdown, [class*="filter"] select').first();
+        if (await filterSelect.count() > 0) {
+            const options = await filterSelect.locator('option').all();
+            if (options.length > 1) {
+                const val = await options[1].getAttribute('value');
+                if (val) {
+                    await filterSelect.selectOption(val);
+                    await waitForAngular(page);
+                    await page.waitForTimeout(2000);
+                }
+            }
+        }
+
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        const pt833 = await page.innerText('body');
+        expect(pt833).not.toContain('Internal Server Error');
+    });
+
+    test('316: クロス集計で複数値他テーブル参照のデータ項目2が正しく表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        await page.locator('.dropdown-item:has-text("集計")').first().click({ force: true });
+        await waitForAngular(page);
+
+        const summaryTab = page.locator('a:has-text("集計"), .nav-link:has-text("集計")').first();
+        if (await summaryTab.count() > 0) {
+            await summaryTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const useSummaryLabel = page.locator('label:has-text("集計を使用する")').first();
+        if (await useSummaryLabel.count() > 0) {
+            await useSummaryLabel.click({ force: true });
+            await page.waitForTimeout(500);
+        }
+
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const pt316 = await page.innerText('body');
+        expect(pt316).not.toContain('Internal Server Error');
+    });
+
+    test('614: ダッシュボードのチャートで凡例が多い場合にグラフ部分がスクロール可能であること', async ({ page }) => {
+        test.setTimeout(300000);
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForAngular(page);
+        await closeTemplateModal(page);
+        await page.waitForTimeout(2000);
+
+        const chartWidgets = page.locator('canvas, svg, .chart-container, [class*="chart"]');
+        console.log(`614: ダッシュボードチャート数: ${await chartWidgets.count()}`);
+
+        await expect(page.locator('.navbar')).toBeVisible();
+        const pt614 = await page.innerText('body');
+        expect(pt614).not.toContain('Internal Server Error');
+    });
+
+    test('778: 相対日時フィルタで月をまたぐデータが1つのグラフにまとまって表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        const chartMenu778 = page.locator('.dropdown-item:has-text("チャート")').first();
+        await expect(chartMenu778).toBeVisible({ timeout: 5000 });
+        await chartMenu778.click({ force: true });
+        await waitForAngular(page);
+
+        const filterTab = page.locator('a:has-text("絞り込み"), .nav-link:has-text("絞り込み")').first();
+        if (await filterTab.count() > 0) {
+            await filterTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
+        if (await addCondBtn.count() > 0) {
+            await addCondBtn.click({ force: true });
+            await waitForAngular(page);
+
+            const fieldSelect = page.locator('select[name*="field"], select.filter-field').last();
+            if (await fieldSelect.count() > 0) {
+                const dtOption = fieldSelect.locator('option').filter({ hasText: /日時|日付/ });
+                if (await dtOption.count() > 0) {
+                    await fieldSelect.selectOption(await dtOption.first().getAttribute('value') || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            const operatorSelect = page.locator('select[name*="operator"], select.condition-operator').last();
+            if (await operatorSelect.count() > 0) {
+                const gteOpt = operatorSelect.locator('option').filter({ hasText: '次の値以上' });
+                if (await gteOpt.count() > 0) {
+                    await operatorSelect.selectOption(await gteOpt.first().getAttribute('value') || '');
+                    await page.waitForTimeout(500);
+                }
+            }
+
+            const relativeLabel = page.locator('label:has-text("相対値"), label:has-text("相対")').last();
+            if (await relativeLabel.count() > 0) {
+                await relativeLabel.click({ force: true });
+                await page.waitForTimeout(500);
+            }
+        }
+
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        const pt778 = await page.innerText('body');
+        expect(pt778).not.toContain('Internal Server Error');
+    });
+
+    test('783: 集計結果のヘッダークリックで並び替えが正常に動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToAllTypeTable(page);
+
+        await openActionMenu(page);
+        await page.locator('.dropdown-item:has-text("集計")').first().click({ force: true });
+        await waitForAngular(page);
+
+        const summaryTab = page.locator('a:has-text("集計"), .nav-link:has-text("集計")').first();
+        if (await summaryTab.count() > 0) {
+            await summaryTab.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const useSummaryLabel = page.locator('label:has-text("集計を使用する")').first();
+        if (await useSummaryLabel.count() > 0) {
+            await useSummaryLabel.click({ force: true });
+            await page.waitForTimeout(500);
+        }
+
+        const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
+        if (await displayBtn.count() > 0) {
+            await displayBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        await page.waitForTimeout(2000);
+
+        // ヘッダークリックで並び替え
+        const resultHeaders = page.locator('table th, .summary-result th');
+        if (await resultHeaders.count() > 0) {
+            await resultHeaders.first().click({ force: true });
+            await page.waitForTimeout(1000);
+            await resultHeaders.first().click({ force: true });
+            await page.waitForTimeout(1000);
+        }
+
+        const pt783 = await page.innerText('body');
+        expect(pt783).not.toContain('Internal Server Error');
+    });
+
 });

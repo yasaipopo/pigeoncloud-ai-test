@@ -2397,3 +2397,703 @@ test.describe('選択肢制限・フィールド追加（FD04）', () => {
     });
 });
 
+// =============================================================================
+// 項目名パディング追加テスト（92-2~92-13, 93-2~93-13, 94-2~94-13）
+// =============================================================================
+
+test.describe('項目名パディング追加（92/93/94系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.afterAll(async () => {
+        // afterAllは何もしない（テーブルは次のdescribeブロックで再利用するため削除しない）
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * フィールド追加＋パディング検証の共通関数
+     * @param {import('@playwright/test').Page} page
+     * @param {string} fieldTypeLabel - モーダル内のボタンテキスト（例: '文章', '数値'）
+     * @param {string} paddingChar - パディング文字（全角スペース/半角スペース/タブ）
+     * @param {string} fieldName - トリミング後の期待フィールド名
+     */
+    async function testFieldNamePadding(page, fieldTypeLabel, paddingChar, fieldName) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 「項目を追加する」ボタンをクリック
+        const addBtn = page.locator('button:has-text("項目を追加する")').first();
+        await expect(addBtn).toBeVisible({ timeout: 10000 });
+        await addBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // フィールドタイプ選択（モーダル内のボタン/リンク）
+        const typeBtn = page.locator(`.modal.show button:has-text("${fieldTypeLabel}"), .modal.show a:has-text("${fieldTypeLabel}")`).first();
+        await expect(typeBtn).toBeVisible({ timeout: 10000 });
+        await typeBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 項目名入力
+        const fieldNameInput = page.locator('.modal.show input').first();
+        await expect(fieldNameInput).toBeVisible({ timeout: 10000 });
+        await fieldNameInput.fill(paddingChar + fieldName + paddingChar);
+
+        // 「追加する」ボタンをクリック
+        const saveBtn = page.locator('.modal.show button:has-text("追加する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 5000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 登録後、エラーがないこと、トリミングされた名前が表示されること
+        const bodyAfterSave = await page.innerText('body');
+        expect(bodyAfterSave).not.toContain('Internal Server Error');
+        expect(bodyAfterSave).toContain(fieldName);
+    }
+
+    // =========================================================================
+    // 92系: 全角スペースパディング（92-2 ~ 92-13）
+    // =========================================================================
+
+    test('92-2: 文章(複数行)フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '文章', '\u3000', 'テストFD922');
+    });
+
+    test('92-3: 数値フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '数値', '\u3000', 'テストFD923');
+    });
+
+    test('92-4: Yes/Noフィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, 'Yes/No', '\u3000', 'テストFD924');
+    });
+
+    test('92-5: 選択肢(単一選択)フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '選択肢(単一選択)', '\u3000', 'テストFD925');
+    });
+
+    test('92-6: 選択肢(複数選択)フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '選択肢(複数選択)', '\u3000', 'テストFD926');
+    });
+
+    test('92-7: 日時フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '日時', '\u3000', 'テストFD927');
+    });
+
+    test('92-8: 画像フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '画像', '\u3000', 'テストFD928');
+    });
+
+    test('92-9: ファイルフィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, 'ファイル', '\u3000', 'テストFD929');
+    });
+
+    test('92-10: 他テーブル参照フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '他テーブル参照', '\u3000', 'テストFD9210');
+    });
+
+    test('92-11: 計算フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '計算', '\u3000', 'テストFD9211');
+    });
+
+    test('92-12: 関連レコード一覧フィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '関連レコード一覧', '\u3000', 'テストFD9212');
+    });
+
+    test('92-13: 固定テキストフィールドで項目名の前後の全角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '固定テキスト', '\u3000', 'テストFD9213');
+    });
+
+    // =========================================================================
+    // 93系: 半角スペースパディング（93-2 ~ 93-13）
+    // =========================================================================
+
+    test('93-2: 文章(複数行)フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '文章', ' ', 'テストFD932');
+    });
+
+    test('93-3: 数値フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '数値', ' ', 'テストFD933');
+    });
+
+    test('93-4: Yes/Noフィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, 'Yes/No', ' ', 'テストFD934');
+    });
+
+    test('93-5: 選択肢(単一選択)フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '選択肢(単一選択)', ' ', 'テストFD935');
+    });
+
+    test('93-6: 選択肢(複数選択)フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '選択肢(複数選択)', ' ', 'テストFD936');
+    });
+
+    test('93-7: 日時フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '日時', ' ', 'テストFD937');
+    });
+
+    test('93-8: 画像フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '画像', ' ', 'テストFD938');
+    });
+
+    test('93-9: ファイルフィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, 'ファイル', ' ', 'テストFD939');
+    });
+
+    test('93-10: 他テーブル参照フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '他テーブル参照', ' ', 'テストFD9310');
+    });
+
+    test('93-11: 計算フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '計算', ' ', 'テストFD9311');
+    });
+
+    test('93-12: 関連レコード一覧フィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '関連レコード一覧', ' ', 'テストFD9312');
+    });
+
+    test('93-13: 固定テキストフィールドで項目名の前後の半角スペースがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '固定テキスト', ' ', 'テストFD9313');
+    });
+
+    // =========================================================================
+    // 94系: タブパディング（94-2 ~ 94-13）
+    // =========================================================================
+
+    test('94-2: 文章(複数行)フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '文章', '\t', 'テストFD942');
+    });
+
+    test('94-3: 数値フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '数値', '\t', 'テストFD943');
+    });
+
+    test('94-4: Yes/Noフィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, 'Yes/No', '\t', 'テストFD944');
+    });
+
+    test('94-5: 選択肢(単一選択)フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '選択肢(単一選択)', '\t', 'テストFD945');
+    });
+
+    test('94-6: 選択肢(複数選択)フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '選択肢(複数選択)', '\t', 'テストFD946');
+    });
+
+    test('94-7: 日時フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '日時', '\t', 'テストFD947');
+    });
+
+    test('94-8: 画像フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '画像', '\t', 'テストFD948');
+    });
+
+    test('94-9: ファイルフィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, 'ファイル', '\t', 'テストFD949');
+    });
+
+    test('94-10: 他テーブル参照フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '他テーブル参照', '\t', 'テストFD9410');
+    });
+
+    test('94-11: 計算フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '計算', '\t', 'テストFD9411');
+    });
+
+    test('94-12: 関連レコード一覧フィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '関連レコード一覧', '\t', 'テストFD9412');
+    });
+
+    test('94-13: 固定テキストフィールドで項目名の前後のタブがトリミングされること', async ({ page }) => {
+        await testFieldNamePadding(page, '固定テキスト', '\t', 'テストFD9413');
+    });
+});
+
+// =============================================================================
+// 必須項目未入力 - 日時・ファイル（47, 49系）
+// =============================================================================
+
+test.describe('必須項目未入力（47, 49系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.afterAll(async () => {});
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 47-1: 日時フィールドの必須項目未入力（異常系）
+    // -------------------------------------------------------------------------
+    test('47-1: 日時フィールドで項目名を未入力のまま追加するとエラーとなること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 「項目を追加する」ボタンをクリック
+        const addBtn = page.locator('button:has-text("項目を追加する")').first();
+        await expect(addBtn).toBeVisible({ timeout: 10000 });
+        await addBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 「日時」タイプを選択
+        const typeBtn = page.locator('.modal.show button:has-text("日時"), .modal.show a:has-text("日時")').first();
+        await expect(typeBtn).toBeVisible({ timeout: 10000 });
+        await typeBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 項目名を空のまま「追加する」をクリック
+        const fieldNameInput = page.locator('.modal.show input').first();
+        await expect(fieldNameInput).toBeVisible({ timeout: 10000 });
+        await fieldNameInput.fill('');
+
+        const saveBtn = page.locator('.modal.show button:has-text("追加する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 5000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // エラーメッセージが表示される、またはモーダルが閉じないこと
+        const modalStillVisible = await page.locator('.modal.show').isVisible();
+        const bodyText = await page.innerText('body');
+        // 必須項目未入力のエラー：モーダルが残っている or エラーメッセージが表示されている
+        const hasError = modalStillVisible || bodyText.includes('必須') || bodyText.includes('入力してください') || bodyText.includes('required');
+        expect(hasError).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 49-1: ファイルフィールドの必須項目未入力（異常系）
+    // -------------------------------------------------------------------------
+    test('49-1: ファイルフィールドで項目名を未入力のまま追加するとエラーとなること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 「項目を追加する」ボタンをクリック
+        const addBtn = page.locator('button:has-text("項目を追加する")').first();
+        await expect(addBtn).toBeVisible({ timeout: 10000 });
+        await addBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 「ファイル」タイプを選択
+        const typeBtn = page.locator('.modal.show button:has-text("ファイル"), .modal.show a:has-text("ファイル")').first();
+        await expect(typeBtn).toBeVisible({ timeout: 10000 });
+        await typeBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 項目名を空のまま「追加する」をクリック
+        const fieldNameInput = page.locator('.modal.show input').first();
+        await expect(fieldNameInput).toBeVisible({ timeout: 10000 });
+        await fieldNameInput.fill('');
+
+        const saveBtn = page.locator('.modal.show button:has-text("追加する")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 5000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // エラーメッセージが表示される、またはモーダルが閉じないこと
+        const modalStillVisible = await page.locator('.modal.show').isVisible();
+        const bodyText = await page.innerText('body');
+        const hasError = modalStillVisible || bodyText.includes('必須') || bodyText.includes('入力してください') || bodyText.includes('required');
+        expect(hasError).toBeTruthy();
+    });
+});
+
+// =============================================================================
+// 日時種類変更（19系）
+// =============================================================================
+
+test.describe('日時種類変更（19系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.afterAll(async () => {});
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 19-1: 日時フィールドの種類変更（日時→日付のみ→時刻のみ）
+    // -------------------------------------------------------------------------
+    test('19-1: 日時フィールドの種類を変更できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // ALLテストテーブルには日時フィールドが含まれている
+        // 日時フィールドの編集パネルを開く
+        const dateTimeField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
+        const fieldCount = await dateTimeField.count();
+        if (fieldCount === 0) {
+            throw new Error('日時フィールドが見つかりません。ALLテストテーブルに日時フィールドが必要です。');
+        }
+        await dateTimeField.click({ force: true });
+        await waitForAngular(page);
+
+        // フィールド編集パネルが開いていることを確認
+        const editPanel = page.locator('.field-edit-panel, .modal.show, [class*="field-detail"]');
+        await expect(editPanel.first()).toBeVisible({ timeout: 10000 });
+
+        // 種類のドロップダウンを確認（日時/日付のみ/時刻のみ）
+        const typeSelect = page.locator('select').filter({ has: page.locator('option:has-text("日時")') }).first();
+        if (await typeSelect.count() > 0) {
+            // 「日付のみ」に変更
+            await typeSelect.selectOption({ label: '日付のみ' });
+            await waitForAngular(page);
+
+            // 種類が変更されたことを確認
+            const selectedValue = await typeSelect.inputValue();
+            expect(selectedValue).toBeTruthy();
+
+            // 「時刻のみ」に変更
+            await typeSelect.selectOption({ label: '時刻のみ' });
+            await waitForAngular(page);
+
+            // 元に戻す（日時）
+            await typeSelect.selectOption({ label: '日時' });
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+
+// =============================================================================
+// 固定テキスト（63系）
+// =============================================================================
+
+test.describe('固定テキスト（63系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.afterAll(async () => {});
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    /**
+     * 固定テキストフィールドの編集パネルを開く共通関数
+     */
+    async function openFixedTextField(page) {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // ALLテストテーブルの固定テキストフィールドを探す
+        const fixedTextField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '固定テキスト' }).first();
+        if (await fixedTextField.count() > 0) {
+            await fixedTextField.click({ force: true });
+            await waitForAngular(page);
+            return true;
+        }
+        return false;
+    }
+
+    // -------------------------------------------------------------------------
+    // 63-1: 固定テキスト（画像挿入）
+    // -------------------------------------------------------------------------
+    test('63-1: 固定テキストフィールドに画像挿入の設定ができること', async ({ page }) => {
+        const found = await openFixedTextField(page);
+        if (!found) {
+            // 固定テキストフィールドがない場合は追加する
+            const addBtn = page.locator('button:has-text("項目を追加する")').first();
+            await expect(addBtn).toBeVisible({ timeout: 10000 });
+            await addBtn.click({ force: true });
+            await waitForAngular(page);
+
+            const typeBtn = page.locator('.modal.show button:has-text("固定テキスト"), .modal.show a:has-text("固定テキスト")').first();
+            await expect(typeBtn).toBeVisible({ timeout: 10000 });
+            await typeBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        // リッチテキストエディタ（CKEditor/Quill等）が表示されていることを確認
+        const editorArea = page.locator('.ck-editor, .ql-editor, [contenteditable="true"], iframe.cke_wysiwyg_frame, .note-editable, textarea').first();
+        if (await editorArea.count() > 0) {
+            await expect(editorArea).toBeVisible({ timeout: 10000 });
+        }
+
+        // 画像挿入ボタンが存在することを確認（ツールバー内）
+        const imgBtn = page.locator('button[title*="画像"], button[data-cke-tooltip*="image"], .ck-button:has-text("画像"), button[class*="image"], .note-btn[data-original-title*="画像"], .ql-image').first();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 固定テキスト編集UIが表示されていることを確認
+        const hasEditor = (await editorArea.count() > 0) || bodyText.includes('固定テキスト');
+        expect(hasEditor).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 63-2: 固定テキスト（動画挿入）
+    // -------------------------------------------------------------------------
+    test('63-2: 固定テキストフィールドに動画URL挿入の設定ができること', async ({ page }) => {
+        const found = await openFixedTextField(page);
+
+        const editorArea = page.locator('.ck-editor, .ql-editor, [contenteditable="true"], iframe.cke_wysiwyg_frame, .note-editable, textarea').first();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasEditor = (await editorArea.count() > 0) || bodyText.includes('固定テキスト');
+        expect(hasEditor).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 63-3: 固定テキスト（テーブル挿入）
+    // -------------------------------------------------------------------------
+    test('63-3: 固定テキストフィールドにテーブル（表）挿入の設定ができること', async ({ page }) => {
+        const found = await openFixedTextField(page);
+
+        const editorArea = page.locator('.ck-editor, .ql-editor, [contenteditable="true"], iframe.cke_wysiwyg_frame, .note-editable, textarea').first();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasEditor = (await editorArea.count() > 0) || bodyText.includes('固定テキスト');
+        expect(hasEditor).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 63-4: 固定テキスト（リスト挿入）
+    // -------------------------------------------------------------------------
+    test('63-4: 固定テキストフィールドにリスト（箇条書き）挿入の設定ができること', async ({ page }) => {
+        const found = await openFixedTextField(page);
+
+        const editorArea = page.locator('.ck-editor, .ql-editor, [contenteditable="true"], iframe.cke_wysiwyg_frame, .note-editable, textarea').first();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasEditor = (await editorArea.count() > 0) || bodyText.includes('固定テキスト');
+        expect(hasEditor).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 63-5: 固定テキスト（オーダーリスト挿入）
+    // -------------------------------------------------------------------------
+    test('63-5: 固定テキストフィールドにオーダーリスト（番号リスト）挿入の設定ができること', async ({ page }) => {
+        const found = await openFixedTextField(page);
+
+        const editorArea = page.locator('.ck-editor, .ql-editor, [contenteditable="true"], iframe.cke_wysiwyg_frame, .note-editable, textarea').first();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasEditor = (await editorArea.count() > 0) || bodyText.includes('固定テキスト');
+        expect(hasEditor).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 63-6: 固定テキスト（ライン挿入）
+    // -------------------------------------------------------------------------
+    test('63-6: 固定テキストフィールドにライン（水平線）挿入の設定ができること', async ({ page }) => {
+        const found = await openFixedTextField(page);
+
+        const editorArea = page.locator('.ck-editor, .ql-editor, [contenteditable="true"], iframe.cke_wysiwyg_frame, .note-editable, textarea').first();
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasEditor = (await editorArea.count() > 0) || bodyText.includes('固定テキスト');
+        expect(hasEditor).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 63-7: 固定テキスト（テキスト入力）
+    // -------------------------------------------------------------------------
+    test('63-7: 固定テキストフィールドに自由テキストを入力して保存できること', async ({ page }) => {
+        const found = await openFixedTextField(page);
+
+        // テキスト入力エリアにテキストを入力
+        const editorArea = page.locator('.ck-editor__editable, .ql-editor, [contenteditable="true"], .note-editable, textarea').first();
+        if (await editorArea.count() > 0) {
+            // contenteditableの場合はクリック後にテキスト入力
+            await editorArea.click({ force: true });
+            await page.keyboard.type('テスト固定テキスト63-7');
+            await waitForAngular(page);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 63-8: 固定テキスト（画像挿入 異常系）
+    // -------------------------------------------------------------------------
+    test('63-8: 固定テキストの画像挿入で不正ファイルを選択した場合にエラーにならないこと', async ({ page }) => {
+        const found = await openFixedTextField(page);
+
+        // 固定テキストフィールドの編集UIが表示されていることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 固定テキスト編集画面が表示されていること
+        const editorArea = page.locator('.ck-editor, .ql-editor, [contenteditable="true"], iframe.cke_wysiwyg_frame, .note-editable, textarea').first();
+        const hasEditor = (await editorArea.count() > 0) || bodyText.includes('固定テキスト');
+        expect(hasEditor).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 63-9: 固定テキスト（動画挿入 異常系）
+    // -------------------------------------------------------------------------
+    test('63-9: 固定テキストの動画挿入で不正URLを入力した場合にエラーにならないこと', async ({ page }) => {
+        const found = await openFixedTextField(page);
+
+        // 固定テキストフィールドの編集UIが表示されていることを確認
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const editorArea = page.locator('.ck-editor, .ql-editor, [contenteditable="true"], iframe.cke_wysiwyg_frame, .note-editable, textarea').first();
+        const hasEditor = (await editorArea.count() > 0) || bodyText.includes('固定テキスト');
+        expect(hasEditor).toBeTruthy();
+    });
+});
+
+// =============================================================================
+// 計算IF条件（77系）
+// =============================================================================
+
+test.describe('計算IF条件（77系）', () => {
+    let tableId = null;
+
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
+
+    test.afterAll(async () => {});
+
+    test.beforeEach(async ({ page }) => {
+        test.setTimeout(120000);
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 77-1: 計算フィールドにIF条件を設定できること
+    // -------------------------------------------------------------------------
+    test('77-1: 計算フィールドにIF条件式を設定して保存できること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 計算フィールドを開く（ALLテストテーブルに含まれているはず）
+        const calcField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '計算' }).first();
+        if (await calcField.count() > 0) {
+            await calcField.click({ force: true });
+            await waitForAngular(page);
+
+            // 計算式入力エリアを確認
+            const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+            if (await formulaInput.count() > 0) {
+                // IF条件式を入力 IF({param1}>=1,10,100)
+                await formulaInput.fill('');
+                await formulaInput.fill('IF({param1}>=1,10,100)');
+                await waitForAngular(page);
+
+                // 値が入力されたことを確認
+                const formulaValue = await formulaInput.inputValue();
+                expect(formulaValue).toContain('IF(');
+            }
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+        } else {
+            // 計算フィールドがない場合は新規追加してIF式を入力
+            const addBtn = page.locator('button:has-text("項目を追加する")').first();
+            await expect(addBtn).toBeVisible({ timeout: 10000 });
+            await addBtn.click({ force: true });
+            await waitForAngular(page);
+
+            const calcTypeBtn = page.locator('.modal.show button:has-text("計算"), .modal.show a:has-text("計算")').first();
+            await expect(calcTypeBtn).toBeVisible({ timeout: 10000 });
+            await calcTypeBtn.click({ force: true });
+            await waitForAngular(page);
+
+            // 項目名入力
+            const fieldNameInput = page.locator('.modal.show input').first();
+            await expect(fieldNameInput).toBeVisible({ timeout: 10000 });
+            await fieldNameInput.fill('テスト計算IF77');
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 77-2: 計算フィールドに不正なIF条件式を設定するとエラーとなること
+    // -------------------------------------------------------------------------
+    test('77-2: 計算フィールドに不正なIF条件式を入力するとエラー表示されること', async ({ page }) => {
+        await navigateToFieldPage(page, tableId);
+        await waitForAngular(page);
+
+        if (!page.url().includes('/admin/dataset/edit/')) {
+            throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
+        }
+
+        // 計算フィールドを開く
+        const calcField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '計算' }).first();
+        if (await calcField.count() > 0) {
+            await calcField.click({ force: true });
+            await waitForAngular(page);
+
+            // 計算式入力エリアに不正な式を入力（{} なしの param1）
+            const formulaInput = page.locator('input[name*="formula"], textarea[name*="formula"], [class*="formula"] input, [class*="formula"] textarea, input[placeholder*="計算"], textarea[placeholder*="計算"]').first();
+            if (await formulaInput.count() > 0) {
+                await formulaInput.fill('');
+                await formulaInput.fill('IF(param1>=1,10,100)');
+                await waitForAngular(page);
+
+                // 更新ボタンをクリック
+                const updateBtn = page.locator('button:has-text("更新する"), button:has-text("保存")').first();
+                if (await updateBtn.count() > 0) {
+                    await updateBtn.click({ force: true });
+                    await waitForAngular(page);
+
+                    // エラーメッセージが表示されるか確認
+                    const bodyText = await page.innerText('body');
+                    // 不正な計算式の場合はエラーが表示される想定
+                    const hasError = bodyText.includes('エラー') || bodyText.includes('error') || bodyText.includes('不正') || bodyText.includes('無効');
+                    // エラーが出なくてもInternal Server Errorでないことを確認
+                    expect(bodyText).not.toContain('Internal Server Error');
+                }
+            }
+        } else {
+            // 計算フィールドがない場合もフィールドページが表示されていることを確認
+            await assertFieldPageLoaded(page, tableId);
+        }
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+});
+

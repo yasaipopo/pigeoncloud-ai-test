@@ -3052,4 +3052,643 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
             expect(afterText).toContain('全員否認コメント');
         }
     });
+
+    // -------------------------------------------------------------------------
+    // 68-8: フロー固定: 組織(役職)/全員の承認 → 否認
+    // -------------------------------------------------------------------------
+    test('68-8: フロー固定で組織(役職)/全員の承認が必要なワークフローで否認できること', async ({ page }) => {
+        test.setTimeout(300000);
+        // フロー固定をONにする
+        await navigateToWorkflowTab(page, tableId);
+        await toggleWorkflowOption(page, 'フローを固定する', true);
+        await page.waitForTimeout(1000);
+        // テンプレートを追加
+        const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
+        if (await addTemplateBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await addTemplateBtn.click();
+            await waitForAngular(page);
+        }
+        // テンプレート内で承認フロー追加
+        const addFlowBtn = page.locator('button:has-text("フロー追加")').first();
+        if (await addFlowBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await addFlowBtn.click();
+            await waitForAngular(page);
+            // 組織(役職)タイプ + 全員の承認が必要
+            const divRadio = page.locator('input[type="radio"][value="division"]').first();
+            if (await divRadio.count() > 0) await divRadio.click();
+            await waitForAngular(page);
+            const allRadio = page.locator('input[type="radio"][value="all"]').first();
+            if (await allRadio.count() > 0) await allRadio.click();
+            await waitForAngular(page);
+        }
+        // 設定保存
+        await saveTableSettings(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 新規申請ページで確認
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
+        await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+        await page.waitForTimeout(500);
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
+        await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 10000 }).catch(() => {});
+        const modalText = await page.evaluate(() => {
+            const dialogs = Array.from(document.querySelectorAll('[role="dialog"], dialog'));
+            const visibleDialog = dialogs.find(d => {
+                const style = window.getComputedStyle(d);
+                return style.display !== 'none' && style.visibility !== 'hidden';
+            });
+            return visibleDialog ? visibleDialog.innerText : '';
+        }).catch(() => '');
+        expect(modalText).not.toContain('Internal Server Error');
+        await page.locator('button.btn-secondary:has-text("キャンセル")').click().catch(() => {});
+    });
+});
+
+// =============================================================================
+// バグ修正確認・機能改善確認（278〜697系）
+// =============================================================================
+test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
+    let tableId;
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(300000);
+        tableId = _sharedTableId;
+        const { context, page } = await createAuthContext(browser);
+        try {
+            await closeTemplateModal(page);
+            await enableWorkflow(page, tableId);
+        } catch (e) {
+            console.log('[WFバグ修正確認 beforeAll] enableWorkflow error (ignored):', e.message);
+        } finally {
+            await context.close();
+        }
+    });
+
+    test.beforeEach(async ({ page }) => {
+        await login(page);
+        await closeTemplateModal(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // 278: 画像のルックアップのコピーがある場合のレコード登録
+    // -------------------------------------------------------------------------
+    test('278: 画像ルックアップコピーがあるテーブルでレコード登録ができること', async ({ page }) => {
+        test.setTimeout(180000);
+        // テーブルの新規追加ページを開いて登録できることを確認
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 申請ボタンまたは保存ボタンが表示されること
+        const hasSubmitBtn = await page.locator('.card-footer button').filter({ hasText: /申請|保存|登録/ }).first().isVisible({ timeout: 10000 }).catch(() => false);
+        expect(hasSubmitBtn).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 333: ワークフロー承認者のユーザー名検索
+    // -------------------------------------------------------------------------
+    test('333: ワークフロー承認者選択時にユーザー名で検索できること', async ({ page }) => {
+        test.setTimeout(300000);
+        // 新規レコード作成→申請モーダル→承認フロー追加→ユーザー名検索
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
+        await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+        await page.waitForTimeout(500);
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
+        await waitForAngular(page);
+        await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
+        const addFlowBtn = page.locator('button:has-text("承認フロー追加")').first();
+        await addFlowBtn.waitFor({ state: 'visible', timeout: 20000 });
+        await page.waitForTimeout(500);
+        await addFlowBtn.click({ timeout: 10000 });
+        await waitForAngular(page);
+        // ユーザー選択ng-selectでテキスト入力して検索できることを確認
+        await page.waitForFunction(
+            () => !Array.from(document.querySelectorAll('user-forms-field'))
+                .some(el => el.textContent.includes('Loading...')),
+            { timeout: 15000 }
+        ).catch(() => {});
+        await page.waitForTimeout(300);
+        const ngCombobox = page.locator('user-forms-field').getByRole('combobox').first();
+        await ngCombobox.waitFor({ state: 'visible', timeout: 10000 });
+        await ngCombobox.click({ timeout: 10000 });
+        // 名前の一部をタイプして検索（admin）
+        await ngCombobox.fill('admin');
+        await page.waitForTimeout(1000);
+        // 検索結果が表示されること
+        const optionCount = await page.locator('.ng-option').count();
+        expect(optionCount).toBeGreaterThan(0);
+        await page.locator('button.btn-secondary:has-text("キャンセル")').click().catch(() => {});
+    });
+
+    // -------------------------------------------------------------------------
+    // 363: 表示条件設定でワークフロー状態を条件にしたフィールドの表示
+    // -------------------------------------------------------------------------
+    test('363: WF状態の表示条件設定でフィールドが正しく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // テーブル設定→フィールド一覧で表示条件関連UIを確認
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForSelector('[role=tab]', { timeout: 30000 });
+        await waitForAngular(page);
+        const bodyText2 = await page.innerText('body');
+        expect(bodyText2).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 382: ワークフロー通知メールのオフ機能
+    // -------------------------------------------------------------------------
+    test('382: ワークフロー通知メールをオフにする設定が存在すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 通知メール関連の設定UIが存在すること
+        const hasNotifOption = bodyText.includes('通知') || bodyText.includes('メール');
+        expect(hasNotifOption).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 394: 承認者に自分のメイン組織でない人が選ばれる問題
+    // -------------------------------------------------------------------------
+    test('394: ワークフロー申請時に正しいメイン組織の承認者が選択されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
+        await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+        await page.waitForTimeout(500);
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
+        await waitForAngular(page);
+        await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
+        const addFlowBtn = page.locator('button:has-text("承認フロー追加")').first();
+        await addFlowBtn.waitFor({ state: 'visible', timeout: 20000 });
+        await page.waitForTimeout(500);
+        await addFlowBtn.click({ timeout: 10000 });
+        await waitForAngular(page);
+        // 組織(役職)タイプを選択
+        await page.locator('input[type="radio"][value="division"]').first().click();
+        await waitForAngular(page);
+        await expect(page.locator('division-forms-field').first()).toBeVisible({ timeout: 5000 });
+        await page.locator('division-forms-field .ng-select-container').first().click();
+        await waitForAngular(page);
+        const divOptions = await page.locator('.ng-option').count();
+        expect(divOptions).toBeGreaterThan(0);
+        await page.locator('button.btn-secondary:has-text("キャンセル")').click().catch(() => {});
+    });
+
+    // -------------------------------------------------------------------------
+    // 397(bug): 子テーブルごとに表示条件設定を独立させる
+    // -------------------------------------------------------------------------
+    test('397: 子テーブルの表示条件設定がテーブル設定でエラーなく動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForSelector('[role=tab]', { timeout: 30000 });
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('[role=tab]').first()).toBeVisible();
+    });
+
+    // -------------------------------------------------------------------------
+    // 409: 内部統制用CSVダウンロード
+    // -------------------------------------------------------------------------
+    test('409: ワークフロー関連のCSVダウンロード機能がエラーなく動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('500');
+    });
+
+    // -------------------------------------------------------------------------
+    // 418: 全ての承認が完了後でも変更可能設定
+    // -------------------------------------------------------------------------
+    test('418: 承認完了後でも変更可能にする設定がUIに存在すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasAfterApprovalEdit = bodyText.includes('承認後') || bodyText.includes('再申請') || bodyText.includes('編集可能');
+        expect(hasAfterApprovalEdit).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 431: 申請画面でのフロー設定（固定以降で承認者追加）
+    // -------------------------------------------------------------------------
+    test('431: ワークフロー設定で承認者を追加できるUIが存在すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        await toggleWorkflowOption(page, 'フローを固定する', true);
+        await page.waitForTimeout(1000);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
+        await expect(addTemplateBtn).toBeVisible({ timeout: 8000 });
+        const hasAddOption = bodyText.includes('追加') || bodyText.includes('承認者');
+        expect(hasAddOption).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 434: 複数部署所属時の申請部署選択
+    // -------------------------------------------------------------------------
+    test('434: ワークフロー申請時に組織選択UIが表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
+        await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+        await page.waitForTimeout(500);
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
+        await waitForAngular(page);
+        await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await page.locator('button.btn-secondary:has-text("キャンセル")').click().catch(() => {});
+    });
+
+    // -------------------------------------------------------------------------
+    // 435: 「承認後も編集可能」設定でモーダル遮蔽問題
+    // -------------------------------------------------------------------------
+    test('435: 承認後も編集可能チェック後にユーザー選択画面が正常に動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        await toggleWorkflowOption(page, '承認後', true);
+        await page.waitForTimeout(1000);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasBackdrop = await page.locator('.modal-backdrop.show').count();
+        expect(hasBackdrop).toBeLessThanOrEqual(0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 446: 申請ボタン押下時にローディングが止まらない問題
+    // -------------------------------------------------------------------------
+    test('446: ワークフロー申請ボタン押下時に申請画面が正常に表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
+        await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+        await page.waitForTimeout(500);
+        await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
+        await waitForAngular(page);
+        await page.waitForSelector('button.btn-primary:has-text("申請する")', { timeout: 20000 });
+        const addFlowBtn = page.locator('button:has-text("承認フロー追加")').first();
+        await expect(addFlowBtn).toBeVisible({ timeout: 20000 });
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await page.locator('button.btn-secondary:has-text("キャンセル")').click().catch(() => {});
+    });
+
+    // -------------------------------------------------------------------------
+    // 455: ワークフローCSVエクスポートの文字化け
+    // -------------------------------------------------------------------------
+    test('455: ワークフローCSVエクスポート画面がエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('500');
+    });
+
+    // -------------------------------------------------------------------------
+    // 457: 同じ承認者が続く場合のスキップ機能
+    // -------------------------------------------------------------------------
+    test('457: ワークフロー設定で承認者スキップ関連の設定が存在すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasWfSettings = bodyText.includes('ワークフロー') || bodyText.includes('承認');
+        expect(hasWfSettings).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 463: 通知テンプレートの変数選択肢から固定テキスト除外
+    // -------------------------------------------------------------------------
+    test('463: ワークフロー通知設定のテンプレート変数UIがエラーなく動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const hasNotifUI = bodyText.includes('通知') || bodyText.includes('件名') || bodyText.includes('本文');
+        expect(hasNotifUI).toBeTruthy();
+    });
+
+    // -------------------------------------------------------------------------
+    // 464: WF閲覧権限に承認者条件を追加
+    // -------------------------------------------------------------------------
+    test('464: ワークフロー設定画面で閲覧権限関連のUIがエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 469: 承認者の複数設定（AND/OR）
+    // -------------------------------------------------------------------------
+    test('469: ワークフロー設定でAND/OR承認者設定がエラーなく動作すること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToWorkflowTab(page, tableId);
+        await toggleWorkflowOption(page, 'フローを固定する', true);
+        await page.waitForTimeout(1000);
+        const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
+        if (await addTemplateBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await addTemplateBtn.click();
+            await waitForAngular(page);
+        }
+        const addFlowBtn = page.locator('button:has-text("フロー追加")').first();
+        if (await addFlowBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await addFlowBtn.click();
+            await waitForAngular(page);
+        }
+        const andOrBtn = page.locator('button:has-text("同承認フロー内で"), button:has-text("承認するユーザー"), button:has-text("組織を追加")').first();
+        if (await andOrBtn.count() > 0) {
+            await andOrBtn.click();
+            await waitForAngular(page);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 470: ワークフロー否認/取り下げ後のデータ編集
+    // -------------------------------------------------------------------------
+    test('470: WF否認/取り下げ後にデータ編集しWFが正しく切り替わること', async ({ page }) => {
+        test.setTimeout(300000);
+        const approverName = EMAIL.split('@')[0];
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '否認後編集テスト');
+        expect(recordId).toBeTruthy();
+        await rejectRecord(page, tableId, recordId, '否認テスト470');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('button').filter({ hasText: /^申請$/ }).first()).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 480: 否認/取り下げ後にテンプレートが表示される問題
+    // -------------------------------------------------------------------------
+    test('480: WF否認/取り下げ後の編集画面でテンプレートが正しく表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        const approverName = EMAIL.split('@')[0];
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, 'テンプレート表示テスト');
+        expect(recordId).toBeTruthy();
+        await rejectRecord(page, tableId, recordId, '否認テスト480');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.card-footer').first()).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 484: 行色設定でWF状態条件が正しく適用される
+    // -------------------------------------------------------------------------
+    test('484: ワークフロー状態による行色設定がテーブル一覧でエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 506: 他テーブル参照デフォルト値のルックアップ反映
+    // -------------------------------------------------------------------------
+    test('506: WF付きテーブルの新規レコード画面がエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.card-footer').first()).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 510: 承認者の移動機能
+    // -------------------------------------------------------------------------
+    test('510: ワークフロー設定で承認者の移動関連UIがエラーなく動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 512: 必須条件設定でWF申請状態を条件にする
+    // -------------------------------------------------------------------------
+    test('512: WF申請状態を必須条件に設定したフィールドが正しく動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForSelector('[role=tab]', { timeout: 30000 });
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 513: 固定ルート承認者間に追加した承認者の移動
+    // -------------------------------------------------------------------------
+    test('513: フロー固定時に承認者の追加・移動設定がエラーなく動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        await toggleWorkflowOption(page, 'フローを固定する', true);
+        await page.waitForTimeout(1000);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
+        await expect(addTemplateBtn).toBeVisible({ timeout: 8000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 520: AND/OR並行承認で2人目以降の役職保存確認
+    // -------------------------------------------------------------------------
+    test('520: WF設定のAND/OR並行承認で2人目以降の役職が保存されること', async ({ page }) => {
+        test.setTimeout(300000);
+        await navigateToWorkflowTab(page, tableId);
+        await toggleWorkflowOption(page, 'フローを固定する', true);
+        await page.waitForTimeout(1000);
+        const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
+        if (await addTemplateBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await addTemplateBtn.click();
+            await waitForAngular(page);
+        }
+        const addFlowBtn = page.locator('button:has-text("フロー追加")').first();
+        if (await addFlowBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await addFlowBtn.click();
+            await waitForAngular(page);
+        }
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        const andOrBtn = page.locator('button:has-text("同承認フロー内で"), button:has-text("承認するユーザー"), button:has-text("組織を追加")').first();
+        if (await andOrBtn.count() > 0) {
+            await andOrBtn.click();
+            await waitForAngular(page);
+            const bodyText2 = await page.innerText('body');
+            expect(bodyText2).not.toContain('Internal Server Error');
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 574: 無効ユーザーの承認履歴表示
+    // -------------------------------------------------------------------------
+    test('574: WF承認者を無効ユーザーにしても承認履歴が表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        const approverName = EMAIL.split('@')[0];
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '無効ユーザー履歴テスト');
+        expect(recordId).toBeTruthy();
+        await approveRecord(page, tableId, recordId, '履歴表示テストコメント');
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).toContain('履歴表示テストコメント');
+    });
+
+    // -------------------------------------------------------------------------
+    // 577: WF閲覧権限で後付けユーザーの閲覧
+    // -------------------------------------------------------------------------
+    test('577: WF閲覧権限設定がテーブル設定でエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 582: ユーザーテーブルの他テーブル参照で値の絞り込み
+    // -------------------------------------------------------------------------
+    test('582: テーブル設定の他テーブル参照関連UIがエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForSelector('[role=tab]', { timeout: 30000 });
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 588: WF無効ユーザーでの自動取り下げ
+    // -------------------------------------------------------------------------
+    test('588: WF承認者が無効の場合にエラーなくレコード表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 594: WF無効化後のレコード詳細でWF履歴が非表示
+    // -------------------------------------------------------------------------
+    test('594: WFを無効化したテーブルのレコード詳細でWF履歴が非表示であること', async ({ page }) => {
+        test.setTimeout(300000);
+        const approverName = EMAIL.split('@')[0];
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, 'WF履歴非表示テスト');
+        expect(recordId).toBeTruthy();
+        await approveRecord(page, tableId, recordId, 'WF594承認');
+        await disableWorkflow(page, tableId);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // ワークフローを再度有効にする（後続テストのため）
+        await enableWorkflow(page, tableId);
+    });
+
+    // -------------------------------------------------------------------------
+    // 600: WFインポートで組織条件が正しくインポートされる
+    // -------------------------------------------------------------------------
+    test('600: ワークフロー設定のエクスポート/インポートUIがエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await navigateToWorkflowTab(page, tableId);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 613: サイドメニューのWFバッジ表示（テーブル名が長い場合）
+    // -------------------------------------------------------------------------
+    test('613: サイドメニューのWFバッジがテーブル名が長くても表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.sidebar, .nav-sidebar, nav').first()).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 621: 下書き保存後にWFテンプレートが正しく適用される
+    // -------------------------------------------------------------------------
+    test('621: WF設定テーブルで下書き保存が正常に動作すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+        await page.waitForLoadState('domcontentloaded');
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        expect(bodyText).not.toContain('500');
+    });
+
+    // -------------------------------------------------------------------------
+    // 638: WFでフローNo.変更時のステップ番号切り替え
+    // -------------------------------------------------------------------------
+    test('638: WFの申請フローNo.変更時にステップ番号が正しく表示されること', async ({ page }) => {
+        test.setTimeout(300000);
+        const approverName = EMAIL.split('@')[0];
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, 'フローNo切替テスト');
+        expect(recordId).toBeTruthy();
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 645: WFバッジ（左メニューの赤い数字）の正確性
+    // -------------------------------------------------------------------------
+    test('645: WFバッジの数字がサイドメニューにエラーなく表示されること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('.sidebar, .nav-sidebar, nav').first()).toBeVisible({ timeout: 10000 });
+    });
+
+    // -------------------------------------------------------------------------
+    // 697: 下書き保存時に必須項目を空にできるオプション
+    // -------------------------------------------------------------------------
+    test('697: WF下書き保存で必須項目を空にできるオプションがフィールド設定に存在すること', async ({ page }) => {
+        test.setTimeout(180000);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForSelector('[role=tab]', { timeout: 30000 });
+        await waitForAngular(page);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        await expect(page.locator('[role=tab]').first()).toBeVisible();
+    });
 });

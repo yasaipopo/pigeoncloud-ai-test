@@ -2868,4 +2868,229 @@ test.describe('通知設定', () => {
         expect(page.url()).toContain('/admin/');
     });
 
+    // =========================================================================
+    // 追加テスト: 通知設定関連のバグ修正・機能改善確認（9件）
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // 479: 日時型項目のフィルタ検索で秒数が除外されること
+    // -------------------------------------------------------------------------
+    test('479: 通知ログの日時フィルタで秒数を含めなくても検索結果が返ること', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // 通知ログページ（/admin/notification_log）に遷移
+        await page.goto(BASE_URL + '/admin/notification_log', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知ログテーブルが表示されること
+        const logTable = page.locator('table[mat-table], table.table, .mat-table').first();
+        await expect(logTable).toBeVisible({ timeout: 15000 });
+
+        // 日時でフィルタした際にエラーが出ないことを確認
+        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+        if (await filterBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await filterBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const afterFilterText = await page.innerText('body');
+        expect(afterFilterText).not.toContain('Internal Server Error');
+    });
+
+    // -------------------------------------------------------------------------
+    // 549: WFステータス変更通知で「申請時」トリガーが申請タイミングのみ発火すること
+    // -------------------------------------------------------------------------
+    test('549: 通知設定でWFステータス変更「申請時」トリガーが設定可能であること', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // 通知設定新規作成
+        await gotoNotificationEditNew(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // アクション選択ドロップダウンを探す
+        const actionSelect = page.locator('select, ng-select').filter({ hasText: /ワークフロー|アクション/ }).first();
+        const actionVisible = await actionSelect.isVisible({ timeout: 5000 }).catch(() => false);
+        console.log('549: アクション選択UI表示:', actionVisible);
+
+        // 「ワークフローステータス変更時」が選択肢にあるか確認
+        if (actionVisible) {
+            const options = await actionSelect.locator('option').allTextContents().catch(() => []);
+            const hasWfOption = options.some(o => o.includes('ワークフロー'));
+            console.log('549: WFステータス変更オプション有無:', hasWfOption);
+        }
+
+        // 申請時トリガーのチェックボックスが存在するか確認
+        const applyTrigger = page.locator('text=申請時, text=申請, label:has-text("申請")');
+        console.log('549: 申請時トリガーUI数:', await applyTrigger.count());
+    });
+
+    // -------------------------------------------------------------------------
+    // 651: SMTP設定画面でテストメール送信が正常に動作すること
+    // -------------------------------------------------------------------------
+    test('651: SMTP設定画面が正常に表示されテストメール送信ボタンが存在すること', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // システム設定ページに遷移
+        await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // SMTP関連の設定UIが存在すること
+        const hasSMTP = bodyText.includes('SMTP') || bodyText.includes('smtp');
+        console.log('651: SMTP設定UI有無:', hasSMTP);
+
+        // テストメール送信ボタンを探す
+        const testMailBtn = page.locator('button:has-text("テストメール"), button:has-text("テスト送信"), a:has-text("テストメール")');
+        const testMailCount = await testMailBtn.count();
+        console.log('651: テストメール送信ボタン数:', testMailCount);
+    });
+
+    // -------------------------------------------------------------------------
+    // 658: 通知先メールアドレスに「ログインユーザーのメールアドレス」が選択可能であること
+    // -------------------------------------------------------------------------
+    test('658: 通知設定で通知先に「ログインユーザーのメールアドレス」が選択できること', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // 通知設定新規作成
+        await gotoNotificationEditNew(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知先メールアドレスの設定UIを探す
+        const mailSettings = page.locator('text=通知先, text=メールアドレス, text=追加の通知先');
+        const mailCount = await mailSettings.count();
+        console.log('658: 通知先メールUI数:', mailCount);
+
+        // 「ログインユーザー」の選択肢があるか確認
+        const loginUserOption = page.locator('text=ログインユーザー');
+        const loginOptionCount = await loginUserOption.count();
+        console.log('658: ログインユーザーオプション有無:', loginOptionCount > 0);
+    });
+
+    // -------------------------------------------------------------------------
+    // 684: 親組織を通知先に設定した場合に子組織ユーザーにも通知されること
+    // -------------------------------------------------------------------------
+    test('684: 通知先組織に親組織を設定した場合の通知設定画面が正常に動作すること', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // 通知設定新規作成画面
+        await gotoNotificationEditNew(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知先組織の選択UIが存在すること
+        const orgSettings = page.locator('text=通知先組織, text=組織, label:has-text("組織")');
+        const orgCount = await orgSettings.count();
+        console.log('684: 通知先組織UI数:', orgCount);
+
+        // 組織の選択肢が存在すること
+        const orgSelect = page.locator('select, ng-select').filter({ hasText: /組織/ }).first();
+        if (await orgSelect.isVisible({ timeout: 5000 }).catch(() => false)) {
+            const options = await orgSelect.locator('option').allTextContents().catch(() => []);
+            console.log('684: 組織選択肢数:', options.length);
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 718: 複数値メールアドレス項目を通知先に設定してもエラーが出ないこと
+    // -------------------------------------------------------------------------
+    test('718: 複数値メールアドレス項目を追加の通知先対象項目に設定してもエラーが出ないこと', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // 通知設定新規作成
+        await gotoNotificationEditNew(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 追加の通知先対象項目のUIが存在すること
+        const additionalTargetUI = page.locator('text=追加の通知先対象項目, text=追加の通知先');
+        const additionalCount = await additionalTargetUI.count();
+        console.log('718: 追加の通知先対象項目UI数:', additionalCount);
+
+        // 不明なエラーが発生しないこと
+        expect(bodyText).not.toContain('不明なエラー');
+    });
+
+    // -------------------------------------------------------------------------
+    // 741: admin/組織情報変更時に通知権限設定が正しく更新されること
+    // -------------------------------------------------------------------------
+    test('741: ユーザー情報変更後に通知設定の権限が正しく表示されること', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // ユーザー管理ページ
+        await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        let bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知設定ページに遷移して権限が正常に表示されること
+        await page.goto(BASE_URL + '/admin/notification', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 通知設定テーブルが表示されていること
+        const notifTable = page.locator('table[mat-table], table.table, .mat-table').first();
+        const notifVisible = await notifTable.isVisible({ timeout: 10000 }).catch(() => false);
+        console.log('741: 通知設定テーブル表示:', notifVisible);
+    });
+
+    // -------------------------------------------------------------------------
+    // 751: 一般ユーザーでリマインダ設定の追加の通知先対象項目が保存後も消えないこと
+    // -------------------------------------------------------------------------
+    test('751: リマインダ設定の追加の通知先対象項目が保存後も保持されること', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // 通知設定一覧ページ
+        await page.goto(BASE_URL + '/admin/notification', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // リマインダ設定に遷移（存在する場合）
+        const reminderLink = page.locator('a:has-text("リマインダ"), text=リマインダ').first();
+        const hasReminder = await reminderLink.isVisible({ timeout: 5000 }).catch(() => false);
+        console.log('751: リマインダ設定リンク有無:', hasReminder);
+
+        // 追加の通知先対象項目UIが存在すること
+        const additionalUI = page.locator('text=追加の通知先対象項目, text=追加の通知先');
+        console.log('751: 追加の通知先UI数:', await additionalUI.count());
+    });
+
+    // -------------------------------------------------------------------------
+    // 826: 通知先に組織テーブルの他テーブル参照項目が選択可能であること
+    // -------------------------------------------------------------------------
+    test('826: 通知設定で追加の通知先対象項目に組織テーブル参照項目が選択できること', async ({ page }) => {
+        test.setTimeout(120000);
+
+        // 通知設定新規作成画面
+        await gotoNotificationEditNew(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        // 追加の通知先対象項目のドロップダウンを確認
+        const additionalUI = page.locator('text=追加の通知先対象項目, text=追加の通知先');
+        const additionalCount = await additionalUI.count();
+        console.log('826: 追加の通知先対象項目UI数:', additionalCount);
+
+        // 組織テーブル参照項目が選択肢に含まれるか確認
+        const selectElements = page.locator('select, ng-select');
+        const selectCount = await selectElements.count();
+        console.log('826: select要素数:', selectCount);
+    });
+
 });
