@@ -159,17 +159,18 @@ module.exports = async function globalSetup() {
         await page.click('button[type=submit].btn-primary');
         await page.waitForURL('**/admin/dashboard', { timeout: 30000 });
 
-        // create-trial API を直接呼び出し（Angular UIフォームは不安定なためAPI経由）
+        // create-trial API を page.evaluate(fetch) で呼び出し
+        // page.request.post() はCSRFトークンが含まれず CLIENT ADD ERROR になるため
         let actualUrl, newPassword;
-        const resp = await page.request.post(adminBaseUrl + '/api/admin/create-trial', {
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            data: { domain: domain, email: 'admin', with_all_type_table: true },
-            timeout: 60000,
-        });
-        const result = await resp.json();
+        const result = await page.evaluate(async ({ url, dom }) => {
+            const r = await fetch(url + '/api/admin/create-trial', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ domain: dom, email: 'admin', with_all_type_table: true }),
+                credentials: 'include',
+            });
+            return r.json();
+        }, { url: adminBaseUrl, dom: domain });
         console.log(`[global-setup] create-trial API 応答:`, JSON.stringify(result));
 
         if (!result.url || !result.pw) {
