@@ -94,8 +94,8 @@ cases:
   sheet: B
   feature: ログイン
   category: google　login
-  description: ①Googleログイン機能が存在すること（専用テスト環境: demo-popo7）
-  expected: Googleログインボタンが表示され、クリックでGoogle認証画面に遷移すること
+  description: "①Googleログイン機能が存在すること（専用テスト環境: demo-popo7）"
+  expected: "Googleログインボタンが表示され、クリックでGoogle認証画面に遷移すること"
   movie: AT02
   detailed_flow: |
     1. Googleログインが有効な環境（demo-popo7.pigeon-demo.com）にアクセス
