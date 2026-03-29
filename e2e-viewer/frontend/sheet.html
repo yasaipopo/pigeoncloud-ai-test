@@ -27,9 +27,13 @@
     .pipeline-table th { white-space: nowrap; font-size: .82rem; }
     .pipeline-table td { vertical-align: middle; font-size: .85rem; }
     .pipeline-table .case-no { white-space: nowrap; font-weight: 600; }
-    .pipeline-table .feature-col { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .pipeline-table .desc-col { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+    .pipeline-table .feature-col { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pipeline-table .desc-col { max-width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
     .pipeline-table .desc-col:hover { background: #e9ecef; }
+    /* フィルタ時はテスト内容を全文表示 */
+    .pipeline-table.filtered .desc-col { max-width: none; white-space: pre-wrap; word-break: break-word; }
+    /* テーブル幅を広げる */
+    .container-fluid { max-width: 100%; padding: 0 20px; }
 
     /* ステータスバッジ */
     .check-cell { text-align: center; cursor: pointer; min-width: 48px; }
@@ -104,7 +108,7 @@
   </div>
 </nav>
 
-<div class="container py-4">
+<div class="container-fluid py-4">
 
   <!-- サマリーバー -->
   <div class="card mb-3" id="summary-card">
@@ -322,6 +326,38 @@ function doLogout() {
 // =========================================
 let allItems = [];
 let currentSpec = 'all';
+
+// spec名 → 日本語ラベル
+const SPEC_LABELS = {
+  'auth': '認証',
+  'chart-calendar': 'チャート・カレンダー',
+  'chart-calendar-2': 'チャート・カレンダー2',
+  'comments-logs': 'コメント・ログ',
+  'csv-export': 'CSV・エクスポート',
+  'dashboard': 'ダッシュボード',
+  'fields': '項目設定',
+  'fields-2': '項目設定2',
+  'fields-3': '項目設定3',
+  'fields-4': '項目設定4',
+  'fields-5': '項目設定5',
+  'filters': 'フィルタ',
+  'layout-ui': 'レイアウト・UI',
+  'notifications': '通知設定',
+  'notifications-2': '通知設定2',
+  'payment': '決済',
+  'public-form': '公開フォーム',
+  'records': 'レコード操作',
+  'reports': '帳票',
+  'rpa': 'コネクト(RPA)',
+  'system-settings': 'システム設定',
+  'table-definition': 'テーブル定義',
+  'templates': 'テンプレート',
+  'uncategorized': '総合テスト',
+  'uncategorized-2': '総合テスト2',
+  'uncategorized-3': '総合テスト3',
+  'users-permissions': 'ユーザー・権限',
+  'workflow': 'ワークフロー',
+};
 let currentStatusFilter = 'all';
 let specList = [];
 
@@ -466,7 +502,7 @@ function buildSpecTabs() {
     tab.className = 'spec-tab';
     tab.dataset.spec = spec;
     tab.onclick = () => selectSpec(spec, tab);
-    tab.innerHTML = `${escHtml(spec)} <span class="spec-count">(${count})</span>`;
+    tab.innerHTML = `${escHtml(SPEC_LABELS[spec] || spec)} <span class="spec-count">(${count})</span>`;
     container.appendChild(tab);
   });
 }
@@ -532,6 +568,13 @@ function applyFilters() {
 function renderTable(items) {
   const tbody = document.getElementById('pipeline-tbody');
   tbody.innerHTML = '';
+  // フィルタ時（spec選択 or 検索中）はテスト内容を全文表示
+  const table = tbody.closest('table');
+  if (currentSpec !== 'all' || document.getElementById('search-box').value) {
+    table.classList.add('filtered');
+  } else {
+    table.classList.remove('filtered');
+  }
 
   // spec でグループ化（currentSpec === 'all' のとき）
   if (currentSpec === 'all') {
