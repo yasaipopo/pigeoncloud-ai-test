@@ -210,7 +210,7 @@ async function getUserList(page) {
             if (!res.ok) return { list: [] };
             const data = await res.json();
             // user-names APIはusersを返す。listに変換して返す
-            const users = (data.users || []).filter(u => u.type === 'user');
+            const users = data.users || [];
             return { list: users.map(u => ({ id: u.id, email: u.name, type: u.type })) };
         } catch(e) {
             return { list: [] };
