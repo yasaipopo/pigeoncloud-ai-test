@@ -35,7 +35,7 @@ async function login(page) {
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
     } catch (e) {
         const bodyText = await page.innerText('body').catch(() => '');
         if (bodyText.includes('利用規約') || bodyText.includes('同意')) {

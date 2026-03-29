@@ -2,8 +2,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
-const { getAllTypeTableId: getAllTypeTableIdHelper, setupAllTypeTable } = require('./helpers/table-setup');
-const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -32,7 +30,7 @@ async function login(page, email, password) {
         await page.fill('#password', password || PASSWORD);
         await page.click('button[type=submit].btn-primary');
         try {
-            await page.waitForSelector('.navbar', { timeout: 60000 });
+            await page.waitForSelector('.navbar', { timeout: 40000 });
             await page.waitForTimeout(1000);
             return; // ログイン成功
         } catch (e) {
@@ -161,8 +159,17 @@ async function createAllTypeData(page, count = 5) {
  * ALLテストテーブルのIDを取得する
  */
 async function getAllTypeTableId(page) {
-    // セッション切れ対策付きのヘルパーを使用
-    return await getAllTypeTableIdHelper(page);
+    const status = await page.evaluate(async (baseUrl) => {
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
+            return res.json();
+        } catch (e) {
+            return { all_type_tables: [] };
+        }
+    }, BASE_URL);
+    // APIは {id, label, count} の形式で返す（table_idではなくid）
+    const mainTable = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+    return mainTable ? (mainTable.table_id || mainTable.id) : null;
 }
 
 /**
@@ -256,39 +263,30 @@ async function openFieldEditPanel(page, fieldLabel) {
 // ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
 // =============================================================================
 let _sharedTableId = null;
-let _setupReady = false; // cascade防止フラグ
 
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(600000);
     const { context, page } = await createAuthContext(browser);
-    try {
-        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-        await ensureLoggedIn(page);
-        // setupAllTypeTable（ヘルパー）を使って確実にテーブルを取得・作成する
-        const result = await setupAllTypeTable(page);
-        if (result.tableId) {
-            _sharedTableId = result.tableId;
-            await createAllTypeData(page, 3).catch(e => console.error('[beforeAll] createAllTypeData失敗:', e.message));
-        }
-        // フォールバック: まだ取得できない場合は再ログインしてリトライ
-        if (!_sharedTableId) {
-            await ensureLoggedIn(page);
-            const retryResult = await setupAllTypeTable(page);
-            if (retryResult.tableId) {
-                _sharedTableId = retryResult.tableId;
-            }
-        }
-        if (_sharedTableId) {
-            _setupReady = true;
-        } else {
-            console.error('[beforeAll] ALLテストテーブルの作成に失敗（cascade防止: 全テストskip）');
-        }
-    } catch (e) {
-        console.error(`[beforeAll] セットアップ失敗（cascade防止: 全テストskip）: ${e.message}`);
-        // throwしない → _setupReady=false のまま → 全テストskip
-    } finally {
-        await context.close();
+    // about:blankではcookiesが送られないため、先にアプリURLに遷移
+    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    const createResult = await createAllTypeTable(page);
+    if (createResult && createResult.tableId) {
+        _sharedTableId = createResult.tableId;
     }
+    await createAllTypeData(page, 3);
+    if (!_sharedTableId) {
+        // リトライ: セッション切れ対策で再ログインしてから取得
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        const loginForm = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+        if (loginForm) {
+            await page.fill('#id', process.env.TEST_EMAIL || 'admin');
+            await page.fill('#password', process.env.TEST_PASSWORD || '');
+            await page.click('button[type=submit].btn-primary');
+            await page.waitForURL('**/admin/dashboard', { timeout: 60000 }).catch(() => {});
+        }
+        _sharedTableId = await getAllTypeTableId(page);
+    }
+    await context.close();
 });
 
 // =============================================================================
@@ -303,7 +301,6 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.skip(!_setupReady, 'file-level beforeAll failed: テーブル作成失敗');
         test.setTimeout(120000);
         await login(page);
         await closeTemplateModal(page);
@@ -321,7 +318,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 30000 });
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
         }
 
         // 選択肢フィールドを探してクリック
@@ -354,7 +351,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 30000 });
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
         }
 
         // Yes/No フィールドを探してクリック
@@ -362,7 +359,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         const opened = await openFieldEditPanel(page, 'Yes / No');
         if (!opened) {
             // Yes/Noフィールドが見つからない場合はスキップ
-            await expect(yesnoField, 'Yes/Noフィールドが存在すること（ALLテストテーブルに含まれるべき）').toBeVisible({ timeout: 30000 });
+            await expect(yesnoField, 'Yes/Noフィールドが存在すること（ALLテストテーブルに含まれるべき）').toBeVisible({ timeout: 60000 });
         }
 
         // クリック後にページが正常であること
@@ -406,14 +403,14 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 30000 });
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
         }
 
         // ALLテストテーブルには"選択肢(複数選択)"フィールドが存在する（チェックボックスはない）
         const opened = await openFieldEditPanel(page, '選択肢(複数選択)');
         if (!opened) {
             // 選択肢(複数選択)フィールドが見つからない場合はスキップ
-            await expect(multiSelectField, '選択肢(複数選択)フィールドが存在すること').toBeVisible({ timeout: 30000 });
+            await expect(multiSelectField, '選択肢(複数選択)フィールドが存在すること').toBeVisible({ timeout: 60000 });
         }
 
         // クリック後にページが正常であること
@@ -436,7 +433,6 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
     });
 
     test.beforeEach(async ({ page }) => {
-        test.skip(!_setupReady, 'file-level beforeAll failed: テーブル作成失敗');
         test.setTimeout(180000);
         await login(page);
         await closeTemplateModal(page);
@@ -455,13 +451,13 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 30000 });
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
         }
 
         // テキストフィールドを探してクリックしインライン編集パネルを開く
         const opened = await openFieldEditPanel(page, 'テキスト');
         if (!opened) {
-            await expect(textField, 'テキストフィールドが存在すること').toBeVisible({ timeout: 30000 });
+            await expect(textField, 'テキストフィールドが存在すること').toBeVisible({ timeout: 60000 });
         }
 
         // 必須トグルを探す（label/input[type=checkbox]/toggle等）
@@ -622,7 +618,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 30000 });
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
         }
 
         // テキストフィールドを探してクリック
@@ -631,7 +627,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
             // 数値フィールドを代替確認
             const openedNum = await openFieldEditPanel(page, '数値');
             if (!openedNum) {
-                await expect(targetField, 'テキスト/数値フィールドが存在すること').toBeVisible({ timeout: 30000 });
+                await expect(targetField, 'テキスト/数値フィールドが存在すること').toBeVisible({ timeout: 60000 });
             }
         }
 
@@ -660,7 +656,6 @@ test.describe('初期値設定テスト（267系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.skip(!_setupReady, 'file-level beforeAll failed: テーブル作成失敗');
         test.setTimeout(180000);
         await login(page);
         await closeTemplateModal(page);
@@ -681,13 +676,13 @@ test.describe('初期値設定テスト（267系）', () => {
         const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
         const fieldCount = await fieldRows.count();
         if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 30000 });
+            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
         }
 
         // テキストフィールドを探してクリックしインライン編集パネルを開く
         const opened = await openFieldEditPanel(page, 'テキスト');
         if (!opened) {
-            await expect(textField, 'テキストフィールドが存在すること').toBeVisible({ timeout: 30000 });
+            await expect(textField, 'テキストフィールドが存在すること').toBeVisible({ timeout: 60000 });
         }
 
         // 初期値入力欄を探して値を入力

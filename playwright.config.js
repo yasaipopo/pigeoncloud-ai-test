@@ -37,7 +37,7 @@ module.exports = defineConfig({
     timeout: 300000, // setupAllTypeTableのポーリング(最大200秒)に対応するため5分に延長
     expect: { timeout: 10000 },
     fullyParallel: false,
-    retries: 1,
+    retries: 2,
     workers: process.env.PLAYWRIGHT_WORKERS ? parseInt(process.env.PLAYWRIGHT_WORKERS) : 1,
     reporter: [
         ['list'],

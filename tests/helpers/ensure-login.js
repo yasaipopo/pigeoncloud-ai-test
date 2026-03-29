@@ -32,7 +32,7 @@ async function ensureLoggedIn(page, email, password) {
     }
 
     // navbarが表示されていれば既にログイン済み
-    const navbar = await page.waitForSelector('.navbar', { timeout: 60000 }).catch(() => null);
+    const navbar = await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => null);
     if (navbar && !page.url().includes('/admin/login')) {
         return; // セッション有効
     }

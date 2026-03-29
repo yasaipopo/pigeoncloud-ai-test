@@ -100,16 +100,16 @@ async function login(page, email, password) {
     // Angular SPAのロード完了を待つ（networkidleまたは#idが現れるまで）
     await page.waitForLoadState('domcontentloaded');
     try {
-        await page.waitForSelector('#id', { timeout: 60000 });
+        await page.waitForSelector('#id', { timeout: 15000 });
     } catch (e) {
         // #idが見つからない場合はnetworkidleまで待つ
-        await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     }
     await page.fill('#id', email || EMAIL);
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
     } catch (e) {
         // ログイン後のページ状態を確認
         const bodyText = await page.innerText('body').catch(() => '');
@@ -138,7 +138,7 @@ async function login(page, email, password) {
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 90000 }).catch(() => {});
+            await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
         } else if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             // ボタンが無効（送信中）の場合はURLが変わるまで待つ（再クリック不要）
@@ -157,7 +157,7 @@ async function login(page, email, password) {
             await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
-    // waitForTimeout不要: login後のAngular bootは ensureLoggedIn/closeTemplateModal で待機
+    await page.waitForTimeout(2000);
 }
 
 /**
@@ -428,7 +428,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             () => document.querySelector('button') && Array.from(document.querySelectorAll('button')).some(b => b.textContent.includes('メニュー並び替え')),
             { timeout: 20000 }
         ).catch(() => {});
-        await expect(page.locator('button:has-text("メニュー並び替え")').first()).toBeVisible({ timeout: 30000 }).catch(() => {});
+        await expect(page.locator('button:has-text("メニュー並び替え")').first()).toBeVisible({ timeout: 60000 }).catch(() => {});
         // 全て展開・全て閉じるボタンが存在することを確認（存在しない場合はスキップ）
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -522,7 +522,7 @@ test.describe('共通設定・システム設定', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(600000); // loginリトライ(最大360s) + closeTemplateModal で300sでは不足するため600sに延長
+        test.setTimeout(300000); // loginが遅い環境で120s超えることがあるため延長
         await login(page);
         await closeTemplateModal(page);
     });
@@ -1558,7 +1558,7 @@ test.describe('共通設定・システム設定', () => {
         // SSO設定ページへ遷移
         await page.goto(BASE_URL + '/admin/sso-settings');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
         // ページが表示されること（エラーページでないこと）
@@ -1603,7 +1603,7 @@ test.describe('共通設定・システム設定', () => {
     test('839-2: SSO設定ページで識別子と応答URLのコピー機能UIが存在すること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/sso-settings');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
         // 識別子・応答URL関連のUI要素を確認
@@ -1636,7 +1636,7 @@ test.describe('共通設定・システム設定', () => {
         // /admin/maintenance-cert または設定ページに証明書管理セクションがある
         await page.goto(BASE_URL + '/admin/maintenance-cert');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
         const certPageContent = await page.evaluate(() => {
@@ -1662,7 +1662,7 @@ test.describe('共通設定・システム設定', () => {
     test('841-1: ログアーカイブページが表示されアーカイブ済みログの一覧が確認できること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/log-archives');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
         const logContent = await page.evaluate(() => {

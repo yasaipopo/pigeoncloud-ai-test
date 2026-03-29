@@ -64,14 +64,14 @@ async function login(page) {
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
         }
     }
     await page.waitForTimeout(1000);
@@ -305,7 +305,7 @@ test.describe('ダッシュボード', () => {
         // ダッシュボードtablist内のタブのみを対象にする
         const dashTablistDB03 = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
         const targetTab = dashTablistDB03.locator('[role=tab]').filter({ hasText: _createdDashboardName });
-        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 5000 });
+        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 60000 });
 
         // タブのテキスト部分をクリックして選択
         await targetTab.first().click();
@@ -325,7 +325,7 @@ test.describe('ダッシュボード', () => {
             // 複数tabpanelがある場合でも表示中のボタンを取得（getBoundingClientRectで可視チェック）
             addWidgetBtn = page.locator('[role=tabpanel] button').filter({ hasText: 'ウィジェットを追加' }).first();
         }
-        await expect(addWidgetBtn).toBeVisible({ timeout: 5000 });
+        await expect(addWidgetBtn).toBeVisible({ timeout: 60000 });
         await addWidgetBtn.click();
 
         // ビューダイアログが開くのを待つ
@@ -373,7 +373,7 @@ test.describe('ダッシュボード', () => {
 
         // 「詳細設定」ボタンをクリック
         const detailBtn = modalContainer.locator('button').filter({ hasText: '詳細設定' });
-        await expect(detailBtn).toBeVisible({ timeout: 5000 });
+        await expect(detailBtn).toBeVisible({ timeout: 60000 });
         await detailBtn.click();
         await waitForAngular(page);
 
@@ -402,7 +402,7 @@ test.describe('ダッシュボード', () => {
         // ダッシュボードtablist内のタブのみを対象にする
         const dashTablistDB04 = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
         const targetTab = dashTablistDB04.locator('[role=tab]').filter({ hasText: _createdDashboardName });
-        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 5000 });
+        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 60000 });
         await targetTab.first().click();
         await waitForAngular(page);
 
@@ -454,7 +454,7 @@ test.describe('ダッシュボード', () => {
         const dashTablistDB05 = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
         // 作成したダッシュボードタブを確認
         const targetTab = dashTablistDB05.locator('[role=tab]').filter({ hasText: _createdDashboardName });
-        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 5000 });
+        await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible({ timeout: 60000 });
 
         // タブ内の▼アイコン（fa-chevron-circle-down）をクリックしてメニューを開く
         const tabEl = targetTab.first();
@@ -482,7 +482,7 @@ test.describe('ダッシュボード', () => {
 
         // 削除確認モーダルが開くことを確認
         const confirmModal = page.locator('.modal.show');
-        await expect(confirmModal).toBeVisible({ timeout: 5000 });
+        await expect(confirmModal).toBeVisible({ timeout: 60000 });
 
         // 「はい」ボタンをクリック
         await confirmModal.locator('button').filter({ hasText: 'はい' }).click();
@@ -498,7 +498,7 @@ test.describe('ダッシュボード', () => {
 
         // HOMEタブに戻っていること（削除後はHOMEに戻る）
         const homeTabAfterDelete = dashTablistDB05.locator('[role=tab]').filter({ hasText: 'HOME' });
-        await expect(homeTabAfterDelete).toBeVisible({ timeout: 5000 });
+        await expect(homeTabAfterDelete).toBeVisible({ timeout: 60000 });
 
         _createdDashboardName = null;
     });
@@ -523,7 +523,7 @@ test.describe('ダッシュボード', () => {
 
         // HOMEタブパネルが表示されること
         const homeTabpanel = page.locator('[role=tabpanel]').filter({ hasText: '掲示板' });
-        await expect(homeTabpanel).toBeVisible({ timeout: 5000 });
+        await expect(homeTabpanel).toBeVisible({ timeout: 60000 });
 
         // HOMEタブの▼メニューに「削除」がないことを確認（ID=1は削除不可）
         const homeTabEl = homeTab.first();

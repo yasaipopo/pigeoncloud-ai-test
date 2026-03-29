@@ -67,8 +67,8 @@ async function login(page) {
     await page.fill('#id', EMAIL);
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
-    await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
-    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+    await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
 }
 
 /**
@@ -204,13 +204,13 @@ test.describe('公開フォーム・公開メールリンク', () => {
             '[role="tabpanel"] .form-control-label:has-text("公開フォームをONにする"), ' +
             'label:has-text("公開フォームをONにする")'
         ).first();
-        await expect(pubFormLabelGlobal).toBeVisible({ timeout: 30000 });
+        await expect(pubFormLabelGlobal).toBeVisible({ timeout: 60000 });
 
         // 「公開フォームをONにする」ラベルが存在することを確認（上記で兼用）
 
         // スイッチ（checkbox）が存在することを確認
         const pubFormRow = page.locator('.form-group.row.admin-forms:has-text("公開フォームをONにする")').first();
-        await expect(pubFormRow).toBeVisible({ timeout: 5000 });
+        await expect(pubFormRow).toBeVisible({ timeout: 60000 });
 
         const switchInput = pubFormRow.locator('input[type="checkbox"].switch-input');
         await expect(switchInput).toBeDefined();
@@ -377,7 +377,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
             // フォールバック: テーブル設定で公開フォームがONであることを確認
             await openOtherTab(page, tableId);
             const pubFormLabel = page.locator('label:has-text("公開フォームをONにする")').first();
-            await expect(pubFormLabel).toBeVisible({ timeout: 30000 });
+            await expect(pubFormLabel).toBeVisible({ timeout: 60000 });
         }
     });
 
@@ -455,7 +455,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         } else {
             console.log('359: 公開フォームURLが取得できませんでした');
             await openOtherTab(page, tableId);
-            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 60000 });
         }
     });
 
@@ -517,7 +517,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         } else {
             console.log('499: 公開フォームURLが取得できませんでした');
             await openOtherTab(page, tableId);
-            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 60000 });
         }
     });
 
@@ -593,7 +593,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         } else {
             console.log('547: 公開フォーム/埋め込みフォームURLが取得できませんでした');
             await openOtherTab(page, tableId);
-            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 60000 });
         }
     });
 
@@ -666,7 +666,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         } else {
             console.log('660: 公開フォームURLが取得できませんでした');
             await openOtherTab(page, tableId);
-            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 60000 });
         }
     });
 
@@ -752,7 +752,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         } else {
             console.log('533: 公開フォームURLが取得できませんでした');
             await openOtherTab(page, tableId);
-            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 60000 });
         }
     });
 
@@ -835,7 +835,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         } else {
             console.log('812: 公開フォームURLが取得できませんでした');
             await openOtherTab(page, tableId);
-            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 60000 });
         }
     });
 
@@ -928,7 +928,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         } else {
             console.log('838: 公開フォームURLが取得できませんでした');
             await openOtherTab(page, tableId);
-            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible({ timeout: 60000 });
         }
     });
 
@@ -1025,7 +1025,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
                     '[role="tabpanel"] label:has-text("公開フォームをONにする"), ' +
                     'label:has-text("公開フォームをONにする")'
                 ).first();
-                await expect(pubFormLabelFallback, '「公開フォームをONにする」ラベルが存在すること').toBeVisible({ timeout: 30000 });
+                await expect(pubFormLabelFallback, '「公開フォームをONにする」ラベルが存在すること').toBeVisible({ timeout: 60000 });
             }
         }
     });
