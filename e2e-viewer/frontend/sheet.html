@@ -991,7 +991,7 @@ function openDetailModal(spec, caseNo, description, expected, feature) {
 
 async function playVideo(spec, movie) {
   // S3署名付きURLを取得
-  const token = localStorage.getItem('e2e_token');
+  const token = localStorage.getItem('e2e_auth_token');
   const key = `videos/${spec}/${movie}/video.webm`;
   try {
     const resp = await fetch(CONFIG.apiUrl + '/assets/download-url', {
