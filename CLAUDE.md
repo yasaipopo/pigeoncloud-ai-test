@@ -61,6 +61,56 @@ node /Users/yasaipopo/PhpStormProjects/PopoframeworkSlim/manage/raw_query.js \
 
 ---
 
+## 【テスト品質チェック（必須・厳格に実施）】
+
+### 「テストOK」の定義
+
+テストが **passed** であっても、以下のチェックリストを全て満たさない限り **本当のOKではない**。
+spec.jsを生成・修正した際、またはテスト結果をシートに書き込む前に、必ず各テストを以下の観点で評価すること。
+
+### テスト品質チェックリスト
+
+各テストケースについて、以下を全てクリアしているか確認する：
+
+| # | チェック項目 | NGの例 |
+|---|------------|--------|
+| 1 | **タイトルとテスト内容が合致している（十分である）** | タイトルが「フィルタ適用中にのみ一括編集がかかること」なのに、`.navbar` が表示されているだけを確認している |
+| 2 | **テスト内容が正しく最後まで完遂している** | 途中で `return` / `console.log('...スキップ')` して実質何もテストしていない |
+| 3 | **スキップされていない** | `test.skip(...)` / 早期 `return` / graceful skip で終わっている |
+| 4 | **navbar/ISEチェックだけで終わっていない** | `.navbar` の toBeVisible + Internal Server Error の非含有チェックだけで、テスト名に書いてある操作を一切していない |
+| 5 | **具体的なassertionが最低1つある** | expect文が0個、またはcheckPage()だけ |
+
+### NGパターン（絶対に許可しない）
+
+```javascript
+// ❌ NG: navbarチェックだけ — 何もテストしていない
+test('フィルタ適用中にのみ一括編集がかかること', async ({ page }) => {
+    await login(page);
+    await page.goto(BASE_URL + '/admin/dataset__7');
+    await waitForAngular(page);
+    await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+    const bodyText = await page.innerText('body');
+    expect(bodyText).not.toContain('Internal Server Error');
+    // ← ここで終わり。フィルタも一括編集も何もしていない
+});
+
+// ❌ NG: checkPageだけ
+test('ワークフロー設定ページが正常表示されること', async ({ page }) => {
+    await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+    // ← checkPage = 500エラーが出ないことだけ確認
+});
+```
+
+### テスト修正くんへの指示ルール
+
+1. **数ではなく質を優先**: 「50件実装して」ではなく「10件を確実に動くように実装して」
+2. **MCP Playwright で実UI確認必須**: テスト対象ページを開いてセレクター・ボタン・テキストを確認
+3. **yaml の description の操作手順を全て実行する**: ①②③の手順を全てPlaywrightコードに落とす
+4. **yaml の expected の期待結果を全て検証する**: expect文で結果を確認
+5. **navbar/ISEだけのテストは禁止**: 具体的な操作 + 具体的なassertion が必須
+
+---
+
 ## 【絶対守るルール】テスト設計
 
 1. **ALLテストテーブルは global-setup で1回だけ作成**。各specは `getAllTypeTableId` でID取得のみ。`setupAllTypeTable` は各specから呼ばない。
