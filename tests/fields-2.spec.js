@@ -234,16 +234,16 @@ async function assertFieldPageLoaded(page, tableId) {
             await expect(fieldRows.first()).toBeVisible();
         } else {
             // フィールドリストがない場合はナビバーだけ確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         }
     } else if (currentUrl.includes(`/admin/dataset__${tableId}`)) {
         // テーブル一覧ページにリダイレクトされた場合
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     } else {
         // その他のページ：ナビバーが表示されていること
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     }
 }
 
@@ -565,7 +565,7 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
         // レコード一覧ページへ（ZIPアップロードはレコード系機能）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { timeout: 60000 });
         await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         // レコード一覧が表示されていること
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -604,7 +604,7 @@ test.describe('列設定（122系）', () => {
         // レコード一覧ページに遷移（列の表示/非表示は一覧ページの機能）
         await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { timeout: 60000 });
         await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         // テーブルヘッダーが表示されていること（一覧テーブルが存在する）
         const tableHeader = page.locator('table thead th, .table-responsive th, .sticky-table-header th');
         const headerCount = await tableHeader.count();

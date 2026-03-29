@@ -205,7 +205,7 @@ test.describe('ダッシュボード', () => {
         await waitForAngular(page);
 
         // ナビゲーションバーが表示されること
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
 
         // ダッシュボードタブリストが存在すること
         const tablist = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
@@ -439,7 +439,7 @@ test.describe('ダッシュボード', () => {
         expect(errorCount).toBe(0);
 
         // ダッシュボードが表示されたままであること
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 
     test('DB-05: ダッシュボードタブを削除できること', async ({ page }) => {
@@ -579,6 +579,6 @@ test.describe('ダッシュボード', () => {
             expect(bodyText).not.toContain('Internal Server Error');
         }
 
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 });

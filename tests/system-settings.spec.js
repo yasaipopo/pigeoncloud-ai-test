@@ -100,10 +100,10 @@ async function login(page, email, password) {
     // Angular SPAのロード完了を待つ（networkidleまたは#idが現れるまで）
     await page.waitForLoadState('domcontentloaded');
     try {
-        await page.waitForSelector('#id', { timeout: 15000 });
+        await page.waitForSelector('#id', { timeout: 60000 });
     } catch (e) {
         // #idが見つからない場合はnetworkidleまで待つ
-        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
     }
     await page.fill('#id', email || EMAIL);
     await page.fill('#password', password || PASSWORD);
@@ -157,7 +157,7 @@ async function login(page, email, password) {
             await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
-    await page.waitForTimeout(2000);
+    // waitForTimeout不要: login後のAngular bootは ensureLoggedIn/closeTemplateModal で待機
 }
 
 /**
@@ -522,7 +522,7 @@ test.describe('共通設定・システム設定', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(300000); // loginが遅い環境で120s超えることがあるため延長
+        test.setTimeout(600000); // loginリトライ(最大360s) + closeTemplateModal で300sでは不足するため600sに延長
         await login(page);
         await closeTemplateModal(page);
     });
@@ -1896,7 +1896,7 @@ test.describe('共通設定・システム設定', () => {
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 
 });

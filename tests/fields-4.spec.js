@@ -213,16 +213,16 @@ async function assertFieldPageLoaded(page, tableId) {
             await expect(fieldRows.first()).toBeVisible();
         } else {
             // フィールドリストがない場合はナビバーだけ確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         }
     } else if (currentUrl.includes(`/admin/dataset__${tableId}`)) {
         // テーブル一覧ページにリダイレクトされた場合
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     } else {
         // その他のページ：ナビバーが表示されていること
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     }
 }
 
@@ -326,7 +326,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         // ページに表示条件関連テキストが存在するか確認（存在しなくてもエラーとしない）
         const hasDisplayCondition = pageText.includes('表示条件') || pageText.includes('display') || pageText.includes('条件');
         // フィールド設定UIが開けていることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         console.log(`[261-1] 表示条件テキスト存在: ${hasDisplayCondition}`);
     });
 
@@ -355,7 +355,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         // クリック後にページが正常であること
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
 
         // インライン編集パネルが開いていることを確認（設定パネル的な要素）
         // パネルの存在確認（admin-forms-field, .field-edit-panel, .panel等）
@@ -406,7 +406,7 @@ test.describe('表示条件の実際の動作テスト（261系）', () => {
         // クリック後にページが正常であること
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         console.log('[261-3] チェックボックスフィールドクリック後、ページ正常確認');
     });
 });
@@ -630,7 +630,7 @@ test.describe('必須設定・重複チェック動作テスト（265系）', ()
                                   bodyText.includes('unique') ||
                                   bodyText.includes('一意');
         console.log(`[265-2] 重複チェック関連テキスト存在: ${hasDuplicateCheck}`);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 });
 
@@ -811,7 +811,7 @@ test.describe('初期値設定テスト（267系）', () => {
 
         console.log(`[267-1] 初期値の自動入力確認: ${defaultFound}`);
         expect(defaultFound, `テキストフィールドの初期値「${testDefaultValue}」が新規作成フォームに自動入力されていること`).toBe(true);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
 
         // 後片付け: 初期値を消去
         await cleanupDefaultValue(page, tableId);

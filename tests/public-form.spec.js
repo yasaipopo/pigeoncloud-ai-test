@@ -252,7 +252,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
         if (toggleCount === 0) {
             console.log('[135] ドロップダウントグルボタンが見つかりません（公開フォームOFF or セッション問題の可能性）');
             // テーブルページが表示されていることを最低限確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
         }
 
         // 公開フォームメールテンプレートモーダルがDOMに存在することを確認

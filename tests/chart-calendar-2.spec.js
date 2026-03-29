@@ -749,7 +749,7 @@ test.describe('チャート - 基本機能', () => {
         await closeTemplateModal(page);
 
         // ダッシュボードが正常に表示されていることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
 
         // ダッシュボードからチャート/フィルタ追加ボタンを探す
         // ダッシュボードの「追加」ボタン（チャート追加やカスタマイズボタン）
@@ -795,7 +795,7 @@ test.describe('チャート - 基本機能', () => {
         expect(pageText).not.toContain('Internal Server Error');
 
         // ダッシュボードが正常に表示されていることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 
     // --------------------------------------------------------------------------

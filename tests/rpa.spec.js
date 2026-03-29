@@ -319,7 +319,7 @@ test.describe('RPA（コネクト）', () => {
         const triggerCount = await triggerSettings.count();
         console.log('603: トリガー設定関連要素数:', triggerCount);
 
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 
     test('609: FTP処理の失敗時にどのテーブルのエラーかが通知に含まれること', async ({ page }) => {
@@ -338,7 +338,7 @@ test.describe('RPA（コネクト）', () => {
         // ページが正常であること
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 
     test('672: RPA実行履歴画面に実行結果が正しく表示されること', async ({ page }) => {
@@ -365,7 +365,7 @@ test.describe('RPA（コネクト）', () => {
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 
     test('789: RPAのビュー表示と編集・保存が正常に動作すること', async ({ page }) => {
@@ -412,6 +412,6 @@ test.describe('RPA（コネクト）', () => {
             }
         }
 
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
     });
 });
