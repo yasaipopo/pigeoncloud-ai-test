@@ -309,101 +309,6 @@ async function getFirstRecordViewUrl(page, tableUrl) {
 
 test.describe('ログ管理', () => {
 
-    // ---------------------------------------------------------------------------
-    // 13-1 (A/B): ログ一覧表示
-    // ---------------------------------------------------------------------------
-    test('13-1: 各ユーザーの操作ログが確認できること', async ({ page }) => {
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-
-        // ログページへ遷移
-        await page.goto(BASE_URL + '/admin/logs');
-        await waitForAngular(page);
-
-        // ログページが表示されることを確認
-        await expect(page).toHaveURL(/\/admin\/logs/);
-
-        // ページ読み込み完了を待機（Angularテーブルの描画まで）
-        await page.waitForFunction(
-            () => document.body.innerText.includes('ユーザー') && document.querySelectorAll('table').length > 0,
-            { timeout: 15000 }
-        ).catch(() => {});
-
-        // テーブルヘッダーに必要な列があることを確認（Angular hidden tableは可視チェック不要）
-        const pageText = await page.innerText('body');
-        expect(pageText).toContain('ユーザー');
-        expect(pageText).toContain('アクション');
-        expect(pageText).toContain('テーブル');
-        expect(pageText).toContain('日時');
-    });
-
-    // ---------------------------------------------------------------------------
-    // 13-2 (A/B): CSV UP/DL履歴
-    // ---------------------------------------------------------------------------
-    test('13-2: CSV UP/DL履歴が確認できること', async ({ page }) => {
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-
-        // CSV UP/DL履歴ページへ遷移
-        await page.goto(BASE_URL + '/admin/csv');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-
-        // CSV履歴ページが表示されることを確認
-        await expect(page).toHaveURL(/\/admin\/csv/);
-
-        // テーブルヘッダーが描画されるまで待機（navのCSV UP/DL履歴テキストより確実）
-        await page.waitForSelector('table th', { timeout: 15000 }).catch(() => {});
-
-        // ページタイトルにCSV UP/DL履歴が含まれることを確認
-        const pageText = await page.innerText('body');
-        expect(pageText).toContain('CSV UP/DL履歴');
-
-        // テーブルヘッダーに必要な列があることを確認（Angular hidden tableは可視チェック不要）
-        expect(pageText).toContain('ファイル名');
-        expect(pageText).toContain('タイプ');
-        expect(pageText).toContain('処理');
-    });
-
-    // ---------------------------------------------------------------------------
-    // 196 (B): リクエストログ
-    // ---------------------------------------------------------------------------
-    test('196: リクエストログで処理ステータスが確認できること', async ({ page }) => {
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-
-        // リクエストログページへ遷移
-        await page.goto(BASE_URL + '/admin/job_logs', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await waitForAngular(page);
-
-        // リクエストログページが表示されることを確認
-        await expect(page).toHaveURL(/\/admin\/job_logs/);
-
-        // ページ読み込み完了を待機（Angularテーブルの描画まで）
-        await page.waitForFunction(
-            () => document.body.innerText.includes('リクエストログ') && document.querySelectorAll('table').length > 0,
-            { timeout: 15000 }
-        ).catch(() => {});
-
-        // ヘッダーに必要な列があることを確認（Angular hidden tableは可視チェック不要）
-        const pageText = await page.innerText('body');
-        expect(pageText).toContain('リクエストログ');
-        expect(pageText).toContain('リクエスト');
-        expect(pageText).toContain('ステータス');
-        expect(pageText).toContain('処理結果');
-    });
-
-});
-
-// =============================================================================
-// コメントメンションテスト
-// =============================================================================
-
-test.describe('コメントメンション', () => {
-    // 各テストのタイムアウトを180秒に設定（コメント送信待機を含む）
-    test.describe.configure({ timeout: 180000 });
-
     /** テーブルURL（beforeAll で設定） */
     let tableUrl = '/admin/dataset__7';
     /** レコードviewURL（beforeAll で設定） */
@@ -417,674 +322,616 @@ test.describe('コメントメンション', () => {
         const tableId = await getAllTypeTableId(page);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         tableUrl = '/admin/dataset__' + tableId;
-        // データが0件だとレコードviewURLが取得できないためデータ投入
         await createAllTypeData(page, 3).catch((e) => console.log('createAllTypeData error (ignored):', e.message));
         await page.waitForTimeout(2000);
         recordViewUrl = await getFirstRecordViewUrl(page, tableUrl);
         await page.close();
         await context.close();
     });
-    // ---------------------------------------------------------------------------
-    // 69-1 (A/B): 1ユーザーへのメンション
-    // ---------------------------------------------------------------------------
-    test('69-1: 1ユーザーへのメンション付きコメントが送信できること', async ({ page }) => {
+
+    // =========================================================================
+    // CL01: ログ閲覧フロー（13-1, 13-2, 196）→ 1動画
+    // =========================================================================
+    test('CL01: ログ閲覧フロー', async ({ page }) => {
+        test.setTimeout(600000);
+        const _testStart = Date.now();
+        page.setDefaultTimeout(60000);
+
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
-        // テストユーザー作成（失敗しても継続）
-        await tryCreateTestUser(page);
+        // ----- step: 13-1 各ユーザーの操作ログが確認できること -----
+        await test.step('13-1: 各ユーザーの操作ログが確認できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 13-1`);
 
-        // レコード詳細ページへ遷移
-        await page.goto(BASE_URL + recordViewUrl);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
+            await page.goto(BASE_URL + '/admin/logs');
+            await waitForAngular(page);
+            await expect(page).toHaveURL(/\/admin\/logs/);
 
-        // レコード詳細ページが表示されていることを確認
-        await expect(page).toHaveURL(/\/view\//);
+            await page.waitForFunction(
+                () => document.body.innerText.includes('ユーザー') && document.querySelectorAll('table').length > 0,
+                { timeout: 15000 }
+            ).catch(() => {});
 
-        // aside-menu（コメントパネル）を開く
-        await openAsideMenu(page);
+            const pageText = await page.innerText('body');
+            expect(pageText).toContain('ユーザー');
+            expect(pageText).toContain('アクション');
+            expect(pageText).toContain('テーブル');
+            expect(pageText).toContain('日時');
+        });
 
-        // コメント入力エリアが表示されることを確認
-        const commentDiv = page.locator('#comment');
-        await expect(commentDiv).toBeVisible({ timeout: 15000 });
-        // コメント入力エリアがcontenteditable属性を持つことを確認
-        await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
-        // 送信ボタンが表示されていることを確認
-        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
-        await expect(sendBtn).toBeVisible();
-        await expect(sendBtn).toContainText('送信');
+        // ----- step: 13-2 CSV UP/DL履歴が確認できること -----
+        await test.step('13-2: CSV UP/DL履歴が確認できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 13-2`);
 
-        // コメントを入力（@ユーザー名でメンション）
-        await commentDiv.click();
-        await waitForAngular(page);
-        await page.keyboard.type('テストコメント @マスターユーザー');
-        await page.waitForTimeout(800);
+            await page.goto(BASE_URL + '/admin/csv');
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
 
-        // オートコンプリートのドロップダウンを閉じる（Escape + 再クリック）
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
+            await expect(page).toHaveURL(/\/admin\/csv/);
+            await page.waitForSelector('table th', { timeout: 15000 }).catch(() => {});
 
-        // 送信ボタンをクリック
-        await sendBtn.click({ force: true });
+            const pageText = await page.innerText('body');
+            expect(pageText).toContain('CSV UP/DL履歴');
+            expect(pageText).toContain('ファイル名');
+            expect(pageText).toContain('タイプ');
+            expect(pageText).toContain('処理');
+        });
 
-        // コメントが送信されてcomment-log-blockが追加されるまで待機（最大20秒）
-        await page.waitForSelector('comment-log-block', { timeout: 20000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        // ----- step: 196 リクエストログで処理ステータスが確認できること -----
+        await test.step('196: リクエストログで処理ステータスが確認できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 196`);
 
-        // コメントがaside内に表示されることを確認（送信者名が表示される）
-        const asideContent = await page.innerText('aside');
-        expect(asideContent).toContain('マスターユーザー');
-        // コメント本文が.comment-bodyに表示されることを確認
-        const commentBody = page.locator('.comment-body').last();
-        await expect(commentBody).toBeVisible();
-        await expect(commentBody).toContainText('テストコメント');
+            await page.goto(BASE_URL + '/admin/job_logs', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await waitForAngular(page);
+
+            await expect(page).toHaveURL(/\/admin\/job_logs/);
+
+            await page.waitForFunction(
+                () => document.body.innerText.includes('リクエストログ') && document.querySelectorAll('table').length > 0,
+                { timeout: 15000 }
+            ).catch(() => {});
+
+            const pageText = await page.innerText('body');
+            expect(pageText).toContain('リクエストログ');
+            expect(pageText).toContain('リクエスト');
+            expect(pageText).toContain('ステータス');
+            expect(pageText).toContain('処理結果');
+        });
     });
 
-    // ---------------------------------------------------------------------------
-    // 69-2 (A/B): 複数ユーザーへのメンション
-    // ---------------------------------------------------------------------------
-    test('69-2: 複数ユーザーへのメンション付きコメントが送信できること', async ({ page }) => {
+    // =========================================================================
+    // CL02: コメントメンションフロー（69-1, 69-2, 69-3, 69-4, 242）→ 1動画
+    // =========================================================================
+    test('CL02: コメントメンションフロー', async ({ page }) => {
+        test.setTimeout(600000);
+        const _testStart = Date.now();
+        page.setDefaultTimeout(60000);
+
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
 
-        // レコード詳細ページへ遷移
-        await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
+        // ----- step: 69-1 1ユーザーへのメンション付きコメントが送信できること -----
+        await test.step('69-1: 1ユーザーへのメンション付きコメントが送信できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-1`);
 
-        // aside-menu（コメントパネル）を開く
-        await openAsideMenu(page);
+            await tryCreateTestUser(page);
 
-        // コメント入力エリアが表示されることを確認
-        const commentDiv = page.locator('#comment');
-        await expect(commentDiv).toBeVisible({ timeout: 15000 });
-        // 送信ボタンが表示されていることを確認
-        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
-        await expect(sendBtn).toBeVisible();
-
-        // 複数ユーザーへのメンション付きコメントを入力
-        await commentDiv.click();
-        await waitForAngular(page);
-        await page.keyboard.type('複数メンションテスト @マスターユーザー @マスターユーザー');
-        await page.waitForTimeout(1000);
-        // オートコンプリートドロップダウンが開いている場合は閉じる
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
-
-        // 送信ボタンをクリック
-        await sendBtn.click({ force: true });
-
-        // コメントが送信されてcomment-log-blockが追加されるまで待機（最大20秒）
-        await page.waitForSelector('comment-log-block', { timeout: 20000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-
-        // コメントがaside内に表示されることを確認（テキストで判定）
-        const asideContent = await page.innerText('aside');
-        expect(asideContent).toContain('複数メンションテスト');
-        // コメント本文が.comment-bodyに表示されることを確認（filterで対象コメントを特定）
-        const commentBody = page.locator('.comment-body').filter({ hasText: '複数メンションテスト' }).first();
-        await expect(commentBody).toBeVisible();
-    });
-
-    // ---------------------------------------------------------------------------
-    // 69-3 (A/B): 存在しないユーザーでメンション
-    // ---------------------------------------------------------------------------
-    test('69-3: 存在しないユーザーでメンションしてもコメントが保存されること', async ({ page }) => {
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-
-        // レコード詳細ページへ遷移
-        await page.goto(BASE_URL + recordViewUrl);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
-
-        // aside-menu（コメントパネル）を開く
-        await openAsideMenu(page);
-
-        // コメント入力エリアが表示されることを確認
-        const commentDiv = page.locator('#comment');
-        await expect(commentDiv).toBeVisible({ timeout: 15000 });
-        // コメント入力エリアがcontenteditable属性を持つことを確認
-        await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
-
-        // 存在しないユーザーへのメンション付きコメントを入力
-        await commentDiv.click();
-        await waitForAngular(page);
-        await page.keyboard.type('存在しないユーザーテスト @存在しないユーザーXYZ99999');
-        await page.waitForTimeout(1000);
-        // オートコンプリートドロップダウンが開いている場合は閉じる
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
-
-        // 送信ボタンをクリック
-        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
-        await sendBtn.click({ force: true });
-
-        // コメントが送信されてcomment-log-blockが追加されるまで待機（最大20秒）
-        await page.waitForSelector('comment-log-block', { timeout: 20000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-
-        // コメント本文が.comment-bodyに表示されることを確認（filterで対象コメントを特定）
-        const commentBody = page.locator('.comment-body').filter({ hasText: '存在しないユーザーテスト' }).first();
-        await expect(commentBody).toBeVisible({ timeout: 15000 });
-    });
-
-    // ---------------------------------------------------------------------------
-    // 69-4 (A): 組織へのメンション
-    // ---------------------------------------------------------------------------
-    test('69-4: 組織へのメンション付きコメントが送信できること', async ({ page }) => {
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-
-        // レコード詳細ページへ遷移
-        await page.goto(BASE_URL + recordViewUrl);
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
-
-        // URLが /view/ を含まない場合（リダイレクト等）、現在のtableUrlから再取得する
-        if (!page.url().includes('/view/')) {
-            const freshViewUrl = await getFirstRecordViewUrl(page, tableUrl);
-            recordViewUrl = freshViewUrl;
             await page.goto(BASE_URL + recordViewUrl);
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
-        }
 
-        // aside-menu（コメントパネル）を開く
-        await openAsideMenu(page);
+            await expect(page).toHaveURL(/\/view\//);
+            await openAsideMenu(page);
 
-        // コメント入力エリアが表示されることを確認
-        const commentDiv = page.locator('#comment');
-        await expect(commentDiv).toBeVisible({ timeout: 15000 });
-        // 送信ボタンが表示されていることを確認
-        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
-        await expect(sendBtn).toBeVisible();
-        await expect(sendBtn).toContainText('送信');
+            const commentDiv = page.locator('#comment');
+            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
+            const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+            await expect(sendBtn).toBeVisible();
+            await expect(sendBtn).toContainText('送信');
 
-        // 組織へのメンション付きコメントを入力
-        await commentDiv.click();
-        await waitForAngular(page);
-        await page.keyboard.type('組織メンションテスト @組織1');
-        await page.waitForTimeout(300);
-
-        // 送信ボタンをクリック
-        await sendBtn.click({ force: true });
-
-        // コメントが送信されてcomment-log-blockが追加されるまで待機（最大20秒）
-        await page.waitForSelector('comment-log-block', { timeout: 20000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-
-        // コメントがaside内に表示されること（テキストで判定）
-        const asideContent = await page.innerText('aside');
-        expect(asideContent).toContain('組織メンションテスト');
-        // コメント本文が.comment-bodyに表示されることを確認（filterで対象コメントを特定）
-        const commentBody = page.locator('.comment-body').filter({ hasText: '組織メンションテスト' }).first();
-        await expect(commentBody).toBeVisible();
-    });
-
-    // ---------------------------------------------------------------------------
-    // 242 (B): ログとコメントをまとめて表示する設定が有効の時にメンションが出ること
-    // ---------------------------------------------------------------------------
-    test('242: ログとコメントをまとめて表示が有効の時にメンション機能が動作すること', async ({ page }) => {
-        // このテストは設定変更+コメント送信を含むため個別にタイムアウトを延長
-        test.setTimeout(180000);
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-
-        // テーブルIDをURLから取得（例: /admin/dataset__7 -> 7）
-        const match = tableUrl.match(/dataset__(\d+)/);
-        const tableId = match ? match[1] : '7';
-
-        // テーブル設定ページでログとコメントをまとめて表示を有効化
-        await page.goto(BASE_URL + '/admin/dataset/edit/' + tableId, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
-
-        // 「詳細・編集画面」タブをクリック
-        try {
-            const detailTab = page.locator('.nav-link').filter({ hasText: '詳細・編集画面' }).first();
-            await detailTab.click({ force: true });
+            await commentDiv.click();
             await waitForAngular(page);
-        } catch (e) {
-            // タブが見つからない場合はスキップ
-        }
+            await page.keyboard.type('テストコメント @マスターユーザー');
+            await page.waitForTimeout(800);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
 
-        // 「ログとコメントをまとめて表示する」スイッチを探してONにする
-        try {
-            const pageText = await page.innerText('body');
-            if (pageText.includes('ログとコメントをまとめて表示する')) {
-                // スイッチラベルをクリックしてONにする
-                await page.evaluate(() => {
-                    const allText = document.querySelectorAll('*');
-                    for (const el of allText) {
-                        if (el.children.length === 0 && el.textContent?.trim() === 'ログとコメントをまとめて表示する') {
-                            // 親要素のswitch-inputを探す
-                            let parent = el.parentElement;
-                            for (let i = 0; i < 5; i++) {
-                                if (!parent) break;
-                                const switchInput = parent.querySelector('input[type="checkbox"].switch-input');
-                                if (switchInput && !switchInput.checked) {
-                                    const label = parent.querySelector('label.switch');
-                                    if (label) label.click();
-                                    return;
+            await sendBtn.click({ force: true });
+            await page.waitForSelector('comment-log-block', { timeout: 20000 }).catch(() => {});
+            await page.waitForTimeout(2000);
+
+            const asideContent = await page.innerText('aside');
+            expect(asideContent).toContain('マスターユーザー');
+            const commentBody = page.locator('.comment-body').last();
+            await expect(commentBody).toBeVisible();
+            await expect(commentBody).toContainText('テストコメント');
+        });
+
+        // ----- step: 69-2 複数ユーザーへのメンション付きコメントが送信できること -----
+        await test.step('69-2: 複数ユーザーへのメンション付きコメントが送信できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-2`);
+
+            await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            await openAsideMenu(page);
+
+            const commentDiv = page.locator('#comment');
+            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+            await expect(sendBtn).toBeVisible();
+
+            await commentDiv.click();
+            await waitForAngular(page);
+            await page.keyboard.type('複数メンションテスト @マスターユーザー @マスターユーザー');
+            await page.waitForTimeout(1000);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            await sendBtn.click({ force: true });
+            await page.waitForSelector('comment-log-block', { timeout: 20000 }).catch(() => {});
+            await page.waitForTimeout(2000);
+
+            const asideContent = await page.innerText('aside');
+            expect(asideContent).toContain('複数メンションテスト');
+            const commentBody = page.locator('.comment-body').filter({ hasText: '複数メンションテスト' }).first();
+            await expect(commentBody).toBeVisible();
+        });
+
+        // ----- step: 69-3 存在しないユーザーでメンションしてもコメントが保存されること -----
+        await test.step('69-3: 存在しないユーザーでメンションしてもコメントが保存されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-3`);
+
+            await page.goto(BASE_URL + recordViewUrl);
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            await openAsideMenu(page);
+
+            const commentDiv = page.locator('#comment');
+            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
+
+            await commentDiv.click();
+            await waitForAngular(page);
+            await page.keyboard.type('存在しないユーザーテスト @存在しないユーザーXYZ99999');
+            await page.waitForTimeout(1000);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+            await sendBtn.click({ force: true });
+            await page.waitForSelector('comment-log-block', { timeout: 20000 }).catch(() => {});
+            await page.waitForTimeout(2000);
+
+            const commentBody = page.locator('.comment-body').filter({ hasText: '存在しないユーザーテスト' }).first();
+            await expect(commentBody).toBeVisible({ timeout: 15000 });
+        });
+
+        // ----- step: 69-4 組織へのメンション付きコメントが送信できること -----
+        await test.step('69-4: 組織へのメンション付きコメントが送信できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-4`);
+
+            await page.goto(BASE_URL + recordViewUrl);
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            if (!page.url().includes('/view/')) {
+                const freshViewUrl = await getFirstRecordViewUrl(page, tableUrl);
+                recordViewUrl = freshViewUrl;
+                await page.goto(BASE_URL + recordViewUrl);
+                await page.waitForLoadState('domcontentloaded');
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                await waitForAngular(page);
+                await page.keyboard.press('Escape');
+                await waitForAngular(page);
+            }
+
+            await openAsideMenu(page);
+
+            const commentDiv = page.locator('#comment');
+            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+            await expect(sendBtn).toBeVisible();
+            await expect(sendBtn).toContainText('送信');
+
+            await commentDiv.click();
+            await waitForAngular(page);
+            await page.keyboard.type('組織メンションテスト @組織1');
+            await page.waitForTimeout(300);
+
+            await sendBtn.click({ force: true });
+            await page.waitForSelector('comment-log-block', { timeout: 20000 }).catch(() => {});
+            await page.waitForTimeout(2000);
+
+            const asideContent = await page.innerText('aside');
+            expect(asideContent).toContain('組織メンションテスト');
+            const commentBody = page.locator('.comment-body').filter({ hasText: '組織メンションテスト' }).first();
+            await expect(commentBody).toBeVisible();
+        });
+
+        // ----- step: 242 ログとコメントをまとめて表示が有効の時にメンション機能が動作すること -----
+        await test.step('242: ログとコメントをまとめて表示が有効の時にメンション機能が動作すること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 242`);
+
+            const match = tableUrl.match(/dataset__(\d+)/);
+            const tableId = match ? match[1] : '7';
+
+            await page.goto(BASE_URL + '/admin/dataset/edit/' + tableId, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            try {
+                const detailTab = page.locator('.nav-link').filter({ hasText: '詳細・編集画面' }).first();
+                await detailTab.click({ force: true });
+                await waitForAngular(page);
+            } catch (e) {}
+
+            try {
+                const pageText = await page.innerText('body');
+                if (pageText.includes('ログとコメントをまとめて表示する')) {
+                    await page.evaluate(() => {
+                        const allText = document.querySelectorAll('*');
+                        for (const el of allText) {
+                            if (el.children.length === 0 && el.textContent?.trim() === 'ログとコメントをまとめて表示する') {
+                                let parent = el.parentElement;
+                                for (let i = 0; i < 5; i++) {
+                                    if (!parent) break;
+                                    const switchInput = parent.querySelector('input[type="checkbox"].switch-input');
+                                    if (switchInput && !switchInput.checked) {
+                                        const label = parent.querySelector('label.switch');
+                                        if (label) label.click();
+                                        return;
+                                    }
+                                    parent = parent.parentElement;
                                 }
-                                parent = parent.parentElement;
                             }
                         }
+                    });
+                    await page.waitForTimeout(500);
+
+                    const saveBtn = page.locator('button[type="submit"]').first();
+                    const saveBtnVisible = await saveBtn.isVisible();
+                    if (saveBtnVisible) {
+                        await saveBtn.click({ force: true });
+                        await page.waitForLoadState('domcontentloaded');
+                        await page.waitForTimeout(4000);
                     }
-                });
-                await page.waitForTimeout(500);
-
-                // 保存ボタンをクリック
-                const saveBtn = page.locator('button[type="submit"]').first();
-                const saveBtnVisible = await saveBtn.isVisible();
-                if (saveBtnVisible) {
-                    await saveBtn.click({ force: true });
-                    await page.waitForLoadState('domcontentloaded');
-                    await page.waitForTimeout(4000);
                 }
-            }
-        } catch (e) {
-            // 設定変更に失敗しても継続
-        }
+            } catch (e) {}
 
-        // レコード詳細ページへ遷移
-        await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
+            await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
 
-        // aside-menu（コメントパネル）を開く
-        await openAsideMenu(page);
+            await openAsideMenu(page);
 
-        // コメント入力エリアが表示されることを確認（マージモードでも同じ #comment）
-        const commentDiv = page.locator('#comment');
-        await expect(commentDiv).toBeVisible({ timeout: 15000 });
-        // コメント入力エリアがcontenteditable属性を持つことを確認
-        await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
-        // 送信ボタンが表示されていることを確認
-        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
-        await expect(sendBtn).toBeVisible();
-        await expect(sendBtn).toContainText('送信');
+            const commentDiv = page.locator('#comment');
+            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
+            const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+            await expect(sendBtn).toBeVisible();
+            await expect(sendBtn).toContainText('送信');
 
-        // @でメンション入力
-        await commentDiv.click();
-        await waitForAngular(page);
-        await page.keyboard.type('@マスターユーザー');
-        await page.waitForTimeout(300);
+            await commentDiv.click();
+            await waitForAngular(page);
+            await page.keyboard.type('@マスターユーザー');
+            await page.waitForTimeout(300);
 
-        // コメント入力エリアにテキストが入力されていることを確認
-        const inputText = await commentDiv.innerText();
-        expect(inputText).toContain('@');
+            const inputText = await commentDiv.innerText();
+            expect(inputText).toContain('@');
 
-        // 送信ボタンをクリック
-        await sendBtn.click({ force: true });
+            await sendBtn.click({ force: true });
+            await page.waitForSelector('comment-log-block', { timeout: 30000 }).catch(() => {});
+            await page.waitForTimeout(2000);
 
-        // コメントが送信されてcomment-log-blockが追加されるまで待機（最大30秒）
-        await page.waitForSelector('comment-log-block', { timeout: 30000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-
-        // コメント本文が.comment-bodyに表示されることを確認（asideのコンテンツより安定）
-        const commentBody = page.locator('.comment-body').last();
-        await expect(commentBody).toBeVisible({ timeout: 20000 });
+            const commentBody = page.locator('.comment-body').last();
+            await expect(commentBody).toBeVisible({ timeout: 20000 });
+        });
     });
 
-});
+    // =========================================================================
+    // CL03: コメント・ログ バグ修正確認（297, 356, 426, 472, 597, 570）→ 1動画
+    // =========================================================================
+    test('CL03: コメント・ログ バグ修正確認', async ({ page }) => {
+        test.setTimeout(600000);
+        const _testStart = Date.now();
+        page.setDefaultTimeout(60000);
 
-// =============================================================================
-// バグ修正・機能改善確認テスト（コメント・ログ追加5件）
-// =============================================================================
-
-test.describe('コメント・ログ バグ修正確認', () => {
-    let tableUrl = null;
-
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(300000);
-        const context = await createLoginContext(browser);
-        const page = await context.newPage();
-        await ensureLoggedIn(page);
-        tableUrl = await setupTestTable(page);
-        console.log('[beforeAll] テーブルURL:', tableUrl);
-        await page.close();
-        await context.close();
-    });
-
-    test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
-    });
 
-    // -------------------------------------------------------------------------
-    // 297: 複数値項目での絞り込み・グラフ作成が正常に動作すること
-    // -------------------------------------------------------------------------
-    test('297: 複数値を持つ項目で絞り込み（OR選択）が正常に動作すること', async ({ page }) => {
-        // レコード一覧に遷移
-        await page.goto(BASE_URL + tableUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
+        // テーブルURLのセットアップ（setupTestTableの代替: 既存tableUrlを使用）
+        const _tableUrl = tableUrl;
 
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
+        // ----- step: 297 複数値を持つ項目で絞り込み（OR選択）が正常に動作すること -----
+        await test.step('297: 複数値を持つ項目で絞り込み（OR選択）が正常に動作すること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 297`);
 
-        // フィルタボタンの存在確認
-        const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
-        if (await filterBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-            await filterBtn.click({ force: true });
+            await page.goto(BASE_URL + _tableUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
-            // フィルタ設定UIが表示されること
-            const filterPanel = page.locator('.filter-panel, .search-panel, .condition-row');
-            const panelCount = await filterPanel.count();
-            console.log('297: フィルタパネル要素数:', panelCount);
-        }
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
 
-        // ページが正常であること
-        const afterText = await page.innerText('body');
-        expect(afterText).not.toContain('Internal Server Error');
-    });
+            const filterBtn = page.locator('button.btn-outline-primary:has(.fa-search)').first();
+            if (await filterBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await filterBtn.click({ force: true });
+                await waitForAngular(page);
 
-    // -------------------------------------------------------------------------
-    // 356: コメント通知クリック時にレコード詳細画面に遷移すること
-    // -------------------------------------------------------------------------
-    test('356: 通知をクリックした際にコメントが来たレコード詳細画面に遷移すること', async ({ page }) => {
-        // 通知一覧ページに遷移
-        await page.goto(BASE_URL + '/admin/notifications', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await waitForAngular(page);
+                const filterPanel = page.locator('.filter-panel, .search-panel, .condition-row');
+                const panelCount = await filterPanel.count();
+                console.log('297: フィルタパネル要素数:', panelCount);
+            }
 
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // 通知ベルアイコンをクリック
-        const bellIcon = page.locator('.notification-bell, .fa-bell, i.icon-bell, .nav-link .badge').first();
-        if (await bellIcon.isVisible({ timeout: 5000 }).catch(() => false)) {
-            await bellIcon.click({ force: true });
-            await waitForAngular(page);
-        }
-
-        // 通知一覧が表示されること（ドロップダウンまたはページ）
-        const notifItems = page.locator('.notification-item, .dropdown-item, .notification-list a');
-        const notifCount = await notifItems.count();
-        console.log('356: 通知アイテム数:', notifCount);
-
-        // 通知をクリックした場合レコード詳細に遷移するか確認（通知が存在する場合）
-        if (notifCount > 0) {
-            await notifItems.first().click({ force: true });
-            await waitForAngular(page);
-            const afterUrl = page.url();
-            console.log('356: 通知クリック後URL:', afterUrl);
-            // レコード詳細画面（/view/）に遷移するか、少なくともエラーでないこと
             const afterText = await page.innerText('body');
             expect(afterText).not.toContain('Internal Server Error');
-        }
-    });
+        });
 
-    // -------------------------------------------------------------------------
-    // 472: コメント入力で改行が反映されること
-    // -------------------------------------------------------------------------
-    test('472: コメント入力欄で改行が正しく反映されること', async ({ page }) => {
-        // レコード詳細画面へ遷移
-        const recordUrl = await getFirstRecordViewUrl(page, tableUrl);
-        await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
+        // ----- step: 356 通知をクリックした際にコメントが来たレコード詳細画面に遷移すること -----
+        await test.step('356: 通知をクリックした際にコメントが来たレコード詳細画面に遷移すること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 356`);
 
-        // aside-menu（コメントパネル）を開く
-        await openAsideMenu(page);
+            await page.goto(BASE_URL + '/admin/notifications', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await waitForAngular(page);
 
-        // コメント入力エリア
-        const commentDiv = page.locator('#comment');
-        await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
 
-        // 改行を含むコメントを入力
-        await commentDiv.click();
-        await waitForAngular(page);
-        await page.keyboard.type('1行目テスト');
-        await page.keyboard.press('Shift+Enter');
-        await page.keyboard.type('2行目テスト');
-
-        // 入力内容に改行が含まれていること
-        const inputHtml = await commentDiv.innerHTML();
-        const hasBr = inputHtml.includes('<br') || inputHtml.includes('<div');
-        console.log('472: 改行含有確認:', hasBr, 'HTML:', inputHtml.substring(0, 200));
-
-        // 送信ボタンをクリック
-        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
-        if (await sendBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-            await sendBtn.click({ force: true });
-            await page.waitForTimeout(3000);
-
-            // 送信後のコメント表示で改行が反映されていること
-            const commentBody = page.locator('.comment-body').last();
-            if (await commentBody.isVisible({ timeout: 10000 }).catch(() => false)) {
-                const bodyHtml = await commentBody.innerHTML();
-                const hasLineBreak = bodyHtml.includes('<br') || bodyHtml.includes('1行目') && bodyHtml.includes('2行目');
-                console.log('472: コメント表示の改行確認:', hasLineBreak);
-            }
-        }
-    });
-
-    // -------------------------------------------------------------------------
-    // 570: 組織メンション時に複数役職ユーザーへの通知が重複しないこと
-    // -------------------------------------------------------------------------
-    test('570: 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと', async ({ page }) => {
-        // レコード詳細画面へ遷移
-        const recordUrl = await getFirstRecordViewUrl(page, tableUrl);
-        await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
-
-        // コメントパネルを開く
-        await openAsideMenu(page);
-
-        // コメント入力エリア
-        const commentDiv = page.locator('#comment');
-        await expect(commentDiv).toBeVisible({ timeout: 15000 });
-
-        // @で組織名メンションを入力
-        await commentDiv.click();
-        await waitForAngular(page);
-        await page.keyboard.type('組織メンションテスト570 @');
-        await page.waitForTimeout(1000);
-
-        // オートコンプリートが表示されるか確認
-        const autocomplete = page.locator('.mention-list, .autocomplete, .dropdown-menu.show');
-        const acCount = await autocomplete.count();
-        console.log('570: オートコンプリート数:', acCount);
-
-        // Escapeで閉じてから送信
-        await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
-
-        // 送信
-        const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
-        if (await sendBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-            await sendBtn.click({ force: true });
-            await page.waitForTimeout(3000);
-        }
-
-        // コメントが保存されたこと
-        const asideText = await page.locator('aside').innerText().catch(() => '');
-        expect(asideText).toContain('組織メンションテスト570');
-    });
-
-    // -------------------------------------------------------------------------
-    // 597: ユーザー無効化・削除後もコメント履歴にユーザー名が表示されること
-    // -------------------------------------------------------------------------
-    test('597: ユーザーを無効化してもコメント履歴にユーザー名が消えないこと', async ({ page }) => {
-        // レコード詳細画面へ遷移
-        const recordUrl = await getFirstRecordViewUrl(page, tableUrl);
-        await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        await page.keyboard.press('Escape');
-        await waitForAngular(page);
-
-        // コメントパネルを開く
-        await openAsideMenu(page);
-
-        // 既存のコメントが表示されていれば、ユーザー名が空でないことを確認
-        const commentBlocks = page.locator('comment-log-block, .comment-block, .comment-item');
-        const blockCount = await commentBlocks.count();
-        console.log('597: コメントブロック数:', blockCount);
-
-        if (blockCount > 0) {
-            // 各コメントブロックにユーザー名が含まれていること（空でないこと）
-            for (let i = 0; i < Math.min(blockCount, 3); i++) {
-                const blockText = await commentBlocks.nth(i).innerText();
-                // ユーザー名部分が空白だけでないこと
-                expect(blockText.trim().length).toBeGreaterThan(0);
-            }
-        }
-
-        // ページが正常であること
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-    });
-
-    // =========================================================================
-    // 以下: 未実装テスト追加（3件）
-    // =========================================================================
-
-    test('426: 年度絞り込みの検索結果コメントが「今年度」「昨年度」と正しく表示されること', async ({ page }) => {
-        test.setTimeout(120000);
-        const tableId = await getAllTypeTableId(page);
-
-        // テーブル一覧を開く
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await waitForAngular(page);
-
-        // フィルタ機能を確認
-        const filterBtn = page.locator('button:has-text("フィルタ"), button:has(.fa-filter), .filter-btn').first();
-        const filterVisible = await filterBtn.isVisible({ timeout: 5000 }).catch(() => false);
-        console.log('426: フィルタボタン表示:', filterVisible);
-
-        if (filterVisible) {
-            await filterBtn.click();
-            await page.waitForTimeout(1000);
-
-            // 年度絞り込みオプションを確認
-            const yearOptions = page.locator(':has-text("今年度"), :has-text("昨年度"), :has-text("年度")');
-            const yearCount = await yearOptions.count();
-            console.log('426: 年度関連オプション数:', yearCount);
-        }
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
-    });
-
-    test('629: コメントの改行がメール通知で{line_break}にならず正常に改行されること', async ({ page }) => {
-        test.setTimeout(120000);
-        const tableId = await getAllTypeTableId(page);
-
-        // レコード一覧を開く
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await waitForAngular(page);
-
-        // レコードが存在すれば詳細を開いてコメント機能を確認
-        const firstRow = page.locator('tr[mat-row]').first();
-        if (await firstRow.isVisible({ timeout: 5000 }).catch(() => false)) {
-            const detailBtn = page.locator('button[data-record-url]').first();
-            if (await detailBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-                const url = await detailBtn.getAttribute('data-record-url');
-                if (url) {
-                    await page.goto(BASE_URL + url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-                    await waitForAngular(page);
-                }
+            const bellIcon = page.locator('.notification-bell, .fa-bell, i.icon-bell, .nav-link .badge').first();
+            if (await bellIcon.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await bellIcon.click({ force: true });
+                await waitForAngular(page);
             }
 
-            // コメント入力欄を確認
-            const commentInput = page.locator('textarea[formcontrolname*="comment"], textarea[placeholder*="コメント"], .comment-input textarea').first();
-            const commentVisible = await commentInput.isVisible({ timeout: 5000 }).catch(() => false);
-            console.log('629: コメント入力欄表示:', commentVisible);
+            const notifItems = page.locator('.notification-item, .dropdown-item, .notification-list a');
+            const notifCount = await notifItems.count();
+            console.log('356: 通知アイテム数:', notifCount);
 
-            if (commentVisible) {
-                // コメントに改行を含むテキストを入力
-                await commentInput.fill('テストコメント\n改行テスト\n3行目');
-                await page.waitForTimeout(500);
-
-                // 入力された値に{line_break}が含まれないこと
-                const inputValue = await commentInput.inputValue();
-                expect(inputValue).not.toContain('{line_break}');
-                expect(inputValue).not.toContain('line_break');
-                console.log('629: コメント入力値:', inputValue.substring(0, 100));
+            if (notifCount > 0) {
+                await notifItems.first().click({ force: true });
+                await waitForAngular(page);
+                const afterUrl = page.url();
+                console.log('356: 通知クリック後URL:', afterUrl);
+                const afterText = await page.innerText('body');
+                expect(afterText).not.toContain('Internal Server Error');
             }
-        }
+        });
 
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
-    });
+        // ----- step: 426 年度絞り込みの検索結果コメントが正しく表示されること -----
+        await test.step('426: 年度絞り込みの検索結果コメントが「今年度」「昨年度」と正しく表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 426`);
 
-    test('653: 組織メンションのキャンセル後にメッセージが出続けないこと', async ({ page }) => {
-        test.setTimeout(120000);
-        const tableId = await getAllTypeTableId(page);
+            const tableId = await getAllTypeTableId(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await waitForAngular(page);
 
-        // レコード詳細を開く
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await waitForAngular(page);
+            const filterBtn = page.locator('button:has-text("フィルタ"), button:has(.fa-filter), .filter-btn').first();
+            const filterVisible = await filterBtn.isVisible({ timeout: 5000 }).catch(() => false);
+            console.log('426: フィルタボタン表示:', filterVisible);
 
-        const firstRow = page.locator('tr[mat-row]').first();
-        if (await firstRow.isVisible({ timeout: 5000 }).catch(() => false)) {
-            const detailBtn = page.locator('button[data-record-url]').first();
-            if (await detailBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-                const url = await detailBtn.getAttribute('data-record-url');
-                if (url) {
-                    await page.goto(BASE_URL + url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-                    await waitForAngular(page);
-                }
-            }
-
-            // コメント入力欄を確認
-            const commentInput = page.locator('textarea[formcontrolname*="comment"], textarea[placeholder*="コメント"], .comment-input textarea').first();
-            const commentVisible = await commentInput.isVisible({ timeout: 5000 }).catch(() => false);
-            console.log('653: コメント入力欄表示:', commentVisible);
-
-            if (commentVisible) {
-                // @を入力してメンション候補を呼び出す
-                await commentInput.fill('@');
+            if (filterVisible) {
+                await filterBtn.click();
                 await page.waitForTimeout(1000);
 
-                // メンション候補リストを確認
-                const mentionList = page.locator('.mention-list, .autocomplete-list, [class*="mention"]');
-                const mentionVisible = await mentionList.first().isVisible({ timeout: 3000 }).catch(() => false);
-                console.log('653: メンション候補表示:', mentionVisible);
-
-                // キャンセル（Escapeキー）を押す
-                await page.keyboard.press('Escape');
-                await page.waitForTimeout(500);
-
-                // メンション警告メッセージが消えていること
-                const warningMsg = page.locator('.mention-warning, .alert-warning:has-text("組織"), .toast-warning');
-                const warningVisible = await warningMsg.first().isVisible({ timeout: 2000 }).catch(() => false);
-                console.log('653: キャンセル後の警告メッセージ表示:', warningVisible);
+                const yearOptions = page.locator(':has-text("今年度"), :has-text("昨年度"), :has-text("年度")');
+                const yearCount = await yearOptions.count();
+                console.log('426: 年度関連オプション数:', yearCount);
             }
-        }
 
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+        });
+
+        // ----- step: 472 コメント入力欄で改行が正しく反映されること -----
+        await test.step('472: コメント入力欄で改行が正しく反映されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 472`);
+
+            const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
+            await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            await openAsideMenu(page);
+
+            const commentDiv = page.locator('#comment');
+            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+
+            await commentDiv.click();
+            await waitForAngular(page);
+            await page.keyboard.type('1行目テスト');
+            await page.keyboard.press('Shift+Enter');
+            await page.keyboard.type('2行目テスト');
+
+            const inputHtml = await commentDiv.innerHTML();
+            const hasBr = inputHtml.includes('<br') || inputHtml.includes('<div');
+            console.log('472: 改行含有確認:', hasBr, 'HTML:', inputHtml.substring(0, 200));
+
+            const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+            if (await sendBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await sendBtn.click({ force: true });
+                await page.waitForTimeout(3000);
+
+                const commentBody = page.locator('.comment-body').last();
+                if (await commentBody.isVisible({ timeout: 10000 }).catch(() => false)) {
+                    const bodyHtml = await commentBody.innerHTML();
+                    const hasLineBreak = bodyHtml.includes('<br') || bodyHtml.includes('1行目') && bodyHtml.includes('2行目');
+                    console.log('472: コメント表示の改行確認:', hasLineBreak);
+                }
+            }
+        });
+
+        // ----- step: 597 ユーザーを無効化してもコメント履歴にユーザー名が消えないこと -----
+        await test.step('597: ユーザーを無効化してもコメント履歴にユーザー名が消えないこと', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 597`);
+
+            const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
+            await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            await openAsideMenu(page);
+
+            const commentBlocks = page.locator('comment-log-block, .comment-block, .comment-item');
+            const blockCount = await commentBlocks.count();
+            console.log('597: コメントブロック数:', blockCount);
+
+            if (blockCount > 0) {
+                for (let i = 0; i < Math.min(blockCount, 3); i++) {
+                    const blockText = await commentBlocks.nth(i).innerText();
+                    expect(blockText.trim().length).toBeGreaterThan(0);
+                }
+            }
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+        });
+
+        // ----- step: 570 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと -----
+        await test.step('570: 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 570`);
+
+            const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
+            await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.keyboard.press('Escape');
+            await waitForAngular(page);
+
+            await openAsideMenu(page);
+
+            const commentDiv = page.locator('#comment');
+            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+
+            await commentDiv.click();
+            await waitForAngular(page);
+            await page.keyboard.type('組織メンションテスト570 @');
+            await page.waitForTimeout(1000);
+
+            const autocomplete = page.locator('.mention-list, .autocomplete, .dropdown-menu.show');
+            const acCount = await autocomplete.count();
+            console.log('570: オートコンプリート数:', acCount);
+
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(500);
+
+            const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
+            if (await sendBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await sendBtn.click({ force: true });
+                await page.waitForTimeout(3000);
+            }
+
+            const asideText = await page.locator('aside').innerText().catch(() => '');
+            expect(asideText).toContain('組織メンションテスト570');
+        });
+
+        // ----- step: 629 コメントの改行がメール通知で{line_break}にならず正常に改行されること -----
+        await test.step('629: コメントの改行がメール通知で{line_break}にならず正常に改行されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 629`);
+
+            const tableId = await getAllTypeTableId(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await waitForAngular(page);
+
+            const firstRow = page.locator('tr[mat-row]').first();
+            if (await firstRow.isVisible({ timeout: 5000 }).catch(() => false)) {
+                const detailBtn = page.locator('button[data-record-url]').first();
+                if (await detailBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                    const url = await detailBtn.getAttribute('data-record-url');
+                    if (url) {
+                        await page.goto(BASE_URL + url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                        await waitForAngular(page);
+                    }
+                }
+
+                const commentInput = page.locator('textarea[formcontrolname*="comment"], textarea[placeholder*="コメント"], .comment-input textarea').first();
+                const commentVisible = await commentInput.isVisible({ timeout: 5000 }).catch(() => false);
+                console.log('629: コメント入力欄表示:', commentVisible);
+
+                if (commentVisible) {
+                    await commentInput.fill('テストコメント\n改行テスト\n3行目');
+                    await page.waitForTimeout(500);
+
+                    const inputValue = await commentInput.inputValue();
+                    expect(inputValue).not.toContain('{line_break}');
+                    expect(inputValue).not.toContain('line_break');
+                    console.log('629: コメント入力値:', inputValue.substring(0, 100));
+                }
+            }
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+        });
+
+        // ----- step: 653 組織メンションのキャンセル後にメッセージが出続けないこと -----
+        await test.step('653: 組織メンションのキャンセル後にメッセージが出続けないこと', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 653`);
+
+            const tableId = await getAllTypeTableId(page);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await waitForAngular(page);
+
+            const firstRow = page.locator('tr[mat-row]').first();
+            if (await firstRow.isVisible({ timeout: 5000 }).catch(() => false)) {
+                const detailBtn = page.locator('button[data-record-url]').first();
+                if (await detailBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                    const url = await detailBtn.getAttribute('data-record-url');
+                    if (url) {
+                        await page.goto(BASE_URL + url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                        await waitForAngular(page);
+                    }
+                }
+
+                const commentInput = page.locator('textarea[formcontrolname*="comment"], textarea[placeholder*="コメント"], .comment-input textarea').first();
+                const commentVisible = await commentInput.isVisible({ timeout: 5000 }).catch(() => false);
+                console.log('653: コメント入力欄表示:', commentVisible);
+
+                if (commentVisible) {
+                    await commentInput.fill('@');
+                    await page.waitForTimeout(1000);
+
+                    const mentionList = page.locator('.mention-list, .autocomplete-list, [class*="mention"]');
+                    const mentionVisible = await mentionList.first().isVisible({ timeout: 3000 }).catch(() => false);
+                    console.log('653: メンション候補表示:', mentionVisible);
+
+                    await page.keyboard.press('Escape');
+                    await page.waitForTimeout(500);
+
+                    const warningMsg = page.locator('.mention-warning, .alert-warning:has-text("組織"), .toast-warning');
+                    const warningVisible = await warningMsg.first().isVisible({ timeout: 2000 }).catch(() => false);
+                    console.log('653: キャンセル後の警告メッセージ表示:', warningVisible);
+                }
+            }
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+        });
     });
+
 });

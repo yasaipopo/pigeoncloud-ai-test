@@ -290,541 +290,442 @@ test.beforeAll(async ({ browser }) => {
 });
 
 // =============================================================================
-// 261系 - 表示条件の実際の動作テスト
+// F401: フィールド設定テスト（261-1〜261-3, 265-1, 265-2, 267-1）→ 1動画
 // =============================================================================
 
-test.describe('表示条件の実際の動作テスト（261系）', () => {
-    let tableId = null;
+test.describe('フィールド設定テスト（261/265/267系）', () => {
 
-    test.beforeAll(async () => {
-        tableId = _sharedTableId;
-    });
+    test('F401: フィールド設定テスト', async ({ page }) => {
+        test.setTimeout(600000); // 10分
+        const _testStart = Date.now();
+        page.setDefaultTimeout(60000);
 
-    test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000);
+        const tableId = _sharedTableId;
+        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
+
         await login(page);
         await closeTemplateModal(page);
-    });
 
-    // -------------------------------------------------------------------------
-    // 261-1: 選択肢フィールド→表示条件設定UIの確認
-    // -------------------------------------------------------------------------
-    test('261-1: 選択肢フィールドのインライン編集パネルで「表示条件」セクションが確認できること', async ({ page }) => {
-        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
-        await navigateToFieldPage(page, tableId);
-        await assertFieldPageLoaded(page, tableId);
+        // ----- step: 261-1 選択肢フィールドの表示条件セクション確認 -----
+        await test.step('261-1: 選択肢フィールドのインライン編集パネルで「表示条件」セクションが確認できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 261-1`);
 
-        // フィールドリストが存在することを確認
-        const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
-        const fieldCount = await fieldRows.count();
-        if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
-        }
+            await navigateToFieldPage(page, tableId);
+            await assertFieldPageLoaded(page, tableId);
 
-        // 選択肢フィールドを探してクリック
-        const opened = await openFieldEditPanel(page, '選択肢');
-        if (!opened) {
-            // 選択肢フィールドが見つからない場合は最初のフィールドで代替確認
-            await fieldRows.first().click({ force: true });
-            await waitForAngular(page);
-        }
-
-        // インライン編集パネルまたは設定エリアが表示されること
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-
-        // ページに表示条件関連テキストが存在するか確認（存在しなくてもエラーとしない）
-        const hasDisplayCondition = pageText.includes('表示条件') || pageText.includes('display') || pageText.includes('条件');
-        // フィールド設定UIが開けていることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
-        console.log(`[261-1] 表示条件テキスト存在: ${hasDisplayCondition}`);
-    });
-
-    // -------------------------------------------------------------------------
-    // 261-2: Yes/No フィールド→表示条件設定UIの確認
-    // -------------------------------------------------------------------------
-    test('261-2: Yes/Noフィールドのインライン編集パネルが開けること', async ({ page }) => {
-        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
-        await navigateToFieldPage(page, tableId);
-        await assertFieldPageLoaded(page, tableId);
-
-        const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
-        const fieldCount = await fieldRows.count();
-        if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
-        }
-
-        // Yes/No フィールドを探してクリック
-        // ALLテストテーブルのYes/Noフィールド名は "Yes / No"（スペースあり）
-        const opened = await openFieldEditPanel(page, 'Yes / No');
-        if (!opened) {
-            // Yes/Noフィールドが見つからない場合はスキップ
-            await expect(yesnoField, 'Yes/Noフィールドが存在すること（ALLテストテーブルに含まれるべき）').toBeVisible({ timeout: 60000 });
-        }
-
-        // クリック後にページが正常であること
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
-
-        // インライン編集パネルが開いていることを確認（設定パネル的な要素）
-        // パネルの存在確認（admin-forms-field, .field-edit-panel, .panel等）
-        const panelSelectors = [
-            'admin-forms-field',
-            '.field-edit-panel',
-            '.field-setting-panel',
-            '.field-option',
-            '.field-config',
-            '.sidebar-panel',
-            '.settings-panel',
-        ];
-        let panelFound = false;
-        for (const sel of panelSelectors) {
-            const cnt = await page.locator(sel).count();
-            if (cnt > 0) {
-                panelFound = true;
-                console.log(`[261-2] パネルセレクター発見: ${sel}`);
-                break;
+            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldCount = await fieldRows.count();
+            if (fieldCount === 0) {
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
             }
-        }
-        console.log(`[261-2] Yes/Noフィールドクリック後パネル検出: ${panelFound}`);
-        // パネルが見つからなくてもテスト自体は通す（UIが変わっている可能性があるため）
-        expect(pageText).not.toContain('Internal Server Error');
-    });
 
-    // -------------------------------------------------------------------------
-    // 261-3: チェックボックスフィールド→表示条件設定UIの確認
-    // -------------------------------------------------------------------------
-    test('261-3: チェックボックスフィールドのインライン編集パネルが開けること', async ({ page }) => {
-        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
-        await navigateToFieldPage(page, tableId);
-        await assertFieldPageLoaded(page, tableId);
+            const opened = await openFieldEditPanel(page, '選択肢');
+            if (!opened) {
+                await fieldRows.first().click({ force: true });
+                await waitForAngular(page);
+            }
 
-        const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
-        const fieldCount = await fieldRows.count();
-        if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
-        }
+            const pageText = await page.innerText('body');
+            expect(pageText).not.toContain('Internal Server Error');
 
-        // ALLテストテーブルには"選択肢(複数選択)"フィールドが存在する（チェックボックスはない）
-        const opened = await openFieldEditPanel(page, '選択肢(複数選択)');
-        if (!opened) {
-            // 選択肢(複数選択)フィールドが見つからない場合はスキップ
-            await expect(multiSelectField, '選択肢(複数選択)フィールドが存在すること').toBeVisible({ timeout: 60000 });
-        }
+            const hasDisplayCondition = pageText.includes('表示条件') || pageText.includes('display') || pageText.includes('条件');
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            console.log(`[261-1] 表示条件テキスト存在: ${hasDisplayCondition}`);
+        });
 
-        // クリック後にページが正常であること
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
-        console.log('[261-3] チェックボックスフィールドクリック後、ページ正常確認');
-    });
-});
+        // ----- step: 261-2 Yes/Noフィールドのインライン編集パネル確認 -----
+        await test.step('261-2: Yes/Noフィールドのインライン編集パネルが開けること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 261-2`);
 
-// =============================================================================
-// 265系 - 必須設定・重複チェック動作テスト
-// =============================================================================
+            await navigateToFieldPage(page, tableId);
+            await assertFieldPageLoaded(page, tableId);
 
-test.describe('必須設定・重複チェック動作テスト（265系）', () => {
-    let tableId = null;
+            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldCount = await fieldRows.count();
+            if (fieldCount === 0) {
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+            }
 
-    test.beforeAll(async () => {
-        tableId = _sharedTableId;
-    });
+            const opened = await openFieldEditPanel(page, 'Yes / No');
+            if (!opened) {
+                await expect(page.locator('.cdk-drag.field-drag:has-text("Yes / No"), .field-drag:has-text("Yes / No")').first(), 'Yes/Noフィールドが存在すること（ALLテストテーブルに含まれるべき）').toBeVisible({ timeout: 60000 });
+            }
 
-    test.beforeEach(async ({ page }) => {
-        test.setTimeout(180000);
-        await login(page);
-        await closeTemplateModal(page);
-    });
+            const pageText = await page.innerText('body');
+            expect(pageText).not.toContain('Internal Server Error');
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
 
-    // -------------------------------------------------------------------------
-    // 265-1: 必須設定→空保存エラー確認
-    // -------------------------------------------------------------------------
-    test('265-1: テキストフィールドに必須設定後、空保存でエラーメッセージが表示されること', async ({ page }) => {
-        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
-
-        // Step1: フィールド設定ページで「テキスト」フィールドの必須トグルをONにする
-        await navigateToFieldPage(page, tableId);
-        await assertFieldPageLoaded(page, tableId);
-
-        const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
-        const fieldCount = await fieldRows.count();
-        if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
-        }
-
-        // テキストフィールドを探してクリックしインライン編集パネルを開く
-        const opened = await openFieldEditPanel(page, 'テキスト');
-        if (!opened) {
-            await expect(textField, 'テキストフィールドが存在すること').toBeVisible({ timeout: 60000 });
-        }
-
-        // 必須トグルを探す（label/input[type=checkbox]/toggle等）
-        const requiredToggleSelectors = [
-            'input[type="checkbox"][id*="required"]',
-            'input[type="checkbox"][name*="required"]',
-            '.required-toggle input[type="checkbox"]',
-            'label:has-text("必須") input[type="checkbox"]',
-            'label:has-text("必須") .toggle',
-            '.toggle-switch:near(:text("必須"))',
-        ];
-
-        let requiredToggled = false;
-        for (const sel of requiredToggleSelectors) {
-            try {
-                const el = page.locator(sel).first();
-                const cnt = await el.count();
+            const panelSelectors = [
+                'admin-forms-field',
+                '.field-edit-panel',
+                '.field-setting-panel',
+                '.field-option',
+                '.field-config',
+                '.sidebar-panel',
+                '.settings-panel',
+            ];
+            let panelFound = false;
+            for (const sel of panelSelectors) {
+                const cnt = await page.locator(sel).count();
                 if (cnt > 0) {
-                    const isChecked = await el.isChecked().catch(() => false);
-                    if (!isChecked) {
-                        await el.click({ force: true });
-                        await waitForAngular(page);
+                    panelFound = true;
+                    console.log(`[261-2] パネルセレクター発見: ${sel}`);
+                    break;
+                }
+            }
+            console.log(`[261-2] Yes/Noフィールドクリック後パネル検出: ${panelFound}`);
+            expect(pageText).not.toContain('Internal Server Error');
+        });
+
+        // ----- step: 261-3 チェックボックスフィールドのインライン編集パネル確認 -----
+        await test.step('261-3: チェックボックスフィールドのインライン編集パネルが開けること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 261-3`);
+
+            await navigateToFieldPage(page, tableId);
+            await assertFieldPageLoaded(page, tableId);
+
+            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldCount = await fieldRows.count();
+            if (fieldCount === 0) {
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+            }
+
+            const opened = await openFieldEditPanel(page, '選択肢(複数選択)');
+            if (!opened) {
+                await expect(page.locator('.cdk-drag.field-drag:has-text("選択肢(複数選択)"), .field-drag:has-text("選択肢(複数選択)")').first(), '選択肢(複数選択)フィールドが存在すること').toBeVisible({ timeout: 60000 });
+            }
+
+            const pageText = await page.innerText('body');
+            expect(pageText).not.toContain('Internal Server Error');
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            console.log('[261-3] チェックボックスフィールドクリック後、ページ正常確認');
+        });
+
+        // ----- step: 265-1 必須設定→空保存エラー確認 -----
+        await test.step('265-1: テキストフィールドに必須設定後、空保存でエラーメッセージが表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 265-1`);
+
+            // Step1: フィールド設定ページで「テキスト」フィールドの必須トグルをONにする
+            await navigateToFieldPage(page, tableId);
+            await assertFieldPageLoaded(page, tableId);
+
+            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldCount = await fieldRows.count();
+            if (fieldCount === 0) {
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+            }
+
+            const opened = await openFieldEditPanel(page, 'テキスト');
+            if (!opened) {
+                await expect(page.locator('.cdk-drag.field-drag:has-text("テキスト"), .field-drag:has-text("テキスト")').first(), 'テキストフィールドが存在すること').toBeVisible({ timeout: 60000 });
+            }
+
+            const requiredToggleSelectors = [
+                'input[type="checkbox"][id*="required"]',
+                'input[type="checkbox"][name*="required"]',
+                '.required-toggle input[type="checkbox"]',
+                'label:has-text("必須") input[type="checkbox"]',
+                'label:has-text("必須") .toggle',
+                '.toggle-switch:near(:text("必須"))',
+            ];
+
+            let requiredToggled = false;
+            for (const sel of requiredToggleSelectors) {
+                try {
+                    const el = page.locator(sel).first();
+                    const cnt = await el.count();
+                    if (cnt > 0) {
+                        const isChecked = await el.isChecked().catch(() => false);
+                        if (!isChecked) {
+                            await el.click({ force: true });
+                            await waitForAngular(page);
+                        }
+                        requiredToggled = true;
+                        console.log(`[265-1] 必須トグル発見・操作: ${sel}`);
+                        break;
                     }
-                    requiredToggled = true;
-                    console.log(`[265-1] 必須トグル発見・操作: ${sel}`);
-                    break;
-                }
-            } catch (e) {
-                // 次のセレクターを試す
+                } catch (e) {}
             }
-        }
 
-        // 必須トグルが見つからない場合はエラーで失敗させる
-        if (!requiredToggled) {
+            if (!requiredToggled) {
+                const bodyText = await page.innerText('body');
+                const hasRequired = bodyText.includes('必須');
+                console.log(`[265-1] 必須トグル未操作。必須テキスト存在: ${hasRequired}`);
+                throw new Error('[265-1] 必須設定トグルが見つかりません。テキストフィールドのインライン編集パネルに「必須」チェックボックスが表示されているか確認してください。');
+            }
+
+            const saveButtonSelectors = [
+                'button:has-text("保存")',
+                'button[type="submit"]:has-text("保存")',
+                '.btn-primary:has-text("保存")',
+                'button:has-text("更新")',
+            ];
+            let saved = false;
+            for (const sel of saveButtonSelectors) {
+                try {
+                    const btn = page.locator(sel).first();
+                    const cnt = await btn.count();
+                    if (cnt > 0) {
+                        await btn.click({ force: true });
+                        await waitForAngular(page);
+                        saved = true;
+                        console.log(`[265-1] 保存ボタンクリック: ${sel}`);
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            // Step2: レコード新規作成フォームで空保存してエラーを確認
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            try {
+                await page.waitForLoadState('networkidle', { timeout: 10000 });
+            } catch (e) {
+                await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+            }
+            await waitForAngular(page);
+
+            const newRecordSelectors = [
+                'button:has-text("新規作成")',
+                'a:has-text("新規作成")',
+                '.btn:has-text("追加")',
+                'button:has-text("追加")',
+                'a:has-text("追加")',
+                '[data-test="add-record"]',
+                '.add-record-btn',
+            ];
+            let recordFormOpened = false;
+            for (const sel of newRecordSelectors) {
+                try {
+                    const btn = page.locator(sel).first();
+                    const cnt = await btn.count();
+                    if (cnt > 0) {
+                        await btn.click({ force: true });
+                        await waitForAngular(page);
+                        recordFormOpened = true;
+                        console.log(`[265-1] 新規作成ボタンクリック: ${sel}`);
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            if (!recordFormOpened) {
+                console.log('[265-1] 新規作成ボタンが見つかりません');
+                await cleanupRequiredSetting(page, tableId);
+                throw new Error('[265-1] 新規作成ボタンが見つかりません。レコード一覧ページに「新規作成」または「追加」ボタンが表示されているか確認してください。');
+            }
+
+            const formSaveSelectors = [
+                'button:has-text("保存")',
+                'button[type="submit"]:has-text("保存")',
+                '.modal button:has-text("保存")',
+                '.modal .btn-primary',
+                'button:has-text("登録")',
+            ];
+            let formSaved = false;
+            for (const sel of formSaveSelectors) {
+                try {
+                    const btn = page.locator(sel).first();
+                    const cnt = await btn.count();
+                    if (cnt > 0) {
+                        await btn.click({ force: true });
+                        await waitForAngular(page);
+                        formSaved = true;
+                        console.log(`[265-1] フォーム保存ボタンクリック: ${sel}`);
+                        break;
+                    }
+                } catch (e) {}
+            }
+
             const bodyText = await page.innerText('body');
-            const hasRequired = bodyText.includes('必須');
-            console.log(`[265-1] 必須トグル未操作。必須テキスト存在: ${hasRequired}`);
-            throw new Error('[265-1] 必須設定トグルが見つかりません。テキストフィールドのインライン編集パネルに「必須」チェックボックスが表示されているか確認してください。');
-        }
+            expect(bodyText).not.toContain('Internal Server Error');
 
-        // 保存ボタンをクリック
-        const saveButtonSelectors = [
-            'button:has-text("保存")',
-            'button[type="submit"]:has-text("保存")',
-            '.btn-primary:has-text("保存")',
-            'button:has-text("更新")',
-        ];
-        let saved = false;
-        for (const sel of saveButtonSelectors) {
-            try {
-                const btn = page.locator(sel).first();
-                const cnt = await btn.count();
-                if (cnt > 0) {
-                    await btn.click({ force: true });
-                    await waitForAngular(page);
-                    saved = true;
-                    console.log(`[265-1] 保存ボタンクリック: ${sel}`);
-                    break;
-                }
-            } catch (e) {
-                // 次のセレクターを試す
-            }
-        }
+            const hasErrorMsg = bodyText.includes('入力してください') ||
+                               bodyText.includes('必須') ||
+                               bodyText.includes('required') ||
+                               bodyText.includes('エラー') ||
+                               bodyText.includes('必要');
+            console.log(`[265-1] エラーメッセージ確認: ${hasErrorMsg}`);
+            expect(hasErrorMsg, '空のまま保存した際に必須エラーメッセージが表示されること（「入力してください」「必須」「エラー」等のテキストが含まれること）').toBe(true);
 
-        // Step2: レコード新規作成フォームで空保存してエラーを確認
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        try {
-            await page.waitForLoadState('networkidle', { timeout: 10000 });
-        } catch (e) {
-            await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
-        }
-        await waitForAngular(page);
-
-        // 新規作成ボタンを探してクリック
-        const newRecordSelectors = [
-            'button:has-text("新規作成")',
-            'a:has-text("新規作成")',
-            '.btn:has-text("追加")',
-            'button:has-text("追加")',
-            'a:has-text("追加")',
-            '[data-test="add-record"]',
-            '.add-record-btn',
-        ];
-        let recordFormOpened = false;
-        for (const sel of newRecordSelectors) {
-            try {
-                const btn = page.locator(sel).first();
-                const cnt = await btn.count();
-                if (cnt > 0) {
-                    await btn.click({ force: true });
-                    await waitForAngular(page);
-                    recordFormOpened = true;
-                    console.log(`[265-1] 新規作成ボタンクリック: ${sel}`);
-                    break;
-                }
-            } catch (e) {
-                // 次のセレクターを試す
-            }
-        }
-
-        if (!recordFormOpened) {
-            console.log('[265-1] 新規作成ボタンが見つかりません');
-            // 後片付け: 必須設定をOFFに戻す試み
             await cleanupRequiredSetting(page, tableId);
-            throw new Error('[265-1] 新規作成ボタンが見つかりません。レコード一覧ページに「新規作成」または「追加」ボタンが表示されているか確認してください。');
-        }
+        });
 
-        // 保存ボタンを空のまま押してエラーを確認
-        const formSaveSelectors = [
-            'button:has-text("保存")',
-            'button[type="submit"]:has-text("保存")',
-            '.modal button:has-text("保存")',
-            '.modal .btn-primary',
-            'button:has-text("登録")',
-        ];
-        let formSaved = false;
-        for (const sel of formSaveSelectors) {
-            try {
-                const btn = page.locator(sel).first();
-                const cnt = await btn.count();
-                if (cnt > 0) {
-                    await btn.click({ force: true });
-                    await waitForAngular(page);
-                    formSaved = true;
-                    console.log(`[265-1] フォーム保存ボタンクリック: ${sel}`);
-                    break;
+        // ----- step: 265-2 重複チェック設定UI確認 -----
+        await test.step('265-2: テキスト/数値フィールドで重複チェック設定のUIが表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 265-2`);
+
+            await navigateToFieldPage(page, tableId);
+            await assertFieldPageLoaded(page, tableId);
+
+            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldCount = await fieldRows.count();
+            if (fieldCount === 0) {
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+            }
+
+            const opened = await openFieldEditPanel(page, 'テキスト');
+            if (!opened) {
+                const openedNum = await openFieldEditPanel(page, '数値');
+                if (!openedNum) {
+                    await expect(page.locator('.cdk-drag.field-drag:has-text("テキスト"), .field-drag:has-text("テキスト")').first(), 'テキスト/数値フィールドが存在すること').toBeVisible({ timeout: 60000 });
                 }
-            } catch (e) {
-                // 次のセレクターを試す
             }
-        }
 
-        // エラーメッセージの確認
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // 必須エラーメッセージが表示されているか確認（空保存で必須エラーが出ること）
-        const hasErrorMsg = bodyText.includes('入力してください') ||
-                           bodyText.includes('必須') ||
-                           bodyText.includes('required') ||
-                           bodyText.includes('エラー') ||
-                           bodyText.includes('必要');
-        console.log(`[265-1] エラーメッセージ確認: ${hasErrorMsg}`);
-        expect(hasErrorMsg, '空のまま保存した際に必須エラーメッセージが表示されること（「入力してください」「必須」「エラー」等のテキストが含まれること）').toBe(true);
-
-        // 後片付け: 必須設定をOFFに戻す
-        await cleanupRequiredSetting(page, tableId);
-    });
-
-    // -------------------------------------------------------------------------
-    // 265-2: 重複チェック設定UI確認
-    // -------------------------------------------------------------------------
-    test('265-2: テキスト/数値フィールドで重複チェック設定のUIが表示されること', async ({ page }) => {
-        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
-        await navigateToFieldPage(page, tableId);
-        await assertFieldPageLoaded(page, tableId);
-
-        const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
-        const fieldCount = await fieldRows.count();
-        if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
-        }
-
-        // テキストフィールドを探してクリック
-        const opened = await openFieldEditPanel(page, 'テキスト');
-        if (!opened) {
-            // 数値フィールドを代替確認
-            const openedNum = await openFieldEditPanel(page, '数値');
-            if (!openedNum) {
-                await expect(targetField, 'テキスト/数値フィールドが存在すること').toBeVisible({ timeout: 60000 });
-            }
-        }
-
-        // 重複チェック関連テキストの確認
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        const hasDuplicateCheck = bodyText.includes('重複') ||
-                                  bodyText.includes('ユニーク') ||
-                                  bodyText.includes('unique') ||
-                                  bodyText.includes('一意');
-        console.log(`[265-2] 重複チェック関連テキスト存在: ${hasDuplicateCheck}`);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
-    });
-});
-
-// =============================================================================
-// 267系 - 初期値設定テスト
-// =============================================================================
-
-test.describe('初期値設定テスト（267系）', () => {
-    let tableId = null;
-
-    test.beforeAll(async () => {
-        tableId = _sharedTableId;
-    });
-
-    test.beforeEach(async ({ page }) => {
-        test.setTimeout(180000);
-        await login(page);
-        await closeTemplateModal(page);
-    });
-
-    // -------------------------------------------------------------------------
-    // 267-1: テキストフィールドの初期値設定→新規レコード作成時に自動入力
-    // -------------------------------------------------------------------------
-    test('267-1: テキストフィールドに初期値を設定すると新規レコード作成時に自動入力されること', async ({ page }) => {
-        expect(tableId, 'ALLテストテーブルのIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
-
-        const testDefaultValue = '__テスト初期値__';
-
-        // Step1: フィールド設定ページで「テキスト」フィールドに初期値を設定
-        await navigateToFieldPage(page, tableId);
-        await assertFieldPageLoaded(page, tableId);
-
-        const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
-        const fieldCount = await fieldRows.count();
-        if (fieldCount === 0) {
-            await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
-        }
-
-        // テキストフィールドを探してクリックしインライン編集パネルを開く
-        const opened = await openFieldEditPanel(page, 'テキスト');
-        if (!opened) {
-            await expect(textField, 'テキストフィールドが存在すること').toBeVisible({ timeout: 60000 });
-        }
-
-        // 初期値入力欄を探して値を入力
-        const defaultValueSelectors = [
-            'input[placeholder*="初期値"]',
-            'input[name*="default"]',
-            'input[id*="default"]',
-            '.default-value input[type="text"]',
-            'label:has-text("初期値") ~ * input',
-            'label:has-text("デフォルト") ~ * input',
-        ];
-
-        let defaultValueSet = false;
-        for (const sel of defaultValueSelectors) {
-            try {
-                const el = page.locator(sel).first();
-                const cnt = await el.count();
-                if (cnt > 0) {
-                    await el.fill(testDefaultValue);
-                    await page.waitForTimeout(500);
-                    defaultValueSet = true;
-                    console.log(`[267-1] 初期値入力欄発見・入力: ${sel}`);
-                    break;
-                }
-            } catch (e) {
-                // 次のセレクターを試す
-            }
-        }
-
-        if (!defaultValueSet) {
-            // 初期値入力欄が見つからない場合はエラーで失敗させる
             const bodyText = await page.innerText('body');
-            const hasDefaultText = bodyText.includes('初期値') || bodyText.includes('デフォルト') || bodyText.includes('default');
-            console.log(`[267-1] 初期値入力欄未検出。初期値テキスト存在: ${hasDefaultText}`);
-            throw new Error('[267-1] 初期値入力欄が見つかりません。テキストフィールドのインライン編集パネルに「初期値」入力欄が表示されているか確認してください。');
-        }
+            expect(bodyText).not.toContain('Internal Server Error');
 
-        // 保存ボタンをクリック
-        const saveButtonSelectors = [
-            'button:has-text("保存")',
-            'button[type="submit"]:has-text("保存")',
-            '.btn-primary:has-text("保存")',
-            'button:has-text("更新")',
-        ];
-        for (const sel of saveButtonSelectors) {
-            try {
-                const btn = page.locator(sel).first();
-                const cnt = await btn.count();
-                if (cnt > 0) {
-                    await btn.click({ force: true });
-                    await waitForAngular(page);
-                    console.log(`[267-1] 保存ボタンクリック: ${sel}`);
-                    break;
-                }
-            } catch (e) {
-                // 次のセレクターを試す
+            const hasDuplicateCheck = bodyText.includes('重複') ||
+                                      bodyText.includes('ユニーク') ||
+                                      bodyText.includes('unique') ||
+                                      bodyText.includes('一意');
+            console.log(`[265-2] 重複チェック関連テキスト存在: ${hasDuplicateCheck}`);
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+        });
+
+        // ----- step: 267-1 テキストフィールドの初期値設定→新規レコード作成時に自動入力 -----
+        await test.step('267-1: テキストフィールドに初期値を設定すると新規レコード作成時に自動入力されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 267-1`);
+
+            const testDefaultValue = '__テスト初期値__';
+
+            // Step1: フィールド設定ページで「テキスト」フィールドに初期値を設定
+            await navigateToFieldPage(page, tableId);
+            await assertFieldPageLoaded(page, tableId);
+
+            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldCount = await fieldRows.count();
+            if (fieldCount === 0) {
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
             }
-        }
 
-        // Step2: レコード新規作成フォームで初期値が自動入力されているか確認
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        try {
-            await page.waitForLoadState('networkidle', { timeout: 10000 });
-        } catch (e) {
-            await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
-        }
-        await waitForAngular(page);
-
-        // 新規作成ボタンを探してクリック
-        const newRecordSelectors = [
-            'button:has-text("新規作成")',
-            'a:has-text("新規作成")',
-            '.btn:has-text("追加")',
-            'button:has-text("追加")',
-            'a:has-text("追加")',
-            '[data-test="add-record"]',
-            '.add-record-btn',
-        ];
-        let recordFormOpened = false;
-        for (const sel of newRecordSelectors) {
-            try {
-                const btn = page.locator(sel).first();
-                const cnt = await btn.count();
-                if (cnt > 0) {
-                    await btn.click({ force: true });
-                    await waitForAngular(page);
-                    recordFormOpened = true;
-                    console.log(`[267-1] 新規作成ボタンクリック: ${sel}`);
-                    break;
-                }
-            } catch (e) {
-                // 次のセレクターを試す
+            const opened = await openFieldEditPanel(page, 'テキスト');
+            if (!opened) {
+                await expect(page.locator('.cdk-drag.field-drag:has-text("テキスト"), .field-drag:has-text("テキスト")').first(), 'テキストフィールドが存在すること').toBeVisible({ timeout: 60000 });
             }
-        }
 
-        if (!recordFormOpened) {
-            console.log('[267-1] 新規作成ボタンが見つかりません');
-            // 後片付け: 初期値を消去
+            const defaultValueSelectors = [
+                'input[placeholder*="初期値"]',
+                'input[name*="default"]',
+                'input[id*="default"]',
+                '.default-value input[type="text"]',
+                'label:has-text("初期値") ~ * input',
+                'label:has-text("デフォルト") ~ * input',
+            ];
+
+            let defaultValueSet = false;
+            for (const sel of defaultValueSelectors) {
+                try {
+                    const el = page.locator(sel).first();
+                    const cnt = await el.count();
+                    if (cnt > 0) {
+                        await el.fill(testDefaultValue);
+                        await page.waitForTimeout(500);
+                        defaultValueSet = true;
+                        console.log(`[267-1] 初期値入力欄発見・入力: ${sel}`);
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            if (!defaultValueSet) {
+                const bodyText = await page.innerText('body');
+                const hasDefaultText = bodyText.includes('初期値') || bodyText.includes('デフォルト') || bodyText.includes('default');
+                console.log(`[267-1] 初期値入力欄未検出。初期値テキスト存在: ${hasDefaultText}`);
+                throw new Error('[267-1] 初期値入力欄が見つかりません。テキストフィールドのインライン編集パネルに「初期値」入力欄が表示されているか確認してください。');
+            }
+
+            const saveButtonSelectors = [
+                'button:has-text("保存")',
+                'button[type="submit"]:has-text("保存")',
+                '.btn-primary:has-text("保存")',
+                'button:has-text("更新")',
+            ];
+            for (const sel of saveButtonSelectors) {
+                try {
+                    const btn = page.locator(sel).first();
+                    const cnt = await btn.count();
+                    if (cnt > 0) {
+                        await btn.click({ force: true });
+                        await waitForAngular(page);
+                        console.log(`[267-1] 保存ボタンクリック: ${sel}`);
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            // Step2: レコード新規作成フォームで初期値が自動入力されているか確認
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            try {
+                await page.waitForLoadState('networkidle', { timeout: 10000 });
+            } catch (e) {
+                await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+            }
+            await waitForAngular(page);
+
+            const newRecordSelectors = [
+                'button:has-text("新規作成")',
+                'a:has-text("新規作成")',
+                '.btn:has-text("追加")',
+                'button:has-text("追加")',
+                'a:has-text("追加")',
+                '[data-test="add-record"]',
+                '.add-record-btn',
+            ];
+            let recordFormOpened = false;
+            for (const sel of newRecordSelectors) {
+                try {
+                    const btn = page.locator(sel).first();
+                    const cnt = await btn.count();
+                    if (cnt > 0) {
+                        await btn.click({ force: true });
+                        await waitForAngular(page);
+                        recordFormOpened = true;
+                        console.log(`[267-1] 新規作成ボタンクリック: ${sel}`);
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            if (!recordFormOpened) {
+                console.log('[267-1] 新規作成ボタンが見つかりません');
+                await cleanupDefaultValue(page, tableId);
+                throw new Error('[267-1] 新規作成ボタンが見つかりません。レコード一覧ページに「新規作成」または「追加」ボタンが表示されているか確認してください。');
+            }
+
+            await page.waitForTimeout(1000);
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+
+            const inputSelectors = [
+                `input[value="${testDefaultValue}"]`,
+                `input:has-text("${testDefaultValue}")`,
+            ];
+            let defaultFound = false;
+            for (const sel of inputSelectors) {
+                try {
+                    const el = page.locator(sel).first();
+                    const cnt = await el.count();
+                    if (cnt > 0) {
+                        defaultFound = true;
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            if (!defaultFound) {
+                const inputValues = await page.evaluate((val) => {
+                    const inputs = Array.from(document.querySelectorAll('input[type="text"], input:not([type])'));
+                    return inputs.map(i => i.value);
+                }, testDefaultValue);
+                defaultFound = inputValues.some(v => v === testDefaultValue || v.includes('テスト初期値'));
+            }
+
+            console.log(`[267-1] 初期値の自動入力確認: ${defaultFound}`);
+            expect(defaultFound, `テキストフィールドの初期値「${testDefaultValue}」が新規作成フォームに自動入力されていること`).toBe(true);
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+
             await cleanupDefaultValue(page, tableId);
-            throw new Error('[267-1] 新規作成ボタンが見つかりません。レコード一覧ページに「新規作成」または「追加」ボタンが表示されているか確認してください。');
-        }
-
-        // フォーム内のinput要素に初期値が入っているか確認
-        await page.waitForTimeout(1000);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テキストフィールドの入力値を確認
-        const inputSelectors = [
-            `input[value="${testDefaultValue}"]`,
-            `input:has-text("${testDefaultValue}")`,
-        ];
-        let defaultFound = false;
-        for (const sel of inputSelectors) {
-            try {
-                const el = page.locator(sel).first();
-                const cnt = await el.count();
-                if (cnt > 0) {
-                    defaultFound = true;
-                    break;
-                }
-            } catch (e) {
-                // 次のセレクターを試す
-            }
-        }
-
-        // bodyテキストで確認（フォームの値はinnerTextに含まれない場合もある）
-        if (!defaultFound) {
-            // inputの値をevaluateで確認
-            const inputValues = await page.evaluate((val) => {
-                const inputs = Array.from(document.querySelectorAll('input[type="text"], input:not([type])'));
-                return inputs.map(i => i.value);
-            }, testDefaultValue);
-            defaultFound = inputValues.some(v => v === testDefaultValue || v.includes('テスト初期値'));
-        }
-
-        console.log(`[267-1] 初期値の自動入力確認: ${defaultFound}`);
-        expect(defaultFound, `テキストフィールドの初期値「${testDefaultValue}」が新規作成フォームに自動入力されていること`).toBe(true);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
-
-        // 後片付け: 初期値を消去
-        await cleanupDefaultValue(page, tableId);
+        });
     });
 });
 
