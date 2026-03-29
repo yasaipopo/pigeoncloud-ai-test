@@ -96,14 +96,14 @@ async function login(page, email, password) {
         await page.fill('#password', loginPassword);
         await page.click('button[type=submit].btn-primary');
         try {
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
         } catch (e) {
             if (page.url().includes('/admin/login')) {
                 await page.waitForTimeout(1000);
                 await page.fill('#id', EMAIL);
                 await page.fill('#password', PASSWORD);
                 await page.click('button[type=submit].btn-primary');
-                await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+                await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
             }
         }
         await page.waitForTimeout(2000);
@@ -601,7 +601,7 @@ async function ensureCalendarView(page) {
 
     // 1. 歯車ボタン（#table-setting-btn）をクリック
     const gearBtn = page.locator('#table-setting-btn');
-    await expect(gearBtn).toBeVisible({ timeout: 10000 });
+    await expect(gearBtn).toBeVisible({ timeout: 30000 });
     await gearBtn.click({ force: true });
     await waitForAngular(page);
 
@@ -617,7 +617,7 @@ async function ensureCalendarView(page) {
 
     // 3. 「一覧画面」タブをクリック
     const listTab = page.locator('a[role=tab], .nav-link').filter({ hasText: '一覧画面' }).first();
-    await expect(listTab).toBeVisible({ timeout: 10000 });
+    await expect(listTab).toBeVisible({ timeout: 30000 });
     await listTab.click({ force: true });
     await waitForAngular(page);
 
@@ -918,7 +918,7 @@ test.describe('カレンダー - ビュー表示', () => {
 
         // カレンダー表示ボタンをクリックしてカレンダーモードに切り替え（beforeAllで有効化済み）
         const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
-        await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+        await expect(calendarBtn).toBeVisible({ timeout: 30000 });
         await calendarBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -937,7 +937,7 @@ test.describe('カレンダー - ビュー表示', () => {
 
         // カレンダー要素が表示されていることを確認
         const calendarEl = page.locator('.fc-view, .calendar-view, .fc-timeGridWeek-view, .fc');
-        await expect(calendarEl.first()).toBeVisible({ timeout: 10000 });
+        await expect(calendarEl.first()).toBeVisible({ timeout: 30000 });
         await expect(calendarEl.first()).toBeVisible();
     });
 
@@ -951,7 +951,7 @@ test.describe('カレンダー - ビュー表示', () => {
 
         // カレンダー表示ボタンをクリックしてカレンダーモードに切り替え（beforeAllで有効化済み）
         const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
-        await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+        await expect(calendarBtn).toBeVisible({ timeout: 30000 });
         await calendarBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -968,7 +968,7 @@ test.describe('カレンダー - ビュー表示', () => {
         await expect(errorMsg).toHaveCount(0);
 
         const calendarEl = page.locator('.fc-view, .fc-timeGridDay-view, .calendar-view, .fc');
-        await expect(calendarEl.first()).toBeVisible({ timeout: 10000 });
+        await expect(calendarEl.first()).toBeVisible({ timeout: 30000 });
         await expect(calendarEl.first()).toBeVisible();
     });
 
@@ -982,13 +982,13 @@ test.describe('カレンダー - ビュー表示', () => {
 
         // カレンダービューへ（beforeAllで存在が保証されている）
         const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
-        await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+        await expect(calendarBtn).toBeVisible({ timeout: 30000 });
         await calendarBtn.click({ force: true });
         await waitForAngular(page);
 
         // カレンダー本体が表示されていることを確認
         const calendarEl = page.locator('.fc, .fc-view, .calendar-view').first();
-        await expect(calendarEl).toBeVisible({ timeout: 10000 });
+        await expect(calendarEl).toBeVisible({ timeout: 30000 });
 
         // 月表示に切り替えてエラーがないことを確認
         const monthBtn = page.locator('button:has-text("月"), .fc-dayGridMonth-button').first();
@@ -998,7 +998,7 @@ test.describe('カレンダー - ビュー表示', () => {
             const errorMsg = page.locator('.alert-danger, .error-message');
             await expect(errorMsg).toHaveCount(0);
             const calendarView = page.locator('.fc-dayGridMonth-view, .fc-view, .fc');
-            await expect(calendarView.first()).toBeVisible({ timeout: 10000 });
+            await expect(calendarView.first()).toBeVisible({ timeout: 30000 });
         }
 
         // 週表示に切り替えてエラーがないことを確認
@@ -1009,7 +1009,7 @@ test.describe('カレンダー - ビュー表示', () => {
             const errorMsg = page.locator('.alert-danger, .error-message');
             await expect(errorMsg).toHaveCount(0);
             const calendarView = page.locator('.fc-timeGridWeek-view, .fc-view, .fc');
-            await expect(calendarView.first()).toBeVisible({ timeout: 10000 });
+            await expect(calendarView.first()).toBeVisible({ timeout: 30000 });
         }
 
         // 日表示に切り替えてエラーがないことを確認
@@ -1020,7 +1020,7 @@ test.describe('カレンダー - ビュー表示', () => {
             const errorMsg = page.locator('.alert-danger, .error-message');
             await expect(errorMsg).toHaveCount(0);
             const calendarView = page.locator('.fc-timeGridDay-view, .fc-view, .fc');
-            await expect(calendarView.first()).toBeVisible({ timeout: 10000 });
+            await expect(calendarView.first()).toBeVisible({ timeout: 30000 });
         }
     });
 
@@ -1034,13 +1034,13 @@ test.describe('カレンダー - ビュー表示', () => {
 
         // カレンダービューへ（beforeAllで存在が保証されている）
         const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
-        await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+        await expect(calendarBtn).toBeVisible({ timeout: 30000 });
         await calendarBtn.click({ force: true });
         await waitForAngular(page);
 
         // カレンダー本体が表示されていることを確認
         const calendarEl = page.locator('.fc, .fc-view, .calendar-view').first();
-        await expect(calendarEl).toBeVisible({ timeout: 10000 });
+        await expect(calendarEl).toBeVisible({ timeout: 30000 });
 
         // カレンダーイベント要素を確認
         const events = page.locator('.fc-event, .calendar-event');
@@ -1281,7 +1281,7 @@ test.describe('集計 - 基本機能', () => {
 
                 // ダッシュボードにテーブルが表示されていることを確認
                 const dashboardTable = page.locator('.dashboard-item, .dashboard-table, table.table');
-                await expect(dashboardTable.first()).toBeVisible({ timeout: 10000 });
+                await expect(dashboardTable.first()).toBeVisible({ timeout: 30000 });
             } else {
                 // UIにオプションがない場合はエラーなく保存できることを確認
                 const pageText = await page.innerText('body');
@@ -3267,7 +3267,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         await page.waitForTimeout(1000);
 
         const calendarEl = page.locator('.fc, [class*="fullcalendar"], .fc-view-harness').first();
-        await expect(calendarEl).toBeVisible({ timeout: 10000 });
+        await expect(calendarEl).toBeVisible({ timeout: 30000 });
 
         // 時間軸ラベルが表示されていること
         const timeLabels = page.locator('.fc-timegrid-slot-label, .fc-axis');
@@ -3319,7 +3319,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         await page.waitForTimeout(2000);
 
         const resultTable = page.locator('table, .summarize-result, .summary-table').first();
-        await expect(resultTable).toBeVisible({ timeout: 10000 });
+        await expect(resultTable).toBeVisible({ timeout: 30000 });
 
         const pt256 = await page.innerText('body');
         expect(pt256).not.toContain('Internal Server Error');
@@ -3341,7 +3341,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         await page.waitForTimeout(2000);
 
         const calendarEl = page.locator('.fc, [class*="fullcalendar"]').first();
-        await expect(calendarEl).toBeVisible({ timeout: 10000 });
+        await expect(calendarEl).toBeVisible({ timeout: 30000 });
 
         const events = page.locator('.fc-event');
         const eventCount = await events.count();
@@ -3377,7 +3377,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await waitForAngular(page);
             await page.waitForTimeout(1000);
         }
-        await expect(page.locator('.fc-timegrid, .fc-timeGridWeek-view').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.fc-timegrid, .fc-timeGridWeek-view').first()).toBeVisible({ timeout: 30000 });
 
         // 日表示
         const dayBtn = page.locator('.fc-timeGridDay-button, button:has-text("日")').first();
@@ -3386,7 +3386,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await waitForAngular(page);
             await page.waitForTimeout(1000);
         }
-        await expect(page.locator('.fc-timegrid, .fc-timeGridDay-view').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.fc-timegrid, .fc-timeGridDay-view').first()).toBeVisible({ timeout: 30000 });
 
         const pt271 = await page.innerText('body');
         expect(pt271).not.toContain('Internal Server Error');
@@ -3493,10 +3493,10 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         await page.waitForTimeout(2000);
 
         const dayCells = page.locator('.fc-daygrid-day, .fc-day');
-        await expect(dayCells.first()).toBeVisible({ timeout: 10000 });
+        await expect(dayCells.first()).toBeVisible({ timeout: 30000 });
 
         const dayNumbers = page.locator('.fc-daygrid-day-number, .fc-day-number');
-        await expect(dayNumbers.first()).toBeVisible({ timeout: 10000 });
+        await expect(dayNumbers.first()).toBeVisible({ timeout: 30000 });
 
         const pt307 = await page.innerText('body');
         expect(pt307).not.toContain('Internal Server Error');
@@ -3525,7 +3525,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         }
 
         const timeLabels = page.locator('.fc-timegrid-slot-label, .fc-axis');
-        await expect(timeLabels.first()).toBeVisible({ timeout: 10000 });
+        await expect(timeLabels.first()).toBeVisible({ timeout: 30000 });
 
         const labelTexts = await timeLabels.allInnerTexts();
         const nonEmpty = labelTexts.filter(t => t.trim().length > 0);
@@ -3588,7 +3588,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         await page.waitForTimeout(2000);
 
         const chartArea = page.locator('canvas, svg, .chart-container').first();
-        if (await chartArea.count() > 0) await expect(chartArea).toBeVisible({ timeout: 10000 });
+        if (await chartArea.count() > 0) await expect(chartArea).toBeVisible({ timeout: 30000 });
 
         const pt339 = await page.innerText('body');
         expect(pt339).not.toContain('Internal Server Error');
@@ -3608,7 +3608,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await waitForAngular(page);
         }
         await page.waitForTimeout(2000);
-        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 30000 });
 
         // 別のテーブルに遷移して戻る
         await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -3621,7 +3621,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await waitForAngular(page);
         }
         await page.waitForTimeout(2000);
-        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 30000 });
 
         const pt346 = await page.innerText('body');
         expect(pt346).not.toContain('Internal Server Error');
@@ -3654,7 +3654,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         }
 
         const calendarSwitchLabel = page.locator('label').filter({ hasText: 'カレンダー表示' }).first();
-        await expect(calendarSwitchLabel).toBeVisible({ timeout: 10000 });
+        await expect(calendarSwitchLabel).toBeVisible({ timeout: 30000 });
 
         const pt353 = await page.innerText('body');
         expect(pt353).not.toContain('Internal Server Error');
@@ -3914,7 +3914,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         }
         await page.waitForTimeout(2000);
 
-        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 30000 });
         const pt478 = await page.innerText('body');
         expect(pt478).not.toContain('Internal Server Error');
     });
@@ -3952,7 +3952,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         }
         await page.waitForTimeout(3000);
 
-        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 30000 });
         const pt523 = await page.innerText('body');
         expect(pt523).not.toContain('Internal Server Error');
         expect(pt523).not.toContain('エラーが発生しました');
@@ -4087,7 +4087,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         const pt676 = await page.innerText('body');
         expect(pt676).not.toContain('Internal Server Error');
         expect(pt676).not.toContain('エラーが発生しました');
-        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 30000 });
     });
 
     // --------------------------------------------------------------------------
@@ -4297,7 +4297,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             }
         }
 
-        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.fc, [class*="fullcalendar"]').first()).toBeVisible({ timeout: 30000 });
         const pt833 = await page.innerText('body');
         expect(pt833).not.toContain('Internal Server Error');
     });

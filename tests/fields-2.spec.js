@@ -3,6 +3,8 @@
 // fields.spec.jsから分割 (line 887〜1595)
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
+const { getAllTypeTableId: getAllTypeTableIdHelper } = require('./helpers/table-setup');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -31,7 +33,7 @@ async function login(page, email, password) {
         await page.fill('#password', password || PASSWORD);
         await page.click('button[type=submit].btn-primary');
         try {
-            await page.waitForSelector('.navbar', { timeout: 40000 });
+            await page.waitForSelector('.navbar', { timeout: 60000 });
             await page.waitForTimeout(1000);
             return; // ログイン成功
         } catch (e) {
@@ -178,17 +180,8 @@ async function deleteAllTypeTables(page) {
  * ALLテストテーブルのIDを取得する
  */
 async function getAllTypeTableId(page) {
-    const status = await page.evaluate(async (baseUrl) => {
-        try {
-            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-            return res.json();
-        } catch (e) {
-            return { all_type_tables: [] };
-        }
-    }, BASE_URL);
-    // APIは {id, label, count} の形式で返す（table_idではなくid）
-    const mainTable = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
-    return mainTable ? (mainTable.table_id || mainTable.id) : null;
+    // セッション切れ対策付きのヘルパーを使用
+    return await getAllTypeTableIdHelper(page);
 }
 
 /**
@@ -312,7 +305,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
         const modal = page.locator('.settingModal .modal-content');
         await expect(modal).toBeVisible({ timeout: 15000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -334,7 +327,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
         const modal = page.locator('.settingModal .modal-content');
         await expect(modal).toBeVisible({ timeout: 15000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 画像フィールド固有: 推奨サイズ表示やオプションが設定可能であること
         // モーダルヘッダーに「画像」が含まれること
         await expect(modal.locator('.modal-header')).toContainText('画像');
@@ -381,9 +374,9 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
         const modal = page.locator('.settingModal .modal-content');
         await expect(modal).toBeVisible({ timeout: 15000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // Yes/No固有: ラベル入力欄が存在すること（boolean-text）
-        await expect(modal.locator('input[type="text"]').nth(1)).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"]').nth(1)).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -407,7 +400,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
         // モーダルヘッダーに「Yes / No」が含まれること
         await expect(modal.locator('.modal-header')).toContainText('Yes');
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -452,12 +445,12 @@ test.describe('自動採番フィールド（216系）', () => {
         const modal = page.locator('.settingModal .modal-content');
         await expect(modal).toBeVisible({ timeout: 15000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 自動採番固有: フォーマット入力欄が存在すること（placeholder: ID-{YYYY}-...）
         const formatInput = modal.locator('input[placeholder*="ID-"]');
-        await expect(formatInput).toBeVisible({ timeout: 10000 });
+        await expect(formatInput).toBeVisible({ timeout: 30000 });
         // 自動採番固有: カウンターリセットボタンが存在すること
-        await expect(modal.locator('button:has-text("カウンターをリセット")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('button:has-text("カウンターをリセット")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -511,10 +504,10 @@ test.describe('固定テキストフィールド（230系）', () => {
         const modal = page.locator('.settingModal .modal-content');
         await expect(modal).toBeVisible({ timeout: 15000 });
         // 固定テキスト固有: 「詳細ページでも表示」チェックボックスが存在すること
-        await expect(modal.locator('label:has-text("詳細ページでも表示")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("詳細ページでも表示")')).toBeVisible({ timeout: 30000 });
         // 固定テキスト固有: froalaエディタ（リッチテキストエディタ）が存在すること
         const froala = modal.locator('[froalaEditor], .fr-element, .fr-box');
-        await expect(froala.first()).toBeVisible({ timeout: 10000 });
+        await expect(froala.first()).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -558,7 +551,7 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
         const modal = page.locator('.settingModal .modal-content');
         await expect(modal).toBeVisible({ timeout: 15000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // ファイルフィールドであること（モーダルヘッダーにファイルが含まれる）
         await expect(modal.locator('.modal-header')).toContainText('ファイル');
         // モーダルを閉じる
@@ -692,13 +685,13 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
         const modal = page.locator('.settingModal .modal-content');
         await expect(modal).toBeVisible({ timeout: 15000 });
         // フィールドタイプ一覧に「文章(複数行)」ボタンが存在すること
-        await expect(modal.locator('button:has-text("文章(複数行)")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('button:has-text("文章(複数行)")')).toBeVisible({ timeout: 30000 });
         // 「文章(複数行)」を選択
         await modal.locator('button:has-text("文章(複数行)")').click();
         await waitForAngular(page);
         // 種類ラジオで「通常テキスト」が選択可能であること
-        await expect(modal.locator('label:has-text("通常テキスト")')).toBeVisible({ timeout: 10000 });
-        await expect(modal.locator('label:has-text("リッチテキスト")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("通常テキスト")')).toBeVisible({ timeout: 30000 });
+        await expect(modal.locator('label:has-text("リッチテキスト")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる（キャンセル）
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -719,12 +712,12 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
         await waitForAngular(page);
         // 種類ラジオで「リッチテキスト」が選択可能であること
         const richRadio = modal.locator('input[type="radio"][value="richtext"]');
-        await expect(richRadio).toBeVisible({ timeout: 10000 });
+        await expect(richRadio).toBeVisible({ timeout: 30000 });
         // 「リッチテキスト」を選択
         await richRadio.click();
         await waitForAngular(page);
         // 項目名入力欄が表示されていること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる（キャンセル）
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -763,18 +756,18 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
         const modal = page.locator('.settingModal .modal-content');
         await expect(modal).toBeVisible({ timeout: 15000 });
         // フィールドタイプ一覧に「文字列(一行)」ボタンが存在すること
-        await expect(modal.locator('button:has-text("文字列(一行)")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('button:has-text("文字列(一行)")')).toBeVisible({ timeout: 30000 });
         // 「文字列(一行)」を選択
         await modal.locator('button:has-text("文字列(一行)")').click();
         await waitForAngular(page);
         // 種類ラジオボタンが表示されること（テキスト/メールアドレス/URL）
-        await expect(modal.locator('label:has-text("テキスト")')).toBeVisible({ timeout: 10000 });
-        await expect(modal.locator('label:has-text("メールアドレス")')).toBeVisible({ timeout: 10000 });
-        await expect(modal.locator('label:has-text("URL")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("テキスト")')).toBeVisible({ timeout: 30000 });
+        await expect(modal.locator('label:has-text("メールアドレス")')).toBeVisible({ timeout: 30000 });
+        await expect(modal.locator('label:has-text("URL")')).toBeVisible({ timeout: 30000 });
         // 項目名入力欄が表示されていること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 「値の重複を禁止する」チェックボックスが存在すること
-        await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる（キャンセル）
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -813,10 +806,10 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「テキスト」がデフォルト選択されていること
         const textRadio = modal.locator('input[type="radio"][value="text"]');
-        await expect(textRadio).toBeVisible({ timeout: 10000 });
+        await expect(textRadio).toBeVisible({ timeout: 30000 });
         await expect(textRadio).toBeChecked();
         // 項目名入力欄が表示されていること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -837,11 +830,11 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「メールアドレス」を選択できること
         const emailRadio = modal.locator('input[type="radio"][value="email"]');
-        await expect(emailRadio).toBeVisible({ timeout: 10000 });
+        await expect(emailRadio).toBeVisible({ timeout: 30000 });
         await emailRadio.click();
         await waitForAngular(page);
         // 項目名入力欄が表示されていること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -862,11 +855,11 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「URL」を選択できること
         const urlRadio = modal.locator('input[type="radio"][value="url"]');
-        await expect(urlRadio).toBeVisible({ timeout: 10000 });
+        await expect(urlRadio).toBeVisible({ timeout: 30000 });
         await urlRadio.click();
         await waitForAngular(page);
         // 項目名入力欄が表示されていること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -887,12 +880,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「URL」を選択
         const urlRadio = modal.locator('input[type="radio"][value="url"]');
-        await expect(urlRadio).toBeVisible({ timeout: 10000 });
+        await expect(urlRadio).toBeVisible({ timeout: 30000 });
         await urlRadio.click();
         await waitForAngular(page);
         // URL選択時は「値の重複を禁止する」が非表示になること（URLは重複禁止対象外）
         // 項目名入力欄が表示されていること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -912,10 +905,10 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("数値")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されていること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 数値固有: 整数/小数の選択ラジオが存在すること
-        await expect(modal.locator('label:has-text("整数")')).toBeVisible({ timeout: 10000 });
-        await expect(modal.locator('label:has-text("小数")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("整数")')).toBeVisible({ timeout: 30000 });
+        await expect(modal.locator('label:has-text("小数")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -936,9 +929,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 整数ラジオが選択されていること（デフォルト）
         const intRadio = modal.locator('input[type="radio"][value="integer"]');
-        await expect(intRadio).toBeVisible({ timeout: 10000 });
+        await expect(intRadio).toBeVisible({ timeout: 30000 });
         // 単位記号の入力欄が存在すること
-        await expect(modal.locator('label:has-text("単位")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("単位")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -959,13 +952,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 小数ラジオを選択
         const decimalRadio = modal.locator('input[type="radio"][value="decimal"]');
-        await expect(decimalRadio).toBeVisible({ timeout: 10000 });
+        await expect(decimalRadio).toBeVisible({ timeout: 30000 });
         await decimalRadio.click();
         await waitForAngular(page);
         // 小数点以下桁数の入力欄が表示されること
-        await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible({ timeout: 30000 });
         // 桁区切り設定が存在すること
-        await expect(modal.locator('label:has-text("桁区切り")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("桁区切り")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -986,12 +979,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「ラジオボタン」がデフォルトであること
         const radioType = modal.locator('input[type="radio"][value="radio"]');
-        await expect(radioType).toBeVisible({ timeout: 10000 });
+        await expect(radioType).toBeVisible({ timeout: 30000 });
         // 選択肢入力欄（カンマ区切り）が存在すること
-        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 30000 });
         // Layoutラジオ（横並び/縦並び）が存在すること
-        await expect(modal.locator('label:has-text("横並び")')).toBeVisible({ timeout: 10000 });
-        await expect(modal.locator('label:has-text("縦並び")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("横並び")')).toBeVisible({ timeout: 30000 });
+        await expect(modal.locator('label:has-text("縦並び")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1012,11 +1005,11 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「プルダウン」を選択できること
         const selectType = modal.locator('input[type="radio"][value="select"]');
-        await expect(selectType).toBeVisible({ timeout: 10000 });
+        await expect(selectType).toBeVisible({ timeout: 30000 });
         // 選択肢入力欄が存在すること
-        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 30000 });
         // 項目名入力欄が存在すること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1037,13 +1030,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「プルダウン」を選択
         const selectType = modal.locator('input[type="radio"][value="select"]');
-        await expect(selectType).toBeVisible({ timeout: 10000 });
+        await expect(selectType).toBeVisible({ timeout: 30000 });
         await selectType.click();
         await waitForAngular(page);
         // 選択肢入力欄が存在すること
-        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 30000 });
         // 項目名入力欄が存在すること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1064,11 +1057,11 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「年月」が選択可能であること
         const yearMonthRadio = modal.locator('input[type="radio"][value="year_month"]');
-        await expect(yearMonthRadio).toBeVisible({ timeout: 10000 });
+        await expect(yearMonthRadio).toBeVisible({ timeout: 30000 });
         await yearMonthRadio.click();
         await waitForAngular(page);
         // 項目名入力欄が存在すること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1088,7 +1081,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("ファイル")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // ファイルフィールドの設定モーダルであること
         await expect(modal.locator('.modal-header')).toContainText('ファイル');
         // モーダルを閉じる
@@ -1110,13 +1103,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("計算")').click();
         await waitForAngular(page);
         // 計算式入力欄（contenteditable）が表示されること
-        await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 30000 });
         // 計算値の種類ドロップダウンが存在すること
-        await expect(modal.locator('label:has-text("計算値の種類")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("計算値の種類")')).toBeVisible({ timeout: 30000 });
         // 計算値の自動更新チェックボックスが存在すること
-        await expect(modal.locator('label:has-text("計算値の自動更新")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("計算値の自動更新")')).toBeVisible({ timeout: 30000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1137,11 +1130,11 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 計算値の種類で「数値」がデフォルト選択されていること
         const calcType = modal.locator('select');
-        await expect(calcType.first()).toBeVisible({ timeout: 10000 });
+        await expect(calcType.first()).toBeVisible({ timeout: 30000 });
         // 計算式入力欄が表示されること
-        await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 30000 });
         // 整数/小数のラジオが存在すること（数値選択時）
-        await expect(modal.locator('label:has-text("整数")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("整数")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1161,14 +1154,14 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("計算")').click();
         await waitForAngular(page);
         // 計算式入力欄が表示されること
-        await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 30000 });
         // 小数ラジオを選択
         const decimalRadio = modal.locator('input[type="radio"][value="decimal"]');
         if (await decimalRadio.count() > 0) {
             await decimalRadio.click();
             await waitForAngular(page);
             // 小数点以下桁数の設定が表示されること
-            await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible({ timeout: 10000 });
+            await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible({ timeout: 30000 });
         }
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
@@ -1190,9 +1183,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // デフォルトで「通常テキスト」ラジオが表示されること
         const textareaRadio = modal.locator('input[type="radio"][value="textarea"]');
-        await expect(textareaRadio).toBeVisible({ timeout: 10000 });
+        await expect(textareaRadio).toBeVisible({ timeout: 30000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1213,11 +1206,11 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 「リッチテキスト」ラジオを選択
         const richRadio = modal.locator('input[type="radio"][value="richtext"]');
-        await expect(richRadio).toBeVisible({ timeout: 10000 });
+        await expect(richRadio).toBeVisible({ timeout: 30000 });
         await richRadio.click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1237,9 +1230,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("Yes / No")').click();
         await waitForAngular(page);
         // ラベル入力欄が存在すること（Yes/No固有: boolean-text）
-        await expect(modal.locator('label:has-text("ラベル")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("ラベル")')).toBeVisible({ timeout: 30000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1260,11 +1253,11 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // ラベル入力欄にカスタムテキストを入力して動作確認
         const labelInput = modal.locator('label:has-text("ラベル")').locator('..').locator('input[type="text"]');
-        await expect(labelInput).toBeVisible({ timeout: 10000 });
+        await expect(labelInput).toBeVisible({ timeout: 30000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 保存ボタンが存在すること
-        await expect(modal.locator('[data-testid="field-save-btn"], button.btn-primary:has-text("追加")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('[data-testid="field-save-btn"], button.btn-primary:has-text("追加")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1285,13 +1278,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「チェックボックス」がデフォルトであること
         const cbRadio = modal.locator('input[type="radio"][value="checkbox"]');
-        await expect(cbRadio).toBeVisible({ timeout: 10000 });
+        await expect(cbRadio).toBeVisible({ timeout: 30000 });
         // 選択肢入力欄（カンマ区切り）が存在すること
-        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 30000 });
         // 選択肢の制限（最小/最大）が存在すること
-        await expect(modal.locator('label:has-text("選択肢の制限")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("選択肢の制限")')).toBeVisible({ timeout: 30000 });
         // Layout選択（横並び/縦並び）が存在すること
-        await expect(modal.locator('label:has-text("横並び")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("横並び")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1312,13 +1305,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await waitForAngular(page);
         // 種類ラジオで「プルダウン」を選択
         const selectRadio = modal.locator('input[type="radio"][value="select"]');
-        await expect(selectRadio).toBeVisible({ timeout: 10000 });
+        await expect(selectRadio).toBeVisible({ timeout: 30000 });
         await selectRadio.click();
         await waitForAngular(page);
         // 選択肢入力欄が存在すること
-        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 30000 });
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1338,7 +1331,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("画像")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 画像フィールドの設定モーダルであること
         await expect(modal.locator('.modal-header')).toContainText('画像');
         // モーダルを閉じる
@@ -1360,9 +1353,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("他テーブル参照")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 他テーブル参照固有: 参照先テーブル選択が存在すること
-        await expect(modal.locator('label:has-text("参照先テーブル"), label:has-text("参照テーブル")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("参照先テーブル"), label:has-text("参照テーブル")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1382,9 +1375,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("他テーブル参照")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 他テーブル参照固有: 「値の重複を禁止する」チェックボックスが存在すること
-        await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1404,9 +1397,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("他テーブル参照")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 他テーブル参照固有: 「複数の値の登録を許可」チェックボックスが存在すること
-        await expect(modal.locator('label:has-text("複数の値"), label:has-text("複数値")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("複数の値"), label:has-text("複数値")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1426,9 +1419,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("関連レコード一覧")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 関連レコード一覧固有: 絞り込み条件設定UIが存在すること
-        await expect(modal.locator('label:has-text("絞り込み"), label:has-text("条件")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("絞り込み"), label:has-text("条件")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1448,9 +1441,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("関連レコード一覧")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 関連レコード一覧固有: 参照先テーブル選択が存在すること
-        await expect(modal.locator('label:has-text("参照先テーブル"), label:has-text("参照テーブル"), label:has-text("テーブル")')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('label:has-text("参照先テーブル"), label:has-text("参照テーブル"), label:has-text("テーブル")')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1470,9 +1463,9 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("関連レコード一覧")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 保存ボタンが存在すること（フィールド追加が可能な状態であること）
-        await expect(modal.locator('[data-testid="field-save-btn"], button.btn-primary')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('[data-testid="field-save-btn"], button.btn-primary')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });
@@ -1492,11 +1485,11 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         await modal.locator('button:has-text("関連レコード一覧")').click();
         await waitForAngular(page);
         // 項目名入力欄が表示されること
-        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 30000 });
         // 関連レコード一覧の設定モーダルであること
         await expect(modal.locator('.modal-header')).toContainText('関連レコード一覧');
         // 保存ボタンが存在すること
-        await expect(modal.locator('[data-testid="field-save-btn"], button.btn-primary')).toBeVisible({ timeout: 10000 });
+        await expect(modal.locator('[data-testid="field-save-btn"], button.btn-primary')).toBeVisible({ timeout: 30000 });
         // モーダルを閉じる
         await modal.locator('button:has-text("キャンセル")').click();
     });

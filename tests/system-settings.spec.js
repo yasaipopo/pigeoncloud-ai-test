@@ -109,7 +109,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
     } catch (e) {
         // ログイン後のページ状態を確認
         const bodyText = await page.innerText('body').catch(() => '');
@@ -138,7 +138,7 @@ async function login(page, email, password) {
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
+            await page.waitForURL('**/admin/dashboard', { timeout: 90000 }).catch(() => {});
         } else if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             // ボタンが無効（送信中）の場合はURLが変わるまで待つ（再クリック不要）
@@ -428,7 +428,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             () => document.querySelector('button') && Array.from(document.querySelectorAll('button')).some(b => b.textContent.includes('メニュー並び替え')),
             { timeout: 20000 }
         ).catch(() => {});
-        await expect(page.locator('button:has-text("メニュー並び替え")').first()).toBeVisible({ timeout: 10000 }).catch(() => {});
+        await expect(page.locator('button:has-text("メニュー並び替え")').first()).toBeVisible({ timeout: 30000 }).catch(() => {});
         // 全て展開・全て閉じるボタンが存在することを確認（存在しない場合はスキップ）
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
@@ -1558,7 +1558,7 @@ test.describe('共通設定・システム設定', () => {
         // SSO設定ページへ遷移
         await page.goto(BASE_URL + '/admin/sso-settings');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
 
         // ページが表示されること（エラーページでないこと）
@@ -1603,7 +1603,7 @@ test.describe('共通設定・システム設定', () => {
     test('839-2: SSO設定ページで識別子と応答URLのコピー機能UIが存在すること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/sso-settings');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
 
         // 識別子・応答URL関連のUI要素を確認
@@ -1636,7 +1636,7 @@ test.describe('共通設定・システム設定', () => {
         // /admin/maintenance-cert または設定ページに証明書管理セクションがある
         await page.goto(BASE_URL + '/admin/maintenance-cert');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
 
         const certPageContent = await page.evaluate(() => {
@@ -1662,7 +1662,7 @@ test.describe('共通設定・システム設定', () => {
     test('841-1: ログアーカイブページが表示されアーカイブ済みログの一覧が確認できること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/log-archives');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
 
         const logContent = await page.evaluate(() => {

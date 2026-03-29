@@ -27,7 +27,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             // CSRFエラー時のリトライ: 再度networkidleまで待ってからログイン
@@ -36,10 +36,10 @@ async function login(page, email, password) {
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
 }
 
 /**

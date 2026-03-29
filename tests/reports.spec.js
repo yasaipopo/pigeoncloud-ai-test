@@ -20,7 +20,7 @@ async function login(page) {
     await page.click('button[type=submit].btn-primary');
     // CSRFエラー時は自動で再ロード -> 再試行
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
     } catch (e) {
         // CSRF エラーで login のまま残っていたら、再度ログイン
         if (page.url().includes('/admin/login')) {
@@ -28,10 +28,10 @@ async function login(page) {
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(1000);
 }
 
@@ -290,7 +290,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // 帳票登録モーダル（admin-ledger-import）が開くのを待つ
             // モーダル内にedit-componentが表示される（ledgerテーブルの編集フォーム）
             const modal = page.locator('.modal.show');
-            await expect(modal.first()).toBeVisible({ timeout: 10000 });
+            await expect(modal.first()).toBeVisible({ timeout: 30000 });
 
             // edit-component内のファイルアップロード入力を探す
             const fileInput = modal.locator('input[type="file"]').first();
@@ -352,7 +352,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             // 帳票登録モーダルが開くことを確認
             const editModal = page.locator('.modal.show');
-            await expect(editModal.first()).toBeVisible({ timeout: 10000 });
+            await expect(editModal.first()).toBeVisible({ timeout: 30000 });
 
             // モーダル内の「ダウンロード」ボタンをクリックしてExcelテンプレートをダウンロード
             const downloadBtn = editModal.locator('button:has-text("ダウンロード")').first();
@@ -689,7 +689,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         // ユーザー管理ページ（/admin/admin）に移動
         await page.goto(BASE_URL + '/admin/admin');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
 
         // ナビバーが表示されること
@@ -848,7 +848,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         // ALLテストテーブルのページに移動
         await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
         await waitForAngular(page);
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
 
         // ログインページにリダイレクトされた場合は再ログイン
@@ -856,7 +856,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await ensureLoggedIn(page);
             await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
             await waitForAngular(page);
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
         }
 

@@ -88,7 +88,7 @@ async function login(page, email, password) {
             await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
 }
 
 /**

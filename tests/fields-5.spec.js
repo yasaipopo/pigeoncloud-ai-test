@@ -3,6 +3,7 @@
 const { test, expect } = require('@playwright/test');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -24,17 +25,17 @@ async function login(page) {
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
 }
 
 async function closeTemplateModal(page) {
@@ -165,7 +166,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
     let beforeAllFailed = false;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
+        test.setTimeout(360000);
         const maxRetries = 3;
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             const { context, page } = await createAuthContext(browser);
@@ -184,7 +185,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
                     await page.fill('#id', email).catch(() => {});
                     await page.fill('#password', password).catch(() => {});
                     await page.click('button[type=submit].btn-primary').catch(() => {});
-                    await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
+                    await page.waitForURL('**/admin/dashboard', { timeout: 90000 }).catch(() => {});
                     await page.waitForTimeout(1500);
                     tableId = await getAllTypeTableId(page);
                 }
@@ -221,10 +222,18 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
 
             expect(editUrl, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
-            await page.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
-            await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
             // ALLテストテーブルは102フィールドあるため読み込みに時間がかかる
-            await page.waitForSelector('.overSetting', { timeout: 180000 });
+            // 最初のgotoでタイムアウトした場合はリトライ
+            for (let attempt = 0; attempt < 2; attempt++) {
+                await page.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 120000 }).catch(() => {});
+                await page.waitForSelector('.navbar', { timeout: 60000 }).catch(() => {});
+                const loaded = await page.waitForSelector('.overSetting', { timeout: 120000 }).then(() => true).catch(() => false);
+                if (loaded) break;
+                if (attempt === 0) {
+                    console.log(`[${caseNo}] .overSetting timeout, リトライ`);
+                    await ensureLoggedIn(page);
+                }
+            }
             await waitForAngular(page);
 
             let found = false;

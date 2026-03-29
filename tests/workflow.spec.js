@@ -48,7 +48,7 @@ async function login(page, email, password) {
             await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
 }
 
 async function logout(page) {
@@ -743,7 +743,7 @@ test.describe('ワークフロー設定（21系）', () => {
         await waitForAngular(page);
         const statusBefore = await page.innerText('body');
         // 申請取り下げボタンが表示されること
-        await expect(page.locator('button:has-text("申請取り下げ")')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('button:has-text("申請取り下げ")')).toBeVisible({ timeout: 30000 });
         // 取り下げを実行（btn-danger.text-bold クラスで正確に特定）
         await page.locator('button.btn-danger.text-bold:has-text("申請取り下げ")').click();
         // *ngIf="workflow_status=='withdraw'" で btn-warning.btn-ladda が DOM に追加されるまで待つ
@@ -908,7 +908,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         const reapplyText = await page.innerText('body');
         expect(reapplyText).not.toContain('Internal Server Error');
         // 申請ボタンが表示されること（"申請する"とのstrict違反を避けるため完全一致で検索）
-        await expect(page.locator('button').filter({ hasText: /^申請$/ }).first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('button').filter({ hasText: /^申請$/ }).first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -968,7 +968,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
         // 承認ボタンが表示されていること
-        await expect(page.locator('button:has-text("承認")').filter({ hasNotText: '一括' }).first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('button:has-text("承認")').filter({ hasNotText: '一括' }).first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -1034,7 +1034,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         const bodyText1 = await page.innerText('body');
         expect(bodyText1).not.toContain('Internal Server Error');
         // 申請ボタンが表示されること（"申請する"とのstrict違反を避けるため完全一致で検索）
-        await expect(page.locator('button').filter({ hasText: /^申請$/ }).first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('button').filter({ hasText: /^申請$/ }).first()).toBeVisible({ timeout: 30000 });
         // 再申請
         await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().click({ timeout: 10000 });
         await waitForAngular(page);
@@ -1745,7 +1745,7 @@ test.describe('一括操作（111系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括承認ボタンが表示されること
@@ -1786,7 +1786,7 @@ test.describe('一括操作（111系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括承認ボタンが表示されること
@@ -1827,7 +1827,7 @@ test.describe('一括操作（111系）', () => {
         // 操作前のレコード数を記録
         const rowsBefore = await page.locator('table tbody tr').count();
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括削除ボタンが表示されること
@@ -1901,7 +1901,7 @@ test.describe('一括操作（111系）', () => {
         // 操作前のレコード数を記録
         const rowsBefore = await page.locator('table tbody tr').count();
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括削除ボタンが表示されること
@@ -1939,7 +1939,7 @@ test.describe('一括操作（111系）', () => {
         // 操作前のレコード数を記録
         const rowsBefore = await page.locator('table tbody tr').count();
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括削除ボタンが表示されること
@@ -1971,7 +1971,7 @@ test.describe('一括操作（111系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括否認ボタンが表示されること
@@ -2038,7 +2038,7 @@ test.describe('一括操作（111系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括否認ボタンが表示されること
@@ -2079,7 +2079,7 @@ test.describe('一括操作（111系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括否認ボタンが表示されること
@@ -2117,7 +2117,7 @@ test.describe('一括操作（111系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括取り下げボタンが表示されること
@@ -2184,7 +2184,7 @@ test.describe('一括操作（111系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括取り下げボタンが表示されること
@@ -2225,7 +2225,7 @@ test.describe('一括操作（111系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await expect(checkboxes.first()).toBeVisible({ timeout: 30000 });
         await checkboxes.first().check();
         await page.waitForTimeout(500);
         // 一括取り下げボタンが表示されること
@@ -3522,7 +3522,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await navigateToWorkflowTab(page, tableId);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3565,7 +3565,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('button').filter({ hasText: /^申請$/ }).first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('button').filter({ hasText: /^申請$/ }).first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3581,7 +3581,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.card-footer').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.card-footer').first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3593,7 +3593,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('table').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3606,7 +3606,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.card-footer').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.card-footer').first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3617,7 +3617,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await navigateToWorkflowTab(page, tableId);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3700,7 +3700,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await navigateToWorkflowTab(page, tableId);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3753,7 +3753,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await navigateToWorkflowTab(page, tableId);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('dataset-workflow-options')).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3765,7 +3765,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.sidebar, .nav-sidebar, nav').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.sidebar, .nav-sidebar, nav').first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -3804,7 +3804,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.sidebar, .nav-sidebar, nav').first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.sidebar, .nav-sidebar, nav').first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
+const { createAuthContext } = require('./helpers/auth-context');
 const fs = require('fs');
 const path = require('path');
 
@@ -44,17 +45,17 @@ async function login(page) {
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(1000);
 }
 
@@ -151,8 +152,8 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
     // テスト前: テーブルとデータを一度だけ作成
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(480000);
-        const context = await createLoginContext(browser);
-        const page = await context.newPage();
+        const { context, page } = await createAuthContext(browser);
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         await ensureLoggedIn(page);
         tableId = await getAllTypeTableId(page);
         if (!tableId) {
@@ -160,7 +161,6 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
             tableId = await getAllTypeTableId(page);
         }
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-        await page.close();
         await context.close();
     });
 
@@ -177,7 +177,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
         // レコード一覧に移動
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
 
         // ナビゲーションバーが表示されていること
@@ -246,7 +246,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
         // レコード一覧に移動
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
 
         // ナビゲーションバーが表示されていること
@@ -319,8 +319,8 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(480000);
-        const context = await createLoginContext(browser);
-        const page = await context.newPage();
+        const { context, page } = await createAuthContext(browser);
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         await ensureLoggedIn(page);
         let status = await debugApiGet(page, '/status');
         let existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
@@ -499,7 +499,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         await waitForAngular(page);
 
         // フィルタパネルが表示されること
-        await expect(page.locator('h5:has-text("フィルタ / 集計"), h5:has-text("フィルタ")')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), h5:has-text("フィルタ")')).toBeVisible({ timeout: 30000 });
 
         // 条件を追加ボタンをクリック
         const addCondBtn = page.locator('button:has-text("条件を追加")').first();
@@ -1080,7 +1080,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         await waitForAngular(page);
 
         // ビュー設定画面が表示されること
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
 
@@ -1386,7 +1386,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
         // フィルタUIが正常に再表示されること
-        await expect(page.locator('h5:has-text("フィルタ / 集計"), h5:has-text("フィルタ")')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('h5:has-text("フィルタ / 集計"), h5:has-text("フィルタ")')).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------

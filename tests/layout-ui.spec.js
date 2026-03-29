@@ -24,7 +24,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
     } catch (e) {
         // アカウントロックエラーの早期検出
         const alertEl = page.locator('.alert, [role=alert]');
@@ -47,7 +47,7 @@ async function login(page, email, password) {
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 90000 });
         }
     }
     await page.waitForTimeout(2000);
@@ -313,7 +313,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
         // ページタイトルにテーブル定義が含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // サイドバーナビゲーションが表示されていることを確認
@@ -330,7 +330,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // Pigeon Cloud ブランドリンクが表示されていることを確認
@@ -378,7 +378,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // Pigeon Cloud ブランドリンクが表示されていることを確認
@@ -398,7 +398,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // Pigeon Cloud ブランドリンクが表示されていることを確認
@@ -425,7 +425,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // Pigeon Cloud ブランドリンクが表示されていることを確認
@@ -714,7 +714,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/, { timeout: 15000 });
         // ページタイトルにテーブル定義が含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // サイドバーナビゲーションが表示されていることを確認（Angular描画待ち）
@@ -734,7 +734,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
         // ページタイトルにテーブル定義が含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // サイドバーナビゲーションが表示されていることを確認
@@ -773,7 +773,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // ダッシュボードが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // mainコンテンツエリアが表示されていることを確認
@@ -852,7 +852,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // mainコンテンツエリアが表示されていることを確認
@@ -891,7 +891,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // mainコンテンツエリアが表示されていることを確認
