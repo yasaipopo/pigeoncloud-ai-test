@@ -1018,6 +1018,8 @@ async function playVideo(spec, movie) {
       const fmtTime = (sec) => { const m = Math.floor(sec/60); const s = sec%60; return `${m}:${String(s).padStart(2,'0')}`; };
 
       if (movieTests.length > 0) {
+        // タイムスタンプ順にソート（動画の実行順と一致させる）
+        movieTests.sort((a, b) => (timeMap[a.caseNo] ?? 999) - (timeMap[b.caseNo] ?? 999));
         listEl.innerHTML = movieTests.map((t, idx) => {
           const sec = timeMap[t.caseNo];
           const timeLabel = sec !== undefined ? `<a href="#" onclick="document.getElementById('videoPlayer').currentTime=${sec};return false" style="color:#fff;background:#0d6efd;padding:1px 6px;border-radius:4px;font-size:.75rem;text-decoration:none;margin-left:6px" title="動画をこの位置にジャンプ">▶ ${fmtTime(sec)}</a>` : '';
