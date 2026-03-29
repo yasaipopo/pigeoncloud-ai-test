@@ -284,7 +284,9 @@ async function navigateToAllTypeTable(page) {
             tableId = mainTable.table_id || mainTable.id;
         }
     } catch (e) {
-        console.log('navigateToAllTypeTable: fetch失敗、getAllTypeTableIdでリトライ:', e.message);
+        console.log('navigateToAllTypeTable: fetch失敗、再ログインしてリトライ:', e.message);
+        // セッション切れの可能性があるため再ログイン
+        await ensureLoggedIn(page);
     }
     // fetchが失敗した場合のフォールバック: getAllTypeTableId を使用
     if (!tableId) {

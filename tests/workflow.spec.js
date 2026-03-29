@@ -90,54 +90,53 @@ async function createTestUser(page) {
 }
 
 /**
- * ワークフローテスト専用のシンプルなテーブルをAPI経由で作成する
- * UI操作不要のため安定性が高い
+ * ワークフローテスト専用のシンプルなテーブルをUI経由で作成する
+ * ALLTESTテーブルはルックアップ型不一致等で保存エラーになる場合があるため
  * 返り値: tableId (string)
  */
 async function createWorkflowTestTable(page) {
     const tableName = 'WFTest_' + Date.now();
-    const result = await page.evaluate(async ({ baseUrl, tableName }) => {
-        try {
-            const res = await fetch(baseUrl + '/api/admin/add/dataset', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({
-                    table_name: tableName,
-                    fields: [{ label: 'テスト項目', type: 'text' }],
-                }),
-                credentials: 'include',
-            });
-            const data = await res.json();
-            // レスポンスからテーブルIDを取得
-            if (data.table_id) return { id: String(data.table_id), error: null };
-            if (data.id) return { id: String(data.id), error: null };
-            return { id: null, error: JSON.stringify(data) };
-        } catch (e) {
-            return { id: null, error: e.message };
-        }
-    }, { baseUrl: BASE_URL, tableName });
-
-    if (result.id) {
-        console.log(`[createWorkflowTestTable] API方式で作成成功: tableId=${result.id}, name=${tableName}`);
-        return result.id;
-    }
-    // APIフォールバック: debug/create-all-type-table は重いので使わない
-    // テーブル一覧から既存WFTestテーブルを探す
-    console.log(`[createWorkflowTestTable] API作成失敗: ${result.error}。テーブル一覧から既存テーブルを探す...`);
-    await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // テーブル作成ページへ直接遷移（タイムアウト延長: Angular SPAのブートストラップに時間がかかる場合がある）
+    await page.goto(BASE_URL + '/admin/dataset/edit/new', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+    await page.waitForSelector('[role=tab]', { timeout: 60000 }).catch(() => {});
     await waitForAngular(page);
-    const existingId = await page.evaluate(() => {
-        const links = document.querySelectorAll('a[href*="/admin/dataset__"]');
-        for (const a of links) {
-            if (a.textContent.trim().startsWith('WFTest_')) {
-                const m = a.href.match(/dataset__(\d+)/);
-                if (m) return m[1];
-            }
-        }
-        return null;
-    });
-    if (existingId) return existingId;
-    throw new Error('ワークフローテスト用テーブルの作成に失敗: ' + result.error);
+
+    // テーブル名入力（Angular SPAのフォームレンダリング完了を待つ）
+    const nameInput = page.locator('#table_name').first();
+    await nameInput.waitFor({ timeout: 60000 });
+    await nameInput.fill(tableName);
+    await page.waitForTimeout(500);
+
+    // フィールドを1つ追加（「項目を追加する」→「文字列(一行)」→項目名入力→「追加する」）
+    await page.getByRole('button', { name: /項目を追加する/ }).click();
+    await waitForAngular(page);
+    // 「文字列(一行)」を選択（ダイアログ内）
+    await page.getByRole('dialog').getByRole('button', { name: /文字列\(一行\)/ }).click();
+    // フィールド設定フォームが表示されるまで待機
+    const labelInput = page.locator('input[name="label"]');
+    await labelInput.waitFor({ timeout: 10000 });
+    await labelInput.fill('テスト項目');
+    await page.waitForTimeout(300);
+    // フィールド追加の「追加する」ボタン（exact matchでダイアログ内のみ）
+    await page.getByRole('button', { name: '追加する', exact: true }).click();
+    await waitForAngular(page);
+
+    // フィールドが追加されたことを確認してから「登録」
+    await page.getByRole('button', { name: '登録', exact: true }).click();
+    await waitForAngular(page);
+    // 確認ダイアログ「本当に追加してもよろしいですか？」→「追加する」
+    // .modal.showクラスを持つ表示中のBootstrapモーダルに限定してクリック
+    await page.locator('.modal.show').getByRole('button', { name: '追加する', exact: true }).click({ timeout: 10000 });
+    // 保存後URLは /admin/dataset__NNN（テーブル一覧ページ）、作成処理に時間がかかるため長めにタイムアウト設定
+    await page.waitForURL(/\/dataset__\d+/, { timeout: 60000, waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1000);
+
+    // URLからテーブルIDを取得
+    const url = page.url();
+    const match = url.match(/\/dataset__(\d+)/);
+    if (match) return match[1];
+    throw new Error('ワークフローテスト用テーブルの作成に失敗しました: URL=' + url);
 }
 
 /**
@@ -566,17 +565,21 @@ test.beforeAll(async ({ browser }) => {
             await page.waitForTimeout(3000); // 削除完了待機
         }
 
-        // ワークフローテスト専用の簡易テーブルをAPI経由で作成（最大3回リトライ）
-        for (let attempt = 1; attempt <= 3; attempt++) {
+        // ワークフローテスト専用の簡易テーブルをUI経由で作成（最大5回リトライ）
+        for (let attempt = 1; attempt <= 5; attempt++) {
             try {
                 _sharedTableId = await createWorkflowTestTable(page);
                 if (_sharedTableId) break;
             } catch (e) {
-                console.log(`[file-level beforeAll] createWorkflowTestTable attempt ${attempt}/3 failed:`, e.message);
-                if (attempt === 3) {
-                    console.error('[file-level beforeAll] テーブル作成に3回失敗。全テストをスキップします。');
+                console.log(`[file-level beforeAll] createWorkflowTestTable attempt ${attempt}/5 failed:`, e.message);
+                if (attempt === 5) {
+                    console.error('[file-level beforeAll] テーブル作成に5回失敗。全テストをスキップします。');
                     return; // throwしない → _setupReady=false のまま → 全テストskip
                 }
+                // リトライ前にダッシュボードに戻り、Angular SPAの完全再起動を待つ
+                await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+                await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+                await waitForAngular(page);
                 await page.waitForTimeout(3000);
             }
         }
