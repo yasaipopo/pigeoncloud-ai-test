@@ -2179,27 +2179,39 @@ test.describe('一括操作（111系）', () => {
     test('111-15: 一括取り下げ時にコメントを入力して実行できること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括取り下げコメントテスト');
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げコメントテスト');
+        expect(recordId).toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括取り下げボタンが表示されること
         const bulkWithdrawBtn = page.locator('button:has-text("一括取り下げ")').first();
-        if (await bulkWithdrawBtn.count() > 0) {
-            await bulkWithdrawBtn.click();
+        await expect(bulkWithdrawBtn).toBeVisible({ timeout: 5000 });
+        await bulkWithdrawBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        // コメント入力欄が表示されること
+        const commentArea = page.locator('.modal.show textarea.form-control');
+        await expect(commentArea).toBeVisible({ timeout: 5000 });
+        await commentArea.fill('一括取り下げコメント111-15');
+        await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 取り下げ後のレコード詳細でコメントが保存されていること
+        if (recordId) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
             await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                const commentArea = page.locator('.modal.show textarea.form-control');
-                if (await commentArea.isVisible({ timeout: 2000 }).catch(() => false)) {
-                    await commentArea.fill('一括取り下げコメント');
-                }
-                await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
+            expect(viewText).toContain('一括取り下げコメント111-15');
         }
-        const bodyText2 = await page.innerText('body');
-        expect(bodyText2).not.toContain('Internal Server Error');
     });
 
     // -------------------------------------------------------------------------
@@ -2208,23 +2220,35 @@ test.describe('一括操作（111系）', () => {
     test('111-16: 一括取り下げ時にコメント入力せずに実行できること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括取り下げコメントなし');
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げコメントなし');
+        expect(recordId).toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括取り下げボタンが表示されること
         const bulkWithdrawBtn = page.locator('button:has-text("一括取り下げ")').first();
-        if (await bulkWithdrawBtn.count() > 0) {
-            await bulkWithdrawBtn.click();
+        await expect(bulkWithdrawBtn).toBeVisible({ timeout: 5000 });
+        await bulkWithdrawBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        // コメントを入力せずにそのまま取り下げ
+        await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+        // 取り下げ後のレコード詳細でエラーなく表示されること
+        if (recordId) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
             await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
         }
-        const bodyText2 = await page.innerText('body');
-        expect(bodyText2).not.toContain('Internal Server Error');
     });
 });
 

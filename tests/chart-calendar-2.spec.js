@@ -1064,67 +1064,66 @@ test.describe('集計・チャート - 詳細権限設定', () => {
     // --------------------------------------------------------------------------
     test('136-01: 集計の詳細権限設定「編集可能なユーザー→全ユーザー」が権限設定通りに動作すること', async ({ page }) => {
 
-        try {
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
+        // ALLテストテーブルに直接遷移
+        await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
+        await openActionMenu(page);
 
-            const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
-            await summaryMenu.click({ force: true });
+        const summaryMenu = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu).toBeVisible({ timeout: 5000 });
+        await summaryMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // フィルタ/集計モーダルが開いたことを確認
+        const modal = page.locator('.modal.show, .charts-modal-dialog').first();
+        await expect(modal).toBeVisible({ timeout: 10000 });
+
+        // 設定タブをクリック
+        const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
+        await expect(settingTab).toBeVisible({ timeout: 5000 });
+        await settingTab.click({ force: true });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('.modal.show input.form-control').first();
+        await expect(titleInput).toBeVisible({ timeout: 3000 });
+        await titleInput.fill('テスト集計-136-01');
+
+        // 「詳細権限設定」ラジオボタンを選択（input[name="grant"][value="custom"]）
+        const customRadio = page.locator('input[name="grant"][value="custom"]').first();
+        await expect(customRadio).toBeVisible({ timeout: 3000 });
+        await customRadio.click({ force: true });
+        await waitForAngular(page);
+
+        // ラジオが選択されたことを確認
+        await expect(customRadio).toBeChecked();
+
+        // 詳細権限設定UIが表示されたことを確認（grant-group-form: 「編集可能ユーザー」セクション）
+        const editGrantSection = page.locator('text=編集可能ユーザー').first();
+        await expect(editGrantSection).toBeVisible({ timeout: 5000 });
+
+        // 「選択」ボタンをクリックしてサブモーダルを開く
+        const editSelectBtn = page.locator('grant-group-form button:has-text("選択"), h4:has-text("編集可能") button:has-text("選択")').first();
+        if (await editSelectBtn.count() > 0) {
+            await editSelectBtn.click({ force: true });
             await waitForAngular(page);
 
-            // 設定タブ
-            const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
-            await settingTab.click({ force: true });
-            await waitForAngular(page);
-
-            // タイトル入力
-            const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
-            if (await titleInput.count() > 0) {
-                await titleInput.fill('テスト集計-136-01');
+            // サブモーダル（ユーザー・組織選択）が開いたことを確認
+            const subModal = page.locator('.modal.show .modal-title:has-text("ユーザー・組織選択")');
+            if (await subModal.count() > 0) {
+                await expect(subModal.first()).toBeVisible({ timeout: 5000 });
             }
-
-            // 詳細権限設定を選択
-            const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
-            if (await detailPermBtn.count() > 0) {
-                await detailPermBtn.click({ force: true });
-                await waitForAngular(page);
-
-                // 編集可能なユーザーの「選択」ボタン
-                const editableSelectBtn = page.locator('button:has-text("選択")').first();
-                if (await editableSelectBtn.count() > 0) {
-                    await editableSelectBtn.click({ force: true });
-                    await waitForAngular(page);
-
-                    // 全ユーザーにチェック
-                    const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[value*="all_users"]').first();
-                    if (await allUsersCheck.count() > 0) {
-                        await allUsersCheck.click({ force: true });
-                        await waitForAngular(page);
-                    }
-
-                    // 保存
-                    const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
-                    if (await modalSaveBtn.count() > 0) {
-                        await modalSaveBtn.click({ force: true });
-                        await waitForAngular(page);
-                    }
-                }
-            }
-
-            const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            if (await saveBtn.count() > 0) {
-                await saveBtn.click({ force: true });
-                await waitForAngular(page);
-            }
-
-            const pageText = await page.innerText('body');
-            expect(pageText).not.toContain('Internal Server Error');
-
-        } catch (_e) {
-            // テーブル削除をスキップ（パフォーマンス改善）
         }
+
+        // 「保存して表示」ボタンで保存
+        const saveBtn = page.locator('button:has-text("保存して表示")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // ISEが出ていないことを確認
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
     });
 
     // --------------------------------------------------------------------------
@@ -1132,45 +1131,57 @@ test.describe('集計・チャート - 詳細権限設定', () => {
     // --------------------------------------------------------------------------
     test('136-04: 集計詳細権限設定で編集可能ユーザーをブランクにして保存するとエラーが出力されること', async ({ page }) => {
 
-        try {
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
+        // ALLテストテーブルに直接遷移
+        await navigateToAllTypeTable(page);
 
-            // ドロップダウンを開いて「集計」をクリック
-            await openActionMenu(page);
-            await page.waitForTimeout(500);
-            const summaryMenu136 = page.locator('.dropdown-item:has-text("集計")').first();
-            await summaryMenu136.click({ force: true });
-            await waitForAngular(page);
+        // ドロップダウンを開いて「集計」をクリック
+        await openActionMenu(page);
+        const summaryMenu136 = page.locator('.dropdown-item:has-text("集計")').first();
+        await expect(summaryMenu136).toBeVisible({ timeout: 5000 });
+        await summaryMenu136.click({ force: true });
+        await waitForAngular(page);
 
-            const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
-            try { await settingTab.waitFor({ state: 'visible', timeout: 5000 }); } catch (_e) {}
-            await settingTab.click({ force: true });
-            await waitForAngular(page);
+        // フィルタ/集計モーダルが開いたことを確認
+        const modal = page.locator('.modal.show, .charts-modal-dialog').first();
+        await expect(modal).toBeVisible({ timeout: 10000 });
 
-            // 詳細権限設定
-            const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
-            if (await detailPermBtn.count() > 0) {
-                await detailPermBtn.click({ force: true });
-                await waitForAngular(page);
+        // 設定タブをクリック
+        const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
+        await expect(settingTab).toBeVisible({ timeout: 5000 });
+        await settingTab.click({ force: true });
+        await waitForAngular(page);
 
-                // ユーザー・組織をブランクのまま保存
-                const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-                if (await saveBtn.count() > 0) {
-                    await saveBtn.click({ force: true });
-                    await waitForAngular(page);
+        // 「詳細権限設定」ラジオボタンを選択
+        const customRadio = page.locator('input[name="grant"][value="custom"]').first();
+        await expect(customRadio).toBeVisible({ timeout: 3000 });
+        await customRadio.click({ force: true });
+        await waitForAngular(page);
 
-                    // エラーメッセージが表示されることを確認
-                    const pageText = await page.innerText('body');
-                    // エラーが出るか、またはバリデーションメッセージが出ること
-                    // （UIによって異なるため、500エラーでないことを確認）
-                    expect(pageText).not.toContain('Internal Server Error');
-                }
-            }
+        // ラジオが選択されたことを確認
+        await expect(customRadio).toBeChecked();
 
-        } catch (_e) {
-            // テーブル削除をスキップ（パフォーマンス改善）
-        }
+        // 詳細権限設定UIが表示されたことを確認
+        const editGrantSection = page.locator('text=編集可能ユーザー').first();
+        await expect(editGrantSection).toBeVisible({ timeout: 5000 });
+
+        // ユーザー・組織をブランクのまま「保存して表示」をクリック
+        const saveBtn = page.locator('button:has-text("保存して表示")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // エラーメッセージまたはバリデーションエラーが表示されることを確認
+        // （保存失敗時はモーダルが閉じない、またはエラーメッセージが表示される）
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+
+        // モーダルが閉じずに残っているか、エラーが表示されていることを確認
+        // 詳細権限でブランク保存した場合、モーダルが残ったままか、
+        // またはバリデーションエラーが表示される
+        const modalStillVisible = await modal.isVisible().catch(() => false);
+        const hasError = pageText.includes('エラー') || pageText.includes('選択してください') || pageText.includes('必須');
+        // モーダルが閉じずにいるか、何らかのエラーメッセージがあることを確認
+        expect(modalStillVisible || hasError).toBeTruthy();
     });
 
     // --------------------------------------------------------------------------
@@ -1178,64 +1189,77 @@ test.describe('集計・チャート - 詳細権限設定', () => {
     // --------------------------------------------------------------------------
     test('139-01: チャートの詳細権限設定「編集可能なユーザー→全ユーザー」が権限設定通りに動作すること', async ({ page }) => {
         test.setTimeout(900000); // 詳細権限設定操作は非常に時間がかかるため15分に延長
-        try {
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
+        // ALLテストテーブルに直接遷移
+        await navigateToAllTypeTable(page);
 
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
-            await chartAddMenu.click({ force: true });
+        await openActionMenu(page);
+
+        const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
+        await chartAddMenu.click({ force: true });
+        await waitForAngular(page);
+
+        // チャートモーダルが開いたことを確認
+        const modal = page.locator('.modal.show, .charts-modal-dialog').first();
+        await expect(modal).toBeVisible({ timeout: 10000 });
+
+        // 設定タブをクリック
+        const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
+        await expect(settingTab).toBeVisible({ timeout: 5000 });
+        await settingTab.click({ force: true });
+        await waitForAngular(page);
+
+        // タイトル入力
+        const titleInput = page.locator('.modal.show input.form-control').first();
+        await expect(titleInput).toBeVisible({ timeout: 3000 });
+        await titleInput.fill('テストチャート-139-01');
+
+        // 「詳細権限設定」ラジオボタンを選択
+        const customRadio = page.locator('input[name="grant"][value="custom"]').first();
+        await expect(customRadio).toBeVisible({ timeout: 3000 });
+        await customRadio.click({ force: true });
+        await waitForAngular(page);
+
+        // ラジオが選択されたことを確認
+        await expect(customRadio).toBeChecked();
+
+        // 詳細権限設定UIが表示されたことを確認
+        const editGrantSection = page.locator('text=編集可能ユーザー').first();
+        await expect(editGrantSection).toBeVisible({ timeout: 5000 });
+
+        // 閲覧のみ可能ユーザーセクションも表示されていることを確認
+        const viewGrantSection = page.locator('text=閲覧のみ可能ユーザー').first();
+        await expect(viewGrantSection).toBeVisible({ timeout: 5000 });
+
+        // 「選択」ボタンをクリックしてサブモーダルを開く
+        const editSelectBtn = page.locator('grant-group-form button:has-text("選択"), h4:has-text("編集可能") button:has-text("選択")').first();
+        if (await editSelectBtn.count() > 0) {
+            await editSelectBtn.click({ force: true });
             await waitForAngular(page);
 
-            // 設定タブ
-            const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
-            await settingTab.click({ force: true });
-            await waitForAngular(page);
-
-            // タイトル
-            const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
-            if (await titleInput.count() > 0) {
-                await titleInput.fill('テストチャート-139-01');
+            // サブモーダル（ユーザー・組織選択）が開いたことを確認
+            const subModalTitle = page.locator('.modal-title:has-text("ユーザー・組織選択")');
+            if (await subModalTitle.count() > 0) {
+                await expect(subModalTitle.first()).toBeVisible({ timeout: 5000 });
             }
 
-            // 詳細権限設定
-            const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
-            if (await detailPermBtn.count() > 0) {
-                await detailPermBtn.click({ force: true });
-                await waitForAngular(page);
-
-                const editableSelectBtn = page.locator('button:has-text("選択")').first();
-                if (await editableSelectBtn.count() > 0) {
-                    await editableSelectBtn.click({ force: true });
-                    await waitForAngular(page);
-
-                    const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[value*="all_users"]').first();
-                    if (await allUsersCheck.count() > 0) {
-                        await allUsersCheck.click({ force: true });
-                        await waitForAngular(page);
-                    }
-
-                    const modalSaveBtn = page.locator('.modal button:has-text("保存"), .modal .btn-primary').first();
-                    if (await modalSaveBtn.count() > 0) {
-                        await modalSaveBtn.click({ force: true });
-                        await waitForAngular(page);
-                    }
-                }
-            }
-
-            const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            if (await saveBtn.count() > 0) {
-                await saveBtn.click({ force: true });
+            // サブモーダルを閉じる（×ボタン）
+            const closeSubModal = page.locator('.modal.show .close, .modal.show button[aria-label="Close"]').last();
+            if (await closeSubModal.count() > 0) {
+                await closeSubModal.click({ force: true });
                 await waitForAngular(page);
             }
-
-            const pageText = await page.innerText('body');
-            expect(pageText).not.toContain('Internal Server Error');
-
-        } catch (_e) {
-            // テーブル削除をスキップ（パフォーマンス改善）
         }
+
+        // 「保存して表示」ボタンで保存
+        const saveBtn = page.locator('button:has-text("保存して表示")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // ISEが出ていないことを確認
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
     });
 
     // --------------------------------------------------------------------------
@@ -1243,38 +1267,52 @@ test.describe('集計・チャート - 詳細権限設定', () => {
     // --------------------------------------------------------------------------
     test('139-04: チャート詳細権限設定で編集可能ユーザーをブランクにして保存するとエラーが出力されること', async ({ page }) => {
 
-        try {
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
+        // ALLテストテーブルに直接遷移
+        await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
+        await openActionMenu(page);
 
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
+        const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
+        await chartAddMenu.click({ force: true });
+        await waitForAngular(page);
 
-            const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
-            await settingTab.click({ force: true });
-            await waitForAngular(page);
+        // チャートモーダルが開いたことを確認
+        const modal = page.locator('.modal.show, .charts-modal-dialog').first();
+        await expect(modal).toBeVisible({ timeout: 10000 });
 
-            const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
-            if (await detailPermBtn.count() > 0) {
-                await detailPermBtn.click({ force: true });
-                await waitForAngular(page);
+        // 設定タブをクリック
+        const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
+        await expect(settingTab).toBeVisible({ timeout: 5000 });
+        await settingTab.click({ force: true });
+        await waitForAngular(page);
 
-                // ユーザー・組織をブランクのまま保存
-                const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-                if (await saveBtn.count() > 0) {
-                    await saveBtn.click({ force: true });
-                    await waitForAngular(page);
-                    const pageText = await page.innerText('body');
-                    expect(pageText).not.toContain('Internal Server Error');
-                }
-            }
+        // 「詳細権限設定」ラジオボタンを選択
+        const customRadio = page.locator('input[name="grant"][value="custom"]').first();
+        await expect(customRadio).toBeVisible({ timeout: 3000 });
+        await customRadio.click({ force: true });
+        await waitForAngular(page);
 
-        } catch (_e) {
-            // テーブル削除をスキップ（パフォーマンス改善）
-        }
+        // ラジオが選択されたことを確認
+        await expect(customRadio).toBeChecked();
+
+        // 詳細権限設定UIが表示されたことを確認
+        const editGrantSection = page.locator('text=編集可能ユーザー').first();
+        await expect(editGrantSection).toBeVisible({ timeout: 5000 });
+
+        // ユーザー・組織をブランクのまま「保存して表示」をクリック
+        const saveBtn = page.locator('button:has-text("保存して表示")').first();
+        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await saveBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // エラーが発生するか、モーダルが閉じずに残ることを確認
+        const pageText = await page.innerText('body');
+        expect(pageText).not.toContain('Internal Server Error');
+
+        // モーダルが閉じずに残っているか、エラーが表示されていることを確認
+        const modalStillVisible = await modal.isVisible().catch(() => false);
+        const hasError = pageText.includes('エラー') || pageText.includes('選択してください') || pageText.includes('必須');
+        expect(modalStillVisible || hasError).toBeTruthy();
     });
 
     // --------------------------------------------------------------------------
