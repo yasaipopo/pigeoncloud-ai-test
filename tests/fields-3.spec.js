@@ -3,7 +3,7 @@
 // fields.spec.jsから分割 (line 1594〜末尾)
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
-const { getAllTypeTableId: getAllTypeTableIdHelper } = require('./helpers/table-setup');
+const { getAllTypeTableId: getAllTypeTableIdHelper, setupAllTypeTable } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 async function waitForAngular(page, timeout = 15000) {
@@ -297,24 +297,24 @@ test.beforeAll(async ({ browser }) => {
     // about:blankではcookiesが送られないため、先にアプリURLに遷移
     await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
     await ensureLoggedIn(page);
-    // まずヘルパーでテーブルID取得（セッション切れ対策付き）
-    _sharedTableId = await getAllTypeTableId(page);
-    if (!_sharedTableId) {
-        // テーブルがない場合は作成を試みる
-        const createResult = await createAllTypeTable(page);
-        if (createResult && createResult.tableId) {
-            _sharedTableId = createResult.tableId;
-        }
-    }
-    if (_sharedTableId) {
+    // setupAllTypeTable（ヘルパー）を使って確実にテーブルを取得・作成する
+    const result = await setupAllTypeTable(page);
+    if (result.tableId) {
+        _sharedTableId = result.tableId;
         await createAllTypeData(page, 3).catch(e => console.error('[beforeAll] createAllTypeData失敗:', e.message));
     }
     // フォールバック: まだ取得できない場合は再ログインしてリトライ
     if (!_sharedTableId) {
         await ensureLoggedIn(page);
-        _sharedTableId = await getAllTypeTableId(page);
+        const retryResult = await setupAllTypeTable(page);
+        if (retryResult.tableId) {
+            _sharedTableId = retryResult.tableId;
+        }
     }
     await context.close();
+    if (!_sharedTableId) {
+        throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
+    }
 });
 
 // =============================================================================

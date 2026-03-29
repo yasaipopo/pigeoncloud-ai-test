@@ -1,7 +1,7 @@
 // @ts-check
 // fields-5.spec.js: フィールドテスト Part 5 (全フィールドタイプ表示条件追加オプション確認 850系)
 const { test, expect } = require('@playwright/test');
-const { getAllTypeTableId } = require('./helpers/table-setup');
+const { getAllTypeTableId, setupAllTypeTable } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 
@@ -167,47 +167,26 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
-        const maxRetries = 3;
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            const { context, page } = await createAuthContext(browser);
-            try {
-                // about:blankではcookiesが送られないため、先にアプリURLに遷移
-                await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-                await closeTemplateModal(page);
-                tableId = await getAllTypeTableId(page);
-
-                // LOGIN_ERROR時はreloginしてリトライ
-                if (tableId === '__LOGIN_ERROR__') {
-                    console.log(`[beforeAll] LOGIN_ERROR検出 (attempt ${attempt}/${maxRetries}), relogin実行`);
-                    const email = process.env.TEST_EMAIL || 'admin';
-                    const password = process.env.TEST_PASSWORD || '';
-                    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-                    await page.fill('#id', email).catch(() => {});
-                    await page.fill('#password', password).catch(() => {});
-                    await page.click('button[type=submit].btn-primary').catch(() => {});
-                    await page.waitForURL('**/admin/dashboard', { timeout: 90000 }).catch(() => {});
-                    await page.waitForTimeout(1500);
-                    tableId = await getAllTypeTableId(page);
-                }
-
-                if (tableId && tableId !== '__LOGIN_ERROR__') {
-                    editUrl = `${BASE_URL}/admin/dataset/edit/${tableId}`;
-                    console.log(`[beforeAll] tableId=${tableId}, editUrl=${editUrl}`);
-                    await context.close();
-                    return; // 成功
-                }
-                console.log(`[beforeAll] tableId取得失敗 (attempt ${attempt}/${maxRetries}): tableId=${tableId}`);
-            } catch (e) {
-                console.log(`[beforeAll] 例外 (attempt ${attempt}/${maxRetries}): ${e.message}`);
+        const { context, page } = await createAuthContext(browser);
+        try {
+            // about:blankではcookiesが送られないため、先にアプリURLに遷移
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+            await closeTemplateModal(page);
+            // setupAllTypeTable（ヘルパー）を使って確実にテーブルを取得・作成する
+            const result = await setupAllTypeTable(page);
+            if (result.tableId) {
+                tableId = result.tableId;
+                editUrl = `${BASE_URL}/admin/dataset/edit/${tableId}`;
+                console.log(`[beforeAll] tableId=${tableId}, editUrl=${editUrl}`);
+            } else {
+                console.error('[beforeAll] テーブルID取得が失敗。テストはスキップされます。');
+                beforeAllFailed = true;
             }
-            await context.close();
-            if (attempt < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, 3000));
-            }
+        } catch (e) {
+            console.error(`[beforeAll] 例外: ${e.message}`);
+            beforeAllFailed = true;
         }
-        // 全リトライ失敗: cascade防止のためthrowせずフラグを立てる
-        console.error('[beforeAll] テーブルID取得が全リトライ失敗。テストはスキップされます。');
-        beforeAllFailed = true;
+        await context.close();
     });
 
     test.beforeEach(async ({ page }) => {
@@ -223,16 +202,16 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
             expect(editUrl, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
             // ALLテストテーブルは102フィールドあるため読み込みに時間がかかる
-            // 最初のgotoでタイムアウトした場合はリトライ
-            for (let attempt = 0; attempt < 2; attempt++) {
+            // 最大3回リトライし、各回で180秒まで待機
+            for (let attempt = 0; attempt < 3; attempt++) {
                 await page.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 120000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 60000 }).catch(() => {});
-                const loaded = await page.waitForSelector('.overSetting', { timeout: 120000 }).then(() => true).catch(() => false);
+                const loaded = await page.waitForSelector('.overSetting', { timeout: 180000 }).then(() => true).catch(() => false);
                 if (loaded) break;
-                if (attempt === 0) {
-                    console.log(`[${caseNo}] .overSetting timeout, リトライ`);
-                    await ensureLoggedIn(page);
-                }
+                console.log(`[${caseNo}] .overSetting timeout (attempt ${attempt + 1}/3), リトライ`);
+                await ensureLoggedIn(page);
+                // ページを完全にリロードしてリトライ
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
             }
             await waitForAngular(page);
 

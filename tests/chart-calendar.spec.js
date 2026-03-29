@@ -1,6 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { getAllTypeTableId } = require('./helpers/table-setup');
+const { getAllTypeTableId, setupAllTypeTable } = require('./helpers/table-setup');
+const { createAuthContext } = require('./helpers/auth-context');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
 const path = require('path');
@@ -401,24 +402,19 @@ async function ensureSummarizeGrant(page) {
 let fileBeforeAllFailed = false;
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(600000);
-    const context = await createLoginContext(browser);
-    const page = await context.newPage();
+    const { context, page } = await createAuthContext(browser);
     try {
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         await ensureLoggedIn(page);
-        // global-setupで作成済みのテーブルIDを取得（自前作成ではなくgetAllTypeTableIdを使用）
-        const tableId = await getAllTypeTableId(page);
-        if (!tableId) {
-            // フォールバック: 自前で作成を試みる
-            const tableRes = await createAllTypeTable(page);
-            if (tableRes.result !== 'success') {
-                console.error('[beforeAll] ALLテストテーブルの取得・作成に失敗しました');
-                fileBeforeAllFailed = true;
-                await page.close();
-                await context.close();
-                return;
-            }
+        // setupAllTypeTable（ヘルパー）を使って確実にテーブルを取得・作成する
+        const result = await setupAllTypeTable(page);
+        if (!result.tableId) {
+            console.error('[beforeAll] ALLテストテーブルの取得・作成に失敗しました');
+            fileBeforeAllFailed = true;
+            await context.close();
+            return;
         }
-        await createAllTypeData(page, 10);
+        await createAllTypeData(page, 10).catch(e => console.error('[beforeAll] createAllTypeData失敗:', e.message));
 
         // summarize（集計/チャート）権限が有効か確認し、不足なら再作成
         await ensureSummarizeGrant(page);
@@ -892,12 +888,11 @@ test.describe('カレンダー - ビュー表示', () => {
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(300000);
-        const context = await createLoginContext(browser);
-        const page = await context.newPage();
+        const { context, page } = await createAuthContext(browser);
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         await ensureLoggedIn(page);
         // カレンダービューが存在することを確保する
         await ensureCalendarView(page);
-        await page.close();
         await context.close();
     });
 
@@ -2531,8 +2526,10 @@ test.describe('チャート - フィルタ・表示設定', () => {
         // 別ユーザーでログインして参照できないことを確認
         const testUser = await createTestUser(page);
         if (testUser.result === 'success' && testUser.email) {
-            const context2 = await createLoginContext(browser);
-            const page2 = await context2.newPage();
+            const auth2 = await createAuthContext(browser);
+            const context2 = auth2.context;
+            const page2 = auth2.page;
+            await page2.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
             await login(page2, testUser.email, testUser.password || 'admin');
             await closeTemplateModal(page2);
 

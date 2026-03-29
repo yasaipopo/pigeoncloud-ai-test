@@ -33,7 +33,18 @@ async function openTableManagementBarsMenu(page) {
     for (let attempt = 0; attempt < 3; attempt++) {
         await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
-        await page.waitForTimeout(1500);
+        await page.waitForTimeout(2000);
+
+        // チュートリアルモーダルが出た場合は閉じる
+        const tutorialModal = page.locator('.modal.show').filter({ hasText: 'テンプレートからインストール' });
+        if (await tutorialModal.count() > 0) {
+            const skipBtn = tutorialModal.locator('button').filter({ hasText: /スキップ|閉じる/ }).first();
+            if (await skipBtn.count() > 0) {
+                await skipBtn.click({ force: true }).catch(() => {});
+                await waitForAngular(page);
+                await page.waitForTimeout(1000);
+            }
+        }
 
         // /admin/dataset にいるか確認（editやdashboardにリダイレクトされていないか）
         const url = page.url();
@@ -45,12 +56,12 @@ async function openTableManagementBarsMenu(page) {
         if (await sidebarLink.count() > 0) {
             await sidebarLink.click();
             await waitForAngular(page);
-            await page.waitForTimeout(1500);
+            await page.waitForTimeout(2000);
             break;
         }
     }
 
-    // fa-bars ドロップダウンボタンを Playwright の click() で操作（Angular の click イベントが正しく処理される）
+    // fa-bars ドロップダウンボタンを Playwright の click() で操作
     // セレクタを広く取り、存在しない場合はフォールバック
     let faBarsBtn = page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle').filter({ has: page.locator('.fa-bars') });
     let btnCount = await faBarsBtn.count();
@@ -60,40 +71,79 @@ async function openTableManagementBarsMenu(page) {
         faBarsBtn = page.locator('button.dropdown-toggle:has(.fa-bars)').first();
         btnCount = await faBarsBtn.count();
     }
+    // フォールバック: .fa-bars を含む任意のボタン
+    if (btnCount === 0) {
+        faBarsBtn = page.locator('button:has(.fa-bars), a:has(.fa-bars)').first();
+        btnCount = await faBarsBtn.count();
+    }
     // さらにフォールバック: dropdown-toggleボタン全般
     if (btnCount === 0) {
         faBarsBtn = page.locator('button.dropdown-toggle').first();
         btnCount = await faBarsBtn.count();
     }
 
-    if (btnCount === 0) return false;
+    if (btnCount === 0) {
+        console.log('[openTableManagementBarsMenu] fa-barsドロップダウンボタンが見つかりません。URL:', page.url());
+        return false;
+    }
 
     await faBarsBtn.first().click();
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(1000);
     return true;
 }
 
 /**
  * テンプレートモーダルを開く
- * （テーブル管理 → fa-bars → テンプレートから追加）
+ * 方法1: テーブル管理 → fa-bars → テンプレートから追加
+ * 方法2: ダッシュボードのチュートリアルモーダル（テンプレートが0件の場合に自動表示）
  * @param {import('@playwright/test').Page} page
  * @returns {Promise<boolean>} モーダルが開けたかどうか
  */
 async function openTemplateModal(page) {
+    // 方法1: テーブル管理画面のfa-barsメニューから開く
     const menuOpened = await openTableManagementBarsMenu(page);
-    if (!menuOpened) return false;
+    if (menuOpened) {
+        // 「テンプレートから追加」メニューアイテムをクリック
+        const templateItem = page.locator('.dropdown-menu.show .dropdown-item, .dropdown-menu.show a').filter({ hasText: /テンプレート/ });
+        const templateItemCount = await templateItem.count();
+        if (templateItemCount > 0) {
+            await templateItem.first().click();
+            await page.waitForTimeout(2000);
+            const modalCount = await page.locator('.modal.show').count();
+            if (modalCount > 0) return true;
+        }
+    }
 
-    // 「テンプレートから追加」を Playwright の locator でクリック（Angular の click イベントが正しく処理される）
-    const templateItem = page.locator('.dropdown-menu.show .dropdown-item').filter({ hasText: 'テンプレートから追加' });
-    const templateItemCount = await templateItem.count();
-    if (templateItemCount === 0) return false;
-
-    await templateItem.first().click();
+    // 方法2: ダッシュボードに遷移してチュートリアルモーダルを利用
+    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await waitForAngular(page);
     await page.waitForTimeout(2000);
+    const tutorialModal = page.locator('.modal.show').filter({ hasText: /テンプレート/ });
+    if (await tutorialModal.count() > 0) {
+        return true;
+    }
 
-    // モーダルが開いているか確認
-    const modalCount = await page.locator('.modal.show').count();
-    return modalCount > 0;
+    // 方法3: サイドバーのリンクからテーブル管理を開き直す
+    const sidebarLink = page.locator('a').filter({ hasText: /テーブル管理/ }).first();
+    if (await sidebarLink.count() > 0) {
+        await sidebarLink.click();
+        await waitForAngular(page);
+        await page.waitForTimeout(2000);
+        // 再度fa-barsを試す
+        const retryMenu = await openTableManagementBarsMenu(page);
+        if (retryMenu) {
+            const templateItem = page.locator('.dropdown-menu.show .dropdown-item, .dropdown-menu.show a').filter({ hasText: /テンプレート/ });
+            if (await templateItem.count() > 0) {
+                await templateItem.first().click();
+                await page.waitForTimeout(2000);
+                const modalCount = await page.locator('.modal.show').count();
+                if (modalCount > 0) return true;
+            }
+        }
+    }
+
+    console.log('[openTemplateModal] テンプレートモーダルを開けませんでした。URL:', page.url());
+    return false;
 }
 
 test.describe('テンプレート', () => {

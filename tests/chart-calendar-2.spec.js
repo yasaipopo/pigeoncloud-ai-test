@@ -2,8 +2,9 @@
 // chart-calendar-2.spec.js: チャート・カレンダーテスト Part 2 (describe #4〜#5: チャート基本機能/集計チャート詳細権限設定)
 // chart-calendar.spec.jsから分割 (line 1294〜末尾)
 const { test, expect } = require('@playwright/test');
-const { getAllTypeTableId } = require('./helpers/table-setup');
+const { getAllTypeTableId, setupAllTypeTable } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
+const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -344,31 +345,24 @@ async function openTableMenu(page) {
 let fileBeforeAllFailed = false;
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(600000);
-    const maxRetries = 3;
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        const { context, page } = await createAuthContext(browser);
-        try {
-            // about:blankではcookiesが送られないため、先にアプリURLに遷移
-            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-            const tableRes = await createAllTypeTable(page);
-            if (tableRes.result === 'success') {
-                await createAllTypeData(page, 10);
-                await context.close();
-                return; // 成功
-            }
-            console.log(`[beforeAll] テーブル作成失敗 (attempt ${attempt}/${maxRetries}): result=${tableRes.result}`);
-        } catch (e) {
-            console.log(`[beforeAll] テーブル作成例外 (attempt ${attempt}/${maxRetries}): ${e.message}`);
+    const { context, page } = await createAuthContext(browser);
+    try {
+        // about:blankではcookiesが送られないため、先にアプリURLに遷移
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        await ensureLoggedIn(page);
+        // setupAllTypeTable（ヘルパー）を使って確実にテーブルを取得・作成する
+        const result = await setupAllTypeTable(page);
+        if (result.tableId) {
+            await createAllTypeData(page, 10).catch(e => console.error('[beforeAll] createAllTypeData失敗:', e.message));
+        } else {
+            console.error('[beforeAll] ALLテストテーブル作成が失敗。テストはスキップされます。');
+            fileBeforeAllFailed = true;
         }
-        await context.close();
-        if (attempt < maxRetries) {
-            // リトライ前に少し待つ
-            await new Promise(resolve => setTimeout(resolve, 5000));
-        }
+    } catch (e) {
+        console.error(`[beforeAll] 例外: ${e.message}`);
+        fileBeforeAllFailed = true;
     }
-    // 全リトライ失敗: cascade防止のためthrowせずフラグを立てる
-    console.error('[beforeAll] ALLテストテーブル作成が全リトライ失敗。テストはスキップされます。');
-    fileBeforeAllFailed = true;
+    await context.close();
 });
 
 // チャート テスト

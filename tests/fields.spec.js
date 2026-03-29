@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
-const { getAllTypeTableId: getAllTypeTableIdHelper } = require('./helpers/table-setup');
+const { getAllTypeTableId: getAllTypeTableIdHelper, setupAllTypeTable } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 
 const BASE_URL = process.env.TEST_BASE_URL;
@@ -206,7 +206,10 @@ async function getAllTypeTableId(page) {
  * フィールド設定ページへ遷移する
  */
 async function navigateToFieldPage(page, tableId) {
-    const tid = tableId || 'ALL';
+    if (!tableId) {
+        throw new Error('navigateToFieldPage: tableIdがnullです。beforeAllでテーブルID取得が失敗しています。');
+    }
+    const tid = tableId;
     // フィールド設定ページは /admin/dataset/edit/:id （テーブル設定ページ）
     await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
     try {
@@ -276,10 +279,25 @@ test.beforeAll(async ({ browser }) => {
     const { context, page } = await createAuthContext(browser);
     // about:blankではcookiesが送られないため、先にアプリURLに遷移
     await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-    await createAllTypeTable(page);
-    await createAllTypeData(page, 5);
-    _sharedTableId = await getAllTypeTableId(page);
+    await ensureLoggedIn(page);
+    // setupAllTypeTable（ヘルパー）を使って確実にテーブルを取得・作成する
+    const result = await setupAllTypeTable(page);
+    if (result.tableId) {
+        _sharedTableId = result.tableId;
+        await createAllTypeData(page, 5).catch(e => console.error('[beforeAll] createAllTypeData失敗:', e.message));
+    }
+    // フォールバック: まだ取得できない場合は再ログインしてリトライ
+    if (!_sharedTableId) {
+        await ensureLoggedIn(page);
+        const retryResult = await setupAllTypeTable(page);
+        if (retryResult.tableId) {
+            _sharedTableId = retryResult.tableId;
+        }
+    }
     await context.close();
+    if (!_sharedTableId) {
+        throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
+    }
 });
 
 test.describe('フィールド - 日時（101）', () => {
