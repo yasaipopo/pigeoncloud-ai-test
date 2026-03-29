@@ -994,7 +994,7 @@ async function playVideo(spec, movie) {
   const token = localStorage.getItem('e2e_token');
   const key = `videos/${spec}/${movie}/video.webm`;
   try {
-    const resp = await fetch(API_URL + '/assets/download-url', {
+    const resp = await fetch(CONFIG.apiUrl + '/assets/download-url', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ key })
