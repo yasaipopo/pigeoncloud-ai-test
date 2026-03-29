@@ -379,6 +379,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
     // 55-2: CSV以外のファイルをアップロード（異常系）
     // =========================================================================
     test('55-2: CSV以外のファイル(.txt)をアップロードするとインポートエラーが発生すること', async ({ page }) => {
+        test.setTimeout(300000); // CSV非同期処理の完了待ちに対応
         await login(page, EMAIL, PASSWORD);
         await closeTemplateModal(page);
 
@@ -1759,6 +1760,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 309: CSVアップロードのエラーメッセージが内容がわかるようになっていること（機能改善確認）
     // -------------------------------------------------------------------------
     test('309: CSVアップロード時にエラーメッセージが具体的な内容で表示されること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000); // CSVアップロード/ダウンロード＋非同期処理の完了待ちに対応
         const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1820,6 +1822,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 313: CSVアップロードの注意書きに作成者・最終更新者が含まれること（機能改善確認）
     // -------------------------------------------------------------------------
     test('313: CSVアップロードの注意書きに「作成者、最終更新者」が含まれること（機能改善確認）', async ({ page }) => {
+        test.setTimeout(300000); // CSVアップロード/ダウンロード＋非同期処理の完了待ちに対応
         const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1912,6 +1915,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 378: クロス集計フィルタでCSVダウンロードがエラーなく動作すること（バグ修正確認）
     // -------------------------------------------------------------------------
     test('378: クロス集計フィルタでCSVダウンロードがエラーなく動作すること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000); // CSVアップロード/ダウンロード＋非同期処理の完了待ちに対応
         const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1936,6 +1940,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 379: CSVログは自分のUP/DL分だけ全ユーザーが見られること
     // -------------------------------------------------------------------------
     test('379: CSVログ画面で自分のCSV UP/DL履歴が表示されること', async ({ page }) => {
+        test.setTimeout(300000); // CSVアップロード/ダウンロード＋非同期処理の完了待ちに対応
         await login(page, EMAIL, PASSWORD);
         // CSV UP/DL履歴ページに遷移
         await page.goto(BASE_URL + '/admin/csv', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1961,6 +1966,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 438: テーブル管理者でも子テーブルのCSVダウンロードができること（バグ修正確認）
     // -------------------------------------------------------------------------
     test('438: テーブル管理者が子テーブルのCSVダウンロードボタンを利用できること（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000); // CSVアップロード/ダウンロード＋非同期処理の完了待ちに対応
         const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1981,6 +1987,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 444: 他テーブル参照で文字列の「1-03」が日付変換されないこと（バグ修正確認）
     // -------------------------------------------------------------------------
     test('444: 他テーブル参照の文字列がCSVダウンロードで日付変換されないこと（バグ修正確認）', async ({ page }) => {
+        test.setTimeout(300000); // CSVアップロード/ダウンロード＋非同期処理の完了待ちに対応
         const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});

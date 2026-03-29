@@ -193,6 +193,40 @@ async function getAllTypeTableId(page) {
 }
 
 /**
+ * 日時系フィールド（日時/日付のみ/時刻のみ/年月）の設定モーダルを開く
+ * @param {import('@playwright/test').Page} page
+ * @param {string} tableId
+ * @param {string} fieldTypeText - フィールド一覧に表示されるフィールドタイプ名（例: '日時', '日付のみ', '時刻のみ', '年月'）
+ * @returns {Promise<import('@playwright/test').Locator>} 設定モーダルのLocator
+ */
+async function openDateTimeFieldModal(page, tableId, fieldTypeText = '日時') {
+    await navigateToFieldPage(page, tableId);
+    await assertFieldPageLoaded(page, tableId);
+    // フィールド一覧から対象フィールドを探す
+    const fieldBlock = page.locator('.pc-field-block').filter({ hasText: fieldTypeText });
+    await expect(fieldBlock.first()).toBeVisible({ timeout: 15000 });
+    // 歯車アイコンをクリックして設定モーダルを開く
+    await fieldBlock.first().hover();
+    await fieldBlock.first().locator('.overSetting .fa-gear').click();
+    await waitForAngular(page);
+    const modal = page.locator('.settingModal .modal-content');
+    await expect(modal).toBeVisible({ timeout: 15000 });
+    return modal;
+}
+
+/**
+ * テーブル設定ページのタブを切り替える
+ * @param {import('@playwright/test').Page} page
+ * @param {string} tabText - タブのテキスト（例: '基本設定', 'メニュー', '一覧画面', '詳細・編集画面', 'CSV', 'ワークフロー', 'その他'）
+ */
+async function clickSettingTab(page, tabText) {
+    const tab = page.locator('.dataset-tabs [ngbnavlink], .dataset-tabs a').filter({ hasText: tabText });
+    await tab.first().click();
+    await waitForAngular(page);
+    await page.waitForTimeout(1000); // Angularタブ切り替え完了待ち
+}
+
+/**
  * フィールド設定ページへ遷移する
  */
 async function navigateToFieldPage(page, tableId) {
@@ -1898,14 +1932,17 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
         test.setTimeout(480000); // ユーザー作成・ログイン操作のため3分に延長
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
-        // ユーザー上限を外す（create-userが制限で失敗しないように、ページセッションを使用）
+        // ユーザー上限を外す（create-userが制限で失敗しないように）
         await page.evaluate(async (baseUrl) => {
-            await fetch(baseUrl + '/admin/debug-tools/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({ table: 'setting', data: { max_user: 9999 } }),
-                credentials: 'include',
-            }).catch(() => {});
+            // 両方のエンドポイントを試す（環境によって異なるため）
+            for (const path of ['/api/admin/debug/settings', '/admin/debug-tools/settings']) {
+                await fetch(baseUrl + path, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ table: 'setting', data: { max_user: 9999 } }),
+                    credentials: 'include',
+                }).catch(() => {});
+            }
         }, BASE_URL);
 
         // デバッグAPIでテストユーザー作成

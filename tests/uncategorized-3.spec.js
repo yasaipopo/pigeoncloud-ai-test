@@ -226,12 +226,11 @@ test.describe('追加実装テスト（314-579系）', () => {
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
         const { context, page } = await createAuthContext(browser);
+        // about:blankからfetchするとcookiesが送られないため、先にアプリURLに遷移
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        await ensureLoggedIn(page);
         tableId = await getAllTypeTableId(page);
-        if (!tableId) {
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-        }
-        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
+        if (!tableId || tableId === '__LOGIN_ERROR__') throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
         await createAllTypeData(page, 3).catch(e => {
             console.error('[beforeAll] createAllTypeData失敗:', e.message);

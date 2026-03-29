@@ -1698,36 +1698,40 @@ test.describe('一括操作（111系）', () => {
     // 111-02: 一括承認（複数選択）
     // -------------------------------------------------------------------------
     test('111-02: 申請を複数選択して一括承認できること', async ({ page }) => {
-        test.setTimeout(600000); // createRecordAndSubmitが遅い環境で300s超えることがあるため延長
+        test.setTimeout(600000);
         // adminで複数申請
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括承認A');
-        await createRecordAndSubmit(page, tableId, approverName, '一括承認B');
+        const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括承認A');
+        const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括承認B');
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         // 複数チェック
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
         const cbCount = await checkboxes.count();
-        if (cbCount >= 2) {
-            await checkboxes.nth(0).check();
-            await checkboxes.nth(1).check();
-            await page.waitForTimeout(500);
-        } else if (cbCount === 1) {
-            await checkboxes.first().check();
-            await page.waitForTimeout(500);
-        }
-        // 一括承認
+        expect(cbCount).toBeGreaterThanOrEqual(2); // 2件以上のレコードが存在すること
+        await checkboxes.nth(0).check();
+        await checkboxes.nth(1).check();
+        await page.waitForTimeout(500);
+        // 一括承認ボタンが表示されること
         const bulkApproveBtn = page.locator('button:has-text("一括承認")').first();
-        if (await bulkApproveBtn.count() > 0) {
-            await bulkApproveBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkApproveBtn).toBeVisible({ timeout: 5000 });
+        await bulkApproveBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 一括承認後、承認済みレコードの詳細で承認コメントが確認できること
+        if (rid1) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${rid1}`);
+            await waitForAngular(page);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
+        }
     });
 
     // -------------------------------------------------------------------------
@@ -1736,28 +1740,39 @@ test.describe('一括操作（111系）', () => {
     test('111-03: 一括承認時にコメントを入力して実行できること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括承認コメントテスト');
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認コメントテスト');
+        expect(recordId).toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括承認ボタンが表示されること
         const bulkApproveBtn = page.locator('button:has-text("一括承認")').first();
-        if (await bulkApproveBtn.count() > 0) {
-            await bulkApproveBtn.click();
-            await waitForAngular(page);
-            // Bootstrap modal でコメント入力・承認確定
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                const commentArea = page.locator('.modal.show textarea.form-control');
-                if (await commentArea.isVisible({ timeout: 2000 }).catch(() => false)) {
-                    await commentArea.fill('一括承認コメント');
-                }
-                await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkApproveBtn).toBeVisible({ timeout: 5000 });
+        await bulkApproveBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        // コメント入力欄が表示されること
+        const commentArea = page.locator('.modal.show textarea.form-control');
+        await expect(commentArea).toBeVisible({ timeout: 5000 });
+        await commentArea.fill('一括承認コメント111-03');
+        await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 承認後のレコード詳細でコメントが保存されていること
+        if (recordId) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await waitForAngular(page);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
+            expect(viewText).toContain('一括承認コメント111-03');
+        }
     });
 
     // -------------------------------------------------------------------------
@@ -1766,24 +1781,35 @@ test.describe('一括操作（111系）', () => {
     test('111-04: 一括承認時にコメント入力せずに実行できること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括承認コメントなし');
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認コメントなし');
+        expect(recordId).toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括承認ボタンが表示されること
         const bulkApproveBtn = page.locator('button:has-text("一括承認")').first();
-        if (await bulkApproveBtn.count() > 0) {
-            await bulkApproveBtn.click();
-            await waitForAngular(page);
-            // コメントを入力せずにそのまま承認
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkApproveBtn).toBeVisible({ timeout: 5000 });
+        await bulkApproveBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        // コメントを入力せずにそのまま承認
+        await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 承認後のレコード詳細でエラーなく表示されること
+        if (recordId) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await waitForAngular(page);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
+        }
     });
 
     // -------------------------------------------------------------------------
@@ -1794,25 +1820,31 @@ test.describe('一括操作（111系）', () => {
         // 申請してすぐ取り下げることで削除対象レコードを作る
         const approverName = EMAIL.split('@')[0];
         const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括削除テスト');
-        if (recordId) {
-            await withdrawRecord(page, tableId, recordId);
-        }
+        expect(recordId).toBeTruthy();
+        await withdrawRecord(page, tableId, recordId);
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
+        // 操作前のレコード数を記録
+        const rowsBefore = await page.locator('table tbody tr').count();
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括削除ボタンが表示されること
         const bulkDeleteBtn = page.locator('button:has-text("一括削除")').first();
-        if (await bulkDeleteBtn.count() > 0) {
-            await bulkDeleteBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("削除")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkDeleteBtn).toBeVisible({ timeout: 5000 });
+        await bulkDeleteBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("削除")').last().click({ timeout: 5000 });
+        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 削除後にレコード数が減少していること
+        const rowsAfter = await page.locator('table tbody tr').count();
+        expect(rowsAfter).toBeLessThan(rowsBefore);
     });
 
     // -------------------------------------------------------------------------
@@ -1823,31 +1855,36 @@ test.describe('一括操作（111系）', () => {
         const approverName = EMAIL.split('@')[0];
         // 2件の取り下げ済みレコードを作成
         const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括削除A');
-        if (rid1) await withdrawRecord(page, tableId, rid1);
+        expect(rid1).toBeTruthy();
+        await withdrawRecord(page, tableId, rid1);
         const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括削除B');
-        if (rid2) await withdrawRecord(page, tableId, rid2);
+        expect(rid2).toBeTruthy();
+        await withdrawRecord(page, tableId, rid2);
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
+        // 操作前のレコード数を記録
+        const rowsBefore = await page.locator('table tbody tr').count();
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
         const cbCount = await checkboxes.count();
-        if (cbCount >= 2) {
-            await checkboxes.nth(0).check();
-            await checkboxes.nth(1).check();
-        } else if (cbCount === 1) {
-            await checkboxes.first().check();
-        }
+        expect(cbCount).toBeGreaterThanOrEqual(2); // 2件以上のレコードが存在すること
+        await checkboxes.nth(0).check();
+        await checkboxes.nth(1).check();
         await page.waitForTimeout(500);
+        // 一括削除ボタンが表示されること
         const bulkDeleteBtn = page.locator('button:has-text("一括削除")').first();
-        if (await bulkDeleteBtn.count() > 0) {
-            await bulkDeleteBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("削除")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkDeleteBtn).toBeVisible({ timeout: 5000 });
+        await bulkDeleteBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("削除")').last().click({ timeout: 5000 });
+        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 削除後にレコード数が減少していること
+        const rowsAfter = await page.locator('table tbody tr').count();
+        expect(rowsAfter).toBeLessThan(rowsBefore);
     });
 
     // -------------------------------------------------------------------------
@@ -1857,27 +1894,35 @@ test.describe('一括操作（111系）', () => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
         const rid = await createRecordAndSubmit(page, tableId, approverName, '一括削除コメントテスト');
-        if (rid) await withdrawRecord(page, tableId, rid);
+        expect(rid).toBeTruthy();
+        await withdrawRecord(page, tableId, rid);
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
+        // 操作前のレコード数を記録
+        const rowsBefore = await page.locator('table tbody tr').count();
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括削除ボタンが表示されること
         const bulkDeleteBtn = page.locator('button:has-text("一括削除")').first();
-        if (await bulkDeleteBtn.count() > 0) {
-            await bulkDeleteBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                const commentArea = page.locator('.modal.show textarea.form-control');
-                if (await commentArea.isVisible({ timeout: 2000 }).catch(() => false)) {
-                    await commentArea.fill('一括削除コメント');
-                }
-                await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("削除")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkDeleteBtn).toBeVisible({ timeout: 5000 });
+        await bulkDeleteBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        // コメント入力欄が表示されること
+        const commentArea = page.locator('.modal.show textarea.form-control');
+        await expect(commentArea).toBeVisible({ timeout: 5000 });
+        await commentArea.fill('一括削除コメント111-07');
+        await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("削除")').last().click({ timeout: 5000 });
+        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 削除後にレコード数が減少していること
+        const rowsAfter = await page.locator('table tbody tr').count();
+        expect(rowsAfter).toBeLessThan(rowsBefore);
     });
 
     // -------------------------------------------------------------------------
@@ -1887,23 +1932,32 @@ test.describe('一括操作（111系）', () => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
         const rid = await createRecordAndSubmit(page, tableId, approverName, '一括削除コメントなし');
-        if (rid) await withdrawRecord(page, tableId, rid);
+        expect(rid).toBeTruthy();
+        await withdrawRecord(page, tableId, rid);
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
+        // 操作前のレコード数を記録
+        const rowsBefore = await page.locator('table tbody tr').count();
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括削除ボタンが表示されること
         const bulkDeleteBtn = page.locator('button:has-text("一括削除")').first();
-        if (await bulkDeleteBtn.count() > 0) {
-            await bulkDeleteBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("削除")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkDeleteBtn).toBeVisible({ timeout: 5000 });
+        await bulkDeleteBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        // コメントを入力せずにそのまま削除
+        await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("削除")').last().click({ timeout: 5000 });
+        await page.waitForTimeout(3000);
+        await waitForAngular(page);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 削除後にレコード数が減少していること
+        const rowsAfter = await page.locator('table tbody tr').count();
+        expect(rowsAfter).toBeLessThan(rowsBefore);
     });
 
     // -------------------------------------------------------------------------
@@ -1912,23 +1966,34 @@ test.describe('一括操作（111系）', () => {
     test('111-09: 申請を1つ選択して一括否認できること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括否認テスト');
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認テスト');
+        expect(recordId).toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括否認ボタンが表示されること
         const bulkRejectBtn = page.locator('button:has-text("一括否認")').first();
-        if (await bulkRejectBtn.count() > 0) {
-            await bulkRejectBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkRejectBtn).toBeVisible({ timeout: 5000 });
+        await bulkRejectBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 否認後のレコード詳細でエラーなく表示されること
+        if (recordId) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await waitForAngular(page);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
+        }
     });
 
     // -------------------------------------------------------------------------
@@ -1937,28 +2002,27 @@ test.describe('一括操作（111系）', () => {
     test('111-10: 申請を複数選択して一括否認できること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括否認A');
-        await createRecordAndSubmit(page, tableId, approverName, '一括否認B');
+        const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括否認A');
+        const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括否認B');
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
         const cbCount = await checkboxes.count();
-        if (cbCount >= 2) {
-            await checkboxes.nth(0).check();
-            await checkboxes.nth(1).check();
-        } else if (cbCount === 1) {
-            await checkboxes.first().check();
-        }
+        expect(cbCount).toBeGreaterThanOrEqual(2); // 2件以上のレコードが存在すること
+        await checkboxes.nth(0).check();
+        await checkboxes.nth(1).check();
         await page.waitForTimeout(500);
+        // 一括否認ボタンが表示されること
         const bulkRejectBtn = page.locator('button:has-text("一括否認")').first();
-        if (await bulkRejectBtn.count() > 0) {
-            await bulkRejectBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkRejectBtn).toBeVisible({ timeout: 5000 });
+        await bulkRejectBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
     });
@@ -1969,27 +2033,39 @@ test.describe('一括操作（111系）', () => {
     test('111-11: 一括否認時にコメントを入力して実行できること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括否認コメントテスト');
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認コメントテスト');
+        expect(recordId).toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括否認ボタンが表示されること
         const bulkRejectBtn = page.locator('button:has-text("一括否認")').first();
-        if (await bulkRejectBtn.count() > 0) {
-            await bulkRejectBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                const commentArea = page.locator('.modal.show textarea.form-control');
-                if (await commentArea.isVisible({ timeout: 2000 }).catch(() => false)) {
-                    await commentArea.fill('一括否認コメント');
-                }
-                await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkRejectBtn).toBeVisible({ timeout: 5000 });
+        await bulkRejectBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        // コメント入力欄が表示されること
+        const commentArea = page.locator('.modal.show textarea.form-control');
+        await expect(commentArea).toBeVisible({ timeout: 5000 });
+        await commentArea.fill('一括否認コメント111-11');
+        await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 否認後のレコード詳細でコメントが保存されていること
+        if (recordId) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await waitForAngular(page);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
+            expect(viewText).toContain('一括否認コメント111-11');
+        }
     });
 
     // -------------------------------------------------------------------------
@@ -1998,23 +2074,35 @@ test.describe('一括操作（111系）', () => {
     test('111-12: 一括否認時にコメント入力せずに実行できること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括否認コメントなし');
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認コメントなし');
+        expect(recordId).toBeTruthy();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括否認ボタンが表示されること
         const bulkRejectBtn = page.locator('button:has-text("一括否認")').first();
-        if (await bulkRejectBtn.count() > 0) {
-            await bulkRejectBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkRejectBtn).toBeVisible({ timeout: 5000 });
+        await bulkRejectBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        // コメントを入力せずにそのまま否認
+        await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 否認後のレコード詳細でエラーなく表示されること
+        if (recordId) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await waitForAngular(page);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
+        }
     });
 
     // -------------------------------------------------------------------------
@@ -2022,26 +2110,36 @@ test.describe('一括操作（111系）', () => {
     // -------------------------------------------------------------------------
     test('111-13: 申請を1つ選択して一括取り下げできること', async ({ page }) => {
         test.setTimeout(300000);
-        // adminで申請して取り下げ
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括取り下げテスト');
+        const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げテスト');
+        expect(recordId).toBeTruthy();
         // admin自身の申請一覧でチェック
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
-        if (await checkboxes.count() > 0) await checkboxes.first().check();
+        expect(await checkboxes.count()).toBeGreaterThan(0);
+        await checkboxes.first().check();
         await page.waitForTimeout(500);
+        // 一括取り下げボタンが表示されること
         const bulkWithdrawBtn = page.locator('button:has-text("一括取り下げ")').first();
-        if (await bulkWithdrawBtn.count() > 0) {
-            await bulkWithdrawBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkWithdrawBtn).toBeVisible({ timeout: 5000 });
+        await bulkWithdrawBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+        // 取り下げ後のレコード詳細でエラーなく表示されること
+        if (recordId) {
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await waitForAngular(page);
+            const viewText = await page.innerText('body');
+            expect(viewText).not.toContain('Internal Server Error');
+        }
     });
 
     // -------------------------------------------------------------------------
@@ -2050,28 +2148,27 @@ test.describe('一括操作（111系）', () => {
     test('111-14: 申請を複数選択して一括取り下げできること', async ({ page }) => {
         test.setTimeout(300000);
         const approverName = EMAIL.split('@')[0];
-        await createRecordAndSubmit(page, tableId, approverName, '一括取り下げA');
-        await createRecordAndSubmit(page, tableId, approverName, '一括取り下げB');
+        const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げA');
+        const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げB');
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         const checkboxes = page.locator('table tbody input[type="checkbox"]');
         const cbCount = await checkboxes.count();
-        if (cbCount >= 2) {
-            await checkboxes.nth(0).check();
-            await checkboxes.nth(1).check();
-        } else if (cbCount === 1) {
-            await checkboxes.first().check();
-        }
+        expect(cbCount).toBeGreaterThanOrEqual(2); // 2件以上のレコードが存在すること
+        await checkboxes.nth(0).check();
+        await checkboxes.nth(1).check();
         await page.waitForTimeout(500);
+        // 一括取り下げボタンが表示されること
         const bulkWithdrawBtn = page.locator('button:has-text("一括取り下げ")').first();
-        if (await bulkWithdrawBtn.count() > 0) {
-            await bulkWithdrawBtn.click();
-            await waitForAngular(page);
-            if (await page.locator('.modal.show').isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 3000 }).catch(() => {});
-            }
-            await page.waitForTimeout(3000);
-        }
+        await expect(bulkWithdrawBtn).toBeVisible({ timeout: 5000 });
+        await bulkWithdrawBtn.click();
+        await waitForAngular(page);
+        // 確認モーダルが表示されること
+        await expect(page.locator('.modal.show')).toBeVisible({ timeout: 5000 });
+        await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 5000 });
+        // 成功トーストが表示されること
+        await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
     });

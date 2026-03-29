@@ -954,8 +954,11 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
 
         // 全角・半角どちらでもエラーなく検索が実行されること
         // （完全一致は環境のデータ次第なのでエラーなし+テーブル構造存在を確認）
+        await waitForAngular(page);
         const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
         await expect(table.first()).toBeVisible({ timeout: 30000 });
+        // 検索結果がゼロでないことを確認（全角・半角どちらでも結果が返ること）
+        expect(fullWidthRows + halfWidthRows).toBeGreaterThan(0);
     });
 
     // -------------------------------------------------------------------------

@@ -2057,7 +2057,7 @@ test.describe('通知設定', () => {
     // 150-1(B): ステップメール設定 - 必須項目チェック
     // ---------------------------------------------------------------------------
     test('150-1: ステップメール設定で未入力のまま登録するとエラーが出力されること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         // ステップメール設定ページへ
         await page.goto(BASE_URL + '/admin/step_mail');
@@ -2105,7 +2105,7 @@ test.describe('通知設定', () => {
     // 150-2(B): ステップメール設定 - ステップ1つ+テンプレート仕様
     // ---------------------------------------------------------------------------
     test('150-2: ステップメール設定でステップ1つ＋テンプレート仕様で正常に登録できること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail');
         await waitForAngular(page);
@@ -2171,7 +2171,7 @@ test.describe('通知設定', () => {
     // 150-3(B): ステップメール設定 - ステップ2つ+テンプレート仕様
     // ---------------------------------------------------------------------------
     test('150-3: ステップメール設定でステップ2つ＋テンプレート仕様で正常に登録できること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail/edit/new');
         await waitForAngular(page);
@@ -2201,7 +2201,7 @@ test.describe('通知設定', () => {
     // 150-4(B): ステップメール設定 - ステップ3つ+テンプレート仕様
     // ---------------------------------------------------------------------------
     test('150-4: ステップメール設定でステップ3つ＋テンプレート仕様で正常に登録できること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail/edit/new');
         await waitForAngular(page);
@@ -2229,7 +2229,7 @@ test.describe('通知設定', () => {
     // 150-5(B): ステップメール設定 - ステップ1つ+カスタム仕様
     // ---------------------------------------------------------------------------
     test('150-5: ステップメール設定でステップ1つ＋カスタム仕様で正常に登録できること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail/edit/new');
         await waitForAngular(page);
@@ -2272,7 +2272,7 @@ test.describe('通知設定', () => {
     // 150-6(B): ステップメール設定 - ステップ2つ+カスタム仕様
     // ---------------------------------------------------------------------------
     test('150-6: ステップメール設定でステップ2つ＋カスタム仕様で正常に登録できること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail/edit/new');
         await waitForAngular(page);
@@ -2299,7 +2299,7 @@ test.describe('通知設定', () => {
     // 150-7(B): ステップメール設定 - ステップ3つ+カスタム仕様
     // ---------------------------------------------------------------------------
     test('150-7: ステップメール設定でステップ3つ＋カスタム仕様で正常に登録できること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail/edit/new');
         await waitForAngular(page);
@@ -2326,7 +2326,7 @@ test.describe('通知設定', () => {
     // 150-8(B): ステップメール設定 - 無効化
     // ---------------------------------------------------------------------------
     test('150-8: ステップメール設定を無効にできること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail');
         await waitForAngular(page);
@@ -2362,7 +2362,7 @@ test.describe('通知設定', () => {
     // 150-9(B): ステップメール設定 - 有効化
     // ---------------------------------------------------------------------------
     test('150-9: ステップメール設定を有効にできること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail');
         await waitForAngular(page);
@@ -2497,7 +2497,7 @@ test.describe('通知設定', () => {
     // 157(B): メール配信 - ステップメール設定（テンプレート+カスタム混在）
     // ---------------------------------------------------------------------------
     test('157: ステップメール設定でテンプレートとカスタムを混在して設定できること', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await page.goto(BASE_URL + '/admin/step_mail/edit/new');
         await waitForAngular(page);

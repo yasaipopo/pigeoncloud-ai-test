@@ -111,8 +111,10 @@ async function setupAllTypeTable(page, { pollIntervalMs = 2000, maxPolls = 60 } 
  *   テーブルID or null（未作成）or '__LOGIN_ERROR__'（セッション切れ）
  */
 async function getAllTypeTableId(page) {
-    try {
-        const baseUrl = process.env.TEST_BASE_URL || BASE_URL;
+    const baseUrl = process.env.TEST_BASE_URL || BASE_URL;
+
+    // 内部のfetch処理（セッション切れ検出付き）
+    async function _fetchTableId() {
         // about:blankからのfetchではcookiesが送られないため、先にページ遷移する
         if (!page.url() || page.url() === 'about:blank') {
             await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
@@ -131,20 +133,38 @@ async function getAllTypeTableId(page) {
                 try {
                     return JSON.parse(text);
                 } catch (e) {
-                    // HTMLリダイレクト等でJSONでない場合
                     return { result: 'error', error_type: 'parse_error', text: text.substring(0, 100) };
                 }
             } catch (e) {
                 return { result: 'error', message: e.message };
             }
         }, baseUrl);
-        // セッション切れ（login_max_devices等）を検出
         if (status?.result === 'error' && (status?.error_type === 'login_error' || status?.error_type === 'parse_error')) {
             return LOGIN_ERROR_SENTINEL;
         }
         const table = (status?.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
         if (table) return String(table.table_id || table.id);
-    } catch (e) {}
+        return null;
+    }
+
+    try {
+        let result = await _fetchTableId();
+        // セッション切れの場合、フルログインしてリトライ（1回のみ）
+        if (result === LOGIN_ERROR_SENTINEL) {
+            console.log('[getAllTypeTableId] セッション切れ検出。フルログインしてリトライ...');
+            try {
+                const { ensureLoggedIn } = require('./ensure-login');
+                await ensureLoggedIn(page);
+                result = await _fetchTableId();
+            } catch (loginErr) {
+                console.error('[getAllTypeTableId] フルログイン失敗:', loginErr.message);
+                return LOGIN_ERROR_SENTINEL;
+            }
+        }
+        return result;
+    } catch (e) {
+        console.error('[getAllTypeTableId] 予期しないエラー:', e.message);
+    }
     return null;
 }
 

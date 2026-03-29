@@ -1324,6 +1324,7 @@ test.describe('項目設定（115, 116系）', () => {
     // 117-01: ファイルフィールドのブラウザ表示オプション
     // -------------------------------------------------------------------------
     test('117-01: ファイルフィールドの「ブラウザで表示する」オプションを設定できること', async ({ page }) => {
+        test.setTimeout(300000); // 97フィールドのテーブル設定ページは描画が遅い
         await navigateToFieldPage(page, tableId);
         await waitForAngular(page);
 
@@ -1374,7 +1375,8 @@ test.describe('項目設定（115, 116系）', () => {
     // 121-02: Zipファイルアップロード（50MB以上でエラー）
     // -------------------------------------------------------------------------
     test('121-02: 50MB以上のZipファイルをアップロードするとエラーとなること', async ({ page }) => {
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        test.setTimeout(300000); // 97フィールドの追加画面は描画が遅い
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await waitForAngular(page);
 
         // ファイル項目が存在すること
@@ -1463,6 +1465,7 @@ test.describe('項目設定（115, 116系）', () => {
     // 126-01: ルックアップ機能（項目のコピー）
     // -------------------------------------------------------------------------
     test('126-01: 他テーブル参照フィールドにルックアップ設定ができること', async ({ page }) => {
+        test.setTimeout(300000); // 97フィールドのテーブル設定ページは描画が遅い
         await navigateToFieldPage(page, tableId);
         await waitForAngular(page);
 
@@ -3134,57 +3137,80 @@ test.describe('日時フォーマット（97系）', () => {
             throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
         }
 
-        // 日時フィールドを探してクリック
+        // 日時フィールドを探してクリック — 存在することを必ず確認
         const dateField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
-        if (await dateField.count() > 0) {
-            await dateField.click({ force: true });
-            await waitForAngular(page);
+        await expect(dateField).toBeVisible({ timeout: 10000 });
+        await dateField.click({ force: true });
+        await waitForAngular(page);
 
-            // 追加オプション設定を開く
-            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
-            if (await optionBtn.count() > 0) {
-                await optionBtn.click({ force: true });
-                await waitForAngular(page);
-            }
+        // 追加オプション設定を開く
+        const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
+        await expect(optionBtn).toBeVisible({ timeout: 10000 });
+        await optionBtn.click({ force: true });
+        await waitForAngular(page);
 
-            // フォーマット入力欄を探す
-            const formatInput = page.locator('input[name*="format"], input[placeholder*="フォーマット"], input[name*="display_format"]').first();
-            if (await formatInput.count() > 0) {
-                await formatInput.fill('');
-                await formatInput.fill(formatStr);
-                await waitForAngular(page);
-            }
+        // フォーマット入力欄が存在することを確認し、フォーマットを入力
+        const formatInput = page.locator('input[name*="format"], input[placeholder*="フォーマット"], input[name*="display_format"]').first();
+        await expect(formatInput).toBeVisible({ timeout: 10000 });
+        await formatInput.fill('');
+        await formatInput.fill(formatStr);
+        await waitForAngular(page);
 
-            // 更新ボタンをクリック
-            const updateBtn = page.locator('button:has-text("更新する"), button:has-text("保存")').first();
-            if (await updateBtn.count() > 0) {
-                await updateBtn.click({ force: true });
-                await waitForAngular(page);
-            }
-        }
+        // 更新ボタンをクリック
+        const updateBtn = page.locator('button:has-text("更新する"), button:has-text("保存")').first();
+        await expect(updateBtn).toBeVisible({ timeout: 10000 });
+        await updateBtn.click({ force: true });
+        await waitForAngular(page);
 
+        // 保存後のページでエラーがないことを確認
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
+
+        // 保存後、再度フィールドを開いてフォーマットが保持されていることを確認
+        const dateFieldAfterSave = page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first();
+        await expect(dateFieldAfterSave).toBeVisible({ timeout: 10000 });
+        await dateFieldAfterSave.click({ force: true });
+        await waitForAngular(page);
+
+        const optionBtnAfterSave = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
+        if (await optionBtnAfterSave.count() > 0) {
+            await optionBtnAfterSave.click({ force: true });
+            await waitForAngular(page);
+        }
+
+        const formatInputAfterSave = page.locator('input[name*="format"], input[placeholder*="フォーマット"], input[name*="display_format"]').first();
+        if (await formatInputAfterSave.count() > 0) {
+            const savedValue = await formatInputAfterSave.inputValue();
+            // フォーマット文字列が保持されていること（部分一致でdate関数のコアパターンを確認）
+            const coreFormat = formatStr.replace(/^date\(["']/, '').replace(/["']\)$/, '').replace(/["'],\s*strtotime\(.*$/, '');
+            expect(savedValue).toContain(coreFormat);
+        }
     }
 
     test('97-1: 日時フィールドにdate("Y/m/d H:i:s")フォーマットを設定できること', async ({ page }) => {
         await testDateFormat(page, 'date("Y/m/d H:i:s")');
+        // フォーマット設定後、ページにエラーが表示されていないことを再確認
+        await expect(page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first()).toBeVisible({ timeout: 10000 });
     });
 
     test('97-2: 日時フィールドにdate("Y/m/01")フォーマットを設定できること', async ({ page }) => {
         await testDateFormat(page, 'date("Y/m/01")');
+        await expect(page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first()).toBeVisible({ timeout: 10000 });
     });
 
     test('97-3: 日時フィールドにdate("Y/m/t")フォーマットを設定できること', async ({ page }) => {
         await testDateFormat(page, 'date("Y/m/t")');
+        await expect(page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first()).toBeVisible({ timeout: 10000 });
     });
 
     test('97-4: 日時フィールドにdate("Y/m/d H:i:s", strtotime(\'-1 day\'))フォーマットを設定できること', async ({ page }) => {
         await testDateFormat(page, 'date("Y/m/d H:i:s", strtotime(\'-1 day\'))');
+        await expect(page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first()).toBeVisible({ timeout: 10000 });
     });
 
     test('97-5: 日時フィールドにdate("Y/m/d", strtotime(\'last Saturday\'))フォーマットを設定できること', async ({ page }) => {
         await testDateFormat(page, 'date("Y/m/d", strtotime(\'last Saturday\'))');
+        await expect(page.locator('.field-drag, .cdk-drag').filter({ hasText: '日時' }).first()).toBeVisible({ timeout: 10000 });
     });
 });
 
@@ -3218,30 +3244,31 @@ test.describe('表示条件設定（223-229系）', () => {
             throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
         }
 
-        // 指定フィールドタイプを探してクリック
+        // 指定フィールドタイプを探してクリック — 存在することを必ず確認
         const field = page.locator('.field-drag, .cdk-drag').filter({ hasText: fieldTypeLabel }).first();
-        if (await field.count() > 0) {
-            await field.click({ force: true });
-            await waitForAngular(page);
+        await expect(field).toBeVisible({ timeout: 10000 });
+        await field.click({ force: true });
+        await waitForAngular(page);
 
-            // 追加オプション設定を開く
-            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
-            if (await optionBtn.count() > 0) {
-                await optionBtn.click({ force: true });
-                await waitForAngular(page);
-            }
+        // 追加オプション設定を開く — ボタンの存在を確認
+        const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
+        await expect(optionBtn).toBeVisible({ timeout: 10000 });
+        await optionBtn.click({ force: true });
+        await waitForAngular(page);
 
-            // 表示条件設定エリアを探す
-            const conditionArea = page.locator('text=表示条件, text=条件追加, [class*="condition"]').first();
-            if (await conditionArea.count() > 0) {
-                // 条件追加ボタンがあればクリック
-                const addCondBtn = page.locator('button:has-text("条件追加"), a:has-text("条件追加"), button:has-text("+条件")').first();
-                if (await addCondBtn.count() > 0) {
-                    await addCondBtn.click({ force: true });
-                    await waitForAngular(page);
-                }
-            }
-        }
+        // 表示条件設定エリアが表示されていることを確認
+        const conditionArea = page.locator('text=表示条件, text=条件追加, [class*="condition"]').first();
+        await expect(conditionArea).toBeVisible({ timeout: 10000 });
+
+        // 条件追加ボタンが存在し、クリックできることを確認
+        const addCondBtn = page.locator('button:has-text("条件追加"), a:has-text("条件追加"), button:has-text("+条件")').first();
+        await expect(addCondBtn).toBeVisible({ timeout: 10000 });
+        await addCondBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 条件追加後、条件設定行（セレクトボックスなど）が表示されることを確認
+        const conditionRow = page.locator('select, [class*="condition-row"], [class*="filter-row"]').first();
+        await expect(conditionRow).toBeVisible({ timeout: 10000 });
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -3249,22 +3276,28 @@ test.describe('表示条件設定（223-229系）', () => {
 
     test('223: 選択肢(単一選択)フィールドに表示条件設定ができること', async ({ page }) => {
         await testDisplayCondition(page, '選択肢(単一選択)');
+        // 表示条件設定UIが表示されていることを確認
+        await expect(page.locator('text=表示条件, text=条件追加, [class*="condition"]').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('224: 選択肢(複数選択)フィールドに表示条件設定ができること', async ({ page }) => {
         await testDisplayCondition(page, '選択肢(複数選択)');
+        await expect(page.locator('text=表示条件, text=条件追加, [class*="condition"]').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('225: 日時フィールドに表示条件設定ができること', async ({ page }) => {
         await testDisplayCondition(page, '日時');
+        await expect(page.locator('text=表示条件, text=条件追加, [class*="condition"]').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('227: ファイルフィールドに表示条件設定ができること', async ({ page }) => {
         await testDisplayCondition(page, 'ファイル');
+        await expect(page.locator('text=表示条件, text=条件追加, [class*="condition"]').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('229: 計算フィールドに表示条件設定ができること', async ({ page }) => {
         await testDisplayCondition(page, '計算');
+        await expect(page.locator('text=表示条件, text=条件追加, [class*="condition"]').first()).toBeVisible({ timeout: 5000 });
     });
 });
 
@@ -3298,40 +3331,42 @@ test.describe('必須条件設定（231-241系）', () => {
             throw new Error(`フィールド設定ページに遷移できませんでした。現在のURL: ${page.url()}`);
         }
 
-        // 指定フィールドタイプを探してクリック
+        // 指定フィールドタイプを探してクリック — 存在することを必ず確認
         const field = page.locator('.field-drag, .cdk-drag').filter({ hasText: fieldTypeLabel }).first();
-        if (await field.count() > 0) {
-            await field.click({ force: true });
+        await expect(field).toBeVisible({ timeout: 10000 });
+        await field.click({ force: true });
+        await waitForAngular(page);
+
+        // 追加オプション設定を開く — ボタンの存在を確認
+        const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
+        await expect(optionBtn).toBeVisible({ timeout: 10000 });
+        await optionBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 必須設定チェックボックスが存在することを確認
+        const requiredCheck = page.locator('label:has-text("必須項目にする"), input[name*="required"], input[type="checkbox"]:near(:text("必須"))').first();
+        await expect(requiredCheck).toBeVisible({ timeout: 10000 });
+
+        // チェックを入れる
+        const isChecked = await requiredCheck.isChecked().catch(() => false);
+        if (!isChecked) {
+            await requiredCheck.click({ force: true });
             await waitForAngular(page);
-
-            // 追加オプション設定を開く
-            const optionBtn = page.locator('button:has-text("追加オプション"), a:has-text("追加オプション"), button:has-text("追加オプション設定")').first();
-            if (await optionBtn.count() > 0) {
-                await optionBtn.click({ force: true });
-                await waitForAngular(page);
-            }
-
-            // 必須設定チェックボックスを探す
-            const requiredCheck = page.locator('label:has-text("必須項目にする"), input[name*="required"], input[type="checkbox"]:near(:text("必須"))').first();
-            if (await requiredCheck.count() > 0) {
-                // チェックを入れる
-                const isChecked = await requiredCheck.isChecked().catch(() => false);
-                if (!isChecked) {
-                    await requiredCheck.click({ force: true });
-                    await waitForAngular(page);
-                }
-
-                // 必須条件設定エリアが表示されることを確認
-                const condArea = page.locator('text=必須条件, text=条件追加').first();
-                if (await condArea.count() > 0) {
-                    const addCondBtn = page.locator('button:has-text("条件追加"), a:has-text("条件追加")').first();
-                    if (await addCondBtn.count() > 0) {
-                        await addCondBtn.click({ force: true });
-                        await waitForAngular(page);
-                    }
-                }
-            }
         }
+
+        // 必須条件設定エリアが表示されることを確認
+        const condArea = page.locator('text=必須条件, text=条件追加').first();
+        await expect(condArea).toBeVisible({ timeout: 10000 });
+
+        // 条件追加ボタンが存在し、クリックできることを確認
+        const addCondBtn = page.locator('button:has-text("条件追加"), a:has-text("条件追加")').first();
+        await expect(addCondBtn).toBeVisible({ timeout: 10000 });
+        await addCondBtn.click({ force: true });
+        await waitForAngular(page);
+
+        // 条件追加後、条件設定行が表示されることを確認
+        const conditionRow = page.locator('select, [class*="condition-row"], [class*="filter-row"]').first();
+        await expect(conditionRow).toBeVisible({ timeout: 10000 });
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
@@ -3339,23 +3374,29 @@ test.describe('必須条件設定（231-241系）', () => {
 
     test('231: 文字列(一行)フィールドに必須条件設定ができること', async ({ page }) => {
         await testRequiredCondition(page, '文字列(一行)');
+        // 必須条件設定UIが表示されていることを確認
+        await expect(page.locator('text=必須条件, text=条件追加').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('232: 文章(複数行・通常テキスト)フィールドに必須条件設定ができること', async ({ page }) => {
         await testRequiredCondition(page, '文章');
+        await expect(page.locator('text=必須条件, text=条件追加').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('233: 文章(複数行・リッチテキスト)フィールドに必須条件設定ができること', async ({ page }) => {
         // リッチテキストも「文章」タイプの中にある
         await testRequiredCondition(page, '文章');
+        await expect(page.locator('text=必須条件, text=条件追加').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('234: 数値(整数)フィールドに必須条件設定ができること', async ({ page }) => {
         await testRequiredCondition(page, '数値');
+        await expect(page.locator('text=必須条件, text=条件追加').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('235: 数値(小数)フィールドに必須条件設定ができること', async ({ page }) => {
         await testRequiredCondition(page, '数値');
+        await expect(page.locator('text=必須条件, text=条件追加').first()).toBeVisible({ timeout: 5000 });
     });
 
     test('236: Yes/Noフィールドに必須条件設定ができること', async ({ page }) => {

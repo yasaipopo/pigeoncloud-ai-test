@@ -1374,9 +1374,15 @@ test.describe('子テーブル（325, 341系）', () => {
         test.setTimeout(360000);
         const context = await createLoginContext(browser);
         const page = await context.newPage();
+        // about:blankからfetchするとcookiesが送られないため、先にアプリURLに遷移
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         await ensureLoggedIn(page);
         tableId = await getAllTypeTableId(page);
-        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
+        if (!tableId || tableId === '__LOGIN_ERROR__') {
+            await login(page);
+            tableId = await getAllTypeTableId(page);
+        }
+        if (!tableId || tableId === '__LOGIN_ERROR__') throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
     });
