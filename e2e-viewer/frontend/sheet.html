@@ -1007,11 +1007,24 @@ async function playVideo(spec, movie) {
       // 同じmovieのテスト内容一覧を右カラムに表示
       const movieTests = allItems.filter(i => i.spec === spec && i.movie === movie);
       const listEl = document.getElementById('videoTestList');
+
+      // 動画タイムスタンプ（stepの開始秒数）
+      const STEP_TIMES = {
+        'auth#AT01': {'144-01': 0, '1-1': 6, '1-2': 19, '38-1': 41, '295': 57},
+        'auth#AT02': {'176': 0, '212-1': 13, '212-2': 66, '212-3': 77, '212-4': 84},
+        'auth#UC01': {'267': 0},
+      };
+      const timeMap = STEP_TIMES[`${spec}#${movie}`] || {};
+      const fmtTime = (sec) => { const m = Math.floor(sec/60); const s = sec%60; return `${m}:${String(s).padStart(2,'0')}`; };
+
       if (movieTests.length > 0) {
-        listEl.innerHTML = movieTests.map((t, idx) => `
+        listEl.innerHTML = movieTests.map((t, idx) => {
+          const sec = timeMap[t.caseNo];
+          const timeLabel = sec !== undefined ? `<a href="#" onclick="document.getElementById('videoPlayer').currentTime=${sec};return false" style="color:#fff;background:#0d6efd;padding:1px 6px;border-radius:4px;font-size:.75rem;text-decoration:none;margin-left:6px" title="動画をこの位置にジャンプ">▶ ${fmtTime(sec)}</a>` : '';
+          return `
           <div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #dee2e6">
             <div style="font-weight:700;color:#0d6efd;margin-bottom:4px">
-              ${idx+1}. ${escHtml(t.caseNo)} — ${escHtml(t.feature || '')}
+              ${idx+1}. ${escHtml(t.caseNo)} — ${escHtml(t.feature || '')} ${timeLabel}
             </div>
             <div style="margin-bottom:6px">
               <span style="font-size:.72rem;color:#6c757d;font-weight:600">テスト内容:</span>
