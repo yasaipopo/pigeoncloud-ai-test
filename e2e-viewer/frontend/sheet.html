@@ -1000,8 +1000,8 @@ async function playVideo(spec, movie) {
       body: JSON.stringify({ key })
     });
     const data = await resp.json();
-    if (data.url) {
-      document.getElementById('videoPlayer').src = data.url;
+    if (data.downloadUrl || data.url) {
+      document.getElementById('videoPlayer').src = data.downloadUrl || data.url;
       document.getElementById('videoModalTitle').textContent = `${SPEC_LABELS[spec] || spec} / ${movie}`;
       new bootstrap.Modal(document.getElementById('videoModal')).show();
     } else {
