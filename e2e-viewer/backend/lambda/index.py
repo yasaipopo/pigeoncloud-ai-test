@@ -669,6 +669,8 @@ def pipeline_update(event):
             'yamlCheck': 'yamlCheckNote',
             'specCheck': 'specCheckNote',
             'runCheck': 'runCheckNote',
+            'detailedFlow': 'detailedFlowNote',
+            'testerCheck': 'testerCheckNote',
         }
         if field not in valid_fields:
             results.append({'spec': spec, 'caseNo': case_no, 'error': f'不正なfield: {field}'})
@@ -685,6 +687,7 @@ def pipeline_update(event):
             'stagingResult', 'stagingRunId', 'stagingNote',
             'mainResult', 'mainRunId', 'mainNote',
             'screenshotUrl', 'videoUrl',
+            'testerCheckBy', 'testerCheckAt',
         ]
         for ef in extra_field_whitelist:
             if ef in item:
@@ -890,12 +893,17 @@ def pipeline_init(event):
                 'feature': case.get('feature', ''),
                 'description': case.get('description', ''),
                 'expected': case.get('expected', ''),
+                'detailedFlow': case.get('detailedFlow', ''),
                 'yamlCheck': case.get('yamlCheck') or None,
                 'yamlCheckNote': case.get('yamlCheckNote', ''),
                 'specCheck': case.get('specCheck') or None,
                 'specCheckNote': case.get('specCheckNote', ''),
                 'runCheck': case.get('runCheck') or None,
                 'runCheckNote': case.get('runCheckNote', ''),
+                'testerCheck': case.get('testerCheck') or None,
+                'testerCheckNote': case.get('testerCheckNote', ''),
+                'testerCheckBy': case.get('testerCheckBy', ''),
+                'testerCheckAt': case.get('testerCheckAt', ''),
                 'updatedAt': now_iso,
                 'updatedBy': 'pipeline_init',
             }

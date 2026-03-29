@@ -257,6 +257,7 @@
             <th style="width:64px" class="text-center">1.YAML</th>
             <th style="width:64px" class="text-center">2.Spec</th>
             <th style="width:64px" class="text-center">3.Run</th>
+            <th style="width:64px" class="text-center">✅テスター</th>
             <th style="width:64px" class="text-center">Staging</th>
             <th style="width:64px" class="text-center">Main</th>
             <th style="width:40px" class="text-center" title="スクリーンショット">📸</th>
@@ -588,7 +589,7 @@ function renderTable(items) {
     orderedSpecs.forEach(spec => {
       // グループヘッダー
       const headerRow = tbody.insertRow();
-      headerRow.innerHTML = `<td colspan="12" class="p-0 border-0">
+      headerRow.innerHTML = `<td colspan="14" class="p-0 border-0">
         <div style="background:#e9ecef;font-size:.82rem;font-weight:600;padding:4px 12px;border-radius:4px;margin:8px 0 4px;color:#495057;">
           ${escHtml(spec)} <span style="font-weight:normal;color:#6c757d">(${groups[spec].length}件)</span>
         </div>
@@ -641,6 +642,11 @@ function renderRow(tbody, item) {
     </td>
     <td class="check-cell" onclick="openEdit('${escAttr(item.spec)}','${escAttr(item.caseNo)}','runCheck','${escAttr(item.runCheck||'')}','${escAttr(item.runCheckNote||'')}')">
       ${runBadge} ${runNote}
+    </td>
+    <td class="check-cell" onclick="toggleTesterCheck('${escAttr(item.spec)}','${escAttr(item.caseNo)}')">
+      ${item.testerCheck === 'ok'
+        ? '<span class="badge badge-ok" title="' + escHtml((item.testerCheckBy||'') + ' ' + (item.testerCheckAt||'')) + '">✅</span>'
+        : '<span class="badge badge-unchecked">☐</span>'}
     </td>
     <td class="result-cell">${stagingBadge}</td>
     <td class="result-cell">${mainBadge}</td>
@@ -785,6 +791,11 @@ function openEdit(spec, caseNo, field, currentVal, currentNote) {
         { val: 'fail_product', label: 'FAIL(Product)', cls: 'btn-danger' },
         { val: 'fail_env', label: 'FAIL(Env)', cls: 'btn-outline-purple' },
       ]
+    : field === 'testerCheck'
+    ? [
+        { val: null, label: '未チェック', cls: 'btn-outline-secondary' },
+        { val: 'ok', label: '確認済み', cls: 'btn-success' },
+      ]
     : [
         { val: null, label: '未チェック', cls: 'btn-outline-secondary' },
         { val: 'ok', label: 'OK', cls: 'btn-success' },
@@ -846,6 +857,50 @@ async function saveNote() {
 }
 
 // =========================================
+// テスターチェック トグル
+// =========================================
+async function toggleTesterCheck(spec, caseNo) {
+  const item = allItems.find(i => i.spec === spec && i.caseNo === caseNo);
+  if (!item) return;
+
+  const newVal = item.testerCheck === 'ok' ? null : 'ok';
+  const checkerName = prompt('チェック者名を入力してください:', localStorage.getItem('testerName') || '');
+  if (checkerName === null) return; // キャンセル
+  localStorage.setItem('testerName', checkerName);
+
+  const now = new Date().toISOString();
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/pipeline`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        spec: spec,
+        caseNo: caseNo,
+        field: 'testerCheck',
+        value: newVal,
+        note: '',
+        updatedBy: checkerName || 'tester',
+        testerCheckBy: checkerName || 'tester',
+        testerCheckAt: newVal ? now : '',
+      })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    // ローカルデータ更新
+    item.testerCheck = newVal;
+    item.testerCheckBy = checkerName || 'tester';
+    item.testerCheckAt = newVal ? now : '';
+    item.updatedAt = now;
+    item.updatedBy = checkerName || 'tester';
+
+    applyFilters();
+  } catch (e) {
+    alert('テスターチェック更新に失敗: ' + e.message);
+  }
+}
+
+// =========================================
 // yamlから初期化
 // =========================================
 async function initFromYaml() {
@@ -871,6 +926,7 @@ async function initFromYaml() {
         feature: c.feature || '',
         description: c.description || '',
         expected: c.expected || '',
+        detailedFlow: c.detailedFlow || '',
       }))
     }));
 
@@ -972,21 +1028,79 @@ function escAttr(str) {
           <tr><th>機能名</th><td id="detailFeature"></td></tr>
           <tr><th>テスト内容</th><td id="detailDescription" style="white-space:pre-wrap"></td></tr>
           <tr><th>期待結果</th><td id="detailExpected" style="white-space:pre-wrap"></td></tr>
+          <tr>
+            <th>詳細テストフロー</th>
+            <td>
+              <textarea class="form-control" id="detailDetailedFlow" rows="6" placeholder="詳細なテストフロー・操作手順を記入..."></textarea>
+            </td>
+          </tr>
         </table>
+        <div class="text-end">
+          <button type="button" class="btn btn-primary btn-sm" onclick="saveDetailedFlow()">
+            <i class="bi bi-save me-1"></i>詳細フローを保存
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+// 詳細モーダル用の現在の spec/caseNo
+let detailEditingSpec = '';
+let detailEditingCaseNo = '';
+
 function openDetailModal(spec, caseNo, description, expected, feature) {
+  detailEditingSpec = spec;
+  detailEditingCaseNo = caseNo;
   document.getElementById('detailModalTitle').textContent = `${spec} / ${caseNo}`;
   document.getElementById('detailSpec').textContent = spec;
   document.getElementById('detailCaseNo').textContent = caseNo;
   document.getElementById('detailFeature').textContent = feature.replace(/\\n/g, "\n");
   document.getElementById('detailDescription').textContent = description.replace(/\\n/g, "\n");
   document.getElementById('detailExpected').textContent = expected.replace(/\\n/g, "\n");
+
+  // 詳細フローを取得してセット
+  const item = allItems.find(i => i.spec === spec && i.caseNo === caseNo);
+  document.getElementById('detailDetailedFlow').value = (item && item.detailedFlow) ? item.detailedFlow : '';
+
   new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+
+async function saveDetailedFlow() {
+  const flowText = document.getElementById('detailDetailedFlow').value;
+  const spec = detailEditingSpec;
+  const caseNo = detailEditingCaseNo;
+
+  if (!spec || !caseNo) return;
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/pipeline`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        spec: spec,
+        caseNo: caseNo,
+        field: 'detailedFlow',
+        value: flowText,
+        note: '',
+        updatedBy: 'manual',
+      })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    // ローカルデータ更新
+    const item = allItems.find(i => i.spec === spec && i.caseNo === caseNo);
+    if (item) {
+      item.detailedFlow = flowText;
+      item.updatedAt = new Date().toISOString();
+      item.updatedBy = 'manual';
+    }
+
+    alert('詳細フローを保存しました');
+  } catch (e) {
+    alert('保存に失敗しました: ' + e.message);
+  }
 }
 
 async function playVideo(spec, movie) {
@@ -1036,6 +1150,10 @@ async function playVideo(spec, movie) {
               <span style="font-size:.72rem;color:#6c757d;font-weight:600">期待結果:</span>
               <div style="white-space:pre-wrap;color:#198754;line-height:1.5">${escHtml(t.expected || '')}</div>
             </div>
+            ${t.detailedFlow ? `<div style="margin-top:6px;background:#fff3cd;padding:6px 8px;border-radius:4px;font-size:.8rem">
+              <span style="font-weight:600;color:#856404">📋 詳細テストフロー:</span>
+              <div style="white-space:pre-wrap">${escHtml(t.detailedFlow || '')}</div>
+            </div>` : ''}
           </div>
         `;}).join('');
       } else {
