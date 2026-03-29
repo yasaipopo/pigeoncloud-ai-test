@@ -265,13 +265,28 @@ async function assertFieldPageLoaded(page, tableId) {
 let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(480000);
+    test.setTimeout(600000);
     const { context, page } = await createAuthContext(browser);
     // about:blankではcookiesが送られないため、先にアプリURLに遷移
     await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-    await createAllTypeTable(page);
+    const createResult = await createAllTypeTable(page);
+    if (createResult && createResult.tableId) {
+        _sharedTableId = createResult.tableId;
+    }
     await createAllTypeData(page, 3);
-    _sharedTableId = await getAllTypeTableId(page);
+    // createResultからID取れなかった場合のフォールバック
+    if (!_sharedTableId) {
+        // リトライ: セッション切れ対策で再ログインしてから取得
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        const loginForm = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+        if (loginForm) {
+            await page.fill('#id', process.env.TEST_EMAIL || 'admin');
+            await page.fill('#password', process.env.TEST_PASSWORD || '');
+            await page.click('button[type=submit].btn-primary');
+            await page.waitForURL('**/admin/dashboard', { timeout: 60000 }).catch(() => {});
+        }
+        _sharedTableId = await getAllTypeTableId(page);
+    }
     await context.close();
 });
 

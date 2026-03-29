@@ -177,13 +177,26 @@ async function debugApiGetStatus(page) {
  * @returns {{ email: string, password: string, id: number, result: string }}
  */
 async function createTestUser(page) {
-    const result = await debugApiPost(page, '/create-user');
+    let result = await debugApiPost(page, '/create-user');
     if (result.result === 'success') {
         return result;
     }
     console.log('[createTestUser] create-user API失敗:', JSON.stringify(result));
+    // セッション切れ対策: timeout/error の場合は再ログインしてリトライ
+    if (result.result === 'timeout' || result.result === 'error') {
+        console.log('[createTestUser] セッション切れの可能性、再ログインします');
+        await ensureLoggedIn(page, EMAIL, PASSWORD);
+        // 上限解除も再実行
+        await debugApiPost(page, '/settings', { table: 'setting', data: { max_user: 9999, max_table_num: 9999 } });
+        result = await debugApiPost(page, '/create-user');
+        if (result.result === 'success') {
+            console.log('[createTestUser] 再ログイン後リトライ成功:', result.email);
+            return result;
+        }
+        console.log('[createTestUser] 再ログイン後リトライも失敗:', JSON.stringify(result));
+    }
     // 上限エラーの場合は再度上限解除を試みてリトライ
-    if (result.result === 'error' && (result.message || '').includes('上限') || !result.message) {
+    if (result.result !== 'success') {
         console.log('[createTestUser] 上限解除を再試行します');
         await debugApiPost(page, '/settings', { table: 'setting', data: { max_user: 9999, max_table_num: 9999 } });
         const retryResult = await debugApiPost(page, '/create-user');

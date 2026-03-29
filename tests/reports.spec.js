@@ -51,7 +51,11 @@ async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
-        return await browser.newContext({ storageState: authStatePath });
+        try {
+            return await browser.newContext({ storageState: authStatePath });
+        } catch (e) {
+            console.warn(`[createLoginContext] storageState読み込み失敗、新規コンテキストで続行: ${e.message}`);
+        }
     }
     return await browser.newContext();
 }
@@ -169,6 +173,11 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         try {
             await ensureLoggedIn(page);
             tableId = await getAllTypeTableId(page);
+            if (!tableId) {
+                // リトライ: セッション切れ対策
+                await ensureLoggedIn(page);
+                tableId = await getAllTypeTableId(page);
+            }
             if (!tableId) {
                 console.error('[beforeAll] ALLテストテーブルが見つかりません');
             }

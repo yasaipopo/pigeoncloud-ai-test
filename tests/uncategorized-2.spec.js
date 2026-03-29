@@ -259,6 +259,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         test.setTimeout(360000);
         const { context, page } = await createAuthContext(browser);
         tableId = await getAllTypeTableId(page);
+        if (!tableId) {
+            await ensureLoggedIn(page);
+            tableId = await getAllTypeTableId(page);
+        }
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
         const dataResult = await createAllTypeData(page, 3).catch((e) => { console.log('createAllTypeData error:', e.message); return { result: 'error' }; });

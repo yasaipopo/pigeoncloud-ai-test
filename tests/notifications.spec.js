@@ -233,6 +233,11 @@ test.describe('通知設定', () => {
         // about:blankではcookiesが送られないため、先にアプリURLに遷移
         await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         tableId = await getAllTypeTableId(page);
+        if (!tableId) {
+            // リトライ: セッション切れ対策
+            await ensureLoggedIn(page);
+            tableId = await getAllTypeTableId(page);
+        }
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await context.close();
     });

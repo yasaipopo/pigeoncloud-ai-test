@@ -25,7 +25,11 @@ async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
-        return await browser.newContext({ storageState: authStatePath });
+        try {
+            return await browser.newContext({ storageState: authStatePath });
+        } catch (e) {
+            console.warn(`[createLoginContext] storageState読み込み失敗、新規コンテキストで続行: ${e.message}`);
+        }
     }
     return await browser.newContext();
 }
@@ -146,11 +150,15 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
     // テスト前: テーブルとデータを一度だけ作成
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
+        test.setTimeout(480000);
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
         tableId = await getAllTypeTableId(page);
+        if (!tableId) {
+            await ensureLoggedIn(page);
+            tableId = await getAllTypeTableId(page);
+        }
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await page.close();
         await context.close();
@@ -310,12 +318,18 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     let tableId = null;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
+        test.setTimeout(480000);
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
-        const status = await debugApiGet(page, '/status');
-        const existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+        let status = await debugApiGet(page, '/status');
+        let existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+        if (!existing) {
+            // リトライ: セッション切れ対策
+            await ensureLoggedIn(page);
+            status = await debugApiGet(page, '/status');
+            existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+        }
         if (existing) {
             tableId = existing.id;
         } else {

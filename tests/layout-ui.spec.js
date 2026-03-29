@@ -70,7 +70,11 @@ async function createLoginContext(browser) {
 
     const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
     if (fs.existsSync(authStatePath)) {
-        return await browser.newContext({ storageState: authStatePath });
+        try {
+            return await browser.newContext({ storageState: authStatePath });
+        } catch (e) {
+            console.warn(`[createLoginContext] storageState読み込み失敗、新規コンテキストで続行: ${e.message}`);
+        }
     }
     return await browser.newContext();
 }

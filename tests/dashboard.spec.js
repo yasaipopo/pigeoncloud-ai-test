@@ -103,6 +103,11 @@ test.describe('ダッシュボード', () => {
             // ALLテストテーブルIDの取得（失敗してもthrowしない — DB-03のみが必要）
             _tableId = await getAllTypeTableId(page);
             if (!_tableId) {
+                // リトライ: セッション切れ対策
+                await ensureLoggedIn(page);
+                _tableId = await getAllTypeTableId(page);
+            }
+            if (!_tableId) {
                 console.log('[beforeAll] ALLテストテーブルが見つかりません（DB-03で個別にスキップされます）');
             }
 

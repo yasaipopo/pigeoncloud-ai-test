@@ -115,18 +115,32 @@ async function getAllTypeTableId(page) {
         const baseUrl = process.env.TEST_BASE_URL || BASE_URL;
         // about:blankからのfetchではcookiesが送られないため、先にページ遷移する
         if (!page.url() || page.url() === 'about:blank') {
-            await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        }
+        // ログインページにリダイレクトされている場合はセッション切れ
+        if (page.url().includes('/admin/login')) {
+            return LOGIN_ERROR_SENTINEL;
         }
         const status = await page.evaluate(async (baseUrl) => {
-            const res = await fetch(baseUrl + '/api/admin/debug/status', {
-                credentials: 'include',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            });
-            return res.json();
+            try {
+                const res = await fetch(baseUrl + '/api/admin/debug/status', {
+                    credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    // HTMLリダイレクト等でJSONでない場合
+                    return { result: 'error', error_type: 'parse_error', text: text.substring(0, 100) };
+                }
+            } catch (e) {
+                return { result: 'error', message: e.message };
+            }
         }, baseUrl);
         // セッション切れ（login_max_devices等）を検出
-        if (status?.result === 'error' && status?.error_type === 'login_error') {
-            return '__LOGIN_ERROR__';
+        if (status?.result === 'error' && (status?.error_type === 'login_error' || status?.error_type === 'parse_error')) {
+            return LOGIN_ERROR_SENTINEL;
         }
         const table = (status?.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
         if (table) return String(table.table_id || table.id);
