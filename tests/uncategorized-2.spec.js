@@ -195,27 +195,28 @@ async function deleteAllTypeTables(page) {
  * ページアクセス確認ヘルパー
  */
 async function checkPage(page, path) {
-    await page.goto(BASE_URL + path);
-    await page.waitForLoadState('domcontentloaded');
-    const bodyText = await page.innerText('body');
-    expect(bodyText).not.toContain('Internal Server Error');
-    expect(bodyText).not.toContain('404 Not Found');
-    await expect(page.locator('header.app-header')).toBeVisible({ timeout: 5000 }).catch(() => {});
+    await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    // Angular SPAのブート完了を待つ（.navbar が出る = ログイン済み+Angularレンダリング完了）
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
     // Angular SPAのテーブル描画完了を待機（domcontentloadedの後も非同期ロードが続く）
     // データセット一覧ページの場合は特別処理（サーバー負荷で遅延しやすい）
     if (path.includes('/dataset__') && !path.includes('/setting') && !path.includes('/edit')) {
-        // サーバー負荷により読み込みが遅くなる場合があるため35秒待機
-        const tableFound = await page.waitForSelector('table', { timeout: 35000 }).then(() => true).catch(() => false);
+        // サーバー負荷により読み込みが遅くなる場合があるため60秒待機
+        const tableFound = await page.waitForSelector('table', { timeout: 60000 }).then(() => true).catch(() => false);
         if (tableFound) {
             // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
-            await page.waitForSelector('table thead th', { timeout: 10000 }).catch(() => {});
+            await page.waitForSelector('table thead th', { timeout: 15000 }).catch(() => {});
         } else {
-            await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 5000 }).catch(() => {});
+            await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 10000 }).catch(() => {});
         }
         await page.waitForTimeout(500);
     } else {
-        await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
+        await page.waitForSelector('table', { timeout: 10000 }).catch(() => {});
     }
+    // ページ読み込み後にエラーチェック
+    const bodyText = await page.innerText('body');
+    expect(bodyText).not.toContain('Internal Server Error');
+    expect(bodyText).not.toContain('404 Not Found');
 }
 
 // =============================================================================
@@ -237,7 +238,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
+        test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });

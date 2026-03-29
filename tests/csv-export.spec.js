@@ -1456,6 +1456,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 337: CSVダウンロード時に固定テキスト項目が含まれないこと
     // -------------------------------------------------------------------------
     test('337: CSVダウンロードの項目に固定テキストが含まれないこと', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1482,6 +1483,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 393: 文字列(1行)の「1-03」がCSVで日付変換されないこと
     // -------------------------------------------------------------------------
     test('393: CSVダウンロードで文字列が日付変換されないこと', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1508,6 +1510,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 656: フィルタ適用状態でCSVダウンロードダイアログのフィルタ反映チェックボックス
     // -------------------------------------------------------------------------
     test('656: フィルタ適用状態でCSVダウンロードにフィルタ反映チェックが表示されること', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1537,6 +1540,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 667: CSVアップロード時の「データリセット」チェックボックス
     // -------------------------------------------------------------------------
     test('667: CSVアップロード画面に「データリセット」チェックボックスが存在すること', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1563,6 +1567,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 674: Yes/Noフィールドを含むCSVダウンロードが正常に動作すること
     // -------------------------------------------------------------------------
     test('674: Yes/Noフィールドを含むCSVダウンロードが正常に動作すること', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1589,6 +1594,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 731: CSVアップロード中にプログレスバーが表示されること
     // -------------------------------------------------------------------------
     test('731: CSVアップロード画面にプログレス/進捗UIが存在すること', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1613,6 +1619,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 736: CSV主キー設定で計算項目が設定できない注意書きが表示されること
     // -------------------------------------------------------------------------
     test('736: テーブル設定のCSV主キー設定画面で計算項目の注意書きが表示されること', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         // テーブル編集画面へ
         await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1693,6 +1700,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 752: 日時項目のCSVアップロードで規定フォーマットが認識されること
     // -------------------------------------------------------------------------
     test('752: CSVアップロードモーダルが正常表示されること（日時フォーマット対応確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1724,6 +1732,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 309: CSVアップロードのエラーメッセージが内容がわかるようになっていること（機能改善確認）
     // -------------------------------------------------------------------------
     test('309: CSVアップロード時にエラーメッセージが具体的な内容で表示されること（機能改善確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1784,6 +1793,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 313: CSVアップロードの注意書きに作成者・最終更新者が含まれること（機能改善確認）
     // -------------------------------------------------------------------------
     test('313: CSVアップロードの注意書きに「作成者、最終更新者」が含まれること（機能改善確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1875,6 +1885,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 378: クロス集計フィルタでCSVダウンロードがエラーなく動作すること（バグ修正確認）
     // -------------------------------------------------------------------------
     test('378: クロス集計フィルタでCSVダウンロードがエラーなく動作すること（バグ修正確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1922,6 +1933,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 438: テーブル管理者でも子テーブルのCSVダウンロードができること（バグ修正確認）
     // -------------------------------------------------------------------------
     test('438: テーブル管理者が子テーブルのCSVダウンロードボタンを利用できること（バグ修正確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1941,6 +1953,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 444: 他テーブル参照で文字列の「1-03」が日付変換されないこと（バグ修正確認）
     // -------------------------------------------------------------------------
     test('444: 他テーブル参照の文字列がCSVダウンロードで日付変換されないこと（バグ修正確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1975,6 +1988,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 447: CSVダウンロードで他テーブル参照の値がずれないこと（バグ修正確認）
     // -------------------------------------------------------------------------
     test('447: CSVダウンロードで他テーブル参照項目の値がずれないこと（バグ修正確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -1998,6 +2012,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 483: CSVアップロードで空白項目が既存データを維持すること（バグ修正確認）
     // -------------------------------------------------------------------------
     test('483: CSVアップロードで空白項目が既存データを上書きしないこと（バグ修正確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -2028,6 +2043,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 485: 複数値文字列のCSVダウンロードでデータが連結されないこと（機能改善確認）
     // -------------------------------------------------------------------------
     test('485: 複数値文字列のCSVダウンロードでデータが区切られて出力されること（機能改善確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -2049,6 +2065,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 495: CSVアップロードで数値「0」が正しく認識されること（バグ修正確認）
     // -------------------------------------------------------------------------
     test('495: CSVアップロードで数値「0」が空欄にならず正しく認識されること（バグ修正確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
@@ -2076,6 +2093,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 538: CSVアップロードで計算項目の重複チェックが動作すること（バグ修正確認）
     // -------------------------------------------------------------------------
     test('538: CSVアップロードで計算項目の重複チェックに関するUI確認（バグ修正確認）', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
 
         // テーブル編集画面のCSVタブに移動
@@ -2135,6 +2153,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 712: 必須複数値他テーブル参照のCSVアップロード更新（列なし）
     // -------------------------------------------------------------------------
     test('712: 必須の複数値他テーブル参照項目の列がCSVになくてもエラーにならないこと', async ({ page }) => {
+        const tableId = getTestTableId();
         expect(tableId).not.toBeNull();
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);

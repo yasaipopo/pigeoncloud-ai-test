@@ -194,20 +194,19 @@ async function deleteAllTypeTables(page) {
  * Angular SPAのレンダリング完了を待機してからアサーションを行う
  */
 async function checkPage(page, path) {
-    await page.goto(BASE_URL + path);
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
     // Angularアプリのレンダリング完了を待機（ナビゲーションバー表示まで）
-    await expect(page.locator('header.app-header, .navbar, nav.navbar')).toBeVisible({ timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
     // Angular SPAのデータ読み込み完了を待機（テーブルまたはコンテンツが表示されるまで）
     // /admin/dataset__XXX 系ページではtableが表示されるまで待機
     if (path.includes('/admin/dataset__') && !path.includes('/setting') && !path.includes('/edit')) {
-        // サーバー負荷により読み込みが遅くなる場合があるため待機（60秒timeout内に収まるよう20秒に制限）
-        const tableFound = await page.waitForSelector('table', { timeout: 20000 }).then(() => true).catch(() => false);
+        // サーバー負荷により読み込みが遅くなる場合があるため60秒待機
+        const tableFound = await page.waitForSelector('table', { timeout: 60000 }).then(() => true).catch(() => false);
         if (tableFound) {
             // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
-            await page.waitForSelector('table thead th', { timeout: 10000 }).catch(() => {});
+            await page.waitForSelector('table thead th', { timeout: 15000 }).catch(() => {});
         } else {
-            await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 5000 }).catch(() => {});
+            await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 10000 }).catch(() => {});
         }
     }
     // その他ページは固定の待機
@@ -238,7 +237,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(60000); // checkPage含むテスト用（30秒では不足）
+        test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });

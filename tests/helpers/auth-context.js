@@ -25,6 +25,22 @@ async function createAuthContext(browser) {
         fs.existsSync(authStatePath) ? { storageState: authStatePath } : {}
     );
     const page = await context.newPage();
+
+    // storageStateセッション切れ対策: dashboardに遷移してログイン状態を確認
+    const BASE_URL = process.env.TEST_BASE_URL;
+    if (BASE_URL) {
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        // ログイン画面にリダイレクトされた場合は再ログイン
+        if (page.url().includes('/admin/login')) {
+            const EMAIL = process.env.TEST_EMAIL || 'admin';
+            const PASSWORD = process.env.TEST_PASSWORD || '';
+            await page.fill('#id', EMAIL).catch(() => {});
+            await page.fill('#password', PASSWORD).catch(() => {});
+            await page.click('button[type=submit].btn-primary').catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+        }
+    }
+
     return { context, page };
 }
 
