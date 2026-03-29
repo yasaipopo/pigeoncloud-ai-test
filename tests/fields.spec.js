@@ -281,6 +281,8 @@ let _sharedTableId = null;
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(480000);
     const { context, page } = await createAuthContext(browser);
+    // about:blankではcookiesが送られないため、先にアプリURLに遷移
+    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
     await createAllTypeTable(page);
     await createAllTypeData(page, 5);
     _sharedTableId = await getAllTypeTableId(page);

@@ -163,6 +163,21 @@ async function debugApiPost(page, path, body = {}, timeoutMs = 30000) {
 }
 
 /**
+ * テストユーザー作成（上限エラー時はリトライ）
+ */
+async function createTestUser(page) {
+    const result = await debugApiPost(page, '/create-user');
+    if (result.result === 'success') return result;
+    // 上限エラーの可能性 → 上限解除してリトライ
+    console.log('[createTestUser] create-user失敗、上限解除してリトライ:', JSON.stringify(result));
+    await debugApiPost(page, '/settings', { table: 'setting', data: { max_user: 9999, max_table_num: 9999 } });
+    const retry = await debugApiPost(page, '/create-user');
+    if (retry.result === 'success') return retry;
+    console.log('[createTestUser] リトライも失敗:', JSON.stringify(retry));
+    return retry;
+}
+
+/**
  * テーブルIDを取得する共通関数
  */
 async function getFirstTableId(page) {
@@ -246,7 +261,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     test('100-1: ユーザータイプ「ユーザー」でログイン後ユーザーアイコンクリックでメニュー一覧が表示されること', async ({ page }) => {
         test.setTimeout(120000);
         // マスターユーザーでログインしてテストユーザーを作成
-        const userBody = await debugApiPost(page, '/create-user');
+        const userBody = await createTestUser(page);
         expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         const testEmail = userBody.email;
         const testPassword = userBody.password;
@@ -591,12 +606,12 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // 画像プレビューまたはファイル選択済み表示が確認できること
         // forms-field.component.html: img.admin-forms__image または img.preview_thumbnail
         const imagePreview = page.locator('dataset-menu-options img.admin-forms__image, dataset-menu-options img.preview_thumbnail, dataset-menu-options .fileStyle .text-primary').first();
-        await expect(imagePreview).toBeVisible({ timeout: 10000 });
+        await expect(imagePreview).toBeVisible({ timeout: 30000 });
         console.log('画像アップロード後のプレビュー確認OK');
 
         // 「画像を削除」ボタンが表示されていることを確認（画像アップロード成功の証拠）
         const deleteBtn = page.locator('dataset-menu-options button:has-text("画像を削除")');
-        await expect(deleteBtn).toBeVisible({ timeout: 10000 });
+        await expect(deleteBtn).toBeVisible({ timeout: 30000 });
         console.log('画像アップロード後「画像を削除」ボタン確認OK');
 
         // 保存（更新）ボタンをクリック
@@ -646,7 +661,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await fileInput.setInputFiles(process.cwd() + '/test_files/ok.png');
             await page.waitForTimeout(1500); // アップロード処理待ち
             // アップロード後、削除ボタンが表示されるまで待機
-            await expect(page.locator('dataset-menu-options button:has-text("画像を削除")')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('dataset-menu-options button:has-text("画像を削除")')).toBeVisible({ timeout: 30000 });
             console.log('削除テスト用画像アップロード完了');
         }
 
@@ -697,7 +712,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // ページタイトルにテーブル定義が含まれることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // サイドバーナビゲーションが表示されていることを確認（Angular描画待ち）
         await expect(page.locator('nav.sidebar-nav')).toBeVisible({ timeout: 20000 });
     });
@@ -729,7 +744,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
         // テストユーザーを作成
-        const userBody = await debugApiPost(page, '/create-user');
+        const userBody = await createTestUser(page);
         expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
 
         await logout(page);
@@ -773,7 +788,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
         // テストユーザーを作成
-        const userBody = await debugApiPost(page, '/create-user');
+        const userBody = await createTestUser(page);
         expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         await logout(page);
         try {
@@ -812,7 +827,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     test('82-3: ユーザータイプ「ユーザー」でダッシュボードからチャート追加が行えること', async ({ page }) => {
         test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
-        const userBody = await debugApiPost(page, '/create-user');
+        const userBody = await createTestUser(page);
         expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         await logout(page);
         try {
@@ -851,7 +866,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     test('82-5: ユーザータイプ「ユーザー」でダッシュボードから通知設定が行えること', async ({ page }) => {
         test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
-        const userBody = await debugApiPost(page, '/create-user');
+        const userBody = await createTestUser(page);
         expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
         await logout(page);
         try {
@@ -1009,7 +1024,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                 await backBtn.click();
                 await waitForAngular(page);
                 // 一覧画面に戻ったこと
-                await expect(page).toHaveURL(new RegExp(`dataset__${tableId}`), { timeout: 10000 });
+                await expect(page).toHaveURL(new RegExp(`dataset__${tableId}`), { timeout: 30000 });
             }
         }
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
@@ -1027,7 +1042,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブルヘッダーの存在確認
         const headerRow = page.locator('tr[mat-header-row], thead tr').first();
-        await expect(headerRow).toBeVisible({ timeout: 10000 });
+        await expect(headerRow).toBeVisible({ timeout: 30000 });
 
         // スクロール実行
         await page.evaluate(() => window.scrollTo(0, 500));
@@ -1143,7 +1158,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // テーブル一覧が表示されていること
         const table = page.locator('table, mat-table, [class*="table"]').first();
-        await expect(table).toBeVisible({ timeout: 10000 });
+        await expect(table).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------

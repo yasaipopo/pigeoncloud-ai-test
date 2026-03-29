@@ -230,6 +230,8 @@ test.describe('通知設定', () => {
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(360000);
         const { context, page } = await createAuthContext(browser);
+        // about:blankではcookiesが送られないため、先にアプリURLに遷移
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         tableId = await getAllTypeTableId(page);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await context.close();

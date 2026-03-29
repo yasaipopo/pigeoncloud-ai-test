@@ -332,6 +332,8 @@ test.beforeAll(async ({ browser }) => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         const { context, page } = await createAuthContext(browser);
         try {
+            // about:blankではcookiesが送られないため、先にアプリURLに遷移
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
             const tableRes = await createAllTypeTable(page);
             if (tableRes.result === 'success') {
                 await createAllTypeData(page, 10);

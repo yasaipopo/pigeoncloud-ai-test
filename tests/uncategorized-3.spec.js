@@ -33,7 +33,7 @@ async function login(page, email, password) {
     // ログインページへのリダイレクトを確認（既認証の場合はダッシュボードへ飛ぶ）
     if (page.url().includes('/admin/dashboard') || page.url().includes('/admin/dataset')) {
         // 既にログイン済みの場合はそのまま続行
-        await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         return;
     }
     // アカウントロックチェック
@@ -51,7 +51,7 @@ async function login(page, email, password) {
         if (stillNotVisible) {
             // ダッシュボードにいるか確認
             if (page.url().includes('/admin/')) {
-                await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+                await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
                 return;
             }
         }

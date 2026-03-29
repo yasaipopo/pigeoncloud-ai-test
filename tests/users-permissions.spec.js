@@ -1920,7 +1920,7 @@ test.describe('権限設定・グループ権限', () => {
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         expect(page.url()).toContain('/admin/admin/edit/');
         // フォーム要素が存在すること
-        expect(await page.locator('form, input, button.btn-ladda').count()).toBeGreaterThan(0);
+        await expect(page.locator('form, input, button.btn-ladda').first()).toBeVisible({ timeout: 10000 });
 
         const phoneInput = page.locator('#phone_' + userResult.id);
         const phoneInputCount = await phoneInput.count();
@@ -2242,7 +2242,7 @@ test.describe('権限設定・グループ権限', () => {
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         expect(page.url()).toContain('/admin/admin/edit/');
         // フォーム要素が存在すること
-        expect(await page.locator('form input, form button').count()).toBeGreaterThan(0);
+        await expect(page.locator('form input, form button').first()).toBeVisible({ timeout: 10000 });
 
         // 通知先メールアドレスフィールドを探す（email_notify_NなどのIDパターン）
         // フォーム内の2番目のメールアドレス入力欄が通知先の可能性
@@ -2287,7 +2287,7 @@ test.describe('権限設定・グループ権限', () => {
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         expect(page.url()).toContain('/admin/admin/edit/');
         // フォーム要素が存在すること
-        expect(await page.locator('form input, form button').count()).toBeGreaterThan(0);
+        await expect(page.locator('form input, form button').first()).toBeVisible({ timeout: 10000 });
 
         const emailInputs = page.locator('input[id*="email"]');
         const emailInputsCount = await emailInputs.count();
@@ -3934,7 +3934,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
 
         // ユーザー一覧が正常に表示されていること
         const rows = page.locator('tbody tr, .mat-row');
-        expect(await rows.count()).toBeGreaterThan(0);
+        await expect(rows.first()).toBeVisible({ timeout: 10000 });
     });
 
     // -------------------------------------------------------------------------

@@ -170,6 +170,8 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             const { context, page } = await createAuthContext(browser);
             try {
+                // about:blankではcookiesが送られないため、先にアプリURLに遷移
+                await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
                 await closeTemplateModal(page);
                 tableId = await getAllTypeTableId(page);
 

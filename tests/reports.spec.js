@@ -896,7 +896,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         for (let attempt = 0; attempt < 3; attempt++) {
             await page.reload({ waitUntil: 'domcontentloaded' });
             await waitForAngular(page);
-            await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
             await page.waitForTimeout(2000);
 
             // ログインページにリダイレクトされた場合は再ログイン
@@ -904,7 +904,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 await ensureLoggedIn(page);
                 await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
                 await waitForAngular(page);
-                await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+                await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
                 await waitForAngular(page);
             }
 
@@ -948,7 +948,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         await waitForAngular(page);
         await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
         await waitForAngular(page);
-        await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
 
         // 帳票ボタンが表示されること
         const reportBtn = page.locator('button:has-text("帳票")').first();

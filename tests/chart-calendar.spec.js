@@ -933,7 +933,7 @@ test.describe('カレンダー - ビュー表示', () => {
 
         // カレンダー要素が表示されていることを確認
         const calendarEl = page.locator('.fc-view, .calendar-view, .fc-timeGridWeek-view, .fc');
-        expect(await calendarEl.count()).toBeGreaterThan(0);
+        await expect(calendarEl.first()).toBeVisible({ timeout: 10000 });
         await expect(calendarEl.first()).toBeVisible();
     });
 
@@ -964,7 +964,7 @@ test.describe('カレンダー - ビュー表示', () => {
         await expect(errorMsg).toHaveCount(0);
 
         const calendarEl = page.locator('.fc-view, .fc-timeGridDay-view, .calendar-view, .fc');
-        expect(await calendarEl.count()).toBeGreaterThan(0);
+        await expect(calendarEl.first()).toBeVisible({ timeout: 10000 });
         await expect(calendarEl.first()).toBeVisible();
     });
 
@@ -994,7 +994,7 @@ test.describe('カレンダー - ビュー表示', () => {
             const errorMsg = page.locator('.alert-danger, .error-message');
             await expect(errorMsg).toHaveCount(0);
             const calendarView = page.locator('.fc-dayGridMonth-view, .fc-view, .fc');
-            expect(await calendarView.count()).toBeGreaterThan(0);
+            await expect(calendarView.first()).toBeVisible({ timeout: 10000 });
         }
 
         // 週表示に切り替えてエラーがないことを確認
@@ -1005,7 +1005,7 @@ test.describe('カレンダー - ビュー表示', () => {
             const errorMsg = page.locator('.alert-danger, .error-message');
             await expect(errorMsg).toHaveCount(0);
             const calendarView = page.locator('.fc-timeGridWeek-view, .fc-view, .fc');
-            expect(await calendarView.count()).toBeGreaterThan(0);
+            await expect(calendarView.first()).toBeVisible({ timeout: 10000 });
         }
 
         // 日表示に切り替えてエラーがないことを確認
@@ -1016,7 +1016,7 @@ test.describe('カレンダー - ビュー表示', () => {
             const errorMsg = page.locator('.alert-danger, .error-message');
             await expect(errorMsg).toHaveCount(0);
             const calendarView = page.locator('.fc-timeGridDay-view, .fc-view, .fc');
-            expect(await calendarView.count()).toBeGreaterThan(0);
+            await expect(calendarView.first()).toBeVisible({ timeout: 10000 });
         }
     });
 
@@ -1277,7 +1277,7 @@ test.describe('集計 - 基本機能', () => {
 
                 // ダッシュボードにテーブルが表示されていることを確認
                 const dashboardTable = page.locator('.dashboard-item, .dashboard-table, table.table');
-                expect(await dashboardTable.count()).toBeGreaterThan(0);
+                await expect(dashboardTable.first()).toBeVisible({ timeout: 10000 });
             } else {
                 // UIにオプションがない場合はエラーなく保存できることを確認
                 const pageText = await page.innerText('body');
@@ -3489,10 +3489,10 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         await page.waitForTimeout(2000);
 
         const dayCells = page.locator('.fc-daygrid-day, .fc-day');
-        expect(await dayCells.count()).toBeGreaterThan(0);
+        await expect(dayCells.first()).toBeVisible({ timeout: 10000 });
 
         const dayNumbers = page.locator('.fc-daygrid-day-number, .fc-day-number');
-        expect(await dayNumbers.count()).toBeGreaterThan(0);
+        await expect(dayNumbers.first()).toBeVisible({ timeout: 10000 });
 
         const pt307 = await page.innerText('body');
         expect(pt307).not.toContain('Internal Server Error');
@@ -3521,7 +3521,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         }
 
         const timeLabels = page.locator('.fc-timegrid-slot-label, .fc-axis');
-        expect(await timeLabels.count()).toBeGreaterThan(0);
+        await expect(timeLabels.first()).toBeVisible({ timeout: 10000 });
 
         const labelTexts = await timeLabels.allInnerTexts();
         const nonEmpty = labelTexts.filter(t => t.trim().length > 0);
