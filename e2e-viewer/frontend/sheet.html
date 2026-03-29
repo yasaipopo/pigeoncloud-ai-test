@@ -1003,6 +1003,30 @@ async function playVideo(spec, movie) {
     if (data.downloadUrl || data.url) {
       document.getElementById('videoPlayer').src = data.downloadUrl || data.url;
       document.getElementById('videoModalTitle').textContent = `${SPEC_LABELS[spec] || spec} / ${movie}`;
+
+      // 同じmovieのテスト内容一覧を右カラムに表示
+      const movieTests = allItems.filter(i => i.spec === spec && i.movie === movie);
+      const listEl = document.getElementById('videoTestList');
+      if (movieTests.length > 0) {
+        listEl.innerHTML = movieTests.map((t, idx) => `
+          <div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #dee2e6">
+            <div style="font-weight:700;color:#0d6efd;margin-bottom:4px">
+              ${idx+1}. ${escHtml(t.caseNo)} — ${escHtml(t.feature || '')}
+            </div>
+            <div style="margin-bottom:6px">
+              <span style="font-size:.72rem;color:#6c757d;font-weight:600">テスト内容:</span>
+              <div style="white-space:pre-wrap;line-height:1.5">${escHtml(t.description || '')}</div>
+            </div>
+            <div>
+              <span style="font-size:.72rem;color:#6c757d;font-weight:600">期待結果:</span>
+              <div style="white-space:pre-wrap;color:#198754;line-height:1.5">${escHtml(t.expected || '')}</div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        listEl.innerHTML = '<p class="text-muted">テスト内容が見つかりません</p>';
+      }
+
       new bootstrap.Modal(document.getElementById('videoModal')).show();
     } else {
       alert('動画が見つかりません: ' + key);
@@ -1013,16 +1037,25 @@ async function playVideo(spec, movie) {
 }
 </script>
 
-<!-- 動画再生モーダル -->
+<!-- 動画再生モーダル（動画+テスト内容の2カラム） -->
 <div class="modal fade" id="videoModal" tabindex="-1">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog" style="max-width:95vw">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header py-2">
         <h5 class="modal-title" id="videoModalTitle">動画再生</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="document.getElementById('videoPlayer').pause()"></button>
       </div>
       <div class="modal-body p-0">
-        <video id="videoPlayer" controls style="width:100%" autoplay></video>
+        <div class="d-flex" style="height:75vh">
+          <!-- 左: 動画 -->
+          <div style="flex:3;min-width:0;background:#000;display:flex;align-items:center">
+            <video id="videoPlayer" controls style="width:100%;max-height:75vh" autoplay></video>
+          </div>
+          <!-- 右: テスト内容一覧 -->
+          <div id="videoTestList" style="flex:2;overflow-y:auto;border-left:1px solid #dee2e6;padding:12px;font-size:.85rem;background:#f8f9fa">
+            <p class="text-muted">テスト内容を読み込み中...</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
