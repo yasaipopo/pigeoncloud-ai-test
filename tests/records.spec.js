@@ -1320,10 +1320,25 @@ test.describe('レコード保存・値の永続化', () => {
         tableId = await getAllTypeTableId(page);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await createAllTypeData(page, 1, 'fixed');
+        // データ作成完了をポーリング待機（最大30秒）
+        for (let i = 0; i < 6; i++) {
+            await page.waitForTimeout(5000);
+            try {
+                const status = await page.evaluate(async (baseUrl) => {
+                    const res = await fetch(baseUrl + '/api/admin/debug/status', {
+                        credentials: 'include',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    return res.json();
+                }, BASE_URL);
+                const table = (status?.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+                if (table && table.count >= 1) break;
+            } catch (e) {}
+        }
         // 一覧からレコードIDを取得
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
-        await page.waitForSelector('tr[mat-row]', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('tr[mat-row]', { timeout: 30000 }).catch(() => {});
         const firstRow = page.locator('tr[mat-row]').first();
         const dataRecordId = await firstRow.getAttribute('data-record-id', { timeout: 3000 }).catch(() => null);
         if (dataRecordId) {
