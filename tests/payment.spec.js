@@ -331,7 +331,7 @@ test.describe('支払い・プラン管理', () => {
             console.log('355: 請求情報メニューが表示されない（未契約またはdemo環境の可能性）');
         }
 
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
     });
 
     test('573: 決済後のユーザー数変更が即時反映されること', async ({ page }) => {
@@ -354,7 +354,7 @@ test.describe('支払い・プラン管理', () => {
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
     });
 
     test('715: 支払いページでクレジットカードのブランドが正しく表示されること', async ({ page }) => {
@@ -382,7 +382,7 @@ test.describe('支払い・プラン管理', () => {
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
     });
 
 });

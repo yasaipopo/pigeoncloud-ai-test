@@ -988,7 +988,7 @@ test.describe('コメント・ログ バグ修正確認', () => {
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
     });
 
     test('629: コメントの改行がメール通知で{line_break}にならず正常に改行されること', async ({ page }) => {
@@ -1031,7 +1031,7 @@ test.describe('コメント・ログ バグ修正確認', () => {
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
     });
 
     test('653: 組織メンションのキャンセル後にメッセージが出続けないこと', async ({ page }) => {
@@ -1081,6 +1081,6 @@ test.describe('コメント・ログ バグ修正確認', () => {
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
     });
 });

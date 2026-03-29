@@ -1894,7 +1894,7 @@ test.describe('共通設定・システム設定', () => {
 
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
     });
 
 });

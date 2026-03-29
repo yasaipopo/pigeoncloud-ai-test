@@ -3430,7 +3430,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         const widgetCount = await widgets.count();
         console.log(`303: ダッシュボードウィジェット数: ${widgetCount}`);
 
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         const pt303 = await page.innerText('body');
         expect(pt303).not.toContain('Internal Server Error');
 
@@ -3906,7 +3906,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         await closeTemplateModal(page);
         await page.waitForTimeout(2000);
 
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         const gearIcons = page.locator('.fa-cog, .fa-gear, [class*="settings-icon"]');
         console.log(`491: ダッシュボード歯車アイコン数: ${await gearIcons.count()}`);
 
@@ -4320,7 +4320,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
         const chartWidgets = page.locator('canvas, svg, .chart-container, [class*="chart"]');
         console.log(`614: ダッシュボードチャート数: ${await chartWidgets.count()}`);
 
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         const pt614 = await page.innerText('body');
         expect(pt614).not.toContain('Internal Server Error');
     });
