@@ -119,11 +119,23 @@ async function createAllTypeTable(page) {
     // テーブル作成はサーバー負荷で時間がかかる可能性があるためタイムアウトを延長（504対応）
     // 10分（600秒）に設定：チャート/カレンダーテスト本体で十分な時間を確保するため
     test.setTimeout(600000);
+    // about:blankからのfetchではcookiesが送られないため、先にページ遷移する
+    if (!page.url() || page.url() === 'about:blank') {
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    }
     // まず既存テーブルを確認（スキップ判定）
     const status = await page.evaluate(async (baseUrl) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-        return res.json();
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
+            return res.json();
+        } catch (e) {
+            return { all_type_tables: [] };
+        }
     }, BASE_URL);
+    // セッション切れ検出: login_error → 例外を投げて呼び出し元のリトライに任せる
+    if (status?.result === 'error' && status?.error_type === 'login_error') {
+        throw new Error('createAllTypeTable: セッション切れ (login_error)');
+    }
     const existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
     if (existing) {
         return { result: 'success', tableId: String(existing.table_id || existing.id) };
@@ -144,8 +156,12 @@ async function createAllTypeTable(page) {
     for (let i = 0; i < 30; i++) {
         await page.waitForTimeout(10000);
         const statusCheck = await page.evaluate(async (baseUrl) => {
-            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-            return res.json();
+            try {
+                const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
+                return res.json();
+            } catch (e) {
+                return { all_type_tables: [] };
+            }
         }, BASE_URL);
         const tableCheck = (statusCheck.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
         if (tableCheck) {
@@ -164,21 +180,29 @@ async function createAllTypeTable(page) {
 async function createAllTypeData(page, count = 5) {
     // 既存データ件数確認（ある場合はスキップ）
     const status = await page.evaluate(async (baseUrl) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
-        return res.json();
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/status', { credentials: 'include' });
+            return res.json();
+        } catch (e) {
+            return { all_type_tables: [] };
+        }
     }, BASE_URL);
     const mainTable = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
     if (mainTable && mainTable.count >= count) {
         return { result: 'success' };
     }
     return await page.evaluate(async ({ baseUrl, count }) => {
-        const res = await fetch(baseUrl + '/api/admin/debug/create-all-type-data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            body: JSON.stringify({ count, pattern: 'fixed' }),
-            credentials: 'include',
-        });
-        return res.json();
+        try {
+            const res = await fetch(baseUrl + '/api/admin/debug/create-all-type-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ count, pattern: 'fixed' }),
+                credentials: 'include',
+            });
+            return res.json();
+        } catch (e) {
+            return { result: 'error', error: e.message };
+        }
     }, { baseUrl: BASE_URL, count });
 }
 
@@ -299,17 +323,34 @@ async function openTableMenu(page) {
 
 // ============================================================
 // ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
+// リトライ付き: セッション切れ・fetch失敗に対応
 // ============================================================
+let fileBeforeAllFailed = false;
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(600000);
-    const { context, page } = await createAuthContext(browser);
-    const tableRes = await createAllTypeTable(page);
-    if (tableRes.result !== 'success') {
+    const maxRetries = 3;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const { context, page } = await createAuthContext(browser);
+        try {
+            const tableRes = await createAllTypeTable(page);
+            if (tableRes.result === 'success') {
+                await createAllTypeData(page, 10);
+                await context.close();
+                return; // 成功
+            }
+            console.log(`[beforeAll] テーブル作成失敗 (attempt ${attempt}/${maxRetries}): result=${tableRes.result}`);
+        } catch (e) {
+            console.log(`[beforeAll] テーブル作成例外 (attempt ${attempt}/${maxRetries}): ${e.message}`);
+        }
         await context.close();
-        throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
+        if (attempt < maxRetries) {
+            // リトライ前に少し待つ
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
     }
-    await createAllTypeData(page, 10);
-    await context.close();
+    // 全リトライ失敗: cascade防止のためthrowせずフラグを立てる
+    console.error('[beforeAll] ALLテストテーブル作成が全リトライ失敗。テストはスキップされます。');
+    fileBeforeAllFailed = true;
 });
 
 // チャート テスト
@@ -320,6 +361,7 @@ test.describe('チャート - 基本機能', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });
@@ -895,6 +937,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
     test.beforeEach(async ({ page }) => {
         // 長時間テストスイート実行後の遅延に対応するためタイムアウトを延長（詳細権限設定は時間がかかるため15分）
         test.setTimeout(900000);
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });

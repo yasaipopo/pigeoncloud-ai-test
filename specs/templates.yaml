@@ -4,43 +4,37 @@ base_url: '{{ TEST_BASE_URL }}'
 cases:
 - case_no: TMPL-01
   feature: テンプレート
-  description: |
-    テンプレート一覧モーダルが正常に表示されること
+  description: ①テンプレート一覧モーダルが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: TM01
 - case_no: TMPL-02
   feature: テンプレート
-  description: |
-    テンプレートの詳細を確認できること
+  description: ①テンプレートの詳細を確認できること
   expected: |
     テンプレートの詳細を確認できること
   movie: TM01
 - case_no: TMPL-03
   feature: テンプレート
-  description: |
-    テンプレートインストールモーダルの「戻る」で一覧に戻れること
+  description: ①テンプレートインストールモーダルの「戻る」で一覧に戻れること
   expected: |
     テンプレートインストールモーダルの「戻る」で一覧に戻れること
   movie: TM01
 - case_no: TMPL-04
   feature: テンプレート
-  description: |
-    テンプレートをインストールできること
+  description: ①テンプレートをインストールできること
   expected: |
     テンプレートをインストールできること
   movie: TM01
 - case_no: TMPL-05
   feature: テンプレート
-  description: |
-    テンプレートモーダルを閉じられること
+  description: ①テンプレートモーダルを閉じられること
   expected: |
     テンプレートモーダルを閉じられること
   movie: TM01
 - case_no: TMPL-06
   feature: テンプレート
-  description: |
-    テンプレート一覧のテンプレート名が表示されていること
+  description: ①テンプレート一覧のテンプレート名が表示されていること
   expected: |
     テンプレート一覧のテンプレート名が表示されていること
   movie: TM01

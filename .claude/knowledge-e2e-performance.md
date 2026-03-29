@@ -163,3 +163,34 @@ await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
 | ECS CPU 1024→2048, Memory 2048→4096 | サーバー応答速度改善 | 2026-03-25 |
 | RDS db.t4g.medium → db.t4g.large | DB応答速度改善 | 2026-03-25 |
 | waitForTimeout削減（試み） | 安全範囲が小さすぎ（18件=29秒）で断念。Product側改修が正解 | 2026-03-25 |
+
+---
+
+## 知見3: waitForAngular の body[data-ng-ready="true"] はcatch必須
+
+### 問題
+各spec.jsにインラインで定義された `waitForAngular` 関数が `body[data-ng-ready="true"]` を15秒waitForSelectorしているが、
+PigeonCloudの環境によってはこの属性が設定されないケースがある。
+catchなしだと例外がthrowされ、テスト全体が失敗する。
+
+### 根本原因
+R37 agent-30 で **166件中85件が navbar-not-visible** で失敗していた。
+原因は `waitForAngular` が throw → 後続の `.navbar` 確認に到達しない → テスト失敗のcascade。
+
+### 正しい実装（ui-operations.js と同じ）
+```javascript
+async function waitForAngular(page, timeout = 15000) {
+    try {
+        await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
+    } catch {
+        // data-ng-readyが設定されないケースがある: networkidleで代替
+        await page.waitForLoadState('networkidle').catch(() => {});
+    }
+}
+```
+
+### 対象
+23個のspec.jsファイル + helpers/ui-operations.js が同じ関数を定義している。
+**新しいspec.jsを作る際は必ずtry/catch付きで定義すること。**
+
+### 修正日: 2026-03-29

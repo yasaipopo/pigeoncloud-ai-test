@@ -4,288 +4,247 @@ base_url: '{{ TEST_BASE_URL }}'
 cases:
 - case_no: 48-1
   feature: フィールド設定
-  description: |
-    画像フィールド設定ページが正常に表示されること
+  description: ①画像フィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
 - case_no: '226'
   feature: フィールド設定
-  description: |
-    画像フィールドのフィールド設定ページが正常に表示されること
+  description: ①画像フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
 - case_no: 44-1
   feature: フィールド設定
-  description: |
-    Yes/Noフィールド設定ページが正常に表示されること
+  description: ①Yes/Noフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
 - case_no: '222'
   feature: フィールド設定
-  description: |
-    Yes/Noフィールドのフィールド設定ページが正常に表示されること
+  description: ①Yes/Noフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
 - case_no: '216'
   feature: フィールド設定
-  description: |
-    自動採番フィールドのフィールド設定ページが正常に表示されること
+  description: ①自動採番フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
 - case_no: '230'
   feature: フィールド設定
-  description: |
-    固定テキストフィールドのフィールド設定ページが正常に表示されること
+  description: ①固定テキストフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
 - case_no: 121-01
   feature: フィールド設定
-  description: |
-    ファイルフィールドのアップロード設定ページが表示されること
+  description: ①ファイルフィールドのアップロード設定ページが表示されること
   expected: |
     ファイルフィールドのアップロード設定ページが表示されること
   movie: F202
 - case_no: '192'
   feature: フィールド設定
-  description: |
-    ファイルのZIPアップロード機能が正常に表示されること
+  description: ①ファイルのZIPアップロード機能が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F202
 - case_no: 122-01
   feature: フィールド設定
-  description: |
-    列の表示/非表示設定ページが正常に表示されること
+  description: ①列の表示/非表示設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F202
 - case_no: 122-02
   feature: フィールド設定
-  description: |
-    列の並び替え設定ページが正常に表示されること
+  description: ①列の並び替え設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F202
 - case_no: '218'
   feature: フィールド設定
-  description: |
-    文章複数行（通常テキスト）フィールドの設定ページが正常に表示されること
+  description: ①文章複数行（通常テキスト）フィールドの設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: '219'
   feature: フィールド設定
-  description: |
-    文章複数行（リッチテキスト）フィールドの設定ページが正常に表示されること
+  description: ①文章複数行（リッチテキスト）フィールドの設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: '217'
   feature: フィールド設定
-  description: |
-    文字列一行フィールドの設定ページが正常に表示されること
+  description: ①文字列一行フィールドの設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-1
   feature: フィールド設定
-  description: |
-    テキスト種別フィールドのフィールド設定ページが正常に表示されること
+  description: ①テキスト種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-2
   feature: フィールド設定
-  description: |
-    メールアドレス種別フィールドのフィールド設定ページが正常に表示されること
+  description: ①メールアドレス種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-3
   feature: フィールド設定
-  description: |
-    URL種別フィールドのフィールド設定ページが正常に表示されること
+  description: ①URL種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-3-1
   feature: フィールド設定
-  description: |
-    URLフィールドのフィールド設定ページが正常に表示されること
+  description: ①URLフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-4
   feature: フィールド設定
-  description: |
-    数値フィールドのフィールド設定ページが正常に表示されること
+  description: ①数値フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-5
   feature: フィールド設定
-  description: |
-    数値（整数）フィールドのフィールド設定ページが正常に表示されること
+  description: ①数値（整数）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-6
   feature: フィールド設定
-  description: |
-    数値（小数）フィールドのフィールド設定ページが正常に表示されること
+  description: ①数値（小数）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-7
   feature: フィールド設定
-  description: |
-    ラジオボタン種別（単一選択）フィールドのフィールド設定ページが正常に表示されること
+  description: ①ラジオボタン種別（単一選択）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-8
   feature: フィールド設定
-  description: |
-    ラジオボタン種別フィールドのフィールド設定ページが正常に表示されること
+  description: ①ラジオボタン種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-9
   feature: フィールド設定
-  description: |
-    プルダウン種別（単一選択）フィールドのフィールド設定ページが正常に表示されること
+  description: ①プルダウン種別（単一選択）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-12-1
   feature: フィールド設定
-  description: |
-    年月種別フィールドのフィールド設定ページが正常に表示されること
+  description: ①年月種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-13
   feature: フィールド設定
-  description: |
-    ファイルフィールドのフィールド設定ページが正常に表示されること
+  description: ①ファイルフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-14
   feature: フィールド設定
-  description: |
-    計算フィールドのフィールド設定ページが正常に表示されること
+  description: ①計算フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-15
   feature: フィールド設定
-  description: |
-    計算フィールド（整数形式）のフィールド設定ページが正常に表示されること
+  description: ①計算フィールド（整数形式）のフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-16
   feature: フィールド設定
-  description: |
-    計算フィールド（小数形式）のフィールド設定ページが正常に表示されること
+  description: ①計算フィールド（小数形式）のフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-17
   feature: フィールド設定
-  description: |
-    文章(複数行)・通常テキストフィールドのフィールド設定ページが正常に表示されること
+  description: ①文章(複数行)・通常テキストフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-18
   feature: フィールド設定
-  description: |
-    文章(複数行)・リッチテキストフィールドのフィールド設定ページが正常に表示されること
+  description: ①文章(複数行)・リッチテキストフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
 - case_no: 14-19
   feature: フィールド設定
-  description: |
-    Yes/Noフィールドのフィールド設定ページが正常に表示されること
+  description: ①Yes/Noフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-20
   feature: フィールド設定
-  description: |
-    Yes/Noフィールドのフィールド設定ページが正常に表示されること（追加オプション）
+  description: ①Yes/Noフィールドのフィールド設定ページが正常に表示されること（追加オプション）
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-21
   feature: フィールド設定
-  description: |
-    チェックボックス種別（複数選択）フィールドのフィールド設定ページが正常に表示されること
+  description: ①チェックボックス種別（複数選択）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-22
   feature: フィールド設定
-  description: |
-    プルダウン種別フィールドのフィールド設定ページが正常に表示されること
+  description: ①プルダウン種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-23
   feature: フィールド設定
-  description: |
-    画像フィールドのフィールド設定ページが正常に表示されること
+  description: ①画像フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-24
   feature: フィールド設定
-  description: |
-    他テーブル参照フィールドのフィールド設定ページが正常に表示されること
+  description: ①他テーブル参照フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-25
   feature: フィールド設定
-  description: |
-    他テーブル参照フィールドのフィールド設定ページが正常に表示されること（追加オプション）
+  description: ①他テーブル参照フィールドのフィールド設定ページが正常に表示されること（追加オプション）
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-26
   feature: フィールド設定
-  description: |
-    関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含む）
+  description: '①関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含む）'
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-27
   feature: フィールド設定
-  description: |
-    関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次と一致しない）
+  description: '①関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次と一致しない）'
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-28
   feature: フィールド設定
-  description: |
-    関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含む別パターン）
+  description: '①関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含む別パターン）'
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
 - case_no: 14-29
   feature: フィールド設定
-  description: |
-    関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含まない）
+  description: '①関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含まない）'
   expected: |
     エラーなくページが正常に表示されること
   movie: F204

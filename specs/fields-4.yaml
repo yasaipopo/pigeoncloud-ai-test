@@ -4,43 +4,37 @@ base_url: '{{ TEST_BASE_URL }}'
 cases:
 - case_no: 261-1
   feature: フィールド設定
-  description: |
-    選択肢フィールドのインライン編集パネルで「表示条件」セクションが確認できること
+  description: ①選択肢フィールドのインライン編集パネルで「表示条件」セクションが確認できること
   expected: |
     選択肢フィールドのインライン編集パネルで「表示条件」セクションが確認できること
   movie: F401
 - case_no: 261-2
   feature: フィールド設定
-  description: |
-    Yes/Noフィールドのインライン編集パネルが開けること
+  description: ①Yes/Noフィールドのインライン編集パネルが開けること
   expected: |
     Yes/Noフィールドのインライン編集パネルが開けること
   movie: F401
 - case_no: 261-3
   feature: フィールド設定
-  description: |
-    チェックボックスフィールドのインライン編集パネルが開けること
+  description: ①チェックボックスフィールドのインライン編集パネルが開けること
   expected: |
     チェックボックスフィールドのインライン編集パネルが開けること
   movie: F401
 - case_no: 265-1
   feature: フィールド設定
-  description: |
-    テキストフィールドに必須設定後、空保存でエラーメッセージが表示されること
+  description: ①テキストフィールドに必須設定後、空保存でエラーメッセージが表示されること
   expected: |
     テキストフィールドに必須設定後、空保存でエラーメッセージが表示されること
   movie: F401
 - case_no: 265-2
   feature: フィールド設定
-  description: |
-    テキスト/数値フィールドで重複チェック設定のUIが表示されること
+  description: ①テキスト/数値フィールドで重複チェック設定のUIが表示されること
   expected: |
     テキスト/数値フィールドで重複チェック設定のUIが表示されること
   movie: F401
 - case_no: 267-1
   feature: フィールド設定
-  description: |
-    テキストフィールドに初期値を設定すると新規レコード作成時に自動入力されること
+  description: ①テキストフィールドに初期値を設定すると新規レコード作成時に自動入力されること
   expected: |
     テキストフィールドに初期値を設定すると新規レコード作成時に自動入力されること
   movie: F401

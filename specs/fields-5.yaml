@@ -4,92 +4,79 @@ base_url: '{{ TEST_BASE_URL }}'
 cases:
 - case_no: 850-1
   feature: フィールド追加オプション
-  description: |
-    文字列(一行)フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①文字列(一行)フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     文字列(一行)フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-2
   feature: フィールド追加オプション
-  description: |
-    文章(複数行)フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①文章(複数行)フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     文章(複数行)フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-3
   feature: フィールド追加オプション
-  description: |
-    数値フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①数値フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     数値フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-4
   feature: フィールド追加オプション
-  description: |
-    Yes / Noフィールドの追加オプション（表示条件）UIが確認できること
+  description: ①Yes / Noフィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     Yes / Noフィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-5
   feature: フィールド追加オプション
-  description: |
-    選択肢(単一選択)フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①選択肢(単一選択)フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     選択肢(単一選択)フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-6
   feature: フィールド追加オプション
-  description: |
-    選択肢(複数選択)フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①選択肢(複数選択)フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     選択肢(複数選択)フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-7
   feature: フィールド追加オプション
-  description: |
-    日時フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①日時フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     日時フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-8
   feature: フィールド追加オプション
-  description: |
-    画像フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①画像フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     画像フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-9
   feature: フィールド追加オプション
-  description: |
-    ファイルフィールドの追加オプション（表示条件）UIが確認できること
+  description: ①ファイルフィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     ファイルフィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-10
   feature: フィールド追加オプション
-  description: |
-    他テーブル参照フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①他テーブル参照フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     他テーブル参照フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-11
   feature: フィールド追加オプション
-  description: |
-    計算フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①計算フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     計算フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-12
   feature: フィールド追加オプション
-  description: |
-    固定テキストフィールドの追加オプション（表示条件）UIが確認できること
+  description: ①固定テキストフィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     固定テキストフィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
 - case_no: 850-13
   feature: フィールド追加オプション
-  description: |
-    自動採番フィールドの追加オプション（表示条件）UIが確認できること
+  description: ①自動採番フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     自動採番フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501

@@ -6,21 +6,21 @@ cases:
   sheet: A
   feature: 推奨ブラウザ
   category: 警告出力
-  description: 推奨ブラウザ以外で、PigeonCloudを開く。
+  description: ①推奨ブラウザ以外で、PigeonCloudを開く。
   expected: 警告メッセージが出力されること
   movie: AT01
 - case_no: 1-1
   sheet: A
   feature: ログイン／ログアウト
   category: '-'
-  description: ユーザータイプが「マスター」のユーザーでログイン、ログアウトを行う。
+  description: ①ユーザータイプが「マスター」のユーザーでログイン、ログアウトを行う。
   expected: エラーなくログインログアウトが完了すること。
   movie: AT01
 - case_no: 1-2
   sheet: A
   feature: ログイン／ログアウト
   category: '-'
-  description: ユーザータイプが「ユーザー」のユーザーでログイン、ログアウトを行う。
+  description: ①ユーザータイプが「ユーザー」のユーザーでログイン、ログアウトを行う。
   expected: エラーなくログインログアウトが完了すること。
   movie: AT01
 - case_no: 38-1
@@ -34,211 +34,149 @@ cases:
   sheet: B
   feature: ログイン
   category: google　login
-  description: 'https://demo-popo7.pigeon-demo.com/　のサイトより、Googleログインを実施。
-
-    アカウント／パスワードは以下の通り
-
-
-    ID: test-login@loftal.jp
-
-    password: 2IiPK9Yg'
+  description: |-
+    ①https://demo-popo7.pigeon-demo.com/　のサイトより、Googleログインを実施。
+    ②アカウント／パスワードは以下の通り。
+    ③ID: test-login@loftal.jp。
+    ④password: 2IiPK9Yg。
   expected: Googleログインできること。
   movie: AT02
 - case_no: 212-1
   sheet: B
   feature: 同時ログインプラン
   category: 同時ログイン制御
-  description: '●テスト環境URL
-
-    https://demo-user-num.pigeon-demo.com
-
-
-    ●ID／PW
-
-    admin
-
-    1rxKLot98PUE
-
-
-    ・同時ログイン制御機能、設定人数まで同時ログイン可能。それ以上はログイン不可'
-  expected: ・想定通りの結果となること
+  description: |-
+    ①●テスト環境URL。
+    ②https://demo-user-num.pigeon-demo.com。
+    ③●ID／PW。
+    ④admin。
+    ⑤1rxKLot98PUE。
+    ⑥・同時ログイン制御機能、設定人数まで同時ログイン可能。それ以上はログイン不可。
+  expected: ・同時ログイン制御機能が設定人数まで動作すること
   movie: AT02
 - case_no: 212-2
   sheet: B
   feature: 同時ログインプラン
   category: 強制ログアウト
-  description: '●テスト環境URL
-
-    https://demo-user-num.pigeon-demo.com
-
-
-    ●ID／PW
-
-    admin
-
-    1rxKLot98PUE
-
-
-    ・マスターユーザーはユーザーをユーザー一覧から強制ログアウト可能'
+  description: |-
+    ①●テスト環境URL。
+    ②https://demo-user-num.pigeon-demo.com。
+    ③●ID／PW。
+    ④admin。
+    ⑤1rxKLot98PUE。
+    ⑥・マスターユーザーはユーザーをユーザー一覧から強制ログアウト可能。
   expected: ・マスターユーザーにてユーザーの強制ログアウトが可能なこと
   movie: AT02
 - case_no: 212-3
   sheet: B
   feature: 同時ログインプラン
   category: 自動ログアウト時間を設定
-  description: '●テスト環境URL
-
-    https://demo-user-num.pigeon-demo.com
-
-
-    ●ID／PW
-
-    admin
-
-    1rxKLot98PUE
-
-
-    ・自動ログアウト時間を設定を「60」と設定'
+  description: |-
+    ①●テスト環境URL。
+    ②https://demo-user-num.pigeon-demo.com。
+    ③●ID／PW。
+    ④admin。
+    ⑤1rxKLot98PUE。
+    ⑥・自動ログアウト時間を設定を「60」と設定。
   expected: ・1時間後に自動ログアウトされること。
   movie: AT02
 - case_no: 212-4
   sheet: B
   feature: 同時ログインプラン
   category: 全端末からログアウト
-  description: '●テスト環境URL
-
-    https://demo-user-num.pigeon-demo.com
-
-
-    ●ID／PW
-
-    admin
-
-    1rxKLot98PUE
-
-
-    ・同一アカウントで複数端末でログイン
-
-    ・1つの端末からログアウト実施'
+  description: |-
+    ①●テスト環境URL。
+    ②https://demo-user-num.pigeon-demo.com。
+    ③●ID／PW。
+    ④admin。
+    ⑤1rxKLot98PUE。
+    ⑥・同一アカウントで複数端末でログイン。
+    ⑦・1つの端末からログアウト実施。
   expected: ・全端末ログアウトすること
   movie: AT02
 - case_no: '295'
   sheet: B
   feature: パスワード変更
   category: '-'
-  description: "https://loftal.pigeon-cloud.com/admin/dataset__90/view/265\n\n※注意事項\n・設定ＯＮで有効になるのは、自分自身のパスワード変更時のみ\r\n・マスターユーザーが一般ユーザーのパスワード変更する際は、本機能は対象外となる"
-  expected: 想定通りの結果となること。
+  description: |-
+    ①https://loftal.pigeon-cloud.com/admin/dataset__90/view/265。
+    ②※注意事項。
+    ③・設定ＯＮで有効になるのは、自分自身のパスワード変更時のみ。
+    ④・マスターユーザーが一般ユーザーのパスワード変更する際は、本機能は対象外となる。
+  expected: ・パスワード変更機能が正常に動作すること
   movie: AT01
 - case_no: '267'
   sheet: B
   feature: 2段階認証
-  description: '①ログインIDがメールアドレスでないユーザー（例: admin）でログインする
-
+  description: |-
+    ①ログインIDがメールアドレスでないユーザー（例: admin）でログインする
     ②2段階認証の設定画面を開く
-
     ③2段階認証を有効にしようとする
-
-    ④メールアドレスでないためエラーが表示されることを確認する'
+    ④メールアドレスでないためエラーが表示されることを確認する
   expected: ログインIDがメールアドレス形式でない場合、2段階認証の設定でエラーが表示されること
   movie: UC01
 actual_steps:
 - case_no: 1-1
   status: passed
-  steps: '1. /admin/login にアクセス
-
+  steps: |
+    1. /admin/login にアクセス
     2. #id に TEST_EMAIL を入力
-
     3. #password に TEST_PASSWORD を入力
-
     4. button[type=submit].btn-primary をクリック
-
     5. /admin/dashboard への遷移を確認
-
     6. テンプレートモーダルを閉じる（.modal.show があれば）
-
     7. /api/admin/logout をGET呼び出しでログアウト
-
     8. /admin/login へ遷移して確認
-
-    '
-  assertions: '- URLが /admin/dashboard を含む
-
+  assertions: |
+    - URLが /admin/dashboard を含む
     - .navbar が表示されている
-
     - ログアウト後URLが /admin/login を含む
-
-    '
   gaps: なし
 - case_no: 1-2
   status: passed（ユーザー作成失敗時はskip）
-  steps: '1. マスターユーザーでログイン
-
+  steps: |
+    1. マスターユーザーでログイン
     2. /api/admin/debug/create-user APIでテストユーザーを自動生成（メール・パスワードは自動）
-
     3. マスターユーザーをログアウト
-
     4. 生成したユーザーのメール・パスワードでログイン
-
     5. /admin/dashboard への遷移を確認
-
     6. ログアウト・/admin/login 遷移確認
-
-    '
-  assertions: '- URLが /admin/dashboard を含む
-
+  assertions: |
+    - URLが /admin/dashboard を含む
     - .navbar が表示されている
-
     - ログアウト後URLが /admin/login を含む
-
-    '
-  gaps: '- ユーザー作成失敗（上限など）の場合は test.skip になる。本来は必ず実行されるべきテスト
-
+  gaps: |
+    - ユーザー作成失敗（上限など）の場合は test.skip になる。本来は必ず実行されるべきテスト
     - ユーザー削除（teardown）が存在しないため、繰り返し実行でユーザー数が増加し続ける
-
-    '
 - case_no: 38-1
   status: passed
-  steps: '1. /admin/login にアクセス
-
+  steps: |
+    1. /admin/login にアクセス
     2. #id に TEST_EMAIL を入力
-
-    3. #password に ''wrong_password_12345''（固定値）を入力
-
+    3. #password に 'wrong_password_12345'（固定値）を入力
     4. button[type=submit].btn-primary をクリック
-
-    '
-  assertions: '- URLが /admin/login を含む（ログインページに留まる）
-
+  assertions: |
+    - URLが /admin/login を含む（ログインページに留まる）
     - .toast-message が表示される
-
-    - .toast-message が ''IDまたはパスワードが正しくありません'' を含む
-
-    '
+    - .toast-message が 'IDまたはパスワードが正しくありません' を含む
   gaps: なし
 - case_no: 144-01
   status: passed
-  steps: '1. Firefox の UserAgent でブラウザコンテキストを新規作成
-
+  steps: |
+    1. Firefox の UserAgent でブラウザコンテキストを新規作成
     2. /admin/login にアクセスしてログイン
-
     3. /admin/dashboard 遷移後 3秒待機
-
-    '
-  assertions: '- .warning が表示される
-
-    - .warning が ''推奨されているブラウザ'' を含む
-
-    '
+  assertions: |
+    - .warning が表示される
+    - .warning が '推奨されているブラウザ' を含む
   gaps: なし
 - case_no: '176'
   status: skip
   steps: なし（skip）
   assertions: なし
-  gaps: '- Google OAuthフローが必要なため自動化困難としてskip
-
+  gaps: |
+    - Google OAuthフローが必要なため自動化困難としてskip
     - YAMLには手順・期待値が記載されているが未テスト
-
-    '
 - case_no: 212-1
   status: skip
   steps: なし（skip）
@@ -263,8 +201,6 @@ actual_steps:
   status: skip
   steps: なし（skip）
   assertions: なし
-  gaps: '- 特定URL（loftal.pigeon-cloud.com）での確認が必要なためskip
-
+  gaps: |
+    - 特定URL（loftal.pigeon-cloud.com）での確認が必要なためskip
     - YAMLには手順・期待値が記載されているが未テスト
-
-    '

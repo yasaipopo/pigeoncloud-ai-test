@@ -4,91 +4,67 @@ base_url: '{{ TEST_BASE_URL }}'
 cases:
 - case_no: PAY-01
   feature: 支払い
-  description: '支払いページが表示されること
-
-    '
-  expected: '支払いページが表示されること
-
-    '
+  description: ①支払いページが表示されること
+  expected: |
+    支払いページが表示されること
   movie: PM01
 - case_no: PAY-02
   feature: 支払い
-  description: 'プラン変更フォームと料金情報が表示されること
-
-    '
-  expected: 'プラン変更フォームと料金情報が表示されること
-
-    '
+  description: ①プラン変更フォームと料金情報が表示されること
+  expected: |
+    プラン変更フォームと料金情報が表示されること
   movie: PM01
 - case_no: PAY-03
   feature: 支払い
-  description: 'Stripe checkoutの関連iframeが存在すること
-
-    '
-  expected: 'Stripe checkoutの関連iframeが存在すること
-
-    '
+  description: ①Stripe checkoutの関連iframeが存在すること
+  expected: |
+    Stripe checkoutの関連iframeが存在すること
   movie: PM01
 - case_no: PAY-04
   feature: 支払い
-  description: 'テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
-
-    '
-  expected: 'テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
-
-    '
+  description: ①テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
+  expected: |
+    テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
   movie: PM01
 - case_no: PAY-05
   feature: 支払い
-  description: 'ユーザー数の範囲外入力でバリデーションエラーが表示されること
-
-    '
-  expected: 'ユーザー数の範囲外入力でバリデーションエラーが表示されること
-
-    '
+  description: ①ユーザー数の範囲外入力でバリデーションエラーが表示されること
+  expected: |
+    ユーザー数の範囲外入力でバリデーションエラーが表示されること
   movie: PM01
 - case_no: PAY-06
   feature: 支払い
-  description: '支払い履歴APIエンドポイントが存在すること
-
-    '
-  expected: '支払い履歴APIエンドポイントが存在すること
-
-    '
+  description: ①支払い履歴APIエンドポイントが存在すること
+  expected: |
+    支払い履歴APIエンドポイントが存在すること
   movie: PM01
 - case_no: '715'
   sheet: B
   feature: カードブランド表示
-  description: '①支払い設定ページを開く
-
+  description: |-
+    ①支払い設定ページを開く
     ②クレジットカード情報表示エリアを確認する
-
     ③カードブランド（Visa、MasterCard等）のアイコンと名前が表示されていることを確認する
-
-    ④ブランド表示がカード情報更新ボタンの上に正しく配置されていることを確認する'
+    ④ブランド表示がカード情報更新ボタンの上に正しく配置されていることを確認する
   expected: 支払いページでクレジットカードのブランド（アイコン+名前）が正しく表示されること
   movie: UC16
 - case_no: '355'
   sheet: B
   feature: 領収書ダウンロード
-  description: '①契約済みのdemo環境にログインする
-
+  description: |-
+    ①契約済みのdemo環境にログインする
     ②「請求情報」メニューが表示されることを確認する
-
     ③請求情報画面から領収書ダウンロードを実行する
-
-    ④ダウンロードされたPDFに全項目が正しく印字されていることを確認する'
+    ④ダウンロードされたPDFに全項目が正しく印字されていることを確認する
   expected: 契約済み環境で請求情報メニューが表示され、領収書がダウンロードでき、全項目が印字されていること
   movie: UC03
 - case_no: '573'
   sheet: B
   feature: 決済の即時反映（ユーザー数変更）
-  description: '①決済設定でユーザー数を増やす
-
+  description: |-
+    ①決済設定でユーザー数を増やす
     ②決済完了後、即時に登録可能ユーザー数が反映されることを確認する
-
     ③現在のユーザー数以下に変更した場合にエラーが表示されることを確認する
-
-    ④増やした場合は即時反映され、追加ユーザーが作成可能なことを確認する'
+    ④増やした場合は即時反映され、追加ユーザーが作成可能なことを確認する
   expected: 決済後のユーザー数変更が即時反映され、制限以下への変更時にはエラーが表示されること
   movie: UC09

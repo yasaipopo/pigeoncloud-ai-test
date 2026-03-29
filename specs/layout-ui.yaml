@@ -6,94 +6,84 @@ cases:
   sheet: A
   feature: メニュー
   category: メニュー表示
-  description: '①属性：ユーザータイプ（ユーザー）のユーザーでログイン
-
-    ②画面右側のユーザーアイコンをクリック'
-  expected: 'ユーザーアイコンクリック後、メニュー一覧が表示されること。
-
-    ユーザー情報と、ログアウトだけでOK'
+  description: |-
+    ①属性：ユーザータイプ（ユーザー）のユーザーでログイン
+    ②画面右側のユーザーアイコンをクリック
+  expected: |-
+    ユーザーアイコンクリック後、メニュー一覧が表示されること。
+    ユーザー情報と、ログアウトだけでOK
   movie: LU01
 - case_no: 127-01
   sheet: A
   feature: ショートカットキー
   category: テーブル検索(Ctrl+space)
-  description: '①該当のテーブルのレコード一覧を表示
-
-    ②Ctrl+spaceを押す。'
+  description: |-
+    ①該当のテーブルのレコード一覧を表示
+    ②Ctrl+spaceを押す。
   expected: ショートカット実行により、テーブル検索が行えること。
   movie: LU01
 - case_no: 215-1
   sheet: A
   feature: アイコンタイプ
   category: 画像（画像指定あり）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロード
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロード。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルにアップロードした画像がアイコン表示されていること。
   movie: LU04
 - case_no: 215-2
   sheet: A
   feature: アイコンタイプ
   category: 画像（削除）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプの画像を選択し、「画像を削除」ボタンをクリックする。
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプの画像を選択し、「画像を削除」ボタンをクリックする。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン画像表示がブランク表示となっていること。
   movie: LU04
 - case_no: 215-3
   sheet: A
   feature: アイコンタイプ
   category: 画像（画像指定なし）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロードしない。
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロードしない。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン画像表示がブランク表示となっていること。
   movie: LU04
 - case_no: 215-4
   sheet: A
   feature: アイコンタイプ
   category: アイコン（アイコン指定あり）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプのアイコンを選択し、「fa-user-circle-o」を指定する
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプのアイコンを選択し、「fa-user-circle-o」を指定する。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルに指定したアイコンが表示されていること。
   movie: LU04
 - case_no: 215-5
   sheet: A
   feature: アイコンタイプ
   category: アイコン（アイコン指定なし）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロードしない。
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロードしない。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン表示がデフォルトアイコン表示となっていること。
   movie: LU04
 - case_no: 78-1
   sheet: A
   feature: ダッシュボード
   category: チャートの並び替え
-  description: '①ダッシュボードを表示
-
-    ②ダッシュボードに表示されたチャートをドラッグアンドドロップで並び替え'
+  description: |-
+    ①ダッシュボードを表示
+    ②ダッシュボードに表示されたチャートをドラッグアンドドロップで並び替え
   expected: ドラングアンドドロップでチャートの並び替えが可能なこと。
   movie: LU03
 - case_no: 82-10
@@ -101,578 +91,455 @@ cases:
   feature: ダッシュボード
   category: テーブル詳細・編集
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「通知設定」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  expected: ・マスターユーザーでダッシュボードからテーブルの通知設定が行えること
   movie: LU03
 - case_no: 82-1
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
-
-    ④ 「CSVダウンロード」が問題なくできること。'
-  expected: 想定通りの結果となること。
+    ④ 「CSVダウンロード」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードからテーブル詳細・CSVダウンロードが行えること
   movie: LU02
 - case_no: 82-2
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
-
-    ④ 「集計」が問題なくできること。'
-  expected: 想定通りの結果となること。
+    ④ 「集計」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードから集計が行えること
   movie: LU02
 - case_no: 82-3
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
-
-    ④ 「チャート追加」が問題なくできること。'
-  expected: 想定通りの結果となること。
+    ④ 「チャート追加」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードからチャート追加が行えること
   movie: LU02
 - case_no: 82-5
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
-
-    ④ 「通知設定」が問題なくできること。'
-  expected: 想定通りの結果となること。
+    ④ 「通知設定」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードから通知設定が行えること
   movie: LU02
 - case_no: 82-6
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「CSVダウンロード」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  expected: ・マスターユーザーでダッシュボードからCSVダウンロードが行えること
   movie: LU03
 - case_no: 82-7
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「集計」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  expected: ・マスターユーザーでダッシュボードから集計が行えること
   movie: LU03
 - case_no: 82-8
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「チャート追加」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  expected: ・マスターユーザーでダッシュボードからチャート追加が行えること
   movie: LU03
 - case_no: 82-9
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「帳票登録」が問題なくできること。"
-  expected: 想定通りの結果となること。
+  expected: ・マスターユーザーでダッシュボードから帳票登録が行えること
   movie: LU03
 - case_no: 154-1
   sheet: B
   feature: カスタムCSS
   category: カスタムCSS（適用)
-  description: '①マスター権限のユーザーでログイン。
-
+  description: |-
+    ①マスター権限のユーザーでログイン。
     ②メニューより、「その他設定」をクリック。
-
-    ③カスタムCSSの項目へ「sample.css」をアップロードし「更新」をクリック。'
+    ③カスタムCSSの項目へ「sample.css」をアップロードし「更新」をクリック。
   expected: CSSの定義通りにUIが変更されること。
   movie: LU04
 - case_no: 154-2
   sheet: B
   feature: カスタムCSS
   category: カスタムCSS（削除)
-  description: '①マスター権限のユーザーでログイン。
-
+  description: |-
+    ①マスター権限のユーザーでログイン。
     ②メニューより、「その他設定」をクリック。
-
-    ③カスタムCSSの項目へ「sample.css」を削除し「更新」をクリック。'
+    ③カスタムCSSの項目へ「sample.css」を削除し「更新」をクリック。
   expected: UIがデフォルトに戻ること。
   movie: LU04
 - case_no: '228'
   sheet: B
   feature: UI
   category: デジエからの移行する会社用のバージョン変更
-  description: '●機能
-
+  description: |-
+    ①●機能
     左のメニューはグループのみ表示
-
     グループを押すと、右にその中のグループ・テーブルが表示される。
-
-    グループは２層以上も可能。
-
-
-    https://test-folder.pigeon-demo.com
-
+    ②グループは２層以上も可能。
+    ③https://test-folder.pigeon-demo.com
     ID: admin
-
-    PW: wDYYYHaxbWbX'
-  expected: 想定通りの結果となること
+    PW: wDYYYHaxbWbX。
+  expected: ・他テーブル参照の表示条件設定が機能すること
   movie: LU04
 - case_no: 82-4
   sheet: B
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
-
-    ④ 「帳票登録」が問題なくできること。'
-  expected: 想定通りの結果となること。
+    ④ 「帳票登録」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードから帳票登録が行えること
   movie: LU02
 - case_no: '317'
   sheet: B
-  feature: ''
-  description: 'トライアル環境のダッシュボードの掲示板記載内容ですが、
-
+  feature: 文字列
+  description: |-
+    ①トライアル環境のダッシュボードの掲示板記載内容ですが、
     以下環境の掲示板記載内容に変更いただきたいです。
-
-    （zendeskのフォームURL記載しました。）
-
+    ②（zendeskのフォームURL記載しました。
+    ③）
 
     【テンプレート作成用環境】
-
     https://template-base.pigeon-cloud.com/admin/dashboard
 
-
     ID: admin
-
-    PW: adLGiuuhg0XZ'
+    PW: adLGiuuhg0XZ。
   expected: エラーなく正常に動作すること。(トライアル環境のダッシュボードの掲示板記載内容ですが、 以下環境の掲示板記載内容に変更いただきたいです。 （zendeskのフォームURL記載しました。）  【テンプレート作成用環境】 https:/)
   movie: LU04
 - case_no: '336'
   sheet: B
-  feature: ''
-  description: ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。
+  feature: 文字列
+  description: ①ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。
   expected: エラーなく正常に動作すること。(ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。)
   movie: LU04
 - case_no: '408'
   sheet: B
-  feature: ''
-  description: '【バグ修正確認】左側メニューにテーブルやグループがないとき、「＋テーブル追加画面へ」「エクセルから追加」が隠れてしまうようなので修正希望です。
-
-    （添付画像1枚目が隠れている、2枚目がテーブルを追加した後で隠れず表示される）'
+  feature: 文字列
+  description: |-
+    ①【バグ修正確認】左側メニューにテーブルやグループがないとき、「＋テーブル追加画面へ」「エクセルから追加」が隠れてしまうようなので修正希望です。
+    ②（添付画像1枚目が隠れている、2枚目がテーブルを追加した後で隠れず表示される）
   expected: バグが修正され、正常に動作すること。(左側メニューにテーブルやグループがないとき、「＋テーブル追加画面へ」「エクセルから追加」が隠れてしまうようなので修正希望です。 （添付画像1枚目が隠れている、2枚目がテーブルを追加した後で隠れず表示さ)
   movie: LU04
 - case_no: 146-01
   sheet: B
   feature: スマートフォン表示
-  description: '①スマートフォンサイズのビューポートでレコード編集画面を開く
-
+  description: |-
+    ①スマートフォンサイズのビューポートでレコード編集画面を開く
     ②選択肢フィールドをタップする
-
-    ③ブラウザがズームしないことを確認する'
+    ③ブラウザがズームしないことを確認する
   expected: 選択肢フィールドをタップしてもブラウザのズームが発生しないこと
   movie: UC01
 - case_no: '276'
   sheet: B
   feature: 詳細画面UI
-  description: '①レコード詳細画面を開く
-
+  description: |-
+    ①レコード詳細画面を開く
     ②画面右下に「戻る」ボタンが表示されていることを確認する
-
     ③「戻る」ボタンをクリックする
-
-    ④前の画面（一覧画面等）に正しく戻ることを確認する'
+    ④前の画面（一覧画面等）に正しく戻ることを確認する
   expected: レコード詳細画面に「戻る」ボタンが表示され、クリックで前の画面に戻れること
   movie: UC02
 - case_no: '370'
   sheet: B
   feature: ヘッダー固定
-  description: '①テーブル一覧画面を開く
-
+  description: |-
+    ①テーブル一覧画面を開く
     ②テーブル設定でヘッダー固定を有効にする
-
     ③レコード一覧を下方向にスクロールする
-
-    ④ヘッダー1行目が画面上部に固定表示されることを確認する'
+    ④ヘッダー1行目が画面上部に固定表示されることを確認する
   expected: テーブル一覧でスクロール時にヘッダー1行目が固定表示されること
   movie: UC04
 - case_no: '503'
   sheet: B
   feature: グループ表示
-  description: '①テーブルをグループに所属させる
-
+  description: |-
+    ①テーブルをグループに所属させる
     ②サイドメニューでグループを展開する
-
-    ③グループ内のテーブル名が省略されず読める状態で表示されることを確認する'
+    ③グループ内のテーブル名が省略されず読める状態で表示されることを確認する
   expected: グループに所属するテーブル名がサイドメニューで正しく（見切れなく）表示されること
   movie: UC06
 - case_no: '542'
   sheet: B
   feature: テーブルアイコン
-  description: '①テーブル設定でテーブルにアイコンを設定する
-
+  description: |-
+    ①テーブル設定でテーブルにアイコンを設定する
     ②テーブル一覧やサイドメニューでアイコンが表示されることを確認する
-
-    ③アイコンの位置が正しく（ずれなく）表示されることを確認する'
+    ③アイコンの位置が正しく（ずれなく）表示されることを確認する
   expected: テーブルにアイコンを設定した場合、アイコンの位置が正しく表示されること
   movie: UC07
 - case_no: '686'
   sheet: B
   feature: 行色設定
-  description: '①ビュー設定で「行に色を付ける」条件を設定する（日付A < 日付B）
-
+  description: |-
+    ①ビュー設定で「行に色を付ける」条件を設定する（日付A < 日付B）
     ②日付Aと日付Bが同じ値のレコードを作成する
-
     ③テーブル一覧画面を開く
-
-    ④日付Aと日付Bが同じ値の場合、行に色が付かないことを確認する'
+    ④日付Aと日付Bが同じ値の場合、行に色が付かないことを確認する
   expected: ビューの「行に色を付ける」条件で「日付A < 日付B」の場合、両方の値が同じときは色が付かないこと
   movie: UC14
 - case_no: '607'
   sheet: B
   feature: 関連レコードの更新情報表示位置
-  description: '①関連レコード設定があるテーブルの詳細画面を開く
-
+  description: |-
+    ①関連レコード設定があるテーブルの詳細画面を開く
     ②更新情報（更新日時等）の表示位置を確認する
-
-    ③更新情報が正しい位置（関連レコードではなく本体レコードの情報として）に表示されていることを確認する'
+    ③更新情報が正しい位置（関連レコードではなく本体レコードの情報として）に表示されていることを確認する
   expected: 関連レコード設定時の更新情報が正しい位置に表示されていること
   movie: UC10
 - case_no: '749'
   sheet: B
   feature: 関連レコード一覧のページネーション表示
-  description: '①関連レコード一覧にページネーションを設定する
-
+  description: |-
+    ①関連レコード一覧にページネーションを設定する
     ②詳細画面を開く
-
     ③ページネーションのボタンが横一列に表示され、最後の文字が改行されていないことを確認する
-
-    ④＋ボタンが縦に延びていないことを確認する'
+    ④＋ボタンが縦に延びていないことを確認する
   expected: 関連レコード一覧のページネーション付きレイアウトが崩れず、横一列で正しく表示されること
   movie: UC18
 - case_no: '546'
   sheet: B
   feature: UI表示バグ修正確認
-  description: '①対象画面を開く
-
+  description: |-
+    ①対象画面を開く
     ②UI要素が正しく表示されていることを確認する
-
-    ③操作に応じてUI要素が正しく更新されることを確認する'
+    ③操作に応じてUI要素が正しく更新されることを確認する
   expected: UI表示が正しく、操作に応じて正常に更新されること
   movie: UC07
 - case_no: '755'
   sheet: B
   feature: テーブルビュー表示修正確認
-  description: '①対象テーブルのビュー画面を開く
-
+  description: |-
+    ①対象テーブルのビュー画面を開く
     ②表示レイアウトが崩れていないことを確認する
-
-    ③各カラムのデータが正しく表示されていることを確認する'
+    ③各カラムのデータが正しく表示されていることを確認する
   expected: テーブルビューの表示レイアウトが正しく、データが正常に表示されること
   movie: UC18
 - case_no: '760'
   sheet: B
   feature: UI表示修正確認
-  description: '①対象画面を開く
-
+  description: |-
+    ①対象画面を開く
     ②UI要素のレイアウトが正しいことを確認する
-
-    ③操作時のUI更新が正常であることを確認する'
+    ③操作時のUI更新が正常であることを確認する
   expected: UI表示・レイアウトが正しく動作すること
   movie: UC18
 - case_no: '831'
   sheet: B
   feature: UI表示修正確認
-  description: '①対象画面を開く
-
+  description: |-
+    ①対象画面を開く
     ②表示が正しいことを確認する
-
-    ③操作に応じたUI更新が正常であることを確認する'
+    ③操作に応じたUI更新が正常であることを確認する
   expected: UI表示と操作が正常に動作すること
   movie: UC23
 actual_steps:
 - case_no: 78-1
   status: skip
-  steps: 'test.skip(true, ''D&D操作の不安定性のためスキップ'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ テーブル管理画面でのD&Dによる並び替えは自動化困難としてスキップ
-
+  steps: |
+    test.skip(true, 'D&D操作の不安定性のためスキップ')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ テーブル管理画面でのD&Dによる並び替えは自動化困難としてスキップ
     ⚠️ D&Dライブラリの動作確認は手動テストのみ
-
-    '
 - case_no: 82-1
   status: partial
-  steps: '1. beforeAll: create-all-type-table API呼び出し
-
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
     2. テーブルIDをAPIステータスから取得
-
     3. /admin/dashboard に遷移
-
     4. ページのURLが admin/dashboard を含むことを確認
-
     5. afterAll: delete-all-type-tables API呼び出し
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dashboard/)
-
-    '
-  gaps: '⚠️ YAMLには「ダッシュボードのテーブル表示・テーブル詳細・編集」の確認が期待されるが、URLチェックのみ
-
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dashboard/)
+  gaps: |
+    ⚠️ YAMLには「ダッシュボードのテーブル表示・テーブル詳細・編集」の確認が期待されるが、URLチェックのみ
     ⚠️ テーブルがダッシュボードに表示されることの確認なし
-
     ⚠️ テーブルのサムネイル・カード表示の確認なし
-
-    '
 - case_no: 82-2
   status: partial
-  steps: '1. /admin/dataset に遷移
-
+  steps: |
+    1. /admin/dataset に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ データセット一覧の表示確認のみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ データセット一覧の表示確認のみ
 - case_no: 82-3
   status: partial
-  steps: '1. /admin/user に遷移
-
+  steps: |
+    1. /admin/user に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
-
-    '
-  gaps: '⚠️ ユーザー管理ページの表示確認のみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/user/)
+  gaps: |
+    ⚠️ ユーザー管理ページの表示確認のみ
 - case_no: 82-4
   status: partial
-  steps: '1. /admin/organization に遷移
-
+  steps: |
+    1. /admin/organization に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/organization/)
-
-    '
-  gaps: '⚠️ 組織管理ページの表示確認のみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/organization/)
+  gaps: |
+    ⚠️ 組織管理ページの表示確認のみ
 - case_no: 82-5
   status: partial
-  steps: '1. /admin/setting に遷移
-
+  steps: |
+    1. /admin/setting に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
-
-    '
-  gaps: '⚠️ その他設定ページの表示確認のみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/setting/)
+  gaps: |
+    ⚠️ その他設定ページの表示確認のみ
 - case_no: 82-6
   status: partial
-  steps: '1. テーブル一覧（/admin/dataset__{tableId}）に遷移
-
+  steps: |
+    1. テーブル一覧（/admin/dataset__{tableId}）に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
-
-    '
-  gaps: '⚠️ テーブル内のデータ表示確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(new RegExp(tableId))
+  gaps: |
+    ⚠️ テーブル内のデータ表示確認なし
 - case_no: 82-7
   status: partial
-  steps: '1. テーブル設定（/admin/dataset/edit/{tableId}）に遷移
-
+  steps: |
+    1. テーブル設定（/admin/dataset/edit/{tableId}）に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ テーブル設定ページの詳細確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ テーブル設定ページの詳細確認なし
 - case_no: 82-8
   status: partial
-  steps: '1. テーブル一覧に遷移
-
+  steps: |
+    1. テーブル一覧に遷移
     2. 集計ページへの遷移確認
-
-    '
-  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
-
-    '
-  gaps: '⚠️ 集計ページへの遷移と確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(new RegExp(tableId))
+  gaps: |
+    ⚠️ 集計ページへの遷移と確認なし
 - case_no: 82-9
   status: partial
-  steps: '1. テーブル一覧に遷移
-
+  steps: |
+    1. テーブル一覧に遷移
     2. 帳票登録ページへの遷移確認
-
-    '
-  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
-
-    '
-  gaps: '⚠️ 帳票登録ページへの遷移と確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(new RegExp(tableId))
+  gaps: |
+    ⚠️ 帳票登録ページへの遷移と確認なし
 - case_no: 82-10
   status: partial
-  steps: '1. テーブル一覧に遷移
-
+  steps: |
+    1. テーブル一覧に遷移
     2. 通知設定ページへの遷移確認
-
-    '
-  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
-
-    '
-  gaps: '⚠️ 通知設定ページへの遷移と確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(new RegExp(tableId))
+  gaps: |
+    ⚠️ 通知設定ページへの遷移と確認なし
 - case_no: 100-1
   status: partial
-  steps: '1. テーブル一覧に遷移
-
+  steps: |
+    1. テーブル一覧に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ テーブルアイコン・名前の表示確認なし
-
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ テーブルアイコン・名前の表示確認なし
     ⚠️ テーブル管理機能の詳細確認なし
-
-    '
 - case_no: 127-01
   status: partial
-  steps: '1. テーブル設定ページに遷移
-
+  steps: |
+    1. テーブル設定ページに遷移
     2. ページ表示確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ テーブルのラベル（テーブル名）変更操作・確認なし
-
-    '
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ テーブルのラベル（テーブル名）変更操作・確認なし
 - case_no: 154-1
   status: skip
-  steps: 'test.skip(true, ''ファイルアップロードが必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ テーブルアイコン画像の設定・確認は手動テストのみ
-
-    '
+  steps: |
+    test.skip(true, 'ファイルアップロードが必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ テーブルアイコン画像の設定・確認は手動テストのみ
 - case_no: 154-2
   status: skip
-  steps: 'test.skip(true, ''ファイルアップロードが必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ 154-1と同様
-
-    '
+  steps: |
+    test.skip(true, 'ファイルアップロードが必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 154-1と同様
 - case_no: 215-1
   status: skip
-  steps: 'test.skip(true, ''ファイルアップロードが必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ テーブルのカバー画像設定は手動テストのみ
-
-    '
+  steps: |
+    test.skip(true, 'ファイルアップロードが必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ テーブルのカバー画像設定は手動テストのみ
 - case_no: 215-2
   status: skip
-  steps: 'test.skip(true, ''ファイルアップロードが必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ 215-1と同様
-
-    '
+  steps: |
+    test.skip(true, 'ファイルアップロードが必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 215-1と同様
 - case_no: 215-3
   status: partial
-  steps: '1. テーブル管理ページ（/admin/dataset）に遷移
-
+  steps: |
+    1. テーブル管理ページ（/admin/dataset）に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ YAMLにはテーブル管理画面のレイアウト確認が期待されるが、URLチェックのみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ YAMLにはテーブル管理画面のレイアウト確認が期待されるが、URLチェックのみ
 - case_no: 215-4
   status: partial
-  steps: '1. テーブル管理ページに遷移
-
+  steps: |
+    1. テーブル管理ページに遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ 215-3と同様
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ 215-3と同様
 - case_no: 215-5
   status: partial
-  steps: '1. テーブル管理ページに遷移
-
+  steps: |
+    1. テーブル管理ページに遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ 215-3と同様
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ 215-3と同様
 - case_no: '228'
   status: skip
-  steps: 'test.skip(true, ''専用テスト環境が必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ テーブル表示の権限・ビジビリティの確認は専用環境でのみ可能
-
-    '
+  steps: |
+    test.skip(true, '専用テスト環境が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ テーブル表示の権限・ビジビリティの確認は専用環境でのみ可能

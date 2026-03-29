@@ -146,7 +146,12 @@ async function gotoNotificationEditNew(page, expectedText = '通知設定') {
  * 設定ページ: /admin/admin_setting/edit/1
  */
 async function waitForAngular(page, timeout = 15000) {
-    await page.waitForSelector('body[data-ng-ready="true"]', { timeout });
+    try {
+        await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
+    } catch {
+        // data-ng-readyが設定されないケースがある: networkidleで代替
+        await page.waitForLoadState('networkidle').catch(() => {});
+    }
 }
 
 async function setupSmtp(page) {
