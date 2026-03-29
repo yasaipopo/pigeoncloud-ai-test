@@ -68,7 +68,7 @@ async function fullLogin(page, email, password) {
     await page.locator('button[type=submit].btn-primary').first().click({ timeout: 30000 });
 
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 180000, waitUntil: 'domcontentloaded' });
+        await page.waitForURL('**/admin/dashboard', { timeout: 60000, waitUntil: 'domcontentloaded' });
     } catch (e) {
         const currentUrl = page.url();
         if (!currentUrl.includes('/admin/login')) {
@@ -80,7 +80,7 @@ async function fullLogin(page, email, password) {
         await page.fill('#id', _email);
         await page.fill('#password', _password);
         await page.locator('button[type=submit].btn-primary').first().click({ timeout: 30000 });
-        await page.waitForURL('**/admin/dashboard', { timeout: 180000, waitUntil: 'domcontentloaded' }).catch(() => {});
+        await page.waitForURL('**/admin/dashboard', { timeout: 60000, waitUntil: 'domcontentloaded' }).catch(() => {});
     }
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
 }

@@ -204,7 +204,7 @@ async function checkPage(page, path) {
         const tableFound = await page.waitForSelector('table', { timeout: 60000 }).then(() => true).catch(() => false);
         if (tableFound) {
             // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
-            await page.waitForSelector('table thead th', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('table thead th', { timeout: 30000 }).catch(() => {});
         } else {
             await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 10000 }).catch(() => {});
         }

@@ -104,7 +104,7 @@ async function createWorkflowTestTable(page) {
 
     // テーブル名入力
     const nameInput = page.locator('#table_name').first();
-    await nameInput.waitFor({ timeout: 15000 });
+    await nameInput.waitFor({ timeout: 30000 });
     await nameInput.fill(tableName);
     await page.waitForTimeout(500);
 

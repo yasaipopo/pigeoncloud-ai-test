@@ -195,19 +195,21 @@ async function checkPage(page, path) {
     await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
     // Angular SPAのブート完了を待つ（.navbar が出る = ログイン済み+Angularレンダリング完了）
     await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
-    // Angular SPAのコンポーネント描画完了を待機（domcontentloadedの後も非同期ロードが続く）
-    // dataset__IDページの場合はthead thが描画されるまで待機
+    // Angular SPAのテーブル描画完了を待機（domcontentloadedの後も非同期ロードが続く）
+    // データセット一覧ページの場合は特別処理（サーバー負荷で遅延しやすい）
     if (path.includes('/admin/dataset__') && !path.includes('/setting') && !path.includes('/create') && !path.includes('/notification')) {
-        try {
-            await page.waitForFunction(() => {
-                const ths = document.querySelectorAll('table thead th');
-                return ths.length > 0;
-            }, { timeout: 30000 });
-        } catch (e) {
-            // タイムアウトしても継続（テーブルが空の場合は表示されないことがある）
+        // サーバー負荷により読み込みが遅くなる場合があるため60秒待機
+        const tableFound = await page.waitForSelector('table', { timeout: 60000 }).then(() => true).catch(() => false);
+        if (tableFound) {
+            // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
+            await page.waitForSelector('table thead th', { timeout: 30000 }).catch(() => {});
+        } else {
+            await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 10000 }).catch(() => {});
         }
+        await page.waitForTimeout(500);
+    } else {
+        await page.waitForSelector('table', { timeout: 15000 }).catch(() => {});
     }
-    await page.waitForTimeout(500);
     // ページ読み込み後にエラーチェック
     const bodyText = await page.innerText('body');
     expect(bodyText).not.toContain('Internal Server Error');

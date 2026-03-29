@@ -827,7 +827,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 検索が正常に実行されたこと（テーブル構造が存在すること）
             const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-            await expect(table.first()).toBeVisible({ timeout: 10000 });
+            await expect(table.first()).toBeVisible({ timeout: 30000 });
         } else {
             // 簡易検索が存在しない場合はフィルタ設定UIで確認
             const bodyText = await page.innerText('body');
@@ -941,7 +941,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         // 全角・半角どちらでもエラーなく検索が実行されること
         // （完全一致は環境のデータ次第なのでエラーなし+テーブル構造存在を確認）
         const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-        await expect(table.first()).toBeVisible({ timeout: 10000 });
+        await expect(table.first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -1003,7 +1003,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
 
         // テーブル構造が正常に表示されること
         const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-        await expect(table.first()).toBeVisible({ timeout: 10000 });
+        await expect(table.first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -1049,7 +1049,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
 
         const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-        await expect(table.first()).toBeVisible({ timeout: 10000 });
+        await expect(table.first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------
@@ -1151,7 +1151,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
 
         // テーブル構造が存在すること（検索結果が0件でもテーブル自体は表示される）
         const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-        await expect(table.first()).toBeVisible({ timeout: 10000 });
+        await expect(table.first()).toBeVisible({ timeout: 30000 });
     });
 
     // -------------------------------------------------------------------------

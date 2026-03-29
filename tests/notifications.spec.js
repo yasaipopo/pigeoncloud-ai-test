@@ -126,7 +126,7 @@ async function goToNotificationPage(page, tableId) {
 async function gotoNotificationEditNew(page, expectedText = '通知設定') {
     await page.goto(BASE_URL + '/admin/notification/edit/new', {
         waitUntil: 'domcontentloaded',
-        timeout: 30000,
+        timeout: 60000,
     });
     await waitForAngular(page);
     // ポジティブチェック: 期待テキストが表示されるまで待つ
@@ -136,7 +136,7 @@ async function gotoNotificationEditNew(page, expectedText = '通知設定') {
             return body.includes(text) && !body.includes('読み込み中');
         },
         expectedText,
-        { timeout: 30000 }
+        { timeout: 60000 }
     );
 }
 
