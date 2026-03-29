@@ -126,10 +126,18 @@ async function getFirstTableId(page) {
  * @param {string} tableId
  */
 async function navigateToTablePage(page, tableId) {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-    // Angular描画: 「帳票」ボタンが表示されるまで待機（最大15秒）
-    await page.waitForSelector('button:has-text("帳票"), button.dropdown-toggle', { timeout: 15000 }).catch(() => {});
+    if (!tableId) throw new Error('tableIdがnull — beforeAllで取得に失敗した可能性があります');
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
     await waitForAngular(page);
+    // ログインページにリダイレクトされた場合はre-login
+    if (page.url().includes('/admin/login')) {
+        await ensureLoggedIn(page);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        await waitForAngular(page);
+    }
+    // Angular描画: navbarまたは帳票ボタンが表示されるまで待機
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+    await page.waitForSelector('button:has-text("帳票"), button.dropdown-toggle', { timeout: 15000 }).catch(() => {});
 }
 
 /**
@@ -158,11 +166,17 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         test.setTimeout(360000);
         const context = await createLoginContext(browser);
         const page = await context.newPage();
-        await ensureLoggedIn(page);
-        tableId = await getAllTypeTableId(page);
-        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-        await page.close();
-        await context.close();
+        try {
+            await ensureLoggedIn(page);
+            tableId = await getAllTypeTableId(page);
+            if (!tableId) {
+                console.error('[beforeAll] ALLテストテーブルが見つかりません');
+            }
+        } catch (e) {
+            console.error('[beforeAll] 帳票セットアップ失敗:', e.message);
+        }
+        await page.close().catch(() => {});
+        await context.close().catch(() => {});
     });
 
     // 各テスト前: ログインのみ

@@ -96,15 +96,15 @@ async function createTestUser(page) {
  */
 async function createWorkflowTestTable(page) {
     const tableName = 'WFTest_' + Date.now();
-    // テーブル作成ページへ直接遷移
-    await page.goto(BASE_URL + '/admin/dataset/edit/new');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('[role=tab]', { timeout: 30000 }).catch(() => {});
+    // テーブル作成ページへ直接遷移（タイムアウト延長: Angular SPAのブートストラップに時間がかかる場合がある）
+    await page.goto(BASE_URL + '/admin/dataset/edit/new', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+    await page.waitForSelector('[role=tab]', { timeout: 60000 }).catch(() => {});
     await waitForAngular(page);
 
-    // テーブル名入力
+    // テーブル名入力（Angular SPAのフォームレンダリング完了を待つ）
     const nameInput = page.locator('#table_name').first();
-    await nameInput.waitFor({ timeout: 30000 });
+    await nameInput.waitFor({ timeout: 60000 });
     await nameInput.fill(tableName);
     await page.waitForTimeout(500);
 
@@ -557,17 +557,20 @@ test.beforeAll(async ({ browser }) => {
         await page.waitForTimeout(3000); // 削除完了待機
     }
 
-    // ワークフローテスト専用の簡易テーブルを作成（最大3回リトライ）
+    // ワークフローテスト専用の簡易テーブルを作成（最大5回リトライ）
     // （ALLTESTテーブルはルックアップ型不一致で保存エラーになる場合があるため）
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    for (let attempt = 1; attempt <= 5; attempt++) {
         try {
             _sharedTableId = await createWorkflowTestTable(page);
             if (_sharedTableId) break;
         } catch (e) {
-            console.log(`[file-level beforeAll] createWorkflowTestTable attempt ${attempt} failed:`, e.message);
-            if (attempt === 3) throw e;
-            await page.goto(BASE_URL + '/admin/dashboard');
+            console.log(`[file-level beforeAll] createWorkflowTestTable attempt ${attempt}/5 failed:`, e.message);
+            if (attempt === 5) throw e;
+            // リトライ前にダッシュボードに戻り、Angular SPAの完全再起動を待つ
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+            await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
+            await page.waitForTimeout(3000); // Angular SPAの安定化待機
         }
     }
     // テストユーザーを作成（承認者/申請者として使用）

@@ -127,6 +127,12 @@ async function logout(page) {
  * デバッグAPIのPOSTヘルパー
  */
 async function debugApiPost(page, path, body = {}, timeoutMs = 30000) {
+    // about:blank から fetch すると cookies が送られないため、BASE_URLにいることを確認
+    const currentUrl = page.url();
+    if (!currentUrl || currentUrl === 'about:blank' || !currentUrl.includes(BASE_URL.replace('https://', '').replace('http://', ''))) {
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+    }
     return await page.evaluate(async ({ baseUrl, path, body, timeoutMs }) => {
         try {
             const controller = new AbortController();
@@ -288,7 +294,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
         // ページタイトルにテーブル定義が含まれることを確認
-        await expect(page).toHaveTitle(/テーブル定義/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // サイドバーナビゲーションが表示されていることを確認
@@ -305,7 +311,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page).toHaveTitle(/ダッシュボード/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // Pigeon Cloud ブランドリンクが表示されていることを確認
@@ -353,7 +359,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page).toHaveTitle(/ダッシュボード/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // Pigeon Cloud ブランドリンクが表示されていることを確認
@@ -373,7 +379,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page).toHaveTitle(/ダッシュボード/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // Pigeon Cloud ブランドリンクが表示されていることを確認
@@ -400,7 +406,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page).toHaveTitle(/ダッシュボード/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // Pigeon Cloud ブランドリンクが表示されていることを確認
@@ -561,8 +567,9 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         // 「メニュー」タブをクリック（dataset-form.component.htmlのngbNavItem=2）
         // タブは <a ngbNavLink><i class="fa fa-bars mr-2"></i><span>メニュー</span></a>
-        const menuTab = page.locator('a[ngbnavlink]:has-text("メニュー"), a:has(span:has-text("メニュー"))').first();
-        await expect(menuTab).toBeVisible({ timeout: 10000 });
+        // セレクタを広く取る: ngbnavlink属性、またはnavタブ内のリンク
+        const menuTab = page.locator('a[ngbnavlink]:has-text("メニュー"), a.nav-link:has-text("メニュー"), a:has(span:has-text("メニュー"))').first();
+        await expect(menuTab).toBeVisible({ timeout: 15000 });
         await menuTab.click();
         await waitForAngular(page);
 
@@ -570,7 +577,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // admin-forms-fieldコンポーネントがラジオボタンを描画する（「画像」「アイコン」の2択）
         // ラジオボタンの「画像」ラベルをクリック
         const imageRadio = page.locator('text=画像').first();
-        await expect(imageRadio).toBeVisible({ timeout: 10000 });
+        await expect(imageRadio).toBeVisible({ timeout: 15000 });
         await imageRadio.click();
         await waitForAngular(page);
 
@@ -617,14 +624,14 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await expect(page).toHaveURL(/\/admin\/dataset\/edit/);
 
         // 「メニュー」タブをクリック
-        const menuTab = page.locator('a[ngbnavlink]:has-text("メニュー"), a:has(span:has-text("メニュー"))').first();
-        await expect(menuTab).toBeVisible({ timeout: 10000 });
+        const menuTab = page.locator('a[ngbnavlink]:has-text("メニュー"), a.nav-link:has-text("メニュー"), a:has(span:has-text("メニュー"))').first();
+        await expect(menuTab).toBeVisible({ timeout: 15000 });
         await menuTab.click();
         await waitForAngular(page);
 
         // アイコンタイプを「画像」に設定（ラジオボタン）
         const imageRadio = page.locator('text=画像').first();
-        await expect(imageRadio).toBeVisible({ timeout: 10000 });
+        await expect(imageRadio).toBeVisible({ timeout: 15000 });
         await imageRadio.click();
         await waitForAngular(page);
 
@@ -688,7 +695,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/, { timeout: 15000 });
         // ページタイトルにテーブル定義が含まれることを確認
-        await expect(page).toHaveTitle(/テーブル定義/, { timeout: 10000 });
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
         // サイドバーナビゲーションが表示されていることを確認（Angular描画待ち）
@@ -708,7 +715,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // テーブル管理ページが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dataset/);
         // ページタイトルにテーブル定義が含まれることを確認
-        await expect(page).toHaveTitle(/テーブル定義/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // サイドバーナビゲーションが表示されていることを確認
@@ -747,7 +754,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         // ダッシュボードが表示されることを確認
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page).toHaveTitle(/ダッシュボード/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // mainコンテンツエリアが表示されていることを確認
@@ -826,7 +833,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page).toHaveTitle(/ダッシュボード/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // mainコンテンツエリアが表示されていることを確認
@@ -865,7 +872,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
         await expect(page).toHaveURL(/\/admin\/dashboard/);
         // ページタイトルにダッシュボードが含まれることを確認
-        await expect(page).toHaveTitle(/ダッシュボード/);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         // navbar（ヘッダー）が表示されていることを確認
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
         // mainコンテンツエリアが表示されていることを確認

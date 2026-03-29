@@ -261,7 +261,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -321,7 +321,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -334,7 +334,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('683: テーブル一覧のフィールドヘッダーが正常に表示されること', async ({ page }) => {
@@ -342,7 +342,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -367,7 +367,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -380,7 +380,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('688: テーブル一覧ページでCSV操作関連の処理がエラーなく動作すること', async ({ page }) => {
@@ -391,7 +391,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('689: 集計ページでチャート設定の開始月を設定できることのエラーなし確認', async ({ page }) => {
@@ -407,7 +407,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -428,7 +428,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('693: 公開フォーム機能を使用してもテーブル一覧ページがエラーなく表示されること', async ({ page }) => {
@@ -444,7 +444,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -454,7 +454,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -467,7 +467,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('697: 各項目の設定を変更してもテーブル一覧ページが正常に表示されること', async ({ page }) => {
@@ -478,7 +478,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('698: 通知設定ページがエラーなく正常に表示されること', async ({ page }) => {
@@ -505,7 +505,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('701: CSV空欄アップロードで複数値フィールドの値が削除される仕様変更後にテーブル一覧が正常表示されること', async ({ page }) => {
@@ -516,7 +516,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
 
@@ -526,7 +526,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -539,7 +539,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('707: 自動採番フォーマット変更後にテーブル一覧のフィールドヘッダーが正常に表示されること', async ({ page }) => {
@@ -547,7 +547,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -556,7 +556,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -587,7 +587,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('713: テーブル一覧ページでCSV操作機能がエラーなく動作すること（#issue1049）', async ({ page }) => {
@@ -598,7 +598,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('714: チャート設定タブの期間単位設定後に集計ページが正常に表示されること', async ({ page }) => {
@@ -631,7 +631,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -649,7 +649,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -658,7 +658,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -669,7 +669,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -691,7 +691,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -729,7 +729,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('732: ワークフローの一度承認後の再申請機能を有効にしてもワークフロー設定ページが正常表示されること', async ({ page }) => {
@@ -747,7 +747,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -760,7 +760,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('737: 集計ページがエラーなく正常に表示されること（#issue1218）', async ({ page }) => {
@@ -779,7 +779,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('739: テーブル一覧の絞り込み機能がエラーなく動作すること', async ({ page }) => {
@@ -818,7 +818,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -828,7 +828,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -849,14 +849,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('749: 関連レコード一覧にページネーションを設定してもレコード一覧が正常に表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -885,7 +885,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('753: テーブル一覧のフィールドヘッダーが正常に表示されること（#issue1363）', async ({ page }) => {
@@ -893,7 +893,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -916,7 +916,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1005,17 +1005,9 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('777: 日時項目の種類を時刻のみに設定してもテーブル一覧フィールドヘッダーが正常表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
-        // Angular SPAのtheadレンダリング完了を待機
-        await page.waitForFunction(() => {
-            const ths = document.querySelectorAll('table thead th');
-            return ths.length > 0;
-        }, { timeout: 10000 }).catch(() => {});
-        await page.waitForTimeout(1000);
-        // 項目（フィールド）が正常に表示されること
+        // 項目（フィールド）が正常に表示されること（auto-waitで待機）
         const headers = page.locator('table thead th');
-        const headerCount = await headers.count();
-        console.log('777: thead th数:', headerCount);
-        expect(headerCount).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1058,7 +1050,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('783: 集計結果を並び替えできる機能を有効にしても集計ページが正常に表示されること', async ({ page }) => {
@@ -1074,7 +1066,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1092,7 +1084,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1102,7 +1094,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1115,7 +1107,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
 
@@ -1184,7 +1176,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1194,7 +1186,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1217,7 +1209,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('809: テーブル権限設定の変更後にユーザー管理ページが正常に表示されること', async ({ page }) => {
@@ -1268,7 +1260,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1278,7 +1270,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1335,7 +1327,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1410,7 +1402,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
         const headers = page.locator('table thead th');
-        expect(await headers.count()).toBeGreaterThan(0);
+        await expect(headers.first()).toBeVisible({ timeout: 30000 });
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1441,7 +1433,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        await expect(page.locator('table').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('838: ルックアップ表示した項目が一覧画面でレイアウト崩れなく正常に表示されること', async ({ page }) => {

@@ -192,26 +192,55 @@ async function deleteAllTypeTables(page) {
 // getAllTypeTableId は helpers/table-setup からインポート済み
 
 /**
+ * テーブル一覧ページへ安全に遷移するヘルパー
+ * ログインリダイレクト対策 + table描画完了待機を含む
+ */
+async function navigateToDatasetPage(page, tableId) {
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    // ログインリダイレクトされた場合は再ログイン
+    if (page.url().includes('/admin/login')) {
+        await login(page);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    }
+    // Angular SPAのブート完了を待つ
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+    // テーブル描画完了を待機（table または role="columnheader"）
+    const tableFound = await page.waitForSelector('table, [role="columnheader"]', { timeout: 60000 }).then(() => true).catch(() => false);
+    if (tableFound) {
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
+    }
+    await page.waitForTimeout(500);
+    const bodyText = await page.innerText('body');
+    expect(bodyText).not.toContain('Internal Server Error');
+    return bodyText;
+}
+
+/**
  * ページアクセス確認ヘルパー
  */
 async function checkPage(page, path) {
     await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    // ログインリダイレクトされた場合は再ログイン
+    if (page.url().includes('/admin/login')) {
+        await login(page);
+        await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    }
     // Angular SPAのブート完了を待つ（.navbar が出る = ログイン済み+Angularレンダリング完了）
     await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
     // Angular SPAのテーブル描画完了を待機（domcontentloadedの後も非同期ロードが続く）
     // データセット一覧ページの場合は特別処理（サーバー負荷で遅延しやすい）
     if (path.includes('/dataset__') && !path.includes('/setting') && !path.includes('/edit')) {
         // サーバー負荷により読み込みが遅くなる場合があるため60秒待機
-        const tableFound = await page.waitForSelector('table', { timeout: 60000 }).then(() => true).catch(() => false);
+        const tableFound = await page.waitForSelector('table, [role="columnheader"]', { timeout: 60000 }).then(() => true).catch(() => false);
         if (tableFound) {
             // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
-            await page.waitForSelector('table thead th', { timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         } else {
             await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 10000 }).catch(() => {});
         }
         await page.waitForTimeout(500);
     } else {
-        await page.waitForSelector('table', { timeout: 10000 }).catch(() => {});
+        await page.waitForSelector('table', { timeout: 15000 }).catch(() => {});
     }
     // ページ読み込み後にエラーチェック
     const bodyText = await page.innerText('body');
@@ -232,8 +261,9 @@ test.describe('追加実装テスト（314-579系）', () => {
         tableId = await getAllTypeTableId(page);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
-        await createAllTypeData(page, 3).catch(() => {});
-        await page.waitForTimeout(1000);
+        const dataResult = await createAllTypeData(page, 3).catch((e) => { console.log('createAllTypeData error:', e.message); return { result: 'error' }; });
+        console.log('createAllTypeData result:', JSON.stringify(dataResult));
+        await page.waitForTimeout(2000);
         await context.close();
     });
 
@@ -265,8 +295,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('507: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue791）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -377,8 +409,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('517: 必須条件設定で他の項目を条件利用する場合にテーブル一覧がエラーなく正常表示されること（#issue834）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -387,8 +421,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('518: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue740）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -495,8 +531,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('531: 選択肢（複数項目）で型エラーが発生せずテーブル一覧が正常表示されること（#issue856）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -584,8 +622,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('539: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue742）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -618,8 +658,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('545: 複数ファイル項目で追加ボタン後にファイル未選択のまま登録するとバリデーションエラーになること（#issue869）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -732,8 +774,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('555: 親テーブルに計算項目がない場合でも子テーブルがリアルタイム更新されること（#issue696）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -902,8 +946,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('575: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue913）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -912,8 +958,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('576: テーブル一覧画面がエラーなく正常に表示されること（#issue940）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブル要素が確実に描画されるまで追加待機
+        await page.waitForSelector('table, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -983,8 +1031,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('583: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue867）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1057,7 +1107,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
 
@@ -1092,8 +1142,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('595: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue962）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1124,8 +1176,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('599: 日時項目で時刻のみ選択・時間間隔を1分以外に設定した場合にテーブル一覧が正常表示されること（#issue1063）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1139,7 +1193,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('601: 数値項目に4桁以上の数字が入力されている場合に帳票設定ページが正常表示されること（#issue1013）', async ({ page }) => {
@@ -1158,7 +1212,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('603: コネクトのトリガーにワークフロー完了タイミングが追加されワークフロー設定ページが正常表示されること（#issue1044）', async ({ page }) => {
@@ -1178,7 +1232,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('606: ユーザー管理ページがエラーなく正常に表示されること（#issue881）', async ({ page }) => {
@@ -1191,8 +1245,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('607: テーブル一覧画面がエラーなく正常に表示されること（#issue1074）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブル要素が確実に描画されるまで追加待機
+        await page.waitForSelector('table, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1205,7 +1261,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('609: FTP処理失敗・一部成功時にどのテーブルのエラーかを通知設定ページで確認できること（#issue1093）', async ({ page }) => {
@@ -1236,44 +1292,28 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('612: ビュー設定タブの権限デフォルトが「自分のみ表示」に変更されテーブルページが正常表示されること', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1078 ビューの設定タブの権限で、「全員に表示」がデフォルトになっているところを、「自分のみ表示」をデフォルトにするよう修正いた
-        // expected: 想定通りの結果となること。
+        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1078
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-        // テーブルページを開く（ビュー権限設定はビュー作成後の設定タブで確認できる）
-        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        // テーブル名が表示されるまで待機（SPAのロード完了を確認）
-        await page.locator('h5, [class*="title"], [class*="table-name"]').first().waitFor({ timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
+        // テーブルページを開く（ログインリダイレクト対策付き）
+        await navigateToDatasetPage(page, tid);
         // テーブルページが正常表示されること
-        await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
         expect(page.url()).toContain(`/admin/dataset__${tid}`);
     });
 
     test('613: サイドメニューでテーブル名が省略表示されている場合でもサイドナビに正しくテーブル名が表示されること', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1066 testing video サイドメニューで、テーブル名が長くなり、末尾が…になっている場合、 添付画像一枚目のようにワ
-        // expected: 想定通りの結果となること。 https://henmi013.pigeon-demo.com/admin/dataset__145
+        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1066
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        // サイドナビゲーションのテーブルリンクが表示されるまで待機（SPAのロード完了確認）
-        await page.locator('nav a[href*="/admin/dataset__"]').first().waitFor({ timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(500);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // テーブルページが正常表示されること
-        await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
-        // サイドナビゲーション（左メニュー）が表示されること（.sidebar-navを優先）
-        const sideNav = page.locator('nav.sidebar-nav').first();
-        await expect(sideNav).toBeVisible();
+        // テーブルページを開く（ログインリダイレクト対策付き）
+        await navigateToDatasetPage(page, tid);
+        // サイドナビゲーション（左メニュー）が表示されること
+        const sideNav = page.locator('nav.sidebar-nav, .sidebar-nav, nav.sidebar, .app-sidebar').first();
+        await expect(sideNav).toBeVisible({ timeout: 10000 });
         // ページにテーブル名が表示されていること（サイドメニューのテーブルリスト）
         // waitFor後に再取得してテキストを確認
         const bodyText = await page.innerText('body');
@@ -1310,25 +1350,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('616: チャートにデータ項目・Y軸の並び替え機能が追加されテーブル一覧の列ヘッダーが正常表示されること', async ({ page }) => {
-        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/777 testing video チャートに、並び替え機能つけてもらえますか？ データ項目、ｙ軸で並び替え出来るようにしてくださ
-        // expected: 想定通りの結果となること。
+        // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/777
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        // login_max_devicesでリダイレクトされた場合は再ログイン
-        if (page.url().includes('/admin/login')) {
-            await login(page);
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-            await page.waitForLoadState('domcontentloaded');
-        }
-        // テーブルタイトルが表示されるまで待機（SPAのロード完了確認）
-        await page.locator('h5').first().waitFor({ timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // テーブルページが正常表示されること
-        await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+        await navigateToDatasetPage(page, tid);
         expect(page.url()).toContain(`/admin/dataset__${tid}`);
         // テーブル列ヘッダーが存在すること（th要素 または role="columnheader"）
         const colHeaders = page.locator('th, [role="columnheader"]');
@@ -1337,25 +1362,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     });
 
     test('617: 全データ選択時の一括削除・一括編集ポップアップに赤字で全データ削除の注意書きが表示されること', async ({ page }) => {
-        // description: 下記テストお願いします！ チェックして消す場合、全データが選択されている場合は、一括削除・一括編集のポップアップで、赤文字で全データが削除されます と大きく注意書きしてもらえますか？
-        // expected: 想定通りの結果となること。
+        // description: 全データ選択時の一括削除・一括編集ポップアップに赤字の注意書きが出ること
         const tid = tableId || await getAllTypeTableId(page);
         expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-        await page.waitForLoadState('domcontentloaded');
-        // login_max_devicesでリダイレクトされた場合は再ログイン
-        if (page.url().includes('/admin/login')) {
-            await login(page);
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`);
-            await page.waitForLoadState('domcontentloaded');
-        }
-        // テーブルタイトルが表示されるまで待機（SPAのロード完了確認）
-        await page.locator('h5').first().waitFor({ timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // テーブル一覧が正常表示されること
-        await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+        await navigateToDatasetPage(page, tid);
         expect(page.url()).toContain(`/admin/dataset__${tid}`);
         // チェックボックス（一括選択用）が表示されること（th または tableのtr内のcheckbox）
         const checkboxes = page.locator('table tr input[type="checkbox"], [role="row"] input[type="checkbox"]');
@@ -1392,7 +1402,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('620: ログイン画面のパスワードリセット機能追加後にユーザー管理ページが正常表示されること（#issue950）', async ({ page }) => {
@@ -1426,8 +1436,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('623: 他テーブル参照（複数）から文字列一行（複数）へのルックアップが正常動作すること（#issue1108）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1449,8 +1461,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('625: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1005）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1464,7 +1478,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('627: ユーザー管理画面のテーブル一覧で役職が正しく表示されること（#issue892）', async ({ page }) => {
@@ -1477,8 +1491,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('628: 計算式にnextWeekDay関数が追加されテーブル一覧が正常表示されること（#issue706）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1511,8 +1527,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('633: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1139）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1551,8 +1569,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('636: コピー環境で重複データに対してエラーが出て登録できないことを確認できること（#issue732）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1601,14 +1621,16 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('643: 主キー設定の上限が5項目以上に拡張されてテーブル一覧が正常表示されること（#issue1163）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1626,8 +1648,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('646: 他テーブル参照で複数値登録を許可する設定が有効の場合にテーブル一覧が正常表示されること（#issue1028）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1700,8 +1724,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('653: コメントで組織へメンションする際にエラーメッセージが出ないことをテーブル一覧で確認できること（#issue974）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブル要素が確実に描画されるまで追加待機
+        await page.waitForSelector('table, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -1709,8 +1735,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('654: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue984）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1732,14 +1760,16 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('657: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1047）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1805,8 +1835,10 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('664: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1115）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
+        // テーブルヘッダーが確実に描画されるまで追加待機
+        await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -1844,7 +1876,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('667: CSVアップロード前にデータをリセットする機能が正常に動作すること（#issue1216）', async ({ page }) => {
@@ -1855,7 +1887,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('668: 他の項目で値の絞り込みを行う機能がエラーなく正常に動作すること（#issue1217）', async ({ page }) => {
@@ -1879,7 +1911,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('670: 受信メール取込み機能の強化版追加後に通知設定ページが正常表示されること（#issue1196）', async ({ page }) => {

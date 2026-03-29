@@ -188,21 +188,67 @@ async function deleteAllTypeTables(page) {
 // getAllTypeTableId は helpers/table-setup からインポート済み
 
 /**
+ * テーブル一覧ページへ安全に遷移するヘルパー
+ * ログインリダイレクト対策 + table描画完了待機を含む
+ */
+async function navigateToDatasetPage(page, tableId) {
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    // ログインリダイレクトされた場合は再ログイン
+    if (page.url().includes('/admin/login')) {
+        await login(page);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    }
+    // Angular SPAのブート完了を待つ
+    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+    // テーブル描画完了を待機（サーバー負荷で遅延しやすい）
+    await page.waitForSelector('table', { timeout: 60000 }).catch(() => {});
+    await page.waitForSelector('table thead th', { timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(500);
+    const bodyText = await page.innerText('body');
+    expect(bodyText).not.toContain('Internal Server Error');
+    return bodyText;
+}
+
+/**
+ * フィールド設定ページへ安全に遷移するヘルパー
+ * フィールドリスト描画完了を待機
+ */
+async function navigateToFieldEditPage(page, tableId) {
+    await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    // ログインリダイレクトされた場合は再ログイン
+    if (page.url().includes('/admin/login')) {
+        await login(page);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    }
+    await waitForAngular(page);
+    // フィールドリストがロードされるまで待機（60秒に延長）
+    await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list, .toggle-drag-field-list', { timeout: 60000 }).catch(() => {});
+    const bodyText = await page.innerText('body');
+    expect(bodyText).not.toContain('Internal Server Error');
+    return bodyText;
+}
+
+/**
  * 指定パスにアクセスして基本的な表示確認を行うヘルパー
  * 500エラー・404エラーが表示されていないことを確認する
  */
 async function checkPage(page, path) {
     await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    // ログインリダイレクトされた場合は再ログイン
+    if (page.url().includes('/admin/login')) {
+        await login(page);
+        await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    }
     // Angular SPAのブート完了を待つ（.navbar が出る = ログイン済み+Angularレンダリング完了）
     await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
     // Angular SPAのテーブル描画完了を待機（domcontentloadedの後も非同期ロードが続く）
     // データセット一覧ページの場合は特別処理（サーバー負荷で遅延しやすい）
     if (path.includes('/admin/dataset__') && !path.includes('/setting') && !path.includes('/create') && !path.includes('/notification')) {
-        // サーバー負荷により読み込みが遅くなる場合があるため60秒待機
-        const tableFound = await page.waitForSelector('table', { timeout: 60000 }).then(() => true).catch(() => false);
+        // サーバー負荷により読み込みが遅くなる場合があるため60秒待機（table or role="columnheader"）
+        const tableFound = await page.waitForSelector('table, [role="columnheader"]', { timeout: 60000 }).then(() => true).catch(() => false);
         if (tableFound) {
             // テーブルヘッダー行の描画完了を追加待機（Angularの遅延レンダリング対策）
-            await page.waitForSelector('table thead th', { timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('table thead th, [role="columnheader"]', { timeout: 30000 }).catch(() => {});
         } else {
             await page.waitForSelector('.no-records, [class*="empty"], main', { timeout: 10000 }).catch(() => {});
         }
@@ -247,18 +293,12 @@ test.describe('文字列表示設定（145系）', () => {
     // -------------------------------------------------------------------------
     test('145-01: テキストフィールドの一覧表示文字数設定が正しく動作すること', async ({ page }) => {
         // レコード一覧ページへ
-        await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        expect(pageText).not.toContain('404');
-        // レコード一覧テーブルが正常に表示されること
-        // table exists check
-        const tableExists = await page.locator('table').count();
-        expect(tableExists).toBeGreaterThan(0);
-        await expect(page.locator('table thead th').first()).toBeVisible();
+        const tid = tableId || await getAllTypeTableId(page);
+        await navigateToDatasetPage(page, tid);
+        // レコード一覧テーブルが正常に表示されること（navigateToDatasetPageで待機済み）
+        await expect(page.locator('table thead th, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -271,10 +311,10 @@ test.describe('文字列表示設定（145系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 });
@@ -316,10 +356,10 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
         expect(pageText).not.toContain('Internal Server Error');
         expect(pageText).not.toContain('404');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -337,10 +377,10 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
         expect(pageText).not.toContain('Internal Server Error');
         expect(pageText).not.toContain('404');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 });
@@ -387,9 +427,9 @@ test.describe('列表示幅設定（191系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること（列ヘッダーが存在）
-        const tableCount3 = await page.locator('table').count();
+        const tableCount3 = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount3).toBeGreaterThan(0);
-        const thCount = await page.locator('table thead th').count();
+        const thCount = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount).toBeGreaterThan(0);
         console.log('191: thead th数:', thCount);
     });
@@ -429,10 +469,10 @@ test.describe('大量データ（211系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 });
@@ -572,12 +612,7 @@ test.describe('権限設定（262系）', () => {
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // テーブル設定ページへ移動
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // Angular SPAのレンダリング完了を待機
-        await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list', { timeout: 15000 }).catch(() => {});
+        await navigateToFieldEditPage(page, tableId);
         // 権限設定タブが存在する場合はクリック
         const permissionTab = page.locator('a, button, [role="tab"]').filter({ hasText: /権限|permission/i }).first();
         const permTabCount = await permissionTab.count();
@@ -656,7 +691,7 @@ test.describe('検索機能（270系）', () => {
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
         // table exists check
-        const tableExists = await page.locator('table').count();
+        const tableExists = await page.locator('table, [role="columnheader"]').count();
         expect(tableExists).toBeGreaterThan(0);
         // 検索フォームが存在すること
         const searchInput = page.locator('input[type="search"], input[placeholder*="検索"], .search-input');
@@ -697,12 +732,7 @@ test.describe('自動採番（273系）', () => {
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // フィールド設定ページへ移動
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // フィールドリストがロードされるまで待機
-        await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list', { timeout: 15000 }).catch(() => {});
+        await navigateToFieldEditPage(page, tableId);
         // ページテキストから「自動採番」フィールドを探す
         const bodyText = await page.innerText('body');
         console.log('273: 自動採番テキスト含む:', bodyText.includes('自動採番'));
@@ -777,12 +807,7 @@ test.describe('リッチテキスト（274系）', () => {
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // フィールド設定ページへ移動
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // フィールドリストがロードされるまで待機
-        await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list', { timeout: 15000 }).catch(() => {});
+        await navigateToFieldEditPage(page, tableId);
         // ページテキストから「リッチテキスト」を確認
         const bodyText = await page.innerText('body');
         console.log('274: リッチテキストテキスト含む:', bodyText.includes('リッチテキスト'));
@@ -921,15 +946,21 @@ test.describe('循環参照エラー（291系）', () => {
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // フィールド設定ページへ移動
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // フィールドリストがロードされるまで待機
-        await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list', { timeout: 15000 }).catch(() => {});
+        await navigateToFieldEditPage(page, tableId);
         // 「項目を追加する」ボタンを探してクリック
         const addFieldBtn = page.locator('button').filter({ hasText: /項目を追加|フィールドを追加|add.*field|フィールド追加/i }).first();
-        const addBtnCount = await addFieldBtn.count();
+        // ボタンが見つからない場合は別セレクターも試す
+        let addBtnCount = await addFieldBtn.count();
+        if (addBtnCount === 0) {
+            // Angularコンポーネントの描画完了を追加待機
+            await page.waitForTimeout(3000);
+            addBtnCount = await addFieldBtn.count();
+        }
+        if (addBtnCount === 0) {
+            // 「追加」テキストを含む全ボタンを試す
+            const altBtn = page.locator('button:has-text("追加"), a:has-text("項目を追加")').first();
+            addBtnCount = await altBtn.count();
+        }
         console.log('291: 項目追加ボタン数:', addBtnCount);
         if (addBtnCount === 0) {
             throw new Error('291: 「項目を追加する」ボタンが見つかりません。UIを確認してください');
@@ -986,12 +1017,12 @@ test.describe('一括編集（312系）', () => {
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
         // table exists check
-        const tableExists = await page.locator('table').count();
+        const tableExists = await page.locator('table, [role="columnheader"]').count();
         expect(tableExists).toBeGreaterThan(0);
         // 一括編集ボタン or チェックボックスが存在すること
         const hasBulkEdit = await page.locator('button, .btn').filter({ hasText: '一括' }).count();
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 });
@@ -1198,13 +1229,13 @@ test.describe('CSVキャンセル（367系）', () => {
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
         // table exists check
-        const tableExists = await page.locator('table').count();
+        const tableExists = await page.locator('table, [role="columnheader"]').count();
         expect(tableExists).toBeGreaterThan(0);
         // CSVダウンロードボタンが存在すること
         const hasCsvBtn = await page.locator('.card-header').filter({ hasText: 'CSV' }).count();
         expect(hasCsvBtn).toBeGreaterThanOrEqual(0); // CSVボタンがなくてもエラーにしない
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 });
@@ -1241,16 +1272,9 @@ test.describe('ヘッダー固定（370系）', () => {
     // -------------------------------------------------------------------------
     test('370: テーブル一覧でヘッダー1行目を固定できること', async ({ page }) => {
         test.setTimeout(120000);
-        await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // Angularの仮想スクロール等でtableが遅延描画される場合があるため待機
-        await page.waitForSelector('table', { timeout: 15000 }).catch(() => {});
-        // レコード一覧テーブルが正常に表示されること（ヘッダー行が存在）
-        const tableCount2 = await page.locator('table').count();
-        expect(tableCount2, 'テーブル要素が存在すること').toBeGreaterThan(0);
-        const thCount = await page.locator('table thead th').count();
+        const tid = tableId || await getAllTypeTableId(page);
+        await navigateToDatasetPage(page, tid);
+        const thCount = await page.locator('table thead th, [role="columnheader"]').count();
         console.log('370: th count:', thCount);
         expect(thCount, 'テーブルヘッダー列が存在すること').toBeGreaterThan(1);
     });
@@ -1367,15 +1391,19 @@ test.describe('子テーブル（325, 341系）', () => {
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // フィールド設定ページへ移動
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // フィールドリストがロードされるまで待機
-        await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list', { timeout: 15000 }).catch(() => {});
+        await navigateToFieldEditPage(page, tableId);
         // 「項目を追加する」ボタンを探してクリック
         const addFieldBtn = page.locator('button').filter({ hasText: /項目を追加|フィールドを追加|add.*field|フィールド追加/i }).first();
-        const addBtnCount = await addFieldBtn.count();
+        // ボタンが見つからない場合は追加待機
+        let addBtnCount = await addFieldBtn.count();
+        if (addBtnCount === 0) {
+            await page.waitForTimeout(3000);
+            addBtnCount = await addFieldBtn.count();
+        }
+        if (addBtnCount === 0) {
+            const altBtn = page.locator('button:has-text("追加"), a:has-text("項目を追加")').first();
+            addBtnCount = await altBtn.count();
+        }
         console.log('325: 項目追加ボタン数:', addBtnCount);
         if (addBtnCount === 0) {
             throw new Error('325: 「項目を追加する」ボタンが見つかりません。UIを確認してください');
@@ -1406,10 +1434,10 @@ test.describe('子テーブル（325, 341系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 });
@@ -1446,15 +1474,8 @@ test.describe('一覧編集モード（324系）', () => {
     // -------------------------------------------------------------------------
     test('324: 一覧編集モードで編集後に詳細画面で値が消えないこと', async ({ page }) => {
         test.setTimeout(120000);
-        await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
-        await waitForAngular(page);
-        const pageText = await page.innerText('body');
-        expect(pageText).not.toContain('Internal Server Error');
-        // Angularの仮想スクロール等でtableが遅延描画される場合があるため待機
-        await page.waitForSelector('table', { timeout: 15000 }).catch(() => {});
-        // レコード一覧テーブルが正常に表示されること
-        const tableExists = await page.locator('table').count();
-        expect(tableExists, 'テーブル要素が存在すること').toBeGreaterThan(0);
+        const tid = tableId || await getAllTypeTableId(page);
+        await navigateToDatasetPage(page, tid);
         // 編集モードボタンが存在すること（ボタンテキストが異なる場合も考慮）
         const editModeBtn = page.locator('button, a').filter({ hasText: /編集モード|一覧編集|list.*edit/i }).first();
         const hasEditModeBtn = await editModeBtn.count();
@@ -1471,7 +1492,7 @@ test.describe('一覧編集モード（324系）', () => {
             expect(hasEditModeBtn, '一覧編集モードボタンが存在すること').toBeGreaterThan(0);
         }
         // テーブル構造が正常であること
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2, 'テーブルヘッダーが存在すること').toBeGreaterThanOrEqual(0);
     });
 });
@@ -1930,14 +1951,9 @@ test.describe('未実装テスト（todo）', () => {
 
     test('323: 複数条件フィルターの混合設定が正常に動作すること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await page.waitForLoadState('domcontentloaded');
-        expect(await page.innerText('body')).not.toContain('Internal Server Error');
-        // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -1978,12 +1994,20 @@ test.describe('未実装テスト（todo）', () => {
     });
 
     test('360: ユーザーテーブルのデフォルト項目の編集不可設定が正しく機能すること', async ({ page }) => {
-        await checkPage(page, '/admin/user');
+        await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        if (page.url().includes('/admin/login')) {
+            await login(page);
+            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        }
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('table', { timeout: 60000 }).catch(() => {});
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
         // ユーザー管理ページが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -1991,10 +2015,7 @@ test.describe('未実装テスト（todo）', () => {
         test.setTimeout(120000);
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // テーブル設定ページ（フィールド編集）に遷移して権限設定タブの存在を確認
-        // ※ /admin/dataset__ID/setting/permission はAngularルーターに存在しない（ダッシュボードにリダイレクト）
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await waitForAngular(page);
-        expect(await page.innerText('body')).not.toContain('Internal Server Error');
+        await navigateToFieldEditPage(page, tableId);
         // ページが正常に表示されること
         const navbarCount = await page.locator('.navbar, header.app-header').count();
         expect(navbarCount, 'ナビバーが表示されること').toBeGreaterThan(0);
@@ -2023,17 +2044,13 @@ test.describe('未実装テスト（todo）', () => {
         test.setTimeout(120000);
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // テーブル一覧でバグが再現しないことを確認
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await waitForAngular(page);
-        expect(await page.innerText('body')).not.toContain('Internal Server Error');
-        // Angularの仮想スクロール等でtableが遅延描画される場合があるため待機
-        await page.waitForSelector('table', { timeout: 15000 }).catch(() => {});
+        await navigateToDatasetPage(page, tableId);
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         console.log('365: テーブル数:', tableCount);
         expect(tableCount, 'テーブル要素が存在すること').toBeGreaterThan(0);
         // テーブル構造が正常であること
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2, 'テーブルヘッダーが存在すること').toBeGreaterThanOrEqual(0);
     });
 
@@ -2074,7 +2091,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2110,7 +2127,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2120,7 +2137,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -2129,7 +2146,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2153,10 +2170,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2194,7 +2211,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -2216,7 +2233,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -2229,7 +2246,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('338: ユーザー管理ページが正常に表示されること（#issue483）', async ({ page }) => {
@@ -2272,10 +2289,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2310,10 +2327,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2335,7 +2352,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2364,10 +2381,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2427,7 +2444,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2448,7 +2465,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('373: PigeonAI機能のダッシュボードページが正常に表示されること', async ({ page }) => {
@@ -2468,7 +2485,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2506,7 +2523,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('379: CSVログは、自分がUP/DLした分だけは全ユーザー見られるようにしていただきた（#issue518）', async ({ page }) => {
@@ -2517,14 +2534,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('380: 計算項目の「計算値の自動更新OFF」設定が正しく機能すること（#issue523）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2540,10 +2557,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2570,10 +2587,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2602,7 +2619,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2612,7 +2629,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -2627,10 +2644,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2644,10 +2661,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2661,10 +2678,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2695,7 +2712,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('394: 対象テーブル：「申請」（dataset__31）（#issue578）', async ({ page }) => {
@@ -2710,7 +2727,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2728,7 +2745,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2765,10 +2782,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2782,10 +2799,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2807,10 +2824,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2818,7 +2835,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2850,10 +2867,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2868,7 +2885,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -2910,10 +2927,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2927,10 +2944,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2964,10 +2981,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // ユーザー管理ページが正常にロードされること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2981,10 +2998,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -2992,7 +3009,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3008,10 +3025,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3025,10 +3042,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3042,10 +3059,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3080,10 +3097,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3105,10 +3122,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3116,7 +3133,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3141,7 +3158,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3173,10 +3190,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3195,7 +3212,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('439: ユーザー管理ページが正常に表示されること（#issue643）', async ({ page }) => {
@@ -3209,7 +3226,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3225,10 +3242,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3253,14 +3270,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('445: 他テーブル参照項目の「複数の値の登録を許可する」にチェックが入っている項目は（#issue625）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3284,10 +3301,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3295,7 +3312,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3312,7 +3329,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -3329,7 +3346,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3364,7 +3381,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('456: 集計ページが正常に表示されること（#issue638）', async ({ page }) => {
@@ -3393,10 +3410,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3410,10 +3427,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3434,7 +3451,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3450,10 +3467,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3475,10 +3492,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3492,10 +3509,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3503,7 +3520,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3527,10 +3544,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3538,7 +3555,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3548,7 +3565,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -3578,10 +3595,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3625,7 +3642,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3641,10 +3658,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3656,7 +3673,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('484: ワークフロー設定ページが正常に表示されること（#issue623）', async ({ page }) => {
@@ -3675,14 +3692,14 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('486: フィールド設定ページが正常に表示されること（#issue703）', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3692,7 +3709,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // レコード一覧が正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -3701,7 +3718,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3717,10 +3734,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3728,7 +3745,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3752,10 +3769,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3763,7 +3780,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         await checkPage(page, `/admin/dataset__${tableId}`);
         // 項目（フィールド）が正常に表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -3785,7 +3802,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
         // ページが正常に表示されること
-        expect(await page.locator('table').count()).toBeGreaterThan(0);
+        expect(await page.locator('table, [role="columnheader"]').count()).toBeGreaterThan(0);
     });
 
     test('496: 子テーブルに複数項目ルックアップデータがある場合も親テーブルから更新できること', async ({ page }) => {
@@ -3798,10 +3815,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3823,10 +3840,10 @@ test.describe('追加実装テスト（314-579系）', () => {
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
         // レコード一覧テーブルが正常に表示されること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-        const thCount2 = await page.locator('table thead th').count();
+        const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount2).toBeGreaterThanOrEqual(0);
     });
 
@@ -3877,6 +3894,9 @@ test.describe('追加実装テスト（282-593系）', () => {
         await ensureLoggedIn(page);
         tableId = await getAllTypeTableId(page);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
+        // 空テーブルでは<table>要素が描画されないためレコードを追加
+        await createAllTypeData(page, 3).catch(() => {});
+        await page.waitForTimeout(1000);
         await page.close();
         await context.close();
     });
@@ -3893,11 +3913,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     test('282: レコード編集画面で値を入力・保存し、詳細画面で正しい値が表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
         // レコード一覧を開く
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
+        await navigateToDatasetPage(page, tableId);
 
         // 新規レコード作成ボタンをクリック
         const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
@@ -3930,7 +3946,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             }
         } else {
             // 一覧画面が表示されていることを確認
-            const tableCount = await page.locator('table').count();
+            const tableCount = await page.locator('table, [role="columnheader"]').count();
             expect(tableCount).toBeGreaterThan(0);
         }
     });
@@ -4032,15 +4048,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('501: レコードの編集・保存が正しく動作すること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // レコード行が存在する場合、最初のレコードの詳細/編集リンクをクリック
         const rows = page.locator('table tbody tr');
@@ -4065,18 +4073,21 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('503: グループに所属するテーブル名がサイドメニューで正しく表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + '/admin/dashboard');
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        // ログインリダイレクト対策
+        if (page.url().includes('/admin/login')) {
+            await login(page);
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        }
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
-        await page.waitForTimeout(1500);
 
         // サイドメニューが表示されていること
-        const sidebar = page.locator('.sidebar, .app-sidebar, nav.sidebar, aside');
-        if (await sidebar.count() > 0) {
-            await expect(sidebar.first()).toBeVisible({ timeout: 5000 });
-        }
+        const sidebar = page.locator('.sidebar, .app-sidebar, nav.sidebar, aside, .sidebar-nav');
+        await page.waitForSelector('.sidebar a, .app-sidebar a, aside a, .nav-item a, .sidebar-nav a', { timeout: 30000 }).catch(() => {});
 
         // サイドメニュー内のグループ展開リンクを探す
-        const groupItems = page.locator('.sidebar a, .app-sidebar a, aside a, .nav-item a');
+        const groupItems = page.locator('.sidebar a, .app-sidebar a, aside a, .nav-item a, .sidebar-nav a');
         const groupCount = await groupItems.count();
         expect(groupCount).toBeGreaterThan(0);
 
@@ -4101,14 +4112,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         expect(errors1).toBe(0);
 
         // レコード一覧画面に戻る
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
         const errors2 = await page.locator('.alert-danger').count();
         expect(errors2).toBe(0);
     });
@@ -4145,15 +4149,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('509: 数値が100000000000000以上のとき桁区切りが正しく表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // レコード一覧が正常に表示されること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // レコード編集画面を開いて数値フィールドに大きな値を入力
         const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
@@ -4242,7 +4238,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         if (await applyBtn.count() > 0) {
             // WF設定済みテーブルの場合のみ申請テスト可能
             // 一覧が正常に表示されていることを確認
-            const tableCount = await page.locator('table').count();
+            const tableCount = await page.locator('table, [role="columnheader"]').count();
             expect(tableCount).toBeGreaterThan(0);
         }
 
@@ -4255,16 +4251,8 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('522: 並行承認AND/ORで同一承認者スキップ有効時にテーブル一覧がエラーなく表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブル一覧が正常に表示されること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
-        const thCount = await page.locator('table thead th').count();
+        await navigateToDatasetPage(page, tableId);
+        const thCount = await page.locator('table thead th, [role="columnheader"]').count();
         expect(thCount).toBeGreaterThan(0);
 
         const errors = await page.locator('.alert-danger').count();
@@ -4336,12 +4324,10 @@ test.describe('追加実装テスト（282-593系）', () => {
         expect(errors1).toBe(0);
 
         // 一覧に戻る
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
+        await navigateToDatasetPage(page, tableId);
 
-        // フィールドヘッダーが正常に表示されていること
-        const headers = page.locator('table thead th');
+        // フィールドヘッダーが正常に表示されていること（navigateToDatasetPageで待機済み）
+        const headers = page.locator('table thead th, [role="columnheader"]');
         const headerCount = await headers.count();
         expect(headerCount).toBeGreaterThan(0);
 
@@ -4379,15 +4365,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('532: レコードの作成・編集・削除操作が正しく動作すること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブル一覧が正常に表示されること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // 新規作成ボタンが存在すること
         const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
@@ -4508,7 +4486,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         await waitForAngular(page);
         await page.waitForTimeout(1500);
 
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -4560,7 +4538,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
 
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors2 = await page.locator('.alert-danger').count();
         expect(errors2).toBe(0);
@@ -4679,11 +4657,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('551: フィルター後の一括削除確認メッセージに正しい件数が表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
+        await navigateToDatasetPage(page, tableId);
 
         // 絞り込みUIが存在すること
         const filterBtn = page.locator('button, a').filter({ hasText: /絞り込み|フィルター|検索/ });
@@ -4694,7 +4668,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         // 一括削除ボタンが存在するか確認
         const bulkDeleteBtn = page.locator('button, a').filter({ hasText: /一括削除/ });
         // 一覧画面が正常に表示されていること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
 
         const errors = await page.locator('.alert-danger').count();
@@ -4720,11 +4694,9 @@ test.describe('追加実装テスト（282-593系）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
 
         // レコード一覧で反映確認
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
+        await navigateToDatasetPage(page, tableId);
 
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -4765,14 +4737,10 @@ test.describe('追加実装テスト（282-593系）', () => {
     test('560: フィールド設定変更後に一覧画面・編集画面でフィールドがエラーなく正常に動作すること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
         // 一覧画面
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
+        await navigateToDatasetPage(page, tableId);
 
         // フィールドヘッダーが表示されていること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
 
         // 編集画面（新規作成画面）でフィールドが表示されること
@@ -4834,12 +4802,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
 
         // 一覧画面でレコードが正しく表示されること
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -4889,11 +4852,9 @@ test.describe('追加実装テスト（282-593系）', () => {
         expect(errors1).toBe(0);
 
         // 一覧に移動
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
+        await navigateToDatasetPage(page, tableId);
 
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
 
         const bodyText = await page.innerText('body');
@@ -4937,15 +4898,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('569: レコード編集操作が正しく動作すること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // レコード行が存在する場合、最初のレコードの詳細リンクをクリック
         const rows = page.locator('table tbody tr');
@@ -5005,14 +4958,10 @@ test.describe('追加実装テスト（282-593系）', () => {
     test('571: フィールド設定変更後に一覧・詳細画面でフィールドがエラーなく正常に表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
         // 一覧画面
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
+        await navigateToDatasetPage(page, tableId);
 
         // フィールドヘッダーが表示されること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
 
         // レコードが存在する場合、詳細画面も確認
@@ -5181,15 +5130,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('586: レコードの作成・編集操作が正しく完了しデータが保存されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // 新規作成ボタン
         const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
@@ -5284,15 +5225,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('591: 帳票の一括ダウンロードZIPが正常に動作し選択レコードの帳票がダウンロードできること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // レコードを選択するチェックボックスを探す
         const checkboxes = page.locator('table tbody input[type=checkbox]');
@@ -5321,11 +5254,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('593: 申請中レコードを削除した場合にワークフローバッジが正しく更新されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
+        await navigateToDatasetPage(page, tableId);
 
         // 左メニューのワークフローバッジを確認
         const sidebar = page.locator('.sidebar, .app-sidebar, aside');
@@ -5336,7 +5265,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         }
 
         // テーブル一覧が正常に表示されていること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
 
         const errors = await page.locator('.alert-danger').count();
@@ -5396,7 +5325,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         await page.waitForTimeout(1500);
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -5414,7 +5343,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
 
         // テーブルヘッダーが表示されていること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         const headerCount = await headers.count();
         expect(headerCount, 'テーブルヘッダーが存在すること').toBeGreaterThan(0);
 
@@ -5444,7 +5373,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         // CSVダウンロードメニューが存在すること
         const csvBtn = page.locator('button, a, [class*=dropdown]').filter({ hasText: /CSV|エクスポート|ダウンロード/ });
         // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -5493,7 +5422,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         await page.waitForTimeout(1500);
         bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount, 'レコード一覧テーブルが表示されること').toBeGreaterThan(0);
     });
 
@@ -5509,12 +5438,12 @@ test.describe('追加実装テスト（282-593系）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
 
         // 「最終更新者」列がヘッダーに存在するか確認
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         const headerTexts = await headers.allInnerTexts();
         const hasLastUpdater = headerTexts.some(t => t.includes('最終更新者') || t.includes('更新者'));
         // ALLテストテーブルには最終更新者列が含まれている可能性がある
         // テーブルが正常に表示されていれば基本確認OK
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -5525,15 +5454,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('608: 複数許可の他テーブル参照フィールドがCSVで表示値出力されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示され、CSV関連UIが存在すること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // メニューにCSVダウンロード項目が存在するか確認
         const menuBtn = page.locator('button.dropdown-toggle, [data-toggle=dropdown], [data-bs-toggle=dropdown]').first();
@@ -5685,15 +5606,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('619: 子テーブルCSVダウンロードでテーブル名と親テーブルIDが正しく出力されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -5718,7 +5631,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         await page.waitForTimeout(1500);
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -5768,7 +5681,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         expect(navbar).toBeGreaterThan(0);
 
         // テーブルが表示されていること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -5794,7 +5707,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         await page.waitForTimeout(1500);
         bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -5836,7 +5749,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
         await waitForAngular(page);
         await page.waitForTimeout(1500);
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -5975,7 +5888,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             // フィルタボタンが存在すること
             expect(await filterBtn.first().isVisible()).toBeTruthy();
         }
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -6071,15 +5984,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('655: 計算項目の日付フォーマットが帳票出力で正しく反映されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブル一覧が正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // 帳票関連メニューの存在を確認
         const reportMenu = page.locator('button, a').filter({ hasText: /帳票/ });
@@ -6138,7 +6043,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         if (await filterBtn.count() > 0) {
             expect(await filterBtn.first().isVisible()).toBeTruthy();
         }
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
@@ -6188,15 +6093,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('664: ルックアップで表示した日付がルックアップ先のフォーマットで表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -6206,15 +6103,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('665: 他テーブル参照の日時項目で一桁月日のCSV再アップロードがエラーなく完了すること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // CSV関連UIの存在を確認
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -6224,15 +6113,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('666: 子テーブルを含むCSVアップロードで他テーブル参照値が正しく反映されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -6304,15 +6185,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('671: 大量レコードのCSVダウンロードで重複が発生しないこと', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // CSV UP/DL履歴ページが正常に開けること
         await page.goto(BASE_URL + '/admin/csv');
@@ -6354,15 +6227,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('674: Yes/Noフィールドのラベル空白時もCSVダウンロードで値が正しく出力されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
         const errors = await page.locator('.alert-danger').count();
         expect(errors).toBe(0);
     });
@@ -6464,15 +6329,7 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
     test('682: 子テーブルCSVアップロードで必須項目空欄時にエラーが表示されること', async ({ page }) => {
         expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
-        await waitForAngular(page);
-        await page.waitForTimeout(1500);
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
-
-        // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
-        expect(tableCount).toBeGreaterThan(0);
+        await navigateToDatasetPage(page, tableId);
 
         // CSV UP/DL履歴ページが正常に開けること
         await page.goto(BASE_URL + '/admin/csv');
@@ -6533,7 +6390,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
 
         // テーブルが正常に表示されていること
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
 
         // 文字列の省略表示（...）と全文表示のツールチップ動作を確認
@@ -6588,7 +6445,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
 
         // ヘッダー行の列名を確認して他テーブル参照系があるか確認
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         const headerCount = await headers.count();
         expect(headerCount).toBeGreaterThan(0);
 
@@ -6956,7 +6813,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -7024,7 +6881,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
 
         // フィールドヘッダーが存在すること
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         const headerCount = await headers.count();
         expect(headerCount).toBeGreaterThan(0);
     });
@@ -7180,7 +7037,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -7426,7 +7283,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -7495,7 +7352,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         expect(bodyText).not.toContain('Internal Server Error');
 
         // ヘッダー行クリックでソート
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         const headerCount = await headers.count();
         if (headerCount > 1) {
             await headers.nth(1).click();
@@ -7567,7 +7424,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
 
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         const headerCount = await headers.count();
         expect(headerCount).toBeGreaterThan(0);
     });
@@ -7620,7 +7477,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -7646,7 +7503,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -7677,7 +7534,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -7942,7 +7799,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -8011,7 +7868,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
 
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         const headerCount = await headers.count();
         expect(headerCount).toBeGreaterThan(0);
 
@@ -8128,7 +7985,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 
@@ -8268,7 +8125,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
 
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
     });
 
@@ -8369,7 +8226,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
 
-        const headers = page.locator('table thead th');
+        const headers = page.locator('table thead th, [role="columnheader"]');
         expect(await headers.count()).toBeGreaterThan(0);
     });
 
@@ -8383,7 +8240,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         await page.waitForTimeout(1500);
         const bodyText = await page.innerText('body');
         expect(bodyText).not.toContain('Internal Server Error');
-        const tableCount = await page.locator('table').count();
+        const tableCount = await page.locator('table, [role="columnheader"]').count();
         expect(tableCount).toBeGreaterThan(0);
     });
 

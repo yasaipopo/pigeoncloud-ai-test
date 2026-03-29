@@ -850,8 +850,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         expect(testTableId).toBeTruthy();
 
         // まずデータセット一覧に移動（/admin/datasetから遷移しないとdataset_view=falseになる）
-        await page.goto(BASE_URL + '/admin/dataset');
-        await waitForAngular(page);
+        await navigateToDatasetManagement(page);
 
         // テーブルへのリンクをクリックして遷移（SPA内部遷移でdataset_viewがtrueになる）
         const tableLink = page.locator(`a[href*="dataset__${testTableId}"]`).first();
@@ -930,8 +929,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await closeTemplateModal(page);
 
         // データセット一覧画面（dataset管理画面）に移動
-        await page.goto(BASE_URL + '/admin/dataset');
-        await waitForAngular(page);
+        await navigateToDatasetManagement(page);
 
         // ハンバーガードロップダウンを開く
         const dropdownBtn = page.locator('button.btn-outline-primary.dropdown-toggle').first();
@@ -1196,10 +1194,42 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 // JSONエクスポート・インポート（テーブル定義）
 // =============================================================================
 
+/**
+ * テーブル管理一覧（/admin/dataset）に確実に遷移する
+ * Angular SPAのルーティングで /admin/dataset/edit/new にリダイレクトされる場合に対応
+ */
+async function navigateToDatasetManagement(page) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+        await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await waitForAngular(page);
+        await page.waitForTimeout(1500);
+
+        const url = page.url();
+        // テーブル管理一覧にいるか確認
+        if (url.includes('/admin/dataset') && !url.includes('/edit') && !url.includes('dashboard')) {
+            return;
+        }
+        // リダイレクトされた場合: サイドバーの「テーブル管理」リンクを使う
+        const sidebarLink = page.locator('a[href*="/admin/dataset"]').filter({ hasText: /テーブル管理|テーブル一覧/ }).first();
+        if (await sidebarLink.count() > 0) {
+            await sidebarLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1500);
+            return;
+        }
+    }
+}
+
 test.describe('JSONエクスポート・インポート', () => {
     test.describe.configure({ timeout: 120000 });
 
     let testTableId = null;
+
+    // 各テスト前にログイン（ログインが漏れているテストの安全ネット）
+    test.beforeEach(async ({ page }) => {
+        await login(page, EMAIL, PASSWORD);
+        await closeTemplateModal(page);
+    });
 
     // テスト前にログイン＋ALLタイプテーブル作成
     test.beforeAll(async ({ browser }) => {
@@ -1210,6 +1240,8 @@ test.describe('JSONエクスポート・インポート', () => {
         await closeTemplateModal(page);
         testTableId = await getAllTypeTableId(page);
         if (!testTableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
+        // ファイルにも保存（後半テストの getTestTableId() が参照する）
+        saveTestTableId(testTableId);
         // JSONエクスポートテストではレコード選択が必要なためデータを作成する
         if (testTableId) {
             // createAllTypeDataはpage.evaluate(fetch)を使うため、アプリケーションURLにいる必要がある
@@ -1230,22 +1262,21 @@ test.describe('JSONエクスポート・インポート', () => {
         await closeTemplateModal(page);
 
         // テーブル管理一覧（/admin/dataset）に遷移
-        await page.goto(BASE_URL + '/admin/dataset');
-        await waitForAngular(page);
+        await navigateToDatasetManagement(page);
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
 
         // テーブル管理ページはツリー構造（admin-tree）でテーブルを表示
         // チェックボックスは .admin-tree__check 内にある
-        await page.waitForSelector('.admin-tree__check input[type="checkbox"]', { timeout: 10000 })
+        await page.waitForSelector('.admin-tree__check input[type="checkbox"]', { timeout: 15000 })
             .catch(() => {});
         const firstCheckbox = page.locator('.admin-tree__check input[type="checkbox"]').first();
-        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 10000 });
+        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 15000 });
         await firstCheckbox.click();
         await waitForAngular(page);
 
         // チェックボックス選択後に「JSONエクスポート」ボタンが直接表示される
         const jsonExportBtn = page.locator('button:has-text("JSONエクスポート")').filter({ visible: true }).first();
-        await expect(jsonExportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 8000 });
+        await expect(jsonExportBtn, 'JSONエクスポートボタンが存在すること').toBeVisible({ timeout: 10000 });
         await jsonExportBtn.click();
         await waitForAngular(page);
 
@@ -1278,14 +1309,12 @@ test.describe('JSONエクスポート・インポート', () => {
         // テーブル管理一覧（/admin/dataset）に遷移
         // JSONエクスポートボタンは *ngIf="grant.edit && dataset_view" で制御されており、
         // dataset_viewはテーブル管理一覧（/admin/dataset）でのみtrue
-        // テーブルレコード一覧（/admin/dataset__xxx）ではfalseになる
-        await page.goto(BASE_URL + '/admin/dataset');
-        await waitForAngular(page);
+        await navigateToDatasetManagement(page);
 
         // テーブル管理のツリービューでチェックボックスを選択
         await page.waitForSelector('.admin-tree__check input[type="checkbox"]', { timeout: 15000 }).catch(() => {});
         const firstCheckbox = page.locator('.admin-tree__check input[type="checkbox"]').first();
-        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 10000 });
+        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 15000 });
         await firstCheckbox.click();
         await waitForAngular(page);
 
@@ -1335,13 +1364,12 @@ test.describe('JSONエクスポート・インポート', () => {
         await closeTemplateModal(page);
 
         // テーブル管理一覧（/admin/dataset）に遷移
-        await page.goto(BASE_URL + '/admin/dataset');
-        await waitForAngular(page);
+        await navigateToDatasetManagement(page);
 
         // テーブル管理のツリービューでチェックボックスを選択
         await page.waitForSelector('.admin-tree__check input[type="checkbox"]', { timeout: 15000 }).catch(() => {});
         const firstCheckbox = page.locator('.admin-tree__check input[type="checkbox"]').first();
-        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 10000 });
+        await expect(firstCheckbox, 'テーブル一覧にチェックボックスが存在すること').toBeVisible({ timeout: 15000 });
         await firstCheckbox.click();
         await waitForAngular(page);
 
@@ -1391,8 +1419,7 @@ test.describe('JSONエクスポート・インポート', () => {
         await closeTemplateModal(page);
 
         // テーブル管理一覧（/admin/dataset）に遷移
-        await page.goto(BASE_URL + '/admin/dataset');
-        await waitForAngular(page);
+        await navigateToDatasetManagement(page);
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
 
         // テーブル管理ページのJSONインポートはハンバーガーメニュー（fa-bars）→「JSONから追加」
@@ -1909,6 +1936,7 @@ test.describe('JSONエクスポート・インポート', () => {
     // 379: CSVログは自分のUP/DL分だけ全ユーザーが見られること
     // -------------------------------------------------------------------------
     test('379: CSVログ画面で自分のCSV UP/DL履歴が表示されること', async ({ page }) => {
+        await login(page, EMAIL, PASSWORD);
         // CSV UP/DL履歴ページに遷移
         await page.goto(BASE_URL + '/admin/csv', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);

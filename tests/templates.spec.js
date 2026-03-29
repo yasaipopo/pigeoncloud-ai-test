@@ -28,21 +28,44 @@ async function login(page) {
  * @returns {Promise<boolean>} ドロップダウンが開けたかどうか
  */
 async function openTableManagementBarsMenu(page) {
-    // /admin/dataset は初回アクセス時に /admin/dataset/edit/new にリダイレクトされる場合があるため
-    // 2回ナビゲートするパターンを使用する
-    await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-    await waitForAngular(page);
-    await page.waitForTimeout(800);
-
-    if (!page.url().includes('/admin/dataset') || page.url().includes('/edit') || page.url().includes('dashboard')) {
+    // /admin/dataset は初回アクセス時に /admin/dataset/edit/new にリダイレクトされる場合がある
+    // また Angular SPA のため、ルーティング完了まで待つ必要がある
+    for (let attempt = 0; attempt < 3; attempt++) {
         await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
-        await page.waitForTimeout(800);
+        await page.waitForTimeout(1500);
+
+        // /admin/dataset にいるか確認（editやdashboardにリダイレクトされていないか）
+        const url = page.url();
+        if (url.includes('/admin/dataset') && !url.includes('/edit') && !url.includes('dashboard')) {
+            break;
+        }
+        // リダイレクトされた場合: サイドバーの「テーブル管理」リンクを使う
+        const sidebarLink = page.locator('a[href*="/admin/dataset"]').filter({ hasText: /テーブル管理|テーブル一覧/ }).first();
+        if (await sidebarLink.count() > 0) {
+            await sidebarLink.click();
+            await waitForAngular(page);
+            await page.waitForTimeout(1500);
+            break;
+        }
     }
 
     // fa-bars ドロップダウンボタンを Playwright の click() で操作（Angular の click イベントが正しく処理される）
-    const faBarsBtn = page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle').filter({ has: page.locator('.fa-bars') });
-    const btnCount = await faBarsBtn.count();
+    // セレクタを広く取り、存在しない場合はフォールバック
+    let faBarsBtn = page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle').filter({ has: page.locator('.fa-bars') });
+    let btnCount = await faBarsBtn.count();
+
+    // フォールバック: fa-bars アイコンを持つ任意のドロップダウンボタン
+    if (btnCount === 0) {
+        faBarsBtn = page.locator('button.dropdown-toggle:has(.fa-bars)').first();
+        btnCount = await faBarsBtn.count();
+    }
+    // さらにフォールバック: dropdown-toggleボタン全般
+    if (btnCount === 0) {
+        faBarsBtn = page.locator('button.dropdown-toggle').first();
+        btnCount = await faBarsBtn.count();
+    }
+
     if (btnCount === 0) return false;
 
     await faBarsBtn.first().click();

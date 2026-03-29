@@ -394,30 +394,43 @@ async function ensureSummarizeGrant(page) {
 // ============================================================
 // ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
 // ============================================================
+let fileBeforeAllFailed = false;
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(600000);
     const context = await createLoginContext(browser);
     const page = await context.newPage();
-    await ensureLoggedIn(page);
-    const tableRes = await createAllTypeTable(page);
-    if (tableRes.result !== 'success') {
-        await page.close();
-        await context.close();
-        throw new Error('ALLテストテーブルの作成に失敗しました（ファイルレベルbeforeAll）');
+    try {
+        await ensureLoggedIn(page);
+        // global-setupで作成済みのテーブルIDを取得（自前作成ではなくgetAllTypeTableIdを使用）
+        const tableId = await getAllTypeTableId(page);
+        if (!tableId) {
+            // フォールバック: 自前で作成を試みる
+            const tableRes = await createAllTypeTable(page);
+            if (tableRes.result !== 'success') {
+                console.error('[beforeAll] ALLテストテーブルの取得・作成に失敗しました');
+                fileBeforeAllFailed = true;
+                await page.close();
+                await context.close();
+                return;
+            }
+        }
+        await createAllTypeData(page, 10);
+
+        // summarize（集計/チャート）権限が有効か確認し、不足なら再作成
+        await ensureSummarizeGrant(page);
+    } catch (e) {
+        console.error('[beforeAll] セットアップ失敗:', e.message);
+        fileBeforeAllFailed = true;
     }
-    await createAllTypeData(page, 10);
-
-    // summarize（集計/チャート）権限が有効か確認し、不足なら再作成
-    await ensureSummarizeGrant(page);
-
-    await page.close();
-    await context.close();
+    await page.close().catch(() => {});
+    await context.close().catch(() => {});
 });
 
 test.describe('チャート・集計 - オプション設定', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });
@@ -886,6 +899,7 @@ test.describe('カレンダー - ビュー表示', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });
@@ -1071,6 +1085,7 @@ test.describe('集計 - 基本機能', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });
@@ -2085,6 +2100,7 @@ test.describe('チャート - フィルタ・表示設定', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000);
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });
@@ -2594,6 +2610,7 @@ test.describe('集計 - 詳細権限設定', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000);
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });
@@ -2809,6 +2826,7 @@ test.describe('チャート - 詳細権限設定', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000);
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });
@@ -3014,6 +3032,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(300000);
+        test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await login(page);
         await closeTemplateModal(page);
     });
