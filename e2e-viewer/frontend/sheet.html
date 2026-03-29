@@ -628,7 +628,7 @@ function renderRow(tbody, item) {
   const runNote = item.runCheckNote ? `<i class="bi bi-chat-dots note-indicator has-note" title="${escHtml(item.runCheckNote)}"></i>` : '';
 
   row.innerHTML = `
-    <td style="white-space:nowrap;font-size:.75rem;color:#6c757d">${escHtml(item.movie || '')}</td>
+    <td style="white-space:nowrap;font-size:.75rem">${item.movie ? `<a href="#" onclick="playVideo('${escAttr(item.spec)}','${escAttr(item.movie)}');return false" style="color:#0d6efd;text-decoration:none" title="動画再生">${escHtml(item.movie)} 🎬</a>` : ''}</td>
     <td class="case-no">${escHtml(item.caseNo)}</td>
     <td class="feature-col" title="${escHtml(item.feature || '')}">${escHtml(item.feature || '')}</td>
     <td class="desc-col" onclick="openDetailModal('${escHtml(item.spec)}','${escHtml(item.caseNo)}','${escAttr(item.description || '')}','${escAttr(item.expected || '')}','${escAttr(item.feature || '')}')" title="${escHtml(item.description || '')}">${escHtml(item.description || '')}</td>
@@ -988,7 +988,45 @@ function openDetailModal(spec, caseNo, description, expected, feature) {
   document.getElementById('detailExpected').textContent = expected.replace(/\\n/g, "\n");
   new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
+
+async function playVideo(spec, movie) {
+  // S3署名付きURLを取得
+  const token = localStorage.getItem('e2e_token');
+  const key = `videos/${spec}/${movie}/video.webm`;
+  try {
+    const resp = await fetch(API_URL + '/assets/download-url', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    const data = await resp.json();
+    if (data.url) {
+      document.getElementById('videoPlayer').src = data.url;
+      document.getElementById('videoModalTitle').textContent = `${SPEC_LABELS[spec] || spec} / ${movie}`;
+      new bootstrap.Modal(document.getElementById('videoModal')).show();
+    } else {
+      alert('動画が見つかりません: ' + key);
+    }
+  } catch (e) {
+    alert('動画取得エラー: ' + e.message);
+  }
+}
 </script>
+
+<!-- 動画再生モーダル -->
+<div class="modal fade" id="videoModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="videoModalTitle">動画再生</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="document.getElementById('videoPlayer').pause()"></button>
+      </div>
+      <div class="modal-body p-0">
+        <video id="videoPlayer" controls style="width:100%" autoplay></video>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
