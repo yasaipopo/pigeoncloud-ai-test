@@ -11,6 +11,14 @@ cases:
     ④ラベルが空白の場合でも値が正しくダウンロードされることを確認する
   expected: Yes/Noフィールドのラベルが空白でもCSVダウンロード時にフィルタ反映の値が正しく出力されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. ALLテストテーブル一覧ページへ遷移: /admin/dataset__{tableId}
+    3. フィルタボタン（button.btn-outline-secondary:has(.fa-filter) または [data-testid="filter-btn"]）をクリックしてフィルタを適用する
+    4. CSVダウンロードボタン（button:has-text("CSV"), .dropdown-item:has-text("CSVダウンロード")）をクリックする
+    5. ダウンロードされたCSVファイルをfs.readFileSyncで読み込む
+    6. Yes/Noフィールドの列にyes/noまたは1/0などの値が含まれていることをexpect(csvText).toMatch()で確認する
+    7. ラベルが空白のYes/Noフィールドがある場合も値が空でないことを確認する
 - case_no: '675'
   feature: レコード操作
   description: |
@@ -23,6 +31,15 @@ cases:
   expected: |
     関連レコード削除時、確認ダイアログで「削除する」を押すとダイアログが閉じ、削除後の画面が正常に表示されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、子テーブルとなるテーブルも用意する
+    2. 親テーブルのレコード詳細画面へ遷移: /admin/dataset__{tableId}/view/{recordId}
+    3. 関連レコード一覧セクション（.related-record-list, [data-testid="related-records"]）が表示されていることをexpect().toBeVisible()で確認
+    4. 関連レコードの削除ボタン（button:has-text("削除"), .btn-danger:has(.fa-trash)）をクリックする
+    5. 確認ダイアログ（.modal.show）が表示されることをexpect(page.locator('.modal.show')).toBeVisible()で確認
+    6. ダイアログ内の「削除する」ボタン（button:has-text("削除する")）をクリックする
+    7. ダイアログが閉じること（.modal.show が非表示になること）をexpect().not.toBeVisible()で確認
+    8. 削除したレコードが関連レコード一覧から消えていることを確認する
 - case_no: '676'
   feature: カレンダー
   description: |-
@@ -31,6 +48,14 @@ cases:
     ③カレンダーがエラーなく正常に表示されることを確認する
   expected: カレンダービューがエラーなく正常に表示されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面へ遷移: /admin/dataset__{tableId}
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. カレンダービュー切り替えボタン（button:has-text("カレンダー表示"), [data-testid="calendar-view-btn"]）をクリックする
+    5. カレンダーコンポーネント（.fc, full-calendar, [data-testid="calendar"]）が表示されていることをexpect().toBeVisible()で確認
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
+    7. カレンダーのヘッダー（前月/次月ボタン、月表示テキスト）が表示されていることを確認
 - case_no: '677'
   feature: カレンダー
   description: |-
@@ -39,6 +64,14 @@ cases:
     ③カレンダーがエラーなく正常に表示されることを確認する
   expected: カレンダービューがエラーなく正常に表示されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面へ遷移: /admin/dataset__{tableId}
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. カレンダービュー切り替えボタン（button:has-text("カレンダー表示"), [data-testid="calendar-view-btn"]）をクリックする
+    5. カレンダーコンポーネント（.fc, full-calendar, [data-testid="calendar"]）が表示されていることをexpect().toBeVisible()で確認
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
+    7. コンソールエラーが発生していないことをpage.on('console')で確認する
 - case_no: '678'
   feature: チャートプレビュー・期間切り替えエラーなし
   description: |-
@@ -50,6 +83,16 @@ cases:
   expected: チャートプレビュー画面のページ移動ボタン（≪≫）を押してもエラーが発生しないこと
   movie: U301
   target_spec: chart-calendar
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面へ遷移: /admin/dataset__{tableId}
+    3. 歯車ボタン（#table-setting-btn）→「チャート設定」をクリックしてチャートを作成する
+    4. チャートプレビュー画面（/admin/dataset__{tableId}/chart/{chartId}/preview または /admin/charts/{chartId}）へ遷移
+    5. 期間テキスト（.chart-period, [data-testid="chart-period"]）の現在のテキストを取得する
+    6. 「≪」（前へ）ボタン（button:has-text("≪"), button[aria-label="前へ"]）をクリックする
+    7. waitForAngular()後、期間テキストが変わっていることをexpect()で確認し、「Internal Server Error」がないことを確認
+    8. 「≫」（次へ）ボタン（button:has-text("≫"), button[aria-label="次へ"]）をクリックする
+    9. waitForAngular()後、同様にエラーなしを確認する
 - case_no: '679'
   feature: 集計
   description: |-
@@ -58,6 +101,13 @@ cases:
     ③エラーが発生しないことを確認する
   expected: 集計画面がエラーなく正常に表示されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面へ遷移: /admin/dataset__{tableId}
+    3. 「集計」タブ・ボタン（button:has-text("集計"), a:has-text("集計")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 集計コンテンツエリア（.aggregate, [data-testid="aggregate"]）またはページ本文が表示されていることをexpect().toBeVisible()で確認
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '680'
   feature: ワークフロー設定
   description: |-
@@ -66,6 +116,14 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面へ遷移: /admin/dataset__{tableId}
+    3. 歯車ボタン（#table-setting-btn）をクリックし、ドロップダウンから「テーブル設定」をクリックする
+    4. テーブル設定ページで「ワークフロー」タブ（a:has-text("ワークフロー"), .nav-link:has-text("ワークフロー")）をクリックする
+    5. waitForAngular()でAngularの描画完了を待機する
+    6. ワークフロー設定コンテンツ（ワークフロー有効化スイッチ、設定項目）が表示されていることをexpect().toBeVisible()で確認
+    7. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '681'
   feature: 関連レコード一覧
   description: |-
@@ -75,6 +133,15 @@ cases:
     ④表示条件の比較対象が正しい値で評価されていることを確認する
   expected: 関連レコード一覧の表示条件で「他テーブル参照の他テーブル参照」を設定した場合に条件が正しく反映されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル設定画面→「関連レコード一覧」タブ（a:has-text("関連レコード一覧")）へ遷移する
+    3. 既存の関連レコード一覧設定の「表示する条件」欄で、他テーブル参照フィールド→さらにその参照先フィールドを選択して条件を設定し保存する
+    4. ALLテストテーブルのレコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    5. waitForAngular()でAngularの描画完了を待機する
+    6. 関連レコード一覧セクションが表示されていることをexpect().toBeVisible()で確認する
+    7. 表示条件に合致しないレコードが一覧に含まれていないことをexpect(rowCount).toBeLessThanOrEqual()などで確認する
+    8. ページに「Internal Server Error」が含まれないことを確認する
 - case_no: '682'
   feature: CSV
   description: |
@@ -86,6 +153,14 @@ cases:
   expected: |
     子テーブルCSVアップロードで必須項目空欄時・ID誤入力時にエラーが表示され、新規作成時に正しい件数がポップアップに表示されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、子テーブルを持つ親テーブルを用意する
+    2. テーブル設定画面→「追加オプション」タブで「CSVダウンロード/アップロードに子テーブルも含める」を有効にして保存する
+    3. テーブル一覧（/admin/dataset__{tableId}）からCSVダウンロードを実行してCSVを取得する
+    4. 取得したCSVの子テーブル必須項目列を空欄にしてアップロードする（page.setInputFiles('input[type=file]', csvPath)）
+    5. /admin/csv（CSV UP/DL履歴）に遷移し、エラーメッセージが表示されていることをexpect(bodyText).toContain('エラー')で確認する
+    6. 子テーブルのID列に存在しないIDを入れたCSVをアップロードし、同様にエラーが表示されることを確認する
+    7. 子テーブルのIDを空（新規作成）にしたCSVをアップロードし、完了ポップアップに「1件のデータを更新」と表示されることをexpect().toContain()で確認する
 - case_no: '683'
   feature: 他テーブル参照・並び替え順序
   description: |-
@@ -96,6 +171,14 @@ cases:
   expected: 他テーブル参照フィールドの並び替えが数値順で正しく動作すること
   movie: U301
   target_spec: fields
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. 他テーブル参照フィールドの列ヘッダー（th:has-text("他テーブル参照"), [data-field-type="lookup"]）をクリックして昇順ソートを実行する
+    5. 一覧の最初の行と最後の行の他テーブル参照フィールド値を取得し、昇順になっていることをexpect(firstVal).toBeLessThanOrEqual(lastVal)で確認する
+    6. 同じ列ヘッダーを再度クリックして降順ソートに切り替える
+    7. 最初の行と最後の行の値を再取得し、降順になっていることを確認する
 - case_no: '684'
   feature: 通知設定
   description: |-
@@ -104,6 +187,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知"), .nav-link:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツ（通知追加ボタン、設定リスト等）が表示されていることをexpect().toBeVisible()で確認
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '685'
   feature: ユーザー管理
   description: |-
@@ -112,6 +202,12 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること
   movie: U301
+  detailed_flow: |-
+    1. ユーザー管理画面（/admin/users）へ遷移する
+    2. waitForAngular()でAngularの描画完了を待機する
+    3. ユーザー一覧テーブル（table, .user-list, [data-testid="user-list"]）が表示されていることをexpect().toBeVisible()で確認
+    4. ユーザー行（tbody tr）が1件以上存在することをexpect(count).toBeGreaterThan(0)で確認
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '686'
   feature: 行色設定
   description: |-
@@ -121,6 +217,13 @@ cases:
     ④日付Aと日付Bが同じ値の場合、行に色が付かないことを確認する
   expected: ビューの「行に色を付ける」条件で「日付A < 日付B」の場合、両方の値が同じときは色が付かないこと
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル設定→ビュー設定タブで「行に色を付ける」条件を「日付フィールドA < 日付フィールドB」に設定して保存する
+    3. debug APIでテストデータを作成: POST /api/admin/debug/create-all-type-data（日付AとBが同じ値になるレコードを含む）
+    4. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    5. 日付Aと日付Bが同じ値の行（tbody tr）を特定し、background-colorまたは該当のcolor classが付いていないことをexpect(rowStyle).not.toContain('background')等で確認する
+    6. 日付A < 日付Bとなるレコードの行には色が付いていることも確認する
 - case_no: '687'
   feature: CSV
   description: |
@@ -131,6 +234,14 @@ cases:
   expected: |
     主キー設定をID以外に変更してCSVアップロードした際、同じ主キーの既存レコードが更新され、重複エラーが発生しないこと
   movie: U301
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、テストレコードを作成する
+    2. テーブル設定→基本設定タブで「IDを表示」を無効にし保存する
+    3. テーブル設定→追加オプションタブで「CSVアップロードの主キー設定」をID以外のフィールド（例: 文字列フィールド）に変更して保存する
+    4. テーブル一覧（/admin/dataset__{tableId}）からCSVダウンロードを実行する
+    5. ダウンロードしたCSVのID列を削除し、主キーフィールドに既存レコードと同じ値を入れてアップロードする（page.setInputFiles('input[type=file]', csvPath)）
+    6. /admin/csv（CSV UP/DL履歴）に遷移し、エラーなく「更新」として処理されたことをexpect(bodyText).not.toContain('エラー')で確認する
+    7. テーブル一覧でレコードが更新されていることを確認する（重複エラーが出ていないこと）
 - case_no: '688'
   feature: CSVアップロード・空欄削除/{NOCHANGE}保持
   description: |-
@@ -141,6 +252,15 @@ cases:
   expected: CSVアップロードで空欄は値削除、{NOCHANGE}は値保持として動作すること
   movie: U301
   target_spec: csv-export
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータを作成する
+    2. テーブル一覧（/admin/dataset__{tableId}）からCSVダウンロードし、レコードIDと既存値を確認する
+    3. CSVを編集し、特定フィールドを空欄にした行・{NOCHANGE}にした行・新しい値にした行を用意してアップロードする
+    4. /admin/csv（CSV UP/DL履歴）に遷移し、エラーなく処理されたことを確認する
+    5. テーブル一覧でレコード詳細（/admin/dataset__{tableId}/view/{recordId}）を開く
+    6. 空欄でアップロードした行のフィールドが空になっていることをexpect(value).toBe('')で確認する
+    7. {NOCHANGE}でアップロードした行のフィールドが元の値のままであることをexpect(value).toBe(originalValue)で確認する
+    8. 通常値でアップロードした行のフィールドが新しい値に更新されていることを確認する
 - case_no: '689'
   feature: 集計
   description: |-
@@ -149,6 +269,12 @@ cases:
     ③チャートがエラーなく正常に表示されることを確認する
   expected: チャートがダッシュボードで正常に表示されること
   movie: U302
+  detailed_flow: |-
+    1. ダッシュボード画面（/admin/dashboard）へ遷移する
+    2. waitForAngular()でAngularの描画完了を待機する
+    3. チャートウィジェット（.chart-widget, [data-testid="chart-widget"], canvas）が表示されていることをexpect().toBeVisible()で確認
+    4. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
+    5. チャートの描画エリアが0より大きいサイズであることをboundingBox()で確認する
 - case_no: '690'
   feature: テーブル一覧
   description: |-
@@ -157,6 +283,13 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue1219）
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. テーブルヘッダー行（thead tr th）の各ヘッダーセルを取得し、件数が1件以上あることをexpect(count).toBeGreaterThan(0)で確認する
+    5. ヘッダーセルに空文字や「undefined」「null」が含まれていないことを確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '691'
   feature: 通知設定
   description: |-
@@ -165,6 +298,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知"), .nav-link:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツ（通知追加ボタン等）が表示されていることをexpect().toBeVisible()で確認
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '692'
   feature: 権限設定
   description: |-
@@ -174,6 +314,14 @@ cases:
     ④該当ユーザーでログインし、ログページにアクセスできることを確認する
   expected: ユーザー権限でもログ・リクエストログ・通知ログの閲覧権限を設定でき、権限付与されたユーザーがログを確認できること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでテストユーザーを作成: POST /api/admin/debug/create-user
+    2. 権限設定画面（/admin/users/{userId}/permission または /admin/permission）へ遷移する
+    3. 権限項目一覧に「ログ」「リクエストログ」「通知ログ」の項目が表示されていることをexpect(pageText).toContain()で確認する
+    4. ログ閲覧権限のチェックボックスをONにして保存する
+    5. テストユーザーでログイン（login(page, testEmail, testPassword)）し直す
+    6. /admin/logsへ遷移し、403エラー・アクセス拒否なく表示されることをexpect(page.url()).not.toContain('403')で確認する
+    7. adminユーザーに再ログインしてクリーンアップする
 - case_no: '693'
   feature: 公開フォーム
   description: |-
@@ -182,6 +330,13 @@ cases:
     ③テーブル一覧がエラーなく正常に表示されることを確認する
   expected: 公開フォーム設定後もテーブル一覧が正常に表示されること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル設定→「公開フォーム」タブ（a:has-text("公開フォーム")）で公開フォームを有効にして保存する
+    3. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. テーブル一覧（tbody tr）が表示されていることをexpect().toBeVisible()で確認
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '694'
   feature: テーブル設定
   description: |
@@ -191,6 +346,13 @@ cases:
   expected: |
     関連レコード一覧の表示条件が空欄の場合、具体的なエラーメッセージが表示されること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、関連レコード一覧設定に表示条件を追加しておく
+    2. テーブル設定画面→「関連レコード一覧」タブへ遷移する
+    3. 表示する条件の設定欄で、条件フィールドの選択をクリアして空欄にする
+    4. 「テーブルを更新」ボタン（button:has-text("テーブルを更新"), button[type=submit]）をクリックする
+    5. エラーメッセージ（.alert-danger, .error-message）が表示されることをexpect().toBeVisible()で確認する
+    6. エラーメッセージに「表示する条件」または具体的なフィールド名が含まれていることをexpect(errorText).toContain()で確認する（「不明なエラー」や空白でないことを確認）
 - case_no: '695'
   feature: 関連レコード・計算項目テキスト条件
   description: |-
@@ -201,6 +363,14 @@ cases:
   expected: 関連レコード一覧の表示条件で、計算項目（テキスト）と文字列(一行)の紐づけが正常に動作すること
   movie: U302
   target_spec: fields
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル設定→フィールド設定で計算項目（計算値の種類: テキスト）が存在することを確認する（なければ追加する）
+    3. テーブル設定→「関連レコード一覧」タブで表示する条件を設定し、計算項目（テキスト）と文字列(一行)フィールドを紐づけて保存する
+    4. テーブル設定保存後、レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    5. waitForAngular()でAngularの描画完了を待機する
+    6. 関連レコード一覧が条件通りに表示されていることを確認する（条件に一致しないレコードが除外されていること）
+    7. ページに「Internal Server Error」が含まれないことを確認する
 - case_no: '696'
   feature: CSV
   description: |-
@@ -209,6 +379,13 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. CSVダウンロードボタン（button:has-text("CSV"), .dropdown-item:has-text("CSVダウンロード")）が表示されていることをexpect().toBeVisible()で確認
+    5. CSVダウンロードをクリックしてダウンロードが開始されることを確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '697'
   feature: テーブル一覧
   description: |-
@@ -217,6 +394,12 @@ cases:
     ③エラーが発生しないことを確認する
   expected: テーブル一覧画面がエラーなく正常に表示されること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. テーブル一覧が表示されていることをexpect(page.locator('table, .list-view')).toBeVisible()で確認
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '698'
   feature: 通知設定
   description: |-
@@ -225,6 +408,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '699'
   feature: テーブル設定
   description: |-
@@ -234,6 +424,13 @@ cases:
     ④テーブル更新ボタンを押す前にエラーが検出されていることを確認する
   expected: 他の設定（通知・計算項目等）で使用中の項目を削除しようとした際、即座にエラーが表示され削除自体ができないこと
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、フィールドを通知設定に使用済みの状態にする
+    2. テーブル設定画面→フィールド設定タブへ遷移する
+    3. 通知設定等で使用中のフィールドの削除ボタン（button:has-text("削除"), .btn-delete）をクリックする
+    4. ページ上に即座にエラーメッセージ（.alert-danger, .error, toast.error）が表示されることをexpect().toBeVisible()で確認する
+    5. エラーメッセージに「削除できません」または「使用中」という文字が含まれていることをexpect(errorText).toContain()で確認する
+    6. テーブル更新ボタンをクリックする前（保存操作なし）の時点でエラーが出ていることを確認する
 - case_no: '700'
   feature: 計算項目
   description: |
@@ -245,6 +442,15 @@ cases:
   expected: |
     自動更新OFF計算項目の値変更時にポップアップが表示され、「はい」で上書き・「いいえ」で元の値保持が正しく動作すること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、計算項目フィールドで「計算値の自動更新」をOFFに設定して保存する
+    2. テストレコードを作成し（POST /api/admin/debug/create-all-type-data）、計算項目の初期値を記録する
+    3. レコード編集画面（/admin/dataset__{tableId}/edit/{recordId}）へ遷移する
+    4. 計算項目の元となるフィールドの値を変更する（例: 数値フィールドを書き換える）
+    5. 保存ボタン（button:has-text("保存"), button[type=submit]）をクリックする
+    6. 「計算値の自動更新がOFFの項目の値を上書きしますか？」ポップアップ（.modal.show, [data-testid="confirm-dialog"]）が表示されることをexpect().toBeVisible()で確認
+    7. 「はい」ボタンをクリックし、レコード詳細で計算値が更新されていることをexpect(newValue).not.toBe(originalValue)で確認する
+    8. 別のレコードで同じ操作を行い「いいえ」をクリックし、元の値が保持されていることを確認する
 - case_no: '701'
   feature: CSVアップロード・複数値の空欄削除
   description: |-
@@ -255,6 +461,12 @@ cases:
   expected: CSVで複数値フィールドを空欄でアップロードした場合、値が削除されること
   movie: U302
   target_spec: csv-export
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータを作成: POST /api/admin/debug/create-all-type-data（複数選択フィールドに値が入った状態）
+    2. テーブル一覧（/admin/dataset__{tableId}）からCSVダウンロードして既存の複数値を確認する
+    3. CSVの複数選択フィールド列を空欄にして保存し、アップロードする（page.setInputFiles('input[type=file]', csvPath)）
+    4. /admin/csv（CSV UP/DL履歴）に遷移してエラーなく処理されたことを確認する
+    5. レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移し、複数選択フィールドの値が空（表示なし）であることをexpect(fieldValue).toBe('')で確認する
 - case_no: '705'
   feature: レイアウト
   description: |
@@ -265,6 +477,14 @@ cases:
   expected: |
     関連レコード一覧を縦表示にした場合でも、詳細・編集・削除ボタンが正常に表示・動作すること
   movie: U302
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、関連テーブルとのデータを用意する
+    2. テーブル設定→「関連レコード一覧」タブで「表示方向」を「縦」に設定して保存する
+    3. 親レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 関連レコード一覧セクションの各行に「詳細」ボタン（button:has-text("詳細"), a:has-text("詳細")）が表示されていることをexpect().toBeVisible()で確認する
+    6. 「編集」ボタン（button:has-text("編集")）・「削除」ボタン（button:has-text("削除")）も表示されていることを確認する
+    7. 「詳細」ボタンをクリックし、詳細画面へ遷移することを確認する
 - case_no: '706'
   feature: テーブル上部メモ・ファイルダウンロード名
   description: |-
@@ -274,6 +494,13 @@ cases:
   expected: テーブル上部メモに添付したファイルをダウンロード時、元のファイル名が保持されていること
   movie: U302
   target_spec: layout-ui
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. テーブル上部メモエリア（.table-memo, [data-testid="table-memo"]）でファイル添付フォーム（input[type=file]）を使い、テスト用xlsxファイル（/app/test_files/請求書_+関連ユーザー.xlsx）をアップロードする
+    4. 添付ファイルのリンク（a:has-text(".xlsx")）が表示されることをexpect().toBeVisible()で確認する
+    5. page.waitForEvent('download')でダウンロードイベントを待ちながらリンクをクリックする
+    6. ダウンロードされたファイル名（download.suggestedFilename()）が「請求書_+関連ユーザー.xlsx」と一致していることをexpect(filename).toBe()で確認する（「file」のみにならないこと）
 - case_no: '707'
   feature: テーブル一覧
   description: |-
@@ -282,6 +509,13 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. テーブルヘッダー行（thead tr th）の各ヘッダーセルを取得し、件数が1件以上あることを確認する
+    5. ヘッダーセルに空文字・「undefined」・「null」が含まれていないことを確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '708'
   feature: 関連レコード一覧
   description: |-
@@ -290,6 +524,12 @@ cases:
     ③関連レコード一覧がエラーなく正常に表示されることを確認する
   expected: 関連レコード一覧がエラーなく正常に表示されること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、関連テーブルのデータも用意する
+    2. 親テーブルのレコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. 関連レコード一覧セクション（.related-record-list, [data-testid="related-records"]）が表示されていることをexpect().toBeVisible()で確認する
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '709'
   feature: 帳票ダウンロード
   description: |-
@@ -299,6 +539,13 @@ cases:
     ④別タブで真っ白の画面が開かず、直接ファイルがダウンロードされることを確認する
   expected: 帳票ダウンロード時に別タブで空白ページが開かず、直接ファイルがダウンロードされること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコードを作成する
+    2. テーブル設定→「帳票」タブで帳票テンプレートを新規作成し、xlsxファイルをアップロードして保存する
+    3. テーブル一覧（/admin/dataset__{tableId}）でレコードのチェックボックスをONにしてレコードを選択する
+    4. 「帳票ダウンロード」ボタン（button:has-text("帳票"), .dropdown-item:has-text("帳票")）をクリックする
+    5. page.waitForEvent('download')でダウンロードイベントを待機し、直接ファイルがダウンロードされることを確認する
+    6. 新しいタブで空白ページが開いていないこと（page.context().pages().length が増えていないこと）を確認する
 - case_no: '712'
   feature: CSV
   description: |-
@@ -307,6 +554,12 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue1314）
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. CSVダウンロードボタン（button:has-text("CSV"), .dropdown-item:has-text("CSVダウンロード")）が表示されていることをexpect().toBeVisible()で確認
+    4. CSVダウンロードを実行しエラーなくダウンロードできることを確認する
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '713'
   feature: CSV
   description: |-
@@ -315,6 +568,13 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue1049）
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. CSVダウンロードボタンが表示されていることをexpect().toBeVisible()で確認する
+    4. CSVアップロード用のinput[type=file]にテスト用CSVファイルをセットしてアップロードを実行する
+    5. /admin/csv（CSV UP/DL履歴）に遷移し、エラーなく処理されたことを確認する
+    6. ページに「Internal Server Error」が含まれないことを確認する
 - case_no: '714'
   feature: 集計
   description: |-
@@ -323,6 +583,11 @@ cases:
     ③チャートがエラーなく正常に表示されることを確認する
   expected: チャートがダッシュボードで正常に表示されること
   movie: U303
+  detailed_flow: |-
+    1. ダッシュボード画面（/admin/dashboard）へ遷移する
+    2. waitForAngular()でAngularの描画完了を待機する
+    3. チャートウィジェット（.chart-widget, canvas, [data-testid="chart"]）が表示されていることをexpect().toBeVisible()で確認する
+    4. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認する
 - case_no: '717'
   feature: コメントメンション通知・内容/テーブル名表示
   description: |-
@@ -333,6 +598,14 @@ cases:
   expected: コメントメンション通知メールにコメント内容とテーブル名が記載されること
   movie: U303
   target_spec: notifications
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコード・テストユーザーを作成する
+    2. レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    3. コメント入力欄（textarea[data-testid="comment-input"], .comment-input）に「@テストユーザー名 テストコメント内容」を入力する
+    4. 投稿ボタン（button:has-text("投稿"), button[data-testid="comment-submit"]）をクリックする
+    5. waitForWebhook()またはwaitForEmail()でメール送信を待機する（helpers/mail-checker.js）
+    6. 受信メールの件名・本文にコメント内容（「テストコメント内容」）が含まれていることをexpect(mailBody).toContain()で確認する
+    7. 受信メールにテーブル名が含まれていることをexpect(mailBody).toContain(tableName)で確認する
 - case_no: '718'
   feature: 通知設定
   description: |-
@@ -341,6 +614,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '719'
   feature: ビュー設定
   description: |-
@@ -349,6 +629,14 @@ cases:
     ③レコード一覧が正常に表示されることを確認する
   expected: 行に色を付ける機能使用後もレコード一覧が正常に表示されること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータを作成する
+    2. テーブル設定→ビュー設定タブで「行に色を付ける」条件を設定して保存する
+    3. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. テーブル一覧（tbody tr）が表示されていることをexpect().toBeVisible()で確認する
+    6. 行に色が付いている行（tr[style*="background"], tr.colored）が存在することを確認する
+    7. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '720'
   feature: 計算項目
   description: |-
@@ -358,6 +646,14 @@ cases:
     ④計算値の自動更新をONにした場合も正しく計算されることを確認する
   expected: 関連レコード一覧内の計算項目をSUM集計で計算した値が正しく表示されること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、関連レコードを含むテストデータを作成する
+    2. テーブル設定でSUM集計の計算項目フィールドが設定されていることを確認する（なければ追加）
+    3. 親レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 関連レコード一覧内のSUM計算項目の表示値を取得する（[data-field-type="calc"] または計算項目の列セル）
+    6. 関連レコードの数値フィールドの合計と計算項目の表示値が一致することをexpect(displayValue).toBe(sum)で確認する
+    7. ページに「Internal Server Error」が含まれないことを確認する
 - case_no: '721'
   feature: 他テーブル参照
   description: |
@@ -369,6 +665,14 @@ cases:
   expected: |
     他テーブル参照のプルダウンで「＋新規追加」後、ブラウザリロードなしで即座に選択肢に反映されること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコードを作成する
+    2. レコード編集画面（/admin/dataset__{tableId}/edit/{recordId}）へ遷移する
+    3. 他テーブル参照フィールドのプルダウン（select[data-field-type="lookup"], ng-select）をクリックして開く
+    4. プルダウン内の「＋新規追加」オプション（option:has-text("＋新規追加"), .ng-option:has-text("新規追加")）をクリックする
+    5. 新規データ入力モーダルで名称等を入力して「保存」をクリックする
+    6. モーダルが閉じた後、ページリロードせずに同じプルダウンを再度開く
+    7. 直前に追加したデータが選択肢に表示されていることをexpect(optionText).toContain(newName)で確認する
 - case_no: '722'
   feature: 関連レコード・親情報コピー新規作成
   description: |-
@@ -380,6 +684,13 @@ cases:
   expected: 関連レコード一覧の+ボタンから新規作成時、親レコードの情報が一部コピーされること
   movie: U303
   target_spec: records
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコードを作成する
+    2. 親レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    3. 関連レコード一覧セクションの「+新規」ボタン（button:has-text("+"), button[data-testid="add-related"]）をクリックする
+    4. 新規レコード作成画面（/admin/dataset__{childTableId}/add）が開くことをexpect(page.url()).toContain('/add')で確認する
+    5. 親レコードの情報（他テーブル参照フィールド等）が初期値として設定されていることをexpect(fieldValue).not.toBe('')で確認する
+    6. 値を確認してから「保存」ボタンをクリックし、正常に保存されることを確認する
 - case_no: '724'
   feature: 他テーブル参照
   description: |-
@@ -388,6 +699,13 @@ cases:
     ③ダッシュボードがエラーなく表示されることを確認する
   expected: 他テーブル参照の表示項目設定変更後もダッシュボードが正常に表示されること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル設定→フィールド設定で他テーブル参照フィールドの「表示項目」設定を変更して保存する
+    3. ダッシュボード画面（/admin/dashboard）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. ダッシュボードのウィジェット（.dashboard-widget, .widget-content）が表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '725'
   feature: カレンダー
   description: |-
@@ -397,6 +715,14 @@ cases:
     ④登録後にカレンダー画面に戻った際、登録した月のままであること（当月に戻らないこと）を確認する
   expected: カレンダーで先の月にレコード登録後、カレンダー画面が登録した月のまま維持されること（当月に戻らないこと）
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、カレンダービューを有効にする
+    2. テーブル一覧画面（/admin/dataset__{tableId}）でカレンダービューへ切り替える
+    3. 「次の月」ボタン（button:has-text("＞"), .fc-next-button）を3回クリックして3ヶ月先に移動する
+    4. 移動後の月表示テキスト（.fc-toolbar-title, .calendar-month-title）を取得して記録する
+    5. カレンダー上の日付セルをクリックしてレコード新規作成モーダルを開き、タイトルを入力して保存する
+    6. 保存後、カレンダー画面に戻った際の月表示テキストを取得する
+    7. 移動した月（3ヶ月先）のままであることをexpect(currentMonth).toBe(targetMonth)で確認する（当月に戻っていないこと）
 - case_no: '726'
   feature: 地図
   description: |
@@ -408,6 +734,13 @@ cases:
   expected: |
     地図機能を有効にしたテーブルで、地図ビューにレコードのピンが表示され、クリックで情報が確認できること
   movie: U303
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータ（住所フィールドに「東京都千代田区」等を設定）を作成する
+    2. テーブル設定→「地図」タブで地図機能を有効にし、住所フィールドを選択して保存する
+    3. テーブル一覧画面（/admin/dataset__{tableId}）で地図ビュー切り替えボタン（button:has-text("地図"), [data-testid="map-view"]）をクリックする
+    4. 地図コンポーネント（.leaflet-container, #map, [data-testid="map"]）が表示されることをexpect().toBeVisible()で確認する
+    5. 地図上のピン（.leaflet-marker-icon, .map-pin）が少なくとも1件表示されていることをexpect(count).toBeGreaterThan(0)で確認する
+    6. ピンをクリックし、ポップアップにレコード情報（名称等）が表示されることをexpect(popupText).not.toBe('')で確認する
 - case_no: '728'
   feature: テーブル設定
   description: |-
@@ -416,6 +749,12 @@ cases:
     ③エラーが発生しないことを確認する
   expected: テーブル設定画面がエラーなく正常に表示されること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. テーブル設定の基本設定タブ（a:has-text("基本設定"), .nav-link.active）が表示されていることをexpect().toBeVisible()で確認する
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '729'
   feature: 帳票設定
   description: |-
@@ -424,6 +763,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 帳票設定画面がエラーなく正常に表示されること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「帳票」タブ（a:has-text("帳票"), .nav-link:has-text("帳票")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 帳票設定コンテンツ（帳票追加ボタン、設定項目等）が表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '730'
   feature: 通知設定
   description: |-
@@ -432,6 +778,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '731'
   feature: CSV UL
   description: |-
@@ -441,6 +794,13 @@ cases:
     ④アップロード完了後に結果が正しく反映されていることを確認する
   expected: CSVアップロード時に進捗状況がプログレスバー等で表示されること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、アップロード用テストCSVファイルを用意する
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. CSVアップロードボタン（button:has-text("CSVアップロード"), .dropdown-item:has-text("アップロード")）をクリックする
+    4. input[type=file]にテスト用大容量CSVファイル（/app/test_files/稼働_2M.csv）をセットする
+    5. アップロード実行中にプログレスバー（.progress-bar, [role="progressbar"], [data-testid="upload-progress"]）または進捗表示が出ることをexpect().toBeVisible()で確認する
+    6. /admin/csv（CSV UP/DL履歴）に遷移し、アップロード完了・エラーなしであることを確認する
 - case_no: '732'
   feature: ワークフロー
   description: |
@@ -452,6 +812,14 @@ cases:
   expected: |
     「申請者以外でも再申請可能」を有効にすると、他ユーザーからも承認済みデータの再申請が行えること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストユーザーを作成し、ワークフロー設定を行う
+    2. テーブル設定→「ワークフロー」タブで「一度承認されたデータも再申請可能」スイッチをONにする
+    3. 「申請者以外でも再申請可能」オプション（label:has-text("申請者以外"), input[type=checkbox]）が表示されることをexpect().toBeVisible()で確認する
+    4. 「申請者以外でも再申請可能」をONにして保存する
+    5. adminユーザーでレコードを作成・申請し、別ユーザーで承認する
+    6. 申請者とは異なるユーザー（テストユーザー）でログインし、承認済みレコードの「取り下げ（再申請）」ボタンをクリックする
+    7. 再申請が正常に完了し、ステータスが「取り下げ」または「申請中」になることをexpect(statusText).toContain()で確認する
 - case_no: '735'
   feature: テーブル一覧
   description: |-
@@ -460,6 +828,12 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. テーブルヘッダー行（thead tr th）の各セルが表示されていることを確認する
+    4. ヘッダーセルに「undefined」「null」「%s」等のプレースホルダーが含まれていないことをexpect(text).not.toContain()で確認する
+    5. ページに「Internal Server Error」が含まれないことを確認する
 - case_no: '736'
   feature: CSV主キー
   description: |-
@@ -468,6 +842,12 @@ cases:
     ③「計算項目は設定できません」の注意書きが表示されていることを確認する
   expected: CSVアップロードの主キー設定画面に「計算項目は設定できません」の注意書きが表示されていること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「追加オプション」タブ（a:has-text("追加オプション")）または「CSV設定」タブをクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 「CSVアップロードの主キー設定」セクションに「計算項目は設定できません」の注意テキストが表示されていることをexpect(pageText).toContain('計算項目は設定できません')で確認する
 - case_no: '737'
   feature: 集計
   description: |
@@ -479,6 +859,13 @@ cases:
   expected: |
     集計の合計表示で、フィールドの桁区切り設定に連動して桁区切りの表示・非表示が切り替わること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータ（大きな数値：例1000以上）を作成する
+    2. テーブル設定→フィールド設定で数値フィールドの「桁区切りを表示しない」をOFF（桁区切り有効）にして保存する
+    3. テーブル一覧（/admin/dataset__{tableId}）で「集計」タブをクリックする
+    4. 数値フィールドのSUM集計を実行し、表示値にカンマ（,）が含まれていることをexpect(sumText).toMatch(/\d{1,3}(,\d{3})+/)で確認する
+    5. テーブル設定→フィールド設定で「桁区切りを表示しない」をONに変更して保存する
+    6. 集計タブに戻り、SUM集計値にカンマが含まれていないことをexpect(sumText).not.toContain(',')で確認する
 - case_no: '738'
   feature: 帳票・ワークフロー変数反映
   description: |-
@@ -490,6 +877,14 @@ cases:
   expected: ワークフロー申請状態の帳票出力で、ワークフロー変数と他の項目値が両方正しく反映されること
   movie: U304
   target_spec: reports
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストユーザーを作成し、ワークフロー設定を有効にする
+    2. テーブル設定→「帳票」タブでxlsx帳票テンプレートを作成し、${ワークフロー.承認者.ユーザー}と通常フィールド変数（${フィールド名}）を含めて保存する
+    3. テストレコードを作成して申請ボタンをクリックし、申請状態にする
+    4. 承認者ユーザーでログインしてレコードを承認する
+    5. adminユーザーに戻り、承認済みレコードの「帳票ダウンロード」ボタンをクリックする
+    6. page.waitForEvent('download')でダウンロードを待機し、xlsxファイルを取得する
+    7. ダウンロードしたxlsxの内容（テキスト抽出）にワークフロー変数の値と通常フィールドの値が両方含まれていることを確認する（${...}という変数名のままになっていないこと）
 - case_no: '739'
   feature: フィルタ
   description: |-
@@ -498,6 +893,14 @@ cases:
     ③絞り込み操作がエラーなく正常に動作することを確認する
   expected: フィルタ・絞り込み機能がエラーなく正常に動作すること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータを作成する
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. フィルタ追加ボタン（button:has-text("絞り込み"), button.filter-btn）をクリックする
+    4. フィルタ条件（文字列フィールド「が次と一致」「テスト」等）を設定して「検索」または「適用」をクリックする
+    5. waitForAngular()でAngularの描画完了を待機する
+    6. フィルタ結果が表示されていることをexpect(rowCount).toBeGreaterThanOrEqual(0)で確認する（エラーが出ないこと）
+    7. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '742'
   feature: コネクト（RPA）
   description: |
@@ -509,6 +912,14 @@ cases:
   expected: |
     コネクトのデータ更新ブロック設定が正しく保存され、再表示時に設定内容が保持されていること
   movie: U304
+  detailed_flow: |-
+    1. コネクト一覧画面（/admin/rpa）へ遷移する
+    2. コネクトを新規作成または既存コネクトを開く（button:has-text("追加"), .rpa-item）
+    3. 「データ更新」ブロックを追加し、設定値（更新フィールド・値）を入力する
+    4. 「他テーブルにコピー」ブロックを直後に追加する
+    5. 保存ボタン（button:has-text("保存")）をクリックする
+    6. コネクト一覧（/admin/rpa）に戻り、該当コネクトを再度開く
+    7. 「データ更新」ブロックの設定値が保存時と同じ値で表示されていることをexpect(setting).toBe(savedValue)で確認する
 - case_no: '743'
   feature: 住所フィールド・Google Map連携
   description: |-
@@ -520,6 +931,12 @@ cases:
   expected: 詳細画面・編集画面の住所フィールド横にGoogle Mapリンクがあり、地図表示ができること
   movie: U304
   target_spec: fields
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータ（住所フィールドに「東京都千代田区1-1」を設定）を作成する
+    2. レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    3. 住所フィールドの横にGoogle MapリンクまたはMapsリンク（a[href*="maps.google"], a[href*="google.com/maps"], a:has-text("地図")）が表示されていることをexpect().toBeVisible()で確認する
+    4. リンクをクリックして新しいタブでGoogle Mapが開くことをexpect(newPage.url()).toContain('maps.google')等で確認する
+    5. レコード編集画面（/admin/dataset__{tableId}/edit/{recordId}）へ遷移し、Google Mapリンクが表示されていることも確認する
 - case_no: '744'
   feature: 数値項目
   description: |-
@@ -528,6 +945,13 @@ cases:
     ③一覧・詳細画面で正常に表示されることを確認する
   expected: 複数値登録を許可した文字列項目が一覧・詳細画面で正常に表示されること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、複数値文字列フィールドに値を複数設定したレコードを作成する
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. 複数値文字列フィールドの列セルに値が表示されていることをexpect(cellText).not.toBe('')で確認する
+    4. レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    5. 複数値文字列フィールドの値が全て表示されていることを確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '745'
   feature: テーブル一覧
   description: |-
@@ -536,6 +960,12 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. テーブルヘッダー行（thead tr th）が表示されていることをexpect().toBeVisible()で確認する
+    4. ヘッダーセルに「undefined」「null」が含まれていないことを確認する
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '746'
   feature: 他テーブル参照
   description: |-
@@ -545,6 +975,12 @@ cases:
     ④ユーザー管理テーブルを対象にした場合も、「組織」などの子テーブルが選択できないことを確認する
   expected: 他テーブル参照の表示項目に対象テーブルの子テーブルが選択肢として表示されないこと
   movie: U304
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、他テーブル参照フィールドのある設定画面へ遷移する
+    2. テーブル設定→フィールド設定タブで他テーブル参照フィールドの編集ボタンをクリックする
+    3. 「表示項目」ドロップダウン（select[data-testid="display-field"], .ng-select）の選択肢一覧を取得する
+    4. 対象テーブルの子テーブル名（子テーブルとして設定されているテーブル名）が選択肢に含まれていないことをexpect(options).not.toContain(childTableName)で確認する
+    5. 対象テーブルをユーザー管理テーブルに変更し、「組織」等の子テーブルが選択肢に出ないことも確認する
 - case_no: '748'
   feature: 権限設定・CSVアップロード非表示
   description: |-
@@ -555,6 +991,12 @@ cases:
   expected: テーブル権限設定の項目一覧からCSVアップロードが除外されていること
   movie: U305
   target_spec: users-permissions
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル権限設定画面（/admin/users/permission または /admin/dataset__{tableId}/permission）へ遷移する
+    3. 権限設定の項目一覧（チェックボックスリスト）を確認し、「CSVアップロード」という項目が含まれていないことをexpect(pageText).not.toContain('CSVアップロード')で確認する
+    4. 権限設定を保存するボタン（button:has-text("保存")）をクリックする
+    5. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、正常に表示されることをexpect().toBeVisible()で確認する
 - case_no: '749'
   feature: 関連レコード一覧
   description: |-
@@ -563,6 +1005,13 @@ cases:
     ③ページが正常に表示されることを確認する
   expected: 関連レコード一覧のページネーション設定後もページが正常に表示されること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータを複数件作成する
+    2. テーブル設定→「関連レコード一覧」タブでページネーション件数を設定（例: 5件/ページ）して保存する
+    3. 親テーブルのレコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 関連レコード一覧セクションとページネーションコントロール（.pagination, [data-testid="pagination"]）が表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '750'
   feature: 帳票設定
   description: |-
@@ -571,6 +1020,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 帳票設定画面がエラーなく正常に表示されること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「帳票」タブ（a:has-text("帳票")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 帳票設定コンテンツ（帳票追加ボタン等）が表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '751'
   feature: 通知設定
   description: |-
@@ -579,6 +1035,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '752'
   feature: CSV UL
   description: |-
@@ -589,6 +1052,13 @@ cases:
     ⑤日時項目の項目編集画面に規定フォーマットの注意書きが表示されていることを確認する
   expected: 日時項目のCSVアップロードで規定フォーマット以外はアラート表示され、項目編集画面に規定フォーマットの注意書きがあること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、日時フィールドを含むテーブルを用意する
+    2. 「2026-03」「2026年3月」等の規定フォーマットの日時データをCSVに含めてアップロードする（page.setInputFiles('input[type=file]', csvPath)）
+    3. /admin/csv（CSV UP/DL履歴）に遷移し、エラーなく処理されたことを確認する（規定フォーマットは正常登録）
+    4. 「2026/3/15 10:30」等の規定外フォーマットのデータを含むCSVをアップロードする
+    5. 処理結果に「既定のフォーマットではないため更新されませんでした」メッセージが含まれていることをexpect(resultText).toContain('既定のフォーマット')で確認する
+    6. テーブル設定→フィールド設定で日時フィールドの編集画面を開き、規定フォーマットの注意書きが表示されていることをexpect(pageText).toContain('規定のフォーマット')で確認する
 - case_no: '753'
   feature: レコード一覧
   description: |
@@ -599,6 +1069,13 @@ cases:
   expected: |
     単数の他テーブル参照項目でヘッダークリックによる並び替えが正常に動作すること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータを複数件作成する（他テーブル参照フィールドに異なる値を設定）
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. 他テーブル参照フィールドの列ヘッダー（th:has-text("他テーブル参照フィールド名")）をクリックして昇順ソートを実行する
+    4. 1行目と最終行の他テーブル参照フィールド値を取得し、昇順（a ≤ b）であることを確認する
+    5. 同じ列ヘッダーを再度クリックして降順に切り替える
+    6. 1行目の値が最終行の値より大きい（降順）ことをexpect(firstVal).toBeGreaterThanOrEqual(lastVal)で確認する
 - case_no: '754'
   feature: リマインド通知・複合条件
   description: |-
@@ -609,6 +1086,13 @@ cases:
   expected: 複合条件のリマインド通知設定で、条件を満たした場合に通知が正常に送信されること
   movie: U305
   target_spec: notifications
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータ（返却日フィールドに7日後の日付を設定したレコード）を作成する
+    2. テーブル設定→「通知」タブでリマインド通知を新規作成する
+    3. 条件1: 「返却日フィールド」が「相対値：7日前」、条件2: 別のフィールドにAND条件を追加して保存する
+    4. 通知設定画面でSMTP設定を確認し、メール送信が可能な状態にする（setupSmtp(page)）
+    5. 手動でリマインド通知を発火させる（通知実行ボタンまたはAPIコール: POST /api/admin/notification/send_remind）
+    6. waitForEmail()でメール受信を待機し、通知メールが届いていることをexpect(mail).toBeDefined()で確認する
 - case_no: '761'
   feature: テーブル一覧
   description: |-
@@ -617,6 +1101,13 @@ cases:
     ③レコード一覧が正常に表示されることを確認する
   expected: DATE_ADD関数を使用したテーブルのレコード一覧が正常に表示されること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、計算項目フィールドにDATE_ADD関数（例: DATE_ADD({日付フィールド}, INTERVAL 7 DAY)）を設定したフィールドを追加する
+    2. テストデータを作成: POST /api/admin/debug/create-all-type-data（日付フィールドに値を設定）
+    3. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    4. テーブル一覧（tbody tr）が表示されていることをexpect().toBeVisible()で確認する
+    5. DATE_ADD計算項目の列セルに日付値が表示されていることを確認する（空・エラーでないこと）
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '762'
   feature: カレンダー
   description: |-
@@ -625,6 +1116,13 @@ cases:
     ③カレンダーがエラーなく正常に表示されることを確認する
   expected: カレンダービューがエラーなく正常に表示されること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、カレンダービューが有効になっていることを確認する
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. カレンダービュー切り替えボタン（button:has-text("カレンダー表示")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. カレンダーコンポーネント（.fc, full-calendar）が表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '763'
   feature: 関連レコード一覧
   description: |-
@@ -634,6 +1132,13 @@ cases:
     ④入れ替え後の順番が正しく保存されることを確認する
   expected: 関連レコード一覧の表示条件の順番をドラッグ＆ドロップで入れ替えできること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル設定→「関連レコード一覧」タブで表示条件を2件以上追加する
+    3. 条件の順番を記録する（条件1のフィールド名、条件2のフィールド名）
+    4. 条件1のドラッグハンドル（.drag-handle, [data-testid="drag-handle"]）をドラッグして条件2の下にドロップする（page.dragAndDrop()使用）
+    5. 保存ボタンをクリックして保存する
+    6. 設定画面を再読み込みし、条件の順番が入れ替わった状態で保存されていることをexpect(condition1Position).toBeGreaterThan(condition2Position)で確認する
 - case_no: '770'
   feature: 集計
   description: |-
@@ -642,6 +1147,11 @@ cases:
     ③チャートがエラーなく正常に表示されることを確認する
   expected: チャートがダッシュボードで正常に表示されること
   movie: U305
+  detailed_flow: |-
+    1. ダッシュボード画面（/admin/dashboard）へ遷移する
+    2. waitForAngular()でAngularの描画完了を待機する
+    3. チャートウィジェット（.chart-widget, canvas）が表示されていることをexpect().toBeVisible()で確認する
+    4. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '771'
   feature: フィルタ
   description: |-
@@ -650,6 +1160,13 @@ cases:
     ③絞り込み操作がエラーなく正常に動作することを確認する
   expected: フィルタ・絞り込み機能がエラーなく正常に動作すること（#issue1175）
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータを作成する
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. フィルタ追加ボタン（button:has-text("絞り込み")）をクリックし、条件を設定して「検索」をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. フィルタ結果が表示されていることを確認する（エラーが出ないこと）
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '773'
   feature: 通知設定
   description: |-
@@ -658,6 +1175,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '775'
   feature: カレンダー
   description: |-
@@ -667,6 +1191,13 @@ cases:
     ④予定を削除した後も操作していた月のまま表示されていることを確認する
   expected: カレンダーで予定の登録キャンセル・削除後も操作していた月のまま表示されること（当月に戻らないこと）
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとカレンダーデータを作成する
+    2. テーブル一覧画面（/admin/dataset__{tableId}）でカレンダービューへ切り替える
+    3. 「次の月」ボタン（.fc-next-button）を2回クリックして2ヶ月先に移動し、月表示テキストを記録する
+    4. カレンダー上の日付セルをクリックして新規登録モーダルを開き、「キャンセル」ボタンをクリックする
+    5. カレンダーの月表示テキストが2ヶ月先のままであることをexpect(monthText).toBe(targetMonth)で確認する（当月に戻っていないこと）
+    6. 既存イベントの削除ボタンをクリックして削除後、同様に月表示が変わっていないことを確認する
 - case_no: '776'
   feature: 通知・メール
   description: |
@@ -676,6 +1207,12 @@ cases:
   expected: |
     通知メールでHTMLタグがテキストとして表示されず、改行・太字等の書式が正しく反映されること
   movie: U305
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコードを作成し、SMTPを設定する（setupSmtp(page)）
+    2. テーブル設定→「通知」タブで新規通知を作成し、メール本文テンプレートに「<br>改行テスト</br>」「<b>太字テスト</b>」等のHTMLタグを含めて保存する
+    3. テストレコードを更新して通知を発火させる
+    4. waitForEmail()でメール受信を待機する
+    5. 受信メールのHTMLボディに「&lt;br&gt;」等のエスケープされたタグではなく、実際の改行・太字として反映されていることをexpect(mailHtml).not.toContain('<br>')で確認する（タグがそのまま文字として表示されていないこと）
 - case_no: '777'
   feature: 時刻フィールド・コロン自動補完
   description: |-
@@ -687,6 +1224,13 @@ cases:
   expected: 時刻のみの日時フィールドで数字入力時にコロンが自動補完されること
   movie: U306
   target_spec: fields
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコードを作成し、日時フィールドの種類を「時刻のみ」に設定する
+    2. レコード編集画面（/admin/dataset__{tableId}/edit/{recordId}）へ遷移する
+    3. 時刻フィールド（input[data-field-type="datetime"]）に「730」と入力してblurイベントを発火させる
+    4. フィールドの値が「7:30」に自動補完されていることをexpect(inputValue).toBe('7:30')で確認する
+    5. 同フィールドに「1430」と入力してblurを発火させ、「14:30」になることを確認する
+    6. 「2500」と入力してblurを発火させ、バリデーションエラーまたは空になることを確認する（「25:00」等の無効な時刻が保存されないこと）
 - case_no: '778'
   feature: 集計
   description: |-
@@ -695,6 +1239,13 @@ cases:
     ③エラーが発生しないことを確認する
   expected: 集計画面がエラーなく正常に表示されること（#issue1113）
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. 「集計」タブ（button:has-text("集計"), a:has-text("集計")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 集計コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '779'
   feature: テーブル設定
   description: |-
@@ -703,6 +1254,12 @@ cases:
     ③表示位置変更後もテーブル設定画面が正常に表示されることを確認する
   expected: 子テーブルの表示位置変更後もテーブル設定画面が正常に表示されること
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、子テーブルを持つ親テーブルを用意する
+    2. テーブル設定画面→「関連レコード一覧」タブで子テーブルの「表示位置」を変更（例: 「上部」→「下部」）して保存する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. テーブル設定画面が正常に表示されていることをexpect(page.locator('.nav-tabs')).toBeVisible()で確認する
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '781'
   feature: カレンダー
   description: |
@@ -713,6 +1270,12 @@ cases:
   expected: |
     カレンダー設定のフィールド選択で固定テキスト項目がコード名ではなく項目名で表示されること
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、固定テキストフィールドを追加する（フィールド名: 「固定テキストテスト」）
+    2. テーブル設定→「カレンダー」タブへ遷移する
+    3. 「カレンダーで表示したいフィールド」のドロップダウンを開き、選択肢一覧を取得する
+    4. 固定テキストフィールドが「fixd_html_XXXXXXX」等のコード名ではなく、「固定テキストテスト」という項目名で表示されていることをexpect(optionText).not.toMatch(/fixd_html_/)で確認する
+    5. 固定テキストフィールドを選択して保存し、カレンダービューに正しく表示されることをexpect(eventText).toContain(fieldValue)で確認する
 - case_no: '782'
   feature: 画像複数値・サイズ表示
   description: |-
@@ -723,6 +1286,14 @@ cases:
   expected: 複数画像を一度にアップした場合でも、各画像のサイズ表示が正しいこと
   movie: U306
   target_spec: fields
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコードを作成する
+    2. テーブル設定→画像フィールドの設定で「複数の値の登録を許可する」と「画像の縦横サイズを表示（詳細画面のみ）」を有効にして保存する
+    3. レコード編集画面（/admin/dataset__{tableId}/edit/{recordId}）へ遷移する
+    4. 画像フィールドのinput[type=file]に複数の画像ファイル（/app/test_files/ok.png、/app/test_files/donmai.png）をまとめてセットしてアップロードする
+    5. 保存後、レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    6. 各画像のサイズ表示（「幅: Xpx 高さ: Ypx」等）が表示されていることをexpect(sizeText).toMatch(/\d+/)で確認する
+    7. 2枚目の画像のサイズが1枚目と正しく別々に表示されていることを確認する（1枚目の値がコピーされていないこと）
 - case_no: '783'
   feature: 集計
   description: |-
@@ -731,6 +1302,13 @@ cases:
     ③並び替え機能有効でも集計画面が正常に表示されることを確認する
   expected: 集計結果の並び替え機能が有効でも集計画面が正常に表示されること
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータを作成する
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、「集計」タブをクリックする
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. 集計結果の並び替えボタン（button:has-text("昇順"), button:has-text("降順"), .sort-btn）をクリックする
+    5. 並び替え後も集計画面が正常に表示されていることをexpect(page.locator('.aggregate-table, table')).toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '784'
   feature: テーブル一覧
   description: |-
@@ -739,6 +1317,12 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue944）
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. テーブルヘッダー行（thead tr th）が表示されていることをexpect().toBeVisible()で確認する
+    4. ヘッダーセルに「undefined」「null」「%s」が含まれていないことを確認する
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '785'
   feature: 通知設定
   description: |-
@@ -747,6 +1331,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '786'
   feature: 数値項目
   description: |-
@@ -756,6 +1347,13 @@ cases:
     ④計算項目でも編集画面で常に桁区切りが表示されることを確認する
   expected: 数値項目・計算項目で桁区切り表示が有効な場合、入力時（フォーカス中）にも桁区切りが表示されること
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストデータ（数値フィールドに1000以上の値）を作成する
+    2. テーブル設定→フィールド設定で数値フィールドの「桁区切りを表示しない」をOFF（桁区切り有効）にして保存する
+    3. レコード編集画面（/admin/dataset__{tableId}/edit/{recordId}）へ遷移する
+    4. 数値フィールド（input[data-field-type="number"]）をクリックしてフォーカスを当てる
+    5. フォーカス中の入力欄にカンマ区切り（1,000等）が表示されていることをexpect(inputValue).toMatch(/\d{1,3}(,\d{3})+/)で確認する
+    6. 計算項目フィールドも同様にフォーカス時に桁区切りが表示されていることを確認する
 - case_no: '787'
   feature: リッチテキスト
   description: |
@@ -767,6 +1365,14 @@ cases:
   expected: |
     リッチテキストのリンクで「新しいタブで開く」OFF時は同一タブ、ON時は新しいタブでリンク先が開かれること
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコードを作成する
+    2. レコード編集画面（/admin/dataset__{tableId}/edit/{recordId}）へ遷移する
+    3. リッチテキストフィールドのツールバーで「リンクの挿入」ボタン（button[title="リンク"], .ql-link）をクリックする
+    4. URLに「https://example.com」を入力し、「新しいタブで開く」チェックをOFFにして「保存」をクリックする
+    5. レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移し、リンクアンカー（a[href="https://example.com"]）のtarget属性を確認する
+    6. target="_blank"が付いていないことをexpect(link).not.toHaveAttribute('target', '_blank')で確認する（同一タブで開くこと）
+    7. 同じ操作で「新しいタブで開く」チェックをONにして保存し、target="_blank"が付いていることを確認する
 - case_no: '788'
   feature: CSVダウンロード・非表示ファイル項目対応
   description: |-
@@ -777,6 +1383,13 @@ cases:
   expected: 子テーブル含むCSVダウンロードで、非表示の複数値ファイル項目がある場合もエラーなくダウンロードできること
   movie: U306
   target_spec: csv-export
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、子テーブルを持つ親テーブルを用意する
+    2. テーブル設定→「追加オプション」タブで「CSVダウンロード/アップロードに子テーブルも含める」を有効にして保存する
+    3. ビュー設定→「項目」タブで複数値ファイルフィールドを「非表示」に設定して保存する
+    4. テーブル一覧（/admin/dataset__{tableId}）でCSVダウンロードオプションに「CSVに現在のフィルタを反映する」チェックを入れてダウンロードを実行する
+    5. エラーが発生せずCSVファイルがダウンロードされることをpage.waitForEvent('download')で確認する
+    6. ページに「Internal Server Error」や「エラー」が表示されていないことをexpect(bodyText).not.toContain()で確認する
 - case_no: '795'
   feature: 集計
   description: |-
@@ -785,6 +1398,13 @@ cases:
     ③エラーが発生しないことを確認する
   expected: 集計画面がエラーなく正常に表示されること（#issue1360）
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. 「集計」タブ（button:has-text("集計"), a:has-text("集計")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 集計コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '798'
   feature: ファイル項目・MOVブラウザ表示
   description: |-
@@ -795,6 +1415,13 @@ cases:
   expected: .MOVファイルをファイル項目に添付した場合でも「ブラウザで表示」が正常に動作すること
   movie: U306
   target_spec: fields
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストレコードを作成する
+    2. テーブル設定→ファイルフィールドの設定で「ブラウザで表示する（画像/PDF/動画）」をONにして保存する
+    3. レコード編集画面（/admin/dataset__{tableId}/edit/{recordId}）へ遷移し、ファイルフィールドのinput[type=file]に.MOVファイルをセットしてアップロードする
+    4. 保存後、レコード詳細画面（/admin/dataset__{tableId}/view/{recordId}）へ遷移する
+    5. videoタグまたはメディアプレーヤー要素（video, .video-player）が表示されていることをexpect().toBeVisible()で確認する
+    6. ファイル名リンクだけが表示されダウンロードのみとなっていないことを確認する（「ブラウザで表示」が機能していること）
 - case_no: '799'
   feature: 通知設定
   description: |-
@@ -803,6 +1430,13 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること（#issue967）
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックする
+    3. テーブル設定ページで「通知」タブ（a:has-text("通知")）をクリックする
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 通知設定コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '800'
   feature: レイアウト
   description: |-
@@ -811,6 +1445,13 @@ cases:
     ③フィールド設定画面がエラーなく正常に表示されることを確認する
   expected: 一覧の表示幅設定変更後もフィールド設定画面が正常に表示されること
   movie: U306
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）でビュー設定→「項目」タブ→フィールドの「表示幅」を変更して保存する
+    3. テーブル設定→フィールド設定タブへ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. フィールド設定コンテンツが表示されていることをexpect().toBeVisible()で確認する
+    6. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '801'
   feature: テーブル設定
   description: |-
@@ -819,6 +1460,12 @@ cases:
     ③エラーメッセージに正しい項目名が表示されていることを確認する（%sなどの変数が表示されないこと）
   expected: 使用中の項目を削除した際のエラーメッセージに正しい項目名が表示されること（%sのような変数が表示されないこと）
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、特定フィールドを通知設定に紐づける
+    2. テーブル設定→フィールド設定タブで通知設定に使用中のフィールドの削除ボタンをクリックする
+    3. エラーメッセージ（.alert-danger, .error-toast, .modal.show）が表示されることをexpect().toBeVisible()で確認する
+    4. エラーメッセージのテキストに「%s」「%d」等のフォーマット変数ではなく、実際のフィールド名（例: 「文字列フィールド」）が含まれていることをexpect(errorText).not.toContain('%s')で確認する
+    5. エラーメッセージに正しいフィールド名が含まれていることをexpect(errorText).toContain(fieldName)で確認する
 - case_no: '802'
   feature: ワークフロー
   description: |
@@ -829,6 +1476,13 @@ cases:
   expected: |
     ワークフローテンプレートの条件でログインユーザーの役職のみを設定でき、正しく条件判定されること
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストユーザー（役職設定済み）を作成し、ワークフローを有効にする
+    2. テーブル設定→「ワークフロー」タブでワークフローテンプレートの条件設定画面を開く
+    3. 条件の左辺に「ログインユーザーの役職」という項目が選択肢に表示されていることをexpect(pageText).toContain('役職')で確認する
+    4. 条件を「ログインユーザーの役職」＝「テスト役職」（組織指定なし）に設定して保存する
+    5. 役職「テスト役職」のテストユーザーでログインし、テストレコードのワークフロー申請ボタンをクリックする
+    6. 申請が正常に完了し、ワークフローが進行状態になることをexpect(statusText).toContain('申請中')で確認する
 - case_no: '803'
   feature: テーブルコピー・子テーブル除外
   description: |-
@@ -839,6 +1493,12 @@ cases:
   expected: 親テーブルのコピー時に子テーブル指定の他テーブル参照がコピーされないこと
   movie: U307
   target_spec: table-definition
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得し、子テーブル指定の他テーブル参照フィールドがある状態を確認する
+    2. テーブル設定→基本設定タブで「テーブルをコピー」ボタン（button:has-text("テーブルをコピー")）をクリックする
+    3. コピー完了後、コピーされたテーブルの設定→フィールド設定タブへ遷移する
+    4. 子テーブル指定の他テーブル参照フィールド（子テーブルとして設定されていた参照フィールド）が含まれていないことをexpect(fieldNames).not.toContain(childRefFieldName)で確認する
+    5. 元の子テーブルのテーブル設定→基本設定タブで「親テーブル」の設定が変更されていないことを確認する
 - case_no: '804'
   feature: テーブル一覧
   description: |-
@@ -847,6 +1507,12 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue1381）
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. テーブルヘッダー行（thead tr th）が表示されていることをexpect().toBeVisible()で確認する
+    4. ヘッダーセルに「undefined」「null」が含まれていないことを確認する
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '806'
   feature: ダッシュボード集計
   description: |-
@@ -856,6 +1522,13 @@ cases:
     ④集計結果が正しく並び替えられることを確認する
   expected: ダッシュボードに配置した集計結果の並び替えが正常に動作すること
   movie: U307
+  detailed_flow: |-
+    1. ダッシュボード（/admin/dashboard）へ遷移し、集計ウィジェットが配置されていることを確認する（なければ「ウィジェットを追加」→集計を追加）
+    2. waitForAngular()でAngularの描画完了を待機する
+    3. 集計ウィジェット内の並び替えボタン（button:has-text("昇順"), button:has-text("降順"), .sort-btn）が表示されていることをexpect().toBeVisible()で確認する
+    4. 並び替えボタンをクリックする
+    5. waitForAngular()後、集計テーブルが再描画されてもエラーなく表示されていることを確認する
+    6. 並び替え前後で行の順序が変わっていることをexpect(firstRowBefore).not.toBe(firstRowAfter)で確認する
 - case_no: '808'
   feature: CSV
   description: |-
@@ -864,6 +1537,12 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue1174）
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移し、waitForAngular()を待機する
+    3. CSVダウンロードボタン（button:has-text("CSV"), .dropdown-item:has-text("CSVダウンロード")）が表示されていることをexpect().toBeVisible()で確認
+    4. CSVダウンロードを実行し、エラーなくダウンロードできることを確認する
+    5. ページに「Internal Server Error」が含まれないことをexpect(bodyText).not.toContain()で確認
 - case_no: '809'
   feature: 権限設定・親組織条件変数
   description: |-
@@ -873,6 +1552,13 @@ cases:
   expected: テーブル権限設定の条件で{{parent_division.id}}（親組織名）が使用できること
   movie: U307
   target_spec: users-permissions
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDとテストユーザー（組織設定済み）を作成する
+    2. テーブル設定→「権限設定」タブで条件フィールドの変数一覧を開く
+    3. 条件値に「{{division.id}}」が使用できることを確認し、入力してみる
+    4. 続けて「{{parent_division.id}}」と入力し、条件を保存する
+    5. テストユーザーでログインし、テーブル一覧（/admin/dataset__{tableId}）を開く
+    6. 親組織名に一致するレコードのみが表示され、一致しないレコードが非表示であることをexpect(visibleRows).toBeLessThanOrEqual(totalRows)で確認する
 - case_no: '810'
   feature: ユーザー管理
   description: |-
@@ -881,6 +1567,13 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること
   movie: U307
+  detailed_flow: |-
+    1. ログイン: /admin/login にアクセス、#id に admin、#password に パスワードを入力し button[type=submit].btn-primary をクリック
+    2. ユーザー管理画面へ遷移: /admin/user にアクセス
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. ユーザー一覧が表示されることを確認: page.locator('table tbody tr').count() が1以上であることをexpect()で検証
+    5. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
+    6. .navbarが表示されていることを確認: await expect(page.locator('.navbar')).toBeVisible()
 - case_no: '811'
   feature: ワークフロー設定
   description: |-
@@ -889,6 +1582,17 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. 歯車ボタン（#table-setting-btn）をクリックしてドロップダウンを開く
+    5. 「テーブル設定」メニューをクリックしてテーブル設定画面へ遷移する
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. 「ワークフロー設定」タブ（text=ワークフロー設定）をクリックする
+    8. waitForAngular()でAngularの描画完了を待機する
+    9. ワークフロー設定の項目が表示されることを確認: page.locator('app-workflow-setting, .workflow-setting, [class*="workflow"]').isVisible()
+    10. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '812'
   feature: 公開フォーム
   description: |-
@@ -899,6 +1603,16 @@ cases:
     ⑤複数選択の場合はカンマ区切り（項目名=AAA,BBB,CCC）で複数値が設定されることを確認する
   expected: 公開フォームURLにパラメータを付与して開くと、対応するフィールドに値が初期設定されること
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル設定画面の公開フォーム設定タブを開く: テーブル一覧→歯車(#table-setting-btn)→テーブル設定→公開フォームタブ
+    3. 公開フォームが有効になっていることを確認し、公開フォームURLをコピーする（/public/{token} 形式）
+    4. 文字列フィールド名（例: テキスト）をパラメータとして付与したURLを開く: /public/{token}?テキスト=AAAA
+    5. waitForAngular()でAngularの描画完了を待機する
+    6. テキスト入力欄に「AAAA」が初期値として設定されていることを確認: await expect(page.locator('input[type=text]').first()).toHaveValue('AAAA')
+    7. 複数選択フィールドのURLパラメータをカンマ区切りで付与: /public/{token}?選択肢=AAA,BBB
+    8. 複数選択のチェックボックスにAAA/BBBが選択されていることを確認: page.locator('input[type=checkbox]:checked').count() >= 2
+    9. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '813'
   feature: カレンダー
   description: |
@@ -909,6 +1623,18 @@ cases:
   expected: |
     カレンダー設定のフィールド選択で固定テキスト項目がコード名ではなく項目名で表示されること
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. 歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックしてテーブル設定画面へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 「カレンダー設定」タブ（text=カレンダー設定）をクリックする
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. 「カレンダーで表示したいフィールド」の選択肢ドロップダウンを開く
+    8. 固定テキスト項目の表示名が「fixd_html_」で始まるコード名になっていないことを確認: expect(await page.textContent('[class*="calendar-field"] select, .field-select')).not.toContain('fixd_html_')
+    9. 固定テキスト項目が設定した項目名（例: 固定テキスト）で表示されていることを確認
+    10. フィールドを選択して保存ボタンをクリック: page.locator('button:has-text("保存")')
+    11. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '814'
   feature: 関連レコード一覧・項目幅保持
   description: |-
@@ -919,6 +1645,20 @@ cases:
   expected: 関連レコード一覧の項目幅変更がログアウト後も保持されること
   movie: U307
   target_spec: layout-ui
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テストデータを作成: POST /api/admin/debug/create-all-type-data （count: 3）
+    3. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 最初のレコードをクリックしてレコード詳細画面へ遷移する
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. 関連レコード一覧セクションが表示されていることを確認: page.locator('.related-records, [class*="related"], app-related-dataset').isVisible()
+    8. 関連レコード一覧のカラムヘッダーのリサイズハンドルをドラッグして幅を変更する: page.locator('.col-resize-handle, th .resize').first() → drag操作
+    9. 変更後の幅（px値）を記録する
+    10. ログアウト: /admin/logout にアクセス
+    11. 再ログイン: /admin/login で認証
+    12. 同じレコード詳細画面へ戻る
+    13. 関連レコード一覧のカラム幅が変更前の値と同じであることを確認: expect(columnWidth).toBe(savedWidth)
 - case_no: '815'
   feature: テーブル一覧
   description: |-
@@ -927,6 +1667,15 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue1304）
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. テーブルのヘッダー行が表示されていることを確認: await expect(page.locator('thead, .table-header, [class*="grid-header"]')).toBeVisible()
+    5. フィールドヘッダーの数が1つ以上であることを確認: expect(await page.locator('th, .header-cell').count()).toBeGreaterThan(0)
+    6. フィールドヘッダーのテキストが空でないことを確認: 各th要素のtextContentが空でないこと
+    7. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
+    8. コンソールエラーが発生していないことを確認: page.on('console', msg => { if(msg.type() === 'error') errors.push(msg) })
 - case_no: '816'
   feature: 通知設定
   description: |-
@@ -935,6 +1684,15 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. 歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックしてテーブル設定画面へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 「通知設定」タブ（text=通知設定）をクリックする
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. 通知設定セクションが表示されていることを確認: await expect(page.locator('app-notification-setting, .notification-setting, text=通知設定')).toBeVisible()
+    8. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '817'
   feature: 帳票削除
   description: |-
@@ -946,6 +1704,21 @@ cases:
     ⑥テーブル一覧ページが正常に表示されることを確認する
   expected: エラーなく帳票が削除でき、その後テーブル一覧ページが正常に表示されること
   movie: U307
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. 歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックしてテーブル設定画面へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 「帳票設定」タブ（text=帳票設定）をクリックする
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. 帳票が1件以上存在することを確認（なければ先に帳票を作成する）
+    8. 帳票一覧から最初の帳票を選択してクリックする: page.locator('.report-item, [class*="report-list"] li').first()
+    9. 削除ボタン（text=削除, button:has-text('削除')）をクリックする
+    10. 確認ダイアログが表示されたらOKボタンをクリックする: page.locator('.modal button:has-text("削除"), .btn-danger:has-text("削除")')
+    11. waitForAngular()でAngularの描画完了を待機する
+    12. 帳票が削除されたことを確認: 削除した帳票名がリストから消えていること
+    13. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移して正常表示を確認: .navbarが見えること
+    14. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '818'
   feature: ユーザー管理
   description: |-
@@ -954,6 +1727,14 @@ cases:
     ③画面にエラーが表示されないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること
   movie: U308
+  detailed_flow: |-
+    1. ログイン: /admin/login にアクセス、#id に admin、#password に パスワードを入力し button[type=submit].btn-primary をクリック
+    2. ユーザー管理画面へ遷移: /admin/user にアクセス
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. ユーザー一覧テーブルが表示されることを確認: await expect(page.locator('table, .user-list, app-user-list')).toBeVisible()
+    5. ユーザー行が1件以上表示されることを確認: expect(await page.locator('tbody tr, .user-item').count()).toBeGreaterThan(0)
+    6. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
+    7. .navbarが表示されていることを確認: await expect(page.locator('.navbar')).toBeVisible()
 - case_no: '820'
   feature: 通知設定・ファイル項目のファイル名表示
   description: |-
@@ -963,6 +1744,22 @@ cases:
   expected: 通知設定でファイル項目を含めた場合、通知内容にファイル名が正しく表示されること
   movie: U308
   target_spec: notifications
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. 歯車ボタン（#table-setting-btn）→「テーブル設定」→「通知設定」タブをクリック
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 「新規通知追加」ボタンをクリックして通知設定を追加する
+    6. 通知タイプを「レコード作成時」に設定する
+    7. 通知内容の「含めるフィールド」でファイル項目（ファイル, .file-field）を選択する
+    8. 通知先メールアドレスをSMTP受信アドレス（test@loftal.sakura.ne.jp）に設定する
+    9. 保存ボタンをクリックして通知設定を保存する
+    10. テーブル一覧画面でレコード新規作成ボタン（.btn-add-record, text=新規作成）をクリック
+    11. ファイルフィールドにファイルをアップロード: page.setInputFiles('input[type=file]', '/app/test_files/ok.png')
+    12. レコードを保存する
+    13. waitForEmail()でメール受信を待機する（タイムアウト: 30秒）
+    14. 受信メールの本文にファイル名「ok.png」が含まれていることを確認: expect(mailBody).toContain('ok.png')
+    15. ファイル名が空（「」）でないことを確認: expect(mailBody).not.toMatch(/ファイル:\s*$/m)
 - case_no: '821'
   feature: テーブル一覧
   description: |-
@@ -971,6 +1768,14 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. テーブルヘッダー行が表示されていることを確認: await expect(page.locator('thead tr, .grid-header')).toBeVisible()
+    5. 全フィールドのヘッダーテキストが空でないことを確認: 各 th 要素の innerText が '' でないこと
+    6. ヘッダー行の数が期待値以上（例: 3以上）であることを確認: expect(await page.locator('th').count()).toBeGreaterThan(2)
+    7. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '822'
   feature: 集計
   description: |-
@@ -979,6 +1784,15 @@ cases:
     ③エラーが発生しないことを確認する
   expected: 集計画面がエラーなく正常に表示されること（#issue1427）
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. waitForAngular()でAngularの描画完了を待機する
+    4. 集計ビューに切り替える: ナビゲーションの「集計」タブ（text=集計, [data-view="aggregate"]）をクリック
+    5. waitForAngular()でAngularの描画完了を待機する
+    6. 集計画面が表示されることを確認: await expect(page.locator('app-aggregate, .aggregate-view, [class*="aggregate"]')).toBeVisible()
+    7. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
+    8. .navbarが表示されていることを確認: await expect(page.locator('.navbar')).toBeVisible()
 - case_no: '823'
   feature: フィルタUI
   description: |-
@@ -988,6 +1802,18 @@ cases:
     ④見切れていたフィルタが選択可能であることを確認する
   expected: フィルタ選択ドロップダウンでフィルタ数が多い場合もスクロールバーが正しく機能し、全フィルタが選択可能なこと
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル設定→フィルタ設定で10件以上のフィルタを事前に作成しておく（または既存テーブルで多数フィルタがあるものを使用）
+    3. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. フィルタ切り替えドロップダウンボタン（.filter-select, [class*="filter-dropdown"], text=フィルタ）をクリックする
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. ドロップダウンメニューが表示されていることを確認: await expect(page.locator('.dropdown-menu:visible, .filter-list:visible')).toBeVisible()
+    8. スクロールバーが表示されているか、またはドロップダウンがスクロール可能であることを確認: overflow: auto/scroll が設定されていること
+    9. ドロップダウン内の最後のフィルタ項目が表示されていることを確認（見切れていないこと）
+    10. 最後のフィルタ項目をクリックして選択できることを確認: クリック後にフィルタが適用されること
+    11. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '824'
   feature: フィルタ
   description: |
@@ -999,6 +1825,17 @@ cases:
   expected: |
     相対値「昨年度」の絞り込みが年度開始月に基づいて正しく動作し、年度範囲外のデータが含まれないこと
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル設定→基本設定で年度開始月を「4月」に設定する
+    3. 昨年度範囲（前年4月1日〜当年3月31日）と当年4月以降（今年度）のレコードをそれぞれ作成する
+    4. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    5. フィルタ設定を開き、日時項目の条件に「が次と一致」→「相対値：昨年度」を選択する
+    6. フィルタを保存してレコード一覧に適用する
+    7. waitForAngular()でAngularの描画完了を待機する
+    8. 表示されているレコードの日時フィールドが全て昨年度範囲内（前年4月〜当年3月）であることを確認
+    9. 当年4月以降（今年度）のレコードが一覧に表示されていないことを確認: 今年度レコードの行数が0であること
+    10. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '825'
   feature: リクエストログ・マスターユーザー閲覧
   description: |-
@@ -1010,6 +1847,18 @@ cases:
   expected: マスターユーザーから他ユーザーのリクエストログが閲覧でき、ユーザー列が表示されること
   movie: U308
   target_spec: system-settings
+  detailed_flow: |-
+    1. debug APIでテストユーザーを作成: POST /api/admin/debug/create-user（一般ユーザー）
+    2. マスターユーザー（admin）でログイン: /admin/login
+    3. リクエストログ画面へ遷移: /admin/request-log にアクセス
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. リクエストログ一覧が表示されることを確認: await expect(page.locator('table, .request-log-list, app-request-log')).toBeVisible()
+    6. 「ユーザー」列（text=ユーザー, th:has-text('ユーザー')）が表示されていることを確認
+    7. 複数のユーザー名がログ一覧に表示されていることを確認（adminと作成したテストユーザー両方の記録が見えること）
+    8. 一般ユーザーでログアウトして再ログイン: /admin/logout → /admin/login（テストユーザー）
+    9. リクエストログ画面へ遷移: /admin/request-log
+    10. 自分のログのみ表示され、adminユーザーのログが表示されないことを確認
+    11. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '826'
   feature: 通知設定
   description: |-
@@ -1018,6 +1867,16 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. 歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックしてテーブル設定画面へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 「通知設定」タブ（text=通知設定）をクリックする
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. 通知設定コンテンツが表示されていることを確認: await expect(page.locator('app-notification-setting, .notification-tab')).toBeVisible()
+    8. 「通知追加」ボタンまたは既存通知リストが表示されていることを確認
+    9. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '827'
   feature: 帳票設定
   description: |-
@@ -1026,6 +1885,16 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 帳票設定画面がエラーなく正常に表示されること
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    3. 歯車ボタン（#table-setting-btn）→「テーブル設定」をクリックしてテーブル設定画面へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 「帳票設定」タブ（text=帳票設定）をクリックする
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. 帳票設定コンテンツが表示されていることを確認: await expect(page.locator('app-report-setting, .report-setting-tab, [class*="report"]')).toBeVisible()
+    8. 帳票追加ボタン（text=帳票追加, text=新規作成）が表示されていることを確認
+    9. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '833'
   feature: カレンダーフィルタ
   description: |-
@@ -1035,6 +1904,19 @@ cases:
     ④月移動なしで即座に別フィルタの内容が反映されることを確認する
   expected: カレンダービューでデフォルトフィルタから別フィルタに切り替えた際、月移動なしで即座にフィルタが反映されること
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル設定→カレンダー設定でカレンダー機能をONにする
+    3. テーブル設定→フィルタ設定でフィルタを2つ以上作成し、1つをデフォルトフィルタに設定する
+    4. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    5. waitForAngular()でAngularの描画完了を待機する
+    6. カレンダービューに切り替える: ビュー切り替えボタン（text=カレンダー, [data-view="calendar"]）をクリック
+    7. waitForAngular()でAngularの描画完了を待機する
+    8. デフォルトフィルタが適用された状態でカレンダーが表示されていることを確認
+    9. フィルタ切り替えドロップダウンで別のフィルタを選択する
+    10. 月移動（前月/翌月ボタン）を押さずに待機する
+    11. カレンダーの表示内容が即座に切り替わったフィルタの内容に変わっていることを確認
+    12. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '834'
   feature: フィールド設定
   description: |
@@ -1045,6 +1927,20 @@ cases:
   expected: |
     複数値許可の日時項目で設定した表示フォーマット（Y-m-d等）が正しく反映されること
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル設定→フィールド設定で日時フィールドを選択またはダブルクリックして編集画面を開く
+    3. 「複数の値の登録を許可する」チェックボックスをONにする
+    4. 種類を「日付のみ」に変更する
+    5. 表示フォーマットのドロップダウンで「Y-m-d」を選択する
+    6. 保存ボタンをクリックしてフィールド設定を保存する
+    7. レコード作成画面を開き、日時フィールドに「2026-02-04」を入力してレコードを保存する
+    8. テーブル一覧画面（/admin/dataset__{tableId}）へ戻る
+    9. waitForAngular()でAngularの描画完了を待機する
+    10. 一覧画面の日時フィールドが「2026-02-04」形式で表示されていることを確認: expect(cellText).toMatch(/\d{4}-\d{2}-\d{2}/)
+    11. 「2026年02月04日」形式で表示されていないことを確認: expect(cellText).not.toMatch(/\d{4}年\d{2}月\d{2}日/)
+    12. レコード詳細画面でも同様に「Y-m-d」形式で表示されることを確認
+    13. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '836'
   feature: 計算項目
   description: |-
@@ -1053,6 +1949,18 @@ cases:
     ③レコードが正しい順序で並び替えられることを確認する
   expected: 並び替え機能が正常に動作すること
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テストデータを複数件作成: POST /api/admin/debug/create-all-type-data（count: 5, pattern: random）
+    3. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. 計算項目のカラムヘッダー（または数値系フィールドのヘッダー）をクリックして昇順並び替えを実行する
+    6. waitForAngular()でAngularの描画完了を待機する
+    7. 一覧の最初の行と2番目の行の値を取得して、最初の行 <= 2番目の行であることを確認（昇順）
+    8. 同じヘッダーを再度クリックして降順並び替えを実行する
+    9. waitForAngular()でAngularの描画完了を待機する
+    10. 一覧の最初の行が2番目の行以上であることを確認（降順）
+    11. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '837'
   feature: CSV
   description: |-
@@ -1061,6 +1969,19 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テストデータを作成: POST /api/admin/debug/create-all-type-data（count: 3）
+    3. テーブル一覧画面（/admin/dataset__{tableId}）へ遷移する
+    4. waitForAngular()でAngularの描画完了を待機する
+    5. CSVボタン（text=CSV, .csv-btn, [class*="csv"]）が表示されていることを確認: await expect(page.locator('[class*="csv"], button:has-text("CSV")')).toBeVisible()
+    6. CSVダウンロードボタンをクリックする: page.locator('text=CSVダウンロード, text=CSV出力')
+    7. ダウンロードが開始されることを確認（page.waitForEvent('download')）またはCSV履歴ページ（/admin/csv）で確認
+    8. /admin/csv にアクセスしてCSV履歴が表示されることを確認
+    9. 最新のCSVダウンロードが「完了」ステータスであることを確認
+    10. テーブル一覧画面に戻り、CSVアップロードボタンをクリックして /app/test_files/稼働_2M.csv をアップロード
+    11. /admin/csv でアップロード結果が「完了」または「成功」であることを確認
+    12. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')
 - case_no: '838'
   feature: 公開フォーム
   description: |-
@@ -1070,3 +1991,15 @@ cases:
     ④「活動名」「申請受付対象月」「活動内容」等のフィールドが見切れていないことを確認する
   expected: 公開フォームで各フィールドの表示が左寄りにならず、正しいレイアウトで表示されること
   movie: U308
+  detailed_flow: |-
+    1. debug APIでALLテストテーブルIDを取得: GET /api/admin/debug/status → dataset.id を確認
+    2. テーブル設定→公開フォーム設定タブで公開フォームを有効にする
+    3. 公開フォームURLを取得する（/public/{token} 形式）
+    4. 公開フォームURLへ遷移する（ログイン不要）
+    5. waitForAngular()でAngularの描画完了を待機する
+    6. フォームフィールドが表示されていることを確認: await expect(page.locator('.form-group, app-public-form-field, [class*="form-field"]').first()).toBeVisible()
+    7. 各フィールドラベルのx座標（getBoundingClientRect().left）が画面左端（0〜10px以内）ではないことを確認（中央寄せまたは適切な余白があること）
+    8. フィールドの幅が画面幅に対して適切（50%以上）であることを確認: getBoundingClientRect().width > windowWidth * 0.5
+    9. フィールド（text=活動名 または最初のラベル）が見切れていないことを確認（overflow: visible）
+    10. スクロールなしで全フィールドが読める幅で表示されていることを確認
+    11. ページ内にInternal Server Errorが含まれないことを確認: expect(await page.textContent('body')).not.toContain('Internal Server Error')

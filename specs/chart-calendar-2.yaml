@@ -8,209 +8,813 @@ cases:
   expected: |
     チャート設定「全員に表示」で他ユーザーからも集計結果が確認できること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルに10件以上データが存在すること。テストユーザー（ishikawa+N@loftal.jp）が1名以上作成済みであること。
+    1. adminでログインし、ALLテストテーブル一覧ページ（/admin/dataset__{tableId}）に遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show または .charts-modal-dialog が表示されることを確認
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. input[name="grant"][value="public"] をクリックして「全員に表示」を選択する
+    7. input[name="grant"][value="public"] が checked であることを確認（expect(radio).toBeChecked()）
+    8. タイトル入力欄（.modal.show input.form-control）にチャート名（例: テストチャート-16-1-全員表示）を入力する
+    9. button:has-text("保存して表示") をクリックして保存する
+    10. body に "Internal Server Error" / "エラーが発生しました" が含まれないことを確認
+    11. モーダルが閉じてテーブルビュー（.navbar 等）に戻ることを確認
+    【assert】
+    - input[name="grant"][value="public"] が toBeChecked()
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 16-2
   feature: チャート・集計
   description: ①チャート設定「自分のみ表示」で設定したユーザーのみチャートが確認できること
   expected: |
     チャート設定「自分のみ表示」で設定したユーザーのみチャートが確認できること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルに10件以上データが存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. input[name="grant"][value="private"] をクリックして「自分のみ表示」を選択する
+    7. input[name="grant"][value="private"] が checked であることを確認
+    8. タイトル入力欄にチャート名（例: テストチャート-16-2-自分のみ）を入力する
+    9. button:has-text("保存して表示") をクリックして保存する
+    10. body に "Internal Server Error" が含まれないことを確認
+    11. .navbar が toBeVisible() であることを確認
+    【assert】
+    - input[name="grant"][value="private"] が toBeChecked()
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 37-1
   feature: チャート・集計
   description: ①自分のみ参照設定のチャートはチャート作成ユーザーのみ参照できること
   expected: |
     自分のみ参照設定のチャートはチャート作成ユーザーのみ参照できること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、テストユーザー（ishikawa+N@loftal.jp）が1名以上作成済みであること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄に "テストチャート-37-1-自分のみ" を入力する
+    7. input[name="grant"][value="private"] をクリックして「自分のみ表示」を選択する
+    8. input[name="grant"][value="private"] が checked であることを確認
+    9. button:has-text("保存して表示") をクリックして保存する
+    10. body に "Internal Server Error" が含まれないことを確認
+    11. .navbar が toBeVisible() であることを確認
+    【assert】
+    - input[name="grant"][value="private"] が toBeChecked()
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 66-1
   feature: チャート・集計
   description: ①チャート絞り込みで条件「空ではない」を設定した場合に想定通りの集計結果が表示されること
   expected: ・チャート絞り込みで条件「空ではない」を設定した場合に正しい結果が表示されること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、テキスト・数値等のフィールドにデータが入っていること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("絞り込み") をクリックして絞り込みタブに切り替える
+    6. button:has-text("条件を追加") をクリックして条件行を追加する
+    7. 条件行が追加されたことを確認（演算子selectが表示される）
+    8. 演算子のselectで「空ではない」オプションを選択する（select option:has-text("空ではない")）
+    9. 「表示」ボタン（button:has-text("表示")）をクリックしてプレビューを表示する
+    10. body に "Internal Server Error" / "エラーが発生しました" が含まれないことを確認
+    11. チャートプレビュー（canvas, cloud-charts, .chart-container）が表示されていることを確認
+    【assert】
+    - 条件行が1つ以上追加されている
+    - body に "Internal Server Error" を含まない
+    - canvas または cloud-charts が toBeVisible()（存在する場合）
+
 - case_no: 119-01
   feature: チャート・集計
   description: ①チャートフィルタで日付の相対値（今日〜来年）検索が想定通りに動作すること
   expected: ・チャートフィルタで日付の相対値（今日〜来年）検索が正常に動作すること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、日付フィールドにデータが入っていること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("絞り込み") をクリックして絞り込みタブに切り替える
+    6. button:has-text("条件を追加") をクリックして条件行を追加する
+    7. フィールドのselectで「日付」フィールドを選択する
+    8. 「相対」ラベル（label:has-text("相対")）をクリックして相対値を有効にする
+    9. body に "Internal Server Error" / "エラーが発生しました" が含まれないことを確認
+    10. モーダルが正常表示されたままであることを確認（.modal.show が toBeVisible()）
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .modal.show が toBeVisible()
+
 - case_no: 123-01
   feature: チャート・集計
   description: ①チャートで棒グラフと線グラフを同時設定して想定通りに表示されること
   expected: ・テーブル一覧からチャート追加し、棒グラフと線グラフの同時表示が正常に動作すること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、数値フィールドにデータが入っていること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("チャート設定") をクリックしてチャート設定タブに切り替える
+    6. チャート設定エリア（.chart-setting, .tab-pane.active）が表示されることを確認
+    7. データ項目selectが存在することを確認（select が1つ以上存在する）
+    8. データ項目1のselectでフィールドを選択する（最初の選択肢を選択）
+    9. グラフタイプselectで「線グラフ」を選択する（option:has-text("線グラフ")）
+    10. body に "Internal Server Error" が含まれないことを確認
+    11. チャートプレビュー（canvas, cloud-charts, .chart-container）が存在する場合は表示されていることを確認
+    12. モーダルが正常に開いたままであることを確認（.modal.show が toBeVisible()）
+    【assert】
+    - データ項目selectが1つ以上存在する（count > 0）
+    - body に "Internal Server Error" を含まない
+    - .modal.show が toBeVisible()
+
 - case_no: 123-02
   feature: チャート・集計
   description: ①ダッシュボードからチャート作成で棒+線グラフが保存され他ユーザーにも表示されること
   expected: |
     ダッシュボードからチャート作成で棒+線グラフが保存され他ユーザーにも表示されること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。
+    1. adminでログインし、ダッシュボード（/admin/dashboard）に遷移する
+    2. テンプレートモーダルが表示されている場合は閉じる
+    3. .navbar が表示されることを確認
+    4. ダッシュボードの「追加」ボタン（button:has-text("追加") 等）が存在する場合はクリックする
+    5. モーダルが開いた場合、[role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄にチャート名（例: テストチャート-123-02）を入力する
+    7. input[name="grant"][value="public"] をクリックして「全員に表示」を選択する
+    8. input[name="grant"][value="public"] が checked であることを確認
+    9. button:has-text("保存して表示") をクリックして保存する
+    10. body に "Internal Server Error" が含まれないことを確認
+    11. .navbar が toBeVisible() であることを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 152-1
   feature: チャート・集計
   description: ①チャートの絞り込みで日時項目の相対値（今日〜来年）が想定通りの絞り込みとなること
   expected: ・チャートの絞り込みで日時項目の相対値（今日〜来年）が正しく絞り込まれること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、日時フィールドにデータが入っていること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("絞り込み") をクリックして絞り込みタブに切り替える
+    6. button:has-text("条件を追加") をクリックして条件行を追加する
+    7. フィールドのselectで「日時」フィールドを選択する（option:has-text("日時")）
+    8. 演算子selectで「次と一致」を選択する（option:has-text("次と一致")）
+    9. 「相対」ラベル（label:has-text("相対")）をクリックして相対値を有効にする
+    10. body に "Internal Server Error" / "エラーが発生しました" が含まれないことを確認
+    11. モーダルが正常表示されたままであることを確認（.modal.show が toBeVisible()）
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .modal.show が toBeVisible()
+
 - case_no: '261'
   feature: チャート・集計
   description: ①チャートのデフォルト設定「全てのユーザーのデフォルトにする」が正常に動作すること
   expected: |
     チャートのデフォルト設定「全てのユーザーのデフォルトにする」が正常に動作すること
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。チャートのデフォルト設定タブはフィルタ/ビューモードの場合に表示される。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("デフォルト設定") が存在する場合はクリックしてデフォルト設定タブに切り替える
+    6. #check_default チェックボックスが表示されることを確認
+    7. チェックボックスが disabled でない場合は check() でチェックを入れる
+    8. #check_default が toBeChecked() であることを確認
+    9. button:has-text("保存して表示") をクリックして保存する
+    10. body に "Internal Server Error" が含まれないことを確認
+    11. .navbar が toBeVisible() であることを確認
+    【補足】デフォルト設定タブはチャートでは非表示の場合があるため、タブが存在しない場合はモーダルが正常表示されていることだけ確認する
+    【assert】
+    - #check_default が toBeChecked()（タブが存在する場合）
+    - body に "Internal Server Error" を含まない
+
 - case_no: 88-1
   feature: チャート・集計
   description: ①チャート設定「行に色を付ける」（条件1つ）が設定通りに色がつくこと
   expected: |
     チャート設定「行に色を付ける」（条件1つ）が設定通りに色がつくこと
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。「行に色を付ける」タブはビュー（filter_type=view）の場合に表示される。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("行に色を付ける") が存在する場合はクリックしてタブに切り替える
+    6. button:has-text("条件・色を追加") をクリックして条件・色を1つ追加する
+    7. .card 内に input[type="color"] が存在することを確認（カラーフィルタカードが1件追加された）
+    8. input[type="color"] が toBeVisible() であることを確認
+    9. button:has-text("保存して表示") をクリックして保存する
+    10. body に "Internal Server Error" が含まれないことを確認
+    【補足】「行に色を付ける」タブはビューの場合のみ表示。チャートモーダルで非表示の場合はモーダルの正常表示を確認する。
+    【assert】
+    - input[type="color"] が toBeVisible()（タブが存在する場合）
+    - .card filter(has: input[type="color"]) の count が ≥ 1
+    - body に "Internal Server Error" を含まない
+
 - case_no: 88-2
   feature: チャート・集計
   description: ①チャート設定「行に色を付ける」（条件複数）が設定通りに色がつくこと
   expected: |
     チャート設定「行に色を付ける」（条件複数）が設定通りに色がつくこと
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。「行に色を付ける」タブはビューの場合に表示される。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("行に色を付ける") が存在する場合はクリックしてタブに切り替える
+    6. button:has-text("条件・色を追加") を1回目クリックして条件・色を1つ追加する
+    7. button:has-text("条件・色を追加") を2回目クリックして条件・色をさらに1つ追加する
+    8. .card 内に input[type="color"] が2つ以上存在することを確認
+    9. input[type="color"] の count が ≥ 2 であることを確認
+    10. button:has-text("保存して表示") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - .card filter(has: input[type="color"]) の count が ≥ 2
+    - input[type="color"] の count が ≥ 2
+    - body に "Internal Server Error" を含まない
+
 - case_no: 136-01
   feature: チャート・集計
   description: ①集計の詳細権限設定「編集可能なユーザー→全ユーザー」が権限設定通りに動作すること
   expected: |
     集計の詳細権限設定「編集可能なユーザー→全ユーザー」が権限設定通りに動作すること
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. タイトル入力欄（input.form-control）に "テスト集計-136-01" を入力する
+    6. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    7. 詳細権限設定フォームが表示されることを確認
+    8. 「編集可能ユーザー」セクションの「選択」ボタン（grant-group-form内のbutton:has-text("選択")）をクリックする
+    9. ユーザー・組織選択モーダルが開くことを確認
+    10. 「全ユーザー」に該当するオプション（label:has-text("全ユーザー") 等）を選択する
+    11. モーダル内の保存ボタンをクリックして選択を確定する
+    12. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    13. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - input[name="grant"][value="custom"] が checked（詳細権限設定が選択されている）
+    - body に "Internal Server Error" を含まない
+
 - case_no: 136-04
   feature: チャート・集計
   description: ①集計詳細権限設定で編集可能ユーザーをブランクにして保存するとエラーが出力されること
   expected: |
     集計詳細権限設定で編集可能ユーザーをブランクにして保存するとエラーが出力されること
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    6. 詳細権限設定フォームが表示されることを確認
+    7. 編集可能ユーザーを選択せずにブランクのまま保存ボタンをクリックする（button:has-text("保存")）
+    8. エラーメッセージまたはバリデーションメッセージが表示されることを確認
+    9. body に "Internal Server Error" が含まれないことを確認（500エラーでなく、バリデーションエラーであること）
+    【assert】
+    - エラーメッセージまたはバリデーションエラーが表示される
+    - body に "Internal Server Error" を含まない（バリデーションエラーであること）
+
 - case_no: 139-01
   feature: チャート・集計
   description: ①チャートの詳細権限設定「編集可能なユーザー→全ユーザー」が権限設定通りに動作すること
   expected: |
     チャートの詳細権限設定「編集可能なユーザー→全ユーザー」が権限設定通りに動作すること
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄に "テストチャート-139-01" を入力する
+    7. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    8. 詳細権限設定フォームが表示されることを確認（grant-group-form が2つ表示される）
+    9. 「編集可能ユーザー」セクションの「選択」ボタンをクリックする
+    10. ユーザー・組織選択モーダルが開くことを確認
+    11. 「全ユーザー」に該当するオプションを選択し、保存する
+    12. button:has-text("保存して表示") をクリックして保存する
+    13. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - input[name="grant"][value="custom"] が checked
+    - body に "Internal Server Error" を含まない
+
 - case_no: 139-04
   feature: チャート・集計
   description: ①チャート詳細権限設定で編集可能ユーザーをブランクにして保存するとエラーが出力されること
   expected: |
     チャート詳細権限設定で編集可能ユーザーをブランクにして保存するとエラーが出力されること
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    7. 詳細権限設定フォームが表示されることを確認
+    8. 編集可能ユーザーを選択せずにブランクのまま保存ボタンをクリックする
+    9. エラーメッセージまたはバリデーションメッセージが表示されることを確認
+    10. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - エラーまたはバリデーションメッセージが表示される
+    - body に "Internal Server Error" を含まない
+
 - case_no: 139-02
   feature: チャート・集計
   description: ①チャート詳細権限設定で編集可能ユーザーを指定ユーザーに設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   expected: |
     チャート詳細権限設定で編集可能ユーザーを指定ユーザーに設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。テストユーザー（ishikawa+N@loftal.jp）が1名以上作成済みであること。
+    1. adminでAPI経由でテストユーザーを作成する（/api/admin/debug/create-user）
+    2. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    3. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    4. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄に "テストチャート-139-02" を入力する
+    7. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    8. 「編集可能ユーザー」セクションの「選択」ボタンをクリックする
+    9. ユーザー・組織選択モーダルが開くことを確認
+    10. 特定ユーザー（テストユーザー）を選択して保存する
+    11. button:has-text("保存して表示") をクリックして保存する
+    12. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 139-03
   feature: チャート・集計
   description: ①チャート詳細権限設定で編集可能ユーザーを組織指定に設定すると権限設定通りに動作すること（複数ユーザー・組織設定が必要）
   expected: |
     チャート詳細権限設定で編集可能ユーザーを組織指定に設定すると権限設定通りに動作すること（複数ユーザー・組織設定が必要）
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。組織（division）が1つ以上存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. タイトル入力欄に "テストチャート-139-03" を入力する
+    6. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    7. 「編集可能ユーザー」セクションの「選択」ボタンをクリックする
+    8. ユーザー・組織選択モーダルが開くことを確認
+    9. 組織タブまたは組織を選択して保存する（fa-users アイコンが付いた項目）
+    10. button:has-text("保存して表示") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 140-01
   feature: チャート・集計
   description: ①チャート詳細権限設定で閲覧のみ可能なユーザーを全ユーザーに設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   expected: |
     チャート詳細権限設定で閲覧のみ可能なユーザーを全ユーザーに設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。テストユーザーが1名以上作成済みであること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. タイトル入力欄に "テストチャート-140-01" を入力する
+    6. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    7. 詳細権限設定フォームに「編集可能ユーザー」と「閲覧のみ可能ユーザー」の2セクションが表示されることを確認
+    8. 「閲覧のみ可能ユーザー」セクションの「選択」ボタンをクリックする
+    9. ユーザー・組織選択モーダルで「全ユーザー」を選択して保存する
+    10. button:has-text("保存して表示") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 140-02
   feature: チャート・集計
   description: ①チャート詳細権限設定で閲覧のみ可能なユーザーを指定ユーザーに設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   expected: |
     チャート詳細権限設定で閲覧のみ可能なユーザーを指定ユーザーに設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。テストユーザー（ishikawa+N@loftal.jp）が1名以上作成済みであること。
+    1. adminでAPI経由でテストユーザーを作成する（/api/admin/debug/create-user）
+    2. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    3. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    4. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄に "テストチャート-140-02" を入力する
+    7. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    8. 「閲覧のみ可能ユーザー」セクションの「選択」ボタンをクリックする
+    9. ユーザー・組織選択モーダルで特定ユーザーを選択して保存する
+    10. button:has-text("保存して表示") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 140-03
   feature: チャート・集計
   description: ①チャート詳細権限設定で閲覧のみ可能なユーザーを組織指定に設定すると権限設定通りに動作すること（複数ユーザー・組織設定が必要）
   expected: |
     チャート詳細権限設定で閲覧のみ可能なユーザーを組織指定に設定すると権限設定通りに動作すること（複数ユーザー・組織設定が必要）
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。組織（division）が1つ以上存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. タイトル入力欄に "テストチャート-140-03" を入力する
+    6. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    7. 「閲覧のみ可能ユーザー」セクションの「選択」ボタンをクリックする
+    8. ユーザー・組織選択モーダルで組織を選択して保存する
+    9. button:has-text("保存して表示") をクリックして保存する
+    10. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 140-04
   feature: チャート・集計
   description: ①チャート詳細権限設定で閲覧のみユーザー・組織をブランクにして保存するとエラーが出力されること
   expected: |
     チャート詳細権限設定で閲覧のみユーザー・組織をブランクにして保存するとエラーが出力されること
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    6. 詳細権限設定フォームが表示されることを確認
+    7. 閲覧のみ可能ユーザーを選択せずにブランクのまま保存ボタンをクリックする
+    8. エラーメッセージまたはバリデーションメッセージが表示されることを確認
+    9. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - エラーまたはバリデーションメッセージが表示される
+    - body に "Internal Server Error" を含まない
+
 - case_no: 141-01
   feature: チャート・集計
   description: ①チャート詳細権限設定で編集可能・閲覧のみをそれぞれ設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   expected: |
     チャート詳細権限設定で編集可能・閲覧のみをそれぞれ設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   movie: C203
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。テストユーザーが2名以上作成済みであること。
+    1. adminでAPI経由でテストユーザーを2名作成する（/api/admin/debug/create-user を2回）
+    2. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    3. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    4. .dropdown-item:has-text("チャート") をクリックしてチャートモーダルを開く
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄に "テストチャート-141-01" を入力する
+    7. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    8. 「編集可能ユーザー」セクションの「選択」ボタンをクリックし、ユーザー1を選択する
+    9. 「閲覧のみ可能ユーザー」セクションの「選択」ボタンをクリックし、ユーザー2を選択する
+    10. button:has-text("保存して表示") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 136-02
   feature: チャート・集計
   description: ①集計の詳細権限設定「編集可能なユーザー→ユーザー指定」が権限設定通りに動作すること（複数ユーザー操作が必要）
   expected: |
     集計の詳細権限設定「編集可能なユーザー→ユーザー指定」が権限設定通りに動作すること（複数ユーザー操作が必要）
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。テストユーザー（ishikawa+N@loftal.jp）が1名以上作成済みであること。
+    1. adminでAPI経由でテストユーザーを作成する（/api/admin/debug/create-user）
+    2. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    3. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    4. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄に "テスト集計-136-02" を入力する
+    7. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    8. 「編集可能ユーザー」セクションの「選択」ボタンをクリックする
+    9. ユーザー・組織選択モーダルで特定ユーザー（テストユーザー）を選択して保存する
+    10. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+
 - case_no: 136-03
   feature: チャート・集計
   description: ①集計の詳細権限設定「編集可能なユーザー→組織指定」が権限設定通りに動作すること（複数ユーザー・組織設定が必要）
   expected: |
     集計の詳細権限設定「編集可能なユーザー→組織指定」が権限設定通りに動作すること（複数ユーザー・組織設定が必要）
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。組織（division）が1つ以上存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. タイトル入力欄に "テスト集計-136-03" を入力する
+    6. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    7. 「編集可能ユーザー」セクションの「選択」ボタンをクリックする
+    8. ユーザー・組織選択モーダルで組織を選択して保存する（fa-users アイコンが付いた項目）
+    9. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    10. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+
 - case_no: 137-01
   feature: チャート・集計
   description: ①集計の詳細権限設定「閲覧のみ可能なユーザー→全ユーザー」が権限設定通りに動作すること（複数ユーザー操作が必要）
   expected: |
     集計の詳細権限設定「閲覧のみ可能なユーザー→全ユーザー」が権限設定通りに動作すること（複数ユーザー操作が必要）
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。テストユーザーが1名以上作成済みであること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. タイトル入力欄に "テスト集計-137-01" を入力する
+    6. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    7. 詳細権限設定フォームに「編集可能ユーザー」と「閲覧のみ可能ユーザー」の2セクションが表示されることを確認
+    8. 「閲覧のみ可能ユーザー」セクションの「選択」ボタンをクリックする
+    9. ユーザー・組織選択モーダルで「全ユーザー」を選択して保存する
+    10. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+
 - case_no: 137-02
   feature: チャート・集計
   description: ①集計の詳細権限設定「閲覧のみ可能なユーザー→ユーザー指定」が権限設定通りに動作すること（複数ユーザー操作が必要）
   expected: |
     集計の詳細権限設定「閲覧のみ可能なユーザー→ユーザー指定」が権限設定通りに動作すること（複数ユーザー操作が必要）
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。テストユーザー（ishikawa+N@loftal.jp）が1名以上作成済みであること。
+    1. adminでAPI経由でテストユーザーを作成する（/api/admin/debug/create-user）
+    2. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    3. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    4. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄に "テスト集計-137-02" を入力する
+    7. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    8. 「閲覧のみ可能ユーザー」セクションの「選択」ボタンをクリックする
+    9. ユーザー・組織選択モーダルで特定ユーザーを選択して保存する
+    10. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+
 - case_no: 137-03
   feature: チャート・集計
   description: ①集計の詳細権限設定「閲覧のみ可能なユーザー→組織指定」が権限設定通りに動作すること（複数ユーザー・組織設定が必要）
   expected: |
     集計の詳細権限設定「閲覧のみ可能なユーザー→組織指定」が権限設定通りに動作すること（複数ユーザー・組織設定が必要）
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。組織（division）が1つ以上存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. タイトル入力欄に "テスト集計-137-03" を入力する
+    6. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    7. 「閲覧のみ可能ユーザー」セクションの「選択」ボタンをクリックする
+    8. ユーザー・組織選択モーダルで組織を選択して保存する
+    9. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    10. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+
 - case_no: 137-04
   feature: チャート・集計
   description: ①集計の詳細権限設定で閲覧のみユーザー・組織をブランクにして保存するとエラーが出力されること
   expected: |
     集計の詳細権限設定で閲覧のみユーザー・組織をブランクにして保存するとエラーが出力されること
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    5. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    6. 詳細権限設定フォームが表示されることを確認
+    7. 閲覧のみ可能ユーザーを選択せずにブランクのまま保存ボタンをクリックする
+    8. エラーメッセージまたはバリデーションメッセージが表示されることを確認
+    9. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - エラーまたはバリデーションメッセージが表示される
+    - body に "Internal Server Error" を含まない
+
 - case_no: 138-01
   feature: チャート・集計
   description: ①集計の詳細権限設定で編集可能・閲覧のみをそれぞれ設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   expected: |
     集計の詳細権限設定で編集可能・閲覧のみをそれぞれ設定すると権限設定通りに動作すること（複数ユーザー操作が必要）
   movie: C202
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。テストユーザーが2名以上作成済みであること。
+    1. adminでAPI経由でテストユーザーを2名作成する（/api/admin/debug/create-user を2回）
+    2. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    3. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    4. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄に "テスト集計-138-01" を入力する
+    7. input[name="grant"][value="custom"] をクリックして「詳細権限設定」を選択する
+    8. 「編集可能ユーザー」セクションの「選択」ボタンをクリックし、ユーザー1を選択する
+    9. 「閲覧のみ可能ユーザー」セクションの「選択」ボタンをクリックし、ユーザー2を選択する
+    10. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+
 - case_no: 120-02
   feature: チャート・集計
   description: ①集計フィルタの設定タブでタイトル入力・全員に表示・ダッシュボード表示にチェックして集計を保存できること
   expected: |
     集計フィルタの設定タブでタイトル入力・全員に表示・ダッシュボード表示にチェックして集計を保存できること
   movie: C204
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、10件以上データが入っていること。
+    【注意】UIでは「ダッシュボードに表示」チェックボックスは存在しない（仕様変更）。「全員に表示」はラジオボタン（input[name="grant"][value="public"]）。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    6. タイトル入力欄（input.form-control）に集計名（例: テスト集計-120-02）を入力する
+    7. input[name="grant"][value="public"] をクリックして「全員に表示」を選択する
+    8. input[name="grant"][value="public"] が checked であることを確認
+    9. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    10. body に "Internal Server Error" / "エラーが発生しました" が含まれないことを確認
+    11. モーダルが閉じてテーブルビューに戻ることを確認
+    【assert】
+    - input[name="grant"][value="public"] が toBeChecked()
+    - body に "Internal Server Error" を含まない
+    - .navbar が toBeVisible()
+
 - case_no: 120-03
   feature: チャート・集計
   description: ①集計フィルタで他テーブルの項目を使用して集計結果を表示できること
   expected: |
     集計フィルタで他テーブルの項目を使用して集計結果を表示できること
   movie: C204
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、参照フィールド（参照_admin, 参照_division, 参照_マスタ）が設定されていること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("絞り込み") をクリックして絞り込みタブに切り替える
+    6. button:has-text("条件を追加") をクリックして条件行を追加する
+    7. フィールドselectで他テーブルの参照フィールド（参照_admin, 参照_division, 参照_マスタ等）を選択する
+    8. 集計条件が追加されたことを確認
+    9. 「表示」ボタン（button:has-text("表示")）をクリックしてプレビューを表示する
+    10. body に "Internal Server Error" / "エラーが発生しました" が含まれないことを確認
+    【assert】
+    - 条件行が1つ以上追加されている
+    - body に "Internal Server Error" を含まない
+
 - case_no: 120-04
   feature: チャート・集計
   description: ①集計フィルタで他テーブルの項目を使用して保存し全員に表示されること（複数ユーザー確認が必要）
   expected: |
     集計フィルタで他テーブルの項目を使用して保存し全員に表示されること（複数ユーザー確認が必要）
   movie: C204
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、参照フィールドが設定されていること。テストユーザーが1名以上作成済みであること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. [role="tab"]:has-text("絞り込み") をクリックして絞り込みタブに切り替える
+    5. button:has-text("条件を追加") をクリックして条件行を追加する
+    6. フィールドselectで参照フィールドを選択する
+    7. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    8. タイトル入力欄に集計名（例: テスト集計-120-04）を入力する
+    9. input[name="grant"][value="public"] をクリックして「全員に表示」を選択する
+    10. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - input[name="grant"][value="public"] が toBeChecked()
+    - body に "Internal Server Error" を含まない
+
 - case_no: 120-05
   feature: チャート・集計
   description: ①集計フィルタで計算式を使って集計結果が表示されること
   expected: |
     集計フィルタで計算式を使って集計結果が表示されること
   movie: C204
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、計算フィールド（計算_加算, 計算_乗算等）が設定されていること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("絞り込み") をクリックして絞り込みタブに切り替える
+    6. button:has-text("条件を追加") をクリックして条件行を追加する
+    7. フィールドselectで計算フィールド（計算_加算, 計算_乗算, 計算_文字結合等）を選択する
+    8. 計算フィールドを用いた条件を設定する
+    9. 「表示」ボタン（button:has-text("表示")）をクリックしてプレビューを表示する
+    10. body に "Internal Server Error" / "エラーが発生しました" が含まれないことを確認
+    【assert】
+    - 条件行が1つ以上追加されている
+    - body に "Internal Server Error" を含まない
+
 - case_no: 120-06
   feature: チャート・集計
   description: ①集計フィルタで計算式を使った集計を保存し全員に表示されること（複数ユーザー確認が必要）
   expected: |
     集計フィルタで計算式を使った集計を保存し全員に表示されること（複数ユーザー確認が必要）
   movie: C204
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、計算フィールドが設定されていること。テストユーザーが1名以上作成済みであること。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. [role="tab"]:has-text("絞り込み") をクリックして絞り込みタブに切り替える
+    5. button:has-text("条件を追加") をクリックして条件行を追加する
+    6. フィールドselectで計算フィールドを選択する
+    7. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    8. タイトル入力欄に集計名（例: テスト集計-120-06）を入力する
+    9. input[name="grant"][value="public"] をクリックして「全員に表示」を選択する
+    10. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    11. body に "Internal Server Error" が含まれないことを確認
+    【assert】
+    - input[name="grant"][value="public"] が toBeChecked()
+    - body に "Internal Server Error" を含まない
+
 - case_no: 85-1
   feature: チャート・集計
   description: ①ワークフロー設定テーブルで集計フィルタにワークフロー条件を設定して保存できること
   expected: |
     ワークフロー設定テーブルで集計フィルタにワークフロー条件を設定して保存できること
   movie: C205
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在し、ワークフロー設定が有効になっていること（テーブル設定→ワークフロー）。
+    1. adminでログインし、ALLテストテーブル一覧ページに遷移する
+    2. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    3. .dropdown-item:has-text("集計") をクリックして集計モーダルを開く
+    4. .modal.show が表示されることを確認
+    5. [role="tab"]:has-text("絞り込み") をクリックして絞り込みタブに切り替える
+    6. button:has-text("条件を追加") をクリックして条件行を追加する
+    7. フィールドselectでワークフロー関連フィールド（ステータス等）を選択する（存在する場合）
+    8. ワークフロー条件を設定する（承認ステータス等）
+    9. [role="tab"]:has-text("設定") をクリックして設定タブに切り替える
+    10. タイトル入力欄に集計名（例: テスト集計-85-1）を入力する
+    11. button:has-text("保存して表示") または button:has-text("保存") をクリックして保存する
+    12. body に "Internal Server Error" / "エラーが発生しました" が含まれないことを確認
+    【assert】
+    - body に "Internal Server Error" を含まない
+
 - case_no: '260'
   feature: チャート・集計
   description: ①チャートビューにアクセスするとエラーなく表示されること
   expected: |
     エラーが発生しないこと
   movie: C201
+  detailed_flow: |
+    【前提】ALLテストテーブルが存在すること。
+    1. adminでログインし、ALLテストテーブル一覧ページ（/admin/dataset__{tableId}）に遷移する
+    2. ページタイトルまたは見出しに "ALLテスト" が含まれることを確認（heading filter hasText /ALLテスト/）
+    3. button.dropdown-toggle（帳票以外）をクリックしてドロップダウンを開く
+    4. .dropdown-item:has-text("チャート") が表示されることを確認
+    5. body に "Internal Server Error" / "404" が含まれないことを確認
+    【assert】
+    - heading filter(hasText: /ALLテスト/) が toBeVisible()
+    - .dropdown-item:has-text("チャート") が toBeVisible()
+    - body に "Internal Server Error" を含まない
+    - body に "404" を含まない

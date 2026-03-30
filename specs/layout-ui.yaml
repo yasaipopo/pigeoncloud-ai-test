@@ -13,6 +13,38 @@ cases:
     ユーザーアイコンクリック後、メニュー一覧が表示されること。
     ユーザー情報と、ログアウトだけでOK
   movie: LU01
+  detailed_flow:
+    setup:
+      - テストユーザー（ユーザータイプ）を /admin/debug/create-user で作成し、ishikawa+N@loftal.jp / admin でログイン
+    steps:
+      - url: /admin/login
+      - action: fill
+        selector: '#id'
+        value: '{{ TEST_EMAIL }}'
+        note: テストユーザーのメールアドレスでログイン
+      - action: fill
+        selector: '#password'
+        value: '{{ TEST_PASSWORD }}'
+      - action: click
+        selector: 'button[type=submit].btn-primary'
+      - action: waitForSelector
+        selector: '.navbar, header.app-header'
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: click
+        selector: 'a.nav-link.nav-pill.avatar'
+        note: ヘッダー右側のユーザーアイコン（fa-user）クリック
+    assertions:
+      - selector: '.dropdown-menu.show, ul.dropdown-menu[aria-expanded="true"]'
+        type: visible
+        note: ドロップダウンメニューが表示される
+      - selector: '.dropdown-menu'
+        text_contains: 'ログアウト'
+        note: ログアウトリンクが含まれる
+      - selector: '.dropdown-menu'
+        not_contains: '管理'
+        note: 管理者メニューが表示されていないこと（ユーザータイプのため）
+
 - case_no: 127-01
   sheet: A
   feature: ショートカットキー
@@ -22,6 +54,30 @@ cases:
     ②Ctrl+spaceを押す。
   expected: ショートカット実行により、テーブル検索が行えること。
   movie: LU01
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルのレコード一覧に遷移
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.navbar, header.app-header'
+      - action: keyboard
+        key: 'Control+Space'
+        note: Ctrl+Spaceでテーブル検索を発動
+    assertions:
+      - selector: 'input#table_shortcut, input[placeholder*="テーブル名検索"]'
+        type: visible
+        note: テーブル検索入力フィールドが表示される
+      - action: fill
+        selector: 'input#table_shortcut'
+        value: 'ALLテスト'
+        note: テーブル名を入力して絞り込み
+      - selector: '.nav-menus__item, .nav-menus__link'
+        text_contains: 'ALLテスト'
+        note: サイドメニューにALLテスト関連テーブルが表示される
+
 - case_no: 215-1
   sheet: A
   feature: アイコンタイプ
@@ -33,6 +89,37 @@ cases:
     ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルにアップロードした画像がアイコン表示されていること。
   movie: LU04
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset/edit/{{ tableId }}'
+        note: テーブル設定ページに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'text=追加オプション設定, .additional-options, [class*="additional"]'
+        note: 「追加オプション設定」セクションを展開
+      - action: waitForSelector
+        selector: 'input[type="radio"][value="image"], label:has-text("画像")'
+        note: アイコンタイプ選択ラジオボタン表示待ち
+      - action: click
+        selector: 'input[type="radio"][value="image"], label:has-text("画像")'
+        note: アイコンタイプ「画像」を選択
+      - action: setInputFiles
+        selector: 'input[type="file"][name*="icon"], input[type="file"]'
+        value: '/app/test_files/ok.png'
+        note: アイコン画像をアップロード
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: 更新ボタンをクリック
+      - action: waitForAngular
+      - url: /admin/dashboard
+        note: ダッシュボードまたはサイドメニューでアイコン表示確認
+    assertions:
+      - selector: '.nav-menus__link img, .nav-menus a img'
+        type: visible
+        note: サイドメニューの対象テーブル項目に画像アイコンが表示される
+
 - case_no: 215-2
   sheet: A
   feature: アイコンタイプ
@@ -44,6 +131,32 @@ cases:
     ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン画像表示がブランク表示となっていること。
   movie: LU04
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - 事前にアイコン画像が設定済みであること（215-1 の後に実行する想定）
+    steps:
+      - url: '/admin/dataset/edit/{{ tableId }}'
+        note: テーブル設定ページに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'text=追加オプション設定'
+        note: 「追加オプション設定」セクションを展開
+      - action: waitForSelector
+        selector: 'button:has-text("画像を削除"), button:has-text("削除")'
+      - action: click
+        selector: 'button:has-text("画像を削除"), button:has-text("削除")'
+        note: 「画像を削除」ボタンをクリック
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: 更新ボタンをクリック
+      - action: waitForAngular
+      - url: /admin/dashboard
+    assertions:
+      - selector: '.nav-menus__link img'
+        type: not_visible
+        note: サイドメニューの対象テーブル項目に画像アイコンが表示されないこと（ブランク）
+
 - case_no: 215-3
   sheet: A
   feature: アイコンタイプ
@@ -55,6 +168,29 @@ cases:
     ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン画像表示がブランク表示となっていること。
   movie: LU04
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset/edit/{{ tableId }}'
+        note: テーブル設定ページに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'text=追加オプション設定'
+        note: 「追加オプション設定」セクションを展開
+      - action: click
+        selector: 'input[type="radio"][value="image"], label:has-text("画像")'
+        note: アイコンタイプ「画像」を選択（ファイルはアップロードしない）
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: ファイル指定なしで更新ボタンをクリック
+      - action: waitForAngular
+      - url: /admin/dashboard
+    assertions:
+      - selector: '.nav-menus__link img'
+        type: not_visible
+        note: サイドメニューの対象テーブル項目に画像アイコンが表示されないこと（ブランク）
+
 - case_no: 215-4
   sheet: A
   feature: アイコンタイプ
@@ -66,6 +202,33 @@ cases:
     ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルに指定したアイコンが表示されていること。
   movie: LU04
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset/edit/{{ tableId }}'
+        note: テーブル設定ページに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'text=追加オプション設定'
+        note: 「追加オプション設定」セクションを展開
+      - action: click
+        selector: 'input[type="radio"][value="icon"], label:has-text("アイコン")'
+        note: アイコンタイプ「アイコン」を選択
+      - action: fill
+        selector: 'input[placeholder*="fa-"], input[name*="icon_class"], input[class*="icon-input"]'
+        value: 'fa-user-circle-o'
+        note: アイコンクラス名 fa-user-circle-o を入力
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: 更新ボタンをクリック
+      - action: waitForAngular
+      - url: /admin/dashboard
+    assertions:
+      - selector: '.nav-menus__link .fa-user-circle-o, .nav-menus a i.fa-user-circle-o'
+        type: visible
+        note: サイドメニューの対象テーブル項目にfa-user-circle-oアイコンが表示される
+
 - case_no: 215-5
   sheet: A
   feature: アイコンタイプ
@@ -77,6 +240,32 @@ cases:
     ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン表示がデフォルトアイコン表示となっていること。
   movie: LU04
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset/edit/{{ tableId }}'
+        note: テーブル設定ページに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'text=追加オプション設定'
+        note: 「追加オプション設定」セクションを展開
+      - action: click
+        selector: 'input[type="radio"][value="icon"], label:has-text("アイコン")'
+        note: アイコンタイプ「アイコン」を選択
+      - action: clear
+        selector: 'input[placeholder*="fa-"], input[name*="icon_class"]'
+        note: アイコンクラス名を空にする（指定なし）
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: アイコン指定なしで更新ボタンをクリック
+      - action: waitForAngular
+      - url: /admin/dashboard
+    assertions:
+      - selector: '.nav-menus__link .fa-th-list, .nav-menus a i.fa-th-list'
+        type: visible
+        note: サイドメニューの対象テーブル項目にデフォルトアイコン（fa-th-list）が表示される
+
 - case_no: 78-1
   sheet: A
   feature: ダッシュボード
@@ -86,6 +275,29 @@ cases:
     ②ダッシュボードに表示されたチャートをドラッグアンドドロップで並び替え
   expected: ドラングアンドドロップでチャートの並び替えが可能なこと。
   movie: LU03
+  detailed_flow:
+    setup:
+      - ダッシュボードに複数チャートが存在すること
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+        note: ダッシュボードのドラッグ可能なチャートボックスを確認
+      - action: drag_and_drop
+        source: '.cdk-drag.dashboard-chart-box:first-child'
+        target: '.cdk-drag.dashboard-chart-box:last-child'
+        note: 最初のチャートを最後の位置にドラッグアンドドロップ
+      - action: waitForAngular
+    assertions:
+      - selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+        type: visible
+        note: ドラッグ後もチャートボックスが表示されている
+      - selector: '.order_list.row'
+        type: visible
+        note: チャート一覧コンテナが正常に表示されている
+    note: CDK DragDropによる並び替え操作。自動化困難な場合はスキップ対象
+
 - case_no: 82-10
   sheet: A
   feature: ダッシュボード
@@ -93,6 +305,33 @@ cases:
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「通知設定」が問題なくできること。"
   expected: ・マスターユーザーでダッシュボードからテーブルの通知設定が行えること
   movie: LU03
+  detailed_flow:
+    setup:
+      - マスターユーザー（admin）でログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+      - action: click
+        selector: '.dashboard-chart-box a[href*="dataset"], .card-header a, button:has-text("詳細")'
+        note: ダッシュボード上のテーブルカードの「詳細・編集」ボタンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'a[href*="notification"], button:has-text("通知設定"), a:has-text("通知設定")'
+        note: 通知設定リンクをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなく通知設定ページが表示される
+      - url_pattern: '/admin/notification'
+        type: url_contains
+        note: 通知設定ページに遷移していること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+
 - case_no: 82-1
   sheet: A
   feature: ダッシュボード
@@ -104,6 +343,31 @@ cases:
     ④ 「CSVダウンロード」が問題なくできること。
   expected: ・ユーザータイプ「ユーザー」でダッシュボードからテーブル詳細・CSVダウンロードが行えること
   movie: LU02
+  detailed_flow:
+    setup:
+      - テストユーザー（ユーザータイプ）を /admin/debug/create-user で作成しログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+      - action: click
+        selector: '.dashboard-chart-box a[href*="dataset"], .card-header a, button:has-text("詳細")'
+        note: ダッシュボード上のテーブルカードの「詳細・編集」ボタンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'button:has-text("CSV"), a:has-text("CSVダウンロード"), .dropdown-item:has-text("CSV")'
+        note: CSVダウンロードボタンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなくページが表示される
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+        note: CSV機能が正常に動作すること（ダウンロードダイアログまたはCSV履歴ページへの遷移）
+
 - case_no: 82-2
   sheet: A
   feature: ダッシュボード
@@ -115,6 +379,33 @@ cases:
     ④ 「集計」が問題なくできること。
   expected: ・ユーザータイプ「ユーザー」でダッシュボードから集計が行えること
   movie: LU02
+  detailed_flow:
+    setup:
+      - テストユーザー（ユーザータイプ）でログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+      - action: click
+        selector: '.dashboard-chart-box a[href*="dataset"], .card-header a, button:has-text("詳細")'
+        note: ダッシュボード上のテーブルカードの「詳細・編集」ボタンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'a[href*="summary"], button:has-text("集計"), a:has-text("集計")'
+        note: 集計ページへ移動
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなく集計ページが表示される
+      - url_pattern: 'summary'
+        type: url_contains
+        note: 集計ページに遷移していること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+
 - case_no: 82-3
   sheet: A
   feature: ダッシュボード
@@ -126,6 +417,33 @@ cases:
     ④ 「チャート追加」が問題なくできること。
   expected: ・ユーザータイプ「ユーザー」でダッシュボードからチャート追加が行えること
   movie: LU02
+  detailed_flow:
+    setup:
+      - テストユーザー（ユーザータイプ）でログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+      - action: click
+        selector: '.dashboard-chart-box a[href*="dataset"], .card-header a, button:has-text("詳細")'
+        note: ダッシュボード上のテーブルカードの「詳細・編集」ボタンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'button:has-text("チャート追加"), a:has-text("チャート追加"), button:has-text("ウィジェットを追加")'
+        note: チャート追加ボタンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなくチャート追加UIが表示される
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+      - selector: '.modal, [class*="chart"], [class*="widget"]'
+        type: visible
+        note: チャート追加モーダルまたは設定画面が表示される
+
 - case_no: 82-5
   sheet: A
   feature: ダッシュボード
@@ -137,6 +455,33 @@ cases:
     ④ 「通知設定」が問題なくできること。
   expected: ・ユーザータイプ「ユーザー」でダッシュボードから通知設定が行えること
   movie: LU02
+  detailed_flow:
+    setup:
+      - テストユーザー（ユーザータイプ）でログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+      - action: click
+        selector: '.dashboard-chart-box a[href*="dataset"], .card-header a, button:has-text("詳細")'
+        note: ダッシュボード上のテーブルカードの「詳細・編集」ボタンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'a[href*="notification"], button:has-text("通知設定"), a:has-text("通知設定")'
+        note: 通知設定リンクをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなく通知設定ページが表示される
+      - url_pattern: 'notification'
+        type: url_contains
+        note: 通知設定ページに遷移していること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+
 - case_no: 82-6
   sheet: A
   feature: ダッシュボード
@@ -144,6 +489,30 @@ cases:
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「CSVダウンロード」が問題なくできること。"
   expected: ・マスターユーザーでダッシュボードからCSVダウンロードが行えること
   movie: LU03
+  detailed_flow:
+    setup:
+      - マスターユーザー（admin）でログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+      - action: click
+        selector: '.dashboard-chart-box a[href*="dataset"], .card-header a, button:has-text("詳細")'
+        note: ダッシュボード上のテーブルカードの「詳細・編集」ボタンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'button:has-text("CSV"), a:has-text("CSVダウンロード"), .dropdown-item:has-text("CSV")'
+        note: CSVダウンロードボタンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなくCSVダウンロードが実行される
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+
 - case_no: 82-7
   sheet: A
   feature: ダッシュボード
@@ -151,6 +520,33 @@ cases:
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「集計」が問題なくできること。"
   expected: ・マスターユーザーでダッシュボードから集計が行えること
   movie: LU03
+  detailed_flow:
+    setup:
+      - マスターユーザー（admin）でログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.cdk-drag.dashboard-chart-box, .dashboard-chart-box'
+      - action: click
+        selector: '.dashboard-chart-box a[href*="dataset"], .card-header a, button:has-text("詳細")'
+        note: ダッシュボード上のテーブルカードの「詳細・編集」ボタンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'a[href*="summary"], button:has-text("集計"), a:has-text("集計")'
+        note: 集計ページへ移動
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなく集計ページが表示される
+      - url_pattern: 'summary'
+        type: url_contains
+        note: 集計ページに遷移していること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+
 - case_no: 82-8
   sheet: A
   feature: ダッシュボード
@@ -158,6 +554,28 @@ cases:
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「チャート追加」が問題なくできること。"
   expected: ・マスターユーザーでダッシュボードからチャート追加が行えること
   movie: LU03
+  detailed_flow:
+    setup:
+      - マスターユーザー（admin）でログイン
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: 'button:has-text("ウィジェットを追加"), .dashboard-tab-add-btn, .dashboard-chart-box'
+      - action: click
+        selector: 'button:has-text("ウィジェットを追加"), .dashboard-tab-add-btn'
+        note: ダッシュボードの「ウィジェットを追加」ボタンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなくウィジェット追加UIが表示される
+      - selector: '.modal, [class*="widget-add"], [class*="chart-add"]'
+        type: visible
+        note: チャート/ウィジェット追加モーダルが表示される
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+
 - case_no: 82-9
   sheet: A
   feature: ダッシュボード
@@ -165,6 +583,28 @@ cases:
   description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「帳票登録」が問題なくできること。"
   expected: ・マスターユーザーでダッシュボードから帳票登録が行えること
   movie: LU03
+  detailed_flow:
+    setup:
+      - マスターユーザー（admin）でログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'button:has-text("帳票"), .dropdown-item:has-text("帳票"), a:has-text("帳票")'
+        note: 帳票ボタンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなく帳票登録UIが表示される
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+      - selector: '.modal, [class*="report"], button:has-text("帳票")'
+        type: visible
+        note: 帳票登録関連UIが表示される
+
 - case_no: 154-1
   sheet: B
   feature: カスタムCSS
@@ -175,6 +615,36 @@ cases:
     ③カスタムCSSの項目へ「sample.css」をアップロードし「更新」をクリック。
   expected: CSSの定義通りにUIが変更されること。
   movie: LU04
+  detailed_flow:
+    setup:
+      - マスターユーザー（admin）でログイン
+      - "テスト用sample.cssを準備（例: body { background: #f0f0f0; } など視覚的に確認できるCSS）"
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: click
+        selector: '.sidebar-minimizer, nav .fa-cog, [class*="setting-icon"], nav > ul:last-child li:last-child'
+        note: サイドメニュー下部の「その他設定」アイコンをクリック
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: 'input[type="file"][accept*="css"], input[type="file"]'
+        note: カスタムCSSアップロード欄の表示待ち
+      - action: setInputFiles
+        selector: 'input[type="file"][accept*="css"], input[type="file"]'
+        value: '/app/test_files/sample.css'
+        note: sample.cssをアップロード
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: 更新ボタンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: 'link[rel="stylesheet"][href*="custom"], style[id*="custom"]'
+        type: visible
+        note: カスタムCSSが適用されていること（headにカスタムCSS要素が存在）
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+        note: エラーなく更新が完了すること
+
 - case_no: 154-2
   sheet: B
   feature: カスタムCSS
@@ -185,6 +655,32 @@ cases:
     ③カスタムCSSの項目へ「sample.css」を削除し「更新」をクリック。
   expected: UIがデフォルトに戻ること。
   movie: LU04
+  detailed_flow:
+    setup:
+      - マスターユーザー（admin）でログイン
+      - 事前にカスタムCSSが設定済みであること（154-1の後に実行）
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: click
+        selector: '.sidebar-minimizer, nav .fa-cog, [class*="setting-icon"], nav > ul:last-child li:last-child'
+        note: サイドメニュー下部の「その他設定」アイコンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'button:has-text("削除"), .delete-css, [class*="css-delete"]'
+        note: カスタムCSS削除ボタンをクリック
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: 更新ボタンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: 'link[rel="stylesheet"][href*="custom"]'
+        type: not_visible
+        note: カスタムCSSが削除されていること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+        note: エラーなく削除が完了すること
+
 - case_no: '228'
   sheet: B
   feature: UI
@@ -199,6 +695,22 @@ cases:
     PW: wDYYYHaxbWbX。
   expected: ・他テーブル参照の表示条件設定が機能すること
   movie: LU04
+  detailed_flow:
+    note: URLベースのテストケース。専用テスト環境（test-folder.pigeon-demo.com）が必要。
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.nav-menus, nav'
+        note: サイドメニューが表示されていること
+    assertions:
+      - selector: '.nav-menus__item, .nav-menus a'
+        type: visible
+        note: サイドメニューにグループ/テーブルが表示されていること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+    skip_reason: 専用テスト環境（test-folder.pigeon-demo.com）が必要なため、テスト環境での確認が必要
+
 - case_no: 82-4
   sheet: B
   feature: ダッシュボード
@@ -210,6 +722,28 @@ cases:
     ④ 「帳票登録」が問題なくできること。
   expected: ・ユーザータイプ「ユーザー」でダッシュボードから帳票登録が行えること
   movie: LU02
+  detailed_flow:
+    setup:
+      - テストユーザー（ユーザータイプ）でログイン
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'button:has-text("帳票"), .dropdown-item:has-text("帳票"), a:has-text("帳票")'
+        note: 帳票ボタンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: 500エラーなく帳票登録UIが表示される
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+      - selector: '.modal, [class*="report"]'
+        type: visible
+        note: 帳票登録関連UIが表示される
+
 - case_no: '317'
   sheet: B
   feature: 文字列
@@ -226,12 +760,54 @@ cases:
     PW: adLGiuuhg0XZ。
   expected: エラーなく正常に動作すること。(トライアル環境のダッシュボードの掲示板記載内容ですが、 以下環境の掲示板記載内容に変更いただきたいです。 （zendeskのフォームURL記載しました。）  【テンプレート作成用環境】 https:/)
   movie: LU04
+  detailed_flow:
+    note: URLベースのテストケース。ダッシュボードの掲示板機能テスト。
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.card-header:has-text("掲示板"), .dashboard-chart-box'
+        note: ダッシュボードの掲示板ウィジェットが表示されていること
+      - action: click
+        selector: '.fa-pencil, .card-header .fa-pencil'
+        note: 掲示板の編集（鉛筆）アイコンをクリック
+      - action: waitForAngular
+    assertions:
+      - selector: '.fr-box, .fr-toolbar, [class*="froala"], [class*="richtext"]'
+        type: visible
+        note: リッチテキストエディタが表示される（掲示板編集モード）
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+        note: エラーなく掲示板が編集できること
+
 - case_no: '336'
   sheet: B
   feature: 文字列
   description: ①ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。
   expected: エラーなく正常に動作すること。(ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。)
   movie: LU04
+  detailed_flow:
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: 'button:has-text("ウィジェットを追加"), .dashboard-tab-add-btn'
+        note: ウィジェット追加ボタンが表示されていること
+      - action: click
+        selector: 'button:has-text("ウィジェットを追加"), .dashboard-tab-add-btn'
+        note: ウィジェット追加ボタンをクリック
+      - action: waitForAngular
+      - action: click
+        selector: 'text=掲示板, [class*="bulletin"], [class*="board"]'
+        note: 掲示板ウィジェットを選択
+      - action: waitForAngular
+    assertions:
+      - selector: '.dashboard-chart-box:has-text("掲示板"), .card-header:has-text("掲示板")'
+        type: visible
+        note: 新規掲示板ウィジェットが追加されていること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+
 - case_no: '408'
   sheet: B
   feature: 文字列
@@ -240,6 +816,21 @@ cases:
     ②（添付画像1枚目が隠れている、2枚目がテーブルを追加した後で隠れず表示される）
   expected: バグが修正され、正常に動作すること。(左側メニューにテーブルやグループがないとき、「＋テーブル追加画面へ」「エクセルから追加」が隠れてしまうようなので修正希望です。 （添付画像1枚目が隠れている、2枚目がテーブルを追加した後で隠れず表示さ)
   movie: LU04
+  detailed_flow:
+    steps:
+      - url: /admin/dataset
+        note: テーブル定義一覧ページに遷移
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.navbar, header.app-header'
+    assertions:
+      - selector: 'button:has-text("手動でテーブルを作成"), button:has-text("エクセルからインポート"), button:has-text("＋テーブル追加"), a:has-text("テーブル追加")'
+        type: visible
+        note: テーブル追加ボタンおよびエクセルからインポートボタンが可視状態であること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+      - assertion: これらのボタンが隠れていないこと（getBoundingClientRect().height > 0）
+
 - case_no: 146-01
   sheet: B
   feature: スマートフォン表示
@@ -249,6 +840,37 @@ cases:
     ③ブラウザがズームしないことを確認する
   expected: 選択肢フィールドをタップしてもブラウザのズームが発生しないこと
   movie: UC01
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - ビューポートをスマートフォンサイズに変更: 375x667 (iPhone SE)
+    steps:
+      - action: setViewport
+        width: 375
+        height: 667
+        note: スマートフォンサイズにビューポートを変更
+      - url: '/admin/dataset__{{ tableId }}/create'
+        note: レコード新規作成画面に遷移（編集画面でもOK）
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: 'select, .select2-container, [class*="select"]'
+        note: 選択肢フィールドの表示待ち
+      - action: evaluate
+        code: |
+          const metaViewport = document.querySelector('meta[name="viewport"]');
+          return metaViewport ? metaViewport.getAttribute('content') : 'no viewport meta';
+        note: viewportメタタグの内容を確認（zoom=no等の設定があること）
+    assertions:
+      - evaluate: |
+          const metaViewport = document.querySelector('meta[name="viewport"]');
+          const content = metaViewport ? metaViewport.getAttribute('content') : '';
+          return content.includes('user-scalable=no') || content.includes('maximum-scale=1');
+        expected: true
+        note: viewportメタタグにzoom制限が設定されていること
+      - selector: 'select, [class*="select"]'
+        attribute: 'font-size'
+        note: 選択肢フィールドのfont-sizeが16px以上であること（16px未満だとiOSでズームが発生）
+
 - case_no: '276'
   sheet: B
   feature: 詳細画面UI
@@ -259,6 +881,32 @@ cases:
     ④前の画面（一覧画面等）に正しく戻ることを確認する
   expected: レコード詳細画面に「戻る」ボタンが表示され、クリックで前の画面に戻れること
   movie: UC02
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - テストレコードが1件以上存在すること
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルのレコード一覧に遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'tbody tr:first-child td:nth-child(2), tbody tr:first-child a'
+        note: 最初のレコードをクリックして詳細画面に遷移
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.btn:has-text("戻る"), button:has-text("戻る"), a:has-text("戻る")'
+        note: 詳細画面に「戻る」ボタンが表示されていること
+    assertions:
+      - selector: '.btn:has-text("戻る"), button:has-text("戻る"), a:has-text("戻る")'
+        type: visible
+        note: 「戻る」ボタンが表示されていること
+      - action: click
+        selector: '.btn:has-text("戻る"), button:has-text("戻る"), a:has-text("戻る")'
+        note: 「戻る」ボタンをクリック
+      - url_pattern: '/admin/dataset__{{ tableId }}'
+        type: url_contains
+        note: 一覧画面に戻っていること
+
 - case_no: '370'
   sheet: B
   feature: ヘッダー固定
@@ -269,6 +917,41 @@ cases:
     ④ヘッダー1行目が画面上部に固定表示されることを確認する
   expected: テーブル一覧でスクロール時にヘッダー1行目が固定表示されること
   movie: UC04
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - テストレコードが多数存在すること（スクロールできる程度）
+    steps:
+      - url: '/admin/dataset/edit/{{ tableId }}'
+        note: テーブル設定ページに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'text=ヘッダー固定, input[type="checkbox"][name*="header_fixed"], label:has-text("ヘッダー固定")'
+        note: ヘッダー固定チェックボックスをONにする
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: 更新ボタンをクリック
+      - action: waitForAngular
+      - url: '/admin/dataset__{{ tableId }}'
+        note: レコード一覧に遷移
+      - action: waitForAngular
+      - action: scroll
+        selector: '.table-responsive, table'
+        direction: down
+        amount: 500
+        note: テーブルを下方向にスクロール
+    assertions:
+      - selector: 'thead tr:first-child, table thead, .sticky-header'
+        type: visible
+        note: スクロール後もヘッダー行が可視状態であること
+      - evaluate: |
+          const thead = document.querySelector('thead tr:first-child, table thead tr');
+          if (!thead) return false;
+          const rect = thead.getBoundingClientRect();
+          return rect.top >= 0 && rect.top < 100;
+        expected: true
+        note: ヘッダーが画面上部に固定されていること（top位置が0〜100px以内）
+
 - case_no: '503'
   sheet: B
   feature: グループ表示
@@ -278,6 +961,32 @@ cases:
     ③グループ内のテーブル名が省略されず読める状態で表示されることを確認する
   expected: グループに所属するテーブル名がサイドメニューで正しく（見切れなく）表示されること
   movie: UC06
+  detailed_flow:
+    setup:
+      - ALLテストテーブルがALLTESTグループに所属していることを確認
+    steps:
+      - url: /admin/dashboard
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.nav-menus__item, .nav-menus'
+        note: サイドメニューが表示されていること
+      - action: click
+        selector: '.nav-menus__item:has-text("ALLTEST") .nav-menus__link, .nav-menus__link.-toggle:has-text("ALLTEST")'
+        note: ALLTESTグループをクリックして展開
+      - action: waitForAngular
+    assertions:
+      - selector: '.nav-menus__lower-menus a:has-text("ALLテストテーブル"), .nav-menus__item .nav-menus__link:has-text("ALLテストテーブル")'
+        type: visible
+        note: グループ内のテーブル名が表示されていること
+      - evaluate: |
+          const menuItems = document.querySelectorAll('.nav-menus__lower-menus a, .nav-menus__link.-nowrap');
+          return Array.from(menuItems).every(item => {
+            const rect = item.getBoundingClientRect();
+            return rect.width > 0;
+          });
+        expected: true
+        note: テーブル名が見切れず表示されていること（-nowrapクラスにより折り返しあり）
+
 - case_no: '542'
   sheet: B
   feature: テーブルアイコン
@@ -287,6 +996,40 @@ cases:
     ③アイコンの位置が正しく（ずれなく）表示されることを確認する
   expected: テーブルにアイコンを設定した場合、アイコンの位置が正しく表示されること
   movie: UC07
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset/edit/{{ tableId }}'
+        note: テーブル設定ページに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'text=追加オプション設定'
+        note: 「追加オプション設定」セクションを展開
+      - action: click
+        selector: 'input[type="radio"][value="icon"], label:has-text("アイコン")'
+        note: アイコンタイプ「アイコン」を選択
+      - action: fill
+        selector: 'input[placeholder*="fa-"], input[name*="icon_class"]'
+        value: 'fa-star'
+        note: fa-starアイコンを設定
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: 更新ボタンをクリック
+      - action: waitForAngular
+      - url: /admin/dashboard
+    assertions:
+      - selector: '.nav-menus__link .fa-star, .nav-menus a i.fa-star'
+        type: visible
+        note: サイドメニューにfa-starアイコンが表示される
+      - evaluate: |
+          const icon = document.querySelector('.nav-menus__link .fa-star, .nav-menus a i.fa-star');
+          if (!icon) return false;
+          const rect = icon.getBoundingClientRect();
+          return rect.left >= 0 && rect.top >= 0 && rect.width > 0;
+        expected: true
+        note: アイコンが正しい位置（画面内）に表示されていること
+
 - case_no: '686'
   sheet: B
   feature: 行色設定
@@ -297,6 +1040,44 @@ cases:
     ④日付Aと日付Bが同じ値の場合、行に色が付かないことを確認する
   expected: ビューの「行に色を付ける」条件で「日付A < 日付B」の場合、両方の値が同じときは色が付かないこと
   movie: UC14
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - "日付フィールドが2つ存在すること（日付A: field__日付, 日付B: field__日時等）"
+    steps:
+      - url: '/admin/dataset/edit/{{ tableId }}'
+        note: テーブル設定ページに遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'text=ビュー設定, a:has-text("ビュー"), tab:has-text("ビュー")'
+        note: ビュー設定タブをクリック
+      - action: click
+        selector: 'text=行に色を付ける, button:has-text("行色"), [class*="row-color"]'
+        note: 行色設定を開く
+      - note: 条件「日付フィールドA < 日付フィールドB」を設定する
+      - action: click
+        selector: 'button.ladda-button:has-text("更新"), button[type=submit]:has-text("更新")'
+        note: 設定を保存
+      - action: waitForAngular
+      - action: api_post
+        path: '/admin/debug/create-all-type-data'
+        body:
+          count: 1
+          pattern: fixed
+        note: 日付Aと日付Bが同一値のテストレコードを作成
+      - url: '/admin/dataset__{{ tableId }}'
+        note: レコード一覧に遷移
+      - action: waitForAngular
+    assertions:
+      - evaluate: |
+          const rows = document.querySelectorAll('tbody tr');
+          return Array.from(rows).some(row => {
+            const style = window.getComputedStyle(row);
+            return style.backgroundColor === 'rgba(0, 0, 0, 0)' || style.backgroundColor === 'rgb(255, 255, 255)';
+          });
+        expected: true
+        note: 日付Aと日付Bが同値のレコードの行に色が付いていないこと（背景色が透明またはデフォルト）
+
 - case_no: '607'
   sheet: B
   feature: 関連レコードの更新情報表示位置
@@ -306,6 +1087,36 @@ cases:
     ③更新情報が正しい位置（関連レコードではなく本体レコードの情報として）に表示されていることを確認する
   expected: 関連レコード設定時の更新情報が正しい位置に表示されていること
   movie: UC10
+  detailed_flow:
+    setup:
+      - ALLテストテーブルに関連レコード（子テーブル）が設定済みであることを確認
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - テストレコードが1件以上存在すること
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルのレコード一覧に遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'tbody tr:first-child td:nth-child(2), tbody tr:first-child a'
+        note: 最初のレコードの詳細画面に遷移
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '[class*="update"], [class*="modified"], text=更新日時'
+        note: 更新情報の表示待ち
+    assertions:
+      - selector: '[class*="record-info"], [class*="update-info"], .record-meta'
+        type: visible
+        note: 本体レコードの更新情報が表示されていること
+      - evaluate: |
+          const updateInfo = document.querySelector('[class*="update"], [class*="modified"], .record-meta');
+          const relatedSection = document.querySelector('[class*="related"], [class*="child-table"]');
+          if (!updateInfo || !relatedSection) return true;
+          const updateRect = updateInfo.getBoundingClientRect();
+          const relatedRect = relatedSection.getBoundingClientRect();
+          return updateRect.top < relatedRect.top;
+        expected: true
+        note: 更新情報が関連レコードセクションより上部（本体レコード情報位置）に表示されていること
+
 - case_no: '749'
   sheet: B
   feature: 関連レコード一覧のページネーション表示
@@ -316,6 +1127,43 @@ cases:
     ④＋ボタンが縦に延びていないことを確認する
   expected: 関連レコード一覧のページネーション付きレイアウトが崩れず、横一列で正しく表示されること
   movie: UC18
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - ALLテスト_子テーブルが関連レコードとして設定されていること
+      - テストレコードに関連レコードが複数件存在すること（ページネーションが発生するほど）
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルのレコード一覧に遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'tbody tr:first-child td:nth-child(2), tbody tr:first-child a'
+        note: 最初のレコードの詳細画面に遷移
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '[class*="pagination"], .page-link, .paginate'
+        note: ページネーションの表示待ち
+    assertions:
+      - selector: '[class*="pagination"], .pagination'
+        type: visible
+        note: ページネーションが表示されていること
+      - evaluate: |
+          const pagination = document.querySelector('[class*="pagination"], .pagination');
+          if (!pagination) return true;
+          const items = pagination.querySelectorAll('li, a, button');
+          const rects = Array.from(items).map(i => i.getBoundingClientRect());
+          const firstTop = rects[0]?.top;
+          return rects.every(r => Math.abs(r.top - firstTop) < 5);
+        expected: true
+        note: ページネーションボタンが横一列に並んでいること（Y座標が同一）
+      - evaluate: |
+          const addBtn = document.querySelector('[class*="add-related"], button.btn-outline-primary[class*="add"], [class*="related"] button:has-text("＋")');
+          if (!addBtn) return true;
+          const rect = addBtn.getBoundingClientRect();
+          return rect.height < 60;
+        expected: true
+        note: ＋ボタンの高さが正常範囲内（縦に延びていないこと）
+
 - case_no: '546'
   sheet: B
   feature: UI表示バグ修正確認
@@ -325,6 +1173,38 @@ cases:
     ③操作に応じてUI要素が正しく更新されることを確認する
   expected: UI表示が正しく、操作に応じて正常に更新されること
   movie: UC07
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルのレコード一覧に遷移
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: 'table, .table-responsive'
+        note: テーブルが表示されていること
+      - action: click
+        selector: 'button:has-text("編集モード"), [class*="edit-mode"]'
+        note: 編集モードがある場合はクリック
+      - action: waitForAngular
+    assertions:
+      - selector: 'table, .table-responsive'
+        type: visible
+        note: テーブル本体が正しく表示されていること
+      - selector: 'thead th'
+        type: visible
+        note: テーブルヘッダーが表示されていること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+        note: エラーなく表示されていること
+      - evaluate: |
+          const table = document.querySelector('table');
+          if (!table) return false;
+          const rect = table.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        expected: true
+        note: テーブルのサイズが正常であること（幅・高さが0以上）
+
 - case_no: '755'
   sheet: B
   feature: テーブルビュー表示修正確認
@@ -334,6 +1214,35 @@ cases:
     ③各カラムのデータが正しく表示されていることを確認する
   expected: テーブルビューの表示レイアウトが正しく、データが正常に表示されること
   movie: UC18
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - テストレコードが1件以上存在すること
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルのレコード一覧に遷移
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: 'table thead, table tbody'
+        note: テーブルのヘッダーとボディが表示されていること
+    assertions:
+      - selector: 'table thead tr th'
+        type: visible
+        note: テーブルヘッダー行のカラムが表示されていること
+      - selector: 'table tbody tr'
+        type: visible
+        note: テーブルボディにレコード行が表示されていること
+      - evaluate: |
+          const headers = document.querySelectorAll('table thead tr th');
+          return Array.from(headers).every(th => {
+            const rect = th.getBoundingClientRect();
+            return rect.width > 0;
+          });
+        expected: true
+        note: 全カラムヘッダーの幅が0以上であること（レイアウト崩れなし）
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+
 - case_no: '760'
   sheet: B
   feature: UI表示修正確認
@@ -343,6 +1252,34 @@ cases:
     ③操作時のUI更新が正常であることを確認する
   expected: UI表示・レイアウトが正しく動作すること
   movie: UC18
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+      - テストレコードが1件以上存在すること
+    steps:
+      - url: '/admin/dataset__{{ tableId }}'
+        note: ALLテストテーブルのレコード一覧に遷移
+      - action: waitForAngular
+      - action: click
+        selector: 'tbody tr:first-child td:nth-child(2), tbody tr:first-child a'
+        note: 最初のレコードの詳細/編集画面に遷移
+      - action: waitForAngular
+    assertions:
+      - selector: '.navbar, header.app-header'
+        type: visible
+        note: ヘッダーが正常に表示されていること
+      - selector: '.form-group, [class*="field"], .record-field'
+        type: visible
+        note: フォームフィールドが正常に表示されていること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+        note: エラーなく表示されていること
+      - evaluate: |
+          const formGroups = document.querySelectorAll('.form-group, [class*="field"]');
+          return formGroups.length > 0;
+        expected: true
+        note: フォームフィールドが1つ以上表示されていること
+
 - case_no: '831'
   sheet: B
   feature: UI表示修正確認
@@ -352,6 +1289,40 @@ cases:
     ③操作に応じたUI更新が正常であることを確認する
   expected: UI表示と操作が正常に動作すること
   movie: UC23
+  detailed_flow:
+    setup:
+      - getAllTypeTableId でALLテストテーブルのIDを取得
+    steps:
+      - url: '/admin/dataset__{{ tableId }}/create'
+        note: ALLテストテーブルのレコード新規作成画面に遷移
+      - action: waitForAngular
+      - action: waitForSelector
+        selector: '.form-group, [class*="field"], form'
+        note: 作成フォームが表示されていること
+      - action: fill
+        selector: 'input[id*="field__"][type="text"]:first-of-type'
+        value: 'UIテスト確認用テキスト'
+        note: テキストフィールドに値を入力
+      - action: waitForAngular
+    assertions:
+      - selector: '.form-group, [class*="field"]'
+        type: visible
+        note: フォームフィールドが正常に表示されていること
+      - selector: 'button:has-text("登録"), button:has-text("保存"), button[type=submit]'
+        type: visible
+        note: 登録/保存ボタンが表示されていること
+      - selector: 'body'
+        not_contains: 'Internal Server Error'
+        note: エラーなく作成フォームが操作できること
+      - evaluate: |
+          const fields = document.querySelectorAll('.form-group, [class*="field"]');
+          return Array.from(fields).every(f => {
+            const rect = f.getBoundingClientRect();
+            return rect.width > 0;
+          });
+        expected: true
+        note: 全フォームフィールドのレイアウトが正常であること
+
 actual_steps:
 - case_no: 78-1
   status: skip

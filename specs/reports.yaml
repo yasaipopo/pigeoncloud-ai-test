@@ -9,6 +9,32 @@ cases:
   description: ①関連テーブルを帳票出力に入れ込めるように変更
   expected: 帳票へ関連テーブルが出力されていること。
   movie: RP01
+  detailed_flow: |
+    # 1. /admin/dataset__${tableId} に遷移（ALLテストテーブル）
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 確認:
+    #   - expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible()
+    # 3. 「帳票」ボタンが表示されていること:
+    #    expect(page.locator('button:has-text("帳票")').first()).toBeVisible()
+    # 4. ハンバーガー（≡）ドロップダウン → 「帳票登録」をクリック:
+    #    page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle').first().click()
+    #    page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').click()
+    # 5. 帳票登録モーダルが表示されること:
+    #    waitForSelector('.modal.show', { timeout: 15000 })
+    # 6. Excelテンプレートをアップロード（関連テーブル指定あり）:
+    #    page.locator('.modal.show input[type="file"]').setInputFiles('/app/test_files/請求書_+関連ユーザー.xlsx')
+    # 7. 保存ボタンをクリック:
+    #    page.locator('.modal.show button.btn-primary').click()
+    # 確認:
+    #   - 帳票が登録されること（モーダルが閉じるかトースト表示）
+    # 8. レコードにチェックを入れて帳票ダウンロードを実行:
+    #    page.locator('tr[mat-row] input[type="checkbox"]').first().click()
+    #    page.locator('button:has-text("帳票")').click()
+    #    page.locator('.dropdown-menu.show a:has-text("ダウンロード"), .dropdown-menu.show button:has-text("ダウンロード")').click()
+    # 確認:
+    #   - ダウンロードが開始されること（download イベントが発火）
+    #   - エラーが発生しないこと
+
 - case_no: '198'
   sheet: B
   feature: 帳票
@@ -16,6 +42,25 @@ cases:
   description: ①ファイル項目へExcelおよびPDFのファイル生成を行う。
   expected: Excel／PDFともにファイル生成できること
   movie: RP01
+  detailed_flow: |
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 確認:
+    #   - 「帳票」ボタンが表示されていること:
+    #     expect(page.locator('button:has-text("帳票")').first()).toBeVisible()
+    # 3. レコードを1件選択: page.locator('tr[mat-row] input[type="checkbox"]').first().click()
+    # 4. 「帳票」ドロップダウンをクリック: page.locator('button:has-text("帳票")').click()
+    # 確認:
+    #   - ドロップダウンメニューが表示されること:
+    #     expect(page.locator('.dropdown-menu.show')).toBeVisible()
+    # 5. Excelダウンロード実行（ドロップダウン内の帳票名をクリック）
+    # 確認:
+    #   - Excel形式（.xlsx）のダウンロードが開始されること
+    #   - エラーが発生しないこと（.alert-danger が表示されないこと）
+    # 6. 同様にPDF形式の帳票も存在する場合はダウンロード実行
+    # 確認:
+    #   - PDF形式のダウンロードが開始されること
+
 - case_no: '205'
   sheet: B
   feature: 帳票
@@ -23,6 +68,25 @@ cases:
   description: ①Excelファイルにて帳票出力
   expected: エラーなく帳票出力ができ、項目の出力も行えていること。
   movie: RP01
+  detailed_flow: |
+    # 前提: 帳票テンプレート（Excel）が登録済みであること
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. waitForSelector('tr[mat-row]', { timeout: 30000 })
+    # 3. レコードを1件選択: page.locator('tr[mat-row] input[type="checkbox"]').first().click()
+    # 4. 「帳票」ドロップダウンをクリック: page.locator('button:has-text("帳票")').click()
+    # 5. waitForSelector('.dropdown-menu.show', { timeout: 10000 })
+    # 確認:
+    #   - ドロップダウンに帳票名が表示されること（少なくとも1件の帳票が表示）:
+    #     expect(page.locator('.dropdown-menu.show .dropdown-item').first()).toBeVisible()
+    # 6. Excelダウンロードのリンクをクリック（ファイル名に.xlsxが含まれるもの）:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - download.suggestedFilename() に '.xlsx' が含まれること
+    #   - エラーが発生しないこと
+
 - case_no: '206'
   sheet: B
   feature: 帳票
@@ -30,6 +94,24 @@ cases:
   description: ①PDFファイルにて帳票出力
   expected: エラーなく帳票出力ができ、項目の出力も行えていること。
   movie: RP01
+  detailed_flow: |
+    # 前提: PDF形式の帳票テンプレートが登録済みであること
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. waitForSelector('tr[mat-row]', { timeout: 30000 })
+    # 3. レコードを1件選択
+    # 4. 「帳票」ドロップダウンを開く
+    # 確認:
+    #   - ドロップダウンに帳票名が表示されること
+    # 5. PDF形式の帳票をクリック（ファイル名に.pdfが含まれるもの）:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - download.suggestedFilename() に '.pdf' が含まれること
+    #   - ダウンロードでエラーが発生しないこと（新規タブが開かないこと）
+    #   - エラーページや 500 エラーが表示されないこと
+
 - case_no: '207'
   sheet: B
   feature: 帳票
@@ -46,6 +128,24 @@ cases:
 
     https://henmi021.pigeon-demo.com/admin/dataset__56
   movie: RP01
+  detailed_flow: |
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 3. ハンバーガーメニュー → 「帳票登録」から帳票を登録（または既存帳票を編集）
+    # 4. 帳票設定モーダル内の「出力ファイル名フォーマット」フィールドに「%m-%d」を入力:
+    #    page.locator('.modal.show input[name*="filename"], .modal.show input[placeholder*="ファイル名"]').fill('%m-%d')
+    # 5. 保存ボタンをクリック
+    # 6. レコードを1件選択して帳票をダウンロード:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードファイル名が「MM-DD.xlsx」または「%m-%d」形式に変換された形式であること:
+    #     const filename = download.suggestedFilename()
+    #     expect(filename).toMatch(/^\d{2}-\d{2}\.xlsx$/)  // 例: "03-30.xlsx"
+    #   - エラーが発生しないこと
+
 - case_no: '208'
   sheet: B
   feature: 帳票
@@ -62,6 +162,20 @@ cases:
 
     https://henmi021.pigeon-demo.com/admin/dataset__56
   movie: RP01
+  detailed_flow: |
+    # 207と同様の手順で、PDFテンプレートに対して実施
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. 帳票設定モーダルで「出力ファイル名フォーマット」に「%m-%d」を入力
+    # 3. 保存後、レコード選択 → PDF帳票ダウンロード:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードファイル名が「MM-DD.pdf」形式であること:
+    #     const filename = download.suggestedFilename()
+    #     expect(filename).toMatch(/^\d{2}-\d{2}\.pdf$/)  // 例: "03-30.pdf"
+
 - case_no: '216'
   sheet: B
   feature: 帳票
@@ -69,6 +183,17 @@ cases:
   description: ①帳票登録後、メニューからの帳票登録のリスト表示した際のアイコン表示を確認する。
   expected: ・アイコンが歯車アイコンとなっていること。
   movie: RP01
+  detailed_flow: |
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 3. ハンバーガーメニューを開く: page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle').first().click()
+    # 4. waitForSelector('.dropdown-menu.show', { timeout: 10000 })
+    # 確認:
+    #   - 「帳票登録」メニューアイテムの左に歯車アイコン（.fa-cog）が表示されること:
+    #     expect(page.locator('.dropdown-menu.show .fa-cog')).toBeVisible()
+    #   - または「帳票」に関連するメニューアイテムに設定/歯車アイコンが使用されていること
+    #   - expect(page.locator('.dropdown-menu.show a:has-text("帳票"), .dropdown-menu.show button:has-text("帳票")').locator('.fa-cog')).toBeVisible()
+
 - case_no: '230'
   sheet: B
   feature: 帳票
@@ -83,6 +208,21 @@ cases:
     ⑦・役職。
   expected: ・ユーザーテーブルの帳票設定ページが表示されること
   movie: RP01
+  detailed_flow: |
+    # 1. /admin/admin に遷移（ユーザーテーブル管理ページ）
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 3. ユーザーテーブルの帳票設定ページに移動（ハンバーガーメニュー → 帳票登録）
+    #    または /admin/dataset__${userTableId} に遷移
+    # 4. waitForSelector('button:has-text("帳票")', { timeout: 30000 })
+    # 確認:
+    #   - 帳票設定ページが表示されること:
+    #     expect(page.locator('.navbar')).toBeVisible()
+    #   - 帳票登録モーダルを開いたとき、「通知先メールアドレス」「パスワード」等の
+    #     機密フィールドがフィールド選択リストに表示されないこと:
+    #     const fieldOptions = await page.locator('.modal.show select option, .modal.show .field-item').allTextContents()
+    #     expect(fieldOptions).not.toContain('パスワード')
+    #     expect(fieldOptions).not.toContain('通知先メールアドレス')
+
 - case_no: '236'
   sheet: B
   feature: 帳票
@@ -90,6 +230,22 @@ cases:
   description: ①子テーブルの設定を行い、帳票にはAA列以降の指定も行う
   expected: AA列以降も帳票出力されること
   movie: RP01
+  detailed_flow: |
+    # 前提: ALLテストテーブルには子テーブルフィールドが含まれている
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 3. 帳票テンプレートをアップロード（AA列以降にデータが含まれるExcel）
+    # 4. レコードを選択してダウンロードを実行:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードが成功すること（エラーなし）
+    #   - download.suggestedFilename() が空でないこと
+    #   - エラーレスポンス（alert-danger）が表示されないこと:
+    #     expect(page.locator('.alert-danger, .toast-error')).not.toBeVisible()
+
 - case_no: '253'
   sheet: B
   feature: 帳票ダウンロード
@@ -99,6 +255,21 @@ cases:
   description: ①https://loftal.pigeon-cloud.com/admin/dataset__90/view/294
   expected: ・帳票ダウンロードでファイル項目・画像項目が出力されること（手動確認推奨）
   movie: RP01
+  detailed_flow: |
+    # 注意: ファイル項目・画像項目の実際のファイル内容確認は手動テスト推奨
+    # 自動化可能な範囲でのみ確認する
+    # 1. /admin/dataset__${tableId} に遷移（ファイル/画像フィールドがあるALLテストテーブル）
+    # 2. waitForSelector('tr[mat-row]', { timeout: 30000 })
+    # 3. 画像/ファイルが含まれるレコードを1件選択
+    # 4. 「帳票」ドロップダウン → ダウンロードを実行
+    # 確認:
+    #   - ダウンロードが開始されること（download イベントが発火）
+    #   - エラー（alert-danger, .toast-error）が表示されないこと
+    #   - ダウンロードしたファイルのサイズが 0 より大きいこと（空でないこと）:
+    #     const path = await download.path()
+    #     const stat = require('fs').statSync(path)
+    #     expect(stat.size).toBeGreaterThan(0)
+
 - case_no: 56-1
   sheet: B
   feature: 帳票登録
@@ -106,6 +277,26 @@ cases:
   description: ①Excelファイル以外のファイル形式のファイルで、帳票アップロードする。
   expected: 帳票登録エラーが発生すること。
   movie: RP01
+  detailed_flow: |
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 3. ハンバーガーメニューを開く: page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle').first().click()
+    # 4. waitForSelector('.dropdown-menu.show', { timeout: 10000 })
+    # 5. 「帳票登録」をクリック:
+    #    page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').click()
+    # 6. waitForSelector('.modal.show', { timeout: 15000 })
+    # 7. ファイルアップロード欄にExcel以外のファイル（テキストファイル等）をアップロード:
+    #    // テスト用 .txt ファイルを作成
+    #    const tmpFile = '/tmp/test_invalid.txt'
+    #    require('fs').writeFileSync(tmpFile, 'This is not an Excel file')
+    #    await page.locator('.modal.show input[type="file"]').setInputFiles(tmpFile)
+    # 8. 保存/登録ボタンをクリック:
+    #    page.locator('.modal.show button.btn-primary, .modal.show button:has-text("登録"), .modal.show button:has-text("保存")').click()
+    # 確認:
+    #   - エラーメッセージが表示されること（.text-danger, .alert-danger, .invalid-feedback）:
+    #     expect(page.locator('.modal.show .text-danger, .alert-danger, .toast-error').first()).toBeVisible({ timeout: 10000 })
+    #   - モーダルが開いたままであること（登録が成功しないこと）
+
 - case_no: '264'
   sheet: B
   feature: 文字列
@@ -125,6 +316,23 @@ cases:
     のペアのつもりだったと思うのですが、システムでその認識ができ。
   expected: バグが修正され、正常に動作すること。(帳票のダウンロードをするとエラーになるそうで、コピー環境でも再現されました。こちら、原因は何か、ご確認いただいてもよいでしょうか。 帳票雛形に間違いがあっても、データが反映されないだけで、帳票のダウン)
   movie: RP02
+  detailed_flow: |
+    # バグ修正確認: $START/$END の位置関係が逆でもエラーにならないこと
+    # 1. /admin/dataset__${tableId} に遷移（子テーブルフィールドを持つテーブル）
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 3. 帳票テンプレートをアップロード（子テーブルの$START/$ENDの位置関係が
+    #    意図的に不正なExcelファイル、または正常なExcel）
+    # 4. レコード選択 → 帳票ダウンロード実行:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードがエラーなく完了すること
+    #   - {"result":"error"} のようなエラーJSONを含むレスポンスが返ってこないこと
+    #   - 別タブや空白ページが開かないこと
+    #   - エラートースト（.toast-error, .alert-danger）が表示されないこと
+
 - case_no: '272'
   sheet: B
   feature: 文字列
@@ -134,6 +342,23 @@ cases:
     ③」とお伝えしております。
   expected: 機能改善が正しく反映されていること。(テーブル作成権限のあるユーザー様に対し、ExcelやJSONから作成できるよう修正希望。 「早ければ8/27（日）、遅くとも9/24（日）の定期アップデートの際に修正をさせていただきます。」とお伝えし)
   movie: RP02
+  detailed_flow: |
+    # テーブル作成権限を持つ一般ユーザーが Excel/JSONからテーブル作成できること
+    # 1. テーブル作成権限あり・管理者権限なしのテストユーザーを作成:
+    #    POST /api/admin/debug/create-user
+    # 2. そのユーザーでログイン
+    # 3. /admin/dataset に遷移
+    # 4. waitForSelector('.navbar', { timeout: 30000 })
+    # 確認:
+    #   - テーブル一覧ページに「エクセルからインポート」または「テーブルを作成」ボタンが表示されること:
+    #     expect(page.locator('button:has-text("エクセルからインポート"), button:has-text("テーブルを作成")').first()).toBeVisible()
+    # 5. 「エクセルからインポート」ボタンをクリック
+    # 6. モーダルが開くことを確認:
+    #    waitForSelector('.modal.show', { timeout: 10000 })
+    # 確認:
+    #   - インポートモーダルがエラーなく表示されること
+    #   - 「権限がありません」等のエラーが表示されないこと
+
 - case_no: '310'
   sheet: B
   feature: 文字列
@@ -148,6 +373,21 @@ cases:
     項目は、文章(複数行)でリッチテキストになっています。
   expected: バグが修正され、正常に動作すること。(帳票出力後、添付のように＜p＞が反映されてしまっています。 PDFでもExcelでも試しましたが、どちらも反映されてしまっています。   対象テーブル：ES広場（社会貢献活動投稿フォーム） 　　　　　)
   movie: RP02
+  detailed_flow: |
+    # バグ修正確認: リッチテキスト（複数行）フィールドの帳票出力に <p> タグが含まれないこと
+    # 前提: ALLテストテーブルには複数行テキスト（リッチテキスト）フィールドが含まれている
+    # 1. リッチテキストフィールドに HTMLタグを含まない値を登録:
+    #    例: "テストコンテンツ（タグなし）"
+    # 2. /admin/dataset__${tableId} に遷移
+    # 3. レコードを選択して帳票ダウンロード実行
+    # 確認:
+    #   - ダウンロードが完了すること（エラーなし）
+    #   - ダウンロードしたファイルのサイズが 0 より大きいこと
+    #   - エラートースト（.toast-error, .alert-danger）が表示されないこと
+    # 注意: ファイル内容（<p>タグの有無）はAPIレスポンスで確認:
+    #   download イベント発火後、download.path() でファイルを読み込んで
+    #   テキストに "<p>" が含まれないことを確認（Excelの場合は難しいため省略可）
+
 - case_no: '530'
   sheet: B
   feature: 追加実装
@@ -157,6 +397,23 @@ cases:
     ③https://loftal.slack.com/archives/C05CK6Z7YDQ/p1708153763775189。
   expected: 機能改善が正しく反映されていること。(テーブル管理者の場合は、一般ユーザーでも帳票の登録や編集が行えるようにしていただけますでしょうか。 （現在帳票の設定はマスターユーザーのみ可能です）  https://loftal.slack.com)
   movie: RP02
+  detailed_flow: |
+    # テーブル管理者権限の一般ユーザーが帳票登録・編集できること
+    # 1. テーブル管理者権限を持つ一般ユーザーを作成:
+    #    POST /api/admin/debug/create-user
+    # 2. そのユーザーのテーブル管理者権限を設定（/admin/dataset/edit/${tableId} → 権限設定）
+    # 3. 一般ユーザーとしてログイン
+    # 4. /admin/dataset__${tableId} に遷移
+    # 5. ハンバーガーメニューを開く
+    # 確認:
+    #   - ドロップダウンに「帳票登録」メニューが表示されること（マスターユーザーのみでないこと）:
+    #     expect(page.locator('.dropdown-menu.show a:has-text("帳票登録"), .dropdown-menu.show button:has-text("帳票登録")').first()).toBeVisible()
+    # 6. 「帳票登録」をクリック
+    # 確認:
+    #   - 帳票登録モーダルが表示されること（権限エラーが出ないこと）:
+    #     expect(page.locator('.modal.show')).toBeVisible()
+    #     expect(page.locator('.alert-danger, [class*="forbidden"]')).not.toBeVisible()
+
 - case_no: '557'
   sheet: B
   feature: 追加実装
@@ -168,6 +425,25 @@ cases:
     ④"],"error_debug_a":["請求書!B13 -> For。
   expected: バグが修正され、正常に動作すること。(帳票の元Excelに登録したデータに、タブが2つ以上あると、 ダウンロードができないようですので、修正いただけますでしょうか。 ダウンロードのボタンを押すと下記のようなエラーが出るようです。    {)
   movie: RP02
+  detailed_flow: |
+    # バグ修正確認: Excelテンプレートに複数タブがあってもダウンロードできること
+    # 前提: test_files/請求書_+関連ユーザー.xlsx は複数タブを持つExcelファイル
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. 複数タブのExcelテンプレートを帳票として登録:
+    #    - ハンバーガーメニュー → 「帳票登録」
+    #    - input[type="file"] に '/app/test_files/請求書_+関連ユーザー.xlsx' をセット
+    #    - 保存
+    # 3. レコードを選択して帳票ダウンロード実行
+    # 確認:
+    #   - ダウンロードが完了すること（エラーなし）:
+    #     const [download] = await Promise.all([
+    #       page.waitForEvent('download'),
+    #       page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #     ])
+    #     expect(download.suggestedFilename()).not.toBe('')
+    #   - エラートースト・エラーJSON が表示されないこと:
+    #     expect(page.locator('.toast-error, .alert-danger')).not.toBeVisible()
+
 - case_no: '568'
   sheet: B
   feature: 追加実装
@@ -182,6 +458,23 @@ cases:
     ⑧* https://www.notio。
   expected: 'エラーなく正常に動作すること。(### 要件名 * 帳票に画像を指定できる  ### 要件 * 帳票を出力するためのexcelにて、画像型のフィールドを指定できる * 帳票出力時に、画像型のフィールドが指定されたセルに画像が埋め込ま)'
   movie: RP02
+  detailed_flow: |
+    # 帳票に画像型フィールドを指定してダウンロードできること
+    # 前提: ALLテストテーブルには画像型フィールドが含まれている
+    # 1. 画像が含まれるレコードを事前に作成（create-all-type-data で作成）
+    # 2. /admin/dataset__${tableId} に遷移
+    # 3. 帳票テンプレートをアップロード（画像フィールドを参照するExcel）
+    # 4. レコードを1件選択して帳票ダウンロード実行:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードが完了すること（エラーなし）
+    #   - ファイルサイズが 0 より大きいこと
+    #   - エラートースト（.toast-error）が表示されないこと:
+    #     expect(page.locator('.toast-error, .alert-danger')).not.toBeVisible()
+
 - case_no: '579'
   sheet: B
   feature: 追加実装
@@ -191,6 +484,21 @@ cases:
     ③https://loftal.slack.com/archives/C05CK6Z7YDQ/p1712112449327109。
   expected: 機能改善が正しく反映されていること。(現在、帳票で子テーブルに連番を振るには${子テーブル名.INDEX}を入力すればできますが、 これと同じことを、${関連レコード一覧名.INDEX}と入れれば関連レコード一覧でも行えるようにしていただ)
   movie: RP02
+  detailed_flow: |
+    # 関連レコード一覧で ${関連名.INDEX} による連番出力が動作すること
+    # 1. /admin/dataset__${tableId} に遷移（関連レコード一覧フィールドを持つテーブル）
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 3. ${関連レコード一覧名.INDEX} を含む帳票テンプレートをアップロード
+    # 4. レコードを選択して帳票ダウンロード実行:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードが完了すること（エラーなし）
+    #   - エラートースト（.toast-error, .alert-danger）が表示されないこと
+    #   - ファイルサイズが 0 より大きいこと（空ファイルでないこと）
+
 - case_no: '584'
   sheet: B
   feature: 追加実装
@@ -200,6 +508,21 @@ cases:
     ③https://loftal.slack.com/archives/C05EZQC8UJW/p1714629873959709。
   expected: バグが修正され、正常に動作すること。(帳票の元Excelに、シートが2枚以上あるとき、$から始まる式が反映されるのは1枚目のシートだけなのですが、 これを、2枚目以降のシートにも$から始まる式がある場合、反映されるように修正いただけますで)
   movie: RP02
+  detailed_flow: |
+    # バグ修正確認: 複数シートのExcelテンプレートで2枚目以降のシートにも$式が反映されること
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. 複数シート（2枚以上）かつ2枚目にも $フィールド名 の式が含まれるExcelをアップロード
+    #    （test_files/請求書_+関連ユーザー.xlsx が複数タブを持つ場合は利用）
+    # 3. レコードを選択して帳票ダウンロード実行:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードが完了すること（エラーなし）
+    #   - エラートースト（.toast-error）が表示されないこと
+    #   - ダウンロードしたファイルのサイズが 0 より大きいこと
+
 - case_no: '601'
   sheet: B
   feature: 追加実装
@@ -211,6 +534,18 @@ cases:
     ③https://loftal.slack.com/archives/C05C2V0C5QQ/p。
   expected: 機能改善が正しく反映されていること。(数値項目で、4桁以上の数字が入力されていて、 「桁区切りを表示しない」がONの状態だと、 帳票出力した際にセル内の数値にカンマが入って、文字列として認識されてしまうようです。 数値項目を帳票出力する際)
   movie: RP02
+  detailed_flow: |
+    # 機能改善確認: 桁区切りONの数値フィールドを帳票出力してもカンマが付かないこと
+    # 前提: ALLテストテーブルには数値フィールド（4桁以上）が含まれている
+    # 1. 数値フィールドに 4桁以上の値（例: 12345）を持つレコードを作成または確認
+    # 2. /admin/dataset__${tableId} に遷移
+    # 3. レコードを選択して帳票ダウンロード実行
+    # 確認:
+    #   - ダウンロードが完了すること（エラーなし）
+    #   - エラートースト（.toast-error）が表示されないこと
+    # 注意: ダウンロードしたExcelの数値セルにカンマがないかは手動確認が必要
+    #       自動テストでは「エラーなくダウンロードできること」のみ確認
+
 - case_no: '729'
   sheet: B
   feature: 追加実装
@@ -221,6 +556,22 @@ cases:
     ④https://loftal.slack.com/archives/C05CK6Z7YDQ/p1722219212802169。
   expected: バグが修正され、正常に動作すること。(帳票で、子テーブルの情報を出力する際、 子テーブルが入っていないレコードで出力すると、 $STARTおよび$ENDがそのまま表示されてしまうため、修正いただけますでしょうか。  https://lof)
   movie: RP02
+  detailed_flow: |
+    # バグ修正確認: 子テーブルが空のレコードを帳票出力しても $START/$END がそのまま残らないこと
+    # 1. 子テーブルが空のレコードを作成（子テーブルフィールドに値なし）
+    # 2. /admin/dataset__${tableId} に遷移
+    # 3. 子テーブルのフィールドを含む帳票テンプレートをアップロード
+    # 4. 子テーブルが空のレコードを選択して帳票ダウンロード実行:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードが完了すること（エラーなし）
+    #   - エラートースト（.toast-error, .alert-danger）が表示されないこと:
+    #     expect(page.locator('.toast-error, .alert-danger')).not.toBeVisible()
+    # 注意: ダウンロードしたExcelに $START/$END 文字列が残っていないかは手動確認が必要
+
 - case_no: '709'
   sheet: B
   feature: 帳票ダウンロード
@@ -231,6 +582,26 @@ cases:
     ④別タブで真っ白の画面が開かず、直接ファイルがダウンロードされることを確認する
   expected: 帳票ダウンロード時に別タブで空白ページが開かず、直接ファイルがダウンロードされること
   movie: UC15
+  detailed_flow: |
+    # 1. /admin/dataset__${tableId} に遷移（帳票テンプレートが登録済みであること）
+    # 2. waitForSelector('tr[mat-row]', { timeout: 30000 })
+    # 3. レコードを1件選択: page.locator('tr[mat-row] input[type="checkbox"]').first().click()
+    # 4. 「帳票」ボタンをクリック: page.locator('button:has-text("帳票")').click()
+    # 5. waitForSelector('.dropdown-menu.show', { timeout: 10000 })
+    # 6. 帳票名をクリックしてダウンロード:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - 新しいタブが開かないこと（page.context().pages() の件数が変わらないこと）:
+    #     const pagesBefore = page.context().pages().length
+    #     // ダウンロード後
+    #     const pagesAfter = page.context().pages().length
+    #     expect(pagesAfter).toBe(pagesBefore)
+    #   - download イベントが発火すること（直接ダウンロード）
+    #   - download.suggestedFilename() が空でないこと
+
 - case_no: '817'
   sheet: B
   feature: 帳票削除
@@ -243,6 +614,28 @@ cases:
     ⑥テーブル一覧ページが正常に表示されることを確認する
   expected: エラーなく帳票が削除でき、その後テーブル一覧ページが正常に表示されること
   movie: UC22
+  detailed_flow: |
+    # 前提: テスト用帳票が1件以上登録されていること
+    # 1. /admin/dataset__${tableId} に遷移
+    # 2. waitForSelector('button:has-text("帳票")', { timeout: 30000 })
+    # 3. ハンバーガーメニューを開く: page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle').first().click()
+    # 4. waitForSelector('.dropdown-menu.show', { timeout: 10000 })
+    # 5. 「帳票設定」または帳票一覧ページに移動:
+    #    page.locator('.dropdown-menu.show a:has-text("帳票設定"), .dropdown-menu.show a:has-text("帳票一覧")').click()
+    # 6. 作成済み帳票のリストが表示されること:
+    #    waitForSelector('.report-list, .list-group, table', { timeout: 15000 })
+    # 7. 削除ボタンをクリック:
+    #    page.locator('button:has-text("削除"), .btn-danger:has-text("削除")').first().click()
+    # 8. 確認ダイアログを承認:
+    #    page.on('dialog', dialog => dialog.accept())
+    #    または page.locator('.modal.show button.btn-danger').click()
+    # 確認:
+    #   - エラーが発生しないこと（.alert-danger, .toast-error が表示されないこと）
+    #   - 削除後に帳票リストから対象帳票が消えること（または件数が減ること）
+    #   - テーブル一覧ページが正常に表示されること:
+    #     expect(page.locator('.navbar')).toBeVisible()
+    #     expect(page.locator('table.pc-list-view, tr[mat-header-row]')).toBeVisible()
+
 - case_no: '567'
   sheet: B
   feature: 承認履歴の帳票出力
@@ -253,6 +646,23 @@ cases:
     ④帳票に承認履歴（承認者名・承認日時・コメント等）が正しく表示されていることを確認する
   expected: 帳票テンプレートで承認履歴を子テーブル方式で指定し、正しく出力されること
   movie: UC08
+  detailed_flow: |
+    # 前提: ワークフロー設定済みのテーブルで承認済みレコードが存在すること
+    # 1. /admin/dataset__${tableId} に遷移（ワークフロー設定済みのALLテストテーブル or 別テーブル）
+    # 2. waitForSelector('.navbar', { timeout: 30000 })
+    # 3. ワークフローが設定されているか確認:
+    #    const wfBtn = page.locator('[class*="workflow"], button:has-text("承認"), button:has-text("申請")')
+    # 4. 帳票テンプレート（承認履歴を ${承認履歴.INDEX}, ${承認履歴.承認者名} 等で参照するExcel）を登録
+    # 5. 承認済みのレコードを選択して帳票ダウンロード実行:
+    #    const [download] = await Promise.all([
+    #      page.waitForEvent('download'),
+    #      page.locator('.dropdown-menu.show .dropdown-item').first().click()
+    #    ])
+    # 確認:
+    #   - ダウンロードが完了すること（エラーなし）
+    #   - エラートースト（.toast-error, .alert-danger）が表示されないこと
+    #   - ダウンロードしたファイルのサイズが 0 より大きいこと
+
 actual_steps:
 - case_no: 144-01
   status: partial

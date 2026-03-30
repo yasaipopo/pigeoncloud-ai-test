@@ -8,243 +8,660 @@ cases:
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .pc-field-block のリストが表示されることを確認
+    4. .pc-field-block の中から「画像」テキストを含む要素をホバー
+    5. .overSetting .fa-gear（歯車アイコン）をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    8. .modal-header に「画像」が含まれることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: '226'
   feature: フィールド設定
   description: ①画像フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .pc-field-block のリストが表示されることを確認
+    4. .pc-field-block の中から「画像」テキストを含む要素をホバー
+    5. .overSetting .fa-gear（歯車アイコン）をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    8. .modal-header に「画像」が含まれることを確認（フィールドタイプが画像であること）
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 44-1
   feature: フィールド設定
   description: ①Yes/Noフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .pc-field-block の中から「Yes/No」または「Yes／No」テキストを含む要素をホバー
+    4. .overSetting .fa-gear（歯車アイコン）をクリック
+    5. .settingModal .modal-content が表示されることを確認
+    6. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    7. Yes/No固有のラベル入力欄（input[type="text"] 2番目以降）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: '222'
   feature: フィールド設定
   description: ①Yes/Noフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .pc-field-block の中から「Yes/No」または「Yes／No」テキストを含む要素をホバー
+    4. .overSetting .fa-gear（歯車アイコン）をクリック
+    5. .settingModal .modal-content が表示されることを確認
+    6. .modal-header に「Yes」が含まれることを確認（フィールドタイプがYes/Noであること）
+    7. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: '216'
   feature: フィールド設定
   description: ①自動採番フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .pc-field-block の中から「自動採番」テキストを含む要素をホバー
+    4. .overSetting .fa-gear（歯車アイコン）をクリック
+    5. .settingModal .modal-content が表示されることを確認
+    6. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    7. input[placeholder*="ID-"]（フォーマット入力欄）が表示されることを確認
+    8. button:has-text("カウンターをリセット")（カウンターリセットボタン）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: '230'
   feature: フィールド設定
   description: ①固定テキストフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F201
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .pc-field-block の中から「固定テキスト」テキストを含む要素、または .fixed_html_wrapper を含む .pc-field-block をホバー
+    4. .overSetting .fa-gear（歯車アイコン）をクリック
+    5. .settingModal .modal-content が表示されることを確認
+    6. label:has-text("詳細ページでも表示")（固定テキスト固有チェックボックス）が表示されることを確認
+    7. [froalaEditor], .fr-element, .fr-box（リッチテキストエディタ）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 121-01
   feature: フィールド設定
   description: ①ファイルフィールドのアップロード設定ページが表示されること
   expected: |
     ファイルフィールドのアップロード設定ページが表示されること
   movie: F202
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .pc-field-block の中から「ファイル」テキストを含む要素をホバー
+    4. .overSetting .fa-gear（歯車アイコン）をクリック
+    5. .settingModal .modal-content が表示されることを確認
+    6. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    7. .modal-header に「ファイル」が含まれることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: '192'
   feature: フィールド設定
   description: ①ファイルのZIPアップロード機能が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F202
+  detailed_flow: |
+    1. /admin/dataset__{tableId}（ALLテストテーブルのレコード一覧ページ）を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. button:has-text("追加") または a:has-text("追加")（レコード追加ボタン）が表示されることを確認
+    6. ページ上にファイルアップロード用UIが存在することを確認
+
 - case_no: 122-01
   feature: フィールド設定
   description: ①列の表示/非表示設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F202
+  detailed_flow: |
+    1. /admin/dataset__{tableId}（ALLテストテーブルのレコード一覧ページ）を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. table thead th または .sticky-table-header th（テーブルヘッダー列）が1件以上存在することを確認
+    5. .fa-gear, .fa-cog または button:has-text("列")（列設定ボタン）の存在を確認
+    6. 列設定ボタンが存在する場合クリックして設定UIが開くことを確認
+    7. テーブルヘッダー列が複数（2列以上）存在することを確認
+
 - case_no: 122-02
   feature: フィールド設定
   description: ①列の並び替え設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F202
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .pc-field-block のリストが表示されることを確認
+    4. [cdkDrag] または .cdk-drag（ドラッグ可能なフィールド行）が2件以上存在することを確認
+    5. [cdkDragHandle] または .dragger（ドラッグハンドル）が1件以上存在することを確認
+    6. フィールドの並び替えUIが正常に表示されていることを確認
+
 - case_no: '218'
   feature: フィールド設定
   description: ①文章複数行（通常テキスト）フィールドの設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("文章(複数行)") をクリック
+    6. label:has-text("通常テキスト")（通常テキストラジオ）が表示されることを確認
+    7. label:has-text("リッチテキスト")（リッチテキストラジオ）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: '219'
   feature: フィールド設定
   description: ①文章複数行（リッチテキスト）フィールドの設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("文章(複数行)") をクリック
+    6. input[type="radio"][value="richtext"]（リッチテキストラジオ）が表示されることを確認
+    7. input[type="radio"][value="richtext"] をクリックして選択
+    8. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: '217'
   feature: フィールド設定
   description: ①文字列一行フィールドの設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("文字列(一行)") をクリック
+    6. label:has-text("テキスト")、label:has-text("メールアドレス")、label:has-text("URL") が表示されることを確認
+    7. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    8. label:has-text("値の重複を禁止する")（重複禁止チェックボックス）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-1
   feature: フィールド設定
   description: ①テキスト種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("文字列(一行)") をクリック
+    6. input[type="radio"][value="text"]（テキストラジオ）が表示されることを確認
+    7. input[type="radio"][value="text"] がデフォルトでチェック済みであることを確認
+    8. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-2
   feature: フィールド設定
   description: ①メールアドレス種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("文字列(一行)") をクリック
+    6. input[type="radio"][value="email"]（メールアドレスラジオ）が表示されることを確認
+    7. input[type="radio"][value="email"] をクリックして選択
+    8. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-3
   feature: フィールド設定
   description: ①URL種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("文字列(一行)") をクリック
+    6. input[type="radio"][value="url"]（URLラジオ）が表示されることを確認
+    7. input[type="radio"][value="url"] をクリックして選択
+    8. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-3-1
   feature: フィールド設定
   description: ①URLフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("文字列(一行)") をクリック
+    6. input[type="radio"][value="url"] をクリックして選択
+    7. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    8. URL選択時の追加オプション（複数の値の登録を許可など）設定UIが存在することを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-4
   feature: フィールド設定
   description: ①数値フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("数値") をクリック
+    6. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    7. label:has-text("整数")（整数ラジオ）が表示されることを確認
+    8. label:has-text("小数")（小数ラジオ）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-5
   feature: フィールド設定
   description: ①数値（整数）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("数値") をクリック
+    6. input[type="radio"][value="integer"]（整数ラジオ）が表示されることを確認
+    7. label:has-text("単位")（単位記号入力欄）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-6
   feature: フィールド設定
   description: ①数値（小数）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("数値") をクリック
+    6. input[type="radio"][value="decimal"]（小数ラジオ）が表示されることを確認
+    7. input[type="radio"][value="decimal"] をクリックして選択
+    8. label:has-text("小数点以下")（小数点以下桁数設定）が表示されることを確認
+    9. label:has-text("桁区切り")（桁区切り設定）が表示されることを確認
+    10. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-7
   feature: フィールド設定
   description: ①ラジオボタン種別（単一選択）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("選択肢(単一選択)") をクリック
+    6. input[type="radio"][value="radio"]（ラジオボタン種別ラジオ）が表示されることを確認
+    7. label:has-text("選択肢")（選択肢入力欄）が表示されることを確認
+    8. label:has-text("横並び") と label:has-text("縦並び")（Layoutラジオ）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-8
   feature: フィールド設定
   description: ①ラジオボタン種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("選択肢(単一選択)") をクリック
+    6. input[type="radio"][value="select"]（プルダウン種別ラジオ）が表示されることを確認
+    7. label:has-text("選択肢")（選択肢入力欄）が表示されることを確認
+    8. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-9
   feature: フィールド設定
   description: ①プルダウン種別（単一選択）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("選択肢(単一選択)") をクリック
+    6. input[type="radio"][value="select"]（プルダウン種別ラジオ）が表示されることを確認
+    7. input[type="radio"][value="select"] をクリックして選択
+    8. label:has-text("選択肢")（選択肢入力欄）が表示されることを確認
+    9. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    10. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-12-1
   feature: フィールド設定
   description: ①年月種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("日時") をクリック
+    6. input[type="radio"][value="year_month"]（年月ラジオ）が表示されることを確認
+    7. input[type="radio"][value="year_month"] をクリックして選択
+    8. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-13
   feature: フィールド設定
   description: ①ファイルフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("ファイル") をクリック
+    6. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    7. .modal-header に「ファイル」が含まれることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-14
   feature: フィールド設定
   description: ①計算フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("計算") をクリック
+    6. #CommentExpression または .contenteditable（計算式入力欄）が表示されることを確認
+    7. label:has-text("計算値の種類")（種類ドロップダウン）が表示されることを確認
+    8. label:has-text("計算値の自動更新")（自動更新チェックボックス）が表示されることを確認
+    9. input[type="text"][name="label"]（項目名入力欄）が表示されることを確認
+    10. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-15
   feature: フィールド設定
   description: ①計算フィールド（整数形式）のフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("計算") をクリック
+    6. select（計算値の種類ドロップダウン）が表示されることを確認
+    7. #CommentExpression または .contenteditable（計算式入力欄）が表示されることを確認
+    8. label:has-text("整数")（整数ラジオ）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-16
   feature: フィールド設定
   description: ①計算フィールド（小数形式）のフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. button:has-text("項目を追加する") をクリック
+    4. .settingModal .modal-content が表示されることを確認
+    5. button:has-text("計算") をクリック
+    6. #CommentExpression または .contenteditable（計算式入力欄）が表示されることを確認
+    7. input[type="radio"][value="decimal"]（小数ラジオ）が表示される場合はクリックして選択
+    8. label:has-text("小数点以下")（小数点以下桁数設定）が表示されることを確認
+    9. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-17
   feature: フィールド設定
   description: ①文章(複数行)・通常テキストフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block のフィールドリストが表示されることを確認（フィールド設定ページが正常に表示）
+
 - case_no: 14-18
   feature: フィールド設定
   description: ①文章(複数行)・リッチテキストフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F203
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block のフィールドリストが表示されることを確認（フィールド設定ページが正常に表示）
+
 - case_no: 14-19
   feature: フィールド設定
   description: ①Yes/Noフィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中からYes/Noフィールドが存在することを確認
+
 - case_no: 14-20
   feature: フィールド設定
   description: ①Yes/Noフィールドのフィールド設定ページが正常に表示されること（追加オプション）
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中からYes/Noフィールドをホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. Yes/No追加オプション（例: label入力欄、デフォルト値設定）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-21
   feature: フィールド設定
   description: ①チェックボックス種別（複数選択）フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block のフィールドリストが表示されることを確認
+    6. button:has-text("項目を追加する") をクリック
+    7. .settingModal .modal-content が表示されることを確認
+    8. button:has-text("選択肢(複数選択)") をクリック
+    9. チェックボックス種別の設定UIが表示されることを確認
+
 - case_no: 14-22
   feature: フィールド設定
   description: ①プルダウン種別フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中からプルダウンフィールドをホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. プルダウン種別の設定UI（選択肢入力欄等）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-23
   feature: フィールド設定
   description: ①画像フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中から「画像」テキストを含む要素をホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. 画像フィールドの設定UI（推奨サイズ設定等）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-24
   feature: フィールド設定
   description: ①他テーブル参照フィールドのフィールド設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中から他テーブル参照フィールドをホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. 他テーブル参照フィールドの設定UI（参照先テーブル選択等）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-25
   feature: フィールド設定
   description: ①他テーブル参照フィールドのフィールド設定ページが正常に表示されること（追加オプション）
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中から他テーブル参照フィールドをホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. 他テーブル参照フィールドの追加オプション（複数値許可設定等）が表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-26
   feature: フィールド設定
   description: '①関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含む）'
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中から関連レコード一覧フィールドをホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. 絞り込み条件「次を含む」の設定UIが表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-27
   feature: フィールド設定
   description: '①関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次と一致しない）'
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中から関連レコード一覧フィールドをホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. 絞り込み条件「次と一致しない」の設定UIが表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-28
   feature: フィールド設定
   description: '①関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含む別パターン）'
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中から関連レコード一覧フィールドをホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. 絞り込み条件「次を含む」の別パターン設定UIが表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる
+
 - case_no: 14-29
   feature: フィールド設定
   description: '①関連レコード一覧フィールドのフィールド設定ページが正常に表示されること（絞り込み条件: 次を含まない）'
   expected: |
     エラーなくページが正常に表示されること
   movie: F204
+  detailed_flow: |
+    1. /admin/dataset/edit/{ALLテストテーブルID} を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. .navbar が表示されることを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .pc-field-block の中から関連レコード一覧フィールドをホバーして .overSetting .fa-gear をクリック
+    6. .settingModal .modal-content が表示されることを確認
+    7. 絞り込み条件「次を含まない」の設定UIが表示されることを確認
+    8. button:has-text("キャンセル") をクリックしてモーダルを閉じる

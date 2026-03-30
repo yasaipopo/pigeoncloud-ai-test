@@ -9,6 +9,17 @@ cases:
   description: ①子テーブルが設定されているテーブルよりCSVダウンロードを実施する
   expected: CSVダウンロードがエラーなく完了し、CSVファイルの中に子テーブルの情報が含まれていること
   movie: CE01
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. a.nav-link:has-text("CSV") をクリックしてCSVタブを開く
+    3. 「CSVダウンロード/アップロードに子テーブルも含める」スイッチ（input[type=checkbox]）がONであることを確認する
+    4. ONでなければスイッチをONにして保存ボタン（button:has-text("保存")）をクリックする
+    5. /admin/dataset__{tableId} （テーブル一覧）に遷移する
+    6. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    7. a.dropdown-item:has-text("CSVダウンロード") をクリックする
+    8. .modal.show が表示されることを確認する
+    9. ダウンロードボタン（button:has-text("ダウンロード"), a:has-text("ダウンロード")）が表示されていることを確認する
+    10. .alert-danger が表示されていないことを確認する
 - case_no: 148-02
   sheet: B
   feature: CSVアップロード
@@ -18,6 +29,17 @@ cases:
     ②※アップロードするCSVファイルには子テーブルの情報を含める。
   expected: CSVアップロードがエラーなく完了し、子テーブルの情報も反映されること。
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. a.nav-link:has-text("CSV") をクリックしてCSVタブを開く
+    3. 「CSVダウンロード/アップロードに子テーブルも含める」スイッチがONになっていることを確認する
+    4. /admin/dataset__{tableId} （テーブル一覧）に遷移する
+    5. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    6. a.dropdown-item:has-text("CSVアップロード") をクリックする
+    7. .modal.show が表示されることを確認する
+    8. 子テーブルの列（カラム名）を含むCSVファイルをinput[type=file]にsetInputFilesでセットする
+    9. アップロードボタン（button:has-text("アップロード")）をクリックする
+    10. /admin/csv（CSV UP/DL履歴）で処理結果を確認し、エラーが発生していないことを確認する
 - case_no: 148-03
   sheet: B
   feature: CSVアップロード
@@ -25,6 +47,15 @@ cases:
   description: ①CSVアップロードを選択し、「CSVダウンロード(空)」を選択。
   expected: CSVファイル(空)のヘッダーに子テーブルの情報も含まれていること。
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset__{tableId} （テーブル一覧）に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    3. a.dropdown-item:has-text("CSVアップロード") をクリックする
+    4. .modal.show が表示されることを確認する
+    5. モーダル内の「CSVダウンロード(空)」ボタン（button:has-text("CSVダウンロード(空)"), a:has-text("CSVダウンロード(空)")）が表示されていることを確認する
+    6. 「CSVダウンロード(空)」ボタンをクリックしてダウンロードを実行する
+    7. ダウンロードが正常に開始されること（エラーなし）を確認する
+    8. .alert-danger が表示されていないことを確認する
 - case_no: '161'
   sheet: B
   feature: CSVダウンロード
@@ -32,6 +63,15 @@ cases:
   description: ①並び替えしてCSVダウンロードする
   expected: そのままその並び替えが有効になってダウンロードされる
   movie: CE01
+  detailed_flow: |
+    1. /admin/dataset__{tableId} （テーブル一覧）に遷移する
+    2. テーブルヘッダー（例: th a:has-text("ID")）をクリックして並び替えを適用する
+    3. 簡易検索 input#search_input にテキスト「テスト」を入力してEnterキーを押し、フィルターを適用する（フィルター適用でモーダルが開くようになる）
+    4. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    5. a.dropdown-item:has-text("CSVダウンロード") をクリックする
+    6. .modal.show が表示されることを確認する
+    7. ダウンロードボタン（button:has-text("ダウンロード"), a:has-text("ダウンロード")）が表示されていることを確認する
+    8. .alert-danger が表示されていないことを確認する
 - case_no: '173'
   sheet: B
   feature: Excelインポート
@@ -39,6 +79,15 @@ cases:
   description: ①Excelインポート機能改修(UI上で項目名の変更が可能）
   expected: ・データセット一覧でExcelインポートメニューが利用可能であることが正常に動作すること。
   movie: CE03
+  detailed_flow: |
+    1. /admin/dataset （テーブル一覧）に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    3. a.dropdown-item:has-text("エクセルから追加") または a.dropdown-item:has-text("Excelインポート") が表示されていることを確認する
+    4. メニューアイテムをクリックしてExcelインポートUIを開く
+    5. Excelインポートモーダルまたはページが表示されることを確認する
+    6. 項目名変更UIが存在すること（input[type=text]またはそれに相当する要素）を確認する
+    7. .navbar が表示されていることを確認する
+    8. Internal Server Error が表示されていないことを確認する
 - case_no: '181'
   sheet: B
   feature: CSV
@@ -53,6 +102,15 @@ cases:
     ・エラーとならないこと
     https://henmi022.pigeon-demo.com/admin/dataset__33
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. フィールド編集タブ（a.nav-link:has-text("フィールド")）をクリックする
+    3. チェックボックス（複数選択）フィールドを選択し、「最低数」に1を設定して保存する
+    4. /admin/dataset__{tableId}/add （新規登録フォーム）でテストデータを2件以上登録する（うち1件は最低数設定の選択肢を選択）
+    5. /admin/dataset__{tableId} に戻りCSVダウンロードを実行する（button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード")）
+    6. ダウンロードされたCSVの内容を取得または確認する
+    7. CSVデータを修正してアップロードする（button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") → input[type=file]にCSVファイルをセット）
+    8. アップロードボタンをクリックし、/admin/csv でエラーが発生していないことを確認する
 - case_no: 193-1
   sheet: B
   feature: CSV
@@ -67,6 +125,17 @@ cases:
     アップロードが正常に完了すること。
     https://henmi022.pigeon-demo.com/admin/dataset__31
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. a.nav-link:has-text("CSV") をクリックしてCSVタブを開く
+    3. 「アップロード時必須項目が空の状態でも許可」スイッチ（input[type=checkbox]）をONにする
+    4. 保存ボタン（button:has-text("保存")）をクリックする
+    5. .alert-success または保存完了メッセージが表示されることを確認する
+    6. /admin/dataset__{tableId} に遷移する
+    7. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    8. a.dropdown-item:has-text("CSVアップロード") をクリックする
+    9. 必須項目が空のCSVファイルをinput[type=file]にセットしてアップロードする
+    10. /admin/csv でアップロード結果を確認し、エラーが表示されていないことを確認する
 - case_no: 193-2
   sheet: B
   feature: CSV
@@ -81,6 +150,16 @@ cases:
     アップロードエラーになること。
     https://henmi022.pigeon-demo.com/admin/dataset__31
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. a.nav-link:has-text("CSV") をクリックしてCSVタブを開く
+    3. 「アップロード時必須項目が空の状態でも許可」スイッチをOFFにする
+    4. 保存ボタン（button:has-text("保存")）をクリックし保存を確認する
+    5. /admin/dataset__{tableId} に遷移する
+    6. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    7. a.dropdown-item:has-text("CSVアップロード") をクリックする
+    8. 必須項目が空のCSVファイルをinput[type=file]にセットしてアップロードする
+    9. /admin/csv でアップロード結果を確認し、エラー（失敗・NG等）が表示されていることを確認する
 - case_no: 194-1
   sheet: B
   feature: CSV
@@ -96,6 +175,16 @@ cases:
     選択肢に存在しなかったデータが選択肢へ自動追加されていること
     https://henmi022.pigeon-demo.com/admin/dataset__31
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. a.nav-link:has-text("CSV") をクリックしてCSVタブを開く
+    3. 「選択肢または選択肢(複数選択)項目で、項目がない場合自動的に追加する」スイッチをONにする
+    4. 保存ボタン（button:has-text("保存")）をクリックし保存を確認する
+    5. /admin/dataset__{tableId} に遷移する
+    6. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でCSVアップロードモーダルを開く
+    7. 既存選択肢に存在しない値を含むCSVファイルをinput[type=file]にセットしてアップロードする
+    8. /admin/csv でエラーが表示されていないことを確認する
+    9. /admin/dataset/edit/{tableId} のフィールド設定に戻り、選択肢が自動追加されていることを確認する
 - case_no: 194-2
   sheet: B
   feature: CSV
@@ -110,6 +199,15 @@ cases:
     アップロードエラーになること。
     https://henmi022.pigeon-demo.com/admin/dataset__31
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. a.nav-link:has-text("CSV") をクリックしてCSVタブを開く
+    3. 「選択肢または選択肢(複数選択)項目で、項目がない場合自動的に追加する」スイッチをOFFにする
+    4. 保存ボタン（button:has-text("保存")）をクリックし保存を確認する
+    5. /admin/dataset__{tableId} に遷移する
+    6. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でCSVアップロードモーダルを開く
+    7. 既存選択肢に存在しない値を含むCSVファイルをinput[type=file]にセットしてアップロードする
+    8. /admin/csv でアップロード結果を確認し、エラー（失敗・NG等）が表示されていることを確認する
 - case_no: '224'
   sheet: B
   feature: JSONエクスポート
@@ -121,6 +219,17 @@ cases:
     ④通知設定を含める。
   expected: ・選択肢(複数選択)フィールドに表示条件設定ができること
   movie: CE03
+  detailed_flow: |
+    1. /admin/dataset__{tableId} に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    3. a.dropdown-item:has-text("JSON") または a:has-text("JSONエクスポート") をクリックする
+    4. JSONエクスポートモーダルが表示されることを確認する
+    5. 「データを含める」チェックボックスをONにする
+    6. 「権限設定を含める」チェックボックスをONにする
+    7. 「フィルタを含める」チェックボックスをONにする
+    8. 「通知設定を含める」チェックボックスをONにする
+    9. エクスポートボタン（button:has-text("エクスポート")）をクリックする
+    10. エラーが発生しないことを確認する（.alert-danger が表示されないこと）
 - case_no: '231'
   sheet: B
   feature: CSVダウンロード
@@ -130,6 +239,17 @@ cases:
   description: ①いくつかのパターンでカンマ区切りON／OFFにし、CSVダウンロード実施
   expected: ・文字列(一行)フィールドに必須条件設定ができること
   movie: CE01
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. a.nav-link:has-text("フィールド") をクリックしてフィールド設定タブを開く
+    3. 数値フィールドを選択し、「カンマ区切り」をONにして保存する
+    4. /admin/dataset__{tableId} に遷移する
+    5. 簡易検索 input#search_input に「テスト」を入力してフィルターを適用する
+    6. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でモーダルを開く
+    7. ダウンロードボタンをクリックする
+    8. .alert-danger が表示されていないことを確認する
+    9. /admin/dataset/edit/{tableId} に戻り「カンマ区切り」をOFFにして保存する
+    10. 再度CSVダウンロードを実行し、エラーが発生しないことを確認する
 - case_no: '233'
   sheet: B
   feature: CSVアップロード
@@ -146,6 +266,13 @@ cases:
     エラーとならずにCSVアップロードが完了すること。
     https://henmi022.pigeon-demo.com/admin/dataset__23
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset__{tableId} （他テーブル参照フィールドを持つテーブル一覧）に遷移する
+    2. 参照先テーブルの数値フィールドに単位記号（例: 円、kg）が設定されていることを事前に確認する
+    3. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でCSVアップロードモーダルを開く
+    4. 他テーブル参照フィールドの値を含むCSVファイルをinput[type=file]にセットしてアップロードする
+    5. アップロードボタン（button:has-text("アップロード")）をクリックする
+    6. /admin/csv でアップロード結果を確認し、エラーが発生していないことを確認する
 - case_no: '255'
   sheet: B
   feature: CSVダウンロード
@@ -153,6 +280,14 @@ cases:
   description: ①https://loftal.pigeon-cloud.com/admin/dataset__90/view/210
   expected: ・CSVダウンロードモーダルが開き、ダウンロードボタンが表示されること
   movie: CE01
+  detailed_flow: |
+    1. /admin/dataset__{tableId} （テーブル一覧）に遷移する
+    2. 簡易検索 input#search_input に「テスト」を入力してEnterキーを押しフィルターを適用する（フィルター適用でモーダルが開くようになる）
+    3. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    4. a.dropdown-item:has-text("CSVダウンロード") をクリックする
+    5. .modal.show（CSVダウンロードモーダル）が表示されていることを確認する
+    6. モーダル内にダウンロードボタン（button:has-text("ダウンロード"), a:has-text("ダウンロード")）が表示されていることを確認する
+    7. .alert-danger が表示されていないことを確認する
 - case_no: 55-1
   sheet: B
   feature: CSVアップロード
@@ -160,6 +295,14 @@ cases:
   description: ①アップロードするCSVファイルのヘッダー行なしのCSVファイルをアップロードする。
   expected: インポートエラーが発生すること。
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset__{tableId} （テーブル一覧）に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    3. a.dropdown-item:has-text("CSVアップロード") をクリックする
+    4. .modal.show が表示されることを確認する
+    5. ヘッダー行なしのCSVファイル（データ行のみ）をinput[type=file]にセットする
+    6. アップロードボタン（button:has-text("アップロード")）をクリックする
+    7. /admin/csv でアップロード結果を確認し、エラー（失敗・NG・エラー件数 > 0）が表示されていることを確認する
 - case_no: 55-2
   sheet: B
   feature: CSVアップロード
@@ -167,6 +310,14 @@ cases:
   description: ①CSV以外のファイルをアップロードする。
   expected: インポートエラーが発生すること。
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset__{tableId} （テーブル一覧）に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    3. a.dropdown-item:has-text("CSVアップロード") をクリックする
+    4. .modal.show が表示されることを確認する
+    5. CSV以外のファイル（例: .txt, .png, .pdf）をinput[type=file]にセットする
+    6. アップロードボタン（button:has-text("アップロード")）をクリックする
+    7. モーダル内または /admin/csv でエラーメッセージが表示されることを確認する（.alert-danger, error等）
 - case_no: '246'
   sheet: B
   feature: 文字列
@@ -181,6 +332,14 @@ cases:
     https://github.com/Loftal/pigeon_cloud/pull/261。
   expected: バグが修正され、正常に動作すること。(JSONエクスポートできない。（添付ファイル参照）  （階層になっているのは関係ありますか？）)
   movie: CE03
+  detailed_flow: |
+    1. /admin/dataset__{tableId} に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    3. a.dropdown-item:has-text("JSON") または a:has-text("JSONエクスポート") をクリックする
+    4. JSONエクスポートモーダルが表示されることを確認する
+    5. エクスポートボタン（button:has-text("エクスポート")）をクリックする
+    6. エクスポートがバックグラウンドで開始されることを確認する（タイムアウトエラーが発生しないこと）
+    7. /admin/csv または /admin/job_logs でJSONエクスポートの処理結果を確認し、エラーが表示されていないことを確認する
 - case_no: '309'
   sheet: B
   feature: 文字列
@@ -189,6 +348,14 @@ cases:
     ②「選択肢にない場合に自動で追加する」がOFFの場合はエラーを出してほしいです。
   expected: 機能改善が正しく反映されていること。(CSVアップロードの際、一行目（項目行）が異なっていたり、項目内に選択肢として存在しないワードが含まれている場合に、内容がわかるようなエラーメッセージを出していただきたいです。 「選択肢にない場合に自)
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} のCSVタブで「選択肢がない場合自動追加」をOFFにして保存する
+    2. /admin/dataset__{tableId} に遷移する
+    3. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でモーダルを開く
+    4. 存在しないヘッダー列名を含むCSVファイルをinput[type=file]にセットしてアップロードする
+    5. /admin/csv でアップロード結果を確認し、具体的なエラーメッセージ（項目名不一致の旨）が表示されていることを確認する
+    6. 再度、既存選択肢に存在しない値を含むCSVファイルをアップロードする
+    7. /admin/csv で「選択肢に存在しない値」に関するエラーメッセージが表示されていることを確認する
 - case_no: '313'
   sheet: B
   feature: 文字列
@@ -203,24 +370,53 @@ cases:
     としていただきたいです。
   expected: 機能改善が正しく反映されていること。(CSVアップロードの際の注意書きに、 「更新日時、作成日時は自動更新されます。」 とありますが、 ここに作成者、最終更新者も追加していただき、 「作成者、最終更新者、更新日時、作成日時は自動更新されま)
   movie: CE02
+  detailed_flow: |
+    1. /admin/dataset__{tableId} に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でCSVアップロードモーダルを開く
+    3. モーダル内の注意書きテキストを確認する（page.locator('.modal.show') のテキスト内容）
+    4. 注意書きに「作成者」または「最終更新者」のテキストが含まれていることを確認する（expect(page.locator('.modal.show')).toContainText("作成者")）
+    5. 「作成者、最終更新者、更新日時、作成日時は自動更新されます」に相当するテキストが表示されていることを確認する
 - case_no: '337'
   sheet: B
   feature: 文字列
   description: ①【バグ修正確認】CSVダウンロードの際、固定テキストはダウンロード項目に含まれないように修正希望です。
   expected: バグが修正され、正常に動作すること。(CSVダウンロードの際、固定テキストはダウンロード項目に含まれないように修正希望です。)
   movie: CE04
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} に遷移し、「固定テキスト」フィールドが含まれていることを確認する（存在しなければ追加する）
+    2. /admin/dataset__{tableId} に遷移する
+    3. 簡易検索でフィルターを適用する（input#search_input）
+    4. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でモーダルを開く
+    5. ダウンロードボタンをクリックしてCSVをダウンロードする
+    6. ダウンロードしたCSVのヘッダー行に固定テキストフィールドの列名が含まれていないことを確認する
+    7. .alert-danger が表示されていないことを確認する
 - case_no: '347'
   sheet: B
   feature: 文字列
   description: ①【バグ修正確認】案件管理をデータ含めてJSON export / importするとエラーになったため修正を希望です。
   expected: バグが修正され、正常に動作すること。(案件管理をデータ含めてJSON export / importするとエラーになったため修正を希望です。)
   movie: CE04
+  detailed_flow: |
+    1. /admin/dataset__{tableId} に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    3. a:has-text("JSONエクスポート") または a:has-text("JSON") をクリックする
+    4. JSONエクスポートモーダルで「データを含める」をONにしてエクスポートボタンをクリックする
+    5. エクスポートが正常に実行されることを確認する（エラーが表示されないこと）
+    6. /admin/job_logs でJSONエクスポートジョブが成功していることを確認する
+    7. エクスポートされたJSONファイルを使ってJSONインポートを実行する（対応ページがあれば）
+    8. インポートがエラーなく完了することを確認する
 - case_no: '372'
   sheet: B
   feature: 文字列
   description: ①【バグ修正確認】ユーザー管理テーブルで、ユーザー作成のためCSVアップロードを行うと、組織が反映されないため修正を希望です。
   expected: バグが修正され、正常に動作すること。(ユーザー管理テーブルで、ユーザー作成のためCSVアップロードを行うと、組織が反映されないため修正を希望です。)
   movie: CE04
+  detailed_flow: |
+    1. /admin/user （ユーザー管理テーブル）に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でCSVアップロードモーダルを開く
+    3. 組織列を含む新規ユーザー追加用CSVファイルをinput[type=file]にセットしてアップロードする
+    4. /admin/csv でアップロート結果を確認し、エラーが発生していないことを確認する
+    5. /admin/user に戻り、アップロードしたユーザーの組織欄が正しく反映されていることを確認する（expect(page.locator('td:has-text("組織名")')).toBeVisible()）
 - case_no: '378'
   sheet: B
   feature: 文字列
@@ -232,12 +428,28 @@ cases:
     ⑤https://loftal.slack.com/archives/C05CK6Z7YDQ/p1701154237570519?thread_ts=1701153082.141629&cid=C05CK6Z7YDQ。
   expected: バグが修正され、正常に動作すること。(ログをクロス集計したフィルタでCSVダウンロードしようとすると、 添付画像のエラーが発生しダウンロードできないため、修正を希望です。)
   movie: CE04
+  detailed_flow: |
+    1. /admin/logs （ログテーブル）に遷移する
+    2. クロス集計ビューを選択する（ビュー切り替えボタンまたはドロップダウン）
+    3. フィルターを適用した状態にする（簡易検索または詳細フィルター）
+    4. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") をクリックする
+    5. CSVダウンロードモーダルが表示されることを確認する（.modal.show）
+    6. ダウンロードボタンをクリックしてダウンロードを実行する
+    7. .alert-danger が表示されていないことを確認する
+    8. /admin/csv でエラーが記録されていないことを確認する
 - case_no: '379'
   sheet: B
   feature: 文字列
   description: ①CSVログは、自分がUP/DLした分だけは全ユーザー見られるようにしていただきたいです。
   expected: エラーなく正常に動作すること。(CSVログは、自分がUP/DLした分だけは全ユーザー見られるようにしていただきたいです。)
   movie: CE04
+  detailed_flow: |
+    1. adminユーザーでCSVアップロードまたはダウンロードを1件実行する
+    2. /admin/csv （CSV UP/DL履歴）に遷移する
+    3. 自分が実行したCSVのログが表示されていることを確認する（expect(page.locator('table tbody tr')).toHaveCount(n > 0)）
+    4. 別の一般ユーザーでログインして /admin/csv に遷移する（createAuthContext等）
+    5. 一般ユーザーがadminユーザーのCSVログを参照できないことを確認する（自分が実行したもののみ表示される）
+    6. .alert-danger が表示されていないことを確認する
 - case_no: '393'
   sheet: B
   feature: 文字列
@@ -246,6 +458,13 @@ cases:
     ②CSVでダウンロードしたときに「１月３日」とせずそのまま「1-03」でダウンロードできるように修正希望です。
   expected: バグが修正され、正常に動作すること。(文字列（１行）に、例えば「1-03」と入力してあるものを、 CSVでダウンロードしたときに「１月３日」とせずそのまま「1-03」でダウンロードできるように修正希望です。)
   movie: CE04
+  detailed_flow: |
+    1. /admin/dataset__{tableId}/add でテキストフィールドに「1-03」を入力して登録する
+    2. /admin/dataset__{tableId} に戻る
+    3. 簡易検索でフィルターを適用する
+    4. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でモーダルを開いてダウンロードする
+    5. ダウンロードしたCSVのデータ行を確認し、「1-03」が「１月３日」等の日付形式に変換されていないことを確認する
+    6. .alert-danger が表示されていないことを確認する
 - case_no: '438'
   sheet: B
   feature: 文字列
@@ -254,6 +473,15 @@ cases:
     ②子テーブルのCSVダウンロードができないようですので修正いただけますでしょうか。
   expected: バグが修正され、正常に動作すること。(テーブル作成者以外のユーザーは、テーブル管理者であっても 子テーブルのCSVダウンロードができないようですので修正いただけますでしょうか。)
   movie: CE04
+  detailed_flow: |
+    1. /api/admin/debug/create-user でテーブル管理者権限を持つ別ユーザーを作成する
+    2. そのユーザーでログインする（createAuthContext等）
+    3. 子テーブルが設定されているテーブル（/admin/dataset__{tableId}）に遷移する
+    4. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    5. a.dropdown-item:has-text("CSVダウンロード") をクリックする
+    6. .modal.show が表示されることを確認する（権限不足エラーが出ないこと）
+    7. ダウンロードボタンが表示されていることを確認する
+    8. .alert-danger が表示されていないことを確認する
 - case_no: '444'
   sheet: B
   feature: 文字列
@@ -263,6 +491,13 @@ cases:
     ③CSVでダウンロードしたときに「１月３日」とせずそのまま「1-03」でダウンロードできるように修正希望です。
   expected: エラーなく正常に動作すること。(他テーブル参照で、参照先が文字列（一行）だった場合、 「1-03」と入力してあるものを、 CSVでダウンロードしたときに「１月３日」とせずそのまま「1-03」でダウンロードできるように修正希望です。)
   movie: CE04
+  detailed_flow: |
+    1. 参照先テーブルのテキストフィールドに「1-03」を含むレコードを登録する
+    2. 他テーブル参照フィールドを持つテーブル（/admin/dataset__{tableId}）に遷移する
+    3. 参照先の「1-03」を参照するレコードを登録する
+    4. 簡易検索でフィルターを適用する
+    5. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でモーダルを開いてダウンロードする
+    6. ダウンロードしたCSVの他テーブル参照列の値が「1-03」のまま保持されていることを確認する（「１月３日」等に変換されていないこと）
 - case_no: '447'
   sheet: B
   feature: 文字列
@@ -274,6 +509,13 @@ cases:
     ③親テーブルと子テーブルすべてのテーブル更新をお願いしたのですが、解消されませんでした。
   expected: バグが修正され、正常に動作すること。(テーブル名：工事日報（dataset__14）  こちらコピー環境で再現されました。 CSVの「工種」の部分に「1」など数値が入っており、値がずれているため、修正いただけますでしょうか。。 親テーブル)
   movie: CE04
+  detailed_flow: |
+    1. 子テーブルを持つテーブル（/admin/dataset__{tableId}）に遷移する
+    2. 選択肢フィールドに値を持つレコードを複数件登録する
+    3. 簡易検索でフィルターを適用する
+    4. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でダウンロードを実行する
+    5. ダウンロードしたCSVの選択肢フィールド列に数値ではなく正しい選択肢のテキストが入っていることを確認する
+    6. .alert-danger が表示されていないことを確認する
 - case_no: '483'
   sheet: B
   feature: 文字列
@@ -283,6 +525,14 @@ cases:
     ③実際にアップロードしたCSVを添付。
   expected: バグが修正され、正常に動作すること。(「PigeonCloud実装依頼・FB」にてテストステータス、記入者ステータスなど変更が必要な項目のみ入力して他を空白にした状態でCSVアップロードしたところ、空白にした項目が全て空欄になってしまいま)
   movie: CE04
+  detailed_flow: |
+    1. /admin/dataset__{tableId}/add で複数フィールドにデータを入力してレコードを登録する
+    2. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でCSVをダウンロードする
+    3. ダウンロードしたCSVを取得し、特定フィールドのみ値を変更・他は空白にした修正CSVを作成する
+    4. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でモーダルを開く
+    5. 修正CSVをinput[type=file]にセットしてアップロードする
+    6. /admin/csv でアップロードが成功したことを確認する
+    7. /admin/dataset__{tableId}/{recordId} でレコード詳細を確認し、空白にした項目が元の値（空欄でない）のままであることを確認する
 - case_no: '485'
   sheet: B
   feature: 文字列
@@ -299,6 +549,12 @@ cases:
     ⑩となってし。
   expected: 機能改善が正しく反映されていること。(テーブル名：議案書管理台帳（dataset__75） 項目名：伝票№（文字列(一行)）  現状、文字列(一行)項目で、「複数の値の登録を許可する」を有効にしている場合、 CSVダウンロードしたとき、登)
   movie: CE04
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} で文字列(一行)フィールドに「複数の値の登録を許可する」をONにして保存する
+    2. /admin/dataset__{tableId}/add で当該フィールドに複数の値（「123456」「456789」）を登録したレコードを作成する
+    3. 簡易検索でフィルターを適用する
+    4. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でCSVをダウンロードする
+    5. ダウンロードしたCSVの当該フィールド列で「123456」と「456789」が区切り文字（カンマ、改行等）で区切られて出力されていることを確認する（「123456456789」の様に連結されていないこと）
 - case_no: '495'
   sheet: B
   feature: 文字列
@@ -314,6 +570,13 @@ cases:
     「0」は0として認。
   expected: バグが修正され、正常に動作すること。(動画をご確認いただければと思います。  CSVアップロードで数値項目で「0」を入れても認識されないです。 数値項目で小数点0.0まで表示するように設定しています。  CSV側で「0.0」を入れる⇒Pi)
   movie: CE04
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} で数値フィールドの小数点表示を「0.0（小数点1桁）」に設定して保存する
+    2. 数値フィールドに「0」を含むCSVファイルを作成する
+    3. /admin/dataset__{tableId} に遷移し、CSVアップロードモーダルを開く
+    4. CSVファイルをinput[type=file]にセットしてアップロードする
+    5. /admin/csv でアップロートが成功したことを確認する
+    6. /admin/dataset__{tableId} でアップロードしたレコードを確認し、数値フィールドが「0」または「0.0」として登録されていることを確認する（空欄ではないこと）
 - case_no: '538'
   sheet: B
   feature: 追加実装
@@ -321,6 +584,12 @@ cases:
     ⑦・計算項。"
   expected: "バグが修正され、正常に動作すること。(テーブル：https://l-akahori.pigeon-cloud.com/admin/dataset__120 ID：admin\tPW：dM4ApAcjDXC9 項目：計算  ・不具合内容 計算)"
   movie: CE04
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} で計算フィールドに「値の重複を禁止する」をONにして保存する
+    2. /admin/dataset__{tableId}/add で計算フィールドに特定の値（例: 計算結果が「100」になるデータ）を登録する
+    3. 同じ計算結果（「100」）になる値を含むCSVファイルを作成する
+    4. /admin/dataset__{tableId} でCSVアップロードモーダルを開き、CSVファイルをセットしてアップロードする
+    5. /admin/csv でアップロード結果を確認し、重複エラーが発生していることを確認する（エラー件数 > 0）
 - case_no: '605'
   sheet: B
   feature: 追加実装
@@ -333,6 +602,13 @@ cases:
     ④そのままアップロードすると、組織1の部長のみ。
   expected: バグが修正され、正常に動作すること。(ユーザー管理テーブルにて、 同組織を複数設定している場合、CSVダウンロードで一つしかダウンロードされず、 そのままアップロードすると組織が一つ分になってしまうのですが、修正いただけますでしょうか。 )
   movie: CE04
+  detailed_flow: |
+    1. /admin/user でユーザーに同一組織の複数の役職（部長・マネージャー等）を設定する
+    2. /admin/user に遷移し、CSVダウンロードを実行する（button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード")）
+    3. ダウンロードしたCSVを確認し、ユーザーの組織欄に複数の組織・役職設定が出力されていることを確認する
+    4. ダウンロードしたCSVをそのままアップロードする（button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード")）
+    5. /admin/csv でアップロードが成功したことを確認する
+    6. /admin/user でユーザーの組織設定を確認し、複数設定が維持されていることを確認する
 - case_no: '611'
   sheet: B
   feature: 追加実装
@@ -346,6 +622,14 @@ cases:
     ⑦* slack : https://。
   expected: 'エラーなく正常に動作すること。(### 要件名 * 登録/編集フォームの子テーブルでcsv or excelでの一括登録ができる  ### 要件 * レコードの登録/編集フォームの子テーブルにて、csvやexcelのデータをインポー)'
   movie: CE04
+  detailed_flow: |
+    1. 子テーブルが設定されているテーブルの新規登録フォーム（/admin/dataset__{tableId}/add）を開く
+    2. 子テーブルセクションにCSVインポートボタンが表示されていることを確認する（button:has-text("CSVインポート") または button:has-text("一括登録")）
+    3. CSVインポートボタンをクリックする
+    4. ファイル選択ダイアログが表示されること、またはinput[type=file]が表示されることを確認する
+    5. 子テーブル用CSVファイルをセットしてインポートを実行する
+    6. 子テーブルの入力欄に読み込んだデータが反映されることを確認する
+    7. .alert-danger が表示されていないことを確認する
 - case_no: '808'
   sheet: B
   feature: 追加実装
@@ -360,6 +644,15 @@ cases:
     ③通常のフィルタであれば反映。
   expected: バグが修正され、正常に動作すること。(テーブル：営業活動記録（dataset__119） フィルタ：札幌抽出  該当フィルタは、添付画像一枚目のような設定がされています。  フィルタの結果件数は添付画像二枚目のように7件です（2024/1)
   movie: CE05
+  detailed_flow: |
+    1. /api/admin/debug/create-all-type-data でテスト用レコードを複数件（10件以上）作成する
+    2. /admin/dataset__{tableId} に遷移する
+    3. 詳細フィルターを設定してレコード数を絞り込む（例: 簡易検索でフィルタ適用）
+    4. 表示されているレコード件数（ページヘッダーの件数）を確認する
+    5. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でモーダルを開く
+    6. 「CSVに現在のフィルタを反映する」チェックボックスがONであることを確認する
+    7. ダウンロードボタンをクリックしてCSVをダウンロードする
+    8. ダウンロードされたCSVの行数が画面に表示されているフィルター適用後の件数と一致することを確認する
 - case_no: '626'
   sheet: B
   feature: CSV DL
@@ -370,6 +663,15 @@ cases:
     ④レコードID1001以上のユーザーの組織欄が空欄にならず、正しく出力されていることを確認する
   expected: ユーザーテーブルのCSVダウンロードでレコードID1001以上のユーザーの組織が正しく出力されること
   movie: UC11
+  detailed_flow: |
+    1. /admin/user （ユーザー管理テーブル）に遷移する
+    2. 組織が設定されているユーザーが存在することを確認する
+    3. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    4. a.dropdown-item:has-text("CSVダウンロード") をクリックする
+    5. .modal.show が表示されることを確認する
+    6. ダウンロードボタンをクリックしてCSVをダウンロードする
+    7. ダウンロードされたCSVを解析し、組織欄（org等のヘッダー列）が空欄でないことを確認する
+    8. .alert-danger が表示されていないことを確認する
 - case_no: '674'
   sheet: B
   feature: CSV DL
@@ -380,6 +682,14 @@ cases:
     ④ラベルが空白の場合でも値が正しくダウンロードされることを確認する
   expected: Yes/Noフィールドのラベルが空白でもCSVダウンロード時にフィルタ反映の値が正しく出力されること
   movie: UC13
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} でYes/Noフィールドのラベルを空白に設定して保存する
+    2. /admin/dataset__{tableId}/add で当該フィールドがYes（有効）のレコードを登録する
+    3. /admin/dataset__{tableId} でフィルターを適用する（簡易検索 input#search_input）
+    4. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でモーダルを開く
+    5. 「CSVに現在のフィルタを反映する」がONであることを確認する
+    6. ダウンロードボタンをクリックしてCSVをダウンロードする
+    7. ダウンロードしたCSVのYes/Noフィールド列に値が出力されていることを確認する（空欄でないこと）
 - case_no: '731'
   sheet: B
   feature: CSV UL
@@ -390,6 +700,14 @@ cases:
     ④アップロード完了後に結果が正しく反映されていることを確認する
   expected: CSVアップロード時に進捗状況がプログレスバー等で表示されること
   movie: UC17
+  detailed_flow: |
+    1. /admin/dataset__{tableId} に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でCSVアップロードモーダルを開く
+    3. .modal.show が表示されることを確認する
+    4. テスト用CSVファイルをinput[type=file]にセットしてアップロードボタンをクリックする
+    5. アップロード中にプログレスバー（.progress, .progress-bar）または処理中表示が表示されることを確認する
+    6. /admin/csv でアップロートが完了していることを確認する（ステータスが成功）
+    7. /admin/dataset__{tableId} でアップロードしたデータが反映されていることを確認する
 - case_no: '736'
   sheet: B
   feature: CSV主キー
@@ -399,6 +717,12 @@ cases:
     ③「計算項目は設定できません」の注意書きが表示されていることを確認する
   expected: CSVアップロードの主キー設定画面に「計算項目は設定できません」の注意書きが表示されていること
   movie: UC17
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} を開く
+    2. a.nav-link:has-text("CSV") をクリックしてCSVタブを開く
+    3. 「主キー設定」セクションを探す（h3:has-text("主キー"), label:has-text("主キー")等）
+    4. 主キー設定の選択肢または注意書き欄に「計算項目は設定できません」のテキストが表示されていることを確認する（expect(page.locator('body')).toContainText("計算項目は設定できません")）
+    5. .alert-danger が表示されていないことを確認する
 - case_no: '752'
   sheet: B
   feature: CSV UL
@@ -410,6 +734,13 @@ cases:
     ⑤日時項目の項目編集画面に規定フォーマットの注意書きが表示されていることを確認する
   expected: 日時項目のCSVアップロードで規定フォーマット以外はアラート表示され、項目編集画面に規定フォーマットの注意書きがあること
   movie: UC18
+  detailed_flow: |
+    1. /admin/dataset/edit/{tableId} で年月フィールドの設定画面を開き、規定フォーマット注意書き（Y-m, Y年m月等）が表示されていることを確認する
+    2. 規定フォーマット「2024-03」を含むCSVファイルを作成してアップロードする
+    3. /admin/csv で正常に処理されたことを確認する
+    4. /admin/dataset__{tableId} でレコードが登録されていることを確認する
+    5. 規定外フォーマット「2024/03/15」を含むCSVファイルを作成してアップロードする
+    6. /admin/csv でエラーまたは警告（「既定のフォーマットではないため更新されませんでした」等）が表示されることを確認する
 - case_no: '696'
   sheet: B
   feature: ルックアップ項目のCSVダウンロード文字数制限
@@ -419,6 +750,13 @@ cases:
     ③CSVファイルを確認し、ルックアップ項目の値が文字数制限で途切れずに全文出力されていることを確認する
   expected: ルックアップ先に一覧表示文字数が設定されていても、CSVダウンロード時は全文が出力されること
   movie: UC14
+  detailed_flow: |
+    1. 参照先テーブルの文字列(複数行)フィールドに一覧表示文字数（例: 10文字）を設定して保存する
+    2. 参照先テーブルに長文テキスト（20文字以上）を持つレコードを登録する
+    3. ルックアップ元テーブル（/admin/dataset__{tableId}）で参照先レコードを参照するレコードを登録する
+    4. 簡易検索でフィルターを適用する
+    5. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") でCSVをダウンロードする
+    6. ダウンロードしたCSVのルックアップフィールド列が一覧表示文字数で切られず全文が出力されていることを確認する
 - case_no: '656'
   sheet: B
   feature: CSVダウンロードのフィルター反映デフォルトON
@@ -428,6 +766,15 @@ cases:
     ③そのままCSVダウンロードを実行し、フィルター適用済みのデータのみが出力されることを確認する
   expected: CSVダウンロード時の「CSVに現在のフィルタを反映する」がデフォルトONであること
   movie: UC12
+  detailed_flow: |
+    1. /admin/dataset__{tableId} に遷移する
+    2. 簡易検索 input#search_input にテキストを入力してEnterキーを押しフィルターを適用する
+    3. button.dropdown-toggle:has(.fa-bars) をクリックしてドロップダウンを開く
+    4. a.dropdown-item:has-text("CSVダウンロード") をクリックする
+    5. .modal.show が表示されることを確認する
+    6. 「CSVに現在のフィルタを反映する」チェックボックス（input[type=checkbox]）がデフォルトでチェック済み（checked）であることを確認する（expect(page.locator('input[type=checkbox]').filter({hasText:'フィルタ'})).toBeChecked()）
+    7. ダウンロードボタンをクリックしてCSVをダウンロードする
+    8. .alert-danger が表示されていないことを確認する
 - case_no: '667'
   sheet: B
   feature: CSVアップロード時のデータリセット警告
@@ -437,6 +784,15 @@ cases:
     ③赤文字の大きなアラート「テーブル内のデータが全削除されます。一度削除したデータは元に戻せません。全削除してよろしいでしょうか？」が表示されることを確認する
   expected: データリセット付きCSVアップロード時に、赤文字の大きな警告アラートが表示されること
   movie: UC13
+  detailed_flow: |
+    1. /admin/dataset__{tableId} に遷移する
+    2. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でCSVアップロードモーダルを開く
+    3. .modal.show が表示されることを確認する
+    4. 「アップロード前にデータをリセットする」チェックボックス（input[type=checkbox]）をチェックする
+    5. テスト用CSVファイルをinput[type=file]にセットする
+    6. アップロードボタン（button:has-text("アップロード")）をクリックする
+    7. 赤文字の警告アラート（.alert-danger または text:has-text("全削除")）が表示されることを確認する
+    8. アラートに「テーブル内のデータが全削除されます」のテキストが含まれることを確認する（expect(page.locator('.alert-danger, [class*="alert"]')).toContainText("全削除")）
 - case_no: '712'
   sheet: B
   feature: 必須複数値他テーブル参照のCSVアップロード更新（列なし）
@@ -448,6 +804,15 @@ cases:
     ⑤既存の他テーブル参照値が変更されていないことを確認する
   expected: 必須の複数値他テーブル参照項目の列がCSVになくてもエラーにならず、既存値が維持されること
   movie: UC15
+  detailed_flow: |
+    1. 必須設定の他テーブル参照フィールド（複数値許可）を持つテーブル（/admin/dataset__{tableId}）を用意する
+    2. /admin/dataset__{tableId}/add で他テーブル参照フィールドに値を設定したレコードを登録する
+    3. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVダウンロード") で全件CSVをダウンロードする
+    4. ダウンロードしたCSVから他テーブル参照フィールドの列を削除したCSVファイルを作成する
+    5. button.dropdown-toggle:has(.fa-bars) → a:has-text("CSVアップロード") でCSVアップロードモーダルを開く
+    6. 修正CSVをinput[type=file]にセットしてアップロードする（更新モードの場合はIDを含めることでupsertになる）
+    7. /admin/csv でアップロートが成功したことを確認する（エラーなし）
+    8. /admin/dataset__{tableId}/{recordId} でレコード詳細を確認し、他テーブル参照値が元の値のまま維持されていることを確認する
 actual_steps:
 - case_no: 55-1
   status: partial
@@ -546,142 +911,3 @@ actual_steps:
     ⚠️ YAMLには「Excelファイルをアップロードして項目名変更UI確認」が期待されるが未実装
     ⚠️ Excelファイルの実際アップロードなし
     ⚠️ メニューが表示されない場合（管理者権限確認コメント）でもパスする
-- case_no: 181
-  status: partial
-  steps: |
-    1. テーブルに遷移
-    2. CSVアップロードモーダルを開く
-    3. モーダルのタイトルが「CSVアップロード」を含むことを確認
-    4. ガイドテキスト（.text-danger）の表示確認
-    5. ファイル入力（#inputCsv）の存在確認
-    6. 「CSVダウンロード」ボタンの表示確認
-    7. モーダルを閉じる
-  assertions: |
-    - await expect(modal).toBeVisible()
-    - await expect(modalTitle).toContainText('CSVアップロード')
-    - await expect(guideText).toBeVisible()
-    - await expect(fileInput).toBeAttached()
-    - await expect(csvDlBtn).toBeVisible()
-  gaps: |
-    ⚠️ YAMLでは「複数選択最低数設定後のCSVアップロード」の検証が期待されるが、実際のCSVアップロードなし
-    ⚠️ 複数選択最低数の設定操作なし
-    ⚠️ アップロード後のデータ検証なし
-- case_no: 193-1
-  status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動
-    2. スイッチ4番目（必須項目空許可ON）の状態確認
-    3. OFFの場合はONにしてスイッチをクリック
-    4. 更新ボタンをクリックして保存
-    5. .alert-danger が0件であることを確認
-  assertions: |
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ YAMLでは「必須項目を空白にしたCSVをアップロードしてエラー確認/許可確認」が期待されるが未実装
-    ⚠️ スイッチON後の実際のCSVアップロードによる動作確認なし
-    ⚠️ スイッチが4番目にない場合（switchCount < 5）はcsvTab.lengthの確認のみ
-- case_no: 193-2
-  status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動
-    2. スイッチ4番目をOFFにして保存
-    3. .alert-danger が0件であることを確認
-  assertions: |
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ 193-1と同様、OFFにした場合の実際のCSVアップロードによる動作確認なし
-- case_no: 194-1
-  status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動
-    2. スイッチ6番目（選択肢自動追加ON）の状態確認
-    3. OFFの場合はONにして保存
-    4. .alert-danger が0件であることを確認
-  assertions: |
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ 選択肢自動追加が実際に機能するかの確認なし
-    ⚠️ 実際のCSVアップロードで選択肢が自動追加されるか未検証
-- case_no: 194-2
-  status: partial
-  steps: |
-    1. テーブル編集画面のCSVタブに移動
-    2. スイッチ6番目をOFFにして保存
-    3. .alert-danger が0件であることを確認
-  assertions: |
-    - expect(await page.locator('.alert-danger').count()).toBe(0)
-  gaps: |
-    ⚠️ 194-1と同様
-- case_no: 224
-  status: partial
-  steps: |
-    1. データセット一覧（/admin/dataset）から対象テーブルリンクをクリックして遷移
-    2. テーブルデータのチェックボックスを1件チェック
-    3. 「JSONエクスポート」ボタンをクリック
-    4. エクスポートモーダルが表示されることを確認
-    5. 「ダウンロードオプション」タイトルの表示確認
-    6. データ・権限・フィルタ・通知の4チェックボックスが存在することを確認
-    7. 各チェックボックスをクリック
-    8. エクスポートボタンの表示確認
-    9. モーダルを閉じる
-  assertions: |
-    - await expect(exportModal).toBeVisible()
-    - await expect(optionTitle).toBeVisible()
-    - await expect(dataCheckbox).toBeAttached()
-    - await expect(grantCheckbox).toBeAttached()
-    - await expect(filterCheckbox).toBeAttached()
-    - await expect(notificationCheckbox).toBeAttached()
-    - await expect(exportExecuteBtn).toBeVisible()
-  gaps: |
-    ⚠️ 実際のJSONエクスポートを実行してダウンロードファイルの内容確認なし
-    ⚠️ チェックボックスのON/OFFによるエクスポート内容の変化確認なし
-- case_no: 231
-  status: partial
-  steps: |
-    1. テーブル編集画面で数値フィールドの存在確認（console.log）
-    2. テーブルに遷移
-    3. applyQuickSearchFilter()でフィルター適用
-    4. openCsvDownloadModal()でCSVダウンロードモーダルを開く
-    5. モーダルの表示確認
-    6. ダウンロードボタンの表示確認
-    7. モーダルを閉じる
-  assertions: |
-    - await expect(modal).toBeVisible()
-    - await expect(downloadBtn).toBeVisible()
-  gaps: |
-    ⚠️ YAMLでは「数値フィールドのカンマ区切り設定をしたCSVをダウンロードして内容確認」が期待されるが未実装
-    ⚠️ 実際のCSVダウンロードと数値フォーマット確認なし
-- case_no: 233
-  status: partial
-  steps: |
-    1. テーブルに遷移
-    2. CSVアップロードモーダルを開く
-    3. モーダルの注意書き（.text-danger）の表示確認
-    4. モーダルボディのHTML長さが0より大きいことを確認
-    5. ファイル入力の存在確認
-    6. モーダルを閉じる
-  assertions: |
-    - await expect(warningText).toBeVisible()
-    - expect(modalBody.length).toBeGreaterThan(0)
-    - await expect(fileInput).toBeAttached()
-  gaps: |
-    ⚠️ 実際のCSVアップロード（他テーブル参照・数値・単位記号含む）の動作確認なし
-    ⚠️ アップロード後のデータ検証なし
-- case_no: 255
-  status: partial
-  steps: |
-    1. テーブルに遷移
-    2. applyQuickSearchFilter()でフィルター適用
-    3. openCsvDownloadModal()でCSVダウンロードモーダルを開く
-    4. モーダルが表示されることを確認
-    5. ダウンロードボタンが表示されることを確認
-    6. ダウンロードボタンをクリックしてダウンロードイベントを待機
-    7. ダウンロードが開始された場合はファイル名を確認
-  assertions: |
-    - await expect(csvModal).toBeVisible()
-    - await expect(downloadBtn).toBeVisible()
-    - if (download) { expect(fileName).toBeTruthy() }
-  gaps: |
-    ⚠️ ダウンロードイベントが取れない場合でもパスする（条件付きアサーション）
-    ⚠️ CSVの実際の内容（データ行数・フォーマット等）確認なし
-    ⚠️ ファイル名の形式確認が不十分（Truthyチェックのみ）

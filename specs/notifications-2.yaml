@@ -8,249 +8,609 @@ cases:
   expected: |
     エラーが発生しないこと
   movie: N201
+  detailed_flow: |
+    1. /admin/mail_template を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. button:has-text("追加") または a:has-text("追加")（追加ボタン）をクリック
+    7. テキストタイプ選択で「TEXT」を選択
+    8. 件名・本文を入力して登録ボタンをクリック
+    9. エラーメッセージが表示されないことを確認
+
 - case_no: 99-2
   feature: メール配信・通知
   description: ①メールテンプレートをテキストタイプHTMLで新規作成がエラーなく行えること
   expected: |
     エラーが発生しないこと
   movie: N201
+  detailed_flow: |
+    1. /admin/mail_template を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. button:has-text("追加") または a:has-text("追加")（追加ボタン）をクリック
+    6. テキストタイプ選択で「HTML」を選択（option:has-text("HTML") または input[value="html"]）
+    7. 件名・本文を入力して登録ボタンをクリック
+    8. エラーメッセージが表示されないことを確認
+
 - case_no: 99-3
   feature: メール配信・通知
   description: ①メールテンプレートの削除がエラーなく行えること
   expected: |
     エラーが発生しないこと
   movie: N201
+  detailed_flow: |
+    1. /admin/mail_template を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. button:has-text("削除"), .fa-trash, a:has-text("削除")（削除ボタン）の存在を確認
+    7. 削除ボタンが存在する場合クリックして確認ダイアログで「はい」をクリック
+    8. エラーメッセージが表示されないことを確認
+
 - case_no: 99-4
   feature: メール配信・通知
   description: ①メールテンプレートで必須項目未入力のまま登録するとエラーが発生すること
   expected: |
     メールテンプレートで必須項目未入力のまま登録するとエラーが発生すること
   movie: N201
+  detailed_flow: |
+    1. /admin/mail_template を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. button:has-text("追加") または a:has-text("追加")（追加ボタン）をクリック
+    5. 必須項目（件名・本文など）を入力せずに button[type="submit"] または button:has-text("登録") をクリック
+    6. .alert-danger, .error, .invalid-feedback, .text-danger（エラーメッセージ）が表示されることを確認
+
 - case_no: 99-5
   feature: メール配信・通知
   description: ①配信リストの新規追加がエラーなく行えること
   expected: |
     エラーが発生しないこと
   movie: N202
+  detailed_flow: |
+    1. /admin/mail_list を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. button:has-text("追加") または a:has-text("追加")（追加ボタン）の存在を確認
+    7. 追加ボタンをクリックして新規追加フォームが開くことを確認
+    8. エラーメッセージが表示されないことを確認
+
 - case_no: 99-6
   feature: メール配信・通知
   description: ①配信リストの削除がエラーなく行えること
   expected: |
     エラーが発生しないこと
   movie: N202
+  detailed_flow: |
+    1. /admin/mail_list を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. button:has-text("削除"), .fa-trash, [data-action="delete"]（削除ボタン）の存在を確認
+    7. 削除ボタンが存在する場合クリックして確認ダイアログで「はい」をクリック
+    8. エラーメッセージが表示されないことを確認
+
 - case_no: 99-7
   feature: メール配信・通知
   description: ①配信リストで必須項目未入力のまま登録するとエラーが発生すること
   expected: |
     配信リストで必須項目未入力のまま登録するとエラーが発生すること
   movie: N202
+  detailed_flow: |
+    1. /admin/mail_list を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. button:has-text("追加") または a:has-text("追加")（追加ボタン）をクリック
+    5. 必須項目（配信リスト名など）を入力せずに button[type="submit"] または button:has-text("登録") をクリック
+    6. .alert-danger, .error, .invalid-feedback, .text-danger（エラーメッセージ）が表示されることを確認
+
 - case_no: 99-8
   feature: メール配信・通知
   description: ①メール配信の新規追加がエラーなく行えること
   expected: |
     エラーが発生しないこと
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. button:has-text("追加") または a:has-text("追加")（追加ボタン）の存在を確認
+    7. 追加ボタンをクリックして新規メール配信設定フォームが開くことを確認
+    8. エラーメッセージが表示されないことを確認
+
 - case_no: 99-9
   feature: メール配信・通知
   description: ①メール配信設定の削除がエラーなく行えること
   expected: |
     エラーが発生しないこと
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. button:has-text("削除"), .fa-trash, [data-action="delete"]（削除ボタン）の存在を確認
+    7. 削除ボタンが存在する場合クリックして確認ダイアログで「はい」をクリック
+    8. エラーメッセージが表示されないことを確認
+
 - case_no: 99-10
   feature: メール配信・通知
   description: ①メール配信で必須項目未入力のまま登録するとエラーが発生すること
   expected: |
     メール配信で必須項目未入力のまま登録するとエラーが発生すること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. button:has-text("追加") または a:has-text("追加")（追加ボタン）をクリック
+    5. 必須項目（件名・配信リスト・テンプレートなど）を入力せずに button[type="submit"] または button:has-text("登録") をクリック
+    6. .alert-danger, .error, .invalid-feedback, .text-danger（エラーメッセージ）が表示されることを確認
+
 - case_no: 99-11
   feature: メール配信・通知
   description: ①メール配信設定でフィルタなしの場合に設定通りの配信設定画面が確認できること
   expected: |
     メール配信設定でフィルタなしの場合に設定通りの配信設定画面が確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. メール配信設定一覧が表示されていること（フィルタなし設定のエントリが確認できること）
+
 - case_no: 99-12
   feature: メール配信・通知
   description: ①メール配信設定でフィルタあり場合の配信設定画面が確認できること
   expected: |
     メール配信設定でフィルタあり場合の配信設定画面が確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. メール配信設定一覧が表示されていること（フィルタあり設定のエントリが確認できること）
+
 - case_no: 99-13
   feature: メール配信・通知
   description: ①配信リストに設定済みのメールアドレス項目削除制限の設定画面が確認できること
   expected: |
     配信リストに設定済みのメールアドレス項目削除制限の設定画面が確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_list を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. 配信リストが存在する場合、メールアドレス項目の削除を試みて削除制限エラーが表示されることを確認
+
 - case_no: 99-14
   feature: メール配信・通知
   description: ①配信リストに設定済みのテーブル削除制限の設定画面が確認できること
   expected: |
     配信リストに設定済みのテーブル削除制限の設定画面が確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_list を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. 配信リストが存在する場合、参照テーブルの削除を試みて削除制限エラーが表示されることを確認
+
 - case_no: 99-15
   feature: メール配信・通知
   description: ①配信リストに設定済みのフィルタ削除制限の設定画面が確認できること
   expected: |
     配信リストに設定済みのフィルタ削除制限の設定画面が確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_list を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. 配信リストが存在する場合、使用中フィルタの削除を試みて削除制限エラーが表示されることを確認
+
 - case_no: 99-16
   feature: メール配信・通知
   description: ①メール配信設定でメールテンプレート設定UIが確認できること
   expected: |
     メール配信設定でメールテンプレート設定UIが確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. /admin/mail_template を開く
+    6. Angular初期化を待つ
+    7. ページが /admin/ のURLを含むことを確認
+    8. メールテンプレート一覧が表示されていることを確認
+
 - case_no: 99-17
   feature: メール配信・通知
   description: ①メール配信設定で配信リスト設定UIが確認できること
   expected: |
     メール配信設定で配信リスト設定UIが確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_list を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. 配信リスト一覧が表示されていることを確認
+
 - case_no: 99-18
   feature: メール配信・通知
   description: ①予約日時の10分前になると配信キャンセル・変更ができない旨のエラーが出力されること（時間依存のため手動確認）
   expected: |
     予約日時の10分前になると配信キャンセル・変更ができない旨のエラーが出力されること（時間依存のため手動確認）
   movie: N203
+  detailed_flow: |
+    1. このテストは予約日時10分前という時間依存条件のため自動テスト不可
+    2. test.skip(true, '予約日時10分前という時間依存条件のため自動テスト不可（手動確認が必要）') でスキップ
+    3. 手動確認: /admin/mail_delivery でメール配信を予約し、10分前に編集・キャンセルを試みてエラーが表示されることを確認
+
 - case_no: 99-19
   feature: メール配信・通知
   description: ①メール配信設定一覧ページに編集・詳細アイコンが表示されること
   expected: |
     メール配信設定一覧ページに編集・詳細アイコンが表示されること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. a[href*="edit"], button:has-text("編集"), .fa-edit, .fa-pencil（編集アイコン）の存在を確認
+    6. a[href*="detail"], a[href*="show"], .fa-eye, .fa-search（詳細アイコン）の存在を確認
+
 - case_no: 99-20
   feature: メール配信・通知
   description: ①メール配信設定ページが正常に表示されること（配信中/配信済みの編集不可確認）
   expected: |
     エラーなくページが正常に表示されること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. 配信中・配信済みステータスのエントリが存在する場合、編集ボタンが無効・非表示であることを確認
+
 - case_no: 99-21
   feature: メール配信・通知
   description: ①メール配信設定ページで一括削除機能のUIが確認できること
   expected: |
     メール配信設定ページで一括削除機能のUIが確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. input[type="checkbox"]（チェックボックス）の存在を確認
+    6. button:has-text("一括") または button:has-text("削除")（一括操作ボタン）の存在を確認
+    7. 一括削除UIが表示されていることを確認
+
 - case_no: 99-22
   feature: メール配信・通知
   description: ①メール配信設定ページで複数選択時の一括操作UIが確認できること
   expected: |
     メール配信設定ページで複数選択時の一括操作UIが確認できること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. input[type="checkbox"]（チェックボックス）が複数存在する場合、複数チェックして一括操作UIが活性化されることを確認
+    6. 一括操作ボタン・UIが表示されることを確認
+
 - case_no: 142-01
   feature: メール配信・通知
   description: ①メール配信で添付ファイルを設定するとエラーなく配信でき添付ファイルが届くこと
   expected: |
     エラーが発生しないこと
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_delivery/edit/new（メール配信設定新規作成ページ）を開く
+    2. ページが domcontentloaded まで待つ
+    3. Angular初期化（body[data-ng-ready="true"]）を待つ
+    4. ページが /admin/ のURLを含むことを確認
+    5. body に「Internal Server Error」が含まれないことを確認
+    6. input[type="file"], input[name*="attach"], [class*="attach"]（添付ファイル入力欄）の存在を確認
+    7. 添付ファイル入力欄が存在する場合 /app/test_files/ok.png をアップロード
+    8. .alert-danger, .error-message などのエラーメッセージが表示されないことを確認
+
 - case_no: 150-1
   feature: メール配信・通知
   description: ①ステップメール設定で必須項目未入力のまま登録するとエラーが発生すること
   expected: |
     ステップメール設定で必須項目未入力のまま登録するとエラーが発生すること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. button:has-text("追加") または a:has-text("追加")（追加ボタン）をクリック
+    7. 必須項目（ステップメール名・テーブルなど）を入力せずに button[type="submit"] または button:has-text("登録") をクリック
+    8. .alert-danger, .error, .invalid-feedback, .text-danger（エラーメッセージ）が表示されることを確認
+
 - case_no: 150-2
   feature: メール配信・通知
   description: ①ステップメール設定ページが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. ステップメール設定一覧ページが正常に表示されていることを確認
+
 - case_no: 150-8
   feature: メール配信・通知
   description: ①ステップメール設定の有効/無効切り替えUIが存在すること
   expected: |
     ステップメール設定の有効/無効切り替えUIが存在すること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. input[type="checkbox"], .toggle-switch, label:has-text("有効"), label:has-text("無効")（有効/無効切り替えUI）が存在することを確認
+
 - case_no: 150-9
   feature: メール配信・通知
   description: ①ステップメール設定の有効化UIが確認できること
   expected: |
     ステップメール設定の有効化UIが確認できること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. ステップメール設定の有効化ボタン/トグル（input[type="checkbox"], label:has-text("有効")）が表示されることを確認
+    6. 有効化UIをクリックして有効化操作が行えることを確認
+
 - case_no: 156-1
   feature: メール配信・通知
   description: ①配信メールでラベル名タグ置換機能のUI設定が確認できること
   expected: |
     配信メールでラベル名タグ置換機能のUI設定が確認できること
   movie: N205
+  detailed_flow: |
+    1. /admin/mail_template を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. メールテンプレート一覧が表示されることを確認
+    6. テンプレートの編集ページ（a[href*="edit"] クリック）を開く
+    7. 本文入力欄にラベル名タグ置換プレースホルダー（例: {フィールド名}）を入力できる設定UIが表示されることを確認
+
 - case_no: '157'
   feature: メール配信・通知
   description: ①ステップメール設定でテンプレート＋カスタム混在の設定UIが確認できること
   expected: |
     ステップメール設定でテンプレート＋カスタム混在の設定UIが確認できること
   movie: N205
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. ステップメール設定ページが正常に表示されることを確認
+    6. テンプレートとカスタム文面を混在して設定するUIが表示されることを確認（テンプレート選択UI + カスタム本文入力欄）
+
 - case_no: '197'
   feature: メール配信・通知
   description: ①メール配信でCC/BCC設定UIが確認できること
   expected: |
     メール配信でCC/BCC設定UIが確認できること
   movie: N205
+  detailed_flow: |
+    1. /admin/mail_delivery/edit/new（メール配信設定新規作成ページ）を開く
+    2. ページが domcontentloaded まで待つ
+    3. Angular初期化（body[data-ng-ready="true"]）を待つ
+    4. ページが /admin/ のURLを含むことを確認
+    5. body に「Internal Server Error」が含まれないことを確認
+    6. input[name*="cc"], input[placeholder*="CC"], label:has-text("CC")（CC入力欄）の存在を確認
+    7. input[name*="bcc"], input[placeholder*="BCC"], label:has-text("BCC")（BCC入力欄）の存在を確認
+
 - case_no: '201'
   feature: メール配信・通知
   description: ①メール配信でファイル項目呼び出しCC/BCC設定のUIが確認できること
   expected: |
     メール配信でファイル項目呼び出しCC/BCC設定のUIが確認できること
   movie: N205
+  detailed_flow: |
+    1. /admin/mail_delivery/edit/new（メール配信設定新規作成ページ）を開く
+    2. ページが domcontentloaded まで待つ
+    3. Angular初期化（body[data-ng-ready="true"]）を待つ
+    4. ページが /admin/ のURLを含むことを確認
+    5. body に「Internal Server Error」が含まれないことを確認
+    6. ファイル項目からCC/BCCを設定するUIが表示されることを確認
+
 - case_no: '218'
   feature: メール配信・通知
   description: ①配信リストの画面下部に配信先一覧が表示されること
   expected: |
     配信リストの画面下部に配信先一覧が表示されること
   movie: N203
+  detailed_flow: |
+    1. /admin/mail_list を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. .content, .main-content, main などのコンテンツ領域が表示されることを確認
+    6. 配信リストのページ下部に配信先一覧テーブルまたはリストが表示されることを確認
+
 - case_no: 102-7
   feature: メール配信・通知
   description: ①通知設定でワークフロー全ステータスチェック時の設定UIが確認できること（複数承認者）
   expected: |
     通知設定でワークフロー全ステータスチェック時の設定UIが確認できること（複数承認者）
   movie: N206
+  detailed_flow: |
+    1. /admin/notification を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. 通知設定ページが表示されることを確認
+    6. ワークフロー通知設定セクションが表示されること（label:has-text("ワークフロー") または .workflow-notification 等）
+    7. 複数承認者設定のUIが存在することを確認
+
 - case_no: 102-8
   feature: メール配信・通知
   description: ①通知設定でワークフロー全ステータスチェック時の否認時通知設定UIが確認できること
   expected: |
     通知設定でワークフロー全ステータスチェック時の否認時通知設定UIが確認できること
   movie: N206
+  detailed_flow: |
+    1. /admin/notification を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. 通知設定ページが表示されることを確認
+    6. ワークフロー否認時通知設定のUIが表示されること（label:has-text("否認") 等）
+
 - case_no: 102-9
   feature: メール配信・通知
   description: ①通知設定でワークフロー全ステータスチェック時の組織宛て申請通知設定UIが確認できること
   expected: |
     通知設定でワークフロー全ステータスチェック時の組織宛て申請通知設定UIが確認できること
   movie: N206
+  detailed_flow: |
+    1. /admin/notification を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. 通知設定ページが表示されることを確認
+    6. 組織宛て申請通知設定のUIが表示されること（label:has-text("組織") または組織設定関連要素）
+
 - case_no: 102-10
   feature: メール配信・通知
   description: ①通知設定でワークフロー全ステータスチェック時の取り下げ通知設定UIが確認できること
   expected: |
     通知設定でワークフロー全ステータスチェック時の取り下げ通知設定UIが確認できること
   movie: N206
+  detailed_flow: |
+    1. /admin/notification を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. 通知設定ページが表示されることを確認
+    6. ワークフロー取り下げ時通知設定のUIが表示されること（label:has-text("取り下げ") 等）
+
 - case_no: 150-3
   feature: メール配信・通知
   description: ①ステップメール設定で送信時刻を0時台に設定できるUIが確認できること
   expected: |
     ステップメール設定で送信時刻を0時台に設定できるUIが確認できること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. ステップメール設定の編集ページ（a[href*="edit"] クリック）を開く
+    6. 送信時刻の時間入力フィールド（select または input[type="number"]）が表示されることを確認
+    7. 時間を「0」に設定できることを確認（0時台の選択が可能であること）
+
 - case_no: 150-4
   feature: メール配信・通知
   description: ①ステップメール設定で文面・添付ファイル設定のUIが確認できること
   expected: |
     ステップメール設定で文面・添付ファイル設定のUIが確認できること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. ステップメール設定の編集ページ（a[href*="edit"] クリック）を開く
+    6. 文面入力欄（textarea または froalaエディタ）が表示されることを確認
+    7. input[type="file"]（添付ファイル設定欄）が表示されることを確認
+
 - case_no: 150-5
   feature: メール配信・通知
   description: ①ステップメール設定で複数ステップ設定のUIが確認できること
   expected: |
     ステップメール設定で複数ステップ設定のUIが確認できること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. ステップメール設定の編集ページを開く
+    6. 複数のステップを追加するUIが表示されることを確認（ステップ一覧または追加ボタン）
+    7. 複数ステップの設定が可能なUIが表示されていることを確認
+
 - case_no: 150-6
   feature: メール配信・通知
   description: ①ステップメール設定で+追加するボタンで複数ステップを追加するUIが確認できること
   expected: |
     ステップメール設定で+追加するボタンで複数ステップを追加するUIが確認できること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. button:has-text("追加"), a:has-text("追加"), button.btn-add, .fa-plus（+追加ボタン）の存在を確認
+    6. 追加ボタンをクリックして新しいステップ設定行が追加されることを確認
+
 - case_no: 150-7
   feature: メール配信・通知
   description: ①ステップメール設定で更に複数ステップを追加するUIが確認できること
   expected: |
     ステップメール設定で更に複数ステップを追加するUIが確認できること
   movie: N204
+  detailed_flow: |
+    1. /admin/step_mail を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. ステップメール設定の編集ページを開く
+    6. ステップ追加ボタンを複数回クリックして複数ステップが追加できることを確認
+    7. 3つ以上のステップ設定行が表示されることを確認
+
 - case_no: 156-2
   feature: メール配信・通知
   description: ①配信メールでHTMLタイプのメールテンプレート設定UIが確認できること
   expected: |
     配信メールでHTMLタイプのメールテンプレート設定UIが確認できること
   movie: N205
+  detailed_flow: |
+    1. /admin/mail_template を開く
+    2. Angular初期化（body[data-ng-ready="true"]）を待つ
+    3. ページが /admin/ のURLを含むことを確認
+    4. body に「Internal Server Error」が含まれないことを確認
+    5. option:has-text("HTML"), label:has-text("HTML"), input[value="html"]（HTMLタイプ選択UI）の存在を確認
+    6. メールテンプレートの新規作成ページを開いてHTMLタイプが選択可能であることを確認
