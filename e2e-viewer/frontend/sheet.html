@@ -84,6 +84,13 @@
 
     /* 同期ボタン */
     .sync-btn { font-size: .75rem; }
+
+    /* movieグループヘッダー */
+    .movie-header { background: #e3f2fd !important; cursor: pointer; }
+    .movie-header:hover { background: #bbdefb !important; }
+    .movie-header td { padding: 8px 12px !important; font-weight: 700; font-size: .85rem; }
+    .movie-group-row td:first-child { padding-left: 24px !important; }
+    .movie-no-group td:first-child { padding-left: 12px !important; }
   </style>
 </head>
 <body>
@@ -597,7 +604,44 @@ function renderTable(items) {
       groups[spec].forEach(item => renderRow(tbody, item));
     });
   } else {
-    items.forEach(item => renderRow(tbody, item));
+    // specフィルタ時: movie単位でグループ化
+    const movieGroups = {};  // movie名 -> items[]
+    const noMovieItems = []; // movie未設定
+    items.forEach(i => {
+      if (i.movie) {
+        if (!movieGroups[i.movie]) movieGroups[i.movie] = [];
+        movieGroups[i.movie].push(i);
+      } else {
+        noMovieItems.push(i);
+      }
+    });
+
+    // movieグループを表示（movie名のアルファベット順）
+    const movieNames = Object.keys(movieGroups).sort();
+    movieNames.forEach(movie => {
+      const groupItems = movieGroups[movie];
+      const headerRow = tbody.insertRow();
+      headerRow.className = 'movie-header';
+      headerRow.setAttribute('data-movie-group', movie);
+      headerRow.onclick = function() { toggleMovieGroup(this); };
+      headerRow.innerHTML = `<td colspan="14">
+        <span class="movie-toggle-icon">&#9660;</span> ${escHtml(movie)} &#127916;
+        <span style="font-size:.8rem;color:#666;font-weight:normal">(${groupItems.length}ケース)</span>
+        <a href="#" onclick="playVideo('${escAttr(currentSpec)}','${escAttr(movie)}');event.stopPropagation();return false"
+           style="margin-left:10px;font-size:.8rem;font-weight:normal">動画再生</a>
+      </td>`;
+      groupItems.forEach(item => {
+        const row = renderRow(tbody, item);
+        if (row) row.classList.add('movie-group-row');
+        row.setAttribute('data-movie-parent', movie);
+      });
+    });
+
+    // movie未設定のアイテム
+    noMovieItems.forEach(item => {
+      const row = renderRow(tbody, item);
+      if (row) row.classList.add('movie-no-group');
+    });
   }
 }
 
@@ -654,6 +698,7 @@ function renderRow(tbody, item) {
     <td class="media-cell">${videoIcon}</td>
     <td>${updatedInfo}</td>
   `;
+  return row;
 }
 
 // =========================================
@@ -964,6 +1009,20 @@ function escAttr(str) {
     .replace(/"/g, '\\"')
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '');
+}
+
+// movieグループの折りたたみ/展開
+function toggleMovieGroup(headerRow) {
+  const movie = headerRow.getAttribute('data-movie-group');
+  const childRows = document.querySelectorAll(`tr[data-movie-parent="${movie}"]`);
+  const icon = headerRow.querySelector('.movie-toggle-icon');
+  const isCollapsed = headerRow.classList.toggle('collapsed');
+  childRows.forEach(row => {
+    row.style.display = isCollapsed ? 'none' : '';
+  });
+  if (icon) {
+    icon.innerHTML = isCollapsed ? '&#9654;' : '&#9660;'; // ▶ or ▼
+  }
 }
 </script>
 <!-- メディア表示モーダル -->
