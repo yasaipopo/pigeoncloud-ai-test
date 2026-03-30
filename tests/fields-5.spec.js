@@ -215,71 +215,72 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
         await closeTemplateModal(page);
     });
 
-    for (const { caseNo, fieldType, hasDisplayCondition, labelKeywords } of FIELD_TYPES) {
-        test(`${caseNo}: ${fieldType}フィールドの追加オプション（表示条件）UIが確認できること`, async ({ page }) => {
-            test.setTimeout(300000);
+    // F501: 全フィールドタイプの表示条件UIを1動画で確認
+    test('F501: フィールド追加オプション（表示条件）', async ({ page }) => {
+        test.setTimeout(300000);
 
-            expect(editUrl, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
+        expect(editUrl, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
-            await page.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
-            await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
-            // ALLテストテーブルは102フィールドあるため読み込みに時間がかかる
-            await page.waitForSelector('.overSetting', { timeout: 180000 });
-            await waitForAngular(page);
+        await page.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
+        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+        // ALLテストテーブルは102フィールドあるため読み込みに時間がかかる
+        await page.waitForSelector('.overSetting', { timeout: 180000 });
+        await waitForAngular(page);
 
-            let found = false;
+        for (const { caseNo, fieldType, hasDisplayCondition, labelKeywords } of FIELD_TYPES) {
+            await test.step(`${caseNo}: ${fieldType}フィールドの追加オプション（表示条件）UIが確認できること`, async () => {
+                const STEP_TIME = Date.now();
 
-            if (fieldType === '固定テキスト') {
-                // 固定テキストはlabelがないため特殊処理
-                found = await findFixedTextField(page);
-            } else {
-                // フィールドラベルからoverSettingインデックスを高速特定
-                const labelMap = await getFieldLabelMap(page);
-                const idx = findIndexByLabel(labelMap, labelKeywords);
-                console.log(`${caseNo}: labelMap lookup → index=${idx}`);
+                let found = false;
 
-                if (idx >= 0) {
-                    found = await openFieldDialogByIndex(page, idx, fieldType);
-                }
+                if (fieldType === '固定テキスト') {
+                    found = await findFixedTextField(page);
+                } else {
+                    const labelMap = await getFieldLabelMap(page);
+                    const idx = findIndexByLabel(labelMap, labelKeywords);
+                    console.log(`${caseNo}: labelMap lookup → index=${idx}`);
 
-                // フォールバック: 近い名前のフィールドを試す
-                if (!found && idx < 0) {
-                    console.log(`${caseNo}: フォールバック - overSetting全スキャン`);
-                    const overSettings = page.locator('.overSetting');
-                    const count = await overSettings.count();
-                    for (let i = 0; i < count && !found; i++) {
-                        found = await openFieldDialogByIndex(page, i, fieldType);
-                        if (!found) {
-                            await page.keyboard.press('Escape').catch(() => {});
-                            await page.waitForTimeout(200);
+                    if (idx >= 0) {
+                        found = await openFieldDialogByIndex(page, idx, fieldType);
+                    }
+
+                    if (!found && idx < 0) {
+                        console.log(`${caseNo}: フォールバック - overSetting全スキャン`);
+                        const overSettings = page.locator('.overSetting');
+                        const count = await overSettings.count();
+                        for (let i = 0; i < count && !found; i++) {
+                            found = await openFieldDialogByIndex(page, i, fieldType);
+                            if (!found) {
+                                await page.keyboard.press('Escape').catch(() => {});
+                                await page.waitForTimeout(200);
+                            }
                         }
                     }
                 }
-            }
 
-            expect(found, `フィールドタイプ "${fieldType}" がALLテストテーブルに存在すること`).toBeTruthy();
+                expect(found, `フィールドタイプ "${fieldType}" がALLテストテーブルに存在すること`).toBeTruthy();
 
-            if (hasDisplayCondition) {
-                const additionalOptionsBtn = page.locator('.modal.show button').filter({ hasText: '追加オプション設定' }).first();
-                await expect(additionalOptionsBtn).toBeVisible({ timeout: 60000 });
+                if (hasDisplayCondition) {
+                    const additionalOptionsBtn = page.locator('.modal.show button').filter({ hasText: '追加オプション設定' }).first();
+                    await expect(additionalOptionsBtn).toBeVisible({ timeout: 60000 });
 
-                await additionalOptionsBtn.click();
-                await waitForAngular(page);
+                    await additionalOptionsBtn.click();
+                    await waitForAngular(page);
 
-                const displayConditionSection = page.locator('.modal.show').locator('text=表示条件設定').first();
-                await expect(displayConditionSection).toBeVisible({ timeout: 60000 });
-                console.log(`${caseNo}: ${fieldType} - 表示条件設定セクション: 確認OK`);
+                    const displayConditionSection = page.locator('.modal.show').locator('text=表示条件設定').first();
+                    await expect(displayConditionSection).toBeVisible({ timeout: 60000 });
+                    console.log(`${caseNo}: ${fieldType} - 表示条件設定セクション: 確認OK (${Date.now() - STEP_TIME}ms)`);
 
-                const addConditionBtn = page.locator('.modal.show button').filter({ hasText: '条件追加' });
-                const btnCount = await addConditionBtn.count();
-                expect(btnCount).toBeGreaterThan(0);
-                console.log(`${caseNo}: ${fieldType} - 条件追加ボタン: ${btnCount}個確認OK`);
-            } else {
-                const modalH5 = page.locator('.modal.show h5').filter({ hasText: fieldType });
-                const modalOpen = await modalH5.count() > 0;
-                console.log(`${caseNo}: ${fieldType} - モーダル開閉確認: ${modalOpen}`);
-                expect(modalOpen).toBe(true);
-            }
-        });
-    }
+                    const addConditionBtn = page.locator('.modal.show button').filter({ hasText: '条件追加' });
+                    const btnCount = await addConditionBtn.count();
+                    expect(btnCount).toBeGreaterThan(0);
+                } else {
+                    const modalH5 = page.locator('.modal.show h5').filter({ hasText: fieldType });
+                    const modalOpen = await modalH5.count() > 0;
+                    console.log(`${caseNo}: ${fieldType} - モーダル開閉確認: ${modalOpen} (${Date.now() - STEP_TIME}ms)`);
+                    expect(modalOpen).toBe(true);
+                }
+            });
+        }
+    });
 });
