@@ -950,6 +950,8 @@ def pipeline_bulk_update(event):
         'yamlCheck': 'yamlCheckNote',
         'specCheck': 'specCheckNote',
         'runCheck': 'runCheckNote',
+        'stagingResult': 'stagingResultNote',
+        'mainResult': 'mainResultNote',
     }
     if field not in valid_fields:
         return response(400, {'error': f'不正なfield: {field}'})
