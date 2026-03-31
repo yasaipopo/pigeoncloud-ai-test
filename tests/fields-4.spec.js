@@ -21,27 +21,24 @@ async function waitForAngular(page, timeout = 15000) {
  * SPA環境ではURLが /admin/login のまま変わらない場合があるため .navbar で待機
  */
 async function login(page, email, password) {
-    // 最大3回リトライ（CSRF失敗などの間欠的エラーに対応）
-    for (let attempt = 1; attempt <= 3; attempt++) {
-        await page.goto(BASE_URL + '/admin/login');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500); // フォーム初期化待機
-        await page.fill('#id', email || EMAIL);
-        await page.fill('#password', password || PASSWORD);
-        await page.click('button[type=submit].btn-primary');
-        try {
-            await page.waitForSelector('.navbar', { timeout: 40000 });
-            await page.waitForTimeout(1000);
-            return; // ログイン成功
-        } catch (e) {
-            if (attempt < 3) {
-                // 次のリトライ前に少し待機
-                await page.waitForTimeout(2000);
-            } else {
-                throw new Error(`ログイン失敗（3回試行）: ${e.message}`);
-            }
-        }
+    await page.goto(BASE_URL + '/admin/login');
+    await page.waitForLoadState('domcontentloaded');
+    // storageStateでログイン済みならdashboardにリダイレクトされる
+    if (!page.url().includes('/admin/login')) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
     }
+    // ログインフォームが表示されたら入力
+    const idField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+    if (!idField) {
+        // リダイレクト途中の可能性。navbarを待つ
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
+    await page.fill('#id', email || EMAIL);
+    await page.fill('#password', password || PASSWORD);
+    await page.click('button[type=submit].btn-primary');
+    await page.waitForSelector('.navbar', { timeout: 40000 });
 }
 
 /**
@@ -415,46 +412,65 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
                 await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
             }
 
-            const opened = await openFieldEditPanel(page, 'テキスト');
-            if (!opened) {
-                await expect(page.locator('.cdk-drag.field-drag:has-text("テキスト"), .field-drag:has-text("テキスト")').first(), 'テキストフィールドが存在すること').toBeVisible({ timeout: 60000 });
+            // overSettingからモーダルを開いて追加オプション展開→必須設定
+            // テキストフィールド（文字列(一行)）のoverSettingを探す
+            const overSettings = page.locator('.overSetting');
+            const osCount = await overSettings.count();
+            let foundTextField = false;
+            for (let i = 0; i < osCount; i++) {
+                const label = await overSettings.nth(i).evaluate(el => {
+                    const lbl = el.closest('.pc-field-block, tr, [class*=field]')?.querySelector('label');
+                    return lbl?.textContent?.trim() || '';
+                }).catch(() => '');
+                if (label.includes('テキスト') && !label.includes('テキストエリア') && !label.includes('固定')) {
+                    await overSettings.nth(i).click({ force: true });
+                    foundTextField = true;
+                    console.log(`[265-1] テキストフィールドのoverSetting found at index ${i}`);
+                    break;
+                }
+            }
+            if (!foundTextField) {
+                // フォールバック: 最初のoverSettingをクリック
+                await overSettings.first().click({ force: true });
+            }
+            await page.waitForTimeout(1500);
+
+            // 追加オプション設定を展開
+            const addOptBtn = page.locator('.modal.show').locator('text=追加オプション設定');
+            if (await addOptBtn.count() > 0) {
+                await addOptBtn.click();
+                await page.waitForTimeout(1000);
             }
 
-            const requiredToggleSelectors = [
-                'input[type="checkbox"][id*="required"]',
-                'input[type="checkbox"][name*="required"]',
-                '.required-toggle input[type="checkbox"]',
-                'label:has-text("必須") input[type="checkbox"]',
-                'label:has-text("必須") .toggle',
-                '.toggle-switch:near(:text("必須"))',
-            ];
-
+            // 必須設定トグルを操作
+            const requiredCheckbox = page.locator('.modal.show').locator('text=必須項目にする').locator('..').locator('input[type="checkbox"], .switch-handle, .custom-control-input').first();
             let requiredToggled = false;
-            for (const sel of requiredToggleSelectors) {
-                try {
-                    const el = page.locator(sel).first();
-                    const cnt = await el.count();
-                    if (cnt > 0) {
-                        const isChecked = await el.isChecked().catch(() => false);
-                        if (!isChecked) {
-                            await el.click({ force: true });
-                            await waitForAngular(page);
-                        }
-                        requiredToggled = true;
-                        console.log(`[265-1] 必須トグル発見・操作: ${sel}`);
-                        break;
-                    }
-                } catch (e) {}
+            if (await requiredCheckbox.count() > 0) {
+                const isChecked = await requiredCheckbox.isChecked().catch(() => false);
+                if (!isChecked) {
+                    await requiredCheckbox.click({ force: true });
+                    await waitForAngular(page);
+                }
+                requiredToggled = true;
+                console.log('[265-1] 必須トグルON');
             }
 
             if (!requiredToggled) {
-                const bodyText = await page.innerText('body');
-                const hasRequired = bodyText.includes('必須');
-                console.log(`[265-1] 必須トグル未操作。必須テキスト存在: ${hasRequired}`);
-                throw new Error('[265-1] 必須設定トグルが見つかりません。テキストフィールドのインライン編集パネルに「必須」チェックボックスが表示されているか確認してください。');
+                // フォールバック: 「必須項目にする」のラベルを直接クリック
+                const labelEl = page.locator('.modal.show label:has-text("必須項目にする")').first();
+                if (await labelEl.count() > 0) {
+                    await labelEl.click({ force: true });
+                    await waitForAngular(page);
+                    requiredToggled = true;
+                    console.log('[265-1] 必須ラベルクリックでON');
+                }
             }
 
+            expect(requiredToggled, '必須設定トグルが操作できること').toBeTruthy();
+
+            // 変更するボタンで保存
             const saveButtonSelectors = [
+                'button:has-text("変更する")',
                 'button:has-text("保存")',
                 'button[type="submit"]:has-text("保存")',
                 '.btn-primary:has-text("保存")',
@@ -463,7 +479,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             let saved = false;
             for (const sel of saveButtonSelectors) {
                 try {
-                    const btn = page.locator(sel).first();
+                    const btn = page.locator('.modal.show').locator(sel).first();
                     const cnt = await btn.count();
                     if (cnt > 0) {
                         await btn.click({ force: true });

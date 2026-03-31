@@ -40,6 +40,17 @@ async function createLoginContext(browser) {
 async function login(page) {
     await page.goto(BASE_URL + '/admin/login');
     await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+    // storageStateでログイン済みならリダイレクトされる
+    if (!page.url().includes('/admin/login')) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
+    // ログインフォームが表示されなければリダイレクト途中
+    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+    if (!_loginField) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
     await page.waitForSelector('#id', { timeout: 30000 });
     await page.fill('#id', EMAIL);
     await page.fill('#password', PASSWORD);

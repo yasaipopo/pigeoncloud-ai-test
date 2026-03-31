@@ -25,6 +25,17 @@ async function login(page, email, password) {
     for (let attempt = 1; attempt <= 3; attempt++) {
         try {
             await page.goto(BASE_URL + '/admin/login', { timeout: 60000, waitUntil: 'domcontentloaded' });
+    // storageStateでログイン済みならリダイレクトされる
+    if (!page.url().includes('/admin/login')) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
+    // ログインフォームが表示されなければリダイレクト途中
+    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+    if (!_loginField) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
             break;
         } catch (e) {
             console.log(`[login] goto attempt ${attempt}/3 failed: ${e.message.split('\n')[0]}`);

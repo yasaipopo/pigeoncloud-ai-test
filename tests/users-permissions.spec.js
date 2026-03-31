@@ -23,6 +23,17 @@ async function waitForAngular(page, timeout = 15000) {
  */
 async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded' });
+    // storageStateでログイン済みならリダイレクトされる
+    if (!page.url().includes('/admin/login')) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
+    // ログインフォームが表示されなければリダイレクト途中
+    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+    if (!_loginField) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
     // gotoした後に既にダッシュボード等にリダイレクトされた場合はログイン済みとみなす
     const urlAfterGoto = page.url();
     if (!urlAfterGoto.includes('/admin/login')) {

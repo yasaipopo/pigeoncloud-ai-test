@@ -59,6 +59,17 @@ async function gotoDatasetList(page) {
  */
 async function login(page) {
     await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 90000 }).catch(() => {});
+    // storageStateでログイン済みならリダイレクトされる
+    if (!page.url().includes('/admin/login')) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
+    // ログインフォームが表示されなければリダイレクト途中
+    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+    if (!_loginField) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
     // ログインフォームが表示されるまで待つ（ページロード完了を確認）
     try { await page.waitForSelector('#id', { timeout: 90000 }); } catch(e) {}
     await page.waitForTimeout(500);

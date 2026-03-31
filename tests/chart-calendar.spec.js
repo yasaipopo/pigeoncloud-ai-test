@@ -44,6 +44,17 @@ async function login(page, email, password) {
 
     // まずCSRFトークンを取得してAPIで直接ログインを試みる
     await page.goto(BASE_URL + '/admin/login');
+    // storageStateでログイン済みならリダイレクトされる
+    if (!page.url().includes('/admin/login')) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
+    // ログインフォームが表示されなければリダイレクト途中
+    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+    if (!_loginField) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
     await waitForAngular(page);
 
     const loginResult = await page.evaluate(async ({ email, password, adminTable }) => {

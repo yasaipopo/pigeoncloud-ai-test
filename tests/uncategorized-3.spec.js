@@ -29,6 +29,17 @@ const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings'
  */
 async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login');
+    // storageStateでログイン済みならリダイレクトされる
+    if (!page.url().includes('/admin/login')) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
+    // ログインフォームが表示されなければリダイレクト途中
+    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
+    if (!_loginField) {
+        await page.waitForSelector('.navbar', { timeout: 30000 });
+        return;
+    }
     await waitForAngular(page);
     // ログインページへのリダイレクトを確認（既認証の場合はダッシュボードへ飛ぶ）
     if (page.url().includes('/admin/dashboard') || page.url().includes('/admin/dataset')) {
