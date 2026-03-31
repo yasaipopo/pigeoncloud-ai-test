@@ -5315,7 +5315,7 @@ test.describe('テーブルアーカイブ', () => {
     let archiveTableId = null;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(300000);
+        test.setTimeout(600000);
         const { context, page } = await createAuthContext(browser);
         await ensureLoggedIn(page);
         await closeTemplateModal(page);

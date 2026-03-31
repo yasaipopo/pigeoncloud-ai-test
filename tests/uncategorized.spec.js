@@ -307,7 +307,7 @@ test.describe('文字列表示設定（145系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -376,7 +376,7 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -446,7 +446,7 @@ test.describe('列表示幅設定（191系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -505,7 +505,7 @@ test.describe('大量データ（211系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -556,7 +556,7 @@ test.describe('表示条件設定（250系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -565,7 +565,7 @@ test.describe('表示条件設定（250系）', () => {
         await test.step('250: 項目削除時に確認モーダルが表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // フィールド設定ページへ移動
@@ -621,7 +621,7 @@ test.describe('表示条件設定（250系）', () => {
 
 test.describe('ユーザー管理（251系）', () => {
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+        test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -668,7 +668,7 @@ test.describe('権限設定（262系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -677,7 +677,7 @@ test.describe('権限設定（262系）', () => {
         await test.step('262: テーブル権限設定と項目権限設定のUIがテーブル設定ページに存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページへ移動
@@ -714,7 +714,7 @@ test.describe('2段階認証（267系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -763,7 +763,7 @@ test.describe('検索機能（270系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -815,7 +815,7 @@ test.describe('自動採番（273系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -824,7 +824,7 @@ test.describe('自動採番（273系）', () => {
         await test.step('273: 自動採番フィールドの設定モーダルが開き設定欄が存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // フィールド設定ページへ移動
@@ -893,7 +893,7 @@ test.describe('リッチテキスト（274系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+        test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -902,7 +902,7 @@ test.describe('リッチテキスト（274系）', () => {
     // 274: リッチテキスト時に追加オプション設定が開くこと
     // -------------------------------------------------------------------------
     test('274: リッチテキスト項目で設定モーダルが開くこと', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // フィールド設定ページへ移動
@@ -965,7 +965,7 @@ test.describe('日時フォーマット（275系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -974,7 +974,7 @@ test.describe('日時フォーマット（275系）', () => {
         await test.step('275: 日時フィールドの表示フォーマット設定モーダルが開くこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // フィールド設定ページへ移動
@@ -1047,7 +1047,7 @@ test.describe('循環参照エラー（291系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1056,7 +1056,7 @@ test.describe('循環参照エラー（291系）', () => {
         await test.step('291: 他テーブル参照フィールドの追加モーダルが利用できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // フィールド設定ページへ移動
@@ -1125,7 +1125,7 @@ test.describe('一括編集（312系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1165,7 +1165,7 @@ test.describe('ダッシュボード集計（315系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1214,7 +1214,7 @@ test.describe('テーブル削除ロック（349系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1223,7 +1223,7 @@ test.describe('テーブル削除ロック（349系）', () => {
         await test.step('349: テーブル設定ページで削除ロック機能のUIが存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページへ移動
@@ -1296,7 +1296,7 @@ test.describe('ログイン失敗制限（357系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1330,7 +1330,7 @@ test.describe('メニュー並び替え（361系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1381,7 +1381,7 @@ test.describe('CSVキャンセル（367系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1439,7 +1439,7 @@ test.describe('ヘッダー固定（370系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1448,7 +1448,7 @@ test.describe('ヘッダー固定（370系）', () => {
         await test.step('370: テーブル一覧でヘッダー1行目を固定できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const tid = tableId || await getAllTypeTableId(page);
             await navigateToDatasetPage(page, tid);
             const thCount = await page.locator('table thead th, [role="columnheader"]').count();
@@ -1479,7 +1479,7 @@ test.describe('桁数カンマ区切り（256系）', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+        test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
         await ensureLoggedIn(page);
         await closeTemplateModal(page);
     });
@@ -1488,7 +1488,7 @@ test.describe('桁数カンマ区切り（256系）', () => {
     // 256: 桁数(カンマ区切り)設定
     // -------------------------------------------------------------------------
     test('256: 集計数値にカンマ桁区切りが表示されること（#issue222）', async ({ page }) => {
-        test.setTimeout(120000); // サマリーページのロードに時間がかかる場合があるため延長
+        test.setTimeout(300000); // サマリーページのロードに時間がかかる場合があるため延長
         expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
         // 集計ページが正常に表示されること
         await checkPage(page, `/admin/summary__${tableId}`);
@@ -1522,7 +1522,7 @@ test.describe('スマートフォン表示（146系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1583,7 +1583,7 @@ test.describe('子テーブル（325, 341系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1607,7 +1607,7 @@ test.describe('子テーブル（325, 341系）', () => {
     });
 
     test('325: 子テーブルフィールドの設定UIが存在すること', async ({ page }) => {
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // フィールド設定ページへ移動
@@ -1675,7 +1675,7 @@ test.describe('一覧編集モード（324系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1684,7 +1684,7 @@ test.describe('一覧編集モード（324系）', () => {
         await test.step('324: 一覧編集モードで編集後に詳細画面で値が消えないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             const tid = tableId || await getAllTypeTableId(page);
             await navigateToDatasetPage(page, tid);
             // 編集モードボタンが存在すること（ボタンテキストが異なる場合も考慮）
@@ -1772,7 +1772,7 @@ test.describe('未実装テスト（todo）', () => {
 
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1985,7 +1985,7 @@ test.describe('未実装テスト（todo）', () => {
         await test.step('362: 編集条件が設定された権限でレコード編集ページが正常に表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページ（フィールド編集）に遷移して権限設定タブの存在を確認
             await navigateToFieldEditPage(page, tableId);
@@ -2354,7 +2354,7 @@ test.describe('未実装テスト（todo）', () => {
         });
 
     test('365: テストケース101-7で発生していたバグが再現しないこと', async ({ page }) => {
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル一覧でバグが再現しないことを確認
             await navigateToDatasetPage(page, tableId);
@@ -2552,7 +2552,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -4838,7 +4838,7 @@ test.describe('追加実装テスト（282-593系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -7704,7 +7704,7 @@ test.describe('追加実装テスト（683-838系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });

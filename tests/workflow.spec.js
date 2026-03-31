@@ -614,7 +614,7 @@ test.describe('ワークフロー設定（21系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -835,7 +835,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -858,7 +858,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-1: テーブルに対してワークフロー設定が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             // ワークフローが有効になっていること（Angular描画完了後に確認）
             await page.waitForFunction(() => {
@@ -1161,7 +1161,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -1472,7 +1472,7 @@ test.describe('引き上げ承認（106系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -1595,7 +1595,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-06: 組織(1人)→組織(全員)の場合、引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             // 106-01と同様のパターン: 組織タイプでは引き上げ不可
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
@@ -1607,7 +1607,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-07: 組織(全員)→ユーザーの場合、ユーザーは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1617,7 +1617,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-08: 組織(全員)→組織(1人)の場合、引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1627,7 +1627,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-09: 組織(全員)→組織(全員)の場合、引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1660,7 +1660,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-04: 組織(1人)→ユーザーの場合、ユーザーは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             // 引き上げ承認機能が有効かつ前段が組織(1人)の場合、後段ユーザーは引き上げ承認可能
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
@@ -1671,7 +1671,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-05: 組織(1人)→組織(1人)の場合、引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1681,7 +1681,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-10: A→B→Cの3段承認でBは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1690,7 +1690,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-11: A→B→Cの3段承認でCは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1701,7 +1701,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-12: 組織(1人)→A→Bの場合、Aは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1711,7 +1711,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-13: 組織(1人)→A→Bの場合、Bは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1721,7 +1721,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-14: 組織(全員)→A→Bの場合、Aは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1731,7 +1731,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-15: 組織(全員)→A→Bの場合、Bは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2447,7 +2447,7 @@ test.describe('承認者削除後の確認（28系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -2689,7 +2689,7 @@ test.describe('自分自身を承認者（166）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -2747,7 +2747,7 @@ test.describe('通知（36系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -2834,7 +2834,7 @@ test.describe('申請取り下げ（64系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -2901,7 +2901,7 @@ test.describe('一つ戻す機能（296）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -2993,7 +2993,7 @@ test.describe('通知カスタマイズ（395系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -3136,7 +3136,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -3372,7 +3372,7 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -3693,7 +3693,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {

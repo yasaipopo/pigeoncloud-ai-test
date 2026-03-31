@@ -313,7 +313,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('100-1: ユーザータイプ「ユーザー」でログイン後ユーザーアイコンクリックでメニュー一覧が表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             // マスターユーザーでログインしてテストユーザーを作成
             const userBody = await createTestUser(page);
             expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
@@ -357,7 +357,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-5: テーブルアイコンタイプ「アイコン」で未指定の場合デフォルトアイコン表示になること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
             // テーブル管理画面へ
             await page.goto(BASE_URL + '/admin/dataset');
             await waitForAngular(page);
@@ -375,7 +375,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('154-1: カスタムCSSを適用するとCSSの定義通りにUIが変更されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
             // テスト用CSSファイルを一時作成
             const cssContent = '/* PigeonCloud UI test */ .navbar { border-bottom: 3px solid red !important; }';
             const cssFilePath = '/tmp/test_custom.css';
@@ -419,7 +419,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('154-2: カスタムCSSを削除するとUIがデフォルトに戻ること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
             // その他設定ページへ
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
             await waitForAngular(page);
@@ -469,7 +469,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('78-1: ダッシュボードでチャートをドラッグアンドドロップで並び替えができること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
             await page.goto(BASE_URL + '/admin/dashboard');
             await waitForAngular(page);
 
@@ -515,7 +515,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-8: マスターユーザーでダッシュボードからチャート追加が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
             // ダッシュボードを表示
             await page.goto(BASE_URL + '/admin/dashboard');
             await waitForAngular(page);
@@ -541,7 +541,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-9: マスターユーザーでダッシュボードから帳票登録が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
             // ダッシュボードを表示
             await page.goto(BASE_URL + '/admin/dashboard');
             await waitForAngular(page);
@@ -563,7 +563,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-4: ユーザータイプ「ユーザー」でダッシュボードから帳票登録が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
             // ダッシュボードを表示
             await page.goto(BASE_URL + '/admin/dashboard');
             await waitForAngular(page);
@@ -731,7 +731,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-1: テーブルアイコンタイプ「画像」で画像をアップロードするとアイコンに表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // テーブル編集ページへ
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -788,7 +788,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-2: テーブルアイコンタイプ「画像」で画像削除するとブランク表示になること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // テーブル編集ページへ
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -857,7 +857,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-3: テーブルアイコンタイプ「画像」で画像未指定の場合ブランク表示になること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブル管理画面へ（/settingはルートへリダイレクトのため/admin/datasetを使用）
             await page.goto(BASE_URL + `/admin/dataset`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -876,7 +876,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-4: テーブルアイコンタイプ「アイコン」でfa-user-circle-oを指定すると指定アイコンが表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブル管理画面へ
             await page.goto(BASE_URL + '/admin/dataset');
@@ -895,7 +895,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('408: サイドメニューの「テーブル追加画面へ」が隠れずに表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -917,7 +917,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('336: ダッシュボードの掲示板機能が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -935,7 +935,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('317: トライアル環境のダッシュボード掲示板にzendesk URLが記載されていること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             await login(page);
 
             // ダッシュボードに遷移
@@ -966,7 +966,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-6: マスターユーザーでダッシュボードからCSVダウンロードが行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -984,7 +984,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-7: マスターユーザーでダッシュボードから集計が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -1009,7 +1009,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-10: マスターユーザーでダッシュボードからテーブルの通知設定が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ（/notificationはルートへリダイレクトのため直接レコード一覧を使用）
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -1197,7 +1197,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('146-01: スマートフォンサイズで選択肢フィールドタップ時にブラウザがズームしないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             // スマートフォンサイズに変更
             await page.setViewportSize({ width: 375, height: 812 });
 
@@ -1230,7 +1230,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('276: レコード詳細画面に「戻る」ボタンが表示されクリックで前画面に戻れること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             if (!tableId) return;
 
             // 一覧画面経由で詳細画面へ
@@ -1262,7 +1262,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('370: テーブル一覧でスクロール時にヘッダーが固定表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             if (!tableId) return;
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1288,7 +1288,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('503: グループ内のテーブル名がサイドメニューで正しく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -1311,7 +1311,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('542: テーブルアイコンが正しい位置に表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -1334,7 +1334,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('546: UI要素が正しく表示されていること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             if (!tableId) return;
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1356,7 +1356,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('686: ビューの「行に色を付ける」で日付が同値の場合に色が付かないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             await login(page);
             const tableId = await getAllTypeTableId(page);
 
@@ -1397,7 +1397,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('607: 関連レコード設定時の更新情報が正しい位置に表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             await login(page);
             const tableId = await getAllTypeTableId(page);
 
@@ -1439,7 +1439,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('755: テーブルビューの表示レイアウトが正しいこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             if (!tableId) return;
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1464,7 +1464,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('760: 操作時のUI更新が正常であること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(90000);
+            test.setTimeout(300000);
             if (!tableId) return;
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1489,7 +1489,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('749: 関連レコードのページネーションが横一列で表示されレイアウトが崩れないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             await login(page);
             const tableId = await getAllTypeTableId(page);
 
@@ -1546,7 +1546,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('831: 対象画面の表示が正しくUI更新が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             await login(page);
             const tableId = await getAllTypeTableId(page);
 

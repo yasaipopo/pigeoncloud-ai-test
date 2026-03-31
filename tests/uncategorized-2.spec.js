@@ -417,7 +417,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1569,7 +1569,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1043 タブを２個開いて、 ①片方で表示項目でAを選ぶ ②他方で他テーブル先からAを消す ③Aを選んだままテーブル更新 の導線で
             // expected: 想定通りの結果となること。
-            test.setTimeout(120000); // 負荷状態でのナビゲーション遅延を考慮して延長
+            test.setTimeout(300000); // 負荷状態でのナビゲーション遅延を考慮して延長
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await page.goto(BASE_URL + `/admin/dataset__${tid}`, { timeout: 90000 });

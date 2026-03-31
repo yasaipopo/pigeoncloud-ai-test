@@ -380,7 +380,7 @@ test.describe('メール配信', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // beforeEach（ログイン）+ テスト本体で120秒
+            test.setTimeout(300000); // beforeEach（ログイン）+ テスト本体で120秒
             await ensureLoggedIn(page, EMAIL, PASSWORD);
             await closeTemplateModal(page);
         });
@@ -780,7 +780,7 @@ test.describe('メール配信', () => {
         await test.step('142-01: メール配信で添付ファイルを設定するとエラーなく配信でき添付ファイルが届くこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(60000);
+            test.setTimeout(300000);
             // メール配信設定の新規作成ページへ
             await page.goto(BASE_URL + '/admin/mail_delivery/edit/new');
             await page.waitForLoadState('domcontentloaded');

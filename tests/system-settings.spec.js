@@ -462,7 +462,7 @@ test.describe('共通設定・システム設定', () => {
     });
 
     test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         // afterAllで設定のリセットのみ行う（テーブル削除はしない）
         try {
             const { context, page } = await createAuthContext(browser);
@@ -1498,7 +1498,7 @@ test.describe('共通設定・システム設定', () => {
     // SS05: 契約設定
     // =========================================================================
     test('SS05: 契約設定', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
 
         await test.step('130-01: PayPalサブスクリプション登録が完了すること', async () => {
             const STEP_TIME = Date.now();

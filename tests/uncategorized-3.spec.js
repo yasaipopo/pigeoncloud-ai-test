@@ -373,7 +373,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });

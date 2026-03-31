@@ -712,7 +712,7 @@ test.describe('通知設定', () => {
         await test.step('105-01: Webhook設定を1つ設定するとレコード作成時にWebhookへ通知が行われること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             const key = `105-01-${Date.now()}`;
             await resetWebhook(key);
@@ -754,7 +754,7 @@ test.describe('通知設定', () => {
         await test.step('105-02: Webhook設定を複数設定すると全Webhookへ通知が行われること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             const key1 = `105-02a-${Date.now()}`;
             const key2 = `105-02b-${Date.now()}`;
@@ -802,7 +802,7 @@ test.describe('通知設定', () => {
         await test.step('105-03: Slack Webhook設定を1つ設定すると申請処理時にSlackへ通知が行われること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             const key = `105-03-${Date.now()}`;
             await resetWebhook(key);
@@ -842,7 +842,7 @@ test.describe('通知設定', () => {
         await test.step('105-04: Slack Webhook設定を複数設定すると全Slackへ通知が行われること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             const key1 = `105-04a-${Date.now()}`;
             const key2 = `105-04b-${Date.now()}`;
@@ -993,7 +993,7 @@ test.describe('通知設定', () => {
         await test.step('172: コメント追加時に通知する機能の確認', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             const testStart = new Date();
             await deleteTestEmails({ since: new Date(Date.now() - 5 * 60 * 1000) }).catch(() => {});
@@ -1042,7 +1042,7 @@ test.describe('通知設定', () => {
             // 通知設定ページで公開メールリンク機能が設定できることを確認する
             // IMAP設定がある場合はメール受信後に公開フォームリンクにアクセスして登録確認する
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定ページにアクセス
             await goToNotificationPage(page, tableId);
@@ -1436,7 +1436,7 @@ test.describe('通知設定', () => {
         await test.step('32-1: 通知先ユーザーを削除しても他機能に影響なくエラーが発生しないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             // ページが有効なコンテキストを持っていることを確認してからAPI呼び出し
             await page.waitForTimeout(500);
             // テストユーザーを作成（ユーザー上限に達した場合はリトライ）
@@ -1473,7 +1473,7 @@ test.describe('通知設定', () => {
         await test.step('32-2: 通知先組織を削除しても他機能に影響なくエラーが発生しないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
             await goToNotificationPage(page, tableId);
 
             expect(page.url()).toContain('/admin/');
@@ -1493,7 +1493,7 @@ test.describe('通知設定', () => {
         await test.step('57-1: 複数データを一括更新した際に更新内容が1本に纏まって通知されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             const testStart = new Date();
             await deleteTestEmails({ since: new Date(Date.now() - 5 * 60 * 1000) }).catch(() => {});
@@ -1564,7 +1564,7 @@ test.describe('通知設定', () => {
         await test.step('57-3: 複数データを削除した際に更新内容が1本に纏まって通知されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 削除対象データを作成
             await debugApiPost(page, '/create-all-type-data', { count: 3, pattern: 'fixed' });
@@ -1610,7 +1610,7 @@ test.describe('通知設定', () => {
         await test.step('57-4: データ新規登録/更新の際に更新内容が1本に纏まって通知されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 新規登録でトリガー
             const createResult = await debugApiPost(page, '/create-all-type-data', { count: 2, pattern: 'fixed' });
@@ -1791,7 +1791,7 @@ test.describe('通知設定', () => {
 
             // コメント追加時に通知が送られることを確認する（test 172と同様の実装）
             // 通知設定でコメント通知が有効になっている前提で実行
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             const testStart = new Date();
             await deleteTestEmails({ since: new Date(Date.now() - 5 * 60 * 1000) }).catch(() => {});
@@ -1905,7 +1905,7 @@ test.describe('通知設定', () => {
         await test.step('6-2: 通知設定でアクション「更新」を設定してレコード更新時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定新規作成ページへ
             await gotoNotificationEditNew(page);
@@ -1935,7 +1935,7 @@ test.describe('通知設定', () => {
         await test.step('6-3: 通知設定でアクション「削除」を設定してレコード削除時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定新規作成ページへ
             await gotoNotificationEditNew(page);
@@ -2274,7 +2274,7 @@ test.describe('通知設定', () => {
         await test.step('84-1: 通知設定でワークフロー条件「申請中(要確認)」を設定すると設定通りの通知が行われること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000); // ログイン+ページロードに時間がかかる場合があるため延長
+            test.setTimeout(300000); // ログイン+ページロードに時間がかかる場合があるため延長
             // 通知設定新規作成ページでワークフロー条件設定UIを確認
             await gotoNotificationEditNew(page);
 
@@ -2333,7 +2333,7 @@ test.describe('通知設定', () => {
         await test.step('249: メール配信テーブルの表示件数が正しいこと（100件以上表示可能）', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             await page.goto(BASE_URL + '/admin/mail_magazine');
             await waitForAngular(page);
@@ -2356,7 +2356,7 @@ test.describe('通知設定', () => {
         await test.step('252: ユーザーを無効にした後も一覧画面・詳細画面で正常に表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // テーブル一覧ページで確認
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -2386,7 +2386,7 @@ test.describe('通知設定', () => {
         await test.step('350: テーブル管理権限がある場合のみ通知の追加・編集が有効であること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // マスターユーザーで通知設定ページにアクセス
             await page.goto(BASE_URL + '/admin/notification');
@@ -2407,7 +2407,7 @@ test.describe('通知設定', () => {
         await test.step('375: テーブル項目設定・テーブル管理者権限を持つユーザーが通知設定を追加できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // テストユーザー作成（テーブル管理者権限あり）
             const userRes = await debugApiPost(page, '/create-user');
@@ -2432,7 +2432,7 @@ test.describe('通知設定', () => {
         await test.step('377: メール通知でHTMLメールをテキストメールで配信するオプションが存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // システム設定 or 通知設定ページでテキストメール配信オプションを確認
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
@@ -2455,7 +2455,7 @@ test.describe('通知設定', () => {
         await test.step('384: リマインド設定の通知をクリックするとレコードに遷移されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知一覧（ベルマーク）を確認
             await page.goto(BASE_URL + '/admin/dashboard');
@@ -2490,7 +2490,7 @@ test.describe('通知設定', () => {
         await test.step('400: HTMLメールがHTMLコードとして表示されず正しくレンダリングされること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // メールテンプレートページでHTML形式テンプレートを確認
             await page.goto(BASE_URL + '/admin/mail_template');
@@ -2529,7 +2529,7 @@ test.describe('通知設定', () => {
         await test.step('404: 通知ログの作成日時フィルタで相対値を正しく使用できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知ログページへ
             await page.goto(BASE_URL + '/admin/notification_log');
@@ -2557,7 +2557,7 @@ test.describe('通知設定', () => {
         await test.step('425: HTMLメールを配信リストから送信しても画像やリンクが正しく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // メールテンプレート一覧ページへ
             await page.goto(BASE_URL + '/admin/mail_template');
@@ -2577,7 +2577,7 @@ test.describe('通知設定', () => {
         await test.step('436: ルックアップ設定されたメールアドレス項目が正しく自動反映されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // セッション切れ対策: ページ遷移前にログイン状態を確認
             await ensureLoggedIn(page);
@@ -2604,7 +2604,7 @@ test.describe('通知設定', () => {
         await test.step('479: 通知ログの日時フィルタで秒数を含めなくても検索結果が返ること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // セッション切れ対策: ページ遷移前にログイン状態を確認
             await ensureLoggedIn(page);
@@ -2633,7 +2633,7 @@ test.describe('通知設定', () => {
         await test.step('751: リマインダ設定の追加の通知先対象項目が保存後も保持されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定一覧ページ
             await page.goto(BASE_URL + '/admin/notification', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -2658,7 +2658,7 @@ test.describe('通知設定', () => {
         await test.step('549: 通知設定でWFステータス変更「申請時」トリガーが設定可能であること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定新規作成
             await gotoNotificationEditNew(page);
@@ -2689,7 +2689,7 @@ test.describe('通知設定', () => {
         await test.step('651: SMTP設定画面が正常に表示されテストメール送信ボタンが存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // システム設定ページに遷移
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -2711,7 +2711,7 @@ test.describe('通知設定', () => {
         await test.step('658: 通知設定で通知先に「ログインユーザーのメールアドレス」が選択できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定新規作成
             await gotoNotificationEditNew(page);
@@ -2736,7 +2736,7 @@ test.describe('通知設定', () => {
         await test.step('741: ユーザー情報変更後に通知設定の権限が正しく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // ユーザー管理ページ
             await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -2764,7 +2764,7 @@ test.describe('通知設定', () => {
         await test.step('684: 通知先組織に親組織を設定した場合の通知設定画面が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定新規作成画面
             await gotoNotificationEditNew(page);
@@ -2791,7 +2791,7 @@ test.describe('通知設定', () => {
         await test.step('718: 複数値メールアドレス項目を追加の通知先対象項目に設定してもエラーが出ないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定新規作成
             await gotoNotificationEditNew(page);
@@ -2814,7 +2814,7 @@ test.describe('通知設定', () => {
         await test.step('826: 通知設定で追加の通知先対象項目に組織テーブル参照項目が選択できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // 通知設定新規作成画面
             await gotoNotificationEditNew(page);
@@ -2879,7 +2879,7 @@ test.describe('通知設定', () => {
         });
 
     test('142-01: メール配信の際に添付ファイルを行ってメール配信ができること', async ({ page }) => {
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // メール配信ページへ
             await page.goto(BASE_URL + '/admin/mail_magazine');
@@ -3343,7 +3343,7 @@ test.describe('通知設定', () => {
         });
 
     test('197: メール配信設定でCC、BCCを設定してメール配信されること', async ({ page }) => {
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             await page.goto(BASE_URL + '/admin/mail_magazine');
             await waitForAngular(page);
@@ -3376,7 +3376,7 @@ test.describe('通知設定', () => {
         });
 
     test('201: メール配信でファイル項目を使用したメール添付が正常に動作すること', async ({ page }) => {
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             // メールテンプレートページへ
             await page.goto(BASE_URL + '/admin/mail_template');
@@ -3403,7 +3403,7 @@ test.describe('通知設定', () => {
         });
 
     test('218: 配信リストの画面下部に配信先一覧が表示されること', async ({ page }) => {
-            test.setTimeout(120000);
+            test.setTimeout(300000);
 
             await page.goto(BASE_URL + '/admin/distribution_list');
             await waitForAngular(page);

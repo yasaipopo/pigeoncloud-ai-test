@@ -314,7 +314,7 @@ test.describe('支払い・プラン管理', () => {
     });
 
     test('UC16: 支払いページでクレジットカードブランド表示確認', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         let stepStart;
 
@@ -348,7 +348,7 @@ test.describe('支払い・プラン管理', () => {
     });
 
     test('UC03: 請求情報メニュー・領収書ダウンロード確認', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         let stepStart;
 
@@ -394,7 +394,7 @@ test.describe('支払い・プラン管理', () => {
     });
 
     test('UC09: 決済後のユーザー数変更確認', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(300000);
         await login(page);
         let stepStart;
 

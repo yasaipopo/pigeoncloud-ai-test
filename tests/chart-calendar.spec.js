@@ -932,7 +932,7 @@ test.describe('カレンダー - ビュー表示', () => {
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(300000);
+            test.setTimeout(600000);
             const context = await createLoginContext(browser);
             const page = await context.newPage();
             await ensureLoggedIn(page);

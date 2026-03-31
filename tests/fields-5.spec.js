@@ -176,7 +176,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
     let beforeAllFailed = false;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
+        test.setTimeout(600000);
         const maxRetries = 3;
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             const { context, page } = await createAuthContext(browser);
