@@ -13,7 +13,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -42,7 +42,7 @@ async function login(page, email, password) {
         await page.fill('#password', password || PASSWORD);
         await page.click('button[type=submit].btn-primary');
         try {
-            await page.waitForSelector('.navbar', { timeout: 40000 });
+            await page.waitForSelector('.navbar', { timeout: 5000 });
             await page.waitForTimeout(1000);
             return; // ログイン成功
         } catch (e) {
@@ -211,9 +211,9 @@ async function navigateToFieldPage(page, tableId) {
     // ALLテストテーブルは102フィールドがあるため読み込みに時間がかかる
     await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`, { timeout: 120000 });
     try {
-        await page.waitForLoadState('networkidle', { timeout: 15000 });
+        await page.waitForLoadState('networkidle', { timeout: 5000 });
     } catch(e) {
-        await page.waitForLoadState('domcontentloaded', { timeout: 60000 });
+        await page.waitForLoadState('domcontentloaded', { timeout: 5000 });
     }
     // ALLテストテーブルは102フィールドのためAngular初期化に時間がかかる
     await waitForAngular(page, 180000);
@@ -222,9 +222,9 @@ async function navigateToFieldPage(page, tableId) {
         await login(page);
         await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`, { timeout: 120000 });
         try {
-            await page.waitForLoadState('networkidle', { timeout: 15000 });
+            await page.waitForLoadState('networkidle', { timeout: 5000 });
         } catch(e) {
-            await page.waitForLoadState('domcontentloaded', { timeout: 60000 });
+            await page.waitForLoadState('domcontentloaded', { timeout: 5000 });
         }
         await waitForAngular(page, 180000);
     }
@@ -241,7 +241,7 @@ async function assertFieldPageLoaded(page, tableId) {
     if (currentUrl.includes('/admin/dataset/edit/')) {
         // タブが読み込まれるまで待機
         try {
-            await page.waitForSelector('.dataset-tabs [role=tab], tabset .nav-tabs li', { timeout: 15000 });
+            await page.waitForSelector('.dataset-tabs [role=tab], tabset .nav-tabs li', { timeout: 5000 });
         } catch (e) {
             // タブが見つからなくてもエラーとしない
         }
@@ -252,16 +252,16 @@ async function assertFieldPageLoaded(page, tableId) {
             await expect(fieldRows.first()).toBeVisible();
         } else {
             // フィールドリストがない場合はナビバーだけ確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         }
     } else if (currentUrl.includes(`/admin/dataset__${tableId}`)) {
         // テーブル一覧ページにリダイレクトされた場合
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+        await expect(page.locator('.navbar')).toBeVisible();
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     } else {
         // その他のページ：ナビバーが表示されていること
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+        await expect(page.locator('.navbar')).toBeVisible();
     }
 }
 
@@ -275,10 +275,10 @@ async function assertFieldPageLoaded(page, tableId) {
 let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(480000);
+    test.setTimeout(120000);
     const { context, page } = await createAuthContext(browser);
     // about:blankではcookiesが送られないため、先にアプリURLに遷移
-    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
     await createAllTypeTable(page);
     await createAllTypeData(page, 3);
     _sharedTableId = await getAllTypeTableId(page);
@@ -312,7 +312,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -325,16 +325,16 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             await assertFieldPageLoaded(page, tableId);
             // フィールド一覧に「画像」タイプのフィールドが存在すること
             const imageField = page.locator('.pc-field-block').filter({ hasText: '画像' });
-            await expect(imageField.first()).toBeVisible({ timeout: 15000 });
+            await expect(imageField.first()).toBeVisible();
             // 画像フィールドの歯車アイコンをクリックして設定モーダルを開く
             await imageField.first().hover();
             await imageField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -346,16 +346,16 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             await assertFieldPageLoaded(page, tableId);
             // フィールド一覧に「画像」タイプのフィールドが存在すること
             const imageField = page.locator('.pc-field-block').filter({ hasText: '画像' });
-            await expect(imageField.first()).toBeVisible({ timeout: 15000 });
+            await expect(imageField.first()).toBeVisible();
             // 歯車アイコンをクリックして設定モーダルを開く
             await imageField.first().hover();
             await imageField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // 画像フィールド固有: 推奨サイズ表示やオプションが設定可能であること
             // モーダルヘッダーに「画像」が含まれること
             await expect(modal.locator('.modal-header')).toContainText('画像');
@@ -394,7 +394,6 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -407,18 +406,18 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             await assertFieldPageLoaded(page, tableId);
             // フィールド一覧に Yes/No タイプのフィールドが存在すること
             const boolField = page.locator('.pc-field-block').filter({ hasText: /Yes\s*[\/／]\s*No/ });
-            await expect(boolField.first()).toBeVisible({ timeout: 15000 });
+            await expect(boolField.first()).toBeVisible();
             // 歯車アイコンをクリックして設定モーダルを開く
             await boolField.first().hover();
             await boolField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // Yes/No固有: ラベル入力欄が存在すること（boolean-text）
-            await expect(modal.locator('input[type="text"]').nth(1)).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"]').nth(1)).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -430,18 +429,18 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             await assertFieldPageLoaded(page, tableId);
             // フィールド一覧に Yes/No タイプのフィールドが存在すること
             const boolField = page.locator('.pc-field-block').filter({ hasText: /Yes\s*[\/／]\s*No/ });
-            await expect(boolField.first()).toBeVisible({ timeout: 15000 });
+            await expect(boolField.first()).toBeVisible();
             // 歯車アイコンをクリックして設定モーダルを開く
             await boolField.first().hover();
             await boolField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示され、Yes/No設定が含まれること
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // モーダルヘッダーに「Yes / No」が含まれること
             await expect(modal.locator('.modal-header')).toContainText('Yes');
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -474,7 +473,6 @@ test.describe('自動採番フィールド（216系）', () => {
 
     test.beforeEach(async ({ page }) => {
             // フレイキー対策: beforeEachのタイムアウトを延長（前のdescribeのafterAllが長い場合の対応）
-            test.setTimeout(300000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -487,21 +485,21 @@ test.describe('自動採番フィールド（216系）', () => {
             await assertFieldPageLoaded(page, tableId);
             // フィールド一覧に「自動採番」タイプのフィールドが存在すること
             const autoIdField = page.locator('.pc-field-block').filter({ hasText: '自動採番' });
-            await expect(autoIdField.first()).toBeVisible({ timeout: 15000 });
+            await expect(autoIdField.first()).toBeVisible();
             // 歯車アイコンをクリックして設定モーダルを開く
             await autoIdField.first().hover();
             await autoIdField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // 自動採番固有: フォーマット入力欄が存在すること（placeholder: ID-{YYYY}-...）
             const formatInput = modal.locator('input[placeholder*="ID-"]');
-            await expect(formatInput).toBeVisible({ timeout: 60000 });
+            await expect(formatInput).toBeVisible();
             // 自動採番固有: カウンターリセットボタンが存在すること
-            await expect(modal.locator('button:has-text("カウンターをリセット")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('button:has-text("カウンターをリセット")')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -533,7 +531,6 @@ test.describe('固定テキストフィールド（230系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -563,12 +560,12 @@ test.describe('固定テキストフィールド（230系）', () => {
             await waitForAngular(page);
             // 設定モーダルが表示されること
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 固定テキスト固有: 「詳細ページでも表示」チェックボックスが存在すること
-            await expect(modal.locator('label:has-text("詳細ページでも表示")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("詳細ページでも表示")')).toBeVisible();
             // 固定テキスト固有: froalaエディタ（リッチテキストエディタ）が存在すること
             const froala = modal.locator('[froalaEditor], .fr-element, .fr-box');
-            await expect(froala.first()).toBeVisible({ timeout: 60000 });
+            await expect(froala.first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -604,7 +601,6 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -617,16 +613,16 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
             await assertFieldPageLoaded(page, tableId);
             // フィールド一覧に「ファイル」タイプのフィールドが存在すること
             const fileField = page.locator('.pc-field-block').filter({ hasText: 'ファイル' });
-            await expect(fileField.first()).toBeVisible({ timeout: 15000 });
+            await expect(fileField.first()).toBeVisible();
             // 歯車アイコンをクリックして設定モーダルを開く
             await fileField.first().hover();
             await fileField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // ファイルフィールドであること（モーダルヘッダーにファイルが含まれる）
             await expect(modal.locator('.modal-header')).toContainText('ファイル');
             // モーダルを閉じる
@@ -637,16 +633,16 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
             const STEP_TIME = Date.now();
 
             // レコード一覧ページへ（ZIPアップロードはレコード系機能）
-            await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { timeout: 60000 });
+            await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { timeout: 5000 });
             await waitForAngular(page);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // レコード一覧が表示されていること
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // ファイルフィールドがあるテーブルのレコード一覧で、ファイルアップロード用のinputが利用可能であること
             // レコード追加ボタンが表示されていること（データ操作が可能な状態）
             const addBtn = page.locator('a:has-text("追加"), button:has-text("追加")');
-            await expect(addBtn.first()).toBeVisible({ timeout: 15000 });
+            await expect(addBtn.first()).toBeVisible();
 
         });
     });
@@ -680,7 +676,6 @@ test.describe('列設定（122系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -690,9 +685,9 @@ test.describe('列設定（122系）', () => {
             const STEP_TIME = Date.now();
 
             // レコード一覧ページに遷移（列の表示/非表示は一覧ページの機能）
-            await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { timeout: 60000 });
+            await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { timeout: 5000 });
             await waitForAngular(page);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // テーブルヘッダーが表示されていること（一覧テーブルが存在する）
             const tableHeader = page.locator('table thead th, .table-responsive th, .sticky-table-header th');
             const headerCount = await tableHeader.count();
@@ -757,7 +752,6 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -779,20 +773,20 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             const fieldCount = await allFields.count();
             expect(fieldCount).toBeGreaterThan(0);
             // 「項目を追加する」ボタンが存在すること
-            await expect(page.locator('button:has-text("項目を追加する")')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('button:has-text("項目を追加する")')).toBeVisible();
             // 「項目を追加する」をクリックしてフィールドタイプ選択モーダルを開く
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // フィールドタイプ一覧に「文章(複数行)」ボタンが存在すること
-            await expect(modal.locator('button:has-text("文章(複数行)")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('button:has-text("文章(複数行)")')).toBeVisible();
             // 「文章(複数行)」を選択
             await modal.locator('button:has-text("文章(複数行)")').click();
             await waitForAngular(page);
             // 種類ラジオで「通常テキスト」が選択可能であること
-            await expect(modal.locator('label:has-text("通常テキスト")')).toBeVisible({ timeout: 60000 });
-            await expect(modal.locator('label:has-text("リッチテキスト")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("通常テキスト")')).toBeVisible();
+            await expect(modal.locator('label:has-text("リッチテキスト")')).toBeVisible();
             // モーダルを閉じる（キャンセル）
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -806,18 +800,18 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「文章(複数行)」を選択
             await modal.locator('button:has-text("文章(複数行)")').click();
             await waitForAngular(page);
             // 種類ラジオで「リッチテキスト」が選択可能であること
             const richRadio = modal.locator('input[type="radio"][value="richtext"]');
-            await expect(richRadio).toBeVisible({ timeout: 60000 });
+            await expect(richRadio).toBeVisible();
             // 「リッチテキスト」を選択
             await richRadio.click();
             await waitForAngular(page);
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる（キャンセル）
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -849,7 +843,6 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -864,20 +857,20 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // フィールドタイプ一覧に「文字列(一行)」ボタンが存在すること
-            await expect(modal.locator('button:has-text("文字列(一行)")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('button:has-text("文字列(一行)")')).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
             await waitForAngular(page);
             // 種類ラジオボタンが表示されること（テキスト/メールアドレス/URL）
-            await expect(modal.locator('label:has-text("テキスト")')).toBeVisible({ timeout: 60000 });
-            await expect(modal.locator('label:has-text("メールアドレス")')).toBeVisible({ timeout: 60000 });
-            await expect(modal.locator('label:has-text("URL")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("テキスト")')).toBeVisible();
+            await expect(modal.locator('label:has-text("メールアドレス")')).toBeVisible();
+            await expect(modal.locator('label:has-text("URL")')).toBeVisible();
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // 「値の重複を禁止する」チェックボックスが存在すること
-            await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible();
             // モーダルを閉じる（キャンセル）
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1016,7 +1009,6 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000);
             await login(page);
             await closeTemplateModal(page);
         });
@@ -1031,16 +1023,16 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
             await waitForAngular(page);
             // 種類ラジオで「テキスト」がデフォルト選択されていること
             const textRadio = modal.locator('input[type="radio"][value="text"]');
-            await expect(textRadio).toBeVisible({ timeout: 60000 });
+            await expect(textRadio).toBeVisible();
             await expect(textRadio).toBeChecked();
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1054,17 +1046,17 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
             await waitForAngular(page);
             // 種類ラジオで「メールアドレス」を選択できること
             const emailRadio = modal.locator('input[type="radio"][value="email"]');
-            await expect(emailRadio).toBeVisible({ timeout: 60000 });
+            await expect(emailRadio).toBeVisible();
             await emailRadio.click();
             await waitForAngular(page);
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1078,17 +1070,17 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
             await waitForAngular(page);
             // 種類ラジオで「URL」を選択できること
             const urlRadio = modal.locator('input[type="radio"][value="url"]');
-            await expect(urlRadio).toBeVisible({ timeout: 60000 });
+            await expect(urlRadio).toBeVisible();
             await urlRadio.click();
             await waitForAngular(page);
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1102,18 +1094,18 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
             await waitForAngular(page);
             // 種類ラジオで「URL」を選択
             const urlRadio = modal.locator('input[type="radio"][value="url"]');
-            await expect(urlRadio).toBeVisible({ timeout: 60000 });
+            await expect(urlRadio).toBeVisible();
             await urlRadio.click();
             await waitForAngular(page);
             // URL選択時は「値の重複を禁止する」が非表示になること（URLは重複禁止対象外）
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1127,15 +1119,15 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「数値」を選択
             await modal.locator('button:has-text("数値")').click();
             await waitForAngular(page);
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // 数値固有: 整数/小数の選択ラジオが存在すること
-            await expect(modal.locator('label:has-text("整数")')).toBeVisible({ timeout: 60000 });
-            await expect(modal.locator('label:has-text("小数")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("整数")')).toBeVisible();
+            await expect(modal.locator('label:has-text("小数")')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1149,15 +1141,15 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「数値」を選択
             await modal.locator('button:has-text("数値")').click();
             await waitForAngular(page);
             // 整数ラジオが選択されていること（デフォルト）
             const intRadio = modal.locator('input[type="radio"][value="integer"]');
-            await expect(intRadio).toBeVisible({ timeout: 60000 });
+            await expect(intRadio).toBeVisible();
             // 単位記号の入力欄が存在すること
-            await expect(modal.locator('label:has-text("単位")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("単位")')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1171,19 +1163,19 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「数値」を選択
             await modal.locator('button:has-text("数値")').click();
             await waitForAngular(page);
             // 小数ラジオを選択
             const decimalRadio = modal.locator('input[type="radio"][value="decimal"]');
-            await expect(decimalRadio).toBeVisible({ timeout: 60000 });
+            await expect(decimalRadio).toBeVisible();
             await decimalRadio.click();
             await waitForAngular(page);
             // 小数点以下桁数の入力欄が表示されること
-            await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible();
             // 桁区切り設定が存在すること
-            await expect(modal.locator('label:has-text("桁区切り")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("桁区切り")')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1192,7 +1184,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1202,7 +1194,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1220,18 +1212,18 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「選択肢(単一選択)」を選択
             await modal.locator('button:has-text("選択肢(単一選択)")').click();
             await waitForAngular(page);
             // 種類ラジオで「ラジオボタン」がデフォルトであること
             const radioType = modal.locator('input[type="radio"][value="radio"]');
-            await expect(radioType).toBeVisible({ timeout: 60000 });
+            await expect(radioType).toBeVisible();
             // 選択肢入力欄（カンマ区切り）が存在すること
-            await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("選択肢")')).toBeVisible();
             // Layoutラジオ（横並び/縦並び）が存在すること
-            await expect(modal.locator('label:has-text("横並び")')).toBeVisible({ timeout: 60000 });
-            await expect(modal.locator('label:has-text("縦並び")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("横並び")')).toBeVisible();
+            await expect(modal.locator('label:has-text("縦並び")')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1245,17 +1237,17 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「選択肢(単一選択)」を選択
             await modal.locator('button:has-text("選択肢(単一選択)")').click();
             await waitForAngular(page);
             // 種類ラジオで「プルダウン」を選択できること
             const selectType = modal.locator('input[type="radio"][value="select"]');
-            await expect(selectType).toBeVisible({ timeout: 60000 });
+            await expect(selectType).toBeVisible();
             // 選択肢入力欄が存在すること
-            await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("選択肢")')).toBeVisible();
             // 項目名入力欄が存在すること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1269,19 +1261,19 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「選択肢(単一選択)」を選択
             await modal.locator('button:has-text("選択肢(単一選択)")').click();
             await waitForAngular(page);
             // 種類ラジオで「プルダウン」を選択
             const selectType = modal.locator('input[type="radio"][value="select"]');
-            await expect(selectType).toBeVisible({ timeout: 60000 });
+            await expect(selectType).toBeVisible();
             await selectType.click();
             await waitForAngular(page);
             // 選択肢入力欄が存在すること
-            await expect(modal.locator('label:has-text("選択肢")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("選択肢")')).toBeVisible();
             // 項目名入力欄が存在すること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1295,17 +1287,17 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「日時」を選択
             await modal.locator('button:has-text("日時")').click();
             await waitForAngular(page);
             // 種類ラジオで「年月」が選択可能であること
             const yearMonthRadio = modal.locator('input[type="radio"][value="year_month"]');
-            await expect(yearMonthRadio).toBeVisible({ timeout: 60000 });
+            await expect(yearMonthRadio).toBeVisible();
             await yearMonthRadio.click();
             await waitForAngular(page);
             // 項目名入力欄が存在すること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1319,12 +1311,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「ファイル」を選択
             await modal.locator('button:has-text("ファイル")').click();
             await waitForAngular(page);
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // ファイルフィールドの設定モーダルであること
             await expect(modal.locator('.modal-header')).toContainText('ファイル');
             // モーダルを閉じる
@@ -1340,18 +1332,18 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「計算」を選択
             await modal.locator('button:has-text("計算")').click();
             await waitForAngular(page);
             // 計算式入力欄（contenteditable）が表示されること
-            await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible();
             // 計算値の種類ドロップダウンが存在すること
-            await expect(modal.locator('label:has-text("計算値の種類")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("計算値の種類")')).toBeVisible();
             // 計算値の自動更新チェックボックスが存在すること
-            await expect(modal.locator('label:has-text("計算値の自動更新")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("計算値の自動更新")')).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1365,17 +1357,17 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「計算」を選択
             await modal.locator('button:has-text("計算")').click();
             await waitForAngular(page);
             // 計算値の種類で「数値」がデフォルト選択されていること
             const calcType = modal.locator('select');
-            await expect(calcType.first()).toBeVisible({ timeout: 60000 });
+            await expect(calcType.first()).toBeVisible();
             // 計算式入力欄が表示されること
-            await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible();
             // 整数/小数のラジオが存在すること（数値選択時）
-            await expect(modal.locator('label:has-text("整数")')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('label:has-text("整数")')).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
 
@@ -1389,19 +1381,19 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
             const modal = page.locator('.settingModal .modal-content');
-            await expect(modal).toBeVisible({ timeout: 15000 });
+            await expect(modal).toBeVisible();
             // 「計算」を選択
             await modal.locator('button:has-text("計算")').click();
             await waitForAngular(page);
             // 計算式入力欄が表示されること
-            await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible({ timeout: 60000 });
+            await expect(modal.locator('#CommentExpression, .contenteditable')).toBeVisible();
             // 小数ラジオを選択
             const decimalRadio = modal.locator('input[type="radio"][value="decimal"]');
             if (await decimalRadio.count() > 0) {
                 await decimalRadio.click();
                 await waitForAngular(page);
                 // 小数点以下桁数の設定が表示されること
-                await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible({ timeout: 60000 });
+                await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible();
             }
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').click();
@@ -1411,7 +1403,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1421,7 +1413,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1431,7 +1423,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1441,7 +1433,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1451,7 +1443,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1461,7 +1453,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1471,7 +1463,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1481,7 +1473,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1491,7 +1483,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1501,7 +1493,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1511,7 +1503,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1521,7 +1513,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
 
     test("14-25': 他テーブル参照フィールドのフィールド設定ページが正常に表示されること（複数値許可）", async ({ page }) => {
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);

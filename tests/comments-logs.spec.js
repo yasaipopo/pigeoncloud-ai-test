@@ -14,7 +14,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -56,14 +56,14 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
         }
     }
     await page.waitForTimeout(2000);
@@ -233,7 +233,7 @@ async function openAsideMenu(page) {
         if (app) app.classList.remove('aside-menu-hidden');
     });
     // Angular コンポーネントの描画を待機
-    await page.waitForSelector('#comment', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('#comment', { timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(500);
 }
 
@@ -245,7 +245,7 @@ async function getFirstRecordViewUrl(page, tableUrl) {
     // テーブル一覧ページにアクセス
     await page.goto(BASE_URL + tableUrl);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
     await waitForAngular(page);
     await page.keyboard.press('Escape');
     await waitForAngular(page);
@@ -297,9 +297,9 @@ async function getFirstRecordViewUrl(page, tableUrl) {
     // 投入後に再度テーブル一覧を確認
     await page.goto(BASE_URL + tableUrl);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
     await waitForAngular(page);
-    try { await page.waitForSelector(`a[href*="${tableUrl}/view/"]`, { timeout: 15000 }); } catch (e) {}
+    try { await page.waitForSelector(`a[href*="${tableUrl}/view/"]`, { timeout: 5000 }); } catch (e) {}
 
     const retryHref = await page.evaluate((tableUrl) => {
         const links = Array.from(document.querySelectorAll('a[href*="/view/"]'));
@@ -326,7 +326,7 @@ test.describe('ログ管理', () => {
     let recordViewUrl = '/admin/dataset__7/view/1';
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
+        test.setTimeout(120000);
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         await ensureLoggedIn(page);
@@ -344,7 +344,7 @@ test.describe('ログ管理', () => {
     // CL01: ログ閲覧フロー（13-1, 13-2, 196）→ 1動画
     // =========================================================================
     test('CL01: ログ閲覧フロー', async ({ page }) => {
-        test.setTimeout(600000);
+        test.setTimeout(75000);
         const _testStart = Date.now();
         page.setDefaultTimeout(60000);
 
@@ -361,7 +361,7 @@ test.describe('ログ管理', () => {
 
             await page.waitForFunction(
                 () => document.body.innerText.includes('ユーザー') && document.querySelectorAll('table').length > 0,
-                { timeout: 15000 }
+                { timeout: 5000 }
             ).catch(() => {});
 
             const pageText = await page.innerText('body');
@@ -377,11 +377,11 @@ test.describe('ログ管理', () => {
 
             await page.goto(BASE_URL + '/admin/csv');
             await page.waitForLoadState('domcontentloaded');
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/csv/);
-            await page.waitForSelector('table th', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('table th', { timeout: 5000 }).catch(() => {});
 
             const pageText = await page.innerText('body');
             expect(pageText).toContain('CSV UP/DL履歴');
@@ -401,7 +401,7 @@ test.describe('ログ管理', () => {
 
             await page.waitForFunction(
                 () => document.body.innerText.includes('リクエストログ') && document.querySelectorAll('table').length > 0,
-                { timeout: 15000 }
+                { timeout: 5000 }
             ).catch(() => {});
 
             const pageText = await page.innerText('body');
@@ -416,7 +416,7 @@ test.describe('ログ管理', () => {
     // CL02: コメントメンションフロー（69-1, 69-2, 69-3, 69-4, 242）→ 1動画
     // =========================================================================
     test('CL02: コメントメンションフロー', async ({ page }) => {
-        test.setTimeout(600000);
+        test.setTimeout(105000);
         const _testStart = Date.now();
         page.setDefaultTimeout(60000);
 
@@ -431,7 +431,7 @@ test.describe('ログ管理', () => {
 
             await page.goto(BASE_URL + recordViewUrl);
             await page.waitForLoadState('domcontentloaded');
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
@@ -440,7 +440,7 @@ test.describe('ログ管理', () => {
             await openAsideMenu(page);
 
             const commentDiv = page.locator('#comment');
-            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toBeVisible();
             await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
             const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
             await expect(sendBtn).toBeVisible();
@@ -469,7 +469,7 @@ test.describe('ログ管理', () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-2`);
 
             await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
@@ -477,7 +477,7 @@ test.describe('ログ管理', () => {
             await openAsideMenu(page);
 
             const commentDiv = page.locator('#comment');
-            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toBeVisible();
             const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
             await expect(sendBtn).toBeVisible();
 
@@ -504,7 +504,7 @@ test.describe('ログ管理', () => {
 
             await page.goto(BASE_URL + recordViewUrl);
             await page.waitForLoadState('domcontentloaded');
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
@@ -512,7 +512,7 @@ test.describe('ログ管理', () => {
             await openAsideMenu(page);
 
             const commentDiv = page.locator('#comment');
-            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toBeVisible();
             await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
 
             await commentDiv.click();
@@ -528,7 +528,7 @@ test.describe('ログ管理', () => {
             await page.waitForTimeout(2000);
 
             const commentBody = page.locator('.comment-body').filter({ hasText: '存在しないユーザーテスト' }).first();
-            await expect(commentBody).toBeVisible({ timeout: 15000 });
+            await expect(commentBody).toBeVisible();
         });
 
         // ----- step: 69-4 組織へのメンション付きコメントが送信できること -----
@@ -537,7 +537,7 @@ test.describe('ログ管理', () => {
 
             await page.goto(BASE_URL + recordViewUrl);
             await page.waitForLoadState('domcontentloaded');
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
@@ -547,7 +547,7 @@ test.describe('ログ管理', () => {
                 recordViewUrl = freshViewUrl;
                 await page.goto(BASE_URL + recordViewUrl);
                 await page.waitForLoadState('domcontentloaded');
-                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
                 await waitForAngular(page);
                 await page.keyboard.press('Escape');
                 await waitForAngular(page);
@@ -556,7 +556,7 @@ test.describe('ログ管理', () => {
             await openAsideMenu(page);
 
             const commentDiv = page.locator('#comment');
-            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toBeVisible();
             const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
             await expect(sendBtn).toBeVisible();
             await expect(sendBtn).toContainText('送信');
@@ -628,7 +628,7 @@ test.describe('ログ管理', () => {
             } catch (e) {}
 
             await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
@@ -636,7 +636,7 @@ test.describe('ログ管理', () => {
             await openAsideMenu(page);
 
             const commentDiv = page.locator('#comment');
-            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toBeVisible();
             await expect(commentDiv).toHaveAttribute('contenteditable', 'true');
             const sendBtn = page.locator('button.btn-sm.btn-primary.pull-right').first();
             await expect(sendBtn).toBeVisible();
@@ -663,7 +663,7 @@ test.describe('ログ管理', () => {
     // CL03: コメント・ログ バグ修正確認（297, 356, 426, 472, 597, 570）→ 1動画
     // =========================================================================
     test('CL03: コメント・ログ バグ修正確認', async ({ page }) => {
-        test.setTimeout(600000);
+        test.setTimeout(150000);
         const _testStart = Date.now();
         page.setDefaultTimeout(60000);
 
@@ -678,7 +678,7 @@ test.describe('ログ管理', () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 297`);
 
             await page.goto(BASE_URL + _tableUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -751,7 +751,7 @@ test.describe('ログ管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         // ----- step: 472 コメント入力欄で改行が正しく反映されること -----
@@ -760,7 +760,7 @@ test.describe('ログ管理', () => {
 
             const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
             await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
@@ -768,7 +768,7 @@ test.describe('ログ管理', () => {
             await openAsideMenu(page);
 
             const commentDiv = page.locator('#comment');
-            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toBeVisible();
 
             await commentDiv.click();
             await waitForAngular(page);
@@ -800,7 +800,7 @@ test.describe('ログ管理', () => {
 
             const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
             await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
@@ -828,7 +828,7 @@ test.describe('ログ管理', () => {
 
             const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
             await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
             await page.keyboard.press('Escape');
             await waitForAngular(page);
@@ -836,7 +836,7 @@ test.describe('ログ管理', () => {
             await openAsideMenu(page);
 
             const commentDiv = page.locator('#comment');
-            await expect(commentDiv).toBeVisible({ timeout: 15000 });
+            await expect(commentDiv).toBeVisible();
 
             await commentDiv.click();
             await waitForAngular(page);
@@ -896,7 +896,7 @@ test.describe('ログ管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         // ----- step: 653 組織メンションのキャンセル後にメッセージが出続けないこと -----
@@ -941,7 +941,7 @@ test.describe('ログ管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
     });
 

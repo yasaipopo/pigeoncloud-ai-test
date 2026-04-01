@@ -26,7 +26,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -61,7 +61,7 @@ async function goDashboard(page) {
 async function goRecordList(page, tableId) {
     await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -73,7 +73,7 @@ async function goRecordList(page, tableId) {
 async function goRecordView(page, tableId, recordId) {
     await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -84,7 +84,7 @@ async function goRecordView(page, tableId, recordId) {
 async function goTableEdit(page, tableId) {
     await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -94,7 +94,7 @@ async function goTableEdit(page, tableId) {
 async function goDatasetList(page) {
     await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 // =============================================================================

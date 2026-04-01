@@ -12,7 +12,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -65,7 +65,7 @@ async function login(page) {
     }
 
     // APIログイン失敗時はフォームログイン
-    await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
     const idField = await page.waitForSelector('#id', { timeout: 30000 }).catch(() => null);
     if (!idField) {
         // すでにダッシュボードにいる場合はOK
@@ -76,14 +76,14 @@ async function login(page) {
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
         }
     }
     await page.waitForTimeout(1000);
@@ -161,11 +161,11 @@ test.describe('RPA（コネクト）', () => {
             await page.locator('button.btn-outline-primary:has(.fa-plus)').first().click();
 
             // 編集画面（/admin/rpa/edit/new）に遷移すること
-            await page.waitForURL('**/admin/rpa/edit/**', { timeout: 15000 });
+            await page.waitForURL('**/admin/rpa/edit/**', { timeout: 5000 });
             await waitForAngular(page);
 
             // RPA名入力フィールドが表示されるまで待機
-            await page.waitForSelector('input[placeholder="フロー名"]', { timeout: 15000 });
+            await page.waitForSelector('input[placeholder="フロー名"]', { timeout: 5000 });
 
             // RPA名入力フィールドが存在すること
             const rpaNameInput = await page.locator('input[placeholder="フロー名"]').count();
@@ -221,11 +221,11 @@ test.describe('RPA（コネクト）', () => {
 
             // 新規作成ボタンをクリック
             await page.locator('button.btn-outline-primary:has(.fa-plus)').first().click();
-            await page.waitForURL('**/admin/rpa/edit/**', { timeout: 15000 });
+            await page.waitForURL('**/admin/rpa/edit/**', { timeout: 5000 });
             await waitForAngular(page);
 
             // RPA名入力フィールドが表示されるまで待機
-            await page.waitForSelector('input[placeholder="フロー名"]', { timeout: 15000 });
+            await page.waitForSelector('input[placeholder="フロー名"]', { timeout: 5000 });
 
             // 編集URLに遷移していること
             const url = page.url();
@@ -316,7 +316,6 @@ test.describe('RPA（コネクト）', () => {
     });
 
     test('UC10: コネクトのWF完了トリガー・FTP処理確認', async ({ page }) => {
-        test.setTimeout(180000);
         await login(page);
         let stepStart;
 
@@ -341,7 +340,7 @@ test.describe('RPA（コネクト）', () => {
             const triggerCount = await triggerSettings.count();
             console.log('603: トリガー設定関連要素数:', triggerCount);
 
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log(`STEP_TIME 603: ${Date.now() - stepStart}ms`);
         });
 
@@ -360,13 +359,12 @@ test.describe('RPA（コネクト）', () => {
             // ページが正常であること
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log(`STEP_TIME 609: ${Date.now() - stepStart}ms`);
         });
     });
 
     test('UC13: RPA実行履歴画面確認', async ({ page }) => {
-        test.setTimeout(180000);
         await login(page);
         let stepStart;
 
@@ -393,13 +391,12 @@ test.describe('RPA（コネクト）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log(`STEP_TIME 672: ${Date.now() - stepStart}ms`);
         });
     });
 
     test('UC20: RPAビュー表示・編集・保存確認', async ({ page }) => {
-        test.setTimeout(180000);
         await login(page);
         let stepStart;
 
@@ -446,7 +443,7 @@ test.describe('RPA（コネクト）', () => {
                 }
             }
 
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log(`STEP_TIME 789: ${Date.now() - stepStart}ms`);
         });
     });

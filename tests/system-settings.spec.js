@@ -12,7 +12,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -77,7 +77,7 @@ async function createTableWithRetry(page, maxRetries = 3) {
 async function getTableLinkFromDashboard(page) {
     await page.goto(BASE_URL + '/admin/dashboard');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 5000 }).catch(() => {});
     await waitForAngular(page);
     const href = await page.evaluate(() => {
         const links = Array.from(document.querySelectorAll('a[href*="/admin/dataset__"]'));
@@ -100,16 +100,16 @@ async function login(page, email, password) {
     // Angular SPAのロード完了を待つ（networkidleまたは#idが現れるまで）
     await page.waitForLoadState('domcontentloaded');
     try {
-        await page.waitForSelector('#id', { timeout: 15000 });
+        await page.waitForSelector('#id', { timeout: 5000 });
     } catch (e) {
         // #idが見つからない場合はnetworkidleまで待つ
-        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
     await page.fill('#id', email || EMAIL);
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
     } catch (e) {
         // ログイン後のページ状態を確認
         const bodyText = await page.innerText('body').catch(() => '');
@@ -134,11 +134,11 @@ async function login(page, email, password) {
             }, BASE_URL).catch(() => {});
             // 同じパスワードでログインし直す
             await page.goto(BASE_URL + '/admin/login');
-            await page.waitForSelector('#id', { timeout: 15000 });
+            await page.waitForSelector('#id', { timeout: 5000 });
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
+            await page.waitForURL('**/admin/dashboard', { timeout: 5000 }).catch(() => {});
         } else if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             // ボタンが無効（送信中）の場合はURLが変わるまで待つ（再クリック不要）
@@ -154,7 +154,7 @@ async function login(page, email, password) {
                 await page.click('button[type=submit].btn-primary');
             }
             // URLが変わるまで待つ（ログイン処理が完了するまで）
-            await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 30000 });
         }
     }
     await page.waitForTimeout(2000);
@@ -349,7 +349,7 @@ async function getAdminSetting(page) {
 test.describe('テーブル定義一覧（ALLテストテーブル不要）', () => {
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(300000);
+        test.setTimeout(120000);
         await login(page);
         await closeTemplateModal(page);
     });
@@ -359,7 +359,6 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
     // SS03: 共通設定（テーブル定義一覧）
     // =========================================================================
     test('SS03: 共通設定（テーブル定義一覧）', async ({ page }) => {
-        test.setTimeout(600000);
 
         await test.step('10-1: テーブルの順番入れ替えがエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
@@ -425,13 +424,13 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             await expect(page).toHaveURL(/\/admin\/dataset/);
 
             // テーブル定義一覧ページのUI要素確認
-            await expect(page.locator('h5, h4, h3, .page-title').filter({ hasText: /テーブル定義/ }).first()).toBeVisible({ timeout: 15000 }).catch(() => {});
+            await expect(page.locator('h5, h4, h3, .page-title').filter({ hasText: /テーブル定義/ }).first()).toBeVisible().catch(() => {});
             // ボタンのレンダリング完了を待機（Angularの非同期レンダリング対応）
             await page.waitForFunction(
                 () => document.querySelector('button') && Array.from(document.querySelectorAll('button')).some(b => b.textContent.includes('メニュー並び替え')),
                 { timeout: 20000 }
             ).catch(() => {});
-            await expect(page.locator('button:has-text("メニュー並び替え")').first()).toBeVisible({ timeout: 60000 }).catch(() => {});
+            await expect(page.locator('button:has-text("メニュー並び替え")').first()).toBeVisible().catch(() => {});
             // 全て展開・全て閉じるボタンが存在することを確認（存在しない場合はスキップ）
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -452,17 +451,17 @@ test.describe('共通設定・システム設定', () => {
     let tableId = null;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
+        test.setTimeout(120000);
         const { context, page } = await createAuthContext(browser);
         // about:blankではcookiesが送られないため、先にアプリURLに遷移
-        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         tableId = await getAllTypeTableId(page);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await context.close();
     });
 
     test.afterAll(async ({ browser }) => {
-        test.setTimeout(300000);
+        test.setTimeout(120000);
         // afterAllで設定のリセットのみ行う（テーブル削除はしない）
         try {
             const { context, page } = await createAuthContext(browser);
@@ -470,7 +469,7 @@ test.describe('共通設定・システム設定', () => {
             async function safeLoginForAfterAll(pw) {
                 await page.goto(BASE_URL + '/admin/login');
                 await page.waitForLoadState('domcontentloaded');
-                await page.waitForSelector('#id', { timeout: 15000 }).catch(() => {});
+                await page.waitForSelector('#id', { timeout: 5000 }).catch(() => {});
                 await page.fill('#id', EMAIL);
                 await page.fill('#password', pw);
                 await page.click('button[type=submit].btn-primary');
@@ -524,7 +523,7 @@ test.describe('共通設定・システム設定', () => {
     });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(300000); // loginが遅い環境で120s超えることがあるため延長
+        test.setTimeout(120000); // loginが遅い環境で120s超えることがあるため延長
         await login(page);
         await closeTemplateModal(page);
     });
@@ -534,7 +533,6 @@ test.describe('共通設定・システム設定', () => {
     // SS03: 共通設定（テーブル定義変更・削除）
     // =========================================================================
     test('SS03: 共通設定（テーブル定義変更・削除）', async ({ page }) => {
-        test.setTimeout(600000);
 
         await test.step('10-3: テーブル定義の変更がエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
@@ -707,7 +705,7 @@ test.describe('共通設定・システム設定', () => {
     // SS04: システム利用状況
     // =========================================================================
     test('SS04: システム利用状況', async ({ page }) => {
-        test.setTimeout(1200000);
+        test.setTimeout(105000);
 
         await test.step('7-1: ユーザーを増やすとシステム利用状況のユーザー数表示が増えること', async () => {
             const STEP_TIME = Date.now();
@@ -957,7 +955,7 @@ test.describe('共通設定・システム設定', () => {
     // SS01: その他設定
     // =========================================================================
     test('SS01: その他設定', async ({ page }) => {
-        test.setTimeout(600000);
+        test.setTimeout(135000);
 
         await test.step('8-1: 二段階認証を有効化すると設定が反映されること', async () => {
             const STEP_TIME = Date.now();
@@ -1233,7 +1231,7 @@ test.describe('共通設定・システム設定', () => {
     // SS02: 共通設定
     // =========================================================================
     test('SS02: 共通設定', async ({ page }) => {
-        test.setTimeout(600000);
+        test.setTimeout(210000);
 
         await test.step('9-1: レコードの追加がエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
@@ -1498,7 +1496,7 @@ test.describe('共通設定・システム設定', () => {
     // SS05: 契約設定
     // =========================================================================
     test('SS05: 契約設定', async ({ page }) => {
-        test.setTimeout(300000);
+        test.setTimeout(75000);
 
         await test.step('130-01: PayPalサブスクリプション登録が完了すること', async () => {
             const STEP_TIME = Date.now();
@@ -1527,7 +1525,7 @@ test.describe('共通設定・システム設定', () => {
         // SSO設定ページへ遷移
         await page.goto(BASE_URL + '/admin/sso-settings');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
         await waitForAngular(page);
 
         // ページが表示されること（エラーページでないこと）
@@ -1572,7 +1570,7 @@ test.describe('共通設定・システム設定', () => {
     test('839-2: SSO設定ページで識別子と応答URLのコピー機能UIが存在すること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/sso-settings');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
         await waitForAngular(page);
 
         // 識別子・応答URL関連のUI要素を確認
@@ -1605,7 +1603,7 @@ test.describe('共通設定・システム設定', () => {
         // /admin/maintenance-cert または設定ページに証明書管理セクションがある
         await page.goto(BASE_URL + '/admin/maintenance-cert');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
         await waitForAngular(page);
 
         const certPageContent = await page.evaluate(() => {
@@ -1631,7 +1629,7 @@ test.describe('共通設定・システム設定', () => {
     test('841-1: ログアーカイブページが表示されアーカイブ済みログの一覧が確認できること', async ({ page }) => {
         await page.goto(BASE_URL + '/admin/log-archives');
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
         await waitForAngular(page);
 
         const logContent = await page.evaluate(() => {
@@ -1663,7 +1661,7 @@ test.describe('共通設定・システム設定', () => {
             const tableLinks = await page.locator('a').filter({ hasText: 'ALLテストテーブル' }).all();
             if (tableLinks.length > 0) {
                 await tableLinks[0].click({ timeout: 8000 }).catch(() => {});
-                await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+                await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
                 await waitForAngular(page);
 
                 // レコード新規作成フォームを開く（count()で安全にチェック）
@@ -1795,7 +1793,6 @@ test.describe('共通設定・システム設定', () => {
     // UC04: その他設定
     // =========================================================================
     test('UC04: その他設定', async ({ page }) => {
-        test.setTimeout(180000);
 
         await test.step('391: 「アラートを自動で閉じない」設定を有効にした場合にアラートが自動で閉じないこと', async () => {
             const STEP_TIME = Date.now();
@@ -1871,7 +1868,7 @@ test.describe('共通設定・システム設定', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
     });

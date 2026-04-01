@@ -35,8 +35,8 @@ module.exports = defineConfig({
     testDir: './tests',
     globalSetup: './tests/global-setup.js',
     globalTeardown: './tests/global-teardown.js',
-    timeout: 300000, // setupAllTypeTableのポーリング(最大200秒)に対応するため5分に延長
-    expect: { timeout: 10000 },
+    timeout: 60000, // テスト関数全体: 60秒。stepが多い場合のみtest.setTimeout(120000)で個別延長
+    expect: { timeout: 5000 },
     fullyParallel: false,
     retries: 1,
     workers: process.env.PLAYWRIGHT_WORKERS ? parseInt(process.env.PLAYWRIGHT_WORKERS) : 1,

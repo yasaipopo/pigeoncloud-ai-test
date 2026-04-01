@@ -26,12 +26,12 @@ async function reloginIfNeeded(page) {
     const password = process.env.TEST_PASSWORD || '';
     try {
         await page.goto(baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.waitForSelector('#id', { timeout: 15000 });
+        await page.waitForSelector('#id', { timeout: 5000 });
         await page.fill('#id', email);
         await page.fill('#password', password);
         await page.click('button[type=submit].btn-primary');
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
     } catch (e) {
         // 再ログイン失敗は無視して継続
     }
@@ -117,7 +117,7 @@ async function getAllTypeTableId(page) {
     async function _fetchTableId() {
         // about:blankからのfetchではcookiesが送られないため、先にページ遷移する
         if (!page.url() || page.url() === 'about:blank') {
-            await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+            await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         }
         // ログインページにリダイレクトされている場合はセッション切れ
         if (page.url().includes('/admin/login')) {

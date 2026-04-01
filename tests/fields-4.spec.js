@@ -12,7 +12,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -206,7 +206,7 @@ async function assertFieldPageLoaded(page, tableId) {
     if (currentUrl.includes('/admin/dataset/edit/')) {
         // タブが読み込まれるまで待機
         try {
-            await page.waitForSelector('.dataset-tabs [role=tab], tabset .nav-tabs li', { timeout: 15000 });
+            await page.waitForSelector('.dataset-tabs [role=tab], tabset .nav-tabs li', { timeout: 5000 });
         } catch (e) {
             // タブが見つからなくてもエラーとしない
         }
@@ -262,7 +262,7 @@ async function openFieldEditPanel(page, fieldLabel) {
 let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(600000);
+    test.setTimeout(120000);
     const { context, page } = await createAuthContext(browser);
     // about:blankではcookiesが送られないため、先にアプリURLに遷移
     await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
@@ -293,7 +293,7 @@ test.beforeAll(async ({ browser }) => {
 test.describe('フィールド設定テスト（261/265/267系）', () => {
 
     test('F401: フィールド設定テスト', async ({ page }) => {
-        test.setTimeout(600000); // 10分
+        test.setTimeout(120000); // 10分
         const _testStart = Date.now();
         page.setDefaultTimeout(60000);
 

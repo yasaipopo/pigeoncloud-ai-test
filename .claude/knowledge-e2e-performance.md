@@ -194,3 +194,129 @@ async function waitForAngular(page, timeout = 15000) {
 **新しいspec.jsを作る際は必ずtry/catch付きで定義すること。**
 
 ### 修正日: 2026-03-29
+
+---
+
+## 知見4: タイムアウト設定の適正値（2026-04-01 全面修正）
+
+### 問題
+全specに `test.setTimeout(300000)` 〜 `test.setTimeout(1800000)` が594箇所あった。
+1テストに最大30分待つ設定のため、セレクターが見つからない時に数分〜数十分黙って待ち続け、failの検出が極めて遅かった。
+
+### 適正値ルール
+
+| 対象 | 適正値 | 理由 |
+|---|---|---|
+| `playwright.config.js` timeout | **60000** (60秒) | テスト関数全体。stepが多い場合のみtest.setTimeout(120000) |
+| `config.expect.timeout` | **5000** (5秒) | expect()のデフォルト。要素がDOMにあれば5秒で十分 |
+| `test.setTimeout()` | **120000** (2分) | step数が多いテスト関数のみ。通常はconfig default(60秒)で十分 |
+| `page.goto()` / `reload()` timeout | **15000** (15秒) | ページ遷移系。ネットワーク往復+HTML取得 |
+| `waitForURL()` timeout | **15000** (15秒) | ログイン後リダイレクト等 |
+| `waitForSelector()` timeout | **5000** (5秒) | DOM要素待ち（ページ遷移なし）。Angular描画含め5秒で十分 |
+| `expect().toBeVisible()` | **引数なし** | config.expect.timeout(5秒)に統一。個別指定は不要 |
+| `waitForAngular` / `networkidle` | **5000** (5秒) | SPA描画完了待ち。5秒超えたらcatchで続行 |
+| テーブル作成等の重い処理 | **60000** (60秒) | create-trial, create-all-type-table（global-setup内のみ） |
+
+### 例外（長いタイムアウトが許容されるケース）
+- `create-trial`（テナント作成）: 最大30秒
+- `create-all-type-table`（ALLテストテーブル作成）: 最大30秒（504 Gateway Timeout対策でポーリングあり）
+- → これらは `global-setup.js` 内で実行されるため、個別テストのtimeoutとは無関係
+
+### 修正日: 2026-04-01
+
+---
+
+## 知見5: networkidle にはタイムアウト必須
+
+### 問題
+```javascript
+// ❌ 悪いパターン: タイムアウトなし
+await page.waitForLoadState('networkidle').catch(() => {});
+```
+`networkidle` は500ms間リクエストがないことを要求する。
+Angular SPAではポーリングやWebSocket等で常にリクエストが発生するため、永久にブロックする場合がある。
+`.catch(() => {})` は **例外をキャッチする** が、**タイムアウトするまでブロックする**（デフォルト=configのtimeout=60秒）。
+
+### 正しい書き方
+```javascript
+// ✅ 良いパターン: 5秒タイムアウト付き
+await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+```
+
+### 影響範囲
+全specの `waitForAngular()` 関数内 + helpers内（28箇所）
+
+### 修正日: 2026-04-01
+
+---
+
+## 知見6: count() > 0 で visibility を確認せずに click() してはいけない
+
+### 問題
+```javascript
+// ❌ 悪いパターン: DOMに存在するがCSSでhiddenな要素にclick
+const checkbox = page.locator('input[type="checkbox"]').first();
+if (await checkbox.count() > 0) {
+    await checkbox.click();  // ← visibleになるまで120秒リトライ → タイムアウト
+}
+```
+`count()` はDOMに存在するかだけを確認。`display:none` や `visibility:hidden` の要素も含む。
+`click()` は Playwright の actionability check で **visible になるまで待機** するため、hidden要素に対して永久にリトライする。
+
+### 正しい書き方
+```javascript
+// ✅ 良いパターン: :visible セレクター + isVisible() で確認
+const checkbox = page.locator('input[type="checkbox"]:visible').first();
+if (await checkbox.isVisible().catch(() => false)) {
+    await checkbox.click();
+}
+```
+
+### 同様に危険なパターン
+- `locator.count() > 0` → `locator.click()`
+- `locator.count() > 0` → `locator.fill()`
+- `locator.count() > 0` → `locator.check()`
+
+全て `isVisible()` でガードするか、`:visible` セレクターを使うこと。
+
+### 修正日: 2026-04-01
+
+---
+
+## 知見7: ensureLoggedIn のフォールバックチェーン
+
+### 問題
+`tests/helpers/ensure-login.js` のtimeoutが60s, 90s, 30sの連鎖だった。
+最悪ケース: goto(60s) + navbar(30s) + fullLogin(goto 60s + selector 60s + waitForURL 90s) = **300秒**
+
+storageStateが有効なら1〜5秒で完了するのに、失効時のフォールバックで5分待つ。
+
+### 適正値
+- `goto`: 15000ms
+- `navbar`: 10000ms
+- `waitForSelector('#id')`: 15000ms
+- `waitForURL`: 15000ms
+- 最悪ケース: **70秒以内**
+
+### 修正日: 2026-04-01
+
+---
+
+## 知見8: locator strict mode violation — .first() の付け忘れ
+
+### 問題
+```javascript
+// ❌ 悪いパターン: ページに複数のtableがある場合エラー
+const table = page.locator('table');
+await expect(table).toBeVisible();
+// → strict mode violation: locator('table') resolved to 3 elements
+```
+
+### 正しい書き方
+```javascript
+// ✅ 良いパターン
+const table = page.locator('table:visible').first();
+await expect(table).toBeVisible();
+```
+
+### 修正日: 2026-04-01

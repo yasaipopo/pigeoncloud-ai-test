@@ -13,7 +13,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -35,17 +35,17 @@ async function login(page) {
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 async function closeTemplateModal(page) {
@@ -169,20 +169,20 @@ async function findFixedTextField(page) {
 }
 
 test.describe('フィールド追加オプション（表示条件）- 850系', () => {
-    test.describe.configure({ timeout: 300000 });
+    test.describe.configure({ timeout: 120000 });
 
     let tableId = null;
     let editUrl = null;
     let beforeAllFailed = false;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(600000);
+        test.setTimeout(120000);
         const maxRetries = 3;
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             const { context, page } = await createAuthContext(browser);
             try {
                 // about:blankではcookiesが送られないため、先にアプリURLに遷移
-                await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+                await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
                 await closeTemplateModal(page);
                 tableId = await getAllTypeTableId(page);
 
@@ -195,7 +195,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
                     await page.fill('#id', email).catch(() => {});
                     await page.fill('#password', password).catch(() => {});
                     await page.click('button[type=submit].btn-primary').catch(() => {});
-                    await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
+                    await page.waitForURL('**/admin/dashboard', { timeout: 5000 }).catch(() => {});
                     await page.waitForTimeout(1500);
                     tableId = await getAllTypeTableId(page);
                 }
@@ -228,14 +228,13 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
 
     // F501: 全フィールドタイプの表示条件UIを1動画で確認
     test('F501: フィールド追加オプション（表示条件）', async ({ page }) => {
-        test.setTimeout(300000);
 
         expect(editUrl, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
         await page.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
         await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
         // ALLテストテーブルは102フィールドあるため読み込みに時間がかかる
-        await page.waitForSelector('.overSetting', { timeout: 180000 });
+        await page.waitForSelector('.overSetting', { timeout: 30000 });
         await waitForAngular(page);
 
         for (const { caseNo, fieldType, hasDisplayCondition, labelKeywords } of FIELD_TYPES) {
@@ -273,13 +272,13 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
 
                 if (hasDisplayCondition) {
                     const additionalOptionsBtn = page.locator('.modal.show button').filter({ hasText: '追加オプション設定' }).first();
-                    await expect(additionalOptionsBtn).toBeVisible({ timeout: 60000 });
+                    await expect(additionalOptionsBtn).toBeVisible();
 
                     await additionalOptionsBtn.click();
                     await waitForAngular(page);
 
                     const displayConditionSection = page.locator('.modal.show').locator('text=表示条件設定').first();
-                    await expect(displayConditionSection).toBeVisible({ timeout: 60000 });
+                    await expect(displayConditionSection).toBeVisible();
                     console.log(`${caseNo}: ${fieldType} - 表示条件設定セクション: 確認OK (${Date.now() - STEP_TIME}ms)`);
 
                     const addConditionBtn = page.locator('.modal.show button').filter({ hasText: '条件追加' });

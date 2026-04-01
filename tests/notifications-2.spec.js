@@ -21,7 +21,7 @@ const PASSWORD = process.env.TEST_PASSWORD;
 async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login');
     // networkidleを待ってAngularがCSRFトークンを取得してからフォームに入力する
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
         await page.waitForSelector('.navbar', { timeout: 30000 });
@@ -38,7 +38,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             // CSRFエラー時のリトライ: 再度networkidleまで待ってからログイン
@@ -47,10 +47,10 @@ async function login(page, email, password) {
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -86,7 +86,7 @@ async function debugApiPost(page, path, body = {}) {
         const res = await page.context().request.post(BASE_URL + '/api/admin/debug' + path, {
             data: body,
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            timeout: 180000, // 180秒タイムアウト
+            timeout: 30000, // 180秒タイムアウト
         });
         try {
             return await res.json();
@@ -370,17 +370,17 @@ test.describe('メール配信', () => {
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(360000);
+            test.setTimeout(120000);
             const { context, page } = await createAuthContext(browser);
             // about:blankではcookiesが送られないため、先にアプリURLに遷移
-            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             tableId = await getAllTypeTableId(page);
             if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
             await context.close();
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000); // beforeEach（ログイン）+ テスト本体で120秒
+            test.setTimeout(120000); // beforeEach（ログイン）+ テスト本体で120秒
             await ensureLoggedIn(page, EMAIL, PASSWORD);
             await closeTemplateModal(page);
         });
@@ -780,7 +780,7 @@ test.describe('メール配信', () => {
         await test.step('142-01: メール配信で添付ファイルを設定するとエラーなく配信でき添付ファイルが届くこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(285000);
             // メール配信設定の新規作成ページへ
             await page.goto(BASE_URL + '/admin/mail_delivery/edit/new');
             await page.waitForLoadState('domcontentloaded');

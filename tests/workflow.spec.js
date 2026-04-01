@@ -11,7 +11,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -59,13 +59,13 @@ async function login(page, email, password) {
             await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 async function logout(page) {
     await page.evaluate(() => fetch('/api/admin/logout', { method: 'GET', credentials: 'include' }));
     await page.goto(BASE_URL + '/admin/login');
-    await page.waitForSelector('#id', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('#id', { timeout: 5000 }).catch(() => {});
 }
 
 async function closeTemplateModal(page) {
@@ -202,7 +202,7 @@ async function saveTableSettings(page, tableId) {
     // 確認ダイアログ「本当に更新してもよろしいですか？」→「更新する」をクリック
     await page.getByRole('button', { name: '更新する', exact: true }).click({ timeout: 20000 });
     // 保存後はリスト画面（/admin/dataset__NNN）に遷移する
-    await page.waitForURL(`**/dataset__${tableId}`, { timeout: 15000 }).catch(() => {});
+    await page.waitForURL(`**/dataset__${tableId}`, { timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(1000);
 }
 
@@ -333,7 +333,7 @@ async function createRecordAndSubmit(page, tableId, approverName, comment = '') 
     await page.waitForFunction(
         () => !Array.from(document.querySelectorAll('user-forms-field'))
             .some(el => el.textContent.includes('Loading...')),
-        { timeout: 15000 }
+        { timeout: 5000 }
     ).catch(() => {});
     await page.waitForTimeout(300);
     // user-forms-field内のng-selectコンボボックスをクリックして展開
@@ -374,7 +374,7 @@ async function createRecordAndSubmit(page, tableId, approverName, comment = '') 
                 if (/^\d+$/.test(text) && parseInt(text) > 0) return true;
             }
             return false;
-        }, { timeout: 15000 }).catch(() => {});
+        }, { timeout: 5000 }).catch(() => {});
         await page.waitForTimeout(500);
         const recordId = await page.evaluate(() => {
             const rows = document.querySelectorAll('table tbody tr');
@@ -538,7 +538,7 @@ let _sharedTableId = null;
 let _testUser = null; // { email, password, id }
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(480000);
+    test.setTimeout(120000);
     const { context: _fileCtx, page } = await createAuthContext(browser);
     await closeTemplateModal(page);
 
@@ -614,7 +614,7 @@ test.describe('ワークフロー設定（21系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -637,7 +637,7 @@ test.describe('ワークフロー設定（21系）', () => {
         await test.step('21-1: ワークフロー承認者はデータ編集可能設定が保存されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(150000);
+            test.setTimeout(90000);
             await navigateToWorkflowTab(page, tableId);
             // ワークフローONを確認（Angular描画完了を待機してから確認）
             await page.waitForFunction(() => {
@@ -701,7 +701,7 @@ test.describe('ワークフロー設定（21系）', () => {
         await test.step('21-2: 一度承認されたデータも再申請可能設定が表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // ワークフローをONにして再申請可能設定を確認
             const isWfEnabled = await page.evaluate(() => {
@@ -727,7 +727,7 @@ test.describe('ワークフロー設定（21系）', () => {
         await test.step('21-3: ワークフローのフローを固定する設定が有効になること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const isWfEnabled = await page.evaluate(() => {
                 const wfSection = document.querySelector('dataset-workflow-options');
@@ -759,7 +759,7 @@ test.describe('ワークフロー設定（21系）', () => {
         await test.step('21-4: ワークフロー申請の取り下げがエラーなく完了すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // admin として申請（承認者もadmin自身）
             const adminName = EMAIL.split('@')[0]; // 検索用
             const recordId = await createRecordAndSubmit(page, tableId, adminName, '取り下げテスト申請');
@@ -835,7 +835,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -858,7 +858,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-1: テーブルに対してワークフロー設定が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(165000);
             await navigateToWorkflowTab(page, tableId);
             // ワークフローが有効になっていること（Angular描画完了後に確認）
             await page.waitForFunction(() => {
@@ -899,7 +899,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-2: ユーザーAが申請しBが承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // adminで申請してadminが承認（WFTestテーブルはルートグループのためテストユーザーは非アクセス）
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '承認テスト申請コメント');
@@ -926,7 +926,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-3: 多段承認フロー（A申請→B承認→C最終承認）ができること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // adminで申請（承認者にadminを指定）
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '多段承認テスト');
@@ -949,7 +949,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-4: 否認された後に再申請ができること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
 
             // adminで申請
@@ -978,7 +978,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-5: 組織による承認（一人の承認が必要）ができること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // adminで申請、承認者タイプ=組織(役職)
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
@@ -1015,7 +1015,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-6: 承認者データ編集可能設定が申請フローに反映されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 「承認者はデータ編集可能」をONにして保存
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, '承認者はデータ編集可能', true);
@@ -1036,7 +1036,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-7: 一度承認後に再申請が可能な設定ができること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // 再申請可能設定をON
             await toggleWorkflowOption(page, '再申請', true);
@@ -1059,7 +1059,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-8: ワークフローのフロー固定設定が機能すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // フロー固定をON
             await toggleWorkflowOption(page, 'フローを固定する', true);
@@ -1076,7 +1076,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
         await test.step('11-9: 否認→再編集→再申請→承認の完全フローが動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 11-8 がフロー固定をONにしている場合があるためリセット
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, 'フローを固定する', false);
@@ -1106,7 +1106,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
             await page.waitForFunction(
                 () => !Array.from(document.querySelectorAll('user-forms-field'))
                     .some(el => el.textContent.includes('Loading...')),
-                { timeout: 15000 }
+                { timeout: 5000 }
             ).catch(() => {});
             await page.waitForTimeout(300);
             const _ngCb11_9 = page.locator('user-forms-field').getByRole('combobox').first();
@@ -1161,7 +1161,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -1184,7 +1184,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await test.step('68-1: 組織(役職)/一人の承認が必要なワークフローで承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(90000);
             // レコード作成 → 申請モーダルで組織(役職)タイプを選択
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
@@ -1243,7 +1243,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await test.step('68-2: 組織(役職)/一人の承認が必要なワークフローで否認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // レコード作成 → 申請モーダルで組織(役職)タイプを選択
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
@@ -1293,7 +1293,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await test.step('68-5: フロー固定で組織(役職)/一人の承認が必要なワークフローが機能すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // フロー固定をON
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, 'フローを固定する', true);
@@ -1347,7 +1347,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await test.step('68-6: フロー固定で組織(役職)/一人の承認が必要なワークフローで否認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1361,7 +1361,6 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await test.step('68-7: 組織(役職)/全員の承認が必要なワークフロー設定ができること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
             // Angular描画完了まで申請ボタン表示を待機
@@ -1472,7 +1471,7 @@ test.describe('引き上げ承認（106系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -1495,7 +1494,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-01: 組織(1人の承認が必要)→の後の承認者では引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(255000);
             // 引き上げ承認機能をONにする
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, '引き上げ承認', true);
@@ -1547,7 +1546,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-02: 組織(全員の承認が必要)→の後の承認者では引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 引き上げ承認機能をONにする
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, '引き上げ承認', true);
@@ -1595,7 +1594,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-06: 組織(1人)→組織(全員)の場合、引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 106-01と同様のパターン: 組織タイプでは引き上げ不可
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
@@ -1607,7 +1606,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-07: 組織(全員)→ユーザーの場合、ユーザーは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1617,7 +1616,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-08: 組織(全員)→組織(1人)の場合、引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1627,7 +1626,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-09: 組織(全員)→組織(全員)の場合、引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1637,7 +1636,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-03: ユーザー→ユーザーの多段承認でBが引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 引き上げ承認機能をONにする
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, '引き上げ承認', true);
@@ -1660,7 +1659,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-04: 組織(1人)→ユーザーの場合、ユーザーは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 引き上げ承認機能が有効かつ前段が組織(1人)の場合、後段ユーザーは引き上げ承認可能
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
@@ -1671,7 +1670,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-05: 組織(1人)→組織(1人)の場合、引き上げ承認ボタンが表示されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1681,7 +1680,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-10: A→B→Cの3段承認でBは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1690,7 +1689,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-11: A→B→Cの3段承認でCは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1701,7 +1700,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-12: 組織(1人)→A→Bの場合、Aは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1711,7 +1710,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-13: 組織(1人)→A→Bの場合、Bは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1721,7 +1720,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-14: 組織(全員)→A→Bの場合、Aは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1731,7 +1730,7 @@ test.describe('引き上げ承認（106系）', () => {
         await test.step('106-15: 組織(全員)→A→Bの場合、Bは引き上げ承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1829,7 +1828,7 @@ test.describe('一括操作（111系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000); // enableWorkflowは重い処理のため10分に延長
+            test.setTimeout(120000); // enableWorkflowは重い処理のため10分に延長
             // tableId を共有テーブルから取得
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のため、beforeAllで1回だけ実行する
@@ -1847,7 +1846,7 @@ test.describe('一括操作（111系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000); // loginが遅い環境でデフォルト60s超えることがあるため延長
+            test.setTimeout(120000); // loginが遅い環境でデフォルト60s超えることがあるため延長
             // ワークフロー有効化はbeforeAllで済んでいるため、ここではログインのみ行う
             await login(page);
             await closeTemplateModal(page);
@@ -1857,7 +1856,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-01: 申請を1つ選択して一括承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(600000); // createRecordAndSubmitが遅い環境で300s超えることがあるため延長
+            test.setTimeout(255000); // createRecordAndSubmitが遅い環境で300s超えることがあるため延長
             // adminで申請を作成
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認テスト');
@@ -1900,7 +1899,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-02: 申請を複数選択して一括承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             // adminで複数申請
             const approverName = EMAIL.split('@')[0];
             const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括承認A');
@@ -1923,7 +1922,7 @@ test.describe('一括操作（111系）', () => {
             await expect(page.locator('.modal.show')).toBeVisible({ timeout: 60000 });
             await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1939,7 +1938,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-03: 一括承認時にコメントを入力して実行できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認コメントテスト');
             expect(recordId).toBeTruthy();
@@ -1962,7 +1961,7 @@ test.describe('一括操作（111系）', () => {
             await commentArea.fill('一括承認コメント111-03');
             await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1979,7 +1978,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-04: 一括承認時にコメント入力せずに実行できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認コメントなし');
             expect(recordId).toBeTruthy();
@@ -1999,7 +1998,7 @@ test.describe('一括操作（111系）', () => {
             // コメントを入力せずにそのまま承認
             await page.locator('.modal.show button.btn-success.btn-ladda, .modal.show button.btn-success:has-text("承認")').last().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2015,7 +2014,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-05: 下書き/取り下げ後の申請を1つ選択して一括削除できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 申請してすぐ取り下げることで削除対象レコードを作る
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括削除テスト');
@@ -2049,7 +2048,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-06: 下書き/取り下げ後の申請を複数選択して一括削除できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             // 2件の取り下げ済みレコードを作成
             const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括削除A');
@@ -2088,7 +2087,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-07: 一括削除時にコメントを入力して実行できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const rid = await createRecordAndSubmit(page, tableId, approverName, '一括削除コメントテスト');
             expect(rid).toBeTruthy();
@@ -2125,7 +2124,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-08: 一括削除時にコメント入力せずに実行できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const rid = await createRecordAndSubmit(page, tableId, approverName, '一括削除コメントなし');
             expect(rid).toBeTruthy();
@@ -2159,7 +2158,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-09: 申請を1つ選択して一括否認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認テスト');
             expect(recordId).toBeTruthy();
@@ -2178,7 +2177,7 @@ test.describe('一括操作（111系）', () => {
             await expect(page.locator('.modal.show')).toBeVisible({ timeout: 60000 });
             await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2194,7 +2193,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-10: 申請を複数選択して一括否認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括否認A');
             const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括否認B');
@@ -2215,7 +2214,7 @@ test.describe('一括操作（111系）', () => {
             await expect(page.locator('.modal.show')).toBeVisible({ timeout: 60000 });
             await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2224,7 +2223,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-11: 一括否認時にコメントを入力して実行できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認コメントテスト');
             expect(recordId).toBeTruthy();
@@ -2247,7 +2246,7 @@ test.describe('一括操作（111系）', () => {
             await commentArea.fill('一括否認コメント111-11');
             await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2264,7 +2263,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-12: 一括否認時にコメント入力せずに実行できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認コメントなし');
             expect(recordId).toBeTruthy();
@@ -2284,7 +2283,7 @@ test.describe('一括操作（111系）', () => {
             // コメントを入力せずにそのまま否認
             await page.locator('.modal.show button.btn-danger.btn-ladda, .modal.show button.btn-danger:has-text("否認")').last().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2300,7 +2299,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-13: 申請を1つ選択して一括取り下げできること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げテスト');
             expect(recordId).toBeTruthy();
@@ -2320,7 +2319,7 @@ test.describe('一括操作（111系）', () => {
             await expect(page.locator('.modal.show')).toBeVisible({ timeout: 60000 });
             await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2336,7 +2335,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-14: 申請を複数選択して一括取り下げできること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げA');
             const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げB');
@@ -2357,7 +2356,7 @@ test.describe('一括操作（111系）', () => {
             await expect(page.locator('.modal.show')).toBeVisible({ timeout: 60000 });
             await page.locator('.modal.show #confirm-submit-btn, .modal.show button:has-text("取り下げを行う"), .modal.show button.btn-warning.btn-ladda').first().click({ timeout: 5000 });
             // 成功トーストが表示されること
-            await expect(page.locator('.toast-success, .toast-message')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.toast-success, .toast-message')).toBeVisible();
             await page.waitForTimeout(2000);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2366,7 +2365,7 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-15: 一括取り下げ時にコメントを入力して実行できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             await createRecordAndSubmit(page, tableId, approverName, '一括取り下げコメントテスト');
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -2397,7 +2396,6 @@ test.describe('一括操作（111系）', () => {
         await test.step('111-16: 一括取り下げ時にコメント入力せずに実行できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             const approverName = EMAIL.split('@')[0];
             await createRecordAndSubmit(page, tableId, approverName, '一括取り下げコメントなし');
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -2447,7 +2445,7 @@ test.describe('承認者削除後の確認（28系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             // ワークフロー有効化は重い処理のためbeforeAllで1回だけ実行
             const { context, page } = await createAuthContext(browser);
@@ -2465,7 +2463,7 @@ test.describe('承認者削除後の確認（28系）', () => {
         await test.step('28-1: ワークフロー承認済み後に承認者ユーザーを削除しても問題ないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(240000);
+            test.setTimeout(90000);
             const approverName = EMAIL.split('@')[0];
             // adminで申請・承認（adminが承認者として設定される）
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '承認者削除テスト申請');
@@ -2496,7 +2494,7 @@ test.describe('承認者削除後の確認（28系）', () => {
         await test.step('28-3: ワークフロー申請中に承認者ユーザーを削除しても問題ないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 専用テストユーザーを作成（承認者として使用後に削除）
             const tempUser2 = await createTestUser(page);
             // adminで申請、承認者=tempUser2
@@ -2517,7 +2515,7 @@ test.describe('承認者削除後の確認（28系）', () => {
             await page.waitForFunction(
                 () => !Array.from(document.querySelectorAll('user-forms-field'))
                     .some(el => el.textContent.includes('Loading...')),
-                { timeout: 15000 }
+                { timeout: 5000 }
             ).catch(() => {});
             await page.waitForTimeout(300);
             const _ngCb28_3 = page.locator('user-forms-field').getByRole('combobox').first();
@@ -2586,7 +2584,7 @@ test.describe('承認者削除後の確認（28系）', () => {
         await test.step('28-2: ワークフロー承認済み後に承認者組織を削除しても問題ないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 組織(役職)で申請→承認→組織削除後もレコード表示エラーなし
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
@@ -2632,7 +2630,7 @@ test.describe('承認者削除後の確認（28系）', () => {
         await test.step('28-4: ワークフロー申請中に承認者組織を削除しても問題ないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 組織(役職)で申請→組織削除後もレコード表示エラーなし
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
@@ -2689,7 +2687,7 @@ test.describe('自分自身を承認者（166）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -2711,7 +2709,6 @@ test.describe('自分自身を承認者（166）', () => {
         await test.step('166: 自分自身を承認者に入れた場合に問題なく動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             // admin自身を承認者として申請
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '自分承認テスト');
@@ -2747,7 +2744,7 @@ test.describe('通知（36系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -2769,7 +2766,6 @@ test.describe('通知（36系）', () => {
         await test.step('36-1: ユーザーを申請者として申請し通知が届くこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '通知テスト申請(ユーザー)');
             expect(recordId).toBeTruthy();
@@ -2785,7 +2781,7 @@ test.describe('通知（36系）', () => {
         await test.step('36-2: 組織を申請者として申請し通知が届くこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 組織(役職)で申請
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
@@ -2834,7 +2830,7 @@ test.describe('申請取り下げ（64系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -2856,7 +2852,6 @@ test.describe('申請取り下げ（64系）', () => {
         await test.step('64-1: 申請取り下げ時にコメント入力し通知が行われること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '取り下げ通知テスト');
             expect(recordId).toBeTruthy();
@@ -2901,7 +2896,7 @@ test.describe('一つ戻す機能（296）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -2923,7 +2918,6 @@ test.describe('一つ戻す機能（296）', () => {
         await test.step('296: ワークフローの一つ戻す機能が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             // 一つ戻す機能を有効にする
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, '一つ戻す', true);
@@ -2993,7 +2987,7 @@ test.describe('通知カスタマイズ（395系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -3015,7 +3009,7 @@ test.describe('通知カスタマイズ（395系）', () => {
         await test.step('395-1: 申請時の通知件名・本文を変更を有効にして通知が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(150000);
             await navigateToWorkflowTab(page, tableId);
             // 通知設定セクションを確認
             const bodyText = await page.innerText('body');
@@ -3028,7 +3022,7 @@ test.describe('通知カスタマイズ（395系）', () => {
         await test.step('395-2: 申請時の通知件名・本文を変更を無効にして通知が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3037,7 +3031,7 @@ test.describe('通知カスタマイズ（395系）', () => {
         await test.step('395-3: 否認時の通知件名・本文を変更を有効にして通知が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3049,7 +3043,7 @@ test.describe('通知カスタマイズ（395系）', () => {
         await test.step('395-4: 否認時の通知件名・本文を変更を無効にして通知が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3058,7 +3052,7 @@ test.describe('通知カスタマイズ（395系）', () => {
         await test.step('395-5: 完了時の通知件名・本文を変更を有効にして通知が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3067,7 +3061,7 @@ test.describe('通知カスタマイズ（395系）', () => {
         await test.step('395-6: 完了時の通知件名・本文を変更を無効にして通知が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3076,7 +3070,7 @@ test.describe('通知カスタマイズ（395系）', () => {
         await test.step('395-7: 取り下げ時の通知件名・本文を変更を有効にして通知が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3085,7 +3079,7 @@ test.describe('通知カスタマイズ（395系）', () => {
         await test.step('395-8: 取り下げ時の通知件名・本文を変更を無効にして通知が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3136,7 +3130,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -3162,7 +3156,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
         await test.step('396-1: ワークフロー設定でステップに条件を追加できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(150000);
             await navigateToWorkflowTab(page, tableId);
             // テンプレート追加ボタン
             const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
@@ -3190,7 +3184,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
         await test.step('396-2: テンプレート自体に適用条件を設定できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // テンプレートレベルの条件追加ボタンを探す
             const bodyText = await page.innerText('body');
@@ -3204,7 +3198,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
         await test.step('397-1: 承認者タイプとして「項目」を選択できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // テンプレート追加→フロー追加
             const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
@@ -3230,7 +3224,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
         await test.step('397-2: AND/OR欄でも承認者タイプに「項目」を設定できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // テンプレート追加→フロー追加
             const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
@@ -3256,7 +3250,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
         await test.step('398-1: 同一ステップ内で複数の承認者を追加できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // テンプレート追加→フロー追加
             const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
@@ -3287,7 +3281,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
         await test.step('398-2: AND/OR選択ドロップダウンでAND/ORを選択できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // テンプレート追加→フロー追加→AND/OR追加
             const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
@@ -3313,7 +3307,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
         await test.step('399-1: 複数テンプレートが追加でき独立設定できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             // テンプレート追加を2回
             const addTemplateBtn = page.locator('button:has-text("テンプレートの追加"), button:has-text("テンプレート追加")').first();
@@ -3338,7 +3332,7 @@ test.describe('ワークフロー詳細設定（396-399系）', () => {
         await test.step('399-2: 承認後もデータを編集できる権限グループ設定UIが存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3372,7 +3366,7 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -3394,7 +3388,6 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
         await test.step('68-3: 組織(役職)/全員の承認が必要なワークフローで承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
@@ -3441,7 +3434,7 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
         await test.step('68-4: 組織(役職)/全員の承認が必要なワークフローで否認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
@@ -3488,7 +3481,6 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
         await test.step('68-8: フロー固定で組織(役職)/全員の承認が必要なワークフローで否認できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             // フロー固定をONにする
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, 'フローを固定する', true);
@@ -3693,7 +3685,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(120000);
             tableId = _sharedTableId;
             const { context, page } = await createAuthContext(browser);
             try {
@@ -3715,7 +3707,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('278: 画像ルックアップコピーがあるテーブルでレコード登録ができること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(225000);
             // テーブルの新規追加ページを開いて登録できることを確認
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
@@ -3730,7 +3722,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('333: ワークフロー承認者選択時にユーザー名で検索できること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             // 新規レコード作成→申請モーダル→承認フロー追加→ユーザー名検索
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
@@ -3749,7 +3741,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             await page.waitForFunction(
                 () => !Array.from(document.querySelectorAll('user-forms-field'))
                     .some(el => el.textContent.includes('Loading...')),
-                { timeout: 15000 }
+                { timeout: 5000 }
             ).catch(() => {});
             await page.waitForTimeout(300);
             const ngCombobox = page.locator('user-forms-field').getByRole('combobox').first();
@@ -3767,7 +3759,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('363: WF状態の表示条件設定でフィールドが正しく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3783,7 +3775,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('382: ワークフロー通知メールをオフにする設定が存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3795,7 +3787,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('394: ワークフロー申請時に正しいメイン組織の承認者が選択されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
@@ -3823,7 +3815,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('397: 子テーブルの表示条件設定がテーブル設定でエラーなく動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 30000 });
@@ -3836,7 +3828,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('409: ワークフロー関連のCSVダウンロード機能がエラーなく動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
@@ -3847,7 +3839,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('418: 承認完了後でも変更可能にする設定がUIに存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3858,7 +3850,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('431: ワークフロー設定で承認者を追加できるUIが存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, 'フローを固定する', true);
             await page.waitForTimeout(1000);
@@ -3873,7 +3865,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('434: ワークフロー申請時に組織選択UIが表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
@@ -3890,7 +3882,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('435: 承認後も編集可能チェック後にユーザー選択画面が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, '承認後', true);
             await page.waitForTimeout(1000);
@@ -3903,7 +3895,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('446: ワークフロー申請ボタン押下時に申請画面が正常に表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 30000 });
@@ -3922,7 +3914,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('455: ワークフローCSVエクスポート画面がエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3935,7 +3927,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('457: ワークフロー設定で承認者スキップ関連の設定が存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(255000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3946,7 +3938,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('463: ワークフロー通知設定のテンプレート変数UIがエラーなく動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3957,7 +3949,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('464: ワークフロー設定画面で閲覧権限関連のUIがエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3967,7 +3959,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('469: ワークフロー設定でAND/OR承認者設定がエラーなく動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, 'フローを固定する', true);
             await page.waitForTimeout(1000);
@@ -3993,7 +3985,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('480: WF否認/取り下げ後の編集画面でテンプレートが正しく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, 'テンプレート表示テスト');
             expect(recordId).toBeTruthy();
@@ -4008,7 +4000,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('484: ワークフロー状態による行色設定がテーブル一覧でエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
@@ -4019,7 +4011,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('506: WF付きテーブルの新規レコード画面がエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
             await waitForAngular(page);
@@ -4031,7 +4023,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('510: ワークフロー設定で承認者の移動関連UIがエラーなく動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4041,7 +4033,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('512: WF申請状態を必須条件に設定したフィールドが正しく動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 30000 });
@@ -4053,7 +4045,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('513: フロー固定時に承認者の追加・移動設定がエラーなく動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, 'フローを固定する', true);
             await page.waitForTimeout(1000);
@@ -4066,7 +4058,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('574: WF承認者を無効ユーザーにしても承認履歴が表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '無効ユーザー履歴テスト');
             expect(recordId).toBeTruthy();
@@ -4081,7 +4073,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('582: テーブル設定の他テーブル参照関連UIがエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 30000 });
@@ -4093,7 +4085,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('600: ワークフロー設定のエクスポート/インポートUIがエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4103,7 +4095,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('613: サイドメニューのWFバッジがテーブル名が長くても表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
@@ -4114,7 +4106,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('621: WF設定テーブルで下書き保存が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
             await page.waitForLoadState('domcontentloaded');
             await waitForAngular(page);
@@ -4129,7 +4121,6 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('645: WFバッジの数字がサイドメニューにエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
@@ -4140,7 +4131,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('697: WF下書き保存で必須項目を空にできるオプションがフィールド設定に存在すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 30000 });
@@ -4156,7 +4147,6 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('520: WF設定のAND/OR並行承認で2人目以降の役職が保存されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             await navigateToWorkflowTab(page, tableId);
             await toggleWorkflowOption(page, 'フローを固定する', true);
             await page.waitForTimeout(1000);
@@ -4187,7 +4177,6 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('577: WF閲覧権限設定がテーブル設定でエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
             await navigateToWorkflowTab(page, tableId);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4197,7 +4186,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('588: WF承認者が無効の場合にエラーなくレコード表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
@@ -4210,7 +4199,6 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('594: WFを無効化したテーブルのレコード詳細でWF履歴が非表示であること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, 'WF履歴非表示テスト');
             expect(recordId).toBeTruthy();
@@ -4230,7 +4218,6 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('638: WFの申請フローNo.変更時にステップ番号が正しく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, 'フローNo切替テスト');
             expect(recordId).toBeTruthy();
@@ -4246,7 +4233,6 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('470: WF否認/取り下げ後にデータ編集しWFが正しく切り替わること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '否認後編集テスト');
             expect(recordId).toBeTruthy();

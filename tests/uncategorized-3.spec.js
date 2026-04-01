@@ -17,7 +17,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -99,7 +99,7 @@ async function login(page, email, password) {
             await page.waitForURL('**/admin/dashboard', { timeout: 180000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -357,7 +357,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(360000);
+            test.setTimeout(120000);
             const { context, page } = await createAuthContext(browser);
             // about:blankからfetchするとcookiesが送られないため、先にアプリURLに遷移
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
@@ -373,7 +373,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });

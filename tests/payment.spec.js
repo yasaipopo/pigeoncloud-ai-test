@@ -10,7 +10,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -38,15 +38,15 @@ async function login(page) {
         return;
     }
     try {
-        await page.waitForSelector('#id', { timeout: 15000 });
+        await page.waitForSelector('#id', { timeout: 5000 });
     } catch (e) {
-        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
     await page.fill('#id', EMAIL);
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
     } catch (e) {
         const bodyText = await page.innerText('body').catch(() => '');
         if (bodyText.includes('利用規約') || bodyText.includes('同意')) {
@@ -73,7 +73,7 @@ async function gotoPaymentPage(page) {
     await page.waitForLoadState('domcontentloaded');
     // Angular SPAのレンダリング完了を待つ
     try {
-        await page.waitForSelector('h1.plan-header, h2.plan-header, .plan-card', { timeout: 15000 });
+        await page.waitForSelector('h1.plan-header, h2.plan-header, .plan-card', { timeout: 5000 });
     } catch (e) {
         await waitForAngular(page);
     }
@@ -314,7 +314,6 @@ test.describe('支払い・プラン管理', () => {
     });
 
     test('UC16: 支払いページでクレジットカードブランド表示確認', async ({ page }) => {
-        test.setTimeout(300000);
         await login(page);
         let stepStart;
 
@@ -342,13 +341,12 @@ test.describe('支払い・プラン管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log(`STEP_TIME 715: ${Date.now() - stepStart}ms`);
         });
     });
 
     test('UC03: 請求情報メニュー・領収書ダウンロード確認', async ({ page }) => {
-        test.setTimeout(300000);
         await login(page);
         let stepStart;
 
@@ -388,13 +386,12 @@ test.describe('支払い・プラン管理', () => {
                 console.log('355: 請求情報メニューが表示されない（未契約またはdemo環境の可能性）');
             }
 
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log(`STEP_TIME 355: ${Date.now() - stepStart}ms`);
         });
     });
 
     test('UC09: 決済後のユーザー数変更確認', async ({ page }) => {
-        test.setTimeout(300000);
         await login(page);
         let stepStart;
 
@@ -417,7 +414,7 @@ test.describe('支払い・プラン管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log(`STEP_TIME 573: ${Date.now() - stepStart}ms`);
         });
     });

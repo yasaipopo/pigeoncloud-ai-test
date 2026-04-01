@@ -31,7 +31,7 @@ async function login(page) {
     await page.click('button[type=submit].btn-primary');
     // CSRFエラー時は自動で再ロード -> 再試行
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
     } catch (e) {
         // CSRF エラーで login のまま残っていたら、再度ログイン
         if (page.url().includes('/admin/login')) {
@@ -39,10 +39,10 @@ async function login(page) {
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(1000);
 }
 
@@ -54,7 +54,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -129,7 +129,7 @@ async function getFirstTableId(page) {
     await waitForAngular(page);
 
     const link = page.locator('a[href*="/admin/dataset__"]').first();
-    const href = await link.getAttribute('href', { timeout: 15000 }).catch(() => null);
+    const href = await link.getAttribute('href', { timeout: 5000 }).catch(() => null);
     if (!href) return null;
     const match = href.match(/dataset__(\d+)/);
     return match ? match[1] : null;
@@ -142,17 +142,17 @@ async function getFirstTableId(page) {
  */
 async function navigateToTablePage(page, tableId) {
     if (!tableId) throw new Error('tableIdがnull — beforeAllで取得に失敗した可能性があります');
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
     // ログインページにリダイレクトされた場合はre-login
     if (page.url().includes('/admin/login')) {
         await ensureLoggedIn(page);
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
     }
     // Angular描画: navbarまたは帳票ボタンが表示されるまで待機
     await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
-    await page.waitForSelector('button:has-text("帳票"), button.dropdown-toggle', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('button:has-text("帳票"), button.dropdown-toggle', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -171,14 +171,14 @@ async function navigateToReportSetting(page, tableId) {
 test.describe('帳票（登録・出力・ダウンロード）', () => {
     // describeブロック全体のデフォルトタイムアウトを240秒に設定
     // （beforeEachのログイン処理が遅い場合に120秒で失敗することを防ぐ）
-    test.describe.configure({ timeout: 240000 });
+    test.describe.configure({ timeout: 120000 });
 
     // describeブロック内で共有するtableId
     let tableId = null;
 
     // テスト全体の前に一度だけテーブルIDを取得（テーブルがなければ作成）
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
+        test.setTimeout(120000);
         const context = await createLoginContext(browser);
         const page = await context.newPage();
         try {
@@ -209,7 +209,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // RP01: 帳票設定・出力
     // =========================================================================
     test('RP01: 帳票設定・出力', async ({ page }) => {
-        test.setTimeout(1800000);
+        test.setTimeout(195000);
 
         await test.step('144-01: 帳票設定で関連テーブルの追加ができること', async () => {
             const STEP_TIME = Date.now();
@@ -217,7 +217,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること（ALLテストテーブル）
             await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
@@ -244,7 +244,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること
             await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
@@ -268,7 +268,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること
             await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
@@ -283,7 +283,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await waitForAngular(page);
 
             const ledgerDropdown = page.locator('.dropdown-menu.show');
-            await expect(ledgerDropdown.first()).toBeVisible({ timeout: 60000 });
+            await expect(ledgerDropdown.first()).toBeVisible();
 
             // 「追加」以外のメニューアイテム（登録済み帳票）があるか確認
             const ledgerItems = ledgerDropdown.locator('.dropdown-item').filter({ hasNotText: '追加' });
@@ -298,7 +298,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
                 // 帳票追加モーダルが開くのを待つ
                 const modal = page.locator('.modal.show');
-                await expect(modal.first()).toBeVisible({ timeout: 60000 });
+                await expect(modal.first()).toBeVisible();
                 await page.waitForTimeout(500);
 
                 // 帳票名をAngular Reactive Forms対応で入力（fill()は効かないためNative Input Value Setterを使う）
@@ -339,7 +339,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
                 // ページを再読み込みして帳票データを反映させる
                 await navigateToTablePage(page, tableId);
-                await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+                await expect(page.locator('.navbar')).toBeVisible();
             } else {
                 // 既に帳票が登録済み — ドロップダウンを閉じる
                 await page.keyboard.press('Escape');
@@ -354,7 +354,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             // ドロップダウンメニューが開いていること
             const dropdown2 = page.locator('.dropdown-menu.show');
-            await expect(dropdown2.first()).toBeVisible({ timeout: 60000 });
+            await expect(dropdown2.first()).toBeVisible();
 
             // 「編集」を含む帳票アイテムを確認（ドロップダウン構造: 「追加」→「【帳票名】編集」）
             const editItems = dropdown2.locator('.dropdown-item').filter({ hasText: '編集' });
@@ -367,12 +367,12 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
                 // 帳票モーダルが開くことを確認
                 const editModal = page.locator('.modal.show');
-                await expect(editModal.first()).toBeVisible({ timeout: 60000 });
+                await expect(editModal.first()).toBeVisible();
 
                 // モーダル内の「ダウンロード」ボタンをクリックしてExcelテンプレートをダウンロード
                 const downloadBtn = editModal.locator('button:has-text("ダウンロード")').first();
                 if (await downloadBtn.count() > 0) {
-                    const downloadPromise = page.waitForEvent('download', { timeout: 15000 }).catch(() => null);
+                    const downloadPromise = page.waitForEvent('download', { timeout: 5000 }).catch(() => null);
                     await downloadBtn.click({ force: true });
                     const download = await downloadPromise;
                     if (download) {
@@ -405,7 +405,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             }
 
             // ページがエラーなく表示されていること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
 
@@ -421,7 +421,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること
             await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
@@ -487,7 +487,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 const itemCount = await menuItems.count();
                 if (itemCount > 0) {
                     // 最初の帳票を選択してダウンロードが開始されることを確認
-                    const downloadPromise = page.waitForEvent('download', { timeout: 15000 }).catch(() => null);
+                    const downloadPromise = page.waitForEvent('download', { timeout: 5000 }).catch(() => null);
                     await menuItems.first().click({ force: true });
                     const download = await downloadPromise;
                     if (download) {
@@ -497,7 +497,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                         console.log('[206] PDF出力ダウンロード確認OK: filename=' + filename);
                     } else {
                         // ダウンロードイベントが発生しなかった場合
-                        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+                        await expect(page.locator('.navbar')).toBeVisible();
                         console.log('[206] ダウンロードイベントなし（ページは正常）');
                     }
                 } else {
@@ -521,7 +521,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること
             await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
@@ -590,7 +590,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること
             await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
@@ -652,7 +652,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること
             await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
@@ -694,11 +694,11 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // ユーザー管理ページ（/admin/admin）に移動
             await page.goto(BASE_URL + '/admin/admin');
             await page.waitForLoadState('domcontentloaded');
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // URLがadmin管理画面内であること
             const pageUrl = page.url();
@@ -720,7 +720,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること
             await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
@@ -820,7 +820,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 // 作成後に再確認（ダッシュボードで確認）
                 await page.goto(BASE_URL + '/admin/dashboard');
                 await page.waitForLoadState('domcontentloaded');
-                try { await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 15000 }); } catch (e) {}
+                try { await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 5000 }); } catch (e) {}
                 await waitForAngular(page);
                 mainTableId = await findOrCreateAllTypeTable();
                 // それでも見つからない場合はダッシュボードのリンクから取得
@@ -846,7 +846,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // ALLテストテーブルのページに移動
             await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
             await waitForAngular(page);
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
 
             // ログインページにリダイレクトされた場合は再ログイン
@@ -854,7 +854,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 await ensureLoggedIn(page);
                 await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
                 await waitForAngular(page);
-                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
                 await waitForAngular(page);
             }
 
@@ -863,7 +863,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             expect(bodyText253, 'テーブルが正常に表示されること').not.toContain('テーブルが見つかりません');
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // Angularのレンダリングを十分に待機してから列ヘッダーを確認
             // （Angular SPAは描画に8秒以上かかることがある）
@@ -980,7 +980,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
 
             // ナビバーが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // テーブルのタイトルが表示されること
             await expect(page.locator('.navbar h5, h5').first()).toContainText('ALLテストテーブル');
@@ -1061,7 +1061,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // RP02: 帳票ダウンロード・各種設定
     // =========================================================================
     test('RP02: 帳票ダウンロード・各種設定', async ({ page }) => {
-        test.setTimeout(1500000);
+        test.setTimeout(180000);
 
         await test.step('264: 帳票ダウンロードがエラーなく実行できること', async () => {
             const STEP_TIME = Date.now();
@@ -1083,7 +1083,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // ページエラーなし
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         await test.step('272: テーブル管理画面でExcel/JSONからの作成メニューが存在すること', async () => {
@@ -1101,7 +1101,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const jsonCount = await jsonAddBtn.count();
             console.log(`272: JSONから追加メニュー数: ${jsonCount}`);
 
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         await test.step('310: 帳票設定でリッチテキスト項目の帳票出力設定ができること', async () => {
@@ -1118,7 +1118,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         await test.step('530: テーブル管理者の一般ユーザーが帳票設定にアクセスできること', async () => {
@@ -1132,7 +1132,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         await test.step('568: 帳票設定で画像型フィールドが指定可能であること', async () => {
@@ -1141,7 +1141,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
             await waitForAngular(page);
 
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -1156,7 +1156,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await navigateToTablePage(page, tableId);
             await waitForAngular(page);
 
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -1180,7 +1180,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         await test.step('557: 帳票の元Excelにタブが2つ以上あってもダウンロードできること', async () => {
@@ -1229,7 +1229,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             const body = await page.innerText('body');
             expect(body).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         await test.step('584: 帳票の2枚目以降のシートでも$から始まる式が反映されること', async () => {
@@ -1254,7 +1254,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             const body = await page.innerText('body');
             expect(body).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         await test.step('729: 子テーブルが空のレコードで帳票出力時に$START/$ENDが表示されないこと', async () => {
@@ -1293,7 +1293,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // $STARTや$ENDがページに表示されていないこと
             expect(body).not.toContain('$START');
             expect(body).not.toContain('$END');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
     });
@@ -1302,7 +1302,6 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // UC15: 帳票ダウンロード別タブ
     // =========================================================================
     test('UC15: 帳票ダウンロード別タブ', async ({ page }) => {
-        test.setTimeout(300000);
 
         await test.step('709: 帳票ダウンロード時に別タブで空白ページが開かないこと', async () => {
             const STEP_TIME = Date.now();
@@ -1323,7 +1322,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
     });
@@ -1332,14 +1331,13 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // UC22: 帳票削除UI
     // =========================================================================
     test('UC22: 帳票削除UI', async ({ page }) => {
-        test.setTimeout(300000);
 
         await test.step('817: 帳票設定画面で帳票の削除UIが存在すること', async () => {
             const STEP_TIME = Date.now();
 
             // テーブルページに移動
             await navigateToTablePage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             // 帳票ドロップダウンを開く
             const reportBtn = page.locator('button:has-text("帳票")').first();
@@ -1410,7 +1408,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
                 // 登録後にページを再読み込みして帳票ドロップダウンを再確認
                 await navigateToTablePage(page, tableId);
-                await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+                await expect(page.locator('.navbar')).toBeVisible();
 
                 const reportBtn2 = page.locator('button:has-text("帳票")').first();
                 await reportBtn2.click({ force: true });
@@ -1439,7 +1437,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
     });
@@ -1448,7 +1446,6 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // UC08: 帳票設定（子テーブル）
     // =========================================================================
     test('UC08: 帳票設定（子テーブル）', async ({ page }) => {
-        test.setTimeout(300000);
 
         await test.step('567: 帳票設定ページで子テーブル方式の設定ができること', async () => {
             const STEP_TIME = Date.now();
@@ -1457,7 +1454,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await waitForAngular(page);
 
             // 帳票設定UIが表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 

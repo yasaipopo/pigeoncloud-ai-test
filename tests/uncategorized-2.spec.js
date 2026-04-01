@@ -17,7 +17,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -101,7 +101,7 @@ async function login(page, email, password) {
             }
         }
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -251,7 +251,7 @@ async function checkPage(page, path) {
         }
         await page.waitForTimeout(500);
     } else {
-        await page.waitForSelector('table', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
     }
     // ページ読み込み後にエラーチェック
     const bodyText = await page.innerText('body');
@@ -402,7 +402,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(360000);
+            test.setTimeout(120000);
             const { context, page } = await createAuthContext(browser);
             // about:blankからfetchするとcookiesが送られないため、先にアプリURLに遷移
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
@@ -417,7 +417,7 @@ test.describe('追加実装テスト（314-579系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(300000); // checkPage含むテスト用（60秒では不足な場合あり）
+            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
             await ensureLoggedIn(page);
             await closeTemplateModal(page);
         });
@@ -1569,7 +1569,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/1043 タブを２個開いて、 ①片方で表示項目でAを選ぶ ②他方で他テーブル先からAを消す ③Aを選んだままテーブル更新 の導線で
             // expected: 想定通りの結果となること。
-            test.setTimeout(300000); // 負荷状態でのナビゲーション遅延を考慮して延長
+            test.setTimeout(255000); // 負荷状態でのナビゲーション遅延を考慮して延長
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await page.goto(BASE_URL + `/admin/dataset__${tid}`, { timeout: 90000 });

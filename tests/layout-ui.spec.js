@@ -35,7 +35,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
     } catch (e) {
         // アカウントロックエラーの早期検出
         const alertEl = page.locator('.alert, [role=alert]');
@@ -58,7 +58,7 @@ async function login(page, email, password) {
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
         }
     }
     await page.waitForTimeout(2000);
@@ -72,7 +72,7 @@ async function waitForAngular(page, timeout = 15000) {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
     } catch {
         // data-ng-readyが設定されないケースがある: networkidleで代替
-        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
 }
 
@@ -135,7 +135,7 @@ async function logout(page) {
     await page.waitForTimeout(1000);
     await page.context().clearCookies();
     await page.goto(BASE_URL + '/admin/login');
-    await page.waitForSelector('#id', { timeout: 15000 });
+    await page.waitForSelector('#id', { timeout: 5000 });
 }
 
 /**
@@ -266,7 +266,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(360000);
+            test.setTimeout(120000);
             const context = await createLoginContext(browser);
             const page = await context.newPage();
             try {
@@ -313,7 +313,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('100-1: ユーザータイプ「ユーザー」でログイン後ユーザーアイコンクリックでメニュー一覧が表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             // マスターユーザーでログインしてテストユーザーを作成
             const userBody = await createTestUser(page);
             expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
@@ -357,7 +356,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-5: テーブルアイコンタイプ「アイコン」で未指定の場合デフォルトアイコン表示になること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
             // テーブル管理画面へ
             await page.goto(BASE_URL + '/admin/dataset');
             await waitForAngular(page);
@@ -365,9 +364,9 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // テーブル管理ページが表示されることを確認
             await expect(page).toHaveURL(/\/admin\/dataset/);
             // ページタイトルにテーブル定義が含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // サイドバーナビゲーションが表示されていることを確認
             await expect(page.locator('nav.sidebar-nav')).toBeVisible();
 
@@ -375,7 +374,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('154-1: カスタムCSSを適用するとCSSの定義通りにUIが変更されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
             // テスト用CSSファイルを一時作成
             const cssContent = '/* PigeonCloud UI test */ .navbar { border-bottom: 3px solid red !important; }';
             const cssFilePath = '/tmp/test_custom.css';
@@ -419,7 +418,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('154-2: カスタムCSSを削除するとUIがデフォルトに戻ること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
             // その他設定ページへ
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
             await waitForAngular(page);
@@ -469,15 +468,15 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('78-1: ダッシュボードでチャートをドラッグアンドドロップで並び替えができること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(75000); // beforeEachのlogin + テスト本体のため延長
             await page.goto(BASE_URL + '/admin/dashboard');
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
             // ページタイトルにダッシュボードが含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // Pigeon Cloud ブランドリンクが表示されていることを確認
             await expect(page.locator('.navbar-brand').first()).toBeVisible();
 
@@ -509,22 +508,22 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             }
 
             // ダッシュボードが正常に表示されていることを確認（再確認）
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
         await test.step('82-8: マスターユーザーでダッシュボードからチャート追加が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
             // ダッシュボードを表示
             await page.goto(BASE_URL + '/admin/dashboard');
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
             // ページタイトルにダッシュボードが含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // Pigeon Cloud ブランドリンクが表示されていることを確認
             await expect(page.locator('.navbar-brand').first()).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
@@ -541,16 +540,16 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-9: マスターユーザーでダッシュボードから帳票登録が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
             // ダッシュボードを表示
             await page.goto(BASE_URL + '/admin/dashboard');
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
             // ページタイトルにダッシュボードが含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // Pigeon Cloud ブランドリンクが表示されていることを確認
             await expect(page.locator('.navbar-brand').first()).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
@@ -563,16 +562,15 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-4: ユーザータイプ「ユーザー」でダッシュボードから帳票登録が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
             // ダッシュボードを表示
             await page.goto(BASE_URL + '/admin/dashboard');
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
             // ページタイトルにダッシュボードが含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // Pigeon Cloud ブランドリンクが表示されていることを確認
             await expect(page.locator('.navbar-brand').first()).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
@@ -692,7 +690,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(360000);
+            test.setTimeout(120000);
             const context = await createLoginContext(browser);
             const page = await context.newPage();
             await ensureLoggedIn(page);
@@ -731,7 +729,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-1: テーブルアイコンタイプ「画像」で画像をアップロードするとアイコンに表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(135000);
 
             // テーブル編集ページへ
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -742,7 +740,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // タブは <a ngbNavLink><i class="fa fa-bars mr-2"></i><span>メニュー</span></a>
             // セレクタを広く取る: ngbnavlink属性、またはnavタブ内のリンク
             const menuTab = page.locator('a[ngbnavlink]:has-text("メニュー"), a.nav-link:has-text("メニュー"), a:has(span:has-text("メニュー"))').first();
-            await expect(menuTab).toBeVisible({ timeout: 15000 });
+            await expect(menuTab).toBeVisible();
             await menuTab.click();
             await waitForAngular(page);
 
@@ -750,7 +748,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // admin-forms-fieldコンポーネントがラジオボタンを描画する（「画像」「アイコン」の2択）
             // ラジオボタンの「画像」ラベルをクリック
             const imageRadio = page.locator('text=画像').first();
-            await expect(imageRadio).toBeVisible({ timeout: 15000 });
+            await expect(imageRadio).toBeVisible();
             await imageRadio.click();
             await waitForAngular(page);
 
@@ -764,18 +762,18 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // 画像プレビューまたはファイル選択済み表示が確認できること
             // forms-field.component.html: img.admin-forms__image または img.preview_thumbnail
             const imagePreview = page.locator('dataset-menu-options img.admin-forms__image, dataset-menu-options img.preview_thumbnail, dataset-menu-options .fileStyle .text-primary').first();
-            await expect(imagePreview).toBeVisible({ timeout: 60000 });
+            await expect(imagePreview).toBeVisible();
             console.log('画像アップロード後のプレビュー確認OK');
 
             // 「画像を削除」ボタンが表示されていることを確認（画像アップロード成功の証拠）
             const deleteBtn = page.locator('dataset-menu-options button:has-text("画像を削除")');
-            await expect(deleteBtn).toBeVisible({ timeout: 60000 });
+            await expect(deleteBtn).toBeVisible();
             console.log('画像アップロード後「画像を削除」ボタン確認OK');
 
             // 保存（更新）ボタンをクリック
             const saveBtn = page.locator('button.btn-primary.ladda-button:has-text("更新"), button.btn-primary.btn-ladda:has-text("更新")').first();
             await saveBtn.scrollIntoViewIfNeeded();
-            await expect(saveBtn).toBeVisible({ timeout: 60000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click();
             await page.waitForTimeout(3000); // 保存処理待ち
 
@@ -788,7 +786,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-2: テーブルアイコンタイプ「画像」で画像削除するとブランク表示になること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
 
             // テーブル編集ページへ
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -797,13 +795,13 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             // 「メニュー」タブをクリック
             const menuTab = page.locator('a[ngbnavlink]:has-text("メニュー"), a.nav-link:has-text("メニュー"), a:has(span:has-text("メニュー"))').first();
-            await expect(menuTab).toBeVisible({ timeout: 15000 });
+            await expect(menuTab).toBeVisible();
             await menuTab.click();
             await waitForAngular(page);
 
             // アイコンタイプを「画像」に設定（ラジオボタン）
             const imageRadio = page.locator('text=画像').first();
-            await expect(imageRadio).toBeVisible({ timeout: 15000 });
+            await expect(imageRadio).toBeVisible();
             await imageRadio.click();
             await waitForAngular(page);
 
@@ -818,7 +816,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                 await fileInput.setInputFiles(process.cwd() + '/test_files/ok.png');
                 await page.waitForTimeout(1500); // アップロード処理待ち
                 // アップロード後、削除ボタンが表示されるまで待機
-                await expect(page.locator('dataset-menu-options button:has-text("画像を削除")')).toBeVisible({ timeout: 60000 });
+                await expect(page.locator('dataset-menu-options button:has-text("画像を削除")')).toBeVisible();
                 console.log('削除テスト用画像アップロード完了');
             }
 
@@ -857,18 +855,18 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-3: テーブルアイコンタイプ「画像」で画像未指定の場合ブランク表示になること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブル管理画面へ（/settingはルートへリダイレクトのため/admin/datasetを使用）
             await page.goto(BASE_URL + `/admin/dataset`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // テーブル管理ページが表示されることを確認
-            await expect(page).toHaveURL(/\/admin\/dataset/, { timeout: 15000 });
+            await expect(page).toHaveURL(/\/admin\/dataset/, { timeout: 5000 });
             // ページタイトルにテーブル定義が含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // サイドバーナビゲーションが表示されていることを確認（Angular描画待ち）
             await expect(page.locator('nav.sidebar-nav')).toBeVisible({ timeout: 20000 });
 
@@ -876,7 +874,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('215-4: テーブルアイコンタイプ「アイコン」でfa-user-circle-oを指定すると指定アイコンが表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブル管理画面へ
             await page.goto(BASE_URL + '/admin/dataset');
@@ -885,9 +883,9 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // テーブル管理ページが表示されることを確認
             await expect(page).toHaveURL(/\/admin\/dataset/);
             // ページタイトルにテーブル定義が含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // サイドバーナビゲーションが表示されていることを確認
             await expect(page.locator('nav.sidebar-nav')).toBeVisible();
 
@@ -895,7 +893,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('408: サイドメニューの「テーブル追加画面へ」が隠れずに表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -911,13 +909,13 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                     expect(box.height).toBeGreaterThan(0);
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
         await test.step('336: ダッシュボードの掲示板機能が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -929,13 +927,13 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // ページが正常であること
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
         await test.step('317: トライアル環境のダッシュボード掲示板にzendesk URLが記載されていること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await login(page);
 
             // ダッシュボードに遷移
@@ -957,7 +955,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // ページが正常に表示されること
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
     });
@@ -966,7 +964,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-6: マスターユーザーでダッシュボードからCSVダウンロードが行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(75000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -974,7 +972,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
             // サイドバーナビゲーションが表示されていることを確認
@@ -984,7 +982,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-7: マスターユーザーでダッシュボードから集計が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -992,7 +990,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
             // サイドバーナビゲーションが表示されていることを確認
@@ -1009,7 +1007,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-10: マスターユーザーでダッシュボードからテーブルの通知設定が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000); // beforeEachのlogin + テスト本体のため延長
+            test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ（/notificationはルートへリダイレクトのため直接レコード一覧を使用）
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
@@ -1020,7 +1018,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             console.log('通知設定遷移後URL: ' + url);
             await expect(page).toHaveURL(new RegExp(`dataset__${tableId}`));
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
             // サイドバーナビゲーションが表示されていることを確認
@@ -1036,7 +1034,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-1: ユーザータイプ「ユーザー」でダッシュボードからテーブル詳細・CSVダウンロードが行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
+            test.setTimeout(90000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
             // テストユーザーを作成
             const userBody = await createTestUser(page);
@@ -1064,9 +1062,9 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // ダッシュボードが表示されることを確認
             await expect(page).toHaveURL(/\/admin\/dashboard/);
             // ページタイトルにダッシュボードが含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
 
@@ -1079,7 +1077,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-2: ユーザータイプ「ユーザー」でダッシュボードから集計が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
+            test.setTimeout(120000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
             // テストユーザーを作成
             const userBody = await createTestUser(page);
@@ -1105,7 +1103,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             const title = await page.title();
             expect(title.length).toBeGreaterThan(0);
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
 
@@ -1118,7 +1116,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-3: ユーザータイプ「ユーザー」でダッシュボードからチャート追加が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
+            test.setTimeout(120000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
             const userBody = await createTestUser(page);
             expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
@@ -1141,9 +1139,9 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
             // ページタイトルにダッシュボードが含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
 
@@ -1156,7 +1154,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('82-5: ユーザータイプ「ユーザー」でダッシュボードから通知設定が行えること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
+            test.setTimeout(120000); // ユーザー作成→2回のログイン→再ログインで120秒を超えることがあるため延長
 
             const userBody = await createTestUser(page);
             expect(userBody.result, 'ユーザー作成が成功すること（デバッグAPIで上限解除済み）').toBe('success');
@@ -1179,9 +1177,9 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
             // ページタイトルにダッシュボードが含まれることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // navbar（ヘッダー）が表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
 
@@ -1197,7 +1195,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('146-01: スマートフォンサイズで選択肢フィールドタップ時にブラウザがズームしないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             // スマートフォンサイズに変更
             await page.setViewportSize({ width: 375, height: 812 });
 
@@ -1221,7 +1218,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             // 元のサイズに戻す
             await page.setViewportSize({ width: 1280, height: 800 });
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
     });
@@ -1230,7 +1227,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('276: レコード詳細画面に「戻る」ボタンが表示されクリックで前画面に戻れること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             if (!tableId) return;
 
             // 一覧画面経由で詳細画面へ
@@ -1253,7 +1249,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                     await expect(page).toHaveURL(new RegExp(`dataset__${tableId}`), { timeout: 30000 });
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
     });
@@ -1262,7 +1258,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('370: テーブル一覧でスクロール時にヘッダーが固定表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             if (!tableId) return;
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1270,7 +1265,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             // テーブルヘッダーの存在確認
             const headerRow = page.locator('tr[mat-header-row], thead tr').first();
-            await expect(headerRow).toBeVisible({ timeout: 60000 });
+            await expect(headerRow).toBeVisible();
 
             // スクロール実行
             await page.evaluate(() => window.scrollTo(0, 500));
@@ -1279,7 +1274,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // ヘッダーが引き続き表示されていること（sticky headerの場合）
             const headerVisible = await headerRow.isVisible().catch(() => false);
             console.log(`370: スクロール後のヘッダー表示状態: ${headerVisible}`);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
     });
@@ -1288,7 +1283,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('503: グループ内のテーブル名がサイドメニューで正しく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -1302,7 +1296,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                 const firstText = await sidebarLinks.first().innerText();
                 expect(firstText.length).toBeGreaterThan(0);
             }
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
     });
@@ -1311,7 +1305,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('542: テーブルアイコンが正しい位置に表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -1328,26 +1321,26 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                     expect(box.height).toBeGreaterThan(0);
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
         await test.step('546: UI要素が正しく表示されていること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             if (!tableId) return;
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 主要なUI要素が正しく表示されていること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             await expect(page.locator('main')).toBeVisible();
             await expect(page.locator('nav.sidebar-nav')).toBeVisible();
 
             // テーブル一覧が表示されていること
             const table = page.locator('table, mat-table, [class*="table"]').first();
-            await expect(table).toBeVisible({ timeout: 60000 });
+            await expect(table).toBeVisible();
 
         });
     });
@@ -1356,7 +1349,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('686: ビューの「行に色を付ける」で日付が同値の場合に色が付かないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             await login(page);
             const tableId = await getAllTypeTableId(page);
 
@@ -1388,7 +1380,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
     });
@@ -1397,7 +1389,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('607: 関連レコード設定時の更新情報が正しい位置に表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             await login(page);
             const tableId = await getAllTypeTableId(page);
 
@@ -1430,7 +1421,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
     });
@@ -1439,7 +1430,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('755: テーブルビューの表示レイアウトが正しいこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(75000);
             if (!tableId) return;
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1458,13 +1449,13 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                     expect(box.height).toBeGreaterThan(0);
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
         await test.step('760: 操作時のUI更新が正常であること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             if (!tableId) return;
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -1483,13 +1474,13 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                 // メニューを閉じる
                 await page.keyboard.press('Escape');
             }
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
         await test.step('749: 関連レコードのページネーションが横一列で表示されレイアウトが崩れないこと', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
+            test.setTimeout(120000);
             await login(page);
             const tableId = await getAllTypeTableId(page);
 
@@ -1537,7 +1528,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
         });
     });
@@ -1546,7 +1537,6 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         await test.step('831: 対象画面の表示が正しくUI更新が正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(300000);
             await login(page);
             const tableId = await getAllTypeTableId(page);
 
@@ -1555,7 +1545,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await waitForAngular(page);
 
             // ページが正常に表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -1570,7 +1560,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                         await waitForAngular(page);
 
                         // 詳細画面が正常に表示されること
-                        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+                        await expect(page.locator('.navbar')).toBeVisible();
                         const detailBody = await page.innerText('body');
                         expect(detailBody).not.toContain('Internal Server Error');
 

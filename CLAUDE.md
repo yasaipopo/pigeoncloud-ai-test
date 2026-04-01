@@ -5,7 +5,74 @@
 
 ---
 
-## 【最初に必ず確認】知見ファイル
+## 【最初に必ず確認】Playwright環境 & 知見ファイル
+
+### Playwrightバージョン確認（テスト実行前に必ず実施）
+
+テスト実行前に、Playwrightのバージョンとブラウザバイナリの整合性を確認すること。
+バージョン不一致は `browserType.launch: Executable doesn't exist` エラーの原因になる。
+
+```bash
+# 1. Playwrightバージョン確認
+npx playwright --version
+
+# 2. インストール済みブラウザ確認
+ls ~/Library/Caches/ms-playwright/ | grep chromium
+
+# 3. 不一致がある場合はブラウザを再インストール
+npx playwright install
+```
+
+**よくある問題**:
+- `package.json` の `@playwright/test` を更新したがブラウザを再インストールしていない
+- 古いテスト結果ファイルを参照して「failしている」と誤判断（実際は古いバージョンでの結果）
+- **対策**: テスト結果を分析する前に、まず1つのspecを実際に実行して現在のPlaywright環境で動くか確認する
+
+### waitForTimeout最適化ルール
+
+`waitForTimeout` は固定sleepであり、テスト実行時間を無駄に伸ばす。以下のルールで最適化すること：
+
+| パターン | 置き換え方法 |
+|---|---|
+| ログインリトライ前の `waitForTimeout(1000)` | `waitForLoadState('domcontentloaded')` |
+| toast/モーダル表示待ち `waitForTimeout(2000)` | `expect(locator).toBeVisible({ timeout: N })` で自動待機 |
+| Angular描画待ち `waitForTimeout(500)` | `waitForAngular(page)` で十分 |
+| ページリロード後 `waitForTimeout(N)` | `waitForLoadState` or `waitForAngular` で代替 |
+| 外部リクエスト検知 `waitForTimeout(5000)` | 2秒で十分（リクエストイベント発火目的） |
+
+**削除してはいけないケース**（knowledge-e2e-performance.md参照）:
+- `count()` / `textContent()` / `getAttribute()` 直前（auto-waitしない）
+- Angularタブ切り替え後（タブコンテンツ未ロード）
+- `waitForSelector` 後のAngularルーティング完了待ち
+
+### test.setTimeout の自動計算ルール
+
+テスト関数の`test.setTimeout`は**step数に応じて自動計算**する:
+
+```
+timeout = Math.max(60000, stepCount * 15000 + 30000)
+```
+
+| step数 | タイムアウト | 例 |
+|---|---|---|
+| 0-2 | 60秒（config default） | `test.setTimeout`不要 |
+| 3-6 | 75〜120秒 | 短いテスト |
+| 7-11 | 135〜195秒 | 中程度のテスト |
+| 12-17 | 210〜285秒 | 長いテスト |
+| 18+ | 300秒〜 | 非常に長いテスト |
+
+- **step数が0-2のテストには`test.setTimeout`を書かない**（config defaultの60秒で十分）
+- テストを新規作成・step追加時は、上記計算式でタイムアウトを設定する
+
+### テスト実行・修正の進め方
+
+- **直列で1specずつ実行** → 結果確認 → 修正 → アップロードのサイクル
+- **subagent（Sonnet）に委任できるもの**: セレクター修正、waitForTimeout最適化、単純なbeforeAll修正など、パターンが明確な作業
+- **subagentへの依頼は細かく書く**: 対象ファイル、修正箇所（行番号）、修正内容、期待する結果を明記。曖昧な「直して」は禁止
+- **テスト実行後は必ずアップロード**: `python3 e2e-viewer/upload_results.py --reports-dir reports/agent-1 --api-url "$E2E_API_URL" --agent-num 1`
+- **結果はsheet.htmlで確認**: https://dezmzppc07xat.cloudfront.net/sheet.html
+
+### 知見ファイル
 
 E2Eテストの修正・作成を始める前に、以下の知見ファイルを**必ず全て読むこと**:
 
