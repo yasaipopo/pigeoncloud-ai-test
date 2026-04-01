@@ -64,6 +64,17 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 - **step数が0-2のテストには`test.setTimeout`を書かない**（config defaultの60秒で十分）
 - テストを新規作成・step追加時は、上記計算式でタイムアウトを設定する
 
+### 次にやること（2026-04-01時点の残タスク）
+
+1. **残りの大きいspec実行**: fields, fields-2, fields-3, table-definition（各15-30テスト）
+2. **fail個別修正（優先順）**:
+   - hidden input/select/textareaへのclick問題（U203等）: `:visible`セレクター追加
+   - ワークフローステータステキスト不一致（WF01/WF03/WF06/WF07）: 実UI確認してexpect修正
+   - chart-calendar 29 fail: セレクター全面修正（最も工数大）
+   - users-permissions 9 fail: 個別セレクター修正
+3. **全spec再テスト → DB同期（TEST_NUMBER更新）**
+4. **sheet.htmlにアップロード**
+
 ### テスト実行・修正の進め方
 
 - **直列で1specずつ実行** → 結果確認 → 修正 → アップロードのサイクル
