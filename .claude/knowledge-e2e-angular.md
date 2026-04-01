@@ -419,7 +419,17 @@ MCP Playwrightで実UIを確認しながら1件ずつ具体的なassertion追加
 - `.overSetting`セレクターを使う全テスト
 - navigateToFieldPage(), assertFieldPageLoaded(), openFieldEditPanel(), getFieldLabelMap()
 
-### 必要な対応
-1. 新UIのタブ構造を把握（どのタブにフィールド一覧があるか）
-2. `.overSetting` → 新しいフィールド編集セレクターに全面修正
-3. テーブル設定ページ遷移後にタブクリックが必要
+### 調査結果（2026-04-02）
+**UIは変わっていなかった！** テーブルID:22が壊れていただけ。
+- テーブル22: `.overSetting` = 0（壊れている）
+- テーブル8: `.overSetting` = 6（正常）
+- テーブル137（新ALLテスト）: `.overSetting` = 102（正常）
+
+global-setupがID:137を返すようになり、fields-5は全PASS。
+**テーブル設定ページのUI自体は変わっていない。**
+
+### 知見: ALLテストテーブルIDは変わることがある
+- テスト環境で複数回create-all-type-tableを実行するとIDが変わる
+- 古いID(22)が壊れて新しいID(137)が作成された
+- global-setupの`getAllTypeTableId`が最新のIDを返すため、各specはこれに依存すべき
+- **テーブルIDをハードコードしない**（`.test_env_runtime`等にキャッシュされた古い値にも注意）
