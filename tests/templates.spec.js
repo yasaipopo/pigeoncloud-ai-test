@@ -1,10 +1,12 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
+const { createTestEnv } = require('./helpers/create-test-env');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+// 環境変数はbeforeAllで上書きされる（自己完結型）
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -97,6 +99,21 @@ async function openTemplateModal(page) {
 }
 
 test.describe('テンプレート', () => {
+    // 自己完結: specごとに専用テスト環境を作成
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120000); // 環境作成に最大2分
+        const env = await createTestEnv(browser, { withAllTypeTable: false }); // テンプレートテストにALLテストテーブル不要
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        // storageStateを更新（ensureLoggedInが使う）
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        await env.context.close();
+        console.log(`[templates] 自己完結環境: ${BASE_URL}`);
+    });
+
     test('TM01: テンプレート機能の基本確認', async ({ page }) => {
         await login(page);
         let stepStart;

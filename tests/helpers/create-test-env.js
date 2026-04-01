@@ -92,6 +92,12 @@ async function createTestEnv(browser, options = {}) {
     await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
 
+    // storageStateファイルを新環境用に上書き（playwright fixtureの{page}が新環境のcookieを持つように）
+    const agentNum = process.env.AGENT_NUM || '1';
+    const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
+    await context.storageState({ path: storageStatePath });
+    console.log(`[createTestEnv] storageState更新: ${storageStatePath}`);
+
     // 3. ALLテストテーブル作成（オプション）
     let tableId = null;
     if (withAllTypeTable) {
