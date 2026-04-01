@@ -320,3 +320,38 @@ await expect(table).toBeVisible();
 ```
 
 ### 修正日: 2026-04-01
+
+---
+
+## 知見9: goto後のexpect(.navbar)は5秒では不足
+
+goto→waitForAngular→expect(.navbar).toBeVisible()でAngular SPAブートが5秒以内に完了しないケースがある。
+全696箇所の`.navbar` toBeVisibleに`{ timeout: 15000 }`を追加済み。
+
+### 修正日: 2026-04-01
+
+---
+
+## 知見10: PigeonCloudのデータテーブルセレクター
+
+`locator('table').first()` はhiddenなtableにマッチする。`.pc-list-view, table.table-striped` を使う。
+
+### 修正日: 2026-04-01
+
+---
+
+## 知見11: 独自login関数を各specに定義しない
+
+各specの独自login関数は `button[type=submit]` 複数マッチ等で壊れやすい。
+`const { ensureLoggedIn } = require('./helpers/ensure-login');` に統一する。
+
+### 修正日: 2026-04-01
+
+---
+
+## 知見12: フィールド設定モーダルのヘッダーは「項目編集」
+
+overSettingクリックで開くモーダルのヘッダーは `項目編集` であり、フィールドタイプ名ではない。
+フィールドタイプ名はモーダル内のh5で確認する。
+
+### 発見日: 2026-04-01（fields-2で発見、未修正）
