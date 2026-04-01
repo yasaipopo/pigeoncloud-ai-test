@@ -66,12 +66,16 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 
 ### 次にやること（2026-04-01時点の残タスク）
 
-1. **残りの大きいspec実行**: fields, fields-2, fields-3, table-definition（各15-30テスト）
-2. **fail個別修正（優先順）**:
-   - hidden input/select/textareaへのclick問題（U203等）: `:visible`セレクター追加
-   - ワークフローステータステキスト不一致（WF01/WF03/WF06/WF07）: 実UI確認してexpect修正
-   - chart-calendar 29 fail: セレクター全面修正（最も工数大）
-   - users-permissions 9 fail: 個別セレクター修正
+**全spec実行済み: 292 pass / 116 fail (72%) ← 前回 121/92 (56%)**
+
+1. **独自login関数の統一**（fields-2等）: ensureLoggedInに置き換え
+2. **UIセレクター修正（fail数順）**:
+   - chart-calendar (29 fail): 詳細権限セレクター全面修正
+   - fields (21 fail): .pc-field-block等のクラス名変更対応
+   - table-definition (14 fail): セレクター修正
+   - system-settings (11 fail): beforeAll/afterAll構造修正
+   - users-permissions (9 fail), fields-2 (9 fail): 個別セレクター
+   - workflow (5 fail): テキスト不一致
 3. **全spec再テスト → DB同期（TEST_NUMBER更新）**
 4. **sheet.htmlにアップロード**
 
