@@ -71,6 +71,11 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 - **subagentへの依頼は細かく書く**: 対象ファイル、修正箇所（行番号）、修正内容、期待する結果を明記。曖昧な「直して」は禁止
 - **テスト実行後は必ずアップロード**: `python3 e2e-viewer/upload_results.py --reports-dir reports/agent-1 --api-url "$E2E_API_URL" --agent-num 1`
 - **結果はsheet.htmlで確認**: https://dezmzppc07xat.cloudfront.net/sheet.html
+- **failが出たら途中でも止めて確認** — 最後まで待たず、エラーパターンを見て修正→再実行のサイクル
+- **独自login関数は使わない** — `ensureLoggedIn`（helpers/ensure-login.js）に統一。独自実装は`button[type=submit]`の複数マッチ等で壊れやすい
+- **`count() > 0` でclick/fillしない** — `isVisible()` または `:visible` セレクターを使う（知見6参照）
+- **sedでの一括置換は禁止** — コードを壊すリスクが高い。nodeスクリプトで安全に置換する
+- **Angularモーダルは×ボタンやEscapeで閉じない場合がある** — 「追加オプション設定」等の入れ子モーダルではEscapeが効かず、×ボタンのDOMも複数存在する。確実に閉じるには**ページリロード**を使う（`page.reload()` → `waitForSelector('.overSetting')`）。JS DOM操作（`classList.remove('show')`等）はAngularの状態を壊すので禁止
 
 ### 知見ファイル
 

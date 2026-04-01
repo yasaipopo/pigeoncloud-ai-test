@@ -96,21 +96,24 @@ async function openFieldDialogByIndex(page, idx, expectedType) {
     const count = await overSettings.count();
     if (idx < 0 || idx >= count) return false;
 
-    // 既にモーダルが開いていれば閉じる
-    const openModal = page.locator('.modal.show');
-    if (await openModal.count() > 0) {
-        await page.keyboard.press('Escape');
-        await page.waitForTimeout(300);
+    // 既にモーダルが開いていればページリロードで確実にクリア
+    if (await page.locator('.modal.show').count() > 0) {
+        await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+        await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+        await waitForAngular(page);
     }
 
     await overSettings.nth(idx).scrollIntoViewIfNeeded().catch(() => {});
     await overSettings.nth(idx).click({ force: true });
-    await page.waitForTimeout(800);
+    await page.locator('.modal.show h5').first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
 
     const heading = page.locator('.modal.show h5');
-    if (await heading.count() === 0) return false;
+    const hCount = await heading.count();
+    console.log(`[openFieldDialog] クリック後 h5 count=${hCount}`);
+    if (hCount === 0) return false;
 
     const text = await heading.first().textContent();
+    console.log(`[openFieldDialog] h5 text="${text?.trim()}", match=${text?.trim() === expectedType}`);
     return text && text.trim() === expectedType;
 }
 
@@ -135,9 +138,12 @@ async function findFixedTextField(page) {
     for (const idx of indices) {
         const found = await openFieldDialogByIndex(page, idx, '固定テキスト');
         if (found) return true;
-        // 閉じる
-        await page.keyboard.press('Escape');
-        await page.waitForTimeout(300);
+        // ×ボタンで閉じる
+        const closeBtn = page.locator('.modal.show button.close').first();
+        if (await closeBtn.count() > 0) {
+            await closeBtn.click({ force: true });
+            await page.waitForTimeout(300);
+        }
     }
     return false;
 }
