@@ -69,6 +69,10 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 **全spec実行済み（login統一後）: 約330 pass / 85 fail (80%) ← 前回 121/92 (56%)**
 
 0. **テスト環境は毎回新規作成**（デフォルト）。`REUSE_ENV=1`で既存環境を使い回す
+   - テスト実行時は `REUSE_ENV=1` を付けて既存環境を再利用（毎回新規作成すると遅い）
+   - 新しい環境が必要な場合は `REUSE_ENV` を付けずに実行
+   - **並列テスト実行時は異なるAGENT_NUMを使う**（storageState競合防止）
+   - **並列テスト実行にはSonnet 1Mモデルのsubagentを使う**（コスト効率）
 1. **独自login関数の統一**（fields-2等）: ensureLoggedInに置き換え
 2. **UIセレクター修正（fail数順）**:
    - chart-calendar (29 fail): 詳細権限セレクター全面修正
