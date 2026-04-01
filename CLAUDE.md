@@ -66,7 +66,7 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 
 ### 次にやること（2026-04-01時点の残タスク）
 
-**全spec実行済み: 292 pass / 116 fail (72%) ← 前回 121/92 (56%)**
+**全spec実行済み（login統一後）: 約330 pass / 85 fail (80%) ← 前回 121/92 (56%)**
 
 1. **独自login関数の統一**（fields-2等）: ensureLoggedInに置き換え
 2. **UIセレクター修正（fail数順）**:
