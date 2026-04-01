@@ -401,7 +401,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await checkPage(page, `/admin/dataset__${tableId}`);
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -488,7 +488,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('683: テーブル一覧のフィールドヘッダーが正常に表示されること', async () => {
@@ -544,7 +544,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('688: テーブル一覧ページでCSV操作関連の処理がエラーなく動作すること', async () => {
@@ -557,7 +557,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
     });
@@ -605,7 +605,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('693: 公開フォーム機能を使用してもテーブル一覧ページがエラーなく表示されること', async () => {
@@ -652,7 +652,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('697: 各項目の設定を変更してもテーブル一覧ページが正常に表示されること', async () => {
@@ -665,7 +665,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('698: 通知設定ページがエラーなく正常に表示されること', async () => {
@@ -698,7 +698,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('701: CSV空欄アップロードで複数値フィールドの値が削除される仕様変更後にテーブル一覧が正常表示されること', async () => {
@@ -711,7 +711,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('705: 関連レコード一覧を縦に表示したとき詳細・編集ボタンが正常に表示されること', async () => {
@@ -720,7 +720,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await checkPage(page, `/admin/dataset__${tableId}`);
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -735,7 +735,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
     });
@@ -759,7 +759,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await checkPage(page, `/admin/dataset__${tableId}`);
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -792,7 +792,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('713: テーブル一覧ページでCSV操作機能がエラーなく動作すること（#issue1049）', async () => {
@@ -805,7 +805,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('714: チャート設定タブの期間単位設定後に集計ページが正常に表示されること', async () => {
@@ -844,7 +844,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await checkPage(page, `/admin/dataset__${tableId}`);
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -877,7 +877,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await checkPage(page, `/admin/dataset__${tableId}`);
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -915,7 +915,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await checkPage(page, `/admin/dataset__${tableId}`);
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -963,7 +963,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('732: ワークフローの一度承認後の再申請機能を有効にしてもワークフロー設定ページが正常表示されること', async () => {
@@ -998,7 +998,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('737: 集計ページがエラーなく正常に表示されること（#issue1218）', async () => {
@@ -1021,7 +1021,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('739: テーブル一覧の絞り込み機能がエラーなく動作すること', async () => {
@@ -1105,7 +1105,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('749: 関連レコード一覧にページネーションを設定してもレコード一覧が正常に表示されること', async () => {
@@ -1114,7 +1114,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await checkPage(page, `/admin/dataset__${tableId}`);
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1149,7 +1149,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('753: テーブル一覧のフィールドヘッダーが正常に表示されること（#issue1363）', async () => {
@@ -1180,7 +1180,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             await checkPage(page, `/admin/dataset__${tableId}`);
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1332,7 +1332,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('783: 集計結果を並び替えできる機能を有効にしても集計ページが正常に表示されること', async () => {
@@ -1401,7 +1401,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('795: 集計ページがエラーなく正常に表示されること（#issue1360）', async () => {
@@ -1516,7 +1516,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('809: テーブル権限設定の変更後にユーザー管理ページが正常に表示されること', async () => {
@@ -1780,7 +1780,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('838: ルックアップ表示した項目が一覧画面でレイアウト崩れなく正常に表示されること', async () => {

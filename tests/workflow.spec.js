@@ -4005,7 +4005,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('table').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('506: WF付きテーブルの新規レコード画面がエラーなく表示されること', async () => {

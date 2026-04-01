@@ -1198,7 +1198,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             // テーブル要素が確実に描画されるまで追加待機
             await page.waitForSelector('table, [role="columnheader"]', { timeout: 5000 }).catch(() => {});
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1369,7 +1369,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('593: データ削除後もワークフロー申請バッジ数が正しい値（NaN・undefinedでない）を表示すること', async () => {
@@ -1467,7 +1467,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('601: 数値項目に4桁以上の数字が入力されている場合に帳票設定ページが正常表示されること（#issue1013）', async () => {
@@ -1490,7 +1490,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('603: コネクトのトリガーにワークフロー完了タイミングが追加されワークフロー設定ページが正常表示されること（#issue1044）', async () => {
@@ -1513,7 +1513,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('606: ユーザー管理ページがエラーなく正常に表示されること（#issue881）', async () => {
@@ -1533,7 +1533,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             // テーブル要素が確実に描画されるまで追加待機
             await page.waitForSelector('table, [role="columnheader"]', { timeout: 5000 }).catch(() => {});
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1551,7 +1551,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('609: FTP処理失敗・一部成功時にどのテーブルのエラーかを通知設定ページで確認できること（#issue1093）', async () => {
@@ -1588,7 +1588,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('612: ビュー設定タブの権限デフォルトが「自分のみ表示」に変更されテーブルページが正常表示されること', async () => {
@@ -1714,7 +1714,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('620: ログイン画面のパスワードリセット機能追加後にユーザー管理ページが正常表示されること（#issue950）', async () => {
@@ -1807,7 +1807,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('627: ユーザー管理画面のテーブル一覧で役職が正しく表示されること（#issue892）', async () => {
@@ -1976,7 +1976,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('643: 主キー設定の上限が5項目以上に拡張されてテーブル一覧が正常表示されること（#issue1163）', async () => {
@@ -2095,7 +2095,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             // テーブル要素が確実に描画されるまで追加待機
             await page.waitForSelector('table, [role="columnheader"]', { timeout: 5000 }).catch(() => {});
             // レコード一覧が正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -2134,7 +2134,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('657: テーブル一覧画面でフィールドヘッダーがエラーなく正常に表示されること（#issue1047）', async () => {
@@ -2273,7 +2273,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('667: CSVアップロード前にデータをリセットする機能が正常に動作すること（#issue1216）', async () => {
@@ -2286,7 +2286,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('668: 他の項目で値の絞り込みを行う機能がエラーなく正常に動作すること（#issue1217）', async () => {
@@ -2314,7 +2314,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
             // ページが正常に表示されること
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('670: 受信メール取込み機能の強化版追加後に通知設定ページが正常表示されること（#issue1196）', async () => {

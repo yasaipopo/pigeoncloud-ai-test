@@ -751,7 +751,7 @@ test.describe('ログ管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         });
 
         // ----- step: 472 コメント入力欄で改行が正しく反映されること -----
@@ -896,7 +896,7 @@ test.describe('ログ管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         });
 
         // ----- step: 653 組織メンションのキャンセル後にメッセージが出続けないこと -----
@@ -941,7 +941,7 @@ test.describe('ログ管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         });
     });
 

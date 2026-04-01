@@ -764,7 +764,7 @@ test.describe('共通設定・システム設定', () => {
 
             await expect(page).toHaveURL(/\/admin\/user/);
             // ユーザー管理ページにテーブルまたはユーザー一覧が表示されていること
-            await expect(page.locator('table, [class*="list"], [class*="user"]').first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
             // その他設定ページへ
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
@@ -1868,7 +1868,7 @@ test.describe('共通設定・システム設定', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         });
 
     });

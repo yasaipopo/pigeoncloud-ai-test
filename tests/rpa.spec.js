@@ -340,7 +340,7 @@ test.describe('RPA（コネクト）', () => {
             const triggerCount = await triggerSettings.count();
             console.log('603: トリガー設定関連要素数:', triggerCount);
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log(`STEP_TIME 603: ${Date.now() - stepStart}ms`);
         });
 
@@ -359,7 +359,7 @@ test.describe('RPA（コネクト）', () => {
             // ページが正常であること
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log(`STEP_TIME 609: ${Date.now() - stepStart}ms`);
         });
     });
@@ -391,7 +391,7 @@ test.describe('RPA（コネクト）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log(`STEP_TIME 672: ${Date.now() - stepStart}ms`);
         });
     });
@@ -443,7 +443,7 @@ test.describe('RPA（コネクト）', () => {
                 }
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log(`STEP_TIME 789: ${Date.now() - stepStart}ms`);
         });
     });

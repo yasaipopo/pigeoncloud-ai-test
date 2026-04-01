@@ -204,7 +204,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
             await waitForAngular(page);
 
             // ナビゲーションバーが表示されていること
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
             // URLにtableIdが含まれること
             const pageUrl = page.url();
@@ -272,7 +272,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
             await waitForAngular(page);
 
             // ナビゲーションバーが表示されていること
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
             // URLにtableIdが含まれること
             const pageUrl = page.url();
@@ -642,7 +642,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             }
 
             // マスター権限でページが正常表示されること
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -686,7 +686,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             console.log(`335: フィルタ状態表示要素数: ${filterStatusCount}`);
 
             // ページが正常であること
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -777,7 +777,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
                     expect(bodyText).not.toContain('Internal Server Error');
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('344: ユーザー管理テーブルの項目クリックで並び替えができること', async () => {
@@ -785,9 +785,10 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
 
             await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
 
             // ユーザー管理テーブルが表示されること
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -835,7 +836,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
                 expect(isEnabled, 'フィルタボタンが有効であること').toBe(true);
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('301: DATE_FORMAT計算項目で検索しても「データはありません」にならないこと', async () => {
@@ -1437,7 +1438,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
                 }
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });

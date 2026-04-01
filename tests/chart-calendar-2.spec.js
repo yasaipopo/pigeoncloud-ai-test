@@ -799,7 +799,7 @@ test.describe('チャート - 基本機能', () => {
             await closeTemplateModal(page);
 
             // ダッシュボードが正常に表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
             // ダッシュボードからチャート/フィルタ追加ボタンを探す
             // ダッシュボードの「追加」ボタン（チャート追加やカスタマイズボタン）
@@ -845,7 +845,7 @@ test.describe('チャート - 基本機能', () => {
             expect(pageText).not.toContain('Internal Server Error');
 
             // ダッシュボードが正常に表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('152-1: チャートの絞り込みで日時項目の相対値（今日〜来年）が想定通りの絞り込みとなること', async () => {

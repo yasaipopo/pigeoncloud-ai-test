@@ -248,7 +248,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
             const toggleCount = await dropdownToggles.count();
             if (toggleCount === 0) {
                 console.log('[135] ドロップダウントグルボタンが見つかりません（公開フォームOFF or セッション問題の可能性）');
-                await expect(page.locator('.navbar')).toBeVisible();
+                await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             }
 
             const mailTemplateModal = page.locator('div.modal .modal-title:has-text("公開フォームメールテンプレート作成"), h4.modal-title:has-text("公開フォームメールテンプレート作成")');

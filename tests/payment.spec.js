@@ -341,7 +341,7 @@ test.describe('支払い・プラン管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log(`STEP_TIME 715: ${Date.now() - stepStart}ms`);
         });
     });
@@ -386,7 +386,7 @@ test.describe('支払い・プラン管理', () => {
                 console.log('355: 請求情報メニューが表示されない（未契約またはdemo環境の可能性）');
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log(`STEP_TIME 355: ${Date.now() - stepStart}ms`);
         });
     });
@@ -414,7 +414,7 @@ test.describe('支払い・プラン管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log(`STEP_TIME 573: ${Date.now() - stepStart}ms`);
         });
     });

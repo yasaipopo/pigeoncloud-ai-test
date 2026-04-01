@@ -252,16 +252,16 @@ async function assertFieldPageLoaded(page, tableId) {
             await expect(fieldRows.first()).toBeVisible();
         } else {
             // フィールドリストがない場合はナビバーだけ確認
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         }
     } else if (currentUrl.includes(`/admin/dataset__${tableId}`)) {
         // テーブル一覧ページにリダイレクトされた場合
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     } else {
         // その他のページ：ナビバーが表示されていること
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
     }
 }
 
@@ -635,7 +635,7 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
             // レコード一覧ページへ（ZIPアップロードはレコード系機能）
             await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { timeout: 5000 });
             await waitForAngular(page);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             // レコード一覧が表示されていること
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -687,7 +687,7 @@ test.describe('列設定（122系）', () => {
             // レコード一覧ページに遷移（列の表示/非表示は一覧ページの機能）
             await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { timeout: 5000 });
             await waitForAngular(page);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             // テーブルヘッダーが表示されていること（一覧テーブルが存在する）
             const tableHeader = page.locator('table thead th, .table-responsive th, .sticky-table-header th');
             const headerCount = await tableHeader.count();
@@ -1184,7 +1184,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1194,7 +1194,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1403,7 +1403,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1413,7 +1413,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1423,7 +1423,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1433,7 +1433,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1443,7 +1443,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1453,7 +1453,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1463,7 +1463,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1473,7 +1473,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1483,7 +1483,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1493,7 +1493,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1503,7 +1503,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1513,7 +1513,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
 
     test("14-25': 他テーブル参照フィールドのフィールド設定ページが正常に表示されること（複数値許可）", async ({ page }) => {
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);

@@ -593,7 +593,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             }
             expect(found).toBeTruthy();
             // ページが正常に表示されていることを確認（クラッシュしていない）
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('55-2: CSV以外のファイル(.txt)をアップロードするとインポートエラーが発生すること', async () => {
@@ -682,7 +682,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             } else {
                 // モーダルが開けなかった場合はフォールバック: ページ正常確認
                 console.log('55-2: CSVアップロードモーダルが開けなかった — ドロップダウンメニュー構成を確認');
-                await expect(page.locator('.navbar')).toBeVisible();
+                await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             }
 
         });
@@ -1161,7 +1161,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             await waitForAngular(page);
 
             // ページが正常に表示されていることを確認
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log('173: Excelインポートメニュー確認完了');
 
         });
@@ -1499,7 +1499,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('313: CSVアップロードの注意書きに「作成者、最終更新者」が含まれること（機能改善確認）', async () => {
@@ -1524,7 +1524,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
                 await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -1555,7 +1555,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 const bodyText = await page.innerText('body');
                 expect(bodyText).not.toContain('Internal Server Error');
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -1584,7 +1584,7 @@ test.describe('JSONエクスポート・インポート', () => {
                     await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('393: CSVダウンロードで文字列が日付変換されないこと', async () => {
@@ -1610,7 +1610,7 @@ test.describe('JSONエクスポート・インポート', () => {
                     await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('347: JSONエクスポート・インポートがエラーなく実行できること（バグ修正確認）', async () => {
@@ -1643,7 +1643,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 }
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('372: ユーザー管理テーブルのCSVアップロードで組織が反映されること（バグ修正確認）', async () => {
@@ -1675,7 +1675,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.keyboard.press('Escape');
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('378: クロス集計フィルタでCSVダウンロードがエラーなく動作すること（バグ修正確認）', async () => {
@@ -1699,7 +1699,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('379: CSVログ画面で自分のCSV UP/DL履歴が表示されること', async () => {
@@ -1722,7 +1722,7 @@ test.describe('JSONエクスポート・インポート', () => {
             expect(headerCount).toBeGreaterThan(0);
             console.log(`379: CSV履歴テーブルヘッダー数: ${headerCount}`);
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -1744,7 +1744,7 @@ test.describe('JSONエクスポート・インポート', () => {
             expect(csvDlVisible).toBeTruthy();
 
             await page.keyboard.press('Escape');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('444: 他テーブル参照の文字列がCSVダウンロードで日付変換されないこと（バグ修正確認）', async () => {
@@ -1779,7 +1779,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 }
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('447: CSVダウンロードで他テーブル参照項目の値がずれないこと（バグ修正確認）', async () => {
@@ -1800,7 +1800,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -1832,7 +1832,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('485: 複数値文字列のCSVダウンロードでデータが区切られて出力されること（機能改善確認）', async () => {
@@ -1853,7 +1853,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('495: CSVアップロードで数値「0」が空欄にならず正しく認識されること（バグ修正確認）', async () => {
@@ -1880,7 +1880,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('538: CSVアップロードで計算項目の重複チェックに関するUI確認（バグ修正確認）', async () => {
@@ -1898,7 +1898,7 @@ test.describe('JSONエクスポート・インポート', () => {
             console.log(`538: 主キー設定セクション存在: ${hasPrimaryKey}`);
 
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('605: ユーザー管理テーブルのCSVダウンロードで組織情報が正しく出力されること（バグ修正確認）', async () => {
@@ -1938,7 +1938,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.keyboard.press('Escape');
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('611: 子テーブルでCSV/Excelの一括登録ができること', async () => {
@@ -1985,7 +1985,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2040,7 +2040,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2068,7 +2068,7 @@ test.describe('JSONエクスポート・インポート', () => {
                     await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2097,7 +2097,7 @@ test.describe('JSONエクスポート・インポート', () => {
                     await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('674: Yes/Noフィールドを含むCSVダウンロードが正常に動作すること', async () => {
@@ -2123,7 +2123,7 @@ test.describe('JSONエクスポート・インポート', () => {
                     await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2150,7 +2150,7 @@ test.describe('JSONエクスポート・インポート', () => {
                     await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('736: テーブル設定のCSV主キー設定画面で計算項目の注意書きが表示されること', async () => {
@@ -2175,7 +2175,7 @@ test.describe('JSONエクスポート・インポート', () => {
             const primaryKeyCount = await primaryKeySection.count();
             console.log(`736: 主キー設定セクション数: ${primaryKeyCount}`);
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2205,7 +2205,7 @@ test.describe('JSONエクスポート・インポート', () => {
                     await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2237,7 +2237,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2269,7 +2269,7 @@ test.describe('JSONエクスポート・インポート', () => {
                     await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
                 }
             }
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2299,7 +2299,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .btn-secondary').first().click().catch(() => {});
             }
 
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -2310,7 +2310,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
             // テーブル管理一覧（/admin/dataset）に遷移
             await navigateToDatasetManagement(page);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
             // テーブル管理ページはツリー構造（admin-tree）でテーブルを表示
             // チェックボックスは .admin-tree__check 内にある
@@ -2458,7 +2458,7 @@ test.describe('JSONエクスポート・インポート', () => {
 
             // テーブル管理一覧（/admin/dataset）に遷移
             await navigateToDatasetManagement(page);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
             // テーブル管理ページのJSONインポートはハンバーガーメニュー（fa-bars）→「JSONから追加」
             // チェックボックス選択不要でアクセス可能

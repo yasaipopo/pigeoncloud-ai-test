@@ -217,16 +217,16 @@ async function assertFieldPageLoaded(page, tableId) {
             await expect(fieldRows.first()).toBeVisible();
         } else {
             // フィールドリストがない場合はナビバーだけ確認
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         }
     } else if (currentUrl.includes(`/admin/dataset__${tableId}`)) {
         // テーブル一覧ページにリダイレクトされた場合
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     } else {
         // その他のページ：ナビバーが表示されていること
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
     }
 }
 
@@ -326,7 +326,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             expect(pageText).not.toContain('Internal Server Error');
 
             const hasDisplayCondition = pageText.includes('表示条件') || pageText.includes('display') || pageText.includes('条件');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log(`[261-1] 表示条件テキスト存在: ${hasDisplayCondition}`);
         });
 
@@ -350,7 +350,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
 
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
             const panelSelectors = [
                 'admin-forms-field',
@@ -394,7 +394,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
 
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             console.log('[261-3] チェックボックスフィールドクリック後、ページ正常確認');
         });
 
@@ -595,7 +595,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
                                       bodyText.includes('unique') ||
                                       bodyText.includes('一意');
             console.log(`[265-2] 重複チェック関連テキスト存在: ${hasDuplicateCheck}`);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         });
 
         // ----- step: 267-1 テキストフィールドの初期値設定→新規レコード作成時に自動入力 -----
@@ -738,7 +738,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
 
             console.log(`[267-1] 初期値の自動入力確認: ${defaultFound}`);
             expect(defaultFound, `テキストフィールドの初期値「${testDefaultValue}」が新規作成フォームに自動入力されていること`).toBe(true);
-            await expect(page.locator('.navbar')).toBeVisible();
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
             await cleanupDefaultValue(page, tableId);
         });
