@@ -25,14 +25,14 @@ async function login(page, email, password) {
     await page.waitForLoadState('domcontentloaded');
     // storageStateでログイン済みならdashboardにリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されたら入力
     const idField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!idField) {
         // リダイレクト途中の可能性。navbarを待つ
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     await page.fill('#id', email || EMAIL);
@@ -217,16 +217,16 @@ async function assertFieldPageLoaded(page, tableId) {
             await expect(fieldRows.first()).toBeVisible();
         } else {
             // フィールドリストがない場合はナビバーだけ確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         }
     } else if (currentUrl.includes(`/admin/dataset__${tableId}`)) {
         // テーブル一覧ページにリダイレクトされた場合
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+        await expect(page.locator('.navbar')).toBeVisible();
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     } else {
         // その他のページ：ナビバーが表示されていること
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+        await expect(page.locator('.navbar')).toBeVisible();
     }
 }
 
@@ -279,7 +279,7 @@ test.beforeAll(async ({ browser }) => {
             await page.fill('#id', process.env.TEST_EMAIL || 'admin');
             await page.fill('#password', process.env.TEST_PASSWORD || '');
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 60000 }).catch(() => {});
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 }).catch(() => {});
         }
         _sharedTableId = await getAllTypeTableId(page);
     }
@@ -313,7 +313,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
-                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
             }
 
             const opened = await openFieldEditPanel(page, '選択肢');
@@ -326,7 +326,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             expect(pageText).not.toContain('Internal Server Error');
 
             const hasDisplayCondition = pageText.includes('表示条件') || pageText.includes('display') || pageText.includes('条件');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log(`[261-1] 表示条件テキスト存在: ${hasDisplayCondition}`);
         });
 
@@ -340,17 +340,17 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
-                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
             }
 
             const opened = await openFieldEditPanel(page, 'Yes / No');
             if (!opened) {
-                await expect(page.locator('.cdk-drag.field-drag:has-text("Yes / No"), .field-drag:has-text("Yes / No")').first(), 'Yes/Noフィールドが存在すること（ALLテストテーブルに含まれるべき）').toBeVisible({ timeout: 60000 });
+                await expect(page.locator('.cdk-drag.field-drag:has-text("Yes / No"), .field-drag:has-text("Yes / No")').first(), 'Yes/Noフィールドが存在すること（ALLテストテーブルに含まれるべき）').toBeVisible();
             }
 
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             const panelSelectors = [
                 'admin-forms-field',
@@ -384,17 +384,17 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
-                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
             }
 
             const opened = await openFieldEditPanel(page, '選択肢(複数選択)');
             if (!opened) {
-                await expect(page.locator('.cdk-drag.field-drag:has-text("選択肢(複数選択)"), .field-drag:has-text("選択肢(複数選択)")').first(), '選択肢(複数選択)フィールドが存在すること').toBeVisible({ timeout: 60000 });
+                await expect(page.locator('.cdk-drag.field-drag:has-text("選択肢(複数選択)"), .field-drag:has-text("選択肢(複数選択)")').first(), '選択肢(複数選択)フィールドが存在すること').toBeVisible();
             }
 
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
             console.log('[261-3] チェックボックスフィールドクリック後、ページ正常確認');
         });
 
@@ -409,7 +409,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
-                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
             }
 
             // overSettingからモーダルを開いて追加オプション展開→必須設定
@@ -576,14 +576,14 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
-                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
             }
 
             const opened = await openFieldEditPanel(page, 'テキスト');
             if (!opened) {
                 const openedNum = await openFieldEditPanel(page, '数値');
                 if (!openedNum) {
-                    await expect(page.locator('.cdk-drag.field-drag:has-text("テキスト"), .field-drag:has-text("テキスト")').first(), 'テキスト/数値フィールドが存在すること').toBeVisible({ timeout: 60000 });
+                    await expect(page.locator('.cdk-drag.field-drag:has-text("テキスト"), .field-drag:has-text("テキスト")').first(), 'テキスト/数値フィールドが存在すること').toBeVisible();
                 }
             }
 
@@ -595,7 +595,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
                                       bodyText.includes('unique') ||
                                       bodyText.includes('一意');
             console.log(`[265-2] 重複チェック関連テキスト存在: ${hasDuplicateCheck}`);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
         });
 
         // ----- step: 267-1 テキストフィールドの初期値設定→新規レコード作成時に自動入力 -----
@@ -611,12 +611,12 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
-                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible({ timeout: 60000 });
+                await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
             }
 
             const opened = await openFieldEditPanel(page, 'テキスト');
             if (!opened) {
-                await expect(page.locator('.cdk-drag.field-drag:has-text("テキスト"), .field-drag:has-text("テキスト")').first(), 'テキストフィールドが存在すること').toBeVisible({ timeout: 60000 });
+                await expect(page.locator('.cdk-drag.field-drag:has-text("テキスト"), .field-drag:has-text("テキスト")').first(), 'テキストフィールドが存在すること').toBeVisible();
             }
 
             const defaultValueSelectors = [
@@ -738,7 +738,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
 
             console.log(`[267-1] 初期値の自動入力確認: ${defaultFound}`);
             expect(defaultFound, `テキストフィールドの初期値「${testDefaultValue}」が新規作成フォームに自動入力されていること`).toBe(true);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 60000 });
+            await expect(page.locator('.navbar')).toBeVisible();
 
             await cleanupDefaultValue(page, tableId);
         });

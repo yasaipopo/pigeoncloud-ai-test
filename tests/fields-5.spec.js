@@ -18,34 +18,8 @@ async function waitForAngular(page, timeout = 15000) {
 }
 
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
-    // storageStateでログイン済みならリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
-        return;
-    }
-    // ログインフォームが表示されなければリダイレクト途中
-    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
-        return;
-    }
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
-    } catch (e) {
-        if (page.url().includes('/admin/login')) {
-            await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
-        }
-    }
-    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
+    const { ensureLoggedIn } = require('./helpers/ensure-login');
+    await ensureLoggedIn(page, EMAIL, PASSWORD);
 }
 
 async function closeTemplateModal(page) {
@@ -195,7 +169,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
                     await page.fill('#id', email).catch(() => {});
                     await page.fill('#password', password).catch(() => {});
                     await page.click('button[type=submit].btn-primary').catch(() => {});
-                    await page.waitForURL('**/admin/dashboard', { timeout: 5000 }).catch(() => {});
+                    await page.waitForURL('**/admin/dashboard', { timeout: 15000 }).catch(() => {});
                     await page.waitForTimeout(1500);
                     tableId = await getAllTypeTableId(page);
                 }
@@ -232,9 +206,9 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
         expect(editUrl, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
         await page.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
-        await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
         // ALLテストテーブルは102フィールドあるため読み込みに時間がかかる
-        await page.waitForSelector('.overSetting', { timeout: 30000 });
+        await page.waitForSelector('.overSetting', { timeout: 5000 });
         await waitForAngular(page);
 
         for (const { caseNo, fieldType, hasDisplayCondition, labelKeywords } of FIELD_TYPES) {

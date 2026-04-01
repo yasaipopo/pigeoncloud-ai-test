@@ -22,20 +22,20 @@ async function login(page, email, password) {
     await page.waitForLoadState('domcontentloaded');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     await page.fill('#id', email || EMAIL);
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     } catch (e) {
         // アカウントロックエラーの早期検出
         const alertEl = page.locator('.alert, [role=alert]');
@@ -58,7 +58,7 @@ async function login(page, email, password) {
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }
     }
     await page.waitForTimeout(2000);
@@ -868,7 +868,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // navbar（ヘッダー）が表示されていることを確認
             await expect(page.locator('.navbar')).toBeVisible();
             // サイドバーナビゲーションが表示されていることを確認（Angular描画待ち）
-            await expect(page.locator('nav.sidebar-nav')).toBeVisible({ timeout: 20000 });
+            await expect(page.locator('nav.sidebar-nav')).toBeVisible();
 
         });
         await test.step('215-4: テーブルアイコンタイプ「アイコン」でfa-user-circle-oを指定すると指定アイコンが表示されること', async () => {

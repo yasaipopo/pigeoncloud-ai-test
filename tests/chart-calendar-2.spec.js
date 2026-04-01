@@ -30,13 +30,13 @@ async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     await waitForAngular(page);
@@ -91,14 +91,14 @@ async function login(page, email, password) {
         await page.fill('#password', loginPassword);
         await page.click('button[type=submit].btn-primary');
         try {
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         } catch (e) {
             if (page.url().includes('/admin/login')) {
                 await page.waitForTimeout(1000);
                 await page.fill('#id', EMAIL);
                 await page.fill('#password', PASSWORD);
                 await page.click('button[type=submit].btn-primary');
-                await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+                await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
             }
         }
         await page.waitForTimeout(2000);
@@ -471,7 +471,7 @@ test.describe('チャート - 基本機能', () => {
 
             // 「全員に表示」ラジオをON（input[name="grant"][value="public"]）
             const allUsersRadio = page.locator('input[name="grant"][value="public"]').first();
-            await expect(allUsersRadio).toBeVisible({ timeout: 3000 });
+            await expect(allUsersRadio).toBeVisible();
             await allUsersRadio.click({ force: true });
             await waitForAngular(page);
 
@@ -480,7 +480,7 @@ test.describe('チャート - 基本機能', () => {
 
             // 「保存して表示」ボタンで保存
             const saveBtn = page.locator('button:has-text("保存して表示")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -521,7 +521,7 @@ test.describe('チャート - 基本機能', () => {
 
             // 「自分のみ表示」ラジオをON（input[name="grant"][value="private"]）
             const selfOnlyRadio = page.locator('input[name="grant"][value="private"]').first();
-            await expect(selfOnlyRadio).toBeVisible({ timeout: 3000 });
+            await expect(selfOnlyRadio).toBeVisible();
             await selfOnlyRadio.click({ force: true });
             await waitForAngular(page);
 
@@ -530,7 +530,7 @@ test.describe('チャート - 基本機能', () => {
 
             // 「保存して表示」ボタンで保存
             const saveBtn = page.locator('button:has-text("保存して表示")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -571,12 +571,12 @@ test.describe('チャート - 基本機能', () => {
 
             // タイトル入力欄にチャート名を設定
             const titleInput = page.locator('.modal.show input.form-control').first();
-            await expect(titleInput).toBeVisible({ timeout: 3000 });
+            await expect(titleInput).toBeVisible();
             await titleInput.fill('テストチャート-37-1-自分のみ');
 
             // 「自分のみ表示」ラジオを選択
             const selfOnlyRadio = page.locator('input[name="grant"][value="private"]').first();
-            await expect(selfOnlyRadio).toBeVisible({ timeout: 3000 });
+            await expect(selfOnlyRadio).toBeVisible();
             await selfOnlyRadio.click({ force: true });
             await waitForAngular(page);
 
@@ -585,7 +585,7 @@ test.describe('チャート - 基本機能', () => {
 
             // 「保存して表示」ボタンで保存
             const saveBtn = page.locator('button:has-text("保存して表示")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -955,7 +955,7 @@ test.describe('チャート - 基本機能', () => {
 
                 // 「保存して表示」ボタンで保存
                 const saveBtn = page.locator('button:has-text("保存して表示")').first();
-                await expect(saveBtn).toBeVisible({ timeout: 3000 });
+                await expect(saveBtn).toBeVisible();
                 await saveBtn.click({ force: true });
                 await waitForAngular(page);
 
@@ -1012,11 +1012,11 @@ test.describe('チャート - 基本機能', () => {
 
                 // カラーピッカー（input[type="color"]）が表示されていることを確認
                 const colorPicker = page.locator('input[type="color"]').first();
-                await expect(colorPicker).toBeVisible({ timeout: 3000 });
+                await expect(colorPicker).toBeVisible();
 
                 // 「保存して表示」ボタンで保存
                 const saveBtn = page.locator('button:has-text("保存して表示")').first();
-                await expect(saveBtn).toBeVisible({ timeout: 3000 });
+                await expect(saveBtn).toBeVisible();
                 await saveBtn.click({ force: true });
                 await waitForAngular(page);
 
@@ -1073,7 +1073,7 @@ test.describe('チャート - 基本機能', () => {
 
                 // 「保存して表示」ボタンで保存
                 const saveBtn = page.locator('button:has-text("保存して表示")').first();
-                await expect(saveBtn).toBeVisible({ timeout: 3000 });
+                await expect(saveBtn).toBeVisible();
                 await saveBtn.click({ force: true });
                 await waitForAngular(page);
 
@@ -2537,7 +2537,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 'select[name*="aggregate"], select[name*="method"], label:has-text("計算式"), input[name*="calc"]'
             ).first();
             if (await aggregateForm.count() > 0) {
-                await expect(aggregateForm).toBeVisible({ timeout: 3000 });
+                await expect(aggregateForm).toBeVisible();
             }
 
             const pageText = await page.innerText('body');

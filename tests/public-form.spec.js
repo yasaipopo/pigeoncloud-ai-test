@@ -23,13 +23,13 @@ async function login(page) {
     await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded' });
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // Angular が ready になるまで待つ（タイムアウトを延長）
@@ -74,11 +74,11 @@ async function login(page) {
     }
 
     // フォールバック: フォームログイン（#id が表示されるまで待つ）
-    await page.waitForSelector('#id', { timeout: 30000 });
+    await page.waitForSelector('#id', { timeout: 5000 });
     await page.fill('#id', EMAIL);
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
-    await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+    await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 

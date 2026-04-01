@@ -23,13 +23,13 @@ async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     await waitForAngular(page);
@@ -67,11 +67,11 @@ async function login(page, email, password) {
     // APIログイン失敗時はフォームログイン（フォールバック）
     await page.goto(BASE_URL + '/admin/login');
     await waitForAngular(page);
-    await page.waitForSelector('#id', { timeout: 30000 });
+    await page.waitForSelector('#id', { timeout: 5000 });
     await page.fill('#id', email || EMAIL);
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
-    await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+    await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
 }
 
 /**

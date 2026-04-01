@@ -551,7 +551,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
             // CSV UP/DL履歴ページに移動して非同期処理結果を確認
             await page.goto(BASE_URL + '/admin/csv', { waitUntil: 'domcontentloaded', timeout: 30000 });
-            await page.waitForSelector('table', { timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page).catch(() => {});
 
             // 処理完了まで待つ（最大90秒、5秒おきにリロード）
@@ -577,7 +577,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                     if (rowText.includes('処理前') || rowText.includes('処理中')) {
                         await page.waitForTimeout(5000);
                         await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
-                        await page.waitForSelector('table', { timeout: 30000 }).catch(() => {});
+                        await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
                         await waitForAngular(page).catch(() => {});
                         continue;
                     }
@@ -588,7 +588,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 }
                 await page.waitForTimeout(5000);
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
-                await page.waitForSelector('table', { timeout: 30000 }).catch(() => {});
+                await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
                 await waitForAngular(page).catch(() => {});
             }
             expect(found).toBeTruthy();
@@ -661,7 +661,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 // CSV UP/DL履歴で結果を確認（55-1と同じアプローチ）
                 await page.goto(BASE_URL + '/admin/csv', { waitUntil: 'domcontentloaded', timeout: 30000 });
                 await waitForAngular(page);
-                await page.waitForSelector('table', { timeout: 30000 }).catch(() => {});
+                await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
 
                 // 最新行を確認
                 const rows = page.locator('table tbody tr');
@@ -737,7 +737,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             // テーブルデータページに移動してCSVアップロードを試みる
             await page.goto(BASE_URL + '/admin/dataset__' + testTableId);
             await page.waitForLoadState('domcontentloaded');
-            await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             // ドロップダウンボタンが表示されるまで待機
             await page.waitForSelector('button.btn-outline-primary.dropdown-toggle', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
@@ -1066,7 +1066,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             // レコードのチェックボックスを選択（JSONエクスポートは checked_id_a.length>0 の場合のみ表示）
             // テーブルデータ読み込みに時間がかかるため、タイムアウトを30秒に延長
             const firstCheckbox = page.locator('table input[type="checkbox"], td input[type="checkbox"]').first();
-            await firstCheckbox.waitFor({ state: 'visible', timeout: 30000 });
+            await firstCheckbox.waitFor({ state: 'visible', timeout: 5000 });
             await firstCheckbox.click();
             await waitForAngular(page);
 
@@ -1478,7 +1478,7 @@ test.describe('JSONエクスポート・インポート', () => {
             // CSV UP/DL履歴で結果確認
             await page.goto(BASE_URL + '/admin/csv', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
-            await page.waitForSelector('table', { timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
 
             // 処理完了を待機（最大60秒）
             for (let i = 0; i < 12; i++) {
@@ -2483,7 +2483,7 @@ test.describe('JSONエクスポート・インポート', () => {
             // .dropdown-menu.show または単純に表示中のdropdown-menu内のリンクを検索
             await page.waitForSelector('.dropdown-menu a:has-text("JSONから追加"), .dropdown-menu.show a:has-text("JSONから追加")', { timeout: 8000 }).catch(() => {});
             const jsonAddLink = page.locator('.dropdown-menu a:has-text("JSONから追加"), a:has-text("JSONから追加")').filter({ visible: true }).first();
-            await expect(jsonAddLink, 'JSONから追加リンクが存在すること').toBeVisible({ timeout: 8000 });
+            await expect(jsonAddLink, 'JSONから追加リンクが存在すること').toBeVisible();
             await jsonAddLink.click();
             await waitForAngular(page);
 

@@ -17,13 +17,13 @@ async function login(page) {
     await page.waitForLoadState('domcontentloaded');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     await page.fill('#id', EMAIL);
@@ -31,7 +31,7 @@ async function login(page) {
     await page.click('button[type=submit].btn-primary');
     // CSRFエラー時は自動で再ロード -> 再試行
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     } catch (e) {
         // CSRF エラーで login のまま残っていたら、再度ログイン
         if (page.url().includes('/admin/login')) {
@@ -39,7 +39,7 @@ async function login(page) {
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }
     }
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
@@ -151,7 +151,7 @@ async function navigateToTablePage(page, tableId) {
         await waitForAngular(page);
     }
     // Angular描画: navbarまたは帳票ボタンが表示されるまで待機
-    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
     await page.waitForSelector('button:has-text("帳票"), button.dropdown-toggle', { timeout: 5000 }).catch(() => {});
 }
 
@@ -323,7 +323,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
                 // 送信ボタン（type=submitを持つbtn-primaryボタン）をクリック
                 const submitBtn = modal.locator('button[type="submit"].btn-primary');
-                await expect(submitBtn).toBeVisible({ timeout: 10000 });
+                await expect(submitBtn).toBeVisible();
                 await submitBtn.click({ force: true });
                 await waitForAngular(page);
                 await page.waitForTimeout(3000);
@@ -903,7 +903,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             for (let attempt = 0; attempt < 3; attempt++) {
                 await page.reload({ waitUntil: 'domcontentloaded' });
                 await waitForAngular(page);
-                await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+                await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
                 await page.waitForTimeout(2000);
 
                 // ログインページにリダイレクトされた場合は再ログイン
@@ -911,7 +911,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                     await ensureLoggedIn(page);
                     await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
                     await waitForAngular(page);
-                    await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+                    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
                     await waitForAngular(page);
                 }
 
@@ -955,7 +955,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await waitForAngular(page);
             await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
             await waitForAngular(page);
-            await page.waitForSelector('.navbar', { timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 
             // 帳票ボタンが表示されること
             const reportBtn = page.locator('button:has-text("帳票")').first();
@@ -1147,7 +1147,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             // 帳票ボタンが表示されていること（画像型フィールドの帳票出力設定にアクセス可能）
             const reportBtn = page.locator('button:has-text("帳票")').first();
-            await expect(reportBtn).toBeVisible({ timeout: 30000 });
+            await expect(reportBtn).toBeVisible();
         });
 
         await test.step('579: 帳票設定ページが正常に表示されること（関連レコードINDEX対応確認）', async () => {
@@ -1162,7 +1162,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             // 帳票ボタンが表示されていること
             const reportBtn = page.locator('button:has-text("帳票")').first();
-            await expect(reportBtn).toBeVisible({ timeout: 30000 });
+            await expect(reportBtn).toBeVisible();
         });
 
         await test.step('601: 帳票出力設定で数値フォーマットの設定が確認できること', async () => {
@@ -1341,12 +1341,12 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             // 帳票ドロップダウンを開く
             const reportBtn = page.locator('button:has-text("帳票")').first();
-            await expect(reportBtn).toBeVisible({ timeout: 30000 });
+            await expect(reportBtn).toBeVisible();
             await reportBtn.click({ force: true });
             await waitForAngular(page);
 
             const dropdown = page.locator('.dropdown-menu.show');
-            await expect(dropdown.first()).toBeVisible({ timeout: 10000 });
+            await expect(dropdown.first()).toBeVisible();
 
             // 「編集」を含む帳票アイテムを探す（帳票が登録されている必要がある）
             const editItems = dropdown.locator('.dropdown-item').filter({ hasText: '編集' });
@@ -1359,14 +1359,14 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 await waitForAngular(page);
 
                 const modal = page.locator('.modal.show');
-                await expect(modal.first()).toBeVisible({ timeout: 10000 });
+                await expect(modal.first()).toBeVisible();
 
                 // モーダル内に「削除」ボタンが存在することを確認（帳票削除UI）
                 const deleteBtn = modal.locator('button:has-text("削除")').first();
                 const deleteBtnCount = await deleteBtn.count();
                 console.log(`817: 帳票削除ボタン数: ${deleteBtnCount}`);
                 expect(deleteBtnCount).toBeGreaterThan(0);
-                await expect(deleteBtn).toBeVisible({ timeout: 10000 });
+                await expect(deleteBtn).toBeVisible();
 
                 // モーダルを閉じる（削除は実行しない）
                 const cancelBtn = modal.locator('button:has-text("キャンセル")').first();
@@ -1380,7 +1380,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 await waitForAngular(page);
 
                 const modal = page.locator('.modal.show');
-                await expect(modal.first()).toBeVisible({ timeout: 10000 });
+                await expect(modal.first()).toBeVisible();
                 await page.waitForTimeout(500);
 
                 // 帳票名をAngular Reactive Forms対応で入力
@@ -1421,11 +1421,11 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                     await waitForAngular(page);
 
                     const modal2 = page.locator('.modal.show');
-                    await expect(modal2.first()).toBeVisible({ timeout: 10000 });
+                    await expect(modal2.first()).toBeVisible();
 
                     const deleteBtn = modal2.locator('button:has-text("削除")').first();
                     expect(await deleteBtn.count()).toBeGreaterThan(0);
-                    await expect(deleteBtn).toBeVisible({ timeout: 10000 });
+                    await expect(deleteBtn).toBeVisible();
 
                     const cancelBtn = modal2.locator('button:has-text("キャンセル")').first();
                     await cancelBtn.click({ force: true }).catch(() => {});
@@ -1460,14 +1460,14 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             // 帳票ボタンが存在すること
             const reportBtn = page.locator('button:has-text("帳票")').first();
-            await expect(reportBtn).toBeVisible({ timeout: 30000 });
+            await expect(reportBtn).toBeVisible();
 
             // 帳票ドロップダウンを開いて帳票登録UIを確認
             await reportBtn.click({ force: true });
             await waitForAngular(page);
 
             const dropdown = page.locator('.dropdown-menu.show');
-            await expect(dropdown.first()).toBeVisible({ timeout: 10000 });
+            await expect(dropdown.first()).toBeVisible();
 
             // 「追加」または既存帳票の編集リンクが存在すること（帳票設定UIへのアクセス確認）
             const addOrEditItems = dropdown.locator('.dropdown-item:has-text("追加"), .dropdown-item:has-text("編集")');

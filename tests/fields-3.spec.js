@@ -28,13 +28,13 @@ async function login(page, email, password) {
         await page.waitForLoadState('domcontentloaded');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
         await page.waitForTimeout(500); // フォーム初期化待機
@@ -328,7 +328,7 @@ test.beforeAll(async ({ browser }) => {
             await page.fill('#id', process.env.TEST_EMAIL || 'admin');
             await page.fill('#password', process.env.TEST_PASSWORD || '');
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 }).catch(() => {});
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 }).catch(() => {});
         }
         _sharedTableId = await getAllTypeTableId(page);
     }
@@ -2491,7 +2491,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
                 return fetch('/api/admin/logout', { method: 'GET', credentials: 'include' }).catch(() => {});
             });
             await page.goto(BASE_URL + '/admin/login');
-            await page.waitForSelector('#id', { timeout: 30000 });
+            await page.waitForSelector('#id', { timeout: 5000 });
             await page.fill('#id', userEmail);
             await page.fill('#password', userPassword);
             await page.click('button[type=submit].btn-primary');

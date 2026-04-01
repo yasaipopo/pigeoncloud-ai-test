@@ -23,13 +23,13 @@ async function login(page) {
     await page.goto(BASE_URL + '/admin/login');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     await waitForAngular(page);
@@ -66,7 +66,7 @@ async function login(page) {
 
     // APIログイン失敗時はフォームログイン
     await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
-    const idField = await page.waitForSelector('#id', { timeout: 30000 }).catch(() => null);
+    const idField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!idField) {
         // すでにダッシュボードにいる場合はOK
         if (!page.url().includes('/admin/login')) return;
@@ -76,14 +76,14 @@ async function login(page) {
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }
     }
     await page.waitForTimeout(1000);
@@ -161,7 +161,7 @@ test.describe('RPA（コネクト）', () => {
             await page.locator('button.btn-outline-primary:has(.fa-plus)').first().click();
 
             // 編集画面（/admin/rpa/edit/new）に遷移すること
-            await page.waitForURL('**/admin/rpa/edit/**', { timeout: 5000 });
+            await page.waitForURL('**/admin/rpa/edit/**', { timeout: 15000 });
             await waitForAngular(page);
 
             // RPA名入力フィールドが表示されるまで待機
@@ -221,7 +221,7 @@ test.describe('RPA（コネクト）', () => {
 
             // 新規作成ボタンをクリック
             await page.locator('button.btn-outline-primary:has(.fa-plus)').first().click();
-            await page.waitForURL('**/admin/rpa/edit/**', { timeout: 5000 });
+            await page.waitForURL('**/admin/rpa/edit/**', { timeout: 15000 });
             await waitForAngular(page);
 
             // RPA名入力フィールドが表示されるまで待機

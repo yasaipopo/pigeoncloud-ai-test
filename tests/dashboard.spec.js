@@ -23,13 +23,13 @@ async function login(page) {
     await page.goto(BASE_URL + '/admin/login');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     await waitForAngular(page);
@@ -66,7 +66,7 @@ async function login(page) {
 
     // APIログイン失敗時はフォームログイン
     await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
-    const idField = await page.waitForSelector('#id', { timeout: 30000 }).catch(() => null);
+    const idField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!idField) {
         if (!page.url().includes('/admin/login')) return;
         throw new Error('ログインフォームの#idフィールドが見つかりません');
@@ -75,14 +75,14 @@ async function login(page) {
     await page.fill('#password', PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             await page.fill('#id', EMAIL);
             await page.fill('#password', PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }
     }
     await page.waitForTimeout(1000);
@@ -294,7 +294,7 @@ test.describe('ダッシュボード', () => {
             const newTab = dashTablist.locator('[role=tab]').filter({ hasText: db02Name });
             const allTabTexts = await dashTablist.locator('[role=tab]').allTextContents().catch(() => []);
             console.log('DB-02: 全タブ:', allTabTexts, '検索名:', db02Name);
-            await expect(newTab).toBeVisible({ timeout: 8000 });
+            await expect(newTab).toBeVisible();
 
             // DB-03〜DB-05で使うためにタブ名を保存
             _createdDashboardName = db02Name;

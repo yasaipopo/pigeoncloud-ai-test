@@ -109,7 +109,7 @@ async function login(page, email, password) {
     await page.fill('#password', password || PASSWORD);
     await page.click('button[type=submit].btn-primary');
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     } catch (e) {
         // ログイン後のページ状態を確認
         const bodyText = await page.innerText('body').catch(() => '');
@@ -138,7 +138,7 @@ async function login(page, email, password) {
             await page.fill('#id', email || EMAIL);
             await page.fill('#password', password || PASSWORD);
             await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 }).catch(() => {});
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 }).catch(() => {});
         } else if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
             // ボタンが無効（送信中）の場合はURLが変わるまで待つ（再クリック不要）
@@ -154,7 +154,7 @@ async function login(page, email, password) {
                 await page.click('button[type=submit].btn-primary');
             }
             // URLが変わるまで待つ（ログイン処理が完了するまで）
-            await page.waitForURL('**/admin/dashboard', { timeout: 30000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }
     }
     await page.waitForTimeout(2000);

@@ -46,13 +46,13 @@ async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     // ログインフォームが表示されなければリダイレクト途中
     const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
     if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
     await waitForAngular(page);
@@ -107,14 +107,14 @@ async function login(page, email, password) {
         await page.fill('#password', loginPassword);
         await page.click('button[type=submit].btn-primary');
         try {
-            await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         } catch (e) {
             if (page.url().includes('/admin/login')) {
                 await page.waitForTimeout(1000);
                 await page.fill('#id', EMAIL);
                 await page.fill('#password', PASSWORD);
                 await page.click('button[type=submit].btn-primary');
-                await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+                await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
             }
         }
         await page.waitForTimeout(2000);
@@ -1222,7 +1222,7 @@ test.describe('集計 - 基本機能', () => {
 
             // 集計モーダル/パネルが開いたことを確認（何らかのタブが見える）
             const anyTab = page.locator('a.nav-link[role="tab"], [role="tab"], a.nav-link').first();
-            await expect(anyTab).toBeVisible({ timeout: 8000 });
+            await expect(anyTab).toBeVisible();
             // 設定タブをクリック（ビューポート外の場合があるのでscrollIntoView + evaluate）
             const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             if (await settingTab.count() > 0) {
@@ -1264,7 +1264,7 @@ test.describe('集計 - 基本機能', () => {
 
             // 保存ボタンが存在して、クリックできることを確認
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -1290,7 +1290,7 @@ test.describe('集計 - 基本機能', () => {
 
             // 集計モーダル/パネルが開いたことを確認（何らかのタブが見える）
             const anyTab2 = page.locator('a.nav-link[role="tab"], [role="tab"], a.nav-link').first();
-            await expect(anyTab2).toBeVisible({ timeout: 8000 });
+            await expect(anyTab2).toBeVisible();
             // 設定タブをクリック（ビューポート外の場合があるのでscrollIntoView + evaluate）
             const settingTab2 = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
             if (await settingTab2.count() > 0) {
@@ -1327,7 +1327,7 @@ test.describe('集計 - 基本機能', () => {
             await waitForAngular(page);
 
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -1424,7 +1424,7 @@ test.describe('集計 - 基本機能', () => {
             // 条件を追加ボタン
             const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
             if (await addCondBtn.count() > 0) {
-                await expect(addCondBtn).toBeVisible({ timeout: 3000 });
+                await expect(addCondBtn).toBeVisible();
                 await addCondBtn.click({ force: true });
                 await waitForAngular(page);
 
@@ -1632,14 +1632,14 @@ test.describe('集計 - 基本機能', () => {
             // 条件を追加ボタンが表示されることを確認
             const addCondBtn = page.locator('button:has-text("条件を追加"), a:has-text("条件を追加")').first();
             if (await addCondBtn.count() > 0) {
-                await expect(addCondBtn).toBeVisible({ timeout: 3000 });
+                await expect(addCondBtn).toBeVisible();
                 await addCondBtn.click({ force: true });
                 await waitForAngular(page);
             }
 
             // 保存ボタンが存在することを確認してクリック
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -1674,14 +1674,14 @@ test.describe('集計 - 基本機能', () => {
             // 色設定追加ボタンが表示されることを確認
             const addColorBtn = page.locator('.tab-pane.active button:has-text("条件・色を追加"), button:has-text("条件・色を追加")').first();
             if (await addColorBtn.count() > 0) {
-                await expect(addColorBtn).toBeVisible({ timeout: 3000 });
+                await expect(addColorBtn).toBeVisible();
                 await addColorBtn.click({ force: true });
                 await waitForAngular(page);
             }
 
             // 保存ボタンが存在することを確認してクリック
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -1753,7 +1753,7 @@ test.describe('集計 - 基本機能', () => {
             // 集計項目で「平均」を選択
             const methodSelect = page.locator('select[name*="method"], select[name*="aggregate"], select.aggregate-method').first();
             if (await methodSelect.count() > 0) {
-                await expect(methodSelect).toBeVisible({ timeout: 3000 });
+                await expect(methodSelect).toBeVisible();
                 const avgOption = methodSelect.locator('option').filter({ hasText: '平均' });
                 if (await avgOption.count() > 0) {
                     const val = await avgOption.first().getAttribute('value');
@@ -1946,7 +1946,7 @@ test.describe('集計 - 基本機能', () => {
 
             // 保存
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -2059,7 +2059,7 @@ test.describe('集計 - 基本機能', () => {
 
             // 保存
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -2172,7 +2172,7 @@ test.describe('集計 - 基本機能', () => {
 
             // 保存
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
@@ -2506,7 +2506,7 @@ test.describe('チャート - フィルタ・表示設定', () => {
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await expect(saveBtn).toBeVisible();
         await saveBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -2550,7 +2550,7 @@ test.describe('チャート - フィルタ・表示設定', () => {
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await expect(saveBtn).toBeVisible();
         await saveBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -2600,7 +2600,7 @@ test.describe('チャート - フィルタ・表示設定', () => {
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await expect(saveBtn).toBeVisible();
         await saveBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -2774,7 +2774,7 @@ test.describe('集計 - 詳細権限設定', () => {
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する"), .modal.show button:has-text("保存")').first();
-        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await expect(saveBtn).toBeVisible();
         await saveBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -2882,7 +2882,7 @@ test.describe('集計 - 詳細権限設定', () => {
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await expect(saveBtn).toBeVisible();
         await saveBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -2973,7 +2973,7 @@ test.describe('チャート - 詳細権限設定', () => {
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する"), .modal.show button:has-text("保存")').first();
-        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await expect(saveBtn).toBeVisible();
         await saveBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -3079,7 +3079,7 @@ test.describe('チャート - 詳細権限設定', () => {
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-        await expect(saveBtn).toBeVisible({ timeout: 3000 });
+        await expect(saveBtn).toBeVisible();
         await saveBtn.click({ force: true });
         await waitForAngular(page);
 
@@ -4625,7 +4625,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
             // 保存
             const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
-            await expect(saveBtn).toBeVisible({ timeout: 3000 });
+            await expect(saveBtn).toBeVisible();
             await saveBtn.click({ force: true });
             await waitForAngular(page);
 
