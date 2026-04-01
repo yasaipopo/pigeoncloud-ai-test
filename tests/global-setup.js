@@ -101,7 +101,9 @@ module.exports = async function globalSetup() {
     // エージェント番号ごとに別ファイルを使用（並列実行での競合を防ぐ）
     const agentNum = process.env.AGENT_NUM || '1';
     const envRuntimePath = path.join(process.cwd(), `.test_env_runtime.${agentNum}`);
-    if (fs.existsSync(envRuntimePath)) {
+
+    // REUSE_ENV=1 の場合のみ既存環境を使い回す（デフォルトは毎回新規作成）
+    if (process.env.REUSE_ENV === '1' && fs.existsSync(envRuntimePath)) {
         const envContent = fs.readFileSync(envRuntimePath, 'utf8');
         for (const line of envContent.split('\n')) {
             const match = line.match(/^([A-Z_]+)=(.+)$/);
@@ -109,17 +111,21 @@ module.exports = async function globalSetup() {
                 process.env[match[1]] = match[2];
             }
         }
-        console.log(`[global-setup] .test_env_runtimeから環境を読み込み: ${process.env.TEST_BASE_URL}`);
-        // storageStateが未作成なら認証してキャッシュ保存
+        console.log(`[global-setup] REUSE_ENV=1: 既存環境を再利用: ${process.env.TEST_BASE_URL}`);
         await saveStorageStateIfNeeded(agentNum);
-        // ALLテストテーブルを作成/確認
         await ensureAllTypeTable(agentNum);
         return;
     }
 
-    // 既に tmp-testai- 環境ならstorageState + ALLテストテーブル確認のみ
-    if (currentUrl.includes('tmp-testai-')) {
-        console.log(`[global-setup] 既存テスト環境を使用: ${currentUrl}`);
+    // 古い環境ファイルを削除（常に新規作成）
+    if (fs.existsSync(envRuntimePath)) {
+        console.log(`[global-setup] 古い.test_env_runtimeを削除: ${envRuntimePath}`);
+        fs.unlinkSync(envRuntimePath);
+    }
+
+    // REUSE_ENV=1 でない限り、tmp-testai- 環境でも新規作成
+    if (process.env.REUSE_ENV === '1' && currentUrl.includes('tmp-testai-')) {
+        console.log(`[global-setup] REUSE_ENV=1: 既存テスト環境を使用: ${currentUrl}`);
         await saveStorageStateIfNeeded(agentNum);
         await ensureAllTypeTable(agentNum);
         return;
