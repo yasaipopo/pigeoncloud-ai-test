@@ -75,6 +75,7 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 - **独自login関数は使わない** — `ensureLoggedIn`（helpers/ensure-login.js）に統一。独自実装は`button[type=submit]`の複数マッチ等で壊れやすい
 - **`count() > 0` でclick/fillしない** — `isVisible()` または `:visible` セレクターを使う（知見6参照）
 - **sedでの一括置換は禁止** — コードを壊すリスクが高い。nodeスクリプトで安全に置換する
+- **ALLテストテーブルのレコード追加/編集画面は102フィールドのため描画に時間がかかる** — `/add`, `/new`, `/view/N` 遷移後は `waitForSelector('.navbar', { timeout: 15000 })` を入れる。`waitForAngular`の5秒だけでは足りない
 - **Angularモーダルは×ボタンやEscapeで閉じない場合がある** — 「追加オプション設定」等の入れ子モーダルではEscapeが効かず、×ボタンのDOMも複数存在する。確実に閉じるには**ページリロード**を使う（`page.reload()` → `waitForSelector('.overSetting')`）。JS DOM操作（`classList.remove('show')`等）はAngularの状態を壊すので禁止
 
 ### 知見ファイル

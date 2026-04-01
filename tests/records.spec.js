@@ -1900,8 +1900,9 @@ test.describe('レコード操作 追加テスト', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId).not.toBeNull();
-            // レコード新規作成画面へ
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/new`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            // レコード新規作成画面へ（102フィールドのフォーム描画に時間がかかる）
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/new`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // 数値フィールド（input.input-number）を探す

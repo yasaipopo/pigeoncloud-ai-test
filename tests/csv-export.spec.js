@@ -1948,8 +1948,9 @@ test.describe('JSONエクスポート・インポート', () => {
             await login(page);
             const tableId = await getAllTypeTableId(page);
 
-            // レコード追加画面を開く
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            // レコード追加画面を開く（102フィールドのフォーム描画に時間がかかる）
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // 子テーブルセクションを確認
