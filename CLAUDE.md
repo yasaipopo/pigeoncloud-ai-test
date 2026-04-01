@@ -68,9 +68,16 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 
 **全spec実行済み（login統一後）: 約330 pass / 85 fail (80%) ← 前回 121/92 (56%)**
 
-0. **テスト環境は毎回新規作成**（デフォルト）。`REUSE_ENV=1`で既存環境を使い回す
-   - テスト実行時は `REUSE_ENV=1` を付けて既存環境を再利用（毎回新規作成すると遅い）
-   - 新しい環境が必要な場合は `REUSE_ENV` を付けずに実行
+0. **全specを自己完結型に移行中** — 各specのbeforeAllで`createTestEnv(browser)`を呼び、専用テナントを作成する設計
+   - `tests/helpers/create-test-env.js` を使う
+   - storageStateファイルも新環境用に上書きされる
+   - templates.spec.jsで動作確認済み
+   - **移行手順（各specに適用）**:
+     1. `const { createTestEnv } = require('./helpers/create-test-env');` を追加
+     2. `let BASE_URL = ...` を `let` に変更（constだとbeforeAllで上書きできない）
+     3. `test.beforeAll(async ({ browser }) => { ... })` で `createTestEnv` を呼び、BASE_URL/EMAIL/PASSWORDを上書き
+     4. `process.env.TEST_BASE_URL` 等も更新（ensureLoggedInが参照するため）
+   - **ALLテストテーブルが不要なspec**: `createTestEnv(browser, { withAllTypeTable: false })`
    - **並列テスト実行時は異なるAGENT_NUMを使う**（storageState競合防止）
    - **並列テスト実行にはSonnet 1Mモデルのsubagentを使う**（コスト効率）
 1. **独自login関数の統一**（fields-2等）: ensureLoggedInに置き換え
