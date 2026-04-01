@@ -22,38 +22,8 @@ const PASSWORD = process.env.TEST_PASSWORD;
  * SPA環境ではURLが /admin/login のまま変わらない場合があるため .navbar で待機
  */
 async function login(page, email, password) {
-    // 最大3回リトライ（CSRF失敗などの間欠的エラーに対応）
-    for (let attempt = 1; attempt <= 3; attempt++) {
-        await page.goto(BASE_URL + '/admin/login');
-        await page.waitForLoadState('domcontentloaded');
-    // storageStateでログイン済みならリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    // ログインフォームが表示されなければリダイレクト途中
-    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-        await page.waitForTimeout(500); // フォーム初期化待機
-        await page.fill('#id', email || EMAIL);
-        await page.fill('#password', password || PASSWORD);
-        await page.click('button[type=submit].btn-primary');
-        try {
-            await page.waitForSelector('.navbar', { timeout: 5000 });
-            await page.waitForTimeout(1000);
-            return; // ログイン成功
-        } catch (e) {
-            if (attempt < 3) {
-                // 次のリトライ前に少し待機
-                await page.waitForTimeout(2000);
-            } else {
-                throw new Error(`ログイン失敗（3回試行）: ${e.message}`);
-            }
-        }
-    }
+    const { ensureLoggedIn } = require('./helpers/ensure-login');
+    await ensureLoggedIn(page, email || EMAIL, password || PASSWORD);
 }
 
 /**

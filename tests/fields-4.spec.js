@@ -21,24 +21,8 @@ async function waitForAngular(page, timeout = 15000) {
  * SPA環境ではURLが /admin/login のまま変わらない場合があるため .navbar で待機
  */
 async function login(page, email, password) {
-    await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
-    // storageStateでログイン済みならdashboardにリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    // ログインフォームが表示されたら入力
-    const idField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!idField) {
-        // リダイレクト途中の可能性。navbarを待つ
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    await page.waitForSelector('.navbar', { timeout: 40000 });
+    const { ensureLoggedIn } = require('./helpers/ensure-login');
+    await ensureLoggedIn(page, email || EMAIL, password || PASSWORD);
 }
 
 /**

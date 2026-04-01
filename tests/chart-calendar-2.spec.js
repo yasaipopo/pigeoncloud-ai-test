@@ -23,86 +23,8 @@ async function waitForAngular(page, timeout = 15000) {
  * ログイン共通関数
  */
 async function login(page, email, password) {
-    const loginEmail = email || EMAIL;
-    const loginPassword = password || PASSWORD;
-
-    // まずCSRFトークンを取得してAPIで直接ログインを試みる
-    await page.goto(BASE_URL + '/admin/login');
-    // storageStateでログイン済みならリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    // ログインフォームが表示されなければリダイレクト途中
-    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    await waitForAngular(page);
-
-    const loginResult = await page.evaluate(async ({ email, password, adminTable }) => {
-        try {
-            const csrfResp = await fetch('/api/csrf_token');
-            const csrf = await csrfResp.json();
-            const loginResp = await fetch('/api/login/admin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email,
-                    password,
-                    admin_table: adminTable,
-                    csrf_name: csrf.csrf_name,
-                    csrf_value: csrf.csrf_value,
-                    login_type: 'user',
-                    auth_token: null,
-                    isManageLogin: false
-                })
-            });
-            return await loginResp.json();
-        } catch (e) {
-            return { result: 'error', error: e.toString() };
-        }
-    }, { email: loginEmail, password: loginPassword, adminTable: 'admin' });
-
-    if (loginResult.result === 'success') {
-        // ログイン成功後ダッシュボードへ移動
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await waitForAngular(page);
-        return;
-    }
-
-    // APIログインが失敗した場合、debugLoginを試みる（アカウントロック・パスワード変更対応）
-    const base64Token = Buffer.from(`${loginEmail}:${loginPassword}`).toString('base64');
-    try {
-        await page.goto(BASE_URL + '/api/login/debug?token=' + base64Token);
-        await waitForAngular(page);
-    } catch (e) {
-        // debugLoginが利用不可の場合は無視
-    }
-
-    // ダッシュボードへ移動
-    await page.goto(BASE_URL + '/admin/dashboard');
-    await waitForAngular(page);
-
-    // まだログインページにいる場合は通常フォームログインを試みる
-    if (page.url().includes('/admin/login')) {
-        await page.fill('#id', loginEmail);
-        await page.fill('#password', loginPassword);
-        await page.click('button[type=submit].btn-primary');
-        try {
-            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-        } catch (e) {
-            if (page.url().includes('/admin/login')) {
-                await page.waitForTimeout(1000);
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
-                await page.click('button[type=submit].btn-primary');
-                await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-            }
-        }
-        await page.waitForTimeout(2000);
-    }
+    const { ensureLoggedIn } = require('./helpers/ensure-login');
+    await ensureLoggedIn(page, email || EMAIL, password || PASSWORD);
 }
 
 /**

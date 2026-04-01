@@ -60,41 +60,8 @@ async function gotoDatasetList(page) {
  * ナビゲーションバーの表示を待つ。
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 90000 }).catch(() => {});
-    // storageStateでログイン済みならリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    // ログインフォームが表示されなければリダイレクト途中
-    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    // ログインフォームが表示されるまで待つ（ページロード完了を確認）
-    try { await page.waitForSelector('#id', { timeout: 5000 }); } catch(e) {}
-    await page.waitForTimeout(500);
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    // Angular SPA: URLが /admin/dashboard に変わるのを待つ（タイムアウト延長）
-    try {
-        // 最初の試行は短めのタイムアウト（CSRF初期化待ちのため失敗することがある）
-        await page.waitForURL('**/admin/dashboard', { timeout: 12000, waitUntil: 'domcontentloaded' });
-    } catch (e) {
-        // URLが変わらない場合：まだログインページならリトライ
-        if (page.url().includes('/admin/login')) {
-            // Laddaボタンが無効化されている場合は有効になるまで待機
-            await page.waitForSelector('button[type=submit].btn-primary:not([disabled])', { timeout: 90000 }).catch(() => {});
-            await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 15000, waitUntil: 'domcontentloaded' });
-        }
-    }
-    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
+    const { ensureLoggedIn } = require('./helpers/ensure-login');
+    await ensureLoggedIn(page, EMAIL, PASSWORD);
 }
 
 /**

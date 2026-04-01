@@ -20,58 +20,8 @@ async function waitForAngular(page, timeout = 15000) {
  * APIログインを優先し、失敗時はフォームログインにフォールバック
  */
 async function login(page, email, password) {
-    await page.goto(BASE_URL + '/admin/login');
-    // storageStateでログイン済みならリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    // ログインフォームが表示されなければリダイレクト途中
-    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    await waitForAngular(page);
-
-    // APIログインを優先（Angular SPA環境でのdetach問題を回避）
-    const loginResult = await page.evaluate(async ({ email, password }) => {
-        try {
-            const csrfResp = await fetch('/api/csrf_token');
-            const csrf = await csrfResp.json();
-            const loginResp = await fetch('/api/login/admin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email, password,
-                    admin_table: 'admin',
-                    csrf_name: csrf.csrf_name,
-                    csrf_value: csrf.csrf_value,
-                    login_type: 'user',
-                    auth_token: null,
-                    isManageLogin: false
-                })
-            });
-            return await loginResp.json();
-        } catch (e) {
-            return { result: 'error', error: e.toString() };
-        }
-    }, { email: email || EMAIL, password: password || PASSWORD });
-
-    if (loginResult.result === 'success') {
-        await page.goto(BASE_URL + '/admin/dashboard');
-        await waitForAngular(page);
-        return;
-    }
-
-    // APIログイン失敗時はフォームログイン（フォールバック）
-    await page.goto(BASE_URL + '/admin/login');
-    await waitForAngular(page);
-    await page.waitForSelector('#id', { timeout: 5000 });
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
+    const { ensureLoggedIn } = require('./helpers/ensure-login');
+    await ensureLoggedIn(page, email || EMAIL, password || PASSWORD);
 }
 
 /**

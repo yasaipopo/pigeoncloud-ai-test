@@ -96,68 +96,8 @@ async function getTableLinkFromDashboard(page) {
  * Angular SPAは #id が表示されるまで待機が必要
  */
 async function login(page, email, password) {
-    await page.goto(BASE_URL + '/admin/login');
-    // Angular SPAのロード完了を待つ（networkidleまたは#idが現れるまで）
-    await page.waitForLoadState('domcontentloaded');
-    try {
-        await page.waitForSelector('#id', { timeout: 5000 });
-    } catch (e) {
-        // #idが見つからない場合はnetworkidleまで待つ
-        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-    }
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-    } catch (e) {
-        // ログイン後のページ状態を確認
-        const bodyText = await page.innerText('body').catch(() => '');
-        if (bodyText.includes('利用規約') || bodyText.includes('同意')) {
-            // 利用規約画面が表示されている場合は自動同意
-            await page.evaluate(() => {
-                const cbs = document.querySelectorAll('input[type="checkbox"]');
-                for (const cb of cbs) { cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); }
-                const btn = document.querySelector('button.btn-primary');
-                if (btn) { btn.removeAttribute('disabled'); btn.click(); }
-            });
-            await page.waitForURL('**/admin/dashboard', { timeout: 20000 }).catch(() => {});
-        } else if (bodyText.includes('パスワードを変更してください') || bodyText.includes('新しいパスワード')) {
-            // パスワード変更必須画面 → pw_change_interval_daysをリセットしてからログインし直す
-            await page.evaluate(async (baseUrl) => {
-                const fd = new FormData();
-                fd.append('id', '1');
-                fd.append('pw_change_interval_days', '');
-                await fetch(baseUrl + '/api/admin/edit/admin_setting/1', {
-                    method: 'POST', body: fd, credentials: 'include',
-                }).catch(() => {});
-            }, BASE_URL).catch(() => {});
-            // 同じパスワードでログインし直す
-            await page.goto(BASE_URL + '/admin/login');
-            await page.waitForSelector('#id', { timeout: 5000 });
-            await page.fill('#id', email || EMAIL);
-            await page.fill('#password', password || PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 15000 }).catch(() => {});
-        } else if (page.url().includes('/admin/login')) {
-            await page.waitForTimeout(1000);
-            // ボタンが無効（送信中）の場合はURLが変わるまで待つ（再クリック不要）
-            const btnDisabled = await page.evaluate(() => {
-                const btn = document.querySelector('button[type=submit].btn-primary');
-                return btn ? btn.disabled : false;
-            }).catch(() => false);
-            if (!btnDisabled) {
-                // ボタンが有効な場合のみ再送信
-                await page.waitForSelector('#id', { timeout: 10000 }).catch(() => {});
-                await page.fill('#id', email || EMAIL);
-                await page.fill('#password', password || PASSWORD);
-                await page.click('button[type=submit].btn-primary');
-            }
-            // URLが変わるまで待つ（ログイン処理が完了するまで）
-            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-        }
-    }
-    await page.waitForTimeout(2000);
+    const { ensureLoggedIn } = require('./helpers/ensure-login');
+    await ensureLoggedIn(page, email || EMAIL, password || PASSWORD);
 }
 
 /**
