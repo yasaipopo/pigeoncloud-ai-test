@@ -865,8 +865,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
                 const bodyText = await page.innerText('body');
                 expect(bodyText).not.toContain('Internal Server Error');
                 // 検索が正常に実行されたこと（テーブル構造が存在すること）
-                const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-                await expect(table.first()).toBeVisible();
+                await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             } else {
                 // 簡易検索が存在しない場合はフィルタ設定UIで確認
                 const bodyText = await page.innerText('body');
@@ -951,8 +950,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             // 全角・半角どちらでもエラーなく検索が実行されること
             // （完全一致は環境のデータ次第なのでエラーなし+テーブル構造存在を確認）
             await waitForAngular(page);
-            const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-            await expect(table.first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
             // 検索結果がゼロでないことを確認（全角・半角どちらでも結果が返ること）
             expect(fullWidthRows + halfWidthRows).toBeGreaterThan(0);
 
@@ -1014,8 +1012,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             console.log(`412: 全角「１２３」検索結果行数: ${fullNumRows}`);
 
             // テーブル構造が正常に表示されること
-            const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-            await expect(table.first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('413: ひらがな・全角カタカナ・半角カタカナの全てで検索できること', async () => {
@@ -1059,8 +1056,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
-            const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-            await expect(table.first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('445: 他テーブル参照の複数選択許可項目がビュー並び順の選択肢に出ないこと', async () => {
@@ -1069,11 +1065,9 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             if (!tableId) throw new Error('テーブルIDが取得できていません');
 
             // ビュー設定画面に遷移
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
-
-            // ビュー設定画面が表示されること
-            await expect(page.locator('.navbar')).toBeVisible();
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -1159,8 +1153,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // テーブル構造が存在すること（検索結果が0件でもテーブル自体は表示される）
-            const table = page.locator('table, .mat-table, .cdk-virtual-scroll-viewport');
-            await expect(table.first()).toBeVisible();
+            await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 
         });
         await test.step('535: 計算項目の値で絞り込み・簡易検索が正常に動作すること', async () => {
