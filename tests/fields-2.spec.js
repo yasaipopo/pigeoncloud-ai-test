@@ -306,7 +306,13 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('226: 画像フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -328,9 +334,15 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // 画像フィールド固有: 推奨サイズ表示やオプションが設定可能であること
             // モーダルヘッダーに「画像」が含まれること
-            await expect(modal.locator('.modal-header')).toContainText('画像');
+            await expect(modal.locator('h5')).toContainText('画像');
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
     });
@@ -389,7 +401,13 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             // Yes/No固有: ラベル入力欄が存在すること（boolean-text）
             await expect(modal.locator('input[type="text"]').nth(1)).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('222: Yes/Noフィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -408,11 +426,17 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             const modal = page.locator('.settingModal .modal-content');
             await expect(modal).toBeVisible();
             // モーダルヘッダーに「Yes / No」が含まれること
-            await expect(modal.locator('.modal-header')).toContainText('Yes');
+            await expect(modal.locator('h5')).toContainText('Yes');
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
     });
@@ -471,7 +495,13 @@ test.describe('自動採番フィールド（216系）', () => {
             // 自動採番固有: カウンターリセットボタンが存在すること
             await expect(modal.locator('button:has-text("カウンターをリセット")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
     });
@@ -537,7 +567,13 @@ test.describe('固定テキストフィールド（230系）', () => {
             const froala = modal.locator('[froalaEditor], .fr-element, .fr-box');
             await expect(froala.first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
     });
@@ -594,9 +630,15 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // ファイルフィールドであること（モーダルヘッダーにファイルが含まれる）
-            await expect(modal.locator('.modal-header')).toContainText('ファイル');
+            await expect(modal.locator('h5')).toContainText('ファイル');
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('192: ファイルのZIPアップロード機能が正常に表示されること', async () => {
@@ -758,7 +800,13 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             await expect(modal.locator('label:has-text("通常テキスト")')).toBeVisible();
             await expect(modal.locator('label:has-text("リッチテキスト")')).toBeVisible();
             // モーダルを閉じる（キャンセル）
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('219: 文章複数行（リッチテキスト）フィールドの設定ページが正常に表示されること', async () => {
@@ -783,7 +831,13 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる（キャンセル）
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
     });
@@ -834,7 +888,7 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
             await modal.locator('button:has-text("文字列(一行)")').click();
             await waitForAngular(page);
             // 種類ラジオボタンが表示されること（テキスト/メールアドレス/URL）
-            await expect(modal.locator('label:has-text("テキスト")')).toBeVisible();
+            await expect(modal.locator('label:has-text("テキスト")').first()).toBeVisible();
             await expect(modal.locator('label:has-text("メールアドレス")')).toBeVisible();
             await expect(modal.locator('label:has-text("URL")')).toBeVisible();
             // 項目名入力欄が表示されていること
@@ -842,7 +896,13 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
             // 「値の重複を禁止する」チェックボックスが存在すること
             await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible();
             // モーダルを閉じる（キャンセル）
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
     });
@@ -1004,7 +1064,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-2: メールアドレス種別フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1028,7 +1094,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-3: URL種別フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1052,7 +1124,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-3-1: URLフィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1077,7 +1155,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-4: 数値フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1099,7 +1183,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await expect(modal.locator('label:has-text("整数")')).toBeVisible();
             await expect(modal.locator('label:has-text("小数")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-5: 数値（整数）フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1121,7 +1211,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 単位記号の入力欄が存在すること
             await expect(modal.locator('label:has-text("単位")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-6: 数値（小数）フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1147,7 +1243,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 桁区切り設定が存在すること
             await expect(modal.locator('label:has-text("桁区切り")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-17: 文章(複数行)・通常テキストフィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1195,7 +1297,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await expect(modal.locator('label:has-text("横並び")')).toBeVisible();
             await expect(modal.locator('label:has-text("縦並び")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-8: ラジオボタン種別フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1219,7 +1327,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が存在すること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-9: プルダウン種別（単一選択）フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1245,7 +1359,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が存在すること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-12-1: 年月種別フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1269,7 +1389,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が存在すること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-13: ファイルフィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1288,9 +1414,15 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // ファイルフィールドの設定モーダルであること
-            await expect(modal.locator('.modal-header')).toContainText('ファイル');
+            await expect(modal.locator('h5')).toContainText('ファイル');
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-14: 計算フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1315,7 +1447,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-15: 計算フィールド（整数形式）のフィールド設定ページが正常に表示されること', async () => {
@@ -1339,7 +1477,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 整数/小数のラジオが存在すること（数値選択時）
             await expect(modal.locator('label:has-text("整数")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-16: 計算フィールド（小数形式）のフィールド設定ページが正常に表示されること', async () => {
@@ -1366,7 +1510,13 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
                 await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible();
             }
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').click();
+            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダルが閉じない場合はリロードで強制クリア
+            if (await page.locator('.modal.show').count() > 0) {
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForSelector('.overSetting', { timeout: 5000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
         });
         await test.step('14-19: Yes/Noフィールドのフィールド設定ページが正常に表示されること', async () => {
