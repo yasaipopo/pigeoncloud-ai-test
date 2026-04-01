@@ -397,3 +397,29 @@ MCP Playwrightで実UIを確認しながら1件ずつ具体的なassertion追加
 3. 「保存ボタンクリック後のURL遷移」を待つだけでは不十分。保存が実際にDBに到達したか確認するために、詳細画面で値を再表示する
 
 **対応テスト**: `tests/records.spec.js` の `SAVE-01` ~ `SAVE-04`
+
+---
+
+## テーブル設定ページのUI刷新（2026-04-02発見）
+
+### 変更内容
+テーブル設定ページ（`/admin/dataset/edit/{id}`）のUIが大幅に刷新された。
+
+**旧UI**:
+- フィールド一覧がフラットに表示、各フィールドに`.overSetting`ボタン
+- 102フィールドが全て1ページに表示
+
+**新UI**:
+- 左サイドにタブメニュー（基本設定、メニュー、一覧画面、詳細・編集画面、CSV、ワークフロー、地図設定、その他）
+- フィールド一覧は別タブに移動。`.overSetting`クラスは存在しない
+- `＋項目を追加する`ボタンが下部にある
+
+### 影響範囲
+- fields.spec.js, fields-2.spec.js, fields-3.spec.js, fields-4.spec.js, fields-5.spec.js
+- `.overSetting`セレクターを使う全テスト
+- navigateToFieldPage(), assertFieldPageLoaded(), openFieldEditPanel(), getFieldLabelMap()
+
+### 必要な対応
+1. 新UIのタブ構造を把握（どのタブにフィールド一覧があるか）
+2. `.overSetting` → 新しいフィールド編集セレクターに全面修正
+3. テーブル設定ページ遷移後にタブクリックが必要
