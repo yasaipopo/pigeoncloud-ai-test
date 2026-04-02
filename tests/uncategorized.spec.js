@@ -314,6 +314,11 @@ test.describe('文字列表示設定（145系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('145-01: テキストフィールドの一覧表示文字数設定が正しく動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // レコード一覧ページへ
@@ -382,6 +387,11 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('128: 埋め込みフォーム設定用のテーブル管理ページが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // テーブルページへ（/settingは存在しないURLのため、テーブル一覧ページを使用）
@@ -399,6 +409,11 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
 
         });
         await test.step('129: 公開フォーム設定用の全種類項目テーブルが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // テーブルページへ（/settingは存在しないURLのため、テーブル一覧ページを使用）
@@ -451,6 +466,11 @@ test.describe('列表示幅設定（191系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('191: 列の表示幅をUI上から設定できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
@@ -509,6 +529,11 @@ test.describe('大量データ（211系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('211: 10万件データのテーブルでキャッシュ周りの動作確認', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // 通常件数（5件）でキャッシュ関連ページが表示できることを確認
@@ -559,6 +584,11 @@ test.describe('表示条件設定（250系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('250: 項目削除時に確認モーダルが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -669,6 +699,11 @@ test.describe('権限設定（262系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('262: テーブル権限設定と項目権限設定のUIがテーブル設定ページに存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -714,6 +749,11 @@ test.describe('2段階認証（267系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('267: メール以外のログインIDでは2段階認証が設定できないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // システム設定ページへ
@@ -762,6 +802,11 @@ test.describe('検索機能（270系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('270: 複数値項目の簡易検索と虫眼鏡アイコンからの検索が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
@@ -813,6 +858,11 @@ test.describe('自動採番（273系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('273: 自動採番フィールドの設定モーダルが開き設定欄が存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -961,6 +1011,11 @@ test.describe('日時フォーマット（275系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('275: 日時フィールドの表示フォーマット設定モーダルが開くこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -1042,6 +1097,11 @@ test.describe('循環参照エラー（291系）', () => {
 
     test('UC02: 詳細画面UI', async ({ page }) => {
         await test.step('291: 他テーブル参照フィールドの追加モーダルが利用できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -1119,6 +1179,11 @@ test.describe('一括編集（312系）', () => {
 
     test('UC02: 詳細画面UI', async ({ page }) => {
         await test.step('312: 一括編集モーダルでID選択時に更新対象レコードが確認できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
@@ -1158,6 +1223,11 @@ test.describe('ダッシュボード集計（315系）', () => {
 
     test('UC02: 詳細画面UI', async ({ page }) => {
         await test.step('315: ダッシュボード集計表示時に絞り込み条件が正しく反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // ダッシュボードページへ
@@ -1206,6 +1276,11 @@ test.describe('テーブル削除ロック（349系）', () => {
 
     test('UC03: フィルタ', async ({ page }) => {
         await test.step('349: テーブル設定ページで削除ロック機能のUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
@@ -1287,6 +1362,11 @@ test.describe('ログイン失敗制限（357系）', () => {
 
     test('UC03: フィルタ', async ({ page }) => {
         await test.step('357: ログイン失敗カウントがメールアドレスベースで行われること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/system');
@@ -1320,6 +1400,11 @@ test.describe('メニュー並び替え（361系）', () => {
 
     test('UC03: フィルタ', async ({ page }) => {
         await test.step('361: メニュー並び替えでフォルダ内の多数テーブルが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/dataset');
@@ -1370,6 +1455,11 @@ test.describe('CSVキャンセル（367系）', () => {
 
     test('UC04: CSV操作', async ({ page }) => {
         await test.step('367: CSVアップロード・ダウンロード処理中にキャンセル操作ができること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // CSVログページへ（存在する場合）
@@ -1427,6 +1517,11 @@ test.describe('ヘッダー固定（370系）', () => {
 
     test('UC04: CSV操作', async ({ page }) => {
         await test.step('370: テーブル一覧でヘッダー1行目を固定できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             const tid = tableId || await getAllTypeTableId(page);
@@ -1508,6 +1603,11 @@ test.describe('スマートフォン表示（146系）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('146-01: スマートフォンで選択肢をタップした際にズームされないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // スマートフォンサイズにリサイズ
@@ -1568,6 +1668,11 @@ test.describe('子テーブル（325, 341系）', () => {
 
     test('UC03: フィルタ', async ({ page }) => {
         await test.step('341: 子テーブル設定後にレコード詳細画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`);
@@ -1659,6 +1764,11 @@ test.describe('一覧編集モード（324系）', () => {
 
     test('UC03: フィルタ', async ({ page }) => {
         await test.step('324: 一覧編集モードで編集後に詳細画面で値が消えないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             const tid = tableId || await getAllTypeTableId(page);
@@ -1781,6 +1891,11 @@ test.describe('未実装テスト（todo）', () => {
 
     test('UC01: フィールド設定', async ({ page }) => {
         await test.step('245: 最終更新者項目がテーブルに追加されていること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -1797,6 +1912,11 @@ test.describe('未実装テスト（todo）', () => {
 
     test('UC02: 詳細画面UI', async ({ page }) => {
         await test.step('276: 詳細画面に「前の画面に戻る」ボタンが実装されていること（#issue390）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -1810,6 +1930,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('290: 文章（複数行）項目でEnterキーを押してもページが上部にスクロールしないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -1832,12 +1957,22 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('292: カレンダーページに複数スケジュール登録後も正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await checkPage(page, '/admin/calendar');
 
         });
         await test.step('293: 複数ダッシュボード作成と権限設定が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await checkPage(page, '/admin/dashboard');
@@ -1851,6 +1986,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('294: 同一ユーザーが4端末から同時ログインできること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // 4端末ログインに備えてタイムアウトを延長（ensureLoggedIn×4並列 + goto）
@@ -1876,6 +2016,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('308: 親テーブル編集画面で子テーブルの計算項目がリアルタイムに表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -1889,6 +2034,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('319: SMTP認証設定ページが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await checkPage(page, '/admin/settings/mail');
@@ -1901,6 +2051,11 @@ test.describe('未実装テスト（todo）', () => {
 
     test('UC03: フィルタ', async ({ page }) => {
         await test.step('323: 複数条件フィルターの混合設定が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -1911,6 +2066,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('326: 編集権限なしの場合に編集条件も適用されないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -1921,6 +2081,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('330: グループ並び替え機能が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await checkPage(page, '/admin/reports');
@@ -1930,6 +2095,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('342: 添付ファイルありのテーブルをJSONエクスポート・インポートしてもエラーが発生しないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -1939,6 +2109,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('360: ユーザーテーブルのデフォルト項目の編集不可設定が正しく機能すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
@@ -1959,6 +2134,11 @@ test.describe('未実装テスト（todo）', () => {
 
         });
         await test.step('362: 編集条件が設定された権限でレコード編集ページが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -1993,6 +2173,11 @@ test.describe('未実装テスト（todo）', () => {
 
     test('UC04: CSV操作', async ({ page }) => {
         await test.step('371: メール通知・配信機能のSMTPアップデート後も正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await checkPage(page, '/admin/notifications');
@@ -2534,6 +2719,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('UC02: 詳細画面UI', async ({ page }) => {
         await test.step('320: 項目の複製ボタンが実装されていること（#issue440）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -2549,6 +2739,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('UC03: フィルタ', async ({ page }) => {
         await test.step('352: 計算項目に指定された項目は名称変更・削除が制限されること（#issue494）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -2564,6 +2759,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('UC04: CSV操作', async ({ page }) => {
         await test.step('373: PigeonAI機能のダッシュボードページが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: PigionAIの動作確認
@@ -2579,6 +2779,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('390: 通知設定をテーブル単位で管理する仕様が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: 以前通知設定は、通知設定に対してslack, メアドなどを設定して、さらに個別通知設定／リマインダ設定で、テーブルを設定していましたが、これだと権限設定などで通知設定内のテーブルが１つは権限あって、１つは無いとかになる際に面倒なので、通知設
@@ -2598,6 +2803,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('391: システム設定に「アラートを自動で閉じない」設定が追加されていること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: その他設定に、”アラートを自動で閉じない”という設定を追加
@@ -2612,6 +2822,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('398: 日時項目を手入力する際に、自動で半角英数の入力モードに切り替わるように変更できな（#issue551）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -2624,6 +2839,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('401: ユーザーテーブルに計算項目がある場合のCSVダウンロードで組織名が正しく出力されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: ユーザーテーブルに計算項目があるとき、 csvダウンロードで組織がidになっていたので、修正
@@ -2643,6 +2863,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('402: テーブルコピー時に権限設定グループが独立して管理されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: 今、テーブルAの権限設定を、高度な設定の項目設定も例えばユーザーAに対して行って、 そのテーブルをテーブルBとしてコピーして、高度な設定の項目設定の権限グループを編集すると、テーブルA のグループも変わってしまう問題 このような問題があった
@@ -2662,6 +2887,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('419: ユーザー状態を無効にした後にリロードなしで利用不可表示になること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。リロードしても同じです。ログアウトして、またログインしたら、利用不可です。 そのissues修正完了致しました。テストお願い致します。
@@ -2679,6 +2909,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('420: 項目追加時のドラッグ移動UIが正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: お客様からのご指摘ではなく気づいた点なのですが、項目を追加した時に場所を変更する際の挙動が少しやりづらいので、UI改善につなげていただければ幸いです。 事象：項目をドラッグして移動先へ移動させている途中に、移動可能であることを示す水色の枠が
@@ -2698,6 +2933,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('422: テーブル管理のグループ削除機能が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: テーブル管理→グループ名横の鉛筆ボタンを押したあとの画面（添付画像）の中に、グループの削除ボタンをつけることは可能でしょうか。 こちらですが、一覧画面のグループのところに削除アイコンつけて、削除したら中のテーブルは全部グループの外に出る（グ
@@ -2720,6 +2960,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('UC05: 権限グループ名重複バリデーション', async ({ page }) => {
         await test.step('424: レコード一覧ページが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: https://loftal.slack.com/archives/C05CK6Z7YDQ/p1702920982265599?thread_ts=1701737040.391339&cid=C05CK6Z7YDQ これのテストお願いします
@@ -2739,6 +2984,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('429: リクエストログにテーブル名が記録されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: リクエストログにテーブル名が入るのかのチェック
@@ -2758,6 +3008,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('442: 一括削除後に全選択チェックボックスが自動的に外れること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: 一覧画面で全選択のチェックを行って一括削除を行った際、削除処理後もチェックされたままの状態となっていたので、処理後は全選択のチェックが外れるよう修正。一括更新の際も同様の処理を行うよう修正。
@@ -2777,6 +3032,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('443: CSVのエクスポート・インポート機能が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: https://www.notion.so/csv-6e68e9b4ed004087883138dd0117d2b6
@@ -2792,6 +3052,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('448: 計算項目に「値の重複を禁止する」の機能をつけていただきたいです。（#issue603）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -2804,6 +3069,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('453: ZIPファイルでの画像アップロードが正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: zipでの画像アップロードができないバグがあったので修正
@@ -2819,6 +3089,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('459: フィルタの日付検索で「より大きい」条件が複数日を対象に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修正
@@ -2838,6 +3113,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('460: 関連テーブルの表示条件で異なる項目種類の組み合わせが正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: 関連テーブルの表示条件で、 自分の項目 = 関連テーブル先の項目 と設定すると思いますが、 文字列 = 文字列 や 数値 = 数値、他テーブル = 他テーブル、他テーブル = 文字列、年月 =年月、日時 = 日時や、ルックアップ = 何か 
@@ -2857,6 +3137,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('465: ワークフローの下書き後、編集画面から申請が行えるかのテスト', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: ワークフローの下書き後、編集画面から申請が行えるかのテスト
@@ -2876,6 +3161,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('466: ワークフロー承認済みスキップが組織・項目パターンで正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: 下記スレッドの内容で、 ワークフローの承認済みのワークフローのスキップですが、 組織や項目にも対応したので、テストお願いします！ 組織の一人や、組織の全員など、色々なパターンのテストをお願いします https://loftal.slack.
@@ -2898,6 +3188,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('UC06: CSV', async ({ page }) => {
         await test.step('482: レコード一覧ページが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: https://loftal.slack.com/archives/C04J1D90QJY/p1707550109873849 こちらテストお願いします！ 全件テストには追加いただいてると思いますが、 下記のバグがあって、一旦消していたので
@@ -2917,6 +3212,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('487: 現状の矢印キーでの移動を削除し、ボタンを設置してのレコード遷移機能を実装希望です（#issue738）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
@@ -2928,6 +3228,11 @@ test.describe('追加実装テスト（314-579系）', () => {
 
         });
         await test.step('489: ビューの行色設定が正しく保存・反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // description: ①viewで行に色をつけるの設定後、再度行に色をつけるの設定画面を開いて、正しく条件が保存されていることの確認 ②複数の条件で色をつけて、それぞれ色が変わっていることの確認(全体が一色になっておらず、条件によって色分けされる) ③日時項目の
@@ -4819,6 +5124,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC02: 詳細画面UI', async ({ page }) => {
         await test.step('282: レコード編集画面で値を入力・保存し、詳細画面で正しい値が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -4862,6 +5172,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('283: 「高度な設定」項目権限設定を追加しても編集不可項目の設定が外れないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -4894,6 +5209,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC05: 権限グループ名重複バリデーション', async ({ page }) => {
         await test.step('474: ワークフロー否認/取り下げ後にデータ編集してもWFが正しく切り替わること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -4918,6 +5238,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('475: レコードコピーボタン押下時に確認ダイアログが表示されOKでコピーが実行されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -4957,6 +5282,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC06: CSV', async ({ page }) => {
         await test.step('501: レコードの編集・保存が正しく動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -4981,6 +5311,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('503: グループに所属するテーブル名がサイドメニューで正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5013,6 +5348,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('504: テーブル設定変更後にレコード一覧画面がエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5028,6 +5368,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('508: ルックアップが他テーブル参照でも関連レコード一覧の表示条件が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5054,6 +5399,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('509: 数値が100000000000000以上のとき桁区切りが正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5085,6 +5435,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('519: テーブル設定の変更が正しく保存・反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5102,6 +5457,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('520: ワークフローのAND/OR並行承認で2人目以降の役職選択が正しく保存・表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5128,6 +5488,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('521: 組織未選択時にバリデーションエラーが表示され正しく選択後に再申請でエラーが出ないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5152,6 +5517,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('522: 並行承認AND/ORで同一承認者スキップ有効時にテーブル一覧がエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5167,6 +5537,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC07: フィールド設定', async ({ page }) => {
         await test.step('525: フィールドの追加オプション設定が正しく動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5188,6 +5563,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('526: 全選択時に全ページのデータが対象となり一括削除・一括編集モーダルに件数が正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5220,6 +5600,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('527: テーブル設定変更後に一覧画面とフィールドヘッダーがエラーなく正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5240,6 +5625,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('528: 親テーブル削除権限あり・子テーブル削除権限なしの場合に子テーブル削除が禁止されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5264,6 +5654,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('532: レコードの作成・編集・削除操作が正しく動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5290,6 +5685,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('533: 未ログイン状態の公開フォームからファイル添付して送信できテーブルに反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5317,6 +5717,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('534: 連鎖する他テーブル参照で親カテゴリ選択に応じて子カテゴリの選択肢が絞り込まれること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5345,6 +5750,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('537: ワークフローステータス変更アクション時にカスタム通知内容が正しく送信されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5362,6 +5772,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('541: フィールド設定の変更が一覧画面・詳細画面に正しく反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5391,6 +5806,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('542: テーブルにアイコンを設定した場合にサイドメニューで正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5420,6 +5840,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('543: テーブル設定の変更保存後にレコード一覧画面がエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5441,6 +5866,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('544: フィルタ後に一括編集した場合フィルタ対象のレコードのみが更新されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5472,6 +5902,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC08: テーブル設定', async ({ page }) => {
         await test.step('548: テーブル設定の追加オプション変更が正しく反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5492,6 +5927,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('549: WFステータス変更通知で「申請時」トリガーが申請タイミングのみ発火すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5513,6 +5953,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('550: 他テーブル参照の検索モーダルが正常に表示されキーワード検索でレコードを選択できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5548,6 +5993,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('551: フィルター後の一括削除確認メッセージに正しい件数が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5570,6 +6020,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('553: フィールド設定が正しく保存・反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5596,6 +6051,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('554: フィルタの「いずれかの項目」OR条件で正しく絞り込みが行われること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5624,6 +6084,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('560: フィールド設定変更後に一覧画面・編集画面でフィールドがエラーなく正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5652,6 +6117,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('561: 集計の最大・最小で日付フィールドが選択でき正しく集計されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5675,6 +6145,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('563: フィールド設定変更が正しく保存・反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5697,6 +6172,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('564: 必須設定のファイルフィールドにファイルを添付して保存時にエラーが発生しないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5731,6 +6211,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('565: フィールド設定変更後にテーブル一覧とフィールドヘッダーがエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5751,6 +6236,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('566: 数値フィールドの入力中は桁区切りが非表示でフォーカスアウト後に桁区切りが適用されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5783,6 +6273,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC09: レコード操作', async ({ page }) => {
         await test.step('569: レコード編集操作が正しく動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5807,6 +6302,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('570: 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5840,6 +6340,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('571: フィールド設定変更後に一覧・詳細画面でフィールドがエラーなく正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5869,6 +6374,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('572: パスワードが7桁以上で設定可能でありハイフンも使用できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5903,6 +6413,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('576: 関連レコード一覧の表示・操作が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5935,6 +6450,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('577: WF閲覧権限で承認者=ログインユーザー設定時に後付けユーザーでもレコードを閲覧できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5957,6 +6477,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('578: Excelテンプレートの300行目までの変数式が正しく反映されてダウンロードされること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -5980,6 +6505,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('581: ダッシュボードがエラーなく正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/dashboard');
@@ -6007,6 +6537,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('586: レコードの作成・編集操作が正しく完了しデータが保存されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6029,6 +6564,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('588: WF承認者が無効/削除済みの場合に申請時にエラー表示で取り下げになること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6057,6 +6597,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('589: モバイルでリッチテキストの拡大編集後に前の画面に正常に戻れ編集内容が保存されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6099,6 +6644,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('591: 帳票の一括ダウンロードZIPが正常に動作し選択レコードの帳票がダウンロードできること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6130,6 +6680,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC10: ワークフロー', async ({ page }) => {
         await test.step('593: 申請中レコードを削除した場合にワークフローバッジが正しく更新されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6152,6 +6707,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('594: WF無効テーブルのレコード詳細画面でWF履歴が非表示であること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6178,6 +6738,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('595: 関連レコードのSUM計算結果が親レコードに正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6205,6 +6770,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('598: 一覧画面のカラム幅を最小にしても項目名が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6232,6 +6802,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('602: 計算フィールドの先頭ゼロ付き数値がCSVダウンロードで保持されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6251,6 +6826,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('603: コネクトのWF完了トリガー時に重複禁止エラーが適切に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6271,6 +6851,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('604: テーブル設定変更後にレコード一覧画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6296,6 +6881,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('606: 子テーブルレコード作成直後に最終更新者が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6318,6 +6908,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('608: 複数許可の他テーブル参照フィールドがCSVで表示値出力されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6341,6 +6936,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('609: FTP連携エラー通知にテーブル名が含まれること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6358,6 +6958,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('610: 他テーブル参照の表示項目が空欄の場合バリデーションエラーが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6380,6 +6985,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('612: ビュー設定タブの権限デフォルト設定が変更・保持できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6407,6 +7017,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC11: チャート', async ({ page }) => {
         await test.step('615: チャートの凡例6個以上の場合の表示/非表示設定が機能すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6426,6 +7041,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('617: 全データ選択時の一括削除に赤文字の注意書きが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6467,6 +7087,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('619: 子テーブルCSVダウンロードでテーブル名と親テーブルIDが正しく出力されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6476,6 +7101,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('622: 他テーブル参照の値の絞り込みが全ユーザーで正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6501,6 +7131,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('625: 数値フィールドの小数デフォルト値が正しく表示・保存されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6528,6 +7163,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('626: ユーザーテーブルCSVダウンロードで組織が正しく出力されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // ユーザー管理テーブルを開く
@@ -6547,6 +7187,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('632: テーブル設定変更後にレコード一覧がエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6574,6 +7219,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('633: スペースのみの項目名でもテーブル設定画面で項目が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6590,6 +7240,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('637: 数字のみの項目名でも計算フィールドで正しく参照・計算できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6614,6 +7269,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('638: WF申請フローNo.変更時にステップ番号が正しく切り替わること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6638,6 +7298,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('639: ブラウザタブのタイトルにテーブル名が正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6664,6 +7329,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('641: システムログページにAPIログチャートが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // システム設定のログページを開く
@@ -6689,6 +7359,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC12: テーブル設定', async ({ page }) => {
         await test.step('643: 主キー設定で5項目以上を設定でき正しく保存・動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6710,6 +7385,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('644: テーブルコピーやJSONインポートで行の設定が正しくコピーされること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6728,6 +7408,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('647: 月末日でも相対値「今月」フィルタが正しく動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6750,6 +7435,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('648: パスワードリセットメールにリンクとURL文字列の両方が含まれること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // ログイン画面のパスワードリセットリンクを確認
@@ -6767,6 +7457,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('650: 特定項目更新時通知が手動編集・CSVアップロード両方で送信されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6784,6 +7479,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('651: SMTP設定画面でテストメール送信が成功すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // SMTP設定ページを開く
@@ -6808,6 +7508,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('652: 関連レコードの表示条件が他テーブル参照でもSUM計算が正しく動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6831,6 +7536,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('655: 計算項目の日付フォーマットが帳票出力で正しく反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6844,6 +7554,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('657: 親テーブルの階層参照を子テーブルの計算フィールドで参照できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6861,6 +7576,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('658: 通知設定の通知先に「ログインユーザーのメールアドレス」が選択可能なこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6876,6 +7596,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('659: 相対値「来年度」フィルタが年度開始月に基づいて正しく絞り込まれること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6897,6 +7622,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('661: チャートプレビューの前後切り替えボタンで期間表示が正しく更新されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6917,6 +7647,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC13: テーブル設定', async ({ page }) => {
         await test.step('663: 一括否認・一括削除ボタンの非表示設定が正しく反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6937,6 +7672,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('664: ルックアップで表示した日付がルックアップ先のフォーマットで表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6946,6 +7686,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('665: 他テーブル参照の日時項目で一桁月日のCSV再アップロードがエラーなく完了すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6955,6 +7700,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('666: 子テーブルを含むCSVアップロードで他テーブル参照値が正しく反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6964,6 +7714,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('668: 他テーブル参照の絞り込みで他テーブル参照タイプの表示項目を選択できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -6981,6 +7736,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('669: 画像フィールドでファイルサイズと画素数が正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7008,6 +7768,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('670: メール受信取込機能の設定画面が正常に表示され保存できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // メール受信取込設定ページを開く
@@ -7023,6 +7788,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('671: 大量レコードのCSVダウンロードで重複が発生しないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7041,6 +7811,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('673: WF承認済みスキップが組織・項目条件で正しく動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7063,6 +7838,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('674: Yes/Noフィールドのラベル空白時もCSVダウンロードで値が正しく出力されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7072,6 +7852,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('675: 関連レコード削除時に確認ダイアログが表示され正常に閉じること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7098,6 +7883,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('678: チャートプレビューのページ移動ボタンを押してもエラーが発生しないこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7118,6 +7908,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     test('UC14: ワークフロー', async ({ page }) => {
         await test.step('680: フロー戻し時にスキップ承認者ではなく直前の承認者に戻ること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7140,6 +7935,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('681: 関連レコード一覧の表示条件で他テーブル参照の他テーブル参照が正しく反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7163,6 +7963,11 @@ test.describe('追加実装テスト（282-593系）', () => {
 
         });
         await test.step('682: 子テーブルCSVアップロードで必須項目空欄時にエラーが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7685,6 +8490,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC04: CSV操作', async ({ page }) => {
         await test.step('403: 一覧→詳細画面の左右キー操作が廃止されていること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7719,6 +8529,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC14: ワークフロー', async ({ page }) => {
         await test.step('683: 他テーブル参照フィールドの列ヘッダークリックで正しい順序に並び替えられること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7751,6 +8566,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('685: テーブル権限設定画面で組織条件設定のUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7774,6 +8594,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('686: ビュー設定の「行に色を付ける」UIが存在し設定可能であること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7796,6 +8621,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('687: テーブル設定でCSV主キー設定の項目が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7821,6 +8651,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('688: CSVアップロード履歴ページが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7836,6 +8671,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('691: 通知設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7849,6 +8689,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('692: 権限設定画面にログ権限の項目が存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7869,6 +8714,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('694: テーブル設定の保存時にバリデーションエラーが正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7882,6 +8732,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('695: テーブル設定画面で関連レコード一覧の表示条件設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7900,6 +8755,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC15: 通知設定', async ({ page }) => {
         await test.step('698: 通知設定画面でレコード作成時通知とリマインダの設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7917,6 +8777,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('699: テーブル設定画面で項目削除ボタンが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7934,6 +8799,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('700: テーブル設定で計算項目の自動更新設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7949,6 +8819,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('701: CSV UP/DL履歴ページが正常に表示されること（複数値空欄テスト用）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7962,6 +8837,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('703: RPA（コネクト）設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7975,6 +8855,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('704: テーブル一覧画面で一括削除UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -7991,6 +8876,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('705: レコード詳細画面で関連レコード一覧が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8012,6 +8902,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('706: テーブル設定画面で上部メモ設定が存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8033,6 +8928,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('708: レコード詳細画面が正常に表示され関連レコードエリアが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8053,6 +8953,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('709: テーブル設定画面に帳票設定へのリンクが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8066,6 +8971,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('710: テーブル設定画面と一覧画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8086,6 +8996,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('711: レコード追加画面で他テーブル参照フィールドが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8105,6 +9020,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC16: 権限設定', async ({ page }) => {
         await test.step('713: テーブル権限設定画面にCSV権限の項目が存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8126,6 +9046,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('715: 支払い設定ページが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/setting/payment');
@@ -8138,6 +9063,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('716: テーブル設定変更後にフィールドヘッダーが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8154,6 +9084,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('717: レコード詳細画面でコメント入力UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8176,6 +9111,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('719: ビュー設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8197,6 +9137,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('720: テーブル設定で計算項目設定のUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8210,6 +9155,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('721: レコード追加画面で他テーブル参照プルダウンが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8226,6 +9176,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('722: レコード詳細画面に関連レコード一覧のUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8244,6 +9199,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('724: テーブル設定画面でフィールド編集モーダルが開くこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8257,6 +9217,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('725: カレンダービュー切り替えボタンが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8274,6 +9239,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('726: テーブル設定画面が正常に表示されること（地図設定用）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8287,6 +9257,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('727: 一覧画面でng-selectコンポーネントが正常にレンダリングされること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8303,6 +9278,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC17: 通知設定', async ({ page }) => {
         await test.step('730: 通知設定一覧画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8314,6 +9294,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('731: CSVアップロード画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8330,6 +9315,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('732: ワークフロー設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8351,6 +9341,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('733: 権限設定画面で編集・削除権限の条件設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8370,6 +9365,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('735: テーブル設定で画像フィールドの設定モーダルが開くこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8391,6 +9391,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('736: テーブル設定のCSVアップロード主キー設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8410,6 +9415,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('737: 数値フィールドの設定画面で桁区切り設定が存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8423,6 +9433,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('738: テーブル設定画面でワークフローと帳票の設定が存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8436,6 +9451,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('740: テーブル管理画面のメニュー並び替えが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/dataset');
@@ -8450,6 +9470,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('741: ユーザー管理画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/list/admin');
@@ -8462,6 +9487,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('742: コネクト設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/connect');
@@ -8474,6 +9504,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('743: レコード詳細画面で住所フィールドの表示を確認すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8495,6 +9530,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC18: フィールド設定', async ({ page }) => {
         await test.step('745: レコード新規作成画面でYes/Noフィールドが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8511,6 +9551,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('746: テーブル設定でフィールド設定モーダルが開くこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8524,6 +9569,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('747: テーブル設定保存後にレコード一覧が正常表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8537,6 +9587,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('748: テーブル権限設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8556,6 +9611,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('750: レコード詳細画面で関連レコードエリアが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8574,6 +9634,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('752: テーブル設定で日時フィールドの設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8587,6 +9652,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('753: テーブル一覧画面でヘッダークリックによるソートが動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8609,6 +9679,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('754: 通知設定画面でリマインド通知の条件設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8620,6 +9695,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('756: ワークフロー設定画面でフロー条件設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8638,6 +9718,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('757: レコード詳細画面の関連レコード一覧が正常表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8656,6 +9741,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('758: テーブル設定変更後にフィールドヘッダーがエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8671,6 +9761,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('759: テーブル設定で帳票テンプレート設定エリアが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8687,6 +9782,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC19: カレンダー', async ({ page }) => {
         await test.step('762: カレンダービュー切り替えUIが正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8698,6 +9798,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('763: テーブル設定画面で関連レコード表示条件の設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8709,6 +9814,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('764: テーブル設定変更後にレコード一覧がエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8722,6 +9832,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('765: テーブル設定で集計項目の条件設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8733,6 +9848,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('767: 複数の他テーブル参照フィールドを含むテーブルが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8746,6 +9866,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('768: ユーザー管理画面でユーザー編集が可能であること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/list/admin');
@@ -8762,6 +9887,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('769: テーブル一覧画面でレコードデータが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8775,6 +9905,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('772: 一覧画面でUIボタンが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8791,6 +9926,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('774: テーブル設定画面とレコード操作が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8808,6 +9948,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('775: カレンダー切り替えUIが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8819,6 +9964,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('776: 通知設定画面でメールテンプレート設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8830,6 +9980,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('777: レコード追加画面で日時フィールドが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8849,6 +10004,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC20: テーブル設定', async ({ page }) => {
         await test.step('779: テーブル設定画面で子テーブルの配置設定が存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8862,6 +10022,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('780: レコード編集画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8887,6 +10052,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('781: テーブル設定画面でカレンダー設定のUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8898,6 +10068,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('782: レコード詳細画面で画像フィールドが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8916,6 +10091,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('785: ワークフロー設定画面でコメント通知設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8934,6 +10114,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('786: レコード編集画面で数値フィールドの入力UIが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8950,6 +10135,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('787: レコード詳細画面でリッチテキストフィールドが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8968,6 +10158,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('788: テーブル設定の追加オプションでCSV設定が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -8986,6 +10181,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('790: テーブル一覧画面で一括操作UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9001,6 +10201,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('791: テーブル設定で数値フィールドの設定モーダルが開くこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9014,6 +10219,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('792: テーブル設定変更後にレコード一覧がエラーなく正常表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9027,6 +10237,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('793: その他設定画面でロック自動解除時間の設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/setting');
@@ -9045,6 +10260,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC21: フィルタ・集計', async ({ page }) => {
         await test.step('795: ビュー設定の行色条件設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9063,6 +10283,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('796: レコード詳細画面で子テーブルの表示を確認すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9081,6 +10306,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('797: テーブル一覧でフィールドヘッダーとデータが正常表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9100,6 +10330,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('798: テーブル設定でファイル項目の「ブラウザで表示」設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9111,6 +10346,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('800: テーブル設定で一覧の表示幅設定が保存後に反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9129,6 +10369,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('801: テーブル設定画面でフィールド削除UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9140,6 +10385,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('802: ワークフロー設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9158,6 +10408,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('803: テーブル管理画面にコピー機能のUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/dataset');
@@ -9168,6 +10423,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('805: テーブル設定の変更が正しく保存されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9181,6 +10441,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('806: ダッシュボード画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/dashboard');
@@ -9191,6 +10456,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('807: テーブル設定変更後にレコード一覧がエラーなく正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9204,6 +10474,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('809: テーブル権限設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9225,6 +10500,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC22: ワークフロー', async ({ page }) => {
         await test.step('811: ワークフロー設定画面で子テーブル関連設定が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9243,6 +10523,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('812: テーブル設定で公開フォーム設定のUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9261,6 +10546,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('813: カレンダー設定画面でフィールド選択肢が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9272,6 +10562,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('814: レコード詳細画面で関連レコード一覧の項目幅が調整可能であること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9290,6 +10585,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('816: 通知設定画面で追加の通知先対象項目設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9301,6 +10601,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('817: テーブル設定で帳票設定のUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9312,6 +10617,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('818: API設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/setting/api');
@@ -9324,6 +10634,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('819: テーブル設定変更後にフィールドヘッダーとデータがエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9338,6 +10653,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('820: 通知設定画面でファイル項目を通知内容に含める設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9349,6 +10669,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('822: チャート設定画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9368,6 +10693,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('823: テーブル一覧画面でフィルタUIが正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9384,6 +10714,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('824: フィルタ設定画面で相対値の条件設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9395,6 +10730,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('825: リクエストログ画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/log/request');
@@ -9410,6 +10750,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('UC23: 帳票', async ({ page }) => {
         await test.step('827: テーブル設定で帳票テンプレートの設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9421,6 +10766,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('828: テーブル一覧画面で全フィールドが正常表示されること（ルックアップ確認用）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9435,6 +10785,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('829: テーブル設定変更後の一覧画面が正常に表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9448,6 +10803,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('830: テーブル一覧画面でフィルタ機能が正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9463,6 +10823,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('832: テーブル一覧画面で一括操作のチェックボックスが表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9478,6 +10843,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('833: テーブル一覧画面でカレンダービューとフィルタUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9489,6 +10859,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('834: テーブル設定で日時フィールドの表示フォーマット設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9500,6 +10875,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('835: レコード新規作成画面でフィールドの必須マーク表示を確認すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9516,6 +10896,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('837: テーブル一覧画面でCSVダウンロードUIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
@@ -9532,6 +10917,11 @@ test.describe('追加実装テスト（683-838系）', () => {
 
         });
         await test.step('838: テーブル設定で公開フォームの設定UIが存在すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();

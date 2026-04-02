@@ -384,6 +384,11 @@ test.describe('チャート・集計 - オプション設定', () => {
 
     test('CC01: チャート', async ({ page }) => {
         await test.step('105-01: チャートオプション「累積(時系列の場合)」で全グラフ種類が正常表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             // ALLテストテーブルに直接遷移
@@ -452,6 +457,11 @@ test.describe('チャート・集計 - オプション設定', () => {
 
         });
         await test.step('105-02: チャートオプション「過去分も全て加算」で棒グラフが正常表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000); // チャート操作は時間がかかるため5分に延長
@@ -872,6 +882,11 @@ test.describe('カレンダー - ビュー表示', () => {
 
     test('CC02: カレンダー', async ({ page }) => {
         await test.step('114-01: カレンダーの週表示ビューがエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -904,6 +919,11 @@ test.describe('カレンダー - ビュー表示', () => {
 
         });
         await test.step('114-02: カレンダーの日表示ビューがエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -937,6 +957,11 @@ test.describe('カレンダー - ビュー表示', () => {
 
     test('CC07: カレンダー', async ({ page }) => {
         await test.step('214: カレンダーFROM/TO設定で月/週/日ビューが想定通り表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -988,6 +1013,11 @@ test.describe('カレンダー - ビュー表示', () => {
 
         });
         await test.step('215: カレンダーでDrag&Dropによる予約情報移動が想定通り動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -1128,6 +1158,11 @@ test.describe('集計 - 基本機能', () => {
 
     test('CC03: 集計', async ({ page }) => {
         await test.step('15-1: 集計設定「全員に表示」で他ユーザーからも集計結果が確認できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -1197,6 +1232,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('15-2: 集計設定「自分のみ表示」で設定したユーザーのみ集計結果が確認できること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -1259,6 +1299,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('23-1: 集計設定「ダッシュボードに表示」でダッシュボードにテーブル形式で表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -1324,6 +1369,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('65-1: 集計絞り込みで条件「空ではない」を設定した場合に想定通りの集計結果が表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -1375,6 +1425,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('118-01: 集計フィルタで日付の相対値（今日〜来年）検索が想定通りに動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -1447,6 +1502,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('151-1: 集計の絞り込みで日時項目の相対値（今日〜来年）が想定通りの絞り込みとなること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -1532,6 +1592,11 @@ test.describe('集計 - 基本機能', () => {
 
     test('CC05: 集計', async ({ page }) => {
         await test.step('85-2: 集計の絞り込み・集計に対する絞り込み・ソート順設定が保存されて想定通り表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -1574,6 +1639,11 @@ test.describe('集計 - 基本機能', () => {
 
     test('CC06: 集計 ビュー作成', async ({ page }) => {
         await test.step('87-1: 集計設定「行に色を付ける」（条件1つ）が設定通りに色がつくこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(105000); // 集計UI操作は時間がかかるため5分に延長
@@ -1612,6 +1682,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('87-2: 集計設定「行に色を付ける」（条件複数）が設定通りに色がつくこと', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -1653,6 +1728,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('110-01: 集計で整数フィールドの「平均」を表示した場合、小数第一位までの表示となること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000); // 集計UI操作は時間がかかるため5分に延長
@@ -1696,6 +1776,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('110-02: 集計で少数フィールドの「平均」を表示した場合、少数の桁数+1桁の表示となること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -1751,6 +1836,11 @@ test.describe('集計 - 基本機能', () => {
 
         });
         await test.step('120-01: 集計でテーブル項目を使用した集計結果がエラーなく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
 
@@ -3167,6 +3257,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('CC08: 文字列', async ({ page }) => {
         await test.step('248: カレンダー表示で時間が隠れないこと（バグ修正確認 PR#267）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(180000);
@@ -3214,6 +3309,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('256: 集計の数字に桁区切りカンマが表示されること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3247,6 +3347,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('268: カレンダーDrag&Dropでのデータ反映が正常に動作すること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3276,6 +3381,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('271: カレンダーの週・日表示で画像表示が正常であること（PR#57修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3312,6 +3422,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('289: チャートの「合計」集計でグラフが正常に表示されること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3358,6 +3473,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('303: ダッシュボードのチャート・フィルタ配置変更が保存されること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3395,6 +3515,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('307: カレンダー表示で日付が消えないこと（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3419,6 +3544,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('318: カレンダーの時間表示がHH:MM形式であること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3455,6 +3585,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('339: チャート累積棒グラフで操作月以降のデータが0にならないこと（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3509,6 +3644,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('346: カレンダーテーブル間遷移時にカレンダー表示が正しく切り替わること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3544,6 +3684,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('CC09: 文字列', async ({ page }) => {
         await test.step('353: 子テーブルでカレンダー表示設定が可能であること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(255000);
@@ -3576,6 +3721,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('366: ユーザー管理の権限設定で「Googleカレンダー連携」が表示されないこと（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3609,6 +3759,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('376: 絞り込み条件に「今年度」「来年度」の相対値が選択できること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3657,6 +3812,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('399: クロス集計で複数値の他テーブル参照の集計結果が表示されること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3692,6 +3852,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('407: チャートの上部ラベルが「年度」表示になること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3733,6 +3898,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('428: チャートでデータ0件の項目が正しく処理されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3751,6 +3921,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('456: 絞り込みの相対値「今年度」で正しい期間が表示されること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3809,6 +3984,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('478: カレンダー表示でnullの予定を非表示にできること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3828,6 +4008,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('491: ダッシュボードのチャート・フィルタに歯車マークが適切に表示されること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3845,6 +4030,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('523: カレンダーフィルタの予定表示が正常に動作すること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3865,6 +4055,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('616: チャートに並び替え（並び順）タブが存在すること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3892,6 +4087,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('631: 集計設定で開始月の設定が可能であること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3915,6 +4115,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('640: チャート・集計の相対値で≪≫ボタンが年度単位で動作すること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3965,6 +4170,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('676: カレンダー表示で簡易検索後のフィルタ条件が正しく設定されること（バグ修正確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -3993,6 +4203,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('677: カレンダー表示で曜日・日付の背景色設定ができること（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -4025,6 +4240,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('CC10: 追加実装', async ({ page }) => {
         await test.step('689: 集計設定で開始月が設定可能であること（再確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(75000);
@@ -4046,6 +4266,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('714: チャート設定の期間単位に「全て」の選択肢が存在しないこと（機能改善確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -4080,6 +4305,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('770: 集計設定で開始月が設定可能であること（追加確認）', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -4104,6 +4334,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('UC16: カレンダー', async ({ page }) => {
         await test.step('725: カレンダーで先の月にレコード登録後、カレンダーが登録した月のまま維持されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await ensureCalendarView(page);
@@ -4137,6 +4372,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('UC19: カレンダー', async ({ page }) => {
         await test.step('775: カレンダーで予定登録キャンセル・削除後も操作していた月のまま表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await ensureCalendarView(page);
@@ -4181,6 +4421,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
         });
         await test.step('778: 相対日時フィルタで月をまたぐデータが1つのグラフにまとまって表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
@@ -4243,6 +4488,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('UC23: カレンダーフィルタ', async ({ page }) => {
         await test.step('833: カレンダーでフィルタ切り替えが即座に反映されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await ensureCalendarView(page);
@@ -4277,6 +4527,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('UC02: クロス集計の複数値他テーブル参照', async ({ page }) => {
         await test.step('316: クロス集計で複数値他テーブル参照のデータ項目2が正しく表示されること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await navigateToAllTypeTable(page);
@@ -4312,6 +4567,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('UC10: ダッシュボードのチャート凡例スクロール', async ({ page }) => {
         await test.step('614: ダッシュボードのチャートで凡例が多い場合にグラフ部分がスクロール可能であること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -4331,6 +4591,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
 
     test('UC20: 集計結果の並び替え', async ({ page }) => {
         await test.step('783: 集計結果のヘッダークリックで並び替えが正常に動作すること', async () => {
+            // モーダルが残っていたらリロード
+            if (await page.locator(".modal.show").count() > 0) {
+                await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
+                await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
+            }
             const STEP_TIME = Date.now();
 
             await navigateToAllTypeTable(page);
