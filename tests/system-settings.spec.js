@@ -121,14 +121,15 @@ async function closeTemplateModal(page) {
  * セッション切れ（login_max_devices等）対策
  */
 async function gotoWithSessionRecovery(page, url) {
-    await page.goto(url);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
-    if (page.url().includes('/admin/login')) {
+    if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
         console.log('[gotoWithSessionRecovery] セッション切れ検出。再ログイン後に再遷移します。');
         await login(page).catch(() => {});
-        await page.goto(url);
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
     }
+    await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
 }
 
 /**
