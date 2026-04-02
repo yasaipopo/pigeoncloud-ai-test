@@ -204,7 +204,15 @@ async function navigateToAllTypeTable(page) {
  */
 async function openActionMenu(page) {
     // ボタンが表示されるまで待機
-    await page.waitForSelector('button.dropdown-toggle', { timeout: 8000 }).catch(() => {});
+    // dropdown-toggleが表示されるまで待機（テーブル一覧のAngular描画完了が必要）
+    let ddFound = await page.waitForSelector('button.dropdown-toggle', { timeout: 15000 }).catch(() => null);
+    if (!ddFound) {
+        // リロードして再試行
+        await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+        await page.waitForTimeout(3000);
+        await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
+    }
     // 帳票ではないdropdown-toggleボタンを順番に試す（集計/チャートが含まれるメニューを探す）
     const buttons = await page.locator('button.dropdown-toggle').all();
     for (const btn of buttons) {
@@ -494,8 +502,8 @@ test.describe('チャート - 基本機能', () => {
             await waitForAngular(page);
 
             // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 絞り込みタブをクリック
             const filterTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /絞り込み/ }).first();
@@ -554,8 +562,8 @@ test.describe('チャート - 基本機能', () => {
             await waitForAngular(page);
 
             // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 絞り込みタブをクリック
             const filterTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /絞り込み/ }).first();
@@ -745,8 +753,8 @@ test.describe('チャート - 基本機能', () => {
             await waitForAngular(page);
 
             // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 絞り込みタブをクリック
             const filterTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /絞り込み/ }).first();
@@ -813,8 +821,8 @@ test.describe('チャート - 基本機能', () => {
             await waitForAngular(page);
 
             // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 「デフォルト設定」タブを探す
             const defaultTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /デフォルト設定/ }).first();
@@ -874,8 +882,8 @@ test.describe('チャート - 基本機能', () => {
             await waitForAngular(page);
 
             // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 「行に色を付ける」タブを探す（ビューの場合のみ表示される）
             const colorTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /行に色を付ける/ }).first();
@@ -929,8 +937,8 @@ test.describe('チャート - 基本機能', () => {
             await waitForAngular(page);
 
             // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 「行に色を付ける」タブを探す（ビューの場合のみ表示される）
             const colorTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /行に色を付ける/ }).first();

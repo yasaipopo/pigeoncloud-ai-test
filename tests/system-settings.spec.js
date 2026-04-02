@@ -289,6 +289,19 @@ async function getAdminSetting(page) {
 // =============================================================================
 test.describe('テーブル定義一覧（ALLテストテーブル不要）', () => {
 
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(180000);
+        const env = await createTestEnv(browser, { withAllTypeTable: false });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        await env.context.close();
+        console.log(`[system-settings-1] 自己完結環境: ${BASE_URL}`);
+    });
+
     test.beforeEach(async ({ page }) => {
         test.setTimeout(120000);
         await login(page);
