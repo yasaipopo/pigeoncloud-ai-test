@@ -3,9 +3,8 @@
 /**
  * spec自己完結型テスト環境作成ヘルパー
  *
- * 各specのbeforeAllで呼び出し、自分専用のテナント環境を作成する。
- * create-trial APIで環境作成。with_all_type_table=trueが使えればテーブル同時作成。
- * 504/失敗時はフォールバックでdebug/create-all-type-tableを使用。
+ * create-trial API（with_all_type_table: true）で環境+ALLテストテーブル+VIEWを一括作成。
+ * domain省略でPHP側自動生成。リトライ付き。
  */
 
 const path = require('path');
@@ -13,29 +12,6 @@ const path = require('path');
 const ADMIN_BASE_URL = process.env.ADMIN_BASE_URL || 'https://ai-test.pigeon-demo.com';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.TEST_PASSWORD || '';
-
-/**
- * create-trial APIを呼ぶ（504対策付き）
- */
-async function callCreateTrial(adminPage, body) {
-    return await adminPage.evaluate(async (b) => {
-        try {
-            const r = await fetch('/api/admin/create-trial', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify(b),
-                credentials: 'include',
-            });
-            if (!r.ok) {
-                const text = await r.text().catch(() => '');
-                return { error: true, status: r.status, message: text.substring(0, 200) };
-            }
-            return await r.json();
-        } catch (e) {
-            return { error: true, message: e.message };
-        }
-    }, body);
-}
 
 async function createTestEnv(browser, options = {}) {
     const { withAllTypeTable = true } = options;
@@ -56,36 +32,46 @@ async function createTestEnv(browser, options = {}) {
         throw new Error(`管理画面ログイン失敗: ${e.message}`);
     }
 
-    // 2. create-trial API（domain省略でPHP側自動生成 — DB名衝突回避）
+    // 2. create-trial（リトライ2回）
+    // domain省略 → PHP側で短いランダム名を自動生成（504リスク低減）
+    // with_all_type_table=true → ALLテストテーブル+VIEW同時作成+table_id返却
     let baseUrl, password, tableId = null;
-    try {
-        // まず with_all_type_table=true で試行（テーブル+VIEW同時作成）
-        let result = withAllTypeTable
-            ? await callCreateTrial(adminPage, { email: 'admin', with_all_type_table: true })
-            : await callCreateTrial(adminPage, { email: 'admin' });
+    const body = { email: 'admin' };
+    if (withAllTypeTable) body.with_all_type_table = true;
 
-        // 失敗（504/500/エラー）時はwith_all_type_tableなしでリトライ
-        if (!result.url || !result.pw) {
-            if (withAllTypeTable) {
-                console.log('[createTestEnv] with_all_type_table付きで失敗、なしでリトライ');
+    for (let attempt = 1; attempt <= 2; attempt++) {
+        const result = await adminPage.evaluate(async (b) => {
+            try {
+                const r = await fetch('/api/admin/create-trial', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify(b),
+                    credentials: 'include',
+                });
+                if (!r.ok) return { error: true, status: r.status };
+                return await r.json();
+            } catch (e) {
+                return { error: true, message: e.message };
             }
-            result = await callCreateTrial(adminPage, { email: 'admin' });
-        }
+        }, body);
 
-        if (!result.url || !result.pw) {
-            throw new Error(`create-trial失敗: ${JSON.stringify(result).substring(0, 200)}`);
+        if (result.url && result.pw) {
+            baseUrl = result.url;
+            password = result.pw;
+            tableId = result.table_id || null;
+            break;
         }
-        baseUrl = result.url;
-        password = result.pw;
-        if (result.table_id) {
-            tableId = result.table_id;
-            console.log(`[createTestEnv] 環境+テーブル同時作成完了: ${baseUrl}, tableId: ${tableId}`);
-        } else {
-            console.log(`[createTestEnv] 環境作成完了: ${baseUrl}`);
-        }
-    } finally {
-        await adminContext.close();
+        console.log(`[createTestEnv] create-trial attempt ${attempt} 失敗:`, JSON.stringify(result).substring(0, 100));
+        if (attempt < 2) await adminPage.waitForTimeout(3000);
     }
+
+    await adminContext.close();
+
+    if (!baseUrl || !password) {
+        throw new Error('create-trial が2回とも失敗');
+    }
+
+    console.log(`[createTestEnv] 環境作成完了: ${baseUrl}${tableId ? ', tableId: ' + tableId : ''}`);
 
     // 3. 新環境にログイン
     const email = 'admin';
@@ -103,34 +89,6 @@ async function createTestEnv(browser, options = {}) {
     const agentNum = process.env.AGENT_NUM || '1';
     const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
     await context.storageState({ path: storageStatePath });
-    console.log(`[createTestEnv] storageState更新: ${storageStatePath}`);
-
-    // 4. tableIdが未取得の場合フォールバック（debug/create-all-type-table + ポーリング）
-    if (withAllTypeTable && !tableId) {
-        console.log('[createTestEnv] tableId未取得、debug APIでフォールバック');
-        page.evaluate(async () => {
-            fetch('/api/admin/debug/create-all-type-table', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: '{}', credentials: 'include',
-            }).catch(() => {});
-        }).catch(() => {});
-        for (let i = 0; i < 12; i++) {
-            await page.waitForTimeout(5000);
-            const status = await page.evaluate(async () => {
-                try {
-                    const res = await fetch('/api/admin/debug/status', { credentials: 'include' });
-                    return res.json();
-                } catch { return { all_type_tables: [] }; }
-            });
-            const table = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
-            if (table) {
-                tableId = table.table_id || table.id;
-                console.log(`[createTestEnv] フォールバック完了: tableId=${tableId}`);
-                break;
-            }
-        }
-    }
 
     return { baseUrl, email, password, tableId, context, page };
 }
