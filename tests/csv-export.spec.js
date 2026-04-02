@@ -337,8 +337,17 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
     // クリーンアップ: 不要（global共有テーブルはテナントごと破棄される）
     // =========================================================================
 
-    test.beforeEach(async ({}, testInfo) => {
+    test.beforeEach(async ({ page }, testInfo) => {
             testInfo.setTimeout(180000);
+            // fixtureのpageは古いstorageStateのため新環境に明示的ログイン
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
+            await closeTemplateModal(page);
         });
 
     test('CE01: CSVダウンロード', async ({ page }) => {
