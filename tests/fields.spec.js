@@ -385,7 +385,7 @@ test.describe('フィールド - 日時（101）', () => {
             await waitForAngular(page);
 
             // フィールド編集パネル/モーダルが開くことを確認
-            const editPanel = page.locator('.modal.show, .field-edit-panel, .panel-body, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, .panel-body, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
             // 「デフォルトで現在日時(時刻)をセット」のチェックボックスを探す
@@ -400,7 +400,7 @@ test.describe('フィールド - 日時（101）', () => {
             }
 
             // 「更新する」ボタンをクリック
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await expect(updateBtn).toBeVisible();
             await updateBtn.click();
             await waitForAngular(page);
@@ -428,11 +428,11 @@ test.describe('フィールド - 日時（101）', () => {
             await waitForAngular(page);
 
             // 編集パネルが開くことを確認
-            const editPanel = page.locator('.modal.show, .field-edit-panel, .panel-body, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, .panel-body, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
             // 「更新する」ボタンをクリック（設定保存のみ確認）
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await expect(updateBtn).toBeVisible();
             await updateBtn.click();
             await waitForAngular(page);
@@ -460,11 +460,11 @@ test.describe('フィールド - 日時（101）', () => {
             await waitForAngular(page);
 
             // 編集パネルが開くことを確認
-            const editPanel = page.locator('.modal.show, .field-edit-panel, .panel-body, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, .panel-body, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
             // 「更新する」ボタンをクリック
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await expect(updateBtn).toBeVisible();
             await updateBtn.click();
             await waitForAngular(page);
@@ -492,11 +492,11 @@ test.describe('フィールド - 日時（101）', () => {
             await waitForAngular(page);
 
             // 編集パネルが開くことを確認
-            const editPanel = page.locator('.modal.show, .field-edit-panel, .panel-body, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, .panel-body, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
             // 「更新する」ボタンをクリック
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await expect(updateBtn).toBeVisible();
             await updateBtn.click();
             await waitForAngular(page);
@@ -769,7 +769,7 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             await waitForAngular(page);
 
             // 編集パネルが表示されること
-            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
             // レイアウト設定（列数）のセレクトが存在するか確認
@@ -779,7 +779,7 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             }
 
             // 更新ボタンをクリック
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await updateBtn.click();
             await waitForAngular(page);
 
@@ -803,10 +803,10 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             await selectField.click();
             await waitForAngular(page);
 
-            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await updateBtn.click();
             await waitForAngular(page);
 
@@ -830,10 +830,10 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             await multiSelectField.click();
             await waitForAngular(page);
 
-            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await updateBtn.click();
             await waitForAngular(page);
 
@@ -857,10 +857,10 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             await imageField.click();
             await waitForAngular(page);
 
-            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await updateBtn.click();
             await waitForAngular(page);
 
@@ -884,10 +884,10 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             await fileField.click();
             await waitForAngular(page);
 
-            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await updateBtn.click();
             await waitForAngular(page);
 
@@ -911,10 +911,10 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             await refField.click();
             await waitForAngular(page);
 
-            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await updateBtn.click();
             await waitForAngular(page);
 
@@ -938,10 +938,10 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             await calcField.click();
             await waitForAngular(page);
 
-            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await updateBtn.click();
             await waitForAngular(page);
 
@@ -965,10 +965,10 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             await relField.click();
             await waitForAngular(page);
 
-            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+            const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
             await expect(editPanel).toBeVisible();
 
-            const updateBtn = page.locator('button:has-text("更新する")').first();
+            const updateBtn = page.locator('button:has-text("変更する")').first();
             await updateBtn.click();
             await waitForAngular(page);
 
@@ -1669,7 +1669,7 @@ test.describe('項目設定（115, 116系）', () => {
                 await waitForAngular(page);
 
                 // 編集パネルが表示されること
-                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
                 await expect(editPanel).toBeVisible();
 
                 // 「他の項目で値の絞り込みを行う」設定を確認
@@ -1700,7 +1700,7 @@ test.describe('項目設定（115, 116系）', () => {
                 await refField.click();
                 await waitForAngular(page);
 
-                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
                 await expect(editPanel).toBeVisible();
             }
 
@@ -1733,7 +1733,7 @@ test.describe('項目設定（115, 116系）', () => {
                 }
 
                 // 更新ボタン
-                const updateBtn = page.locator('button:has-text("更新する")').first();
+                const updateBtn = page.locator('button:has-text("変更する")').first();
                 if (await updateBtn.count() > 0) {
                     await updateBtn.click();
                     await waitForAngular(page);
@@ -1810,7 +1810,7 @@ test.describe('項目設定（115, 116系）', () => {
                 await refField.click();
                 await waitForAngular(page);
 
-                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
                 await expect(editPanel).toBeVisible();
 
                 // ルックアップ/項目のコピー設定を確認
@@ -1841,7 +1841,7 @@ test.describe('項目設定（115, 116系）', () => {
                 await numField.click();
                 await waitForAngular(page);
 
-                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
                 await expect(editPanel).toBeVisible();
 
                 // 桁区切り設定を確認
@@ -1878,7 +1878,7 @@ test.describe('項目設定（115, 116系）', () => {
                 await multiSelectField.click();
                 await waitForAngular(page);
 
-                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
                 await expect(editPanel).toBeVisible();
 
                 // 選択肢の制限（最小/最大）設定を確認
@@ -1888,7 +1888,7 @@ test.describe('項目設定（115, 116系）', () => {
                 }
 
                 // 更新ボタンで保存
-                const updateBtn = page.locator('button:has-text("更新する")').first();
+                const updateBtn = page.locator('button:has-text("変更する")').first();
                 await updateBtn.click();
                 await waitForAngular(page);
             }
@@ -2631,7 +2631,7 @@ test.describe('選択肢制限・フィールド追加（FD04）', () => {
                 await multiSelectField.click();
                 await waitForAngular(page);
 
-                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
                 await expect(editPanel).toBeVisible();
 
                 // 種類をプルダウンに変更
@@ -2642,7 +2642,7 @@ test.describe('選択肢制限・フィールド追加（FD04）', () => {
                 }
 
                 // 更新ボタン
-                const updateBtn = page.locator('button:has-text("更新する")').first();
+                const updateBtn = page.locator('button:has-text("変更する")').first();
                 await updateBtn.click();
                 await waitForAngular(page);
             }
@@ -2667,7 +2667,7 @@ test.describe('選択肢制限・フィールド追加（FD04）', () => {
                 await multiSelectField.click();
                 await waitForAngular(page);
 
-                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
                 await expect(editPanel).toBeVisible();
 
                 // 選択肢の制限を空にする（最小・最大フィールドをクリアする）
@@ -2680,7 +2680,7 @@ test.describe('選択肢制限・フィールド追加（FD04）', () => {
                     await maxInput.fill('');
                 }
 
-                const updateBtn = page.locator('button:has-text("更新する")').first();
+                const updateBtn = page.locator('button:has-text("変更する")').first();
                 await updateBtn.click();
                 await waitForAngular(page);
             }
@@ -2705,10 +2705,10 @@ test.describe('選択肢制限・フィールド追加（FD04）', () => {
                 await multiSelectField.click();
                 await waitForAngular(page);
 
-                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '更新する' }).first();
+                const editPanel = page.locator('.modal.show, .field-edit-panel, form').filter({ hasText: '変更する' }).first();
                 await expect(editPanel).toBeVisible();
 
-                const updateBtn = page.locator('button:has-text("更新する")').first();
+                const updateBtn = page.locator('button:has-text("変更する")').first();
                 await updateBtn.click();
                 await waitForAngular(page);
             }
@@ -4159,7 +4159,7 @@ test.describe('計算IF条件（77系）', () => {
                     await waitForAngular(page);
 
                     // 更新ボタンをクリック
-                    const updateBtn = page.locator('button:has-text("更新する"), button:has-text("保存")').first();
+                    const updateBtn = page.locator('button:has-text("変更する"), button:has-text("保存")').first();
                     if (await updateBtn.count() > 0) {
                         await updateBtn.click({ force: true });
                         await waitForAngular(page);
@@ -4227,7 +4227,7 @@ test.describe('日時フォーマット（97系）', () => {
         await waitForAngular(page);
 
         // 更新ボタンをクリック
-        const updateBtn = page.locator('button:has-text("更新する"), button:has-text("保存")').first();
+        const updateBtn = page.locator('button:has-text("変更する"), button:has-text("保存")').first();
         await expect(updateBtn).toBeVisible();
         await updateBtn.click({ force: true });
         await waitForAngular(page);
@@ -4732,7 +4732,7 @@ test.describe('計算式 DATE系関数（27系）', () => {
             }
 
             // 更新ボタンをクリック
-            const updateBtn = page.locator('button:has-text("更新する"), button:has-text("保存")').first();
+            const updateBtn = page.locator('button:has-text("変更する"), button:has-text("保存")').first();
             if (await updateBtn.count() > 0) {
                 await updateBtn.click({ force: true });
                 await waitForAngular(page);

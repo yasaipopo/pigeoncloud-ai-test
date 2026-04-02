@@ -765,7 +765,7 @@ async function ensureCalendarView(page) {
     }
 
     // 確認ダイアログの「更新する」ボタンがある場合はクリック
-    const confirmBtn = page.locator('button.btn-warning:has-text("更新する")').first();
+    const confirmBtn = page.locator('button.btn-warning:has-text("変更する")').first();
     if (await confirmBtn.count() > 0 && await confirmBtn.isVisible().catch(() => false)) {
         await confirmBtn.click({ force: true });
         await page.waitForTimeout(3000);
@@ -803,7 +803,7 @@ async function ensureCalendarView(page) {
         await page.waitForTimeout(5000);
 
         // 確認ダイアログが出たらクリック
-        const confirmBtn2 = page.locator('button.btn-warning:has-text("更新する")').first();
+        const confirmBtn2 = page.locator('button.btn-warning:has-text("変更する")').first();
         if (await confirmBtn2.count() > 0 && await confirmBtn2.isVisible().catch(() => false)) {
             await confirmBtn2.click({ force: true });
             await page.waitForTimeout(3000);

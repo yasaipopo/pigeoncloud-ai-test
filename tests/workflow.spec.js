@@ -200,7 +200,13 @@ async function saveTableSettings(page, tableId) {
     const saveBtn = page.locator('button[type=submit].btn-primary').filter({ visible: true }).first();
     await saveBtn.click();
     // 確認ダイアログ「本当に更新してもよろしいですか？」→「更新する」をクリック
-    await page.getByRole('button', { name: '更新する', exact: true }).click({ timeout: 20000 });
+    // 「更新する」or「変更する」（UI文言変更対応）
+    const confirmBtn = page.getByRole('button', { name: '変更する', exact: true });
+    if (await confirmBtn.count() > 0) {
+        await confirmBtn.click({ timeout: 20000 });
+    } else {
+        await page.getByRole('button', { name: '更新する', exact: true }).click({ timeout: 20000 });
+    }
     // 保存後はリスト画面（/admin/dataset__NNN）に遷移する
     await page.waitForURL(`**/dataset__${tableId}`, { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(1000);

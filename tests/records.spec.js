@@ -1510,7 +1510,7 @@ test.describe('レコード保存・値の永続化', () => {
         await saveBtn.click();
         await page.waitForTimeout(1000);
         // 確認ダイアログが出る場合があるので対応
-        const confirmBtn = page.locator('button:has-text("更新する")').first();
+        const confirmBtn = page.locator('button:has-text("変更する")').first();
         const hasConfirm = await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false);
         if (hasConfirm) {
             await confirmBtn.click();
@@ -2269,7 +2269,7 @@ test.describe('レコード操作 追加テスト', () => {
                     await saveBtn.click();
                     await page.waitForTimeout(2000);
                     // 確認ダイアログ
-                    const confirmBtn = page.locator('button:has-text("更新する")').first();
+                    const confirmBtn = page.locator('button:has-text("変更する")').first();
                     const hasConfirm = await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false);
                     if (hasConfirm) await confirmBtn.click();
                     await page.waitForURL(/\/view\//, { timeout: 15000 }).catch(() => {});
