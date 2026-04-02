@@ -95,6 +95,13 @@ async function ensureAllTypeTable(agentNum) {
 }
 
 module.exports = async function globalSetup() {
+    // createTestEnv移行済みspecのみ実行する場合、global-setupをスキップ
+    // 各specがbeforeAllで自分専用の環境を作成するため、ここでの環境作成は不要
+    if (process.env.SKIP_GLOBAL_SETUP === '1') {
+        console.log('[global-setup] SKIP_GLOBAL_SETUP=1: スキップ');
+        return;
+    }
+
     const currentUrl = process.env.TEST_BASE_URL || '';
 
     // .test_env_runtime ファイルが存在する場合は環境変数を読み込んでスキップ

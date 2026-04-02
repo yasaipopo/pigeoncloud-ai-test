@@ -188,47 +188,15 @@ async function createTestUser(page) {
  * ステータスAPIからALLテストテーブルのIDを取得して直接遷移する
  */
 async function navigateToAllTypeTable(page) {
-    // about:blankからfetchするとcookiesが送られないため、アプリURLにいることを確認
-    const currentUrl = page.url();
-    if (!currentUrl || currentUrl === 'about:blank' || !currentUrl.includes(BASE_URL.replace('https://', '').replace('http://', ''))) {
-        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        await waitForAngular(page);
-    }
-    // getAllTypeTableIdヘルパーを使ってテーブルIDを取得（フォールバック付き）
-    let tableId = null;
-    try {
-        const result = await page.evaluate(async (baseUrl) => {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 30000);
-            try {
-                const res = await fetch(baseUrl + '/api/admin/debug/status', {
-                    credentials: 'include',
-                    signal: controller.signal,
-                });
-                clearTimeout(timeoutId);
-                return res.json();
-            } catch (e) {
-                clearTimeout(timeoutId);
-                return { all_type_tables: [] };
-            }
-        }, BASE_URL);
-        const mainTable = (result.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
-        if (mainTable) {
-            tableId = mainTable.table_id || mainTable.id;
-        }
-    } catch (e) {
-        console.log('navigateToAllTypeTable: fetch失敗、getAllTypeTableIdでリトライ:', e.message);
-    }
-    // fetchが失敗した場合のフォールバック: getAllTypeTableId を使用
-    if (!tableId) {
-        tableId = await getAllTypeTableId(page);
-    }
-    if (!tableId) throw new Error('ALLテストテーブルが見つかりません');
-    await page.goto(BASE_URL + '/admin/dataset__' + tableId);
-    await page.waitForLoadState('domcontentloaded');
-    // Angular描画完了を待機（アクションメニューボタンが表示されるまで）
-    await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
+    // createTestEnvで取得済みのtableIdを使用（API呼び出し不要）
+    const tableId = _fileTableId;
+    if (!tableId) throw new Error('ALLテストテーブルIDが未設定（beforeAllでcreateTestEnvが失敗した可能性）');
+
+    await page.goto(BASE_URL + '/admin/dataset__' + tableId, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
+    // アクションメニューボタン（dropdown-toggle）が表示されるまで待機
+    await page.waitForSelector('button.dropdown-toggle', { timeout: 15000 }).catch(() => {});
 }
 
 /**
@@ -276,6 +244,7 @@ async function openTableMenu(page) {
 // リトライ付き: セッション切れ・fetch失敗に対応
 // ============================================================
 let fileBeforeAllFailed = false;
+let _fileTableId = null;
 test.beforeAll(async ({ browser }) => {
     test.setTimeout(180000);
     try {
@@ -283,11 +252,12 @@ test.beforeAll(async ({ browser }) => {
         BASE_URL = env.baseUrl;
         EMAIL = env.email;
         PASSWORD = env.password;
+        _fileTableId = env.tableId;
         process.env.TEST_BASE_URL = env.baseUrl;
         process.env.TEST_EMAIL = env.email;
         process.env.TEST_PASSWORD = env.password;
         await env.context.close();
-        console.log(`[chart-calendar-2] 自己完結環境: ${BASE_URL}, tableId: ${env.tableId}`);
+        console.log(`[chart-calendar-2] 自己完結環境: ${BASE_URL}, tableId: ${_fileTableId}`);
     } catch (e) {
         console.error(`[chart-calendar-2] 環境作成失敗: ${e.message}`);
         fileBeforeAllFailed = true;
