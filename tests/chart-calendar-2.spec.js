@@ -326,7 +326,14 @@ test.describe('チャート - 基本機能', () => {
     test.beforeEach(async ({ page }) => {
             test.setTimeout(120000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-            await login(page);
+            // fixtureのpageは古いstorageStateのため新環境に明示的ログイン
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1097,7 +1104,14 @@ test.describe('集計・チャート - 詳細権限設定', () => {
             // 長時間テストスイート実行後の遅延に対応するためタイムアウトを延長（詳細権限設定は時間がかかるため15分）
             test.setTimeout(120000);
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-            await login(page);
+            // fixtureのpageは古いstorageStateのため新環境に明示的ログイン
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
