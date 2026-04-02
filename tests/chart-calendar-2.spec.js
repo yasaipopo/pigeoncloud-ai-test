@@ -513,9 +513,10 @@ test.describe('チャート - 基本機能', () => {
             await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 絞り込みタブをクリック
-            const filterTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /絞り込み/ }).first();
-            await expect(filterTab).toBeVisible();
-            await filterTab.click({ force: true });
+            const filterTab = page.locator('.modal.show a.nav-link, .modal.show [role="tab"]').filter({ hasText: /絞り込み/ }).first();
+            await filterTab.scrollIntoViewIfNeeded().catch(() => {});
+            await expect(filterTab).toBeVisible({ timeout: 5000 });
+            await filterTab.click();
             await waitForAngular(page);
 
             // 条件追加ボタンをクリック
@@ -573,9 +574,10 @@ test.describe('チャート - 基本機能', () => {
             await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 絞り込みタブをクリック
-            const filterTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /絞り込み/ }).first();
-            await expect(filterTab).toBeVisible();
-            await filterTab.click({ force: true });
+            const filterTab = page.locator('.modal.show a.nav-link, .modal.show [role="tab"]').filter({ hasText: /絞り込み/ }).first();
+            await filterTab.scrollIntoViewIfNeeded().catch(() => {});
+            await expect(filterTab).toBeVisible({ timeout: 5000 });
+            await filterTab.click();
             await waitForAngular(page);
 
             // 条件追加ボタンをクリック
@@ -764,9 +766,10 @@ test.describe('チャート - 基本機能', () => {
             await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 絞り込みタブをクリック
-            const filterTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /絞り込み/ }).first();
-            await expect(filterTab).toBeVisible();
-            await filterTab.click({ force: true });
+            const filterTab = page.locator('.modal.show a.nav-link, .modal.show [role="tab"]').filter({ hasText: /絞り込み/ }).first();
+            await filterTab.scrollIntoViewIfNeeded().catch(() => {});
+            await expect(filterTab).toBeVisible({ timeout: 5000 });
+            await filterTab.click();
             await waitForAngular(page);
 
             // 条件追加ボタンをクリック
