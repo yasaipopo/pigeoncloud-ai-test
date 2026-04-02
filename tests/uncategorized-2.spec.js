@@ -123,6 +123,20 @@ async function closeTemplateModal(page) {
 }
 
 /**
+ * レコード新規作成フォームを開く（/edit/newへの直接gotoはAngular SPAで白画面になるため）
+ */
+async function openNewRecordForm(page, tid) {
+    await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await waitForAngular(page);
+    const addBtn = page.locator('button:has(.fa-plus)').first();
+    await addBtn.click({ timeout: 10000 });
+    await page.waitForSelector('admin-forms-field', { timeout: 30000 }).catch(() => {});
+    await waitForAngular(page);
+    await page.waitForTimeout(2000);
+}
+
+/**
  * デバッグAPIでテストテーブルを作成するユーティリティ
  */
 async function createAllTypeTable(page) {
@@ -634,16 +648,12 @@ test.describe('追加実装テスト（314-579系）', () => {
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // レコード新規作成画面を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-            await waitForAngular(page);
+            await openNewRecordForm(page, tid);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            // 編集画面が表示されること
-            await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
-            // 入力フォームが存在すること（4個以下のフィールドに制限されているかの確認）
-            const inputFields = page.locator('input[type="text"], input:not([type="hidden"]), textarea');
+            // 入力フォームが存在すること
+            const inputFields = page.locator('admin-forms-field input, admin-forms-field textarea');
             const fieldCount = await inputFields.count();
-            // フォームが存在することを確認（最低1つ以上入力フィールドがある）
             expect(fieldCount).toBeGreaterThan(0);
 
         });
@@ -883,11 +893,9 @@ test.describe('追加実装テスト（314-579系）', () => {
             await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
             expect(page.url()).toContain(`/admin/dataset__${tid}`);
             // 新規レコード作成画面でも正常表示されること
-            await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-            await waitForAngular(page);
+            await openNewRecordForm(page, tid);
             const editPageText = await page.innerText('body');
             expect(editPageText).not.toContain('Internal Server Error');
-            await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
 
         });
         await test.step('535: 高速化モードでもダッシュボードがエラーなく正常表示されること', async () => {
@@ -1080,15 +1088,21 @@ test.describe('追加実装テスト（314-579系）', () => {
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // レコード新規作成画面で他テーブル参照の検索ボタンを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
+            // /edit/newへの直接gotoはAngular SPAで白画面になるため一覧画面から+ボタンで遷移
+            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
+            const addBtn = page.locator('button:has(.fa-plus)').first();
+            if (await addBtn.isVisible({ timeout: 10000 }).catch(() => false)) {
+                await addBtn.click();
+                await page.waitForSelector('admin-forms-field', { timeout: 30000 }).catch(() => {});
+                await waitForAngular(page);
+            }
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            // 編集フォームが表示されること
-            await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
             // フォーム要素が存在すること
-            const formElements = page.locator('input, select, textarea, button[type="submit"]');
-            await expect(formElements.first()).toBeVisible();
+            const formElements = page.locator('admin-forms-field input, admin-forms-field select, admin-forms-field textarea');
+            await expect(formElements.first()).toBeVisible({ timeout: 10000 });
 
         });
         await test.step('551: フィルター・検索で絞り込み後の一括削除確認メッセージに正しい件数が表示されること', async () => {
@@ -1265,11 +1279,9 @@ test.describe('追加実装テスト（314-579系）', () => {
             await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
             expect(page.url()).toContain(`/admin/dataset__${tid}`);
             // レコード編集画面でも正常表示されること
-            await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-            await waitForAngular(page);
+            await openNewRecordForm(page, tid);
             const editPageText = await page.innerText('body');
             expect(editPageText).not.toContain('Internal Server Error');
-            await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
 
         });
         await test.step('559: 権限設定の変更が即時反映されユーザー管理ページが正常表示されること（#issue753）', async () => {
@@ -2653,12 +2665,9 @@ test.describe('追加実装テスト（314-579系）', () => {
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // レコード編集画面で関連テーブル参照を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
-            await waitForAngular(page);
+            await openNewRecordForm(page, tid);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            // 編集フォームが表示されること
-            await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
             // フォーム要素が存在すること（関連テーブル参照フィールドを含む）
             const formElements = page.locator('input, select, textarea');
             await expect(formElements.first()).toBeVisible();
