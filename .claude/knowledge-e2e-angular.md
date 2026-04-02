@@ -442,6 +442,10 @@ global-setupがID:137を返すようになり、fields-5は全PASS。
 | 関連レコード一覧 | 関連_マスタ |
 | Yes / No | ブール |
 
+### 知見: /new, /add への直接gotoはAngular SPAで白画面（2026-04-02発見）
+`/admin/dataset__N/new` や `/admin/dataset__N/add` はAngular SPAの内部ルートで、直接URLアクセスすると白画面になる。
+レコード新規作成は一覧画面（`/admin/dataset__N`）から「新規作成」ボタンクリックで遷移する。
+
 ### 知見: フィールド行のクリックではモーダルは開かない（2026-04-02発見）
 
 `.field-drag`はフィールド追加パネル（左サイド）のドラッグ要素。既存フィールドの設定モーダルを開くには`.pc-field-block`内の`.overSetting`をクリックする。

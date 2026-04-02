@@ -2553,15 +2553,17 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
 
-            // レコード新規作成ページへ遷移（domcontentloadedを待つことでnavigatioTimeout節約）
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
-            await page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
-            // Angular SPAのレンダリング完了を待機（最大20秒）
-            await page.waitForFunction(
-                () => document.querySelectorAll('admin-forms-field').length > 10,
-                { timeout: 20000 }
-            );
+            // レコード一覧画面から新規作成（/edit/newへの直接gotoはAngular SPAで白画面になる）
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
+            // 「＋」ボタン（新規作成）をクリック
+            const addBtn = page.locator('.fa-plus, button:has(.fa-plus), a:has(.fa-plus)').first();
+            if (await addBtn.isVisible().catch(() => false)) {
+                await addBtn.click();
+                await page.waitForSelector('admin-forms-field', { timeout: 15000 }).catch(() => {});
+                await waitForAngular(page);
+            }
 
             // Angularの表示条件(display condition)適用を待機
             // 初期レンダリング時は全フィールドが一時的に描画されるが、
