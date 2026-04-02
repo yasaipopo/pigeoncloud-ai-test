@@ -6637,7 +6637,7 @@ test.describe('テーブル定義追加テスト', () => {
             await waitForAngular(page);
 
             // 他テーブル参照フィールドをクリックして対象テーブルを確認
-            const refField = page.locator('.field-drag, .cdk-drag').filter({ hasText: '他テーブル参照' }).first();
+            const refField = page.locator('.pc-field-block').filter({ hasText: '参照_admin' }).first();
             let targetTableName = '';
             if (await refField.count() > 0) {
                 await refField.click({ force: true });

@@ -220,7 +220,7 @@ async function assertFieldPageLoaded(page, tableId) {
  */
 async function openFieldEditPanel(page, fieldLabel) {
     // フィールド行は .cdk-drag.field-drag または .field-drag
-    const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+    const fieldRows = page.locator('.pc-field-block');
     const count = await fieldRows.count();
     for (let i = 0; i < count; i++) {
         const row = fieldRows.nth(i);
@@ -294,7 +294,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             await navigateToFieldPage(page, tableId);
             await assertFieldPageLoaded(page, tableId);
 
-            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldRows = page.locator('.pc-field-block');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
                 await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
@@ -321,7 +321,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             await navigateToFieldPage(page, tableId);
             await assertFieldPageLoaded(page, tableId);
 
-            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldRows = page.locator('.pc-field-block');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
                 await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
@@ -365,7 +365,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             await navigateToFieldPage(page, tableId);
             await assertFieldPageLoaded(page, tableId);
 
-            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldRows = page.locator('.pc-field-block');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
                 await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
@@ -390,7 +390,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             await navigateToFieldPage(page, tableId);
             await assertFieldPageLoaded(page, tableId);
 
-            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldRows = page.locator('.pc-field-block');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
                 await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
@@ -557,7 +557,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             await navigateToFieldPage(page, tableId);
             await assertFieldPageLoaded(page, tableId);
 
-            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldRows = page.locator('.pc-field-block');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
                 await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
@@ -592,7 +592,7 @@ test.describe('フィールド設定テスト（261/265/267系）', () => {
             await navigateToFieldPage(page, tableId);
             await assertFieldPageLoaded(page, tableId);
 
-            const fieldRows = page.locator('.cdk-drag.field-drag, .field-drag');
+            const fieldRows = page.locator('.pc-field-block');
             const fieldCount = await fieldRows.count();
             if (fieldCount === 0) {
                 await expect(fieldRows.first(), 'フィールド行が表示されること').toBeVisible();
