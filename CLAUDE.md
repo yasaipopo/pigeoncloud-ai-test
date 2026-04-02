@@ -80,6 +80,7 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
    - **ALLテストテーブルが不要なspec**: `createTestEnv(browser, { withAllTypeTable: false })`
    - **並列テスト実行時は異なるAGENT_NUMを使う**（storageState競合防止）
    - **並列テスト実行にはSonnet 1Mモデルのsubagentを使う**（コスト効率）
+   - **Playwrightテスト実行時に `| pipe` を使うとJSONレポーターが出力しない** — パイプなしで実行すること
 1. **独自login関数の統一**（fields-2等）: ensureLoggedInに置き換え
 2. **UIセレクター修正（fail数順）**:
    - chart-calendar (29 fail): 詳細権限セレクター全面修正
