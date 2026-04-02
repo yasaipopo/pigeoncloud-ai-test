@@ -377,7 +377,7 @@ test.describe('チャート - 基本機能', () => {
             await settingTab.click({ force: true });
             await waitForAngular(page);
             // 設定タブの権限ラジオが表示されるまで待機（Angularタブ切り替え完了判定）
-            await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+            await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
             // 「全員に表示」ラジオをON（input[name="grant"][value="public"]）
             const allUsersRadio = page.locator('input[name="grant"][value="public"]').first();
@@ -428,7 +428,7 @@ test.describe('チャート - 基本機能', () => {
             await expect(settingTab).toBeVisible();
             await settingTab.click({ force: true });
             await waitForAngular(page);
-            await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+            await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
             // 「自分のみ表示」ラジオをON（input[name="grant"][value="private"]）
             const selfOnlyRadio = page.locator('input[name="grant"][value="private"]').first();
@@ -479,7 +479,7 @@ test.describe('チャート - 基本機能', () => {
             await expect(settingTab).toBeVisible();
             await settingTab.click({ force: true });
             await waitForAngular(page);
-            await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+            await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
             // タイトル入力欄にチャート名を設定（設定タブ内のアクティブペイン）
             const titleInput = page.locator('.modal.show .tab-pane.active input.form-control').first();
@@ -727,7 +727,7 @@ test.describe('チャート - 基本機能', () => {
                 if (await settingTab.count() > 0) {
                     await settingTab.click({ force: true });
                     await waitForAngular(page);
-                    await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                    await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
                 }
 
                 // タイトル入力
@@ -1166,7 +1166,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 // タイトル入力
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
@@ -1235,7 +1235,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 try { await settingTab.waitFor({ state: 'visible', timeout: 5000 }); } catch (_e) {}
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 // 詳細権限設定
                 const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
@@ -1282,7 +1282,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -1355,7 +1355,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -1418,7 +1418,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -1486,7 +1486,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -1563,7 +1563,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -1626,7 +1626,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定"), .detail-permission').first();
                 if (await detailPermBtn.count() > 0) {
@@ -1660,7 +1660,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 await settingTab.waitFor({ state: 'visible', timeout: 10000 });
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 // タイトル入力（.modal.show内のtextbox）
                 const titleInput = page.locator('.modal.show input[type="text"], .modal.show input:not([type])').first();
@@ -1748,7 +1748,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 // タイトル
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
@@ -1812,7 +1812,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
                 if (await detailPermBtn.count() > 0) {
@@ -1852,7 +1852,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -1918,7 +1918,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -1983,7 +1983,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -2052,7 +2052,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -2129,7 +2129,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -2192,7 +2192,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const detailPermBtn = page.locator('a:has-text("詳細権限設定"), button:has-text("詳細権限設定")').first();
                 if (await detailPermBtn.count() > 0) {
@@ -2226,7 +2226,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 const settingTab = page.locator('a.nav-link').filter({ hasText: /^設定$/ }).first();
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
                 if (await titleInput.count() > 0) {
@@ -2320,7 +2320,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 await settingTab.waitFor({ state: 'visible', timeout: 10000 });
                 await settingTab.click({ force: true });
                 await waitForAngular(page);
-                await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
                 // タイトル入力（.modal.show内のinput）
                 const titleInput = page.locator('.modal.show input[type="text"], .modal.show input:not([type])').first();
@@ -2421,7 +2421,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 if (await settingTab.count() > 0) {
                     await settingTab.click({ force: true });
                     await waitForAngular(page);
-                    await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                    await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
                 }
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
@@ -2511,7 +2511,7 @@ test.describe('集計・チャート - 詳細権限設定', () => {
                 if (await settingTab.count() > 0) {
                     await settingTab.click({ force: true });
                     await waitForAngular(page);
-                    await expect(page.locator('input[name="grant"]').first()).toBeVisible({ timeout: 5000 });
+                    await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
                 }
 
                 const titleInput = page.locator('input[name*="title"], input[placeholder*="タイトル"]').first();
