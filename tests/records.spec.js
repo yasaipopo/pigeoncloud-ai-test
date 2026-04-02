@@ -1900,12 +1900,12 @@ test.describe('レコード操作 追加テスト', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId).not.toBeNull();
-            // レコード新規作成画面へ（102フィールドのフォーム描画に時間がかかる）
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/new`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            // レコード一覧画面から新規作成（/newへの直接gotoはAngular SPAで白画面になる）
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
-            // 数値フィールド（input.input-number）を探す
+            // 数値フィールド（input.input-number）を探す（一覧画面で確認）
             const numInput = page.locator('input.input-number[id^="field__"]').first();
             const numInputCount = await numInput.count();
             if (numInputCount > 0) {
