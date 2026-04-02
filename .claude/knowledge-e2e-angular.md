@@ -428,6 +428,34 @@ MCP Playwrightで実UIを確認しながら1件ずつ具体的なassertion追加
 global-setupがID:137を返すようになり、fields-5は全PASS。
 **テーブル設定ページのUI自体は変わっていない。**
 
+### 知見: ALLテストテーブルのフィールドラベルとPigeonCloudのUI表示名は異なる（2026-04-02発見）
+
+テストで `filter({ hasText: '選択肢(単一選択)' })` としてもALLテストテーブルのラベルは `セレクト`。
+対応表:
+| テスト表記 | ALLテストテーブルのラベル |
+|---|---|
+| 時刻 | 時間 |
+| 文章(複数行) | テキストエリア |
+| 選択肢(単一選択) | セレクト |
+| 選択肢(複数選択) | チェックボックス |
+| 他テーブル参照 | 参照_admin |
+| 関連レコード一覧 | 関連_マスタ |
+| Yes / No | ブール |
+
+### 知見: フィールド行のクリックではモーダルは開かない（2026-04-02発見）
+
+`.field-drag`はフィールド追加パネル（左サイド）のドラッグ要素。既存フィールドの設定モーダルを開くには`.pc-field-block`内の`.overSetting`をクリックする。
+
+```javascript
+// ❌ 悪い: field-dragクリック → モーダル開かない
+const field = page.locator('.field-drag').filter({ hasText: '日時' }).first();
+await field.click();
+
+// ✅ 良い: pc-field-block + overSettingクリック → モーダルが開く
+const field = page.locator('.pc-field-block').filter({ hasText: '日時' }).first();
+await field.locator('.overSetting').click({ force: true });
+```
+
 ### 知見: UI文言変更「更新する」→「変更する」（2026-04-02発見）
 フィールド設定モーダルの保存ボタンが「更新する」→「変更する」に変更された。
 全specで`hasText: '更新する'`を`hasText: '変更する'`に修正済み（60箇所）。
