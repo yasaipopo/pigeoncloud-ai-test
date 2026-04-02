@@ -2,15 +2,16 @@
 const { test, expect } = require('@playwright/test');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const { createAuthContext } = require('./helpers/auth-context');
+const { createTestEnv } = require('./helpers/create-test-env');
 
 // =============================================================================
 // 未分類テスト（580件）
 // 主要な代表ケースを実装し、残りは test.todo() でマーク
 // =============================================================================
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -402,18 +403,17 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const { context, page } = await createAuthContext(browser);
-            // about:blankからfetchするとcookiesが送られないため、先にアプリURLに遷移
-            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
-            const dataResult = await createAllTypeData(page, 3).catch((e) => { console.log('createAllTypeData error:', e.message); return { result: 'error' }; });
-            console.log('createAllTypeData result:', JSON.stringify(dataResult));
-            await page.waitForTimeout(2000);
-            await context.close();
+            test.setTimeout(180000);
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            tableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+            await env.context.close();
+            console.log(`[uncategorized-2] 自己完結環境: ${BASE_URL}, tableId: ${tableId}`);
         });
 
     test.beforeEach(async ({ page }) => {

@@ -2,12 +2,13 @@
 const { test, expect } = require('@playwright/test');
 const { getAllTypeTableId, createAllTypeData } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
+const { createTestEnv } = require('./helpers/create-test-env');
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 // テーブルIDをファイルに保存・読み込みするためのパス
 const TABLE_ID_FILE = path.join('/tmp', 'csv_export_test_table_id.txt');
@@ -250,7 +251,19 @@ function saveTestTableId(id) {
 test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード', () => {
 
     test.describe.configure({ mode: 'serial' });
-    // ログインに30〜60秒かかる環境に対応するため各テストのタイムアウトを延長
+
+    test.beforeAll(async ({ browser }) => {
+        test.setTimeout(180000);
+        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        await env.context.close();
+        console.log(`[csv-export] 自己完結環境: ${BASE_URL}, tableId: ${env.tableId}`);
+    });
 
     // =========================================================================
     // セットアップ: テーブルを作成してIDを取得
@@ -1421,24 +1434,18 @@ test.describe('JSONエクスポート・インポート', () => {
         });
 
     test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            await closeTemplateModal(page);
-            testTableId = await getAllTypeTableId(page);
-            if (!testTableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            // ファイルにも保存（後半テストの getTestTableId() が参照する）
+            test.setTimeout(180000);
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            testTableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
             saveTestTableId(testTableId);
-            // JSONエクスポートテストではレコード選択が必要なためデータを作成する
-            if (testTableId) {
-                // createAllTypeDataはpage.evaluate(fetch)を使うため、アプリケーションURLにいる必要がある
-                if (!page.url() || page.url() === 'about:blank') {
-                    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-                }
-                await createAllTypeData(page, 3, 'fixed');
-            }
-            await page.close();
-            await context.close();
+            await env.context.close();
+            console.log(`[csv-export-2] 自己完結環境: ${BASE_URL}, tableId: ${testTableId}`);
         });
 
     test('CE02: CSVアップロード', async ({ page }) => {

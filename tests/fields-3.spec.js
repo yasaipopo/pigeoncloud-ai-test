@@ -3,6 +3,7 @@
 // fields.spec.jsから分割 (line 1594〜末尾)
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
+const { createTestEnv } = require('./helpers/create-test-env');
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -13,9 +14,9 @@ async function waitForAngular(page, timeout = 15000) {
     }
 }
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 /**
  * ログイン共通関数
@@ -280,29 +281,17 @@ async function assertFieldPageLoaded(page, tableId) {
 let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(120000);
-    const { context, page } = await createAuthContext(browser);
-    // about:blankではcookiesが送られないため、先にアプリURLに遷移
-    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-    const createResult = await createAllTypeTable(page);
-    if (createResult && createResult.tableId) {
-        _sharedTableId = createResult.tableId;
-    }
-    await createAllTypeData(page, 3);
-    // createResultからID取れなかった場合のフォールバック
-    if (!_sharedTableId) {
-        // リトライ: セッション切れ対策で再ログインしてから取得
-        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-        const loginForm = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-        if (loginForm) {
-            await page.fill('#id', process.env.TEST_EMAIL || 'admin');
-            await page.fill('#password', process.env.TEST_PASSWORD || '');
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 15000 }).catch(() => {});
-        }
-        _sharedTableId = await getAllTypeTableId(page);
-    }
-    await context.close();
+    test.setTimeout(180000); // 環境作成+ALLテストテーブル作成に最大3分
+    const env = await createTestEnv(browser, { withAllTypeTable: true, dataCount: 3 });
+    BASE_URL = env.baseUrl;
+    EMAIL = env.email;
+    PASSWORD = env.password;
+    _sharedTableId = env.tableId;
+    process.env.TEST_BASE_URL = env.baseUrl;
+    process.env.TEST_EMAIL = env.email;
+    process.env.TEST_PASSWORD = env.password;
+    await env.context.close();
+    console.log(`[fields-3] 自己完結環境: ${BASE_URL}, tableId: ${_sharedTableId}`);
 });
 
 // =============================================================================
@@ -2557,73 +2546,46 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
-            // 「＋」ボタン（新規作成）をクリック
-            const addBtn = page.locator('.fa-plus, button:has(.fa-plus), a:has(.fa-plus)').first();
-            if (await addBtn.isVisible().catch(() => false)) {
-                await addBtn.click();
-                await page.waitForSelector('admin-forms-field', { timeout: 15000 }).catch(() => {});
-                await waitForAngular(page);
-            }
+            // 「＋」ボタン（新規作成）をクリック — 必須（auto-waitで最大10秒待機）
+            const addBtn = page.locator('button:has(.fa-plus)').first();
+            await expect(addBtn).toBeVisible({ timeout: 10000 });
+            await addBtn.click();
+            // 102フィールドフォームの描画を待機（15秒では不足する場合がある）
+            await page.waitForSelector('admin-forms-field', { timeout: 30000 });
+            await waitForAngular(page);
+            await page.waitForTimeout(2000); // 102フィールドの描画完了待ち
 
-            // Angularの表示条件(display condition)適用を待機
-            // 初期レンダリング時は全フィールドが一時的に描画されるが、
-            // 表示条件が適用されると「ラジオ_表示条件テキスト」がDOMから消える（初期状態=非表示）
-            // 最大5秒待機し、消えなければそのままの状態で続行
-            await page.waitForFunction(
-                () => {
-                    const labels = Array.from(document.querySelectorAll('label'));
-                    const condExists = labels.some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト');
-                    // まだ存在している場合はfalse（待機継続）、消えたらtrue（待機完了）
-                    return !condExists;
-                },
-                { timeout: 5000 }
-            ).catch(() => {}); // タイムアウト=表示条件が未適用 or 初期表示=表示の実装 → そのまま続行
-
-            // ページが正常に表示されること
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            // ページが正常に表示されること（フォームは admin-forms-field で確認済み）
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
 
             // ラジオボタンフィールド（「ラジオ」ラベル）が存在することを確認
-            // PlaywrightのhasTextフィルターは空白正規化が独自仕様のため、evaluateで直接チェック
             const radioExists = await page.evaluate(() => {
                 const labels = Array.from(document.querySelectorAll('label'));
                 return labels.some(l => l.textContent.trim() === 'ラジオ');
             });
-            if (!radioExists) {
-                // ラジオフィールドが存在しない場合はエラーで失敗させる
-                throw new Error('260-1: ラジオフィールドが新規作成フォームに存在しません。ALLテストテーブルにラジオフィールドが含まれているか確認してください。');
-            }
-
-            // 「ラジオ_表示条件テキスト」フィールドの存在確認（表示条件が設定されている前提）
-            const condFieldInDom = await page.evaluate(() =>
-                Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト')
-            );
-            if (!condFieldInDom) {
-                // 「ラジオ_表示条件テキスト」フィールドが存在しない場合は表示条件未設定のためエラーで失敗させる
-                throw new Error('260-1: 「ラジオ_表示条件テキスト」フィールドが存在しません。ALLテストテーブルにラジオフィールドの表示条件が設定されているか確認してください。');
-            }
+            expect(radioExists, 'ラジオフィールドが新規作成フォームに存在すること').toBe(true);
 
             // 「ラジオ_表示条件テキスト」フィールドの表示状態を確認するヘルパー
-            // DOMにない場合はfalse（非表示）として扱う
             // Angular表示条件はDOMから要素を削除する実装のため、count=0=非表示
             const getCondFieldVisible = async () => {
                 const inDom = await page.evaluate(() =>
                     Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト')
                 );
-                if (!inDom) return false; // DOMにない = 非表示
+                if (!inDom) return false; // DOMにない = 非表示（表示条件適用済み）
                 const condLabel = page.locator('label, .field-label').filter({ hasText: 'ラジオ_表示条件テキスト' }).first();
                 return condLabel.isVisible().catch(() => false);
             };
 
-            // --- 初期状態（ラジオ未選択）: 表示条件テキストは非表示のはず ---
+            // --- 初期状態（ラジオ未選択）: 表示条件テキストは非表示になるまで待機 ---
+            // Angularの表示条件適用は102フィールドの場合10秒以上かかることがある
+            await page.waitForFunction(
+                () => !Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト'),
+                { timeout: 15000 }
+            ).catch(() => {}); // タイムアウト時はそのまま続行
+
             const initialVisible = await getCondFieldVisible();
-            // 初期状態は非表示であること（ラジオ未選択 or ラジオA以外）
-            // 常に表示の場合（表示条件未設定）はスキップ
-            if (initialVisible) {
-                // 初期状態で表示されている場合は表示条件が未設定か誤設定 → エラーで失敗させる
-                throw new Error('260-1: 「ラジオ_表示条件テキスト」が初期状態（ラジオ未選択）で表示されています。表示条件の設定を確認してください（ラジオA選択時のみ表示されるべきです）。');
-            }
+            expect(initialVisible, '初期状態（ラジオ未選択）ではラジオ_表示条件テキストが非表示であること').toBe(false);
 
             // --- ラジオA を選択: 表示条件テキストが表示されるはず ---
             // PigeonCloudのカスタムラジオ: input[type=radio]はCSS非表示、label.radio-customをクリック

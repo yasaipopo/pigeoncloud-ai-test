@@ -2,10 +2,11 @@
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
 const { getAllTypeTableId } = require('./helpers/table-setup');
+const { createTestEnv } = require('./helpers/create-test-env');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -391,59 +392,30 @@ test.describe('共通設定・システム設定', () => {
     let tableId = null;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        const { context, page } = await createAuthContext(browser);
-        // about:blankではcookiesが送られないため、先にアプリURLに遷移
-        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        tableId = await getAllTypeTableId(page);
-        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-        await context.close();
+        test.setTimeout(180000);
+        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        tableId = env.tableId;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        await env.context.close();
+        console.log(`[system-settings] 自己完結環境: ${BASE_URL}, tableId: ${tableId}`);
     });
 
     test.afterAll(async ({ browser }) => {
+        // createTestEnvで作成した使い捨て環境のため、リセット処理は不要
+        // 環境自体が独立しているので他のテストに影響しない
+        console.log('[afterAll] 使い捨て環境のためリセット不要');
+    });
+
+    // 旧afterAll（コメントアウト: 使い捨て環境なので不要）
+    /* test.afterAll(async ({ browser }) => {
         test.setTimeout(120000);
-        // afterAllで設定のリセットのみ行う（テーブル削除はしない）
         try {
             const { context, page } = await createAuthContext(browser);
-            // パスワード変更を起こさない安全なlogin関数（afterAll専用）
-            async function safeLoginForAfterAll(pw) {
-                await page.goto(BASE_URL + '/admin/login');
-                await page.waitForLoadState('domcontentloaded');
-                await page.waitForSelector('#id', { timeout: 5000 }).catch(() => {});
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', pw);
-                await page.click('button[type=submit].btn-primary');
-                await waitForAngular(page);
-                return page.url();
-            }
-
-            let loginSuccess = false;
-            // パスワードは変わらないため同じパスワードのみ試みる
-            const candidates = [PASSWORD];
-            for (const pw of candidates) {
-                try {
-                    const url = await safeLoginForAfterAll(pw);
-                    if (url.includes('/admin/dashboard') || (url.includes('/admin/') && !url.includes('/admin/login'))) {
-                        loginSuccess = true;
-                        console.log('[afterAll] ログイン成功');
-                        break;
-                    }
-                    // パスワード変更画面が出た場合は次のパスワードで試みる（変更はしない）
-                    const bodyText = await page.innerText('body').catch(() => '');
-                    if (bodyText.includes('アカウントロック')) {
-                        console.log('[afterAll] アカウントロック中。afterAll処理をスキップ');
-                        await context.close();
-                        return;
-                    }
-                } catch (e2) {
-                    console.log('[afterAll] パスワード候補失敗:', e2.message);
-                }
-            }
-            if (!loginSuccess) {
-                console.log('[afterAll] ログイン失敗。afterAll処理をスキップ');
-                await context.close();
-                return;
-            }
             // pw_change_interval_daysを空にリセット（89-1テストの副作用除去）
             await page.evaluate(async (baseUrl) => {
                 const fd = new FormData();
@@ -460,7 +432,7 @@ test.describe('共通設定・システム設定', () => {
         } catch (e) {
             console.log('[afterAll] エラー:', e.message);
         }
-    });
+    }); */
 
     test.beforeEach(async ({ page }) => {
         test.setTimeout(120000); // loginが遅い環境で120s超えることがあるため延長

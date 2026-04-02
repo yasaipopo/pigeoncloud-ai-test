@@ -4,10 +4,11 @@
 const { test, expect } = require('@playwright/test');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
+const { createTestEnv } = require('./helpers/create-test-env');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -276,32 +277,21 @@ async function openTableMenu(page) {
 // ============================================================
 let fileBeforeAllFailed = false;
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(120000);
-    const maxRetries = 3;
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        const { context, page } = await createAuthContext(browser);
-        try {
-            // about:blankではcookiesが送られないため、先にアプリURLに遷移
-            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            const tableRes = await createAllTypeTable(page);
-            if (tableRes.result === 'success') {
-                await createAllTypeData(page, 10);
-                await context.close();
-                return; // 成功
-            }
-            console.log(`[beforeAll] テーブル作成失敗 (attempt ${attempt}/${maxRetries}): result=${tableRes.result}`);
-        } catch (e) {
-            console.log(`[beforeAll] テーブル作成例外 (attempt ${attempt}/${maxRetries}): ${e.message}`);
-        }
-        await context.close();
-        if (attempt < maxRetries) {
-            // リトライ前に少し待つ
-            await new Promise(resolve => setTimeout(resolve, 5000));
-        }
+    test.setTimeout(180000);
+    try {
+        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        await env.context.close();
+        console.log(`[chart-calendar-2] 自己完結環境: ${BASE_URL}, tableId: ${env.tableId}`);
+    } catch (e) {
+        console.error(`[chart-calendar-2] 環境作成失敗: ${e.message}`);
+        fileBeforeAllFailed = true;
     }
-    // 全リトライ失敗: cascade防止のためthrowせずフラグを立てる
-    console.error('[beforeAll] ALLテストテーブル作成が全リトライ失敗。テストはスキップされます。');
-    fileBeforeAllFailed = true;
 });
 
 // チャート テスト
@@ -373,13 +363,13 @@ test.describe('チャート - 基本機能', () => {
             await openActionMenu(page);
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
-            await expect(chartAddMenu).toBeVisible();
+            await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
             await chartAddMenu.click({ force: true });
             await waitForAngular(page);
 
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            // チャートモーダルが開くまで待機（Angular描画に時間がかかる場合がある）
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 設定タブが表示されることを確認
             const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
@@ -427,13 +417,13 @@ test.describe('チャート - 基本機能', () => {
             await openActionMenu(page);
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
-            await expect(chartAddMenu).toBeVisible();
+            await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
             await chartAddMenu.click({ force: true });
             await waitForAngular(page);
 
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            // チャートモーダルが開くまで待機（Angular描画に時間がかかる場合がある）
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 設定タブが表示されることを確認
             const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
@@ -477,23 +467,24 @@ test.describe('チャート - 基本機能', () => {
             await openActionMenu(page);
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
-            await expect(chartAddMenu).toBeVisible();
+            await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
             await chartAddMenu.click({ force: true });
             await waitForAngular(page);
 
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            // チャートモーダルが開くまで待機（Angular描画に時間がかかる場合がある）
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // 設定タブが表示されることを確認
             const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
             await expect(settingTab).toBeVisible();
             await settingTab.click({ force: true });
             await waitForAngular(page);
+            await page.waitForTimeout(1000); // Angularタブ切り替え完了待ち
 
-            // タイトル入力欄にチャート名を設定
-            const titleInput = page.locator('.modal.show input.form-control').first();
-            await expect(titleInput).toBeVisible();
+            // タイトル入力欄にチャート名を設定（設定タブ内のアクティブペイン）
+            const titleInput = page.locator('.modal.show .tab-pane.active input.form-control').first();
+            await expect(titleInput).toBeVisible({ timeout: 5000 });
             await titleInput.fill('テストチャート-37-1-自分のみ');
 
             // 「自分のみ表示」ラジオを選択
@@ -653,13 +644,13 @@ test.describe('チャート - 基本機能', () => {
             await openActionMenu(page);
 
             const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
-            await expect(chartAddMenu).toBeVisible();
+            await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
             await chartAddMenu.click({ force: true });
             await waitForAngular(page);
 
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            await expect(modal).toBeVisible();
+            // チャートモーダルが開くまで待機（Angular描画に時間がかかる場合がある）
+            const modal = page.locator('.modal.show');
+            await expect(modal).toBeVisible({ timeout: 10000 });
 
             // チャート設定タブが表示されることを確認（チャートの場合 heading="チャート設定"）
             const chartSettingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /チャート設定/ }).first();
