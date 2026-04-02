@@ -449,8 +449,15 @@ test.describe('共通設定・システム設定', () => {
     }); */
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000); // loginが遅い環境で120s超えることがあるため延長
-        await login(page);
+        test.setTimeout(120000);
+        // fixtureのpageは古いstorageStateを持つため、新環境に明示的にログインさせる
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
         await closeTemplateModal(page);
     });
 
