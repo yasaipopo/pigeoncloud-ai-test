@@ -261,6 +261,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         process.env.TEST_BASE_URL = env.baseUrl;
         process.env.TEST_EMAIL = env.email;
         process.env.TEST_PASSWORD = env.password;
+        saveTestTableId(env.tableId);
         await env.context.close();
         console.log(`[csv-export] 自己完結環境: ${BASE_URL}, tableId: ${env.tableId}`);
     });
