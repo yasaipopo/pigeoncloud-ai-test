@@ -125,7 +125,14 @@ async function gotoWithSessionRecovery(page, url) {
     await waitForAngular(page);
     if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
         console.log('[gotoWithSessionRecovery] セッション切れ検出。再ログイン後に再遷移します。');
-        await login(page).catch(() => {});
+        // 明示的ログイン
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
     }
@@ -538,7 +545,14 @@ test.describe('共通設定・システム設定', () => {
                 }, BASE_URL).catch(() => null);
                 if (!pollStatus) {
                     // セッション切れ → 再ログインしてAPIを再度fire-and-forget
-                    await login(page).catch(() => {});
+                    // 明示的ログイン
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
                     await page.evaluate(async (baseUrl) => {
                         fetch(baseUrl + '/api/admin/debug/create-all-type-table', {
                             method: 'POST',
@@ -744,7 +758,14 @@ test.describe('共通設定・システム設定', () => {
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
             await waitForAngular(page);
             if (page.url().includes('/admin/login')) {
-                await login(page);
+                // 明示的ログイン
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
                 await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
                 await waitForAngular(page);
             }
@@ -755,7 +776,14 @@ test.describe('共通設定・システム設定', () => {
             await page.goto(BASE_URL + '/admin/table');
             await waitForAngular(page);
             if (page.url().includes('/admin/login')) {
-                await login(page);
+                // 明示的ログイン
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
                 await page.goto(BASE_URL + '/admin/table');
                 await waitForAngular(page);
             }
@@ -779,7 +807,14 @@ test.describe('共通設定・システム設定', () => {
             await page.goto(BASE_URL + '/admin/table');
             await waitForAngular(page);
             if (page.url().includes('/admin/login')) {
-                await login(page);
+                // 明示的ログイン
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
                 await page.goto(BASE_URL + '/admin/table');
                 await waitForAngular(page);
             }
@@ -803,7 +838,14 @@ test.describe('共通設定・システム設定', () => {
             await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
             await waitForAngular(page);
             if (page.url().includes('/admin/login')) {
-                await login(page);
+                // 明示的ログイン
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
                 await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
                 await waitForAngular(page);
             }
@@ -1064,7 +1106,14 @@ test.describe('共通設定・システム設定', () => {
                 await fetch(baseUrl + '/api/admin/logout', { method: 'GET', credentials: 'include' }).catch(() => {});
             }, BASE_URL);
             await page.waitForTimeout(500);
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await page.waitForTimeout(500);
 
             // 利用規約をOFFにする（API経由で設定変更）
