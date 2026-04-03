@@ -39,7 +39,7 @@ async function createTestEnv(browser, options = {}) {
     const body = { email: 'admin' };
     if (withAllTypeTable) body.with_all_type_table = true;
 
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
         const result = await adminPage.evaluate(async (b) => {
             try {
                 const r = await fetch('/api/admin/create-trial', {
@@ -61,8 +61,8 @@ async function createTestEnv(browser, options = {}) {
             tableId = result.table_id || null;
             break;
         }
-        console.log(`[createTestEnv] create-trial attempt ${attempt} 失敗:`, JSON.stringify(result).substring(0, 100));
-        if (attempt < 2) await adminPage.waitForTimeout(3000);
+        console.log(`[createTestEnv] create-trial attempt ${attempt}/3 失敗:`, JSON.stringify(result).substring(0, 100));
+        if (attempt < 3) await adminPage.waitForTimeout(5000);
     }
 
     await adminContext.close();
