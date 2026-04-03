@@ -290,6 +290,7 @@ test.beforeAll(async ({ browser }) => {
         process.env.TEST_BASE_URL = env.baseUrl;
         process.env.TEST_EMAIL = env.email;
         process.env.TEST_PASSWORD = env.password;
+        fileBeforeAllFailed = false; // リトライ時にリセット
         await env.context.close();
         console.log(`[chart-calendar-2] 自己完結環境: ${BASE_URL}, tableId: ${_fileTableId}`);
     } catch (e) {
