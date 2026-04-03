@@ -200,6 +200,32 @@ async function navigateToAllTypeTable(page) {
 }
 
 /**
+ * テーブル一覧に遷移してチャートモーダルを開く（安定版）
+ * navigateToAllTypeTable + openActionMenu + チャートクリック + モーダル待ち を統合
+ */
+async function openChartModalFromTable(page) {
+    // 一覧に遷移
+    await navigateToAllTypeTable(page);
+    // dropdown待ち（リロードリトライ付き）
+    let ddFound = await page.waitForSelector('button.dropdown-toggle', { timeout: 15000 }).catch(() => null);
+    if (!ddFound) {
+        await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+        await page.waitForTimeout(3000);
+        await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
+    }
+    // アクションメニュー→チャート
+    await page.locator('button.dropdown-toggle').first().click();
+    await page.waitForTimeout(1000);
+    const chartItem = page.locator('.dropdown-item').filter({ hasText: 'チャート' }).first();
+    await expect(chartItem).toBeVisible({ timeout: 5000 });
+    await chartItem.click({ force: true });
+    await page.waitForTimeout(2000);
+    // モーダル待ち
+    await expect(page.locator('.modal.show')).toBeVisible({ timeout: 10000 });
+}
+
+/**
  * アクションドロップダウンメニューを開く（帳票以外のdropdown-toggle）
  */
 async function openActionMenu(page) {
@@ -342,19 +368,8 @@ test.describe('チャート - 基本機能', () => {
             const STEP_TIME = Date.now();
 
 
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
-
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
-            await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開くまで待機（Angular描画に時間がかかる場合がある）
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            // チャートモーダルを開く
+            await openChartModalFromTable(page);
 
             // 設定タブが表示されることを確認
             const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
@@ -394,19 +409,8 @@ test.describe('チャート - 基本機能', () => {
             const STEP_TIME = Date.now();
 
 
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
-
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
-            await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開くまで待機（Angular描画に時間がかかる場合がある）
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            // チャートモーダルを開く
+            await openChartModalFromTable(page);
 
             // 設定タブが表示されることを確認
             const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
@@ -445,19 +449,7 @@ test.describe('チャート - 基本機能', () => {
 
             test.setTimeout(195000); // チャート操作は時間がかかるため5分に延長
             // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
-
-            // チャートを作成（自分のみ参照）
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
-            await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開くまで待機（Angular描画に時間がかかる場合がある）
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            await openChartModalFromTable(page);
 
             // 設定タブが表示されることを確認
             const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
@@ -502,15 +494,7 @@ test.describe('チャート - 基本機能', () => {
             // ALLテストテーブルに直接遷移
             await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            await openChartModalFromTable(page);
 
             // 絞り込みタブをクリック
             const filterTab = page.locator('.modal.show a.nav-link, .modal.show [role="tab"]').filter({ hasText: /絞り込み/ }).first();
@@ -563,15 +547,7 @@ test.describe('チャート - 基本機能', () => {
             // ALLテストテーブルに直接遷移
             await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            await openChartModalFromTable(page);
 
             // 絞り込みタブをクリック
             const filterTab = page.locator('.modal.show a.nav-link, .modal.show [role="tab"]').filter({ hasText: /絞り込み/ }).first();
@@ -624,19 +600,8 @@ test.describe('チャート - 基本機能', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000); // チャート操作は時間がかかるため10分に延長
-            // ALLテストテーブルに直接遷移
-            await navigateToAllTypeTable(page);
-
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")').first();
-            await expect(chartAddMenu).toBeVisible({ timeout: 5000 });
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開くまで待機（Angular描画に時間がかかる場合がある）
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            // チャートモーダルを開く
+            await openChartModalFromTable(page);
 
             // チャート設定タブが表示されることを確認（チャートの場合 heading="チャート設定"）
             const chartSettingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /チャート設定/ }).first();
@@ -755,15 +720,7 @@ test.describe('チャート - 基本機能', () => {
             // ALLテストテーブルに直接遷移
             await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            await openChartModalFromTable(page);
 
             // 絞り込みタブをクリック
             const filterTab = page.locator('.modal.show a.nav-link, .modal.show [role="tab"]').filter({ hasText: /絞り込み/ }).first();
@@ -824,15 +781,7 @@ test.describe('チャート - 基本機能', () => {
             // ALLテストテーブルに直接遷移
             await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            await openChartModalFromTable(page);
 
             // 「デフォルト設定」タブを探す
             const defaultTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /デフォルト設定/ }).first();
@@ -885,15 +834,7 @@ test.describe('チャート - 基本機能', () => {
             // ALLテストテーブルに直接遷移
             await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            await openChartModalFromTable(page);
 
             // 「行に色を付ける」タブを探す（ビューの場合のみ表示される）
             const colorTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /行に色を付ける/ }).first();
@@ -940,15 +881,7 @@ test.describe('チャート - 基本機能', () => {
             // ALLテストテーブルに直接遷移
             await navigateToAllTypeTable(page);
 
-            await openActionMenu(page);
-
-            const chartAddMenu = page.locator('.dropdown-item:has-text("チャート")');
-            await chartAddMenu.click({ force: true });
-            await waitForAngular(page);
-
-            // チャートモーダルが開いたことを確認
-            const modal = page.locator('.modal.show');
-            await expect(modal).toBeVisible({ timeout: 10000 });
+            await openChartModalFromTable(page);
 
             // 「行に色を付ける」タブを探す（ビューの場合のみ表示される）
             const colorTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /行に色を付ける/ }).first();
