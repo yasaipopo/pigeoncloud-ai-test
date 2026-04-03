@@ -1,54 +1,29 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { createAuthContext } = require('./helpers/auth-context');
+const { createTestEnv } = require('./helpers/create-test-env');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { waitForEmail, deleteTestEmails } = require('./helpers/mail-checker');
 const { webhookUrl, resetWebhook, waitForWebhook } = require('./helpers/webhook-checker');
 const { setupSmtp: setupSmtpApi } = require('./helpers/debug-settings');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 
-const BASE_URL = process.env.TEST_BASE_URL;
+let BASE_URL = process.env.TEST_BASE_URL;
 // メール通知テスト用の受信アドレス（.envのIMAP_USERと同じ）
 const TEST_MAIL_ADDRESS = process.env.IMAP_USER || 'test@loftal.sakura.ne.jp';
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 /**
  * ログイン共通関数
  */
 async function login(page, email, password) {
-    await page.goto(BASE_URL + '/admin/login');
-    // networkidleを待ってAngularがCSRFトークンを取得してからフォームに入力する
-    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
-    // storageStateでログイン済みならリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    if (page.url().includes('/login')) {
+        await page.fill('#id', email || EMAIL);
+        await page.fill('#password', password || PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
-    // ログインフォームが表示されなければリダイレクト途中
-    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    await page.waitForSelector('#id', { state: 'visible', timeout: 10000 }).catch(() => {});
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-    } catch (e) {
-        if (page.url().includes('/admin/login')) {
-            // CSRFエラー時のリトライ: 再度networkidleまで待ってからログイン
-            await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-            await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-        }
-    }
-    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -608,24 +583,27 @@ test.describe('通知設定', () => {
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const { context, page } = await createAuthContext(browser);
-            // about:blankではcookiesが送られないため、先にアプリURLに遷移
-            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) {
-                // リトライ: セッション切れ対策
-                await ensureLoggedIn(page);
-                tableId = await getAllTypeTableId(page);
-            }
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await context.close();
+            test.setTimeout(180000);
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            tableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+            await env.context.close();
         });
 
     test.beforeEach(async ({ page }) => {
             test.setTimeout(120000);
-            // storageStateが有効ならensureLoggedInで高速化（5秒以内）
-            await ensureLoggedIn(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 

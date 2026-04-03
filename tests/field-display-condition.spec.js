@@ -1,12 +1,11 @@
 // @ts-check
 // fields-5.spec.js: フィールドテスト Part 5 (全フィールドタイプ表示条件追加オプション確認 850系)
 const { test, expect } = require('@playwright/test');
-const { getAllTypeTableId } = require('./helpers/table-setup');
-const { createAuthContext } = require('./helpers/auth-context');
+const { createTestEnv } = require('./helpers/create-test-env');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -18,8 +17,13 @@ async function waitForAngular(page, timeout = 15000) {
 }
 
 async function login(page) {
-    const { ensureLoggedIn } = require('./helpers/ensure-login');
-    await ensureLoggedIn(page, EMAIL, PASSWORD);
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    if (page.url().includes('/login')) {
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
 }
 
 async function closeTemplateModal(page) {
@@ -153,56 +157,30 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
 
     let tableId = null;
     let editUrl = null;
-    let beforeAllFailed = false;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        const maxRetries = 3;
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            const { context, page } = await createAuthContext(browser);
-            try {
-                // about:blankではcookiesが送られないため、先にアプリURLに遷移
-                await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-                await closeTemplateModal(page);
-                tableId = await getAllTypeTableId(page);
-
-                // LOGIN_ERROR時はreloginしてリトライ
-                if (tableId === '__LOGIN_ERROR__') {
-                    console.log(`[beforeAll] LOGIN_ERROR検出 (attempt ${attempt}/${maxRetries}), relogin実行`);
-                    const email = process.env.TEST_EMAIL || 'admin';
-                    const password = process.env.TEST_PASSWORD || '';
-                    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-                    await page.fill('#id', email).catch(() => {});
-                    await page.fill('#password', password).catch(() => {});
-                    await page.click('button[type=submit].btn-primary').catch(() => {});
-                    await page.waitForURL('**/admin/dashboard', { timeout: 15000 }).catch(() => {});
-                    await page.waitForTimeout(1500);
-                    tableId = await getAllTypeTableId(page);
-                }
-
-                if (tableId && tableId !== '__LOGIN_ERROR__') {
-                    editUrl = `${BASE_URL}/admin/dataset/edit/${tableId}`;
-                    console.log(`[beforeAll] tableId=${tableId}, editUrl=${editUrl}`);
-                    await context.close();
-                    return; // 成功
-                }
-                console.log(`[beforeAll] tableId取得失敗 (attempt ${attempt}/${maxRetries}): tableId=${tableId}`);
-            } catch (e) {
-                console.log(`[beforeAll] 例外 (attempt ${attempt}/${maxRetries}): ${e.message}`);
-            }
-            await context.close();
-            if (attempt < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, 3000));
-            }
-        }
-        // 全リトライ失敗: cascade防止のためthrowせずフラグを立てる
-        console.error('[beforeAll] テーブルID取得が全リトライ失敗。テストはスキップされます。');
-        beforeAllFailed = true;
+        test.setTimeout(180000);
+        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        tableId = env.tableId;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        editUrl = `${BASE_URL}/admin/dataset/edit/${tableId}`;
+        console.log(`[beforeAll] tableId=${tableId}, editUrl=${editUrl}`);
+        await env.context.close();
     });
 
     test.beforeEach(async ({ page }) => {
-        test.skip(beforeAllFailed, 'beforeAllが失敗したためスキップ');
-        await login(page);
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
         await closeTemplateModal(page);
     });
 

@@ -1,31 +1,16 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { ensureLoggedIn, fullLogin } = require('./helpers/ensure-login');
-const fs = require('fs');
-const path = require('path');
-
-// storageStateを利用したbeforeAll用ログインコンテキスト作成ヘルパー
-async function createLoginContext(browser) {
-    const agentNum = process.env.AGENT_NUM || '1';
-    const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
-    if (fs.existsSync(authStatePath)) {
-        try {
-            return await browser.newContext({ storageState: authStatePath });
-        } catch (e) {
-            console.warn(`[createLoginContext] storageState読み込み失敗、新規コンテキストで続行: ${e.message}`);
-        }
-    }
-    return await browser.newContext();
-}
+const { ensureLoggedIn } = require('./helpers/ensure-login');
+const { createTestEnv } = require('./helpers/create-test-env');
 
 // =============================================================================
 // 未分類テスト（580件）
 // 主要な代表ケースを実装し、残りは test.todo() でマーク
 // =============================================================================
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -44,64 +29,13 @@ const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings'
  * ログイン共通関数
  */
 async function login(page, email, password) {
-    // すでにログイン済み（dashboardにいる）場合はスキップ
-    try {
-        const currentUrl = page.url();
-        if (currentUrl && currentUrl.includes('/admin/') && !currentUrl.includes('/admin/login')) {
-            return;
-        }
-    } catch (e) { /* ignore */ }
-    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-    // storageStateでログイン済みならリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    if (page.url().includes('/login')) {
+        await page.fill('#id', email || EMAIL);
+        await page.fill('#password', password || PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
-    // ログインフォームが表示されなければリダイレクト途中
-    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    await waitForAngular(page);
-    // アカウントロックチェック
-    const bodyText = await page.innerText('body').catch(() => '');
-    if (bodyText.includes('アカウントロック') || bodyText.includes('account lock')) {
-        throw new Error('アカウントロック: テスト環境のログインが制限されています');
-    }
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-    } catch (e) {
-        // アカウントロックエラーをチェック
-        const errText = await page.innerText('body').catch(() => '');
-        if (errText.includes('アカウントロック') || errText.includes('account lock')) {
-            throw new Error('アカウントロック: テスト環境のログインが制限されています');
-        }
-        // 利用規約同意画面への対処
-        const termsCheckbox = page.locator('input[type=checkbox]').first();
-        if (await termsCheckbox.count() > 0) {
-            await termsCheckbox.check();
-            await page.waitForTimeout(500);
-            const continueBtn = page.locator('button').filter({ hasText: '続ける' }).first();
-            if (await continueBtn.count() > 0) {
-                await continueBtn.click();
-                await waitForAngular(page);
-                await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
-            }
-        } else if (page.url().includes('/admin/login')) {
-            // Laddaボタンが無効化されている場合は有効になるまで待機
-            await page.waitForSelector('button[type=submit].btn-primary:not([disabled])', { timeout: 30000 }).catch(() => {});
-            await page.waitForTimeout(1000);
-            await page.fill('#id', email || EMAIL);
-            await page.fill('#password', password || PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-        }
-    }
-    await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
 
 /**
@@ -277,6 +211,21 @@ async function checkPage(page, path) {
     expect(bodyText).not.toContain('404 Not Found');
 }
 
+// ファイルレベル: 専用テスト環境の作成
+let _sharedTableId = null;
+test.beforeAll(async ({ browser }) => {
+    test.setTimeout(180000);
+    const env = await createTestEnv(browser, { withAllTypeTable: true });
+    BASE_URL = env.baseUrl;
+    EMAIL = env.email;
+    PASSWORD = env.password;
+    _sharedTableId = env.tableId;
+    process.env.TEST_BASE_URL = env.baseUrl;
+    process.env.TEST_EMAIL = env.email;
+    process.env.TEST_PASSWORD = env.password;
+    await env.context.close();
+});
+
 // =============================================================================
 // 文字列表示設定（145系）
 // =============================================================================
@@ -295,20 +244,19 @@ test.describe('文字列表示設定（145系）', () => {
     // 145-01(B): 全文字表示設定時の折り返し表示
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -369,19 +317,19 @@ test.describe('埋め込みフォーム・公開フォーム（128, 129系）', 
     //       テーブルページが正常に表示されることを確認する
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -448,19 +396,19 @@ test.describe('列表示幅設定（191系）', () => {
     // 191: 列の表示幅設定
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -511,19 +459,19 @@ test.describe('大量データ（211系）', () => {
     // 211: 大量データでのキャッシュテスト（簡易版 - ページ表示確認のみ）
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -566,19 +514,19 @@ test.describe('表示条件設定（250系）', () => {
     // 250: 項目削除時の表示条件設定との連携
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -646,10 +594,16 @@ test.describe('表示条件設定（250系）', () => {
 
 test.describe('ユーザー管理（251系）', () => {
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-    });
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
+            await closeTemplateModal(page);
+        });
 
     // -------------------------------------------------------------------------
     // 251: ユーザー管理テーブルのログイン状態ソート
@@ -681,19 +635,19 @@ test.describe('権限設定（262系）', () => {
     // 262: テーブル権限設定 + 項目権限設定の組み合わせ
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -742,8 +696,14 @@ test.describe('2段階認証（267系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -784,19 +744,19 @@ test.describe('検索機能（270系）', () => {
     // 270: 複数項目の簡易検索と虫眼鏡検索
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -840,19 +800,19 @@ test.describe('自動採番（273系）', () => {
     // 273: 自動採番フォーマット空時のデフォルト採番形式
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -921,22 +881,21 @@ test.describe('自動採番（273系）', () => {
 test.describe('リッチテキスト（274系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        const context = await createLoginContext(browser);
-        const page = await context.newPage();
-        await ensureLoggedIn(page);
-        tableId = await getAllTypeTableId(page);
-        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-        await page.close();
-        await context.close();
-    });
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
+        });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-    });
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
+            await closeTemplateModal(page);
+        });
 
     // -------------------------------------------------------------------------
     // 274: リッチテキスト時に追加オプション設定が開くこと
@@ -992,20 +951,19 @@ test.describe('日時フォーマット（275系）', () => {
     // 275: 日時フォーマット指定のチェック外し後の動作
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1078,20 +1036,19 @@ test.describe('循環参照エラー（291系）', () => {
     // 291: 他テーブル参照の循環設定でエラーが出ること
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1160,20 +1117,19 @@ test.describe('一括編集（312系）', () => {
     // 312: 一括編集モーダルでIDを選択して対象レコードのみ更新
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1217,7 +1173,13 @@ test.describe('ダッシュボード集計（315系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
-            await ensureLoggedIn(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1258,19 +1220,19 @@ test.describe('テーブル削除ロック（349系）', () => {
     // 349: テーブルの削除ロック機能
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1355,8 +1317,14 @@ test.describe('ログイン失敗制限（357系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1394,7 +1362,13 @@ test.describe('メニュー並び替え（361系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
-            await ensureLoggedIn(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1435,21 +1409,19 @@ test.describe('CSVキャンセル（367系）', () => {
     // 367: CSVアップロード/ダウンロードのキャンセル機能
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            // table要素を描画するためにレコードを追加（空テーブルはtableが描画されない）
-            await createAllTypeData(page, 3).catch(() => {});
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1496,22 +1468,19 @@ test.describe('ヘッダー固定（370系）', () => {
     // 370: テーブル一覧のヘッダー1行目固定機能
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            // 空テーブルは<table>要素が描画されないためレコードを追加
-            await createAllTypeData(page, 3).catch(() => {});
-            await page.waitForTimeout(500);
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1542,22 +1511,21 @@ test.describe('ヘッダー固定（370系）', () => {
 test.describe('桁数カンマ区切り（256系）', () => {
     let tableId = null;
 
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        const context = await createLoginContext(browser);
-        const page = await context.newPage();
-        await ensureLoggedIn(page);
-        tableId = await getAllTypeTableId(page);
-        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-        await page.close();
-        await context.close();
-    });
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
+        });
 
     test.beforeEach(async ({ page }) => {
-        test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-        await ensureLoggedIn(page);
-        await closeTemplateModal(page);
-    });
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
+            await closeTemplateModal(page);
+        });
 
     // -------------------------------------------------------------------------
     // 256: 桁数(カンマ区切り)設定
@@ -1584,20 +1552,19 @@ test.describe('スマートフォン表示（146系）', () => {
     // 146-01: スマートフォンで選択肢タップ時にズームされないこと
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1644,25 +1611,19 @@ test.describe('子テーブル（325, 341系）', () => {
     // 341: 子テーブル設定でレコード詳細画面が表示されること
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            // about:blankからfetchするとcookiesが送られないため、先にアプリURLに遷移
-            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId || tableId === '__LOGIN_ERROR__') {
-                await login(page);
-                tableId = await getAllTypeTableId(page);
-            }
-            if (!tableId || tableId === '__LOGIN_ERROR__') throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1742,23 +1703,19 @@ test.describe('一覧編集モード（324系）', () => {
     // 324: 一覧編集モードで編集後に詳細画面の値が消えないこと
     // -------------------------------------------------------------------------
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            // 空テーブルは<table>要素が描画されないためレコードを追加
-            await createAllTypeData(page, 3).catch(() => {});
-            await page.waitForTimeout(500);
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1858,35 +1815,19 @@ test.describe('未実装テスト（todo）', () => {
 
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
-    test.beforeAll(async ({ browser, request }) => {
-            test.setTimeout(120000);
-            // debug-tools/settings が認証不要の場合のみ動作（失敗しても続行）
-            try { await removeUserLimit(request); } catch (e) {}
-            try { await removeTableLimit(request); } catch (e) {}
-            // テーブルを事前に作成しておく（247-249などがcreateAllTypeTableを呼ばないため）
-            try {
-                const context = await createLoginContext(browser);
-                const page = await context.newPage();
-                await ensureLoggedIn(page);
-                // getAllTypeTableIdでtableIdを取得（テーブルはglobal-setupで作成済み）
-                tableId = await getAllTypeTableId(page);
-                if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-                // 空テーブルは<table>要素が描画されないためレコードを追加
-                await createAllTypeData(page, 3).catch(() => {});
-                await page.close();
-                await context.close();
-            } catch (e) {
-                if (e.message && e.message.includes('アカウントロック')) {
-                    console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
-                    process.exit(1);
-                }
-                console.log('beforeAll table creation error (ignored):', e.message);
-            }
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test('UC01: フィールド設定', async ({ page }) => {
@@ -2700,20 +2641,19 @@ test.describe('追加実装テスト（314-579系）', () => {
 
 
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
-            await ensureLoggedIn(page);
+            test.setTimeout(120000);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -5103,22 +5043,19 @@ test.describe('追加実装テスト（282-593系）', () => {
     // -------------------------------------------------------------------------
 
 
-    test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            // 空テーブルでは<table>要素が描画されないためレコードを追加
-            await createAllTypeData(page, 3).catch(() => {});
-            await page.waitForTimeout(1000);
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
             test.setTimeout(120000);
-            await ensureLoggedIn(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -8471,20 +8408,19 @@ test.describe('追加実装テスト（683-838系）', () => {
     // -------------------------------------------------------------------------
 
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(75000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
             test.setTimeout(120000);
-            await ensureLoggedIn(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 

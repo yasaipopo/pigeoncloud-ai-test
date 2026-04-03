@@ -1,72 +1,26 @@
 // @ts-check
-// debug-settings.js が process.env.BASE_URL を使うため、TEST_BASE_URL を設定しておく
-if (!process.env.BASE_URL) {
-    process.env.BASE_URL = process.env.TEST_BASE_URL || '';
-}
 const { test, expect } = require('@playwright/test');
-const { getAllTypeTableId } = require('./helpers/table-setup');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
-const fs = require('fs');
-const path = require('path');
+const { createTestEnv } = require('./helpers/create-test-env');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 /**
  * ログイン共通関数
  */
 async function login(page, email, password) {
-    await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
-    // storageStateでログイン済みならリダイレクトされる
-    if (!page.url().includes('/admin/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    if (page.url().includes('/login')) {
+        await page.fill('#id', email || EMAIL);
+        await page.fill('#password', password || PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
-    // ログインフォームが表示されなければリダイレクト途中
-    const _loginField = await page.waitForSelector('#id', { timeout: 5000 }).catch(() => null);
-    if (!_loginField) {
-        await page.waitForSelector('.navbar', { timeout: 5000 });
-        return;
-    }
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
-    await page.click('button[type=submit].btn-primary');
-    try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-    } catch (e) {
-        // アカウントロックエラーの早期検出
-        const alertEl = page.locator('.alert, [role=alert]');
-        if (await alertEl.count() > 0) {
-            const alertText = await alertEl.first().innerText().catch(() => '');
-            if (alertText.includes('ロック') || alertText.includes('lock')) {
-                throw new Error(`アカウントロック: ${alertText}`);
-            }
-        }
-        if (page.url().includes('/admin/login')) {
-            await page.waitForTimeout(1000);
-            // リトライ前にアラートを再確認
-            const retryAlert = page.locator('.alert, [role=alert]');
-            if (await retryAlert.count() > 0) {
-                const retryAlertText = await retryAlert.first().innerText().catch(() => '');
-                if (retryAlertText.includes('ロック') || retryAlertText.includes('lock')) {
-                    throw new Error(`アカウントロック: ${retryAlertText}`);
-                }
-            }
-            await page.fill('#id', email || EMAIL);
-            await page.fill('#password', password || PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
-        }
-    }
-    await page.waitForTimeout(2000);
 }
 
-/**
- * storageStateを使ったブラウザコンテキストを作成する
- */
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -74,20 +28,6 @@ async function waitForAngular(page, timeout = 15000) {
         // data-ng-readyが設定されないケースがある: networkidleで代替
         await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
-}
-
-async function createLoginContext(browser) {
-    const agentNum = process.env.AGENT_NUM || '1';
-
-    const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
-    if (fs.existsSync(authStatePath)) {
-        try {
-            return await browser.newContext({ storageState: authStatePath });
-        } catch (e) {
-            console.warn(`[createLoginContext] storageState読み込み失敗、新規コンテキストで続行: ${e.message}`);
-        }
-    }
-    return await browser.newContext();
 }
 
 /**
@@ -220,6 +160,23 @@ async function getFirstTableId(page) {
     return result;
 }
 
+// ファイルレベル: 専用テスト環境の作成
+let _sharedTableId = null;
+test.beforeAll(async ({ browser }) => {
+    test.setTimeout(180000);
+    const env = await createTestEnv(browser, { withAllTypeTable: true });
+    BASE_URL = env.baseUrl;
+    EMAIL = env.email;
+    PASSWORD = env.password;
+    _sharedTableId = env.tableId;
+    process.env.TEST_BASE_URL = env.baseUrl;
+    process.env.TEST_EMAIL = env.email;
+    process.env.TEST_PASSWORD = env.password;
+    // debug-settingsモジュールのBASE_URL同期
+    process.env.BASE_URL = env.baseUrl;
+    await env.context.close();
+});
+
 // =============================================================================
 // レイアウト・メニュー・UI・ダッシュボード（テーブル不要）テスト
 // =============================================================================
@@ -265,46 +222,13 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     // ---------------------------------------------------------------------------
 
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            try {
-                await ensureLoggedIn(page);
-            } catch (e) {
-                console.log('beforeAll ログイン失敗（アカウントロック等）:', e.message);
-                await page.close();
-                await context.close();
-                return;
-            }
-            // ユーザー上限・テーブル上限をpage経由（セッション付き）で解除
-            // 正しいエンドポイント: /api/admin/debug/settings
-            try {
-                const resp = await page.evaluate(async (baseUrl) => {
-                    const r = await fetch(baseUrl + '/api/admin/debug/settings', {
-                        method: 'POST',
-                        headers: {'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json'},
-                        credentials: 'include',
-                        body: JSON.stringify({ table: 'setting', data: { max_user: 9999, max_table_num: 9999 } })
-                    });
-                    return r.json();
-                }, BASE_URL);
-                console.log('ユーザー/テーブル上限解除:', resp.result);
-            } catch (e) { console.log('上限解除failed:', e.message); }
-            await page.close();
-            await context.close();
-        });
-
     test.beforeEach(async ({ page }) => {
-            try {
-                await ensureLoggedIn(page);
-            } catch (e) {
-                if (e.message && e.message.includes('アカウントロック')) {
-                    console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
-                    process.exit(1);
-                    return;
-                }
-                throw e;
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
         });
@@ -689,28 +613,17 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
 
 
-    test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+    test.beforeAll(async () => {
+            tableId = _sharedTableId;
         });
 
     test.beforeEach(async ({ page }) => {
-            try {
-                await ensureLoggedIn(page);
-            } catch (e) {
-                if (e.message && e.message.includes('アカウントロック')) {
-                    // アカウントロック時はテストをスキップする
-                    console.error('FATAL: アカウントロック検出 - テスト実行を中断します:', e.message);
-                    process.exit(1);
-                    return;
-                }
-                throw e;
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
         });
