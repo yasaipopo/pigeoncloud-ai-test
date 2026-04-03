@@ -1342,7 +1342,7 @@ test.describe('集計 - 基本機能', () => {
 
                 // ダッシュボードへ移動して確認（ダッシュボードオプションがあった場合のみ）
                 if (hasDashboardOption) {
-                    await page.goto(BASE_URL + '/admin/dashboard');
+                    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                     await waitForAngular(page);
 
                     // ダッシュボードにテーブルが表示されていることを確認

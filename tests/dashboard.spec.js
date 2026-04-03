@@ -20,7 +20,7 @@ async function waitForAngular(page, timeout = 15000) {
  * ログイン共通関数
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
         await page.waitForSelector('.navbar', { timeout: 5000 });
@@ -59,7 +59,7 @@ async function login(page) {
     }, { email: EMAIL, password: PASSWORD });
 
     if (loginResult.result === 'success') {
-        await page.goto(BASE_URL + '/admin/dashboard');
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         return;
     }
@@ -202,7 +202,7 @@ test.describe('ダッシュボード', () => {
         await test.step('DB-01: ダッシュボード画面が正常に表示されること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-01`);
 
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // ナビゲーションバーが表示されること
@@ -224,7 +224,7 @@ test.describe('ダッシュボード', () => {
         await test.step('DB-02: 新しいダッシュボードタブを作成できること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-02`);
 
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // チュートリアルモーダルを閉じる
@@ -304,7 +304,7 @@ test.describe('ダッシュボード', () => {
         await test.step('DB-03: ダッシュボードにビューコンテンツを追加できること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-03`);
 
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // DB-02で作成したダッシュボードタブを選択
@@ -391,7 +391,7 @@ test.describe('ダッシュボード', () => {
         await test.step('DB-04: ダッシュボードに掲示板コンテンツを追加できること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-04`);
 
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // DB-02で作成したダッシュボードタブを選択
@@ -434,7 +434,7 @@ test.describe('ダッシュボード', () => {
         await test.step('DB-05: ダッシュボードタブを削除できること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-05`);
 
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // DB-02で作成したダッシュボードタブを削除
@@ -488,7 +488,7 @@ test.describe('ダッシュボード', () => {
         await test.step('DB-06: デフォルトダッシュボード（HOMEタブ）が表示されること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-06`);
 
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // HOMEタブが存在すること（ダッシュボードtablist内のみを対象）

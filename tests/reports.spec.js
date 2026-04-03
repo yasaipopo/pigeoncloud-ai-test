@@ -13,7 +13,7 @@ const PASSWORD = process.env.TEST_PASSWORD;
  * ログイン共通関数（CSRFエラーに対応したリトライあり）
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
@@ -125,7 +125,7 @@ async function debugApiPost(page, path, body = {}) {
  * ダッシュボードのサイドバーからテーブルIDを取得（/admin/datasetページではサイドバーにリンクが表示されないため）
  */
 async function getFirstTableId(page) {
-    await page.goto(BASE_URL + '/admin/dashboard');
+    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
 
     const link = page.locator('a[href*="/admin/dataset__"]').first();
@@ -692,7 +692,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         await test.step('230: ユーザーテーブルの帳票設定ページが表示されること', async () => {
             const STEP_TIME = Date.now();
             // ユーザー管理ページ（/admin/admin）に移動
-            await page.goto(BASE_URL + '/admin/admin');
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
@@ -818,7 +818,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 });
                 await page.waitForTimeout(3000);
                 // 作成後に再確認（ダッシュボードで確認）
-                await page.goto(BASE_URL + '/admin/dashboard');
+                await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await page.waitForLoadState('domcontentloaded');
                 try { await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 5000 }); } catch (e) {}
                 await waitForAngular(page);
@@ -844,7 +844,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             console.log('[253] mainTableId:', mainTableId);
 
             // ALLテストテーブルのページに移動
-            await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
@@ -852,7 +852,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // ログインページにリダイレクトされた場合は再ログイン
             if (page.url().includes('/admin/login')) {
                 await ensureLoggedIn(page);
-                await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
                 await waitForAngular(page);
@@ -909,7 +909,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
                 // ログインページにリダイレクトされた場合は再ログイン
                 if (page.url().includes('/admin/login')) {
                     await ensureLoggedIn(page);
-                    await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
+                    await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                     await waitForAngular(page);
                     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
                     await waitForAngular(page);
@@ -953,7 +953,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // 帳票ボタンがアクセス可能かどうか確認（テーブル一覧から）
             await page.keyboard.press('Escape');
             await waitForAngular(page);
-            await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 

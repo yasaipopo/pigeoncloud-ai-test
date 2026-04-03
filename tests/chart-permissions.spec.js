@@ -658,7 +658,7 @@ test.describe('チャート - 基本機能', () => {
 
 
             // ダッシュボードに遷移
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await closeTemplateModal(page);

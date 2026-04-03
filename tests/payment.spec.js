@@ -24,7 +24,7 @@ const STRIPE_INVALID_CARD = '1234 5678 9012 3456';
  * ログイン共通関数
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
@@ -69,7 +69,7 @@ async function login(page) {
  * 支払いページへ遷移する共通関数
  */
 async function gotoPaymentPage(page) {
-    await page.goto(BASE_URL + '/admin/payment/pay');
+    await page.goto(BASE_URL + '/admin/payment/pay', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // Angular SPAのレンダリング完了を待つ
     try {

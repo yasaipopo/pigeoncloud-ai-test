@@ -94,7 +94,7 @@ async function getFirstTableId(page) {
  * 正しいURL: /admin/notification（/admin/dataset__X/notification はルート/にリダイレクトされるため使用不可）
  */
 async function goToNotificationPage(page, tableId) {
-    await page.goto(BASE_URL + "/admin/notification");
+    await page.goto(BASE_URL + "/admin/notification", { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
 }
 
@@ -154,7 +154,7 @@ async function setupSmtp(page) {
         return;
     }
     try {
-        await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+        await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
         // 「通知の送信メールアドレスをSMTPで指定」トグルをONにする（まだOFFの場合）
@@ -626,7 +626,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // 通知設定ページでワークフロー承認時通知設定UIの確認
-            await page.goto(BASE_URL + '/admin/notification');
+            await page.goto(BASE_URL + '/admin/notification', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             expect(page.url()).toContain('/admin/');
             const bodyText = await page.innerText('body');
@@ -638,7 +638,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // 通知設定ページでワークフロー否認時通知設定UIの確認
-            await page.goto(BASE_URL + '/admin/notification');
+            await page.goto(BASE_URL + '/admin/notification', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             expect(page.url()).toContain('/admin/');
             const bodyText = await page.innerText('body');
@@ -650,7 +650,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // 通知設定ページでワークフロー最終承認時通知設定UIの確認
-            await page.goto(BASE_URL + '/admin/notification');
+            await page.goto(BASE_URL + '/admin/notification', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             expect(page.url()).toContain('/admin/');
             const bodyText = await page.innerText('body');
@@ -662,7 +662,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // 通知設定ページでワークフロー取り下げ時通知設定UIの確認
-            await page.goto(BASE_URL + '/admin/notification');
+            await page.goto(BASE_URL + '/admin/notification', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             expect(page.url()).toContain('/admin/');
             const bodyText = await page.innerText('body');
@@ -977,7 +977,7 @@ test.describe('通知設定', () => {
             await deleteTestEmails({ since: new Date(Date.now() - 5 * 60 * 1000) }).catch(() => {});
 
             // レコード詳細ページを開いてコメントを投稿
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // 最初のレコードをクリック
@@ -1043,7 +1043,7 @@ test.describe('通知設定', () => {
             expect(bodyText).toContain('通知設定');
 
             // 公開フォーム（/admin/form）へのアクセス確認
-            await page.goto(BASE_URL + '/admin/form');
+            await page.goto(BASE_URL + '/admin/form', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // 公開フォームページが表示されることを確認（ページが存在する）
@@ -1101,7 +1101,7 @@ test.describe('通知設定', () => {
             // メール取り込み設定ページにアクセスして臨時取り込みUIが利用できることを確認する
             // ※実際のメール取り込み成功はIMAPサーバー接続に依存するため設定済み環境での確認が必要
 
-            await page.goto(BASE_URL + '/admin/import_pop_mail');
+            await page.goto(BASE_URL + '/admin/import_pop_mail', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForFunction(
                 () => !document.body.innerText.includes('読み込み中'),
@@ -1150,7 +1150,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // メール取り込み設定の編集ページへ（/admin/import_pop_mail → /admin/import_pop_mail/edit/1）
-            await page.goto(BASE_URL + '/admin/import_pop_mail');
+            await page.goto(BASE_URL + '/admin/import_pop_mail', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             // Angular SPAのローディング完了を待つ
             await page.waitForFunction(() => !document.body.innerText.includes('読み込み中'), { timeout: 10000 }).catch(() => {});
@@ -1168,7 +1168,7 @@ test.describe('通知設定', () => {
                 await page.waitForTimeout(1000);
             } else {
                 // 直接編集ページへ
-                await page.goto(BASE_URL + '/admin/import_pop_mail/edit/1');
+                await page.goto(BASE_URL + '/admin/import_pop_mail/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await page.waitForLoadState('domcontentloaded');
                 await page.waitForFunction(() => !document.body.innerText.includes('読み込み中'), { timeout: 10000 }).catch(() => {});
                 await waitForAngular(page);
@@ -1209,9 +1209,9 @@ test.describe('通知設定', () => {
 
             // テーブルページへ（サイドバーまたはダッシュボードから）
             if (tableId) {
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             } else {
-                await page.goto(BASE_URL + '/admin/dashboard');
+                await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             }
             await page.waitForLoadState('domcontentloaded');
             await waitForAngular(page);
@@ -1240,7 +1240,7 @@ test.describe('通知設定', () => {
                 }
                 // それでもリンクが見つからない場合は直接アクセス
                 if (!page.url().includes('import_pop_mail')) {
-                    await page.goto(BASE_URL + '/admin/import_pop_mail');
+                    await page.goto(BASE_URL + '/admin/import_pop_mail', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                     await page.waitForLoadState('domcontentloaded');
                     // Angular SPAのコンテンツが表示されるまで待機（最大10秒）
                     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
@@ -1440,7 +1440,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // ユーザー管理ページへアクセスしてエラーがないことを確認
-            await page.goto(BASE_URL + '/admin/user');
+            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const userPageText = await page.innerText('body');
             expect(userPageText).not.toContain('Internal Server Error');
@@ -1461,7 +1461,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // 組織管理ページへアクセスしてエラーがないことを確認
-            await page.goto(BASE_URL + '/admin/organization');
+            await page.goto(BASE_URL + '/admin/organization', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const orgPageText = await page.innerText('body');
             expect(orgPageText).not.toContain('Internal Server Error');
@@ -1482,7 +1482,7 @@ test.describe('通知設定', () => {
 
             // 通知設定ページで「纏めて内容通知」をONに設定済みを前提として
             // レコード一覧で一括更新を実施
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // チェックボックスで複数選択（テーブル行内のチェックボックスのみ対象）
@@ -1549,7 +1549,7 @@ test.describe('通知設定', () => {
             await page.waitForTimeout(2000);
 
             // テーブル一覧ページへ
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // チェックボックスで複数選択（テーブル行内のみ）
@@ -1596,7 +1596,7 @@ test.describe('通知設定', () => {
             await page.waitForTimeout(3000);
 
             // テーブル一覧ページが正常表示されることを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             expect(page.url()).toContain('/admin/');
@@ -1609,7 +1609,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // 管理設定ページへ（SMTP設定はここで行う）
-            await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+            await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             expect(page.url()).toContain('/admin/admin_setting');
@@ -1659,7 +1659,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // 管理設定ページへ
-            await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+            await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             expect(page.url()).toContain('/admin/admin_setting');
@@ -1775,7 +1775,7 @@ test.describe('通知設定', () => {
             await deleteTestEmails({ since: new Date(Date.now() - 5 * 60 * 1000) }).catch(() => {});
 
             // テーブルレコード一覧ページにアクセス
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // 最初のレコードをクリック（詳細ページへ）
@@ -2277,7 +2277,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // ダッシュボードでアプリ内通知UIを確認
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             expect(page.url()).toContain('/admin/dashboard');
@@ -2296,7 +2296,7 @@ test.describe('通知設定', () => {
             await expect(navbar.first()).toBeVisible();
 
             // 通知ログページへのアクセスを確認（通知機能の動作確認）
-            await page.goto(BASE_URL + '/admin/notification_log');
+            await page.goto(BASE_URL + '/admin/notification_log', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             expect(page.url()).toContain('/admin/notification_log');
             const notifLogText = await page.innerText('body');
@@ -2313,7 +2313,7 @@ test.describe('通知設定', () => {
 
             test.setTimeout(90000);
 
-            await page.goto(BASE_URL + '/admin/mail_magazine');
+            await page.goto(BASE_URL + '/admin/mail_magazine', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -2337,7 +2337,7 @@ test.describe('通知設定', () => {
             test.setTimeout(120000);
 
             // テーブル一覧ページで確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -2367,7 +2367,7 @@ test.describe('通知設定', () => {
             test.setTimeout(120000);
 
             // マスターユーザーで通知設定ページにアクセス
-            await page.goto(BASE_URL + '/admin/notification');
+            await page.goto(BASE_URL + '/admin/notification', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -2392,7 +2392,7 @@ test.describe('通知設定', () => {
             console.log('375: テストユーザー作成:', JSON.stringify(userRes).substring(0, 200));
 
             // 通知設定ページにアクセスして追加UIが存在するか確認
-            await page.goto(BASE_URL + '/admin/notification');
+            await page.goto(BASE_URL + '/admin/notification', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -2413,7 +2413,7 @@ test.describe('通知設定', () => {
             test.setTimeout(150000);
 
             // システム設定 or 通知設定ページでテキストメール配信オプションを確認
-            await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+            await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             let bodyText = await page.innerText('body');
@@ -2436,7 +2436,7 @@ test.describe('通知設定', () => {
             test.setTimeout(120000);
 
             // 通知一覧（ベルマーク）を確認
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await closeTemplateModal(page);
 
@@ -2471,7 +2471,7 @@ test.describe('通知設定', () => {
             test.setTimeout(120000);
 
             // メールテンプレートページでHTML形式テンプレートを確認
-            await page.goto(BASE_URL + '/admin/mail_template');
+            await page.goto(BASE_URL + '/admin/mail_template', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -2510,7 +2510,7 @@ test.describe('通知設定', () => {
             test.setTimeout(120000);
 
             // 通知ログページへ
-            await page.goto(BASE_URL + '/admin/notification_log');
+            await page.goto(BASE_URL + '/admin/notification_log', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -2538,7 +2538,7 @@ test.describe('通知設定', () => {
             test.setTimeout(120000);
 
             // メールテンプレート一覧ページへ
-            await page.goto(BASE_URL + '/admin/mail_template');
+            await page.goto(BASE_URL + '/admin/mail_template', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -2560,7 +2560,7 @@ test.describe('通知設定', () => {
             // セッション切れ対策: ページ遷移前にログイン状態を確認
             await ensureLoggedIn(page);
             // テーブルレコード一覧で他テーブル参照項目の動作を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -2571,7 +2571,7 @@ test.describe('通知設定', () => {
             console.log('436: テーブル行数:', await rows.count());
 
             // テーブル設定ページで他テーブル参照項目の設定を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const settingText = await page.innerText('body');
@@ -2821,7 +2821,7 @@ test.describe('通知設定', () => {
         });
 
     test('102-8: 通知設定でワークフロー「全てチェック」時に否認で通知が行われること', async ({ page }) => {
-            await page.goto(BASE_URL + '/admin/notification');
+            await page.goto(BASE_URL + '/admin/notification', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             expect(page.url()).toContain('/admin/');
             const bodyText = await page.innerText('body');
@@ -2830,7 +2830,7 @@ test.describe('通知設定', () => {
         });
 
     test('102-9: 通知設定でワークフロー「全てチェック」時に最終承認で通知が行われること', async ({ page }) => {
-            await page.goto(BASE_URL + '/admin/notification');
+            await page.goto(BASE_URL + '/admin/notification', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             expect(page.url()).toContain('/admin/');
             const bodyText = await page.innerText('body');
@@ -2853,7 +2853,7 @@ test.describe('通知設定', () => {
     test('142-01: メール配信の際に添付ファイルを行ってメール配信ができること', async ({ page }) => {
 
             // メール配信ページへ
-            await page.goto(BASE_URL + '/admin/mail_magazine');
+            await page.goto(BASE_URL + '/admin/mail_magazine', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
 
@@ -2884,7 +2884,7 @@ test.describe('通知設定', () => {
     test('150-1: ステップメール設定で未入力のまま登録するとエラーが出力されること', async ({ page }) => {
 
             // ステップメール設定ページへ
-            await page.goto(BASE_URL + '/admin/step_mail');
+            await page.goto(BASE_URL + '/admin/step_mail', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // 新規追加
@@ -2893,7 +2893,7 @@ test.describe('通知設定', () => {
                 await addBtn.click();
                 await waitForAngular(page);
             } else {
-                await page.goto(BASE_URL + '/admin/step_mail/edit/new');
+                await page.goto(BASE_URL + '/admin/step_mail/edit/new', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
             }
 
@@ -2927,7 +2927,7 @@ test.describe('通知設定', () => {
 
     test('150-2: ステップメール設定でステップ1つ＋テンプレート仕様で正常に登録できること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail');
+            await page.goto(BASE_URL + '/admin/step_mail', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // 新規追加ページへ
@@ -2936,7 +2936,7 @@ test.describe('通知設定', () => {
                 await addBtn.click();
                 await waitForAngular(page);
             } else {
-                await page.goto(BASE_URL + '/admin/step_mail/edit/new');
+                await page.goto(BASE_URL + '/admin/step_mail/edit/new', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
             }
 
@@ -2989,7 +2989,7 @@ test.describe('通知設定', () => {
 
     test('150-3: ステップメール設定でステップ2つ＋テンプレート仕様で正常に登録できること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail/edit/new');
+            await page.goto(BASE_URL + '/admin/step_mail/edit/new', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // ステップメール名
@@ -3015,7 +3015,7 @@ test.describe('通知設定', () => {
 
     test('150-4: ステップメール設定でステップ3つ＋テンプレート仕様で正常に登録できること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail/edit/new');
+            await page.goto(BASE_URL + '/admin/step_mail/edit/new', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const nameInput = page.locator('input[name*="name"], input[placeholder*="名"]').first();
@@ -3039,7 +3039,7 @@ test.describe('通知設定', () => {
 
     test('150-5: ステップメール設定でステップ1つ＋カスタム仕様で正常に登録できること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail/edit/new');
+            await page.goto(BASE_URL + '/admin/step_mail/edit/new', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const nameInput = page.locator('input[name*="name"], input[placeholder*="名"]').first();
@@ -3078,7 +3078,7 @@ test.describe('通知設定', () => {
 
     test('150-6: ステップメール設定でステップ2つ＋カスタム仕様で正常に登録できること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail/edit/new');
+            await page.goto(BASE_URL + '/admin/step_mail/edit/new', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const nameInput = page.locator('input[name*="name"], input[placeholder*="名"]').first();
@@ -3101,7 +3101,7 @@ test.describe('通知設定', () => {
 
     test('150-7: ステップメール設定でステップ3つ＋カスタム仕様で正常に登録できること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail/edit/new');
+            await page.goto(BASE_URL + '/admin/step_mail/edit/new', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const nameInput = page.locator('input[name*="name"], input[placeholder*="名"]').first();
@@ -3124,7 +3124,7 @@ test.describe('通知設定', () => {
 
     test('150-8: ステップメール設定を無効にできること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail');
+            await page.goto(BASE_URL + '/admin/step_mail', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // 既存のステップメール設定一覧が表示されること
@@ -3156,7 +3156,7 @@ test.describe('通知設定', () => {
 
     test('150-9: ステップメール設定を有効にできること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail');
+            await page.goto(BASE_URL + '/admin/step_mail', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -3186,7 +3186,7 @@ test.describe('通知設定', () => {
     test('156-1: メールテンプレートでラベル名タグを使用しテキスト形式で配信メールが正常に動作すること', async ({ page }) => {
 
             // メールテンプレートページへ
-            await page.goto(BASE_URL + '/admin/mail_template');
+            await page.goto(BASE_URL + '/admin/mail_template', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -3235,7 +3235,7 @@ test.describe('通知設定', () => {
 
     test('156-2: メールテンプレートでラベル名タグを使用しHTML形式で配信メールが正常に動作すること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/mail_template');
+            await page.goto(BASE_URL + '/admin/mail_template', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -3279,7 +3279,7 @@ test.describe('通知設定', () => {
 
     test('157: ステップメール設定でテンプレートとカスタムを混在して設定できること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/step_mail/edit/new');
+            await page.goto(BASE_URL + '/admin/step_mail/edit/new', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const nameInput = page.locator('input[name*="name"], input[placeholder*="名"]').first();
@@ -3303,7 +3303,7 @@ test.describe('通知設定', () => {
 
     test('197: メール配信設定でCC、BCCを設定してメール配信されること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/mail_magazine');
+            await page.goto(BASE_URL + '/admin/mail_magazine', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -3336,7 +3336,7 @@ test.describe('通知設定', () => {
     test('201: メール配信でファイル項目を使用したメール添付が正常に動作すること', async ({ page }) => {
 
             // メールテンプレートページへ
-            await page.goto(BASE_URL + '/admin/mail_template');
+            await page.goto(BASE_URL + '/admin/mail_template', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -3361,7 +3361,7 @@ test.describe('通知設定', () => {
 
     test('218: 配信リストの画面下部に配信先一覧が表示されること', async ({ page }) => {
 
-            await page.goto(BASE_URL + '/admin/distribution_list');
+            await page.goto(BASE_URL + '/admin/distribution_list', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');

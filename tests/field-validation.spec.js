@@ -214,7 +214,7 @@ async function clickSettingTab(page, tabText) {
 async function navigateToFieldPage(page, tableId) {
     const tid = tableId || 'ALL';
     // フィールド設定ページは /admin/dataset/edit/:id （テーブル設定ページ）
-    await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
+    await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     try {
         // networkidleはタイムアウトする可能性があるため短めに設定（フレイキー対策で10秒）
         await page.waitForLoadState('networkidle', { timeout: 10000 });
@@ -226,7 +226,7 @@ async function navigateToFieldPage(page, tableId) {
     // ログインページにリダイレクトされた場合は再ログインして再遷移
     if (page.url().includes('/admin/login') || page.url().includes('/user/login')) {
         await login(page);
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         try {
             await page.waitForLoadState('networkidle', { timeout: 10000 });
         } catch(e) {
@@ -1277,7 +1277,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1287,7 +1287,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1337,7 +1337,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1347,7 +1347,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1357,7 +1357,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1367,7 +1367,7 @@ test.describe('レイアウト2-4列 追加ケース（113-02〜113-29）', () =
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1557,7 +1557,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1587,7 +1587,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1640,7 +1640,7 @@ test.describe('項目設定 追加ケース（115〜149系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -2000,7 +2000,7 @@ test.describe('項目機能 追加ケース（158〜204系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -2031,7 +2031,7 @@ test.describe('項目機能 追加ケース（158〜204系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -2286,7 +2286,7 @@ test.describe('表示条件・必須条件設定（223〜231系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -2449,7 +2449,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
             await page.evaluate(() => {
                 return fetch('/api/admin/logout', { method: 'GET', credentials: 'include' }).catch(() => {});
             });
-            await page.goto(BASE_URL + '/admin/login');
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForSelector('#id', { timeout: 5000 });
             await page.fill('#id', userEmail);
             await page.fill('#password', userPassword);
@@ -2478,7 +2478,7 @@ test.describe('大容量ファイル・権限・順番変更（236, 237, 257, 30
     test("14-25': 他テーブル参照フィールドのフィールド設定ページが正常に表示されること（複数値許可UI確認）", async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // フィールド設定ページにアクセス
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');

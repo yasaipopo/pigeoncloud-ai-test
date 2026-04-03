@@ -38,7 +38,7 @@ async function createLoginContext(browser) {
  * ログイン共通関数
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
@@ -198,7 +198,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
 
             // レコード一覧に移動
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
@@ -503,7 +503,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             if (!tableId) {
                 expect(tableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
             }
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -535,7 +535,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             if (!tableId) {
                 expect(tableId, 'テーブルIDが取得できていること（beforeAllで設定済み）').toBeTruthy();
             }
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');

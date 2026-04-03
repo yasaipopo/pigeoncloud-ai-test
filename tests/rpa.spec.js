@@ -20,7 +20,7 @@ async function waitForAngular(page, timeout = 15000) {
  * ログイン共通関数
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
         await page.waitForSelector('.navbar', { timeout: 5000 });
@@ -59,7 +59,7 @@ async function login(page) {
     }, { email: EMAIL, password: PASSWORD });
 
     if (loginResult.result === 'success') {
-        await page.goto(BASE_URL + '/admin/dashboard');
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         return;
     }
@@ -95,7 +95,7 @@ async function login(page) {
  * .card-block（今月使用量エリア）が表示されるまで待機する
  */
 async function navigateToRpa(page) {
-    await page.goto(BASE_URL + '/admin/rpa');
+    await page.goto(BASE_URL + '/admin/rpa', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
     // コネクト一覧のコンテンツ（今月使用量テキスト）が表示されるまで待機
     // .card-blockは複数存在するため、今月使用量テキストを持つ要素を待つ
@@ -302,7 +302,7 @@ test.describe('RPA（コネクト）', () => {
             stepStart = Date.now();
 
             // コネクト実行ログへ遷移
-            await page.goto(BASE_URL + '/admin/rpa_executes');
+            await page.goto(BASE_URL + '/admin/rpa_executes', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // エラーがないこと

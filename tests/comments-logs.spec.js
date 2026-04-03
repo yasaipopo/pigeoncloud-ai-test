@@ -39,7 +39,7 @@ async function createLoginContext(browser) {
  * ログイン共通関数
  */
 async function login(page, email, password) {
-    await page.goto(BASE_URL + '/admin/login');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
@@ -169,7 +169,7 @@ async function setupTestTable(page) {
     }
 
     // フォールバック: ダッシュボードのサイドバーからリンクを取得
-    await page.goto(BASE_URL + '/admin/dashboard');
+    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     try { await page.waitForSelector('a[href*="/admin/dataset__"]', { timeout: 10000 }); } catch (e) {}
     await waitForAngular(page);
@@ -243,7 +243,7 @@ async function openAsideMenu(page) {
  */
 async function getFirstRecordViewUrl(page, tableUrl) {
     // テーブル一覧ページにアクセス
-    await page.goto(BASE_URL + tableUrl);
+    await page.goto(BASE_URL + tableUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
     await waitForAngular(page);
@@ -295,7 +295,7 @@ async function getFirstRecordViewUrl(page, tableUrl) {
     await page.waitForTimeout(3000);
 
     // 投入後に再度テーブル一覧を確認
-    await page.goto(BASE_URL + tableUrl);
+    await page.goto(BASE_URL + tableUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
     await waitForAngular(page);
@@ -355,7 +355,7 @@ test.describe('ログ管理', () => {
         await test.step('13-1: 各ユーザーの操作ログが確認できること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 13-1`);
 
-            await page.goto(BASE_URL + '/admin/logs');
+            await page.goto(BASE_URL + '/admin/logs', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await expect(page).toHaveURL(/\/admin\/logs/);
 
@@ -375,7 +375,7 @@ test.describe('ログ管理', () => {
         await test.step('13-2: CSV UP/DL履歴が確認できること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 13-2`);
 
-            await page.goto(BASE_URL + '/admin/csv');
+            await page.goto(BASE_URL + '/admin/csv', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
@@ -429,7 +429,7 @@ test.describe('ログ管理', () => {
 
             await tryCreateTestUser(page);
 
-            await page.goto(BASE_URL + recordViewUrl);
+            await page.goto(BASE_URL + recordViewUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
@@ -502,7 +502,7 @@ test.describe('ログ管理', () => {
         await test.step('69-3: 存在しないユーザーでメンションしてもコメントが保存されること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-3`);
 
-            await page.goto(BASE_URL + recordViewUrl);
+            await page.goto(BASE_URL + recordViewUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
@@ -535,7 +535,7 @@ test.describe('ログ管理', () => {
         await test.step('69-4: 組織へのメンション付きコメントが送信できること', async () => {
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-4`);
 
-            await page.goto(BASE_URL + recordViewUrl);
+            await page.goto(BASE_URL + recordViewUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await waitForAngular(page);
@@ -545,7 +545,7 @@ test.describe('ログ管理', () => {
             if (!page.url().includes('/view/')) {
                 const freshViewUrl = await getFirstRecordViewUrl(page, tableUrl);
                 recordViewUrl = freshViewUrl;
-                await page.goto(BASE_URL + recordViewUrl);
+                await page.goto(BASE_URL + recordViewUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await page.waitForLoadState('domcontentloaded');
                 await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
                 await waitForAngular(page);

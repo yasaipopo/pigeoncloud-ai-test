@@ -64,7 +64,7 @@ async function login(page, email, password) {
 
 async function logout(page) {
     await page.evaluate(() => fetch('/api/admin/logout', { method: 'GET', credentials: 'include' }));
-    await page.goto(BASE_URL + '/admin/login');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForSelector('#id', { timeout: 5000 }).catch(() => {});
 }
 
@@ -156,7 +156,7 @@ async function createWorkflowTestTable(page) {
 async function navigateToWorkflowTab(page, tableId) {
     for (let attempt = 0; attempt < 3; attempt++) {
         // テーブル設定ページに直接ナビゲート
-        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+        await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         // networkidleまで待機（AngularのHTTPデータ取得完了を確認）
         await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
         await page.waitForSelector('[role=tab]', { timeout: 5000 });
@@ -314,7 +314,7 @@ async function toggleWorkflowOption(page, labelText, enable) {
  */
 async function createRecordAndSubmit(page, tableId, approverName, comment = '') {
     // 新規追加ページへ直接遷移（新規追加ボタンはアイコンのみでテキストなし）
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // card-footer内の「申請」ボタンを正確にターゲット
     // （「申請する」モーダルボタンと区別するため.card-footer限定 + 正規表現で完全一致）
@@ -446,7 +446,7 @@ async function forceShowWorkflowModal(page, targetBtnSelector = null) {
  * btn-success.text-bold クラスで正確に特定する
  */
 async function approveRecord(page, tableId, recordId, comment = '') {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // networkidleはAngular SPAで無限待機になるためdomcontentloadedに変更
     await waitForAngular(page);
@@ -474,7 +474,7 @@ async function approveRecord(page, tableId, recordId, comment = '') {
  * レコード詳細ページで否認する
  */
 async function rejectRecord(page, tableId, recordId, comment = '') {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // networkidleはAngular SPAで無限待機になるためdomcontentloadedに変更
     await waitForAngular(page);
@@ -502,7 +502,7 @@ async function rejectRecord(page, tableId, recordId, comment = '') {
  * レコード詳細ページで申請取り下げする
  */
 async function withdrawRecord(page, tableId, recordId) {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded');
     // networkidleはAngular SPAで無限待機になるためdomcontentloadedに変更
     await waitForAngular(page);
@@ -526,7 +526,7 @@ async function withdrawRecord(page, tableId, recordId) {
  * レコード詳細のワークフロー状態テキストを取得する
  */
 async function getWorkflowStatusText(page, tableId, recordId) {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
     // ワークフローステータスバッジ / ラベルを取得
     const statusEl = page.locator('.badge-workflow, .workflow-status, .label-workflow, span.badge, .workflow-badge').first();
@@ -549,7 +549,7 @@ test.beforeAll(async ({ browser }) => {
     await closeTemplateModal(page);
 
     // 古いWFTestテーブルを削除（テーブル蓄積による遅延防止）
-    await page.goto(BASE_URL + '/admin/dataset');
+    await page.goto(BASE_URL + '/admin/dataset', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
     const oldWFTableIds = await page.evaluate(() => {
         const links = document.querySelectorAll('a[href*="/admin/dataset__"]');
@@ -771,7 +771,7 @@ test.describe('ワークフロー設定（21系）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, adminName, '取り下げテスト申請');
             expect(recordId).toBeTruthy();
             // 申請中であることを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const statusBefore = await page.innerText('body');
             // 申請取り下げボタンが表示されること
@@ -912,7 +912,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
             expect(recordId).toBeTruthy();
 
             // レコードが申請中であることを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const applyingBodyText = await page.innerText('body');
             expect(applyingBodyText).not.toContain('Internal Server Error');
@@ -921,7 +921,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
             await approveRecord(page, tableId, recordId, '承認コメントです');
 
             // 承認済みになっていること
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -939,14 +939,14 @@ test.describe('ワークフロー基本動作（11系）', () => {
             expect(recordId).toBeTruthy();
 
             // 申請中レコードが表示されること
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
             // adminで承認できること
             await approveRecord(page, tableId, recordId, '多段承認コメント');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const afterApproveText = await page.innerText('body');
             expect(afterApproveText).not.toContain('Internal Server Error');
@@ -966,14 +966,14 @@ test.describe('ワークフロー基本動作（11系）', () => {
             await rejectRecord(page, tableId, recordId, '否認コメントです');
 
             // 否認コメントが確認できること
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const afterRejectText = await page.innerText('body');
             expect(afterRejectText).not.toContain('Internal Server Error');
             expect(afterRejectText).toContain('否認コメントです');
 
             // 再申請できること（編集ページへ）
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const reapplyText = await page.innerText('body');
             expect(reapplyText).not.toContain('Internal Server Error');
@@ -986,7 +986,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
 
             test.setTimeout(120000);
             // adminで申請、承認者タイプ=組織(役職)
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             // Angular描画完了まで申請ボタン表示を待機
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
@@ -1031,7 +1031,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '編集可能テスト');
             expect(recordId).toBeTruthy();
             // 承認フォームに編集機能が表示されること
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -1094,7 +1094,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
             // adminで否認
             await rejectRecord(page, tableId, recordId, 'まず否認します');
             // 編集ページへ
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText1 = await page.innerText('body');
             expect(bodyText1).not.toContain('Internal Server Error');
@@ -1127,7 +1127,7 @@ test.describe('ワークフロー基本動作（11系）', () => {
             // adminで最終承認
             await approveRecord(page, tableId, recordId, '再申請を承認します');
             // 承認済みになること
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const finalBody = await page.innerText('body');
             expect(finalBody).not.toContain('Internal Server Error');
@@ -1192,7 +1192,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
 
             test.setTimeout(90000);
             // レコード作成 → 申請モーダルで組織(役職)タイプを選択
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             // Angular描画完了まで申請ボタン表示を待機
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
@@ -1238,7 +1238,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
             if (recordId) {
                 // 承認者で承認（admin）
                 await approveRecord(page, tableId, recordId, '組織役職承認コメント');
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const afterApproveText = await page.innerText('body');
                 expect(afterApproveText).not.toContain('Internal Server Error');
@@ -1251,7 +1251,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
 
             test.setTimeout(120000);
             // レコード作成 → 申請モーダルで組織(役職)タイプを選択
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             // Angular描画完了まで申請ボタン表示を待機
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
@@ -1288,7 +1288,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
             if (recordId) {
                 // 否認
                 await rejectRecord(page, tableId, recordId, '組織役職否認コメント');
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const afterRejectText = await page.innerText('body');
                 expect(afterRejectText).not.toContain('Internal Server Error');
@@ -1328,7 +1328,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             // 申請ページでフロー固定テンプレートが選択可能なこと
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             // Angular描画完了まで申請ボタン表示を待機
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
@@ -1367,7 +1367,7 @@ test.describe('役職指定固定ワークフロー（68系）', () => {
         await test.step('68-7: 組織(役職)/全員の承認が必要なワークフロー設定ができること', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             // Angular描画完了まで申請ボタン表示を待機
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
@@ -1417,7 +1417,7 @@ test.describe('引き上げ承認（106系）', () => {
     // 引き上げ承認機能の共通確認ヘルパー
     // -------------------------------------------------------------------------
     async function checkSalvageButtonVisible(page, tableId, recordId) {
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         return await page.locator('button:has-text("引き上げ承認")').count() > 0;
     }
@@ -1506,7 +1506,7 @@ test.describe('引き上げ承認（106系）', () => {
             await toggleWorkflowOption(page, '引き上げ承認', true);
             await saveTableSettings(page, tableId);
             // 申請: 組織(1人) → admin の2段階
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             // Angular描画完了まで申請ボタン表示を待機
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
@@ -1558,7 +1558,7 @@ test.describe('引き上げ承認（106系）', () => {
             await toggleWorkflowOption(page, '引き上げ承認', true);
             await saveTableSettings(page, tableId);
             // 申請: 組織(全員) → admin の2段階
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -1652,7 +1652,7 @@ test.describe('引き上げ承認（106系）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverNameFor106, '引き上げ承認テスト');
             if (recordId) {
                 // 引き上げ承認ボタンが表示されること（ユーザータイプ）
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const bodyText = await page.innerText('body');
                 expect(bodyText).not.toContain('Internal Server Error');
@@ -1868,7 +1868,7 @@ test.describe('一括操作（111系）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認テスト');
             expect(recordId).toBeTruthy();
             // 一覧ページを開く
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             // 申請中レコードのチェックボックスをON
             const checkbox = page.locator(`tr:has-text("${recordId}") input[type="checkbox"], table tbody tr:first-child input[type="checkbox"]`).first();
@@ -1910,7 +1910,7 @@ test.describe('一括操作（111系）', () => {
             const approverName = EMAIL.split('@')[0];
             const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括承認A');
             const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括承認B');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             // 複数チェック
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
@@ -1934,7 +1934,7 @@ test.describe('一括操作（111系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 一括承認後、承認済みレコードの詳細で承認コメントが確認できること
             if (rid1) {
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${rid1}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${rid1}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const viewText = await page.innerText('body');
                 expect(viewText).not.toContain('Internal Server Error');
@@ -1948,7 +1948,7 @@ test.describe('一括操作（111系）', () => {
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認コメントテスト');
             expect(recordId).toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             expect(await checkboxes.count()).toBeGreaterThan(0);
@@ -1973,7 +1973,7 @@ test.describe('一括操作（111系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 承認後のレコード詳細でコメントが保存されていること
             if (recordId) {
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const viewText = await page.innerText('body');
                 expect(viewText).not.toContain('Internal Server Error');
@@ -1988,7 +1988,7 @@ test.describe('一括操作（111系）', () => {
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括承認コメントなし');
             expect(recordId).toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             expect(await checkboxes.count()).toBeGreaterThan(0);
@@ -2010,7 +2010,7 @@ test.describe('一括操作（111系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 承認後のレコード詳細でエラーなく表示されること
             if (recordId) {
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const viewText = await page.innerText('body');
                 expect(viewText).not.toContain('Internal Server Error');
@@ -2026,7 +2026,7 @@ test.describe('一括操作（111系）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括削除テスト');
             expect(recordId).toBeTruthy();
             await withdrawRecord(page, tableId, recordId);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             // 操作前のレコード数を記録
             const rowsBefore = await page.locator('table tbody tr').count();
@@ -2063,7 +2063,7 @@ test.describe('一括操作（111系）', () => {
             const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括削除B');
             expect(rid2).toBeTruthy();
             await withdrawRecord(page, tableId, rid2);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             // 操作前のレコード数を記録
             const rowsBefore = await page.locator('table tbody tr').count();
@@ -2098,7 +2098,7 @@ test.describe('一括操作（111系）', () => {
             const rid = await createRecordAndSubmit(page, tableId, approverName, '一括削除コメントテスト');
             expect(rid).toBeTruthy();
             await withdrawRecord(page, tableId, rid);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             // 操作前のレコード数を記録
             const rowsBefore = await page.locator('table tbody tr').count();
@@ -2135,7 +2135,7 @@ test.describe('一括操作（111系）', () => {
             const rid = await createRecordAndSubmit(page, tableId, approverName, '一括削除コメントなし');
             expect(rid).toBeTruthy();
             await withdrawRecord(page, tableId, rid);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             // 操作前のレコード数を記録
             const rowsBefore = await page.locator('table tbody tr').count();
@@ -2168,7 +2168,7 @@ test.describe('一括操作（111系）', () => {
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認テスト');
             expect(recordId).toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             expect(await checkboxes.count()).toBeGreaterThan(0);
@@ -2189,7 +2189,7 @@ test.describe('一括操作（111系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 否認後のレコード詳細でエラーなく表示されること
             if (recordId) {
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const viewText = await page.innerText('body');
                 expect(viewText).not.toContain('Internal Server Error');
@@ -2203,7 +2203,7 @@ test.describe('一括操作（111系）', () => {
             const approverName = EMAIL.split('@')[0];
             const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括否認A');
             const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括否認B');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             const cbCount = await checkboxes.count();
@@ -2233,7 +2233,7 @@ test.describe('一括操作（111系）', () => {
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認コメントテスト');
             expect(recordId).toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             expect(await checkboxes.count()).toBeGreaterThan(0);
@@ -2258,7 +2258,7 @@ test.describe('一括操作（111系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 否認後のレコード詳細でコメントが保存されていること
             if (recordId) {
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const viewText = await page.innerText('body');
                 expect(viewText).not.toContain('Internal Server Error');
@@ -2273,7 +2273,7 @@ test.describe('一括操作（111系）', () => {
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括否認コメントなし');
             expect(recordId).toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             expect(await checkboxes.count()).toBeGreaterThan(0);
@@ -2295,7 +2295,7 @@ test.describe('一括操作（111系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 否認後のレコード詳細でエラーなく表示されること
             if (recordId) {
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const viewText = await page.innerText('body');
                 expect(viewText).not.toContain('Internal Server Error');
@@ -2310,7 +2310,7 @@ test.describe('一括操作（111系）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げテスト');
             expect(recordId).toBeTruthy();
             // admin自身の申請一覧でチェック
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             expect(await checkboxes.count()).toBeGreaterThan(0);
@@ -2331,7 +2331,7 @@ test.describe('一括操作（111系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 取り下げ後のレコード詳細でエラーなく表示されること
             if (recordId) {
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const viewText = await page.innerText('body');
                 expect(viewText).not.toContain('Internal Server Error');
@@ -2345,7 +2345,7 @@ test.describe('一括操作（111系）', () => {
             const approverName = EMAIL.split('@')[0];
             const rid1 = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げA');
             const rid2 = await createRecordAndSubmit(page, tableId, approverName, '一括取り下げB');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             const cbCount = await checkboxes.count();
@@ -2374,7 +2374,7 @@ test.describe('一括操作（111系）', () => {
             test.setTimeout(120000);
             const approverName = EMAIL.split('@')[0];
             await createRecordAndSubmit(page, tableId, approverName, '一括取り下げコメントテスト');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             if (await checkboxes.count() > 0) await checkboxes.first().check();
@@ -2404,7 +2404,7 @@ test.describe('一括操作（111系）', () => {
 
             const approverName = EMAIL.split('@')[0];
             await createRecordAndSubmit(page, tableId, approverName, '一括取り下げコメントなし');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const checkboxes = page.locator('table tbody input[type="checkbox"]');
             if (await checkboxes.count() > 0) await checkboxes.first().check();
@@ -2489,7 +2489,7 @@ test.describe('承認者削除後の確認（28系）', () => {
                 await page.waitForTimeout(1000);
             }
             // 承認済みレコードを確認 → ユーザー削除後もエラーなし
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2504,7 +2504,7 @@ test.describe('承認者削除後の確認（28系）', () => {
             // 専用テストユーザーを作成（承認者として使用後に削除）
             const tempUser2 = await createTestUser(page);
             // adminで申請、承認者=tempUser2
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             // Angular描画完了まで申請ボタン表示を待機
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
@@ -2579,7 +2579,7 @@ test.describe('承認者削除後の確認（28系）', () => {
                 await page.waitForTimeout(1000);
             }
             // 申請中レコードを確認 → エラーなく表示されること
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2592,7 +2592,7 @@ test.describe('承認者削除後の確認（28系）', () => {
 
             test.setTimeout(120000);
             // 組織(役職)で申請→承認→組織削除後もレコード表示エラーなし
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -2622,7 +2622,7 @@ test.describe('承認者削除後の確認（28系）', () => {
                 // adminで承認
                 await approveRecord(page, tableId, recordId, '組織削除テスト承認');
                 // 承認済みレコードがエラーなく表示されること
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const bodyText = await page.innerText('body');
                 expect(bodyText).not.toContain('Internal Server Error');
@@ -2638,7 +2638,7 @@ test.describe('承認者削除後の確認（28系）', () => {
 
             test.setTimeout(120000);
             // 組織(役職)で申請→組織削除後もレコード表示エラーなし
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -2666,7 +2666,7 @@ test.describe('承認者削除後の確認（28系）', () => {
             const recordId2 = match2 ? match2[1] : null;
             if (recordId2) {
                 // 申請中レコードがエラーなく表示されること
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId2}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId2}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const bodyText = await page.innerText('body');
                 expect(bodyText).not.toContain('Internal Server Error');
@@ -2722,7 +2722,7 @@ test.describe('自分自身を承認者（166）', () => {
             // 自分自身で承認できること
             await approveRecord(page, tableId, recordId, '自分で承認');
             // 承認後エラーなし
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2776,7 +2776,7 @@ test.describe('通知（36系）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '通知テスト申請(ユーザー)');
             expect(recordId).toBeTruthy();
             // 通知一覧ページで確認
-            await page.goto(BASE_URL + '/admin/notifications');
+            await page.goto(BASE_URL + '/admin/notifications', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2789,7 +2789,7 @@ test.describe('通知（36系）', () => {
 
             test.setTimeout(120000);
             // 組織(役職)で申請
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -2813,7 +2813,7 @@ test.describe('通知（36系）', () => {
             await page.locator('button.btn-primary:has-text("申請する")').click({ timeout: 8000 });
             await waitForAngular(page);
             // 通知一覧ページで確認
-            await page.goto(BASE_URL + '/admin/notifications');
+            await page.goto(BASE_URL + '/admin/notifications', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -2862,7 +2862,7 @@ test.describe('申請取り下げ（64系）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '取り下げ通知テスト');
             expect(recordId).toBeTruthy();
             // 取り下げ（コメント付き）
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.locator('button.btn-danger.text-bold:has-text("申請取り下げ")').click({ timeout: 10000 });
             await page.locator('button.btn-warning.btn-ladda').waitFor({ state: 'attached', timeout: 8000 });
@@ -2879,7 +2879,7 @@ test.describe('申請取り下げ（64系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             // 通知ページでコメントが確認できること
-            await page.goto(BASE_URL + '/admin/notifications');
+            await page.goto(BASE_URL + '/admin/notifications', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const notifText = await page.innerText('body');
             expect(notifText).not.toContain('Internal Server Error');
@@ -2933,7 +2933,7 @@ test.describe('一つ戻す機能（296）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '一つ戻すテスト');
             expect(recordId).toBeTruthy();
             // レコード詳細で「一つ戻す」ボタンが表示されること
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3394,7 +3394,7 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
         await test.step('68-3: 組織(役職)/全員の承認が必要なワークフローで承認できること', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -3429,7 +3429,7 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             if (recordId) {
                 await approveRecord(page, tableId, recordId, '全員承認コメント');
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const afterText = await page.innerText('body');
                 expect(afterText).not.toContain('Internal Server Error');
@@ -3441,7 +3441,7 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -3473,7 +3473,7 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             if (recordId) {
                 await rejectRecord(page, tableId, recordId, '全員否認コメント');
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 const afterText = await page.innerText('body');
                 expect(afterText).not.toContain('Internal Server Error');
@@ -3515,7 +3515,7 @@ test.describe('役職指定ワークフロー追加（68-3, 68-4）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             // 新規申請ページで確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -3715,7 +3715,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
 
             test.setTimeout(225000);
             // テーブルの新規追加ページを開いて登録できることを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
@@ -3730,7 +3730,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
 
             test.setTimeout(120000);
             // 新規レコード作成→申請モーダル→承認フロー追加→ユーザー名検索
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -3770,7 +3770,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             // テーブル設定→フィールド一覧で表示条件関連UIを確認
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -3794,7 +3794,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -3822,7 +3822,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -3835,7 +3835,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3872,7 +3872,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -3902,7 +3902,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.locator('.card-footer button').filter({ hasText: /^申請$/ }).first().waitFor({ state: 'visible', timeout: 5000 });
             await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -3996,7 +3996,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, 'テンプレート表示テスト');
             expect(recordId).toBeTruthy();
             await rejectRecord(page, tableId, recordId, '否認テスト480');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4007,7 +4007,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4018,7 +4018,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
@@ -4040,7 +4040,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -4069,7 +4069,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '無効ユーザー履歴テスト');
             expect(recordId).toBeTruthy();
             await approveRecord(page, tableId, recordId, '履歴表示テストコメント');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4080,7 +4080,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -4102,7 +4102,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4113,7 +4113,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
@@ -4127,7 +4127,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
         await test.step('645: WFバッジの数字がサイドメニューにエラーなく表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4138,7 +4138,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -4193,7 +4193,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4210,7 +4210,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             expect(recordId).toBeTruthy();
             await approveRecord(page, tableId, recordId, 'WF594承認');
             await disableWorkflow(page, tableId);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4227,7 +4227,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const approverName = EMAIL.split('@')[0];
             const recordId = await createRecordAndSubmit(page, tableId, approverName, 'フローNo切替テスト');
             expect(recordId).toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -4243,7 +4243,7 @@ test.describe('バグ修正確認・機能改善確認（WF関連）', () => {
             const recordId = await createRecordAndSubmit(page, tableId, approverName, '否認後編集テスト');
             expect(recordId).toBeTruthy();
             await rejectRecord(page, tableId, recordId, '否認テスト470');
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');

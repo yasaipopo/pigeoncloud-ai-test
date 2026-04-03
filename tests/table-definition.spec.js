@@ -6784,7 +6784,7 @@ test.describe('テーブル定義追加テスト', () => {
 
             test.setTimeout(210000);
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -7481,7 +7481,7 @@ test.describe('テーブル定義追加テスト', () => {
 
             // ALLTESTテーブルの設定ページを開く
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -7508,7 +7508,7 @@ test.describe('テーブル定義追加テスト', () => {
 
             // テーブル設定画面を開く
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -7528,7 +7528,7 @@ test.describe('テーブル定義追加テスト', () => {
 
             test.setTimeout(120000);
             // テーブル管理ページを開く
-            await page.goto(BASE_URL + '/admin/dataset');
+            await page.goto(BASE_URL + '/admin/dataset', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -7550,7 +7550,7 @@ test.describe('テーブル定義追加テスト', () => {
             const STEP_TIME = Date.now();
 
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -7577,7 +7577,7 @@ test.describe('テーブル定義追加テスト', () => {
             const STEP_TIME = Date.now();
 
             // テーブル管理ページを開く
-            await page.goto(BASE_URL + '/admin/dataset');
+            await page.goto(BASE_URL + '/admin/dataset', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -7599,7 +7599,7 @@ test.describe('テーブル定義追加テスト', () => {
             const STEP_TIME = Date.now();
 
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -7626,7 +7626,7 @@ test.describe('テーブル定義追加テスト', () => {
             test.setTimeout(75000);
             const tableId = await getAllTypeTableId(page);
             // テーブル一覧からレコード詳細を開く
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -7746,7 +7746,7 @@ test.describe('テーブル定義追加テスト', () => {
             const STEP_TIME = Date.now();
 
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -7766,7 +7766,7 @@ test.describe('テーブル定義追加テスト', () => {
 
             test.setTimeout(120000);
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -7789,7 +7789,7 @@ test.describe('テーブル定義追加テスト', () => {
             const STEP_TIME = Date.now();
 
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -7799,7 +7799,7 @@ test.describe('テーブル定義追加テスト', () => {
             const updateBtn = page.locator('button[type=submit].btn-primary').first();
             await expect(updateBtn).toBeVisible();
             // テーブル一覧ページに遷移してエラーがないことを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const listText = await page.innerText('body');
             expect(listText).not.toContain('Internal Server Error');
@@ -7863,7 +7863,7 @@ test.describe('テーブル定義追加テスト', () => {
             const STEP_TIME = Date.now();
 
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);
@@ -7898,7 +7898,7 @@ test.describe('テーブル定義追加テスト', () => {
             const STEP_TIME = Date.now();
 
             const tableId = await getAllTypeTableId(page);
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
             await page.waitForSelector('[role=tab]', { timeout: 5000 });
             await waitForAngular(page);

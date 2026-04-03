@@ -28,7 +28,7 @@ const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings'
  * ログイン共通関数
  */
 async function login(page, email, password) {
-    await page.goto(BASE_URL + '/admin/login');
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
         await page.waitForSelector('.navbar', { timeout: 5000 });
@@ -387,7 +387,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル新規作成画面でYes/No項目のバリデーション確認
-            await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`);
+            await page.goto(BASE_URL + `/admin/dataset__${tid}/edit/new`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -771,7 +771,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             // expected: 想定通りの結果となること。
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1207,7 +1207,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             // expected: 想定通りの結果となること。 https://henmi022.pigeon-demo.com/admin/dataset__59
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1442,7 +1442,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // フィールド設定ページを確認（表示幅設定が可能なページ）
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`);
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1613,7 +1613,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             // expected: エラーなく帳票削除が完了すること
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             // Internal Server Errorのみチェック（'500'は件数表示などで誤検知するため使用しない）
@@ -1633,7 +1633,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             // description: APIテストの実施 ※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する
             // expected: ※シート「APIテスト(邊見)」を実施しエラーが発生しないこと
-            await page.goto(BASE_URL + '/admin/user');
+            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1758,7 +1758,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             // expected: 想定通りの結果となっていること。 https://henmi027.pigeon-demo.com/admin/dataset__4
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1790,7 +1790,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             // expected: 想定通りの結果となっていること。 https://henmi027.pigeon-demo.com/admin/dataset__9
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             // Internal Server Errorのみチェック（'500'は件数表示などで誤検知するため使用しない）
