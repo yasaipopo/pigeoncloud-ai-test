@@ -337,9 +337,15 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
     // クリーンアップ: 不要（global共有テーブルはテナントごと破棄される）
     // =========================================================================
 
-    test.beforeEach(async ({ page }, testInfo) => {
+    test.beforeEach(async ({}, testInfo) => {
             testInfo.setTimeout(180000);
-            // fixtureのpageは古いstorageStateのため新環境に明示的ログイン
+        });
+
+    test('CE01: CSVダウンロード', async ({ page }) => {
+        await test.step('255: CSVダウンロードモーダルが開き、ダウンロードボタンが表示されること', async () => {
+            const STEP_TIME = Date.now();
+
+            // 新環境に明示的ログイン
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL);
@@ -347,14 +353,6 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
-            await closeTemplateModal(page);
-        });
-
-    test('CE01: CSVダウンロード', async ({ page }) => {
-        await test.step('255: CSVダウンロードモーダルが開き、ダウンロードボタンが表示されること', async () => {
-            const STEP_TIME = Date.now();
-
-            await login(page, EMAIL, PASSWORD);
             await closeTemplateModal(page);
 
             // テーブルに移動
@@ -400,7 +398,14 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('161: ソート後にCSVダウンロードを実行するとモーダルが表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 新環境に明示的ログイン
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
 
             // テーブルに移動
@@ -517,7 +522,14 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('55-1: ヘッダー行なしのCSVをアップロードするとインポートエラーが発生すること', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 新環境に明示的ログイン
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
 
             // テーブルに移動
@@ -622,7 +634,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             const STEP_TIME = Date.now();
 
             test.setTimeout(180000); // CSV非同期処理の完了待ちに対応
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             const testTableId = getTestTableId();
@@ -711,7 +732,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('193-1: テーブル設定で必須項目空を許可(ON)にすると、必須項目が空のCSVをアップロードできること', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル編集画面のCSVタブに移動
@@ -792,7 +822,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('193-2: テーブル設定で必須項目空を許可(OFF)にすると、必須項目が空のCSVはエラーになること', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル編集画面のCSVタブに移動
@@ -826,7 +865,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('194-1: 選択肢がない場合自動追加(ON)の設定をテーブル編集で確認できること', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル編集画面のCSVタブに移動
@@ -879,7 +927,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('194-2: 選択肢がない場合自動追加(OFF)の設定をテーブル編集で確認できること', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル編集画面のCSVタブに移動
@@ -909,7 +966,14 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('181: CSVアップロードモーダルが正常に表示されること（複数選択項目設定確認）', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 新環境に明示的ログイン
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
 
             // テーブルに移動
@@ -952,7 +1016,14 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('233: CSVアップロードモーダルのUIが正常に表示されること（他テーブル参照設定環境）', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 新環境に明示的ログイン
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
 
             // テーブルに移動
@@ -993,7 +1064,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
 
             // 子テーブルが設定されたテーブルが必要なためskip
             // デバッグAPIで作成されるALLテストテーブルに子テーブル設定がある場合のみ実施可能
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             const testTableId = getTestTableId();
@@ -1032,7 +1112,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             // 子テーブルが設定されたテーブルが必要なためskip
             // 子テーブル設定済みのテーブルでCSVダウンロード(空)を行うと
             // 子テーブルのカラムもヘッダーに含まれることを確認する
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             const testTableId = getTestTableId();
@@ -1067,7 +1156,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('224: JSONエクスポートモーダルにダウンロードオプション（データ・権限・フィルタ・通知）が表示されること', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブルに移動（dataset_viewをtrueにするため、/admin/dataset一覧から遷移する必要がある）
@@ -1150,7 +1248,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('173: データセット一覧でExcelインポートメニューが利用可能であること', async () => {
             const STEP_TIME = Date.now();
 
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // データセット一覧画面（dataset管理画面）に移動
@@ -1190,7 +1297,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
     });
 
     test('セットアップ: ALLタイプテーブル作成とデータ投入', async ({ page }) => {
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
 
             const tableId = await getAllTypeTableId(page);
             if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
@@ -1202,7 +1318,16 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         });
 
     test('148-01〜03: 子テーブル含むCSV設定がテーブル編集画面で確認できること', async ({ page }) => {
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル編集画面のCSVタブに移動
@@ -1729,7 +1854,16 @@ test.describe('JSONエクスポート・インポート', () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000); // CSVアップロード/ダウンロード＋非同期処理の完了待ちに対応
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             // CSV UP/DL履歴ページに遷移
             await page.goto(BASE_URL + '/admin/csv', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
@@ -2328,7 +2462,16 @@ test.describe('JSONエクスポート・インポート', () => {
     });
 
     test('JSON-01: テーブル管理一覧のチェックボックスを選択してJSONエクスポートが開始されること', async ({ page }) => {
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル管理一覧（/admin/dataset）に遷移
@@ -2370,7 +2513,16 @@ test.describe('JSONエクスポート・インポート', () => {
         });
 
     test('JSON-02: JSONエクスポートモーダルで「データを含める」チェックをオフにしてエクスポートできること', async ({ page }) => {
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル管理一覧（/admin/dataset）に遷移
@@ -2424,7 +2576,16 @@ test.describe('JSONエクスポート・インポート', () => {
         });
 
     test('JSON-03: JSONエクスポートモーダルで「データを含める」チェックをオンにしてエクスポートできること', async ({ page }) => {
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル管理一覧（/admin/dataset）に遷移
@@ -2476,7 +2637,16 @@ test.describe('JSONエクスポート・インポート', () => {
         });
 
     test('JSON-04: テーブル管理画面でJSONインポートのUIが表示されること', async ({ page }) => {
-            await login(page, EMAIL, PASSWORD);
+            // 明示的ログイン（セッション切れ対策）
+            if (page.url().includes('/login') || page.url() === 'about:blank') {
+                await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                if (page.url().includes('/login')) {
+                    await page.fill('#id', EMAIL);
+                    await page.fill('#password', PASSWORD);
+                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+                }
+            }
             await closeTemplateModal(page);
 
             // テーブル管理一覧（/admin/dataset）に遷移
