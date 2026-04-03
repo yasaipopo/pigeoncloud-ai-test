@@ -3,8 +3,8 @@
 /**
  * spec自己完結型テスト環境作成ヘルパー
  *
- * create-trial API（with_all_type_table: true）で環境+ALLテストテーブル+VIEWを一括作成。
- * domain省略でPHP側自動生成。リトライ付き。
+ * create-trial API（with_all_type_table: true）で環境作成+テーブル作成をバックグラウンド開始。
+ * テーブル作成完了はテスト側でポーリング（ALBタイムアウトに依存しない）。
  */
 
 const path = require('path');
@@ -32,9 +32,7 @@ async function createTestEnv(browser, options = {}) {
         throw new Error(`管理画面ログイン失敗: ${e.message}`);
     }
 
-    // 2. create-trial（リトライ2回）
-    // domain省略 → PHP側で短いランダム名を自動生成（504リスク低減）
-    // with_all_type_table=true → ALLテストテーブル+VIEW同時作成+table_id返却
+    // 2. create-trial（リトライ3回）
     let baseUrl, password, tableId = null;
     const body = { email: 'admin' };
     if (withAllTypeTable) body.with_all_type_table = true;
@@ -68,10 +66,10 @@ async function createTestEnv(browser, options = {}) {
     await adminContext.close();
 
     if (!baseUrl || !password) {
-        throw new Error('create-trial が2回とも失敗');
+        throw new Error('create-trial が3回とも失敗');
     }
 
-    console.log(`[createTestEnv] 環境作成完了: ${baseUrl}${tableId ? ', tableId: ' + tableId : ''}`);
+    console.log(`[createTestEnv] 環境作成完了: ${baseUrl}${tableId ? ', tableId: ' + tableId : ', テーブル作成中...'}`);
 
     // 3. 新環境にログイン
     const email = 'admin';
@@ -89,6 +87,30 @@ async function createTestEnv(browser, options = {}) {
     const agentNum = process.env.AGENT_NUM || '1';
     const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
     await context.storageState({ path: storageStatePath });
+
+    // 4. テーブルIDが未取得の場合、テスト側でポーリング（最大120秒）
+    // PHP側はバックグラウンドでテーブル作成中 → ALBタイムアウトに依存しない
+    if (withAllTypeTable && !tableId) {
+        console.log('[createTestEnv] テーブル作成完了をポーリング中...');
+        for (let i = 0; i < 24; i++) {
+            await page.waitForTimeout(5000);
+            const status = await page.evaluate(async () => {
+                try {
+                    const res = await fetch('/api/admin/debug/status', { credentials: 'include' });
+                    return res.json();
+                } catch { return { all_type_tables: [] }; }
+            });
+            const table = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+            if (table) {
+                tableId = table.table_id || table.id;
+                console.log(`[createTestEnv] テーブル作成完了: tableId=${tableId} (${(i + 1) * 5}秒)`);
+                break;
+            }
+        }
+        if (!tableId) {
+            console.warn('[createTestEnv] テーブル作成が120秒以内に完了しませんでした');
+        }
+    }
 
     return { baseUrl, email, password, tableId, context, page };
 }
