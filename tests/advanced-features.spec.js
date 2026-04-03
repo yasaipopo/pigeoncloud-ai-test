@@ -358,10 +358,13 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test.beforeAll(async ({ browser }) => {
             test.setTimeout(120000);
-            const { context, page } = await createAuthContext(browser);
-            // about:blankからfetchするとcookiesが送られないため、先にアプリURLに遷移
-            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-            await ensureLoggedIn(page);
+            const context = await browser.newContext();
+            const page = await context.newPage();
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             tableId = await getAllTypeTableId(page);
             if (!tableId || tableId === '__LOGIN_ERROR__') throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
             // テーブル一覧に<table>要素が描画されるようレコードを追加（空テーブルは特殊UIのため）
