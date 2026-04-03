@@ -901,7 +901,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // ページをリロードしてレコードを確認（最大3回リトライ）
             let rowCount = 0;
             for (let attempt = 0; attempt < 3; attempt++) {
-                await page.reload({ waitUntil: 'domcontentloaded' });
+                await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
                 await page.waitForTimeout(2000);

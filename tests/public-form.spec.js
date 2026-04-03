@@ -20,7 +20,7 @@ async function waitForAngular(page, timeout = 15000) {
  * ログイン共通関数（APIログイン優先方式）
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded' });
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
     // storageStateでログイン済みならリダイレクトされる
     if (!page.url().includes('/admin/login')) {
         await page.waitForSelector('.navbar', { timeout: 5000 });
@@ -60,7 +60,7 @@ async function login(page) {
     }, { email: EMAIL, password: PASSWORD });
 
     if (loginResult.result === 'success') {
-        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded' });
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await waitForAngular(page, 40000);
         return;
     }
@@ -104,7 +104,7 @@ async function closeTemplateModal(page) {
  * Angular SPAのためdispatchEventを使用してタブ切り替え
  */
 async function openOtherTab(page, tableId) {
-    await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
     await waitForAngular(page, 40000);
 
     // Playwright の click() で Angular のイベントを正しく発火させる

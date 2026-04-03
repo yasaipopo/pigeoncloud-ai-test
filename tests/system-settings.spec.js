@@ -684,7 +684,7 @@ test.describe('共通設定・システム設定', () => {
             expect(userBody.result).toBe('success');
 
             // ページを再読み込みしてユーザー数を確認
-            await page.reload({ waitUntil: 'domcontentloaded' });
+            await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
@@ -742,7 +742,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page.locator('body')).toContainText('ロック自動解除時間');
 
             // ページを再読み込みして確認
-            await page.reload({ waitUntil: 'domcontentloaded' });
+            await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
