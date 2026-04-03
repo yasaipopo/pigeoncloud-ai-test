@@ -5964,8 +5964,13 @@ test.describe('テーブルアーカイブ', () => {
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(75000);
-        const { context, page } = await createAuthContext(browser);
-        await ensureLoggedIn(page);
+        const context = await browser.newContext();
+        const page = await context.newPage();
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await closeTemplateModal(page);
 
         // アーカイブテスト専用テーブルを作成（ALLタイプではなく通常テーブル）

@@ -180,9 +180,13 @@ test.describe('公開フォーム・公開メールリンク', () => {
     // テスト前: テーブルとデータを一度だけ作成
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(120000);
-        const { context, page } = await createAuthContext(browser);
-        // about:blankではcookiesが送られないため、先にアプリURLに遷移
-        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        const context = await browser.newContext();
+        const page = await context.newPage();
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         tableId = await getAllTypeTableId(page);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
         await context.close();

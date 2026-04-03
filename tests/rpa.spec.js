@@ -113,9 +113,15 @@ test.describe('RPA（コネクト）', () => {
 
     test.beforeAll(async ({ browser: b }) => {
         browser = b;
-        const auth = await createAuthContext(browser);
-        sharedContext = auth.context;
-        sharedPage = auth.page;
+        const sharedCtx = await browser.newContext();
+        const sharedPg = await sharedCtx.newPage();
+        await sharedPg.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await sharedPg.fill('#id', EMAIL);
+        await sharedPg.fill('#password', PASSWORD);
+        await sharedPg.locator('button[type=submit].btn-primary').first().click();
+        await sharedPg.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        sharedContext = sharedCtx;
+        sharedPage = sharedPg;
         // ALLテストテーブルのID取得（global-setupで作成済み）
         tableId = await getAllTypeTableId(sharedPage);
         if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
