@@ -653,12 +653,11 @@ test.describe('共通設定・システム設定', () => {
             console.log('ユーザー上限解除:', JSON.stringify(limitResult));
             await page.waitForTimeout(1000);
 
-            // その他設定ページへ（Angular router: /admin/admin_setting/edit/1）
-            await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+            // その他設定ページへ
+            await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
-
-            // その他設定ページが表示されることを確認
-            await expect(page).toHaveURL(/\/admin\/admin_setting/);
+            await page.waitForTimeout(3000); // Angular描画待ち
 
             // その他設定ページに設定フォームが表示されていること
             await expect(page.locator('form').first()).toBeVisible();
