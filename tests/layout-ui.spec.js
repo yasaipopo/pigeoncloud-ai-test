@@ -282,7 +282,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             test.setTimeout(90000); // beforeEachのlogin + テスト本体のため延長
             // テーブル管理画面へ
-            await page.goto(BASE_URL + '/admin/dataset');
+            await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // テーブル管理ページが表示されることを確認
@@ -306,7 +307,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             try {
                 // その他設定ページへ
-                await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+                await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
 
                 await expect(page).toHaveURL(/\/admin\/admin_setting/);
@@ -344,7 +345,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
             // その他設定ページへ
-            await page.goto(BASE_URL + '/admin/admin_setting/edit/1');
+            await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
@@ -393,7 +394,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             const STEP_TIME = Date.now();
 
             test.setTimeout(75000); // beforeEachのlogin + テスト本体のため延長
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
@@ -440,7 +441,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
             // ダッシュボードを表示
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
@@ -466,7 +467,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
             // ダッシュボードを表示
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
@@ -487,7 +488,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             const STEP_TIME = Date.now();
 
             // ダッシュボードを表示
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
@@ -790,7 +791,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブル管理画面へ
-            await page.goto(BASE_URL + '/admin/dataset');
+            await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // テーブル管理ページが表示されることを確認
@@ -880,7 +882,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             test.setTimeout(75000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
@@ -898,7 +900,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
@@ -923,7 +925,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             test.setTimeout(120000); // beforeEachのlogin + テスト本体のため延長
 
             // テーブルのレコード一覧へ（/notificationはルートへリダイレクトのため直接レコード一覧を使用）
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // ページが表示されることを確認
@@ -969,7 +971,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await closeTemplateModal(page);
 
             // ダッシュボードを表示
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             // ダッシュボードが表示されることを確認
@@ -1009,7 +1011,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await closeTemplateModal(page);
 
             // テーブルのレコード一覧へ
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`);
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
             // ページタイトルが表示されていることを確認（テーブル名が含まれる）
@@ -1047,7 +1049,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await closeTemplateModal(page);
 
             // ダッシュボードを表示
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
@@ -1085,7 +1087,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await closeTemplateModal(page);
 
             // ダッシュボードを表示
-            await page.goto(BASE_URL + '/admin/dashboard');
+            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page).toHaveURL(/\/admin\/dashboard/);
