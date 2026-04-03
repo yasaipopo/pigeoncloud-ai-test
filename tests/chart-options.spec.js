@@ -2,12 +2,13 @@
 const { test, expect } = require('@playwright/test');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
+const { createTestEnv } = require('./helpers/create-test-env');
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -179,30 +180,12 @@ async function createTestUser(page) {
  * ステータスAPIからALLテストテーブルのIDを取得して直接遷移する
  */
 async function navigateToAllTypeTable(page) {
-    const result = await page.evaluate(async (baseUrl) => {
-        // fetchハング防止のため30秒タイムアウトを設定
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-        try {
-            const res = await fetch(baseUrl + '/api/admin/debug/status', {
-                credentials: 'include',
-                signal: controller.signal,
-            });
-            clearTimeout(timeoutId);
-            return res.json();
-        } catch (e) {
-            clearTimeout(timeoutId);
-            return { all_type_tables: [] };
-        }
-    }, BASE_URL);
-    const mainTable = (result.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
-    if (!mainTable) throw new Error('ALLテストテーブルが見つかりません');
-    // table_id または id の両方に対応（APIレスポンスの形式差異を吸収）
-    const tableId = mainTable.table_id || mainTable.id;
-    await page.goto(BASE_URL + '/admin/dataset__' + tableId);
-    await page.waitForLoadState('domcontentloaded');
-    // Angular描画完了を待機（アクションメニューボタンが表示されるまで）
-    await page.waitForSelector('button.dropdown-toggle', { timeout: 10000 }).catch(() => {});
+    const tableId = _fileTableId;
+    if (!tableId) throw new Error('ALLテストテーブルIDが未設定（beforeAllでcreateTestEnvが失敗した可能性）');
+    await page.goto(BASE_URL + '/admin/dataset__' + tableId, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await waitForAngular(page);
+    await page.waitForSelector('button.dropdown-toggle', { timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
 }
 
@@ -332,35 +315,25 @@ async function ensureSummarizeGrant(page) {
 // ファイルレベルのALLテストテーブル共有セットアップ（1回のみ実行）
 // ============================================================
 let fileBeforeAllFailed = false;
+let _fileTableId = null;
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(120000);
-    const context = await createLoginContext(browser);
-    const page = await context.newPage();
+    test.setTimeout(180000);
     try {
-        await ensureLoggedIn(page);
-        // global-setupで作成済みのテーブルIDを取得（自前作成ではなくgetAllTypeTableIdを使用）
-        const tableId = await getAllTypeTableId(page);
-        if (!tableId) {
-            // フォールバック: 自前で作成を試みる
-            const tableRes = await createAllTypeTable(page);
-            if (tableRes.result !== 'success') {
-                console.error('[beforeAll] ALLテストテーブルの取得・作成に失敗しました');
-                fileBeforeAllFailed = true;
-                await page.close();
-                await context.close();
-                return;
-            }
-        }
-        await createAllTypeData(page, 10);
-
-        // summarize（集計/チャート）権限が有効か確認し、不足なら再作成
-        await ensureSummarizeGrant(page);
+        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        _fileTableId = env.tableId;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        fileBeforeAllFailed = false;
+        await env.context.close();
+        console.log(`[chart-options] 自己完結環境: ${BASE_URL}, tableId: ${_fileTableId}`);
     } catch (e) {
-        console.error('[beforeAll] セットアップ失敗:', e.message);
+        console.error('[chart-options] 環境作成失敗:', e.message);
         fileBeforeAllFailed = true;
     }
-    await page.close().catch(() => {});
-    await context.close().catch(() => {});
 });
 
 test.describe('チャート・集計 - オプション設定', () => {
@@ -378,7 +351,13 @@ test.describe('チャート・集計 - オプション設定', () => {
     test.beforeEach(async ({ page }) => {
             test.setTimeout(120000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-            await login(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -876,7 +855,13 @@ test.describe('カレンダー - ビュー表示', () => {
     test.beforeEach(async ({ page }) => {
             test.setTimeout(120000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-            await login(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -1152,7 +1137,13 @@ test.describe('集計 - 基本機能', () => {
 
     test.beforeEach(async ({ page }) => {
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-            await login(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -2204,7 +2195,13 @@ test.describe('チャート - フィルタ・表示設定', () => {
     test.beforeEach(async ({ page }) => {
         test.setTimeout(120000);
         test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-        await login(page);
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
         await closeTemplateModal(page);
     });
 
@@ -2706,7 +2703,13 @@ test.describe('集計 - 詳細権限設定', () => {
     test.beforeEach(async ({ page }) => {
         test.setTimeout(120000);
         test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-        await login(page);
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
         await closeTemplateModal(page);
     });
 
@@ -2913,7 +2916,13 @@ test.describe('チャート - 詳細権限設定', () => {
     test.beforeEach(async ({ page }) => {
         test.setTimeout(120000);
         test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-        await login(page);
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
         await closeTemplateModal(page);
     });
 
@@ -3251,7 +3260,13 @@ test.describe('チャート・集計 - バグ修正確認', () => {
     test.beforeEach(async ({ page }) => {
             test.setTimeout(120000);
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
-            await login(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
