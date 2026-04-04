@@ -40,18 +40,22 @@ async function closeTemplateModal(page) {
  * レコード一覧画面から+ボタンで新規作成フォームを開く
  */
 async function openNewRecordForm(page, tableId) {
-    // レコード一覧画面に遷移（リトライ付き — テーブル作成直後はAngularルーティング未登録の場合あり）
+    // テーブル作成直後はAngularのメニューデータにテーブルが登録されていないため、
+    // まずダッシュボードをリロードしてメニューを最新化し、その後テーブルに遷移する
     for (let attempt = 0; attempt < 3; attempt++) {
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        // ダッシュボードでAngularメニューをリロード
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
-        // ダッシュボードにリダイレクトされた場合はリトライ
-        if (!page.url().includes(`dataset__${tableId}`)) {
-            console.log(`[openNewRecordForm] ダッシュボードにリダイレクト (attempt ${attempt + 1}/3), 10秒後にリトライ`);
-            await page.waitForTimeout(10000);
-            continue;
-        }
-        break;
+        // テーブル一覧に遷移
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await waitForAngular(page);
+        await page.waitForTimeout(2000);
+        // レコード一覧が表示されたか確認（+ボタンの存在で判定）
+        const hasPlusBtn = await page.locator('button:has(.fa-plus)').count() > 0;
+        if (hasPlusBtn) break;
+        console.log(`[openNewRecordForm] テーブル画面未表示 (attempt ${attempt + 1}/3), 10秒後にリトライ`);
+        await page.waitForTimeout(10000);
     }
     const addBtn = page.locator('button:has(.fa-plus)').first();
     await expect(addBtn).toBeVisible({ timeout: 15000 });
