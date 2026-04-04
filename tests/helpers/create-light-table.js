@@ -6,6 +6,9 @@
  * debug API（/api/admin/debug/create-light-table）でスキーマ定義に基づき
  * テーブル+フィールド+レコード+ワークフロー設定を一括作成。
  *
+ * APIスキーマ定義: pigeon_cloud/assets/json_schema/create-light-table-schema.json
+ * ワークフロースキーマ: pigeon_cloud/assets/json_schema/workflow-schema.json
+ *
  * 使い方1: スキーマファイル指定
  *   const { createTableFromSchema } = require('./helpers/create-light-table');
  *   const result = await createTableFromSchema(page, 'datetime-test');

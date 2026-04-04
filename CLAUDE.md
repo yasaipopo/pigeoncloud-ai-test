@@ -135,6 +135,8 @@ cat .claude/knowledge-e2e-angular.md
 | `tests/schemas/workflow-test.json` | ワークフロー設定付きテスト |
 
 テーブル作成API: `POST /api/admin/debug/create-light-table` にスキーマJSONを渡す。
+APIスキーマ定義: `pigeon_cloud/assets/json_schema/create-light-table-schema.json`
+ワークフロースキーマ: `pigeon_cloud/assets/json_schema/workflow-schema.json`
 テスト側: `createTableFromSchema(page, 'datetime-test')` または `createLightTable(page, '名前', [...fields])`
 
 調査で新しい知見が得られたら、作業終了前に必ず該当ファイルに追記すること。
