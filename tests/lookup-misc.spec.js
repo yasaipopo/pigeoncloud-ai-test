@@ -3,6 +3,7 @@ const { test, expect } = require('@playwright/test');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const { createAuthContext } = require('./helpers/auth-context');
 const { createTestEnv } = require('./helpers/create-test-env');
+const { navigateToTable } = require('./helpers/navigate-to-table');
 
 // =============================================================================
 // 未分類テスト（580件）
@@ -1092,9 +1093,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // レコード新規作成画面で他テーブル参照の検索ボタンを確認
             // /edit/newへの直接gotoはAngular SPAで白画面になるため一覧画面から+ボタンで遷移
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-            await waitForAngular(page);
+            await navigateToTable(page, BASE_URL, tid, { maxRetries: 3, retryWait: 5000 });
             const addBtn = page.locator('button:has(.fa-plus)').first();
             if (await addBtn.isVisible({ timeout: 10000 }).catch(() => false)) {
                 await addBtn.click();
@@ -1103,8 +1102,8 @@ test.describe('追加実装テスト（314-579系）', () => {
             }
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            // フォーム要素が存在すること
-            const formElements = page.locator('admin-forms-field input, admin-forms-field select, admin-forms-field textarea');
+            // フォーム要素が存在すること（:visibleで非表示のhidden inputを除外）
+            const formElements = page.locator('admin-forms-field input:visible, admin-forms-field select:visible, admin-forms-field textarea:visible');
             await expect(formElements.first()).toBeVisible({ timeout: 10000 });
 
         });
@@ -1120,8 +1119,8 @@ test.describe('追加実装テスト（314-579系）', () => {
             // expected: 想定通りの結果となること。
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
-            await waitForAngular(page);
+            // openNewRecordForm後のAngularメニュー未登録対策でnavigateToTableを使用
+            await navigateToTable(page, BASE_URL, tid, { maxRetries: 3, retryWait: 5000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // テーブル一覧が正常表示されること
@@ -2672,7 +2671,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // フォーム要素が存在すること（関連テーブル参照フィールドを含む）
-            const formElements = page.locator('input, select, textarea');
+            const formElements = page.locator('input:visible, select:visible, textarea:visible');
             await expect(formElements.first()).toBeVisible();
 
         });
