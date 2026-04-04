@@ -40,11 +40,21 @@ async function closeTemplateModal(page) {
  * レコード一覧画面から+ボタンで新規作成フォームを開く
  */
 async function openNewRecordForm(page, tableId) {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-    await waitForAngular(page);
+    // レコード一覧画面に遷移（リトライ付き — テーブル作成直後はAngularルーティング未登録の場合あり）
+    for (let attempt = 0; attempt < 3; attempt++) {
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await waitForAngular(page);
+        // ダッシュボードにリダイレクトされた場合はリトライ
+        if (!page.url().includes(`dataset__${tableId}`)) {
+            console.log(`[openNewRecordForm] ダッシュボードにリダイレクト (attempt ${attempt + 1}/3), 10秒後にリトライ`);
+            await page.waitForTimeout(10000);
+            continue;
+        }
+        break;
+    }
     const addBtn = page.locator('button:has(.fa-plus)').first();
-    await expect(addBtn).toBeVisible({ timeout: 10000 });
+    await expect(addBtn).toBeVisible({ timeout: 15000 });
     await addBtn.click();
     // 102フィールドフォームの描画+表示条件の初期評価待ち
     await page.waitForSelector('admin-forms-field', { timeout: 30000 });
