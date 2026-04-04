@@ -126,20 +126,23 @@ async function createTestEnv(browser, options = {}) {
         }
     }
 
-    // 5. テーブル作成後、ダッシュボードリロードでAngularメニューを最新化
-    // （テーブル作成直後はAngularルーティングにテーブルが未登録でgoto→ダッシュボードフォールバック問題の防止）
+    // 5. テーブル作成後、Angularルーティングにテーブルが登録されるまで待機
+    // テーブル作成直後はgoto(/admin/dataset__N)→ダッシュボードにフォールバックする問題の対策
     if (withAllTypeTable && tableId) {
-        await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        // メニューにテーブルが表示されるまで待機
-        try {
-            await page.waitForFunction(
-                (tid) => !!document.querySelector(`a[href*="dataset__${tid}"]`),
-                tableId,
-                { timeout: 15000 }
-            );
-        } catch {
-            // タイムアウトしても続行
+        for (let retry = 0; retry < 6; retry++) {
+            await page.goto(baseUrl + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await page.waitForTimeout(2000);
+            // +ボタン（レコード追加）があればテーブル画面が表示されている
+            const hasTable = await page.locator('button:has(.fa-plus)').count() > 0;
+            if (hasTable) {
+                console.log(`[createTestEnv] テーブル画面表示確認OK (${(retry + 1) * 5}秒)`);
+                break;
+            }
+            if (retry < 5) {
+                console.log(`[createTestEnv] テーブル画面未表示、リトライ ${retry + 1}/6`);
+                await page.waitForTimeout(5000);
+            }
         }
     }
 
