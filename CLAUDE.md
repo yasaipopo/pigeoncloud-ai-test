@@ -119,6 +119,10 @@ cat .claude/knowledge-e2e-angular.md
 |---|---|
 | `.claude/knowledge-e2e-performance.md` | waitForTimeout, auto-waiting, 高速化施策 |
 | `.claude/knowledge-e2e-angular.md` | beforeAll/storageState, Reactive Forms, ダッシュボードUI, パスワード変更フロー等 |
+| `.claude/knowledge-page-table-settings.md` | テーブル設定ページ、テーブル作成フロー、.pc-field-block、設定モーダル |
+| `.claude/knowledge-page-record-list.md` | レコード一覧、新規作成、アクションメニュー、チャートモーダル |
+| `.claude/knowledge-page-workflow.md` | ワークフロー設定、ビジュアルフローエディタ、申請・承認フロー |
+| `.claude/knowledge-page-admin-settings.md` | 管理設定、debug API、ログインフロー |
 
 調査で新しい知見が得られたら、作業終了前に必ず該当ファイルに追記すること。
 
