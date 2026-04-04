@@ -1,0 +1,15 @@
+{
+  "name": "CSVテスト",
+  "fields": [
+    { "type": "text", "label": "テキスト", "required": true },
+    { "type": "number", "label": "数値" },
+    { "type": "datetime", "label": "日時", "default_now": true },
+    { "type": "select", "label": "セレクト", "options": ["A", "B", "C"] },
+    { "type": "boolean", "label": "ブール" }
+  ],
+  "records": [
+    { "テキスト": "レコード1", "数値": 100, "セレクト": "A", "ブール": true },
+    { "テキスト": "レコード2", "数値": 200, "セレクト": "B", "ブール": false },
+    { "テキスト": "レコード3", "数値": 300, "セレクト": "C", "ブール": true }
+  ]
+}

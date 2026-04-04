@@ -1,0 +1,20 @@
+{
+  "name": "フィールドオプションテスト",
+  "fields": [
+    { "type": "text", "label": "テキスト_必須", "required": true },
+    { "type": "text", "label": "テキスト_ユニーク", "unique": true },
+    { "type": "text", "label": "テキスト_デフォルト値", "default_value": "サンプル" },
+    { "type": "text", "label": "テキスト_文字数制限", "max_length": 50 },
+    { "type": "text", "label": "テキスト_正規表現", "regex": "^[0-9]+$" },
+    { "type": "number", "label": "数値_整数" },
+    { "type": "number", "label": "数値_小数", "decimal": 3 },
+    { "type": "number", "label": "数値_範囲", "min": 0, "max": 100 },
+    { "type": "select", "label": "セレクト", "options": ["選択肢A", "選択肢B", "選択肢C"] },
+    { "type": "checkbox", "label": "チェックボックス", "options": ["チェックA", "チェックB"] },
+    { "type": "radio", "label": "ラジオ", "options": ["ラジオA", "ラジオB", "ラジオC"] },
+    { "type": "boolean", "label": "ブール" },
+    { "type": "textarea", "label": "テキストエリア" },
+    { "type": "file", "label": "ファイル" },
+    { "type": "image", "label": "画像" }
+  ]
+}

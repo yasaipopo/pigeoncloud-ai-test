@@ -1,0 +1,10 @@
+{
+  "name": "日時テスト",
+  "fields": [
+    { "type": "datetime", "label": "日時", "default_now": true },
+    { "type": "date", "label": "日付", "default_now": true },
+    { "type": "time", "label": "時間" },
+    { "type": "year_month", "label": "年月" },
+    { "type": "text", "label": "テキスト", "required": true }
+  ]
+}
