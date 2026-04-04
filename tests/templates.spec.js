@@ -18,10 +18,16 @@ async function waitForAngular(page, timeout = 15000) {
 }
 
 /**
- * ログイン共通関数（ensureLoggedInにフォールバック）
+ * ログイン共通関数（明示的ログイン）
  */
 async function login(page) {
-    await ensureLoggedIn(page);
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    if (page.url().includes('/login')) {
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
 }
 
 /**

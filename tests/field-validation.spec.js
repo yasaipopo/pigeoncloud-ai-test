@@ -23,8 +23,13 @@ let PASSWORD = process.env.TEST_PASSWORD;
  * SPA環境ではURLが /admin/login のまま変わらない場合があるため .navbar で待機
  */
 async function login(page, email, password) {
-    const { ensureLoggedIn } = require('./helpers/ensure-login');
-    await ensureLoggedIn(page, email || EMAIL, password || PASSWORD);
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    if (page.url().includes('/login')) {
+        await page.fill('#id', email || EMAIL);
+        await page.fill('#password', password || PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
 }
 
 /**

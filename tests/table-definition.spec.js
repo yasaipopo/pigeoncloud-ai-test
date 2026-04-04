@@ -6013,7 +6013,7 @@ test.describe('テーブルアーカイブ', () => {
     // ARC-01: テーブルをアーカイブできること
     // -------------------------------------------------------------------------
     test('ARC-01: テーブルをアーカイブできること', async ({ page }) => {
-        await ensureLoggedIn(page);
+        await login(page);
         await closeTemplateModal(page);
 
         // アーカイブボタンはテーブル管理一覧ページ（/admin/dataset）に表示される
@@ -6060,7 +6060,7 @@ test.describe('テーブルアーカイブ', () => {
     // ARC-02: アーカイブしたテーブルを復元できること
     // -------------------------------------------------------------------------
     test('ARC-02: アーカイブしたテーブルを復元できること', async ({ page }) => {
-        await ensureLoggedIn(page);
+        await login(page);
         await closeTemplateModal(page);
 
         // テーブル管理一覧（/admin/dataset）に遷移
@@ -6137,7 +6137,7 @@ test.describe('自動採番リセット', () => {
     test('AUTOID-01: テーブル設定画面に自動採番リセット機能が存在すること', async ({ page }) => {
         expect(tableId).not.toBeNull();
 
-        await ensureLoggedIn(page);
+        await login(page);
         await closeTemplateModal(page);
 
         // テーブル設定ページに遷移（ALLテストテーブルはフィールド数が多いため読み込みが遅い）
@@ -6209,7 +6209,7 @@ test.describe('自動採番リセット', () => {
     test('AUTOID-02: 自動採番リセットを実行できること', async ({ page }) => {
         expect(tableId).not.toBeNull();
 
-        await ensureLoggedIn(page);
+        await login(page);
         await closeTemplateModal(page);
 
         // テーブル設定ページに遷移（ALLテストテーブルはフィールド数が多いため読み込みが遅い）

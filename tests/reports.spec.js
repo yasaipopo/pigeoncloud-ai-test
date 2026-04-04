@@ -148,7 +148,7 @@ async function navigateToTablePage(page, tableId) {
     await waitForAngular(page);
     // ログインページにリダイレクトされた場合はre-login
     if (page.url().includes('/admin/login')) {
-        await ensureLoggedIn(page);
+        await login(page);
         await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
     }
@@ -851,7 +851,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
             // ログインページにリダイレクトされた場合は再ログイン
             if (page.url().includes('/admin/login')) {
-                await ensureLoggedIn(page);
+                await login(page);
                 await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                 await waitForAngular(page);
                 await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
@@ -908,7 +908,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
                 // ログインページにリダイレクトされた場合は再ログイン
                 if (page.url().includes('/admin/login')) {
-                    await ensureLoggedIn(page);
+                    await login(page);
                     await page.goto(BASE_URL + `/admin/dataset__${mainTableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
                     await waitForAngular(page);
                     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});

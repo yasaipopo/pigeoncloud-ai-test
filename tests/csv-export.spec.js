@@ -17,8 +17,13 @@ const TABLE_ID_FILE = path.join('/tmp', 'csv_export_test_table_id.txt');
  * ログイン共通関数（storageState対応版のensureLoggedInを内部で呼ぶ）
  */
 async function login(page, email, password) {
-    await ensureLoggedIn(page, email, password);
-    await page.waitForTimeout(1000);
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    if (page.url().includes('/login')) {
+        await page.fill('#id', email || EMAIL);
+        await page.fill('#password', password || PASSWORD);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
 }
 
 /**
