@@ -35,7 +35,7 @@ module.exports = defineConfig({
     testDir: './tests',
     globalSetup: './tests/global-setup.js',
     globalTeardown: './tests/global-teardown.js',
-    timeout: 60000, // テスト関数全体: 60秒。stepが多い場合のみtest.setTimeout(120000)で個別延長
+    timeout: 300000, // テスト関数全体: 300秒。beforeAll内のポーリング(最大60s)対応のため延長
     expect: { timeout: 5000 },
     fullyParallel: false,
     retries: 1,

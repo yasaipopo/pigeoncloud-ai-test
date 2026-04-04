@@ -3,9 +3,13 @@
 /**
  * テーブル画面に確実に遷移するヘルパー
  *
- * テーブル作成直後はAngularのメニューデータにテーブルが登録されていないため、
- * dataset__Nへのgotoがダッシュボードにフォールバックする。
- * ダッシュボードリロード→リトライで解決する。
+ * 問題: Angular SPA の dataset__N ルートは、直接 goto すると
+ * ルートガードの非同期 API 呼び出しが間に合わずダッシュボードにリダイレクトされることがある。
+ *
+ * 解決策:
+ * 1. まずダッシュボードに goto してAngularメニューを完全ロード
+ * 2. サイドバーリンクをクリック（SPA ナビゲーション = ルートガード問題を回避）
+ * 3. SPA nav 失敗時は direct goto でフォールバック
  *
  * 使い方:
  *   const { navigateToTable } = require('./helpers/navigate-to-table');
@@ -31,27 +35,43 @@ async function waitForAngular(page, timeout = 15000) {
  */
 async function navigateToTable(page, baseUrl, tableId, options = {}) {
     const { maxRetries = 3, retryWait = 10000 } = options;
+    const targetPath = `/admin/dataset__${tableId}`;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
-        // ダッシュボードでAngularメニューをリロード
+        // ダッシュボードへ遷移してAngularメニューを完全ロード
         await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
-        // テーブル画面に遷移
-        await page.goto(baseUrl + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        // 優先: サイドバーリンクからAngular SPA ナビゲーションで遷移
+        // （ルートガードの非同期API呼び出しを回避できる）
+        const tableLink = page.locator(`a[href*="${targetPath}"]`).first();
+        if (await tableLink.count() > 0) {
+            await tableLink.click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+            await page.waitForTimeout(2000);
+            if (page.url().includes(targetPath)) {
+                return; // サイドバークリックで成功
+            }
+            console.log(`[navigateToTable] SPA nav 後 URL 不一致: ${page.url()}`);
+        } else {
+            console.log(`[navigateToTable] サイドバーリンクが見つからない (attempt ${attempt + 1})`);
+        }
+
+        // フォールバック: direct goto で遷移試行
+        await page.goto(baseUrl + targetPath, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         await page.waitForTimeout(2000);
+        if (page.url().includes(targetPath)) {
+            return; // direct goto で成功
+        }
 
-        // レコード一覧が表示されたか確認
-        const hasPlusBtn = await page.locator('button:has(.fa-plus)').count() > 0;
-        if (hasPlusBtn) return;
-
-        console.log(`[navigateToTable] テーブル画面未表示 (attempt ${attempt + 1}/${maxRetries}), ${retryWait / 1000}秒後にリトライ`);
-        await page.waitForTimeout(retryWait);
+        console.log(`[navigateToTable] テーブル画面未表示 (attempt ${attempt + 1}/${maxRetries}), URL: ${page.url()}, ${retryWait / 1000}秒後にリトライ`);
+        if (attempt < maxRetries - 1) await page.waitForTimeout(retryWait);
     }
-    // 最終リトライ後も表示されなかった場合は続行（呼び出し側で判定）
-    console.warn(`[navigateToTable] ${maxRetries}回リトライ後もテーブル画面が表示されませんでした`);
+    console.warn(`[navigateToTable] ${maxRetries}回リトライ後もテーブル画面が表示されませんでした (tableId: ${tableId})`);
 }
 
 module.exports = { navigateToTable };
