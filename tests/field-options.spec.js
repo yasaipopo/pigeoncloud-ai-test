@@ -78,6 +78,19 @@ test.beforeAll(async ({ browser }) => {
 
 test.describe('フィールド機能テスト（261/265/267系）', () => {
 
+    test.beforeEach(async ({ page }) => {
+        // fixture pageの古いcookieをクリアし、新環境に明示的にログイン
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await closeTemplateModal(page);
+    });
+
     test('F401: フィールド機能テスト', async ({ page }) => {
         test.setTimeout(300000);
         const _testStart = Date.now();
@@ -85,8 +98,7 @@ test.describe('フィールド機能テスト（261/265/267系）', () => {
         const tableId = _sharedTableId;
         expect(tableId, 'ALLテストテーブルのIDが取得できていること').toBeTruthy();
 
-        await login(page);
-        await closeTemplateModal(page);
+        // beforeEachでログイン+テンプレートモーダル閉じ済み
 
         // ----- 261-1: 選択肢フィールドの表示条件UIと動作確認 -----
         // テスト観点: 選択肢フィールド（セレクト/ラジオ/チェックボックス）がフォームに存在し、

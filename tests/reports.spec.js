@@ -195,6 +195,8 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
     // 各テスト前: 明示的ログイン
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         if (page.url().includes('/login')) {
             await page.fill('#id', EMAIL);

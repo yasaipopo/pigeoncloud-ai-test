@@ -357,6 +357,8 @@ test.describe('メール配信', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000); // beforeEach（ログイン）+ テスト本体で120秒
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {

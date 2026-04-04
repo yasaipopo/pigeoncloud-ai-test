@@ -296,6 +296,8 @@ test.describe('ワークフロー', () => {
     });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
         // 新環境のログインページに明示的に遷移してログイン
         // ※configのstorageStateは古い環境のcookieのため、必ずフルログインが必要
         try {

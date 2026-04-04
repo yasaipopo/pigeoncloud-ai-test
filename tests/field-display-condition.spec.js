@@ -174,6 +174,8 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
     });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         if (page.url().includes('/login')) {
             await page.fill('#id', EMAIL);

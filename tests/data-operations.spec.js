@@ -240,6 +240,8 @@ test.describe('大量データ（211系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -291,6 +293,8 @@ test.describe('検索機能（270系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -343,6 +347,8 @@ test.describe('自動採番（273系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -426,6 +432,8 @@ test.describe('循環参照エラー（291系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -503,6 +511,8 @@ test.describe('一括編集（312系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -556,6 +566,8 @@ test.describe('CSVキャンセル（367系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -615,6 +627,8 @@ test.describe('子テーブル（325, 341系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -703,6 +717,8 @@ test.describe('一覧編集モード（324系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -1163,6 +1179,8 @@ test.describe('追加実装テスト（282-593系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {

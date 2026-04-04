@@ -227,6 +227,8 @@ test.beforeAll(async ({ browser }) => {
 });
 test.describe('ユーザー管理（251系）', () => {
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -270,6 +272,8 @@ test.describe('権限設定（262系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -322,6 +326,8 @@ test.describe('2段階認証（267系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -365,6 +371,8 @@ test.describe('ログイン失敗制限（357系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {

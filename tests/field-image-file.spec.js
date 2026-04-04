@@ -288,6 +288,8 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000);
             await login(page);
             await closeTemplateModal(page);
@@ -382,6 +384,8 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             await login(page);
             await closeTemplateModal(page);
         });
@@ -472,6 +476,8 @@ test.describe('自動採番フィールド（216系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             // フレイキー対策: beforeEachのタイムアウトを延長（前のdescribeのafterAllが長い場合の対応）
             await login(page);
             await closeTemplateModal(page);
@@ -537,6 +543,8 @@ test.describe('固定テキストフィールド（230系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             await login(page);
             await closeTemplateModal(page);
         });
@@ -613,6 +621,8 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             await login(page);
             await closeTemplateModal(page);
         });
@@ -694,6 +704,8 @@ test.describe('列設定（122系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             await login(page);
             await closeTemplateModal(page);
         });
@@ -770,6 +782,8 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             await login(page);
             await closeTemplateModal(page);
         });
@@ -873,6 +887,8 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             await login(page);
             await closeTemplateModal(page);
         });
@@ -1045,6 +1061,8 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             await login(page);
             await closeTemplateModal(page);
         });

@@ -387,6 +387,8 @@ test.describe('追加実装テスト（314-579系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のcookieをクリアして新環境にログイン
+        await page.context().clearCookies();
             test.setTimeout(120000); // checkPage含むテスト用（60秒では不足な場合あり）
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
