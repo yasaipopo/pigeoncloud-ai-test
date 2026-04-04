@@ -5,9 +5,11 @@ const { ensureLoggedIn } = require('./helpers/ensure-login');
 const path = require('path');
 const fs = require('fs');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+const { createTestEnv } = require('./helpers/create-test-env');
+
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 /**
  * ログイン共通関数（CSRFエラーに対応したリトライあり）
@@ -176,32 +178,30 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // describeブロック内で共有するtableId
     let tableId = null;
 
-    // テスト全体の前に一度だけテーブルIDを取得（テーブルがなければ作成）
+    // テスト全体の前に自己完結環境を作成
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        const context = await createLoginContext(browser);
-        const page = await context.newPage();
-        try {
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) {
-                // リトライ: セッション切れ対策
-                await ensureLoggedIn(page);
-                tableId = await getAllTypeTableId(page);
-            }
-            if (!tableId) {
-                console.error('[beforeAll] ALLテストテーブルが見つかりません');
-            }
-        } catch (e) {
-            console.error('[beforeAll] 帳票セットアップ失敗:', e.message);
-        }
-        await page.close().catch(() => {});
-        await context.close().catch(() => {});
+        test.setTimeout(180000);
+        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        tableId = env.tableId;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        await env.context.close();
+        console.log(`[reports] 自己完結環境: ${BASE_URL}`);
     });
 
-    // 各テスト前: ログインのみ
+    // 各テスト前: 明示的ログイン
     test.beforeEach(async ({ page }) => {
-        await ensureLoggedIn(page);
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
         await closeTemplateModal(page);
     });
 

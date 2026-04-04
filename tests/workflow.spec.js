@@ -148,7 +148,13 @@ async function createSimpleTable(page) {
  * - フロー固定OFF（テンプレートなし）: 「承認フロー追加」→ユーザー選択→「申請する」
  */
 async function createRecordAndApply(page, tid) {
-    await page.goto(BASE_URL + '/admin/dataset__' + tid + '/edit/new', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    // レコード一覧 → +ボタンで新規作成（/edit/newは Angular SPA内部ルートで白画面になる）
+    await page.goto(BASE_URL + '/admin/dataset__' + tid, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await waitForAngular(page);
+    const addBtn = page.locator('button:has(.fa-plus)').first();
+    await addBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await addBtn.click();
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(1000);
 

@@ -1,10 +1,11 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const { createAuthContext } = require('./helpers/auth-context');
+const { createTestEnv } = require('./helpers/create-test-env');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -207,25 +208,24 @@ async function createTestUser(page) {
 
 test.describe('認証（ログイン・ログアウト・パスワード変更）', () => {
 
-    // テスト開始前にアカウントロックを解除
+    // テスト開始前に自己完結テスト環境を作成 + アカウントロック解除
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        const context = await browser.newContext();
-            const page = await context.newPage();
-            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
-                await page.locator('button[type=submit].btn-primary').first().click();
-                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-            }
-            await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            await unlockAccount(page);
+        test.setTimeout(180000);
+        const env = await createTestEnv(browser, { withAllTypeTable: false });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        // アカウントロック解除
+        try {
+            await unlockAccount(env.page);
         } catch (e) {
             // ロック解除に失敗しても続行
-        } finally {
-            await context.close();
         }
+        await env.context.close();
+        console.log(`[auth] 自己完結環境: ${BASE_URL}`);
     });
 
     // =========================================================================

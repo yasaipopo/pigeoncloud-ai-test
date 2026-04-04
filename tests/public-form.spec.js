@@ -3,9 +3,11 @@ const { test, expect } = require('@playwright/test');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+const { createTestEnv } = require('./helpers/create-test-env');
+
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -177,19 +179,29 @@ async function enablePublicForm(page, tableId) {
 test.describe('公開フォーム・公開メールリンク', () => {
     let tableId = null;
 
-    // テスト前: テーブルとデータを一度だけ作成
+    // テスト前: 自己完結環境を作成
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        const context = await browser.newContext();
-        const page = await context.newPage();
+        test.setTimeout(180000);
+        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        tableId = env.tableId;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        await env.context.close();
+        console.log(`[public-form] 自己完結環境: ${BASE_URL}`);
+    });
+
+    test.beforeEach(async ({ page }) => {
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await page.fill('#id', EMAIL);
-        await page.fill('#password', PASSWORD);
-        await page.locator('button[type=submit].btn-primary').first().click();
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        tableId = await getAllTypeTableId(page);
-        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-        await context.close();
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
     });
 
     // =========================================================================

@@ -5,9 +5,11 @@ const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+const { createTestEnv } = require('./helpers/create-test-env');
+
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -173,22 +175,27 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(120000);
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            tableId = await getAllTypeTableId(page);
-            if (!tableId) {
-                await ensureLoggedIn(page);
-                tableId = await getAllTypeTableId(page);
-            }
-            if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
-            await page.close();
-            await context.close();
+            test.setTimeout(180000);
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            tableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+            await env.context.close();
+            console.log(`[filters-1] 自己完結環境: ${BASE_URL}`);
         });
 
     test.beforeEach(async ({ page }) => {
-            await ensureLoggedIn(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 
@@ -460,39 +467,27 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            const context = await createLoginContext(browser);
-            const page = await context.newPage();
-            await ensureLoggedIn(page);
-            let status = await debugApiGet(page, '/status');
-            let existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
-            if (!existing) {
-                // リトライ: セッション切れ対策
-                await ensureLoggedIn(page);
-                status = await debugApiGet(page, '/status');
-                existing = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
-            }
-            if (existing) {
-                tableId = existing.id;
-            } else {
-                const result = await debugApiPost(page, '/create-all-type-table', {});
-                if (result.result === 'success') {
-                    tableId = result.table_id;
-                }
-            }
-            // データが少なければ投入
-            if (tableId) {
-                const statusAfter = await debugApiGet(page, '/status');
-                const tbl = (statusAfter.all_type_tables || []).find(t => t.id === tableId);
-                if (!tbl || tbl.count < 3) {
-                    await debugApiPost(page, '/create-all-type-data', { count: 3, pattern: 'fixed' });
-                }
-            }
-            await page.close();
-            await context.close();
+            test.setTimeout(180000);
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            tableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+            await env.context.close();
+            console.log(`[filters-2] 自己完結環境: ${BASE_URL}`);
         });
 
     test.beforeEach(async ({ page }) => {
-            await ensureLoggedIn(page);
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL);
+                await page.fill('#password', PASSWORD);
+                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await closeTemplateModal(page);
         });
 

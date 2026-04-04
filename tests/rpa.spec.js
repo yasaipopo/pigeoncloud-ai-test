@@ -2,10 +2,11 @@
 const { test, expect } = require('@playwright/test');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
+const { createTestEnv } = require('./helpers/create-test-env');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
 
 async function waitForAngular(page, timeout = 15000) {
     try {
@@ -105,30 +106,31 @@ async function navigateToRpa(page) {
 test.describe('RPA（コネクト）', () => {
     /** @type {import('@playwright/test').Browser} */
     let browser;
-    /** @type {import('@playwright/test').BrowserContext} */
-    let sharedContext;
-    /** @type {import('@playwright/test').Page} */
-    let sharedPage;
     let tableId;
 
     test.beforeAll(async ({ browser: b }) => {
+        test.setTimeout(180000);
         browser = b;
-        const sharedCtx = await browser.newContext();
-        const sharedPg = await sharedCtx.newPage();
-        await sharedPg.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await sharedPg.fill('#id', EMAIL);
-        await sharedPg.fill('#password', PASSWORD);
-        await sharedPg.locator('button[type=submit].btn-primary').first().click();
-        await sharedPg.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-        sharedContext = sharedCtx;
-        sharedPage = sharedPg;
-        // ALLテストテーブルのID取得（global-setupで作成済み）
-        tableId = await getAllTypeTableId(sharedPage);
-        if (!tableId) throw new Error('ALLテストテーブルが見つかりません（global-setupで作成されているはずです）');
+        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        BASE_URL = env.baseUrl;
+        EMAIL = env.email;
+        PASSWORD = env.password;
+        tableId = env.tableId;
+        process.env.TEST_BASE_URL = env.baseUrl;
+        process.env.TEST_EMAIL = env.email;
+        process.env.TEST_PASSWORD = env.password;
+        await env.context.close();
+        console.log(`[rpa] 自己完結環境: ${BASE_URL}`);
     });
 
-    test.afterAll(async () => {
-        await sharedContext.close().catch(() => {});
+    test.beforeEach(async ({ page }) => {
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
     });
 
     test('RA01: コネクト管理画面の基本機能確認', async ({ page }) => {

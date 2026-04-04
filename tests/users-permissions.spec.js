@@ -3990,9 +3990,20 @@ test.describe('バグ修正・機能改善確認（UP09）', () => {
         await test.step('432: 数値項目（小数形式）で小数点の入力が可能であること', async () => {
             const STEP_TIME = Date.now();
 
-            // レコード新規作成画面
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/new`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-            await waitForAngular(page);
+            // レコード一覧 → +ボタンで新規作成（/edit/newは Angular SPA内部ルートで白画面になる）
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            // Angular描画完了待ち
+            try {
+                await page.waitForSelector('body[data-ng-ready="true"]', { timeout: 5000 });
+            } catch {
+                await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+            }
+            const addBtn = page.locator('button:has(.fa-plus)').first();
+            await addBtn.waitFor({ state: 'visible', timeout: 10000 });
+            await addBtn.click();
+            await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+            await page.waitForTimeout(1000);
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
