@@ -110,10 +110,14 @@ async function createTestEnv(browser, options = {}) {
                     return res.json();
                 } catch { return { all_type_tables: [] }; }
             });
-            const table = (status.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
+            // ALLテストテーブル本体を探す（フィールド数50以上 or ラベル完全一致）
+            const tables = status.all_type_tables || [];
+            const table = tables.find(t => t.label === 'ALLテストテーブル') ||
+                          tables.find(t => (t.fields || []).length >= 50);
             if (table) {
                 tableId = table.table_id || table.id;
-                console.log(`[createTestEnv] テーブル作成完了: tableId=${tableId} (${(i + 1) * 5}秒)`);
+                const fieldCount = (table.fields || []).length;
+                console.log(`[createTestEnv] テーブル作成完了: tableId=${tableId}, fields=${fieldCount} (${(i + 1) * 5}秒)`);
                 break;
             }
         }
