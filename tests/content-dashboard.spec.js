@@ -235,6 +235,7 @@ test.describe('リッチテキスト（274系）', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -304,6 +305,7 @@ test.describe('日時フォーマット（275系）', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -381,6 +383,7 @@ test.describe('ダッシュボード集計（315系）', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL);
@@ -431,6 +434,7 @@ test.describe('テーブル削除ロック（349系）', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -570,6 +574,7 @@ test.describe('未実装テスト（todo）', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -1709,6 +1714,7 @@ test.describe('追加実装テスト（683-838系）', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {

@@ -318,6 +318,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         test.setTimeout(120000);
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         if (page.url().includes('/login')) {
@@ -471,6 +472,7 @@ test.describe('共通設定・システム設定', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         test.setTimeout(120000);
         // fixtureのpageは古いstorageStateを持つため、新環境に明示的にログインさせる
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});

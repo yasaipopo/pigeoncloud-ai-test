@@ -74,6 +74,7 @@ async function logout(page) {
     // クッキーをクリアしてセッションを強制終了（リダイレクト待ち不要）
     await page.waitForTimeout(1000);
     await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
     await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
     await page.waitForSelector('#id', { timeout: 5000 });
 }

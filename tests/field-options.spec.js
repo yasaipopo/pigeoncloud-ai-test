@@ -95,6 +95,7 @@ test.describe('フィールド機能テスト（261/265/267系）', () => {
     test.beforeEach(async ({ page }) => {
         // fixture pageの古いcookieをクリアし、新環境に明示的にログイン
         await page.context().clearCookies();
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         if (page.url().includes('/login')) {
             await page.fill('#id', EMAIL);
