@@ -20,16 +20,26 @@ async function createTestEnv(browser, options = {}) {
     const adminContext = await browser.newContext();
     const adminPage = await adminContext.newPage();
 
-    try {
-        await adminPage.goto(ADMIN_BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await adminPage.waitForSelector('#id', { timeout: 15000 });
-        await adminPage.fill('#id', ADMIN_EMAIL);
-        await adminPage.fill('#password', ADMIN_PASSWORD);
-        await adminPage.locator('button[type=submit].btn-primary').first().click();
-        await adminPage.waitForSelector('.navbar', { timeout: 30000 });
-    } catch (e) {
+    // ログインリトライ（並列実行時のセッション競合対策）
+    let loginOk = false;
+    for (let loginAttempt = 1; loginAttempt <= 3; loginAttempt++) {
+        try {
+            await adminPage.goto(ADMIN_BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await adminPage.waitForSelector('#id', { timeout: 15000 });
+            await adminPage.fill('#id', ADMIN_EMAIL);
+            await adminPage.fill('#password', ADMIN_PASSWORD);
+            await adminPage.locator('button[type=submit].btn-primary').first().click();
+            await adminPage.waitForSelector('.navbar', { timeout: 30000 });
+            loginOk = true;
+            break;
+        } catch (e) {
+            console.log(`[createTestEnv] ログイン attempt ${loginAttempt}/3 失敗: ${e.message.substring(0, 50)}`);
+            if (loginAttempt < 3) await adminPage.waitForTimeout(3000 + Math.random() * 2000);
+        }
+    }
+    if (!loginOk) {
         await adminContext.close();
-        throw new Error(`管理画面ログイン失敗: ${e.message}`);
+        throw new Error('管理画面ログインが3回とも失敗');
     }
 
     // 2. create-trial（リトライ3回）
