@@ -1,0 +1,79 @@
+{
+  "$schema": "create-light-table API スキーマ定義",
+  "request": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255,
+      "description": "テーブル名"
+    },
+    "fields": {
+      "type": "array",
+      "required": true,
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": {
+          "enum": ["text", "textarea", "richtext", "number", "num", "datetime", "date", "time", "year_month", "boolean", "select", "checkbox", "radio", "file", "image", "auto_number", "calc", "email", "url", "color", "select_other_table", "relation", "fixed_text"],
+          "required": true
+        },
+        "label": { "type": "string", "maxLength": 255, "description": "フィールド表示名（省略時はtype名）" },
+        "required": { "type": "boolean", "description": "必須フィールド" },
+        "unique": { "type": "boolean", "description": "ユニーク制約" },
+        "default_value": { "type": "string", "description": "デフォルト値" },
+        "default_now": { "type": "boolean", "description": "デフォルトで現在日時セット（datetime/date/time用）" },
+        "max_length": { "type": "integer", "description": "最大文字数（text用）" },
+        "regex": { "type": "string", "description": "正規表現バリデーション（text用）" },
+        "decimal": { "type": "integer", "description": "小数桁数（number用）" },
+        "min": { "type": "number", "description": "最小値（number用）" },
+        "max": { "type": "number", "description": "最大値（number用）" },
+        "options": { "type": "array", "items": "string", "description": "選択肢（select/checkbox/radio用）" },
+        "display_condition": {
+          "type": "object",
+          "properties": {
+            "field": { "type": "string", "description": "条件フィールドのlabel" },
+            "value": { "type": "string", "description": "条件値" }
+          },
+          "description": "表示条件（指定フィールドが指定値の時のみ表示）"
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "description": "初期レコード（label→値のオブジェクト配列）",
+      "items": { "type": "object" }
+    },
+    "workflow": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "description": "ワークフロー有効化（dataset.workflow）" },
+        "fix_flow": { "type": "boolean", "description": "フロー固定（dataset.workflow_flow_fixed）" },
+        "editable": { "type": "boolean", "description": "承認者はデータ編集可能（dataset.workflow_editable）" },
+        "reapply": { "type": "boolean", "description": "再申請可能（dataset.workflow_reapply）" },
+        "reapply_other_user": { "type": "boolean", "description": "他ユーザーによる再申請可能" },
+        "salvage": { "type": "boolean", "description": "引き上げ承認機能（dataset.workflow_salvage）" },
+        "back": { "type": "boolean", "description": "フローを一つ戻す機能（dataset.workflow_back）" },
+        "same_user_skip": { "type": "boolean", "description": "同一承認者スキップ（dataset.workflow_same_user_skip）" },
+        "fix_flow_can_add": { "type": "boolean", "description": "フロー固定時に承認者追加可能" },
+        "notify_for_division": { "type": "boolean", "description": "組織の全員が承認時のみに通知" },
+        "done_can_edit": { "type": "boolean", "description": "承認完了後のデータ編集可能" },
+        "include_csv": { "type": "boolean", "description": "CSVにワークフロー情報を含める" }
+      },
+      "description": "ワークフロー設定"
+    }
+  },
+  "response": {
+    "table_id": { "type": "integer" },
+    "table_name": { "type": "string" },
+    "fields": {
+      "type": "array",
+      "items": {
+        "id": { "type": "integer" },
+        "label": { "type": "string" },
+        "type": { "type": "string" },
+        "column": { "type": "string", "description": "物理カラム名（field__N）" }
+      }
+    },
+    "record_count": { "type": "integer" }
+  }
+}
