@@ -126,6 +126,23 @@ async function createTestEnv(browser, options = {}) {
         }
     }
 
+    // 5. テーブル作成後、ダッシュボードリロードでAngularメニューを最新化
+    // （テーブル作成直後はAngularルーティングにテーブルが未登録でgoto→ダッシュボードフォールバック問題の防止）
+    if (withAllTypeTable && tableId) {
+        await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        // メニューにテーブルが表示されるまで待機
+        try {
+            await page.waitForFunction(
+                (tid) => !!document.querySelector(`a[href*="dataset__${tid}"]`),
+                tableId,
+                { timeout: 15000 }
+            );
+        } catch {
+            // タイムアウトしても続行
+        }
+    }
+
     return { baseUrl, email, password, tableId, context, page };
 }
 
