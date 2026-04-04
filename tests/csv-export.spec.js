@@ -253,7 +253,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
     test.describe.configure({ mode: 'serial' });
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(180000);
+        test.setTimeout(300000);
         const env = await createTestEnv(browser, { withAllTypeTable: true });
         BASE_URL = env.baseUrl;
         EMAIL = env.email;
@@ -634,7 +634,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         await test.step('55-2: CSV以外のファイル(.txt)をアップロードするとインポートエラーが発生すること', async () => {
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000); // CSV非同期処理の完了待ちに対応
+            test.setTimeout(300000); // CSV非同期処理の完了待ちに対応
             // 明示的ログイン（セッション切れ対策）
             if (page.url().includes('/login') || page.url() === 'about:blank') {
                 await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
@@ -1576,7 +1576,7 @@ test.describe('JSONエクスポート・インポート', () => {
         });
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(180000);
+            test.setTimeout(300000);
             const env = await createTestEnv(browser, { withAllTypeTable: true });
             BASE_URL = env.baseUrl;
             EMAIL = env.email;

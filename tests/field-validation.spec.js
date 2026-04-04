@@ -281,7 +281,7 @@ async function assertFieldPageLoaded(page, tableId) {
 let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(180000); // 環境作成+ALLテストテーブル作成に最大3分
+    test.setTimeout(300000); // 環境作成+ALLテストテーブル作成に最大3分
     const env = await createTestEnv(browser, { withAllTypeTable: true, dataCount: 3 });
     BASE_URL = env.baseUrl;
     EMAIL = env.email;

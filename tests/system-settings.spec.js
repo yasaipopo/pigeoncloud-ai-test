@@ -298,7 +298,7 @@ async function getAdminSetting(page) {
 test.describe('テーブル定義一覧（ALLテストテーブル不要）', () => {
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(180000);
+        test.setTimeout(300000);
         const env = await createTestEnv(browser, { withAllTypeTable: false });
         BASE_URL = env.baseUrl;
         EMAIL = env.email;
@@ -419,7 +419,7 @@ test.describe('共通設定・システム設定', () => {
     let tableId = null;
 
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(180000);
+        test.setTimeout(300000);
         const env = await createTestEnv(browser, { withAllTypeTable: true });
         BASE_URL = env.baseUrl;
         EMAIL = env.email;

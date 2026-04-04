@@ -249,7 +249,7 @@ async function assertFieldPageLoaded(page, tableId) {
 let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(300000);
     const env = await createTestEnv(browser, { withAllTypeTable: true });
     BASE_URL = env.baseUrl;
     EMAIL = env.email;

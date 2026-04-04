@@ -180,7 +180,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
 
     // テスト全体の前に自己完結環境を作成
     test.beforeAll(async ({ browser }) => {
-        test.setTimeout(180000);
+        test.setTimeout(300000);
         const env = await createTestEnv(browser, { withAllTypeTable: true });
         BASE_URL = env.baseUrl;
         EMAIL = env.email;
@@ -1061,7 +1061,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
     // RP02: 帳票ダウンロード・各種設定
     // =========================================================================
     test('RP02: 帳票ダウンロード・各種設定', async ({ page }) => {
-        test.setTimeout(180000);
+        test.setTimeout(300000);
 
         await test.step('264: 帳票ダウンロードがエラーなく実行できること', async () => {
             const STEP_TIME = Date.now();

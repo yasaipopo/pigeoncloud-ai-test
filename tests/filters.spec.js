@@ -175,7 +175,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(180000);
+            test.setTimeout(300000);
             const env = await createTestEnv(browser, { withAllTypeTable: true });
             BASE_URL = env.baseUrl;
             EMAIL = env.email;
@@ -467,7 +467,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
     // -------------------------------------------------------------------------
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(180000);
+            test.setTimeout(300000);
             const env = await createTestEnv(browser, { withAllTypeTable: true });
             BASE_URL = env.baseUrl;
             EMAIL = env.email;

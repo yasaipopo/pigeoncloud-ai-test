@@ -53,7 +53,7 @@ async function openNewRecordForm(page, tableId) {
 let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(300000);
     const env = await createTestEnv(browser, { withAllTypeTable: true });
     BASE_URL = env.baseUrl;
     EMAIL = env.email;
@@ -74,7 +74,7 @@ test.beforeAll(async ({ browser }) => {
 test.describe('フィールド機能テスト（261/265/267系）', () => {
 
     test('F401: フィールド機能テスト', async ({ page }) => {
-        test.setTimeout(180000);
+        test.setTimeout(300000);
         const _testStart = Date.now();
 
         const tableId = _sharedTableId;

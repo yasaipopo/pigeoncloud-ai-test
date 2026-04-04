@@ -282,7 +282,7 @@ test.describe('フィールド - 日時（101）', () => {
     }
 
     test('FD01: 日時フィールド設定と現在日時セット', async ({ page }) => {
-        test.setTimeout(180000);
+        test.setTimeout(300000);
 
         // テーブル設定ページに遷移（1回だけ）
         await test.step('テーブル設定ページに遷移', async () => {

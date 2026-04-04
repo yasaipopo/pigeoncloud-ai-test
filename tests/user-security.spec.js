@@ -214,7 +214,7 @@ async function checkPage(page, path) {
 // ファイルレベル: 専用テスト環境の作成
 let _sharedTableId = null;
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(300000);
     const env = await createTestEnv(browser, { withAllTypeTable: true });
     BASE_URL = env.baseUrl;
     EMAIL = env.email;

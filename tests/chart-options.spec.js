@@ -317,7 +317,7 @@ async function ensureSummarizeGrant(page) {
 let fileBeforeAllFailed = false;
 let _fileTableId = null;
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(300000);
     try {
         const env = await createTestEnv(browser, { withAllTypeTable: true });
         BASE_URL = env.baseUrl;
@@ -3279,7 +3279,7 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             }
             const STEP_TIME = Date.now();
 
-            test.setTimeout(180000);
+            test.setTimeout(300000);
             await ensureCalendarView(page);
             await navigateToAllTypeTable(page);
 

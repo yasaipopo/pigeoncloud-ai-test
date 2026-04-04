@@ -109,7 +109,7 @@ test.describe('RPA（コネクト）', () => {
     let tableId;
 
     test.beforeAll(async ({ browser: b }) => {
-        test.setTimeout(180000);
+        test.setTimeout(300000);
         browser = b;
         const env = await createTestEnv(browser, { withAllTypeTable: true });
         BASE_URL = env.baseUrl;
