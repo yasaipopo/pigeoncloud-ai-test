@@ -412,15 +412,9 @@ test.describe('追加実装テスト（314-579系）', () => {
             // expected: 想定通りの結果となること。
             const tid = tableId || await getAllTypeTableId(page);
             expect(tid, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
-            // レコード一覧 → +ボタンで新規作成（/edit/newは Angular SPA内部ルートで白画面になる）
-            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-            // Angular描画完了待ち
-            try {
-                await page.waitForSelector('body[data-ng-ready="true"]', { timeout: 5000 });
-            } catch {
-                await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-            }
+            // beforeEachでnavigateToTable済み → テーブル画面にいるので+ボタンクリックのみ
+            // 念のためテーブル画面確認（別stepでgotoした後など）
+            await navigateToTable(page, BASE_URL, tid, { maxRetries: 3, retryWait: 5000 });
             const addBtn = page.locator('button:has(.fa-plus)').first();
             await addBtn.waitFor({ state: 'visible', timeout: 10000 });
             await addBtn.click();
