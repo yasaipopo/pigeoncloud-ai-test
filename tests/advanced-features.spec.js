@@ -9,6 +9,7 @@ const { createAuthContext } = require('./helpers/auth-context');
 // =============================================================================
 
 const { createTestEnv } = require('./helpers/create-test-env');
+const { navigateToTable } = require('./helpers/navigate-to-table');
 
 let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
@@ -399,6 +400,8 @@ test.describe('追加実装テスト（314-579系）', () => {
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
+            // テーブル画面が確実に表示されるようにリトライ付き遷移
+            if (tableId) await navigateToTable(page, BASE_URL, tableId, { maxRetries: 3, retryWait: 5000 });
         });
 
     test('U301: CSV DL', async ({ page }) => {
