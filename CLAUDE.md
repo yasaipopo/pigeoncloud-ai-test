@@ -124,6 +124,19 @@ cat .claude/knowledge-e2e-angular.md
 | `.claude/knowledge-page-workflow.md` | ワークフロー設定、ビジュアルフローエディタ、申請・承認フロー |
 | `.claude/knowledge-page-admin-settings.md` | 管理設定、debug API、ログインフロー |
 
+テスト用テーブルスキーマ定義:
+
+| ファイル | 用途 |
+|---|---|
+| `tests/schemas/datetime-test.json` | 日時系フィールドテスト |
+| `tests/schemas/field-options-test.json` | フィールドオプション全種テスト |
+| `tests/schemas/display-condition-test.json` | 表示条件テスト |
+| `tests/schemas/csv-test.json` | CSV操作テスト（レコード付き） |
+| `tests/schemas/workflow-test.json` | ワークフロー設定付きテスト |
+
+テーブル作成API: `POST /api/admin/debug/create-light-table` にスキーマJSONを渡す。
+テスト側: `createTableFromSchema(page, 'datetime-test')` または `createLightTable(page, '名前', [...fields])`
+
 調査で新しい知見が得られたら、作業終了前に必ず該当ファイルに追記すること。
 
 ## 【パイプラインフロー】
