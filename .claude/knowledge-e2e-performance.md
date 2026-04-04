@@ -384,3 +384,28 @@ AGENT_NUM=N bash run-test.sh tests/XXX.spec.js --reporter=list --workers=1
 同時に多数のcreateTestEnv（10+）を走らせるとai-testサーバーのRDS負荷が高くなり、テーブル作成タイムアウト（120秒超え）が発生する。同時実行は3-4個までに抑える。
 
 ### 発見日: 2026-04-04
+
+---
+
+## 知見16: テーブル作成直後はAngularメニューに未登録
+
+create-trialやcreateTestEnvでテーブル作成後、Angularのメニューデータにテーブルが登録されていない。
+`page.goto('/admin/dataset__N')`すると**ダッシュボードにフォールバック**する。
+
+**対策**: `navigateToTable(page, BASE_URL, tableId)` ヘルパーを使う（tests/helpers/navigate-to-table.js）。
+ダッシュボードリロード→dataset__Nに遷移→+ボタンが見つかるまでリトライ（最大3回）。
+
+### 発見日: 2026-04-05
+
+---
+
+## 知見17: clearCookiesがbeforeEachに必須
+
+fixture pageのstorageStateに古い環境のcookieが残り、createTestEnvの新環境にログインできない。
+全specのbeforeEachの先頭で`await page.context().clearCookies()`を呼ぶこと。
+
+### 発見日: 2026-04-05
+
+同時に多数のcreateTestEnv（10+）を走らせるとai-testサーバーのRDS負荷が高くなり、テーブル作成タイムアウト（120秒超え）が発生する。同時実行は3-4個までに抑える。
+
+### 発見日: 2026-04-04
