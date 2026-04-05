@@ -356,10 +356,13 @@ test.describe('チャート・集計 - オプション設定', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
@@ -863,7 +866,6 @@ test.describe('カレンダー - ビュー表示', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
@@ -1149,7 +1151,6 @@ test.describe('集計 - 基本機能', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
@@ -2209,7 +2210,6 @@ test.describe('チャート - フィルタ・表示設定', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         test.setTimeout(120000);
         test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
@@ -2720,7 +2720,6 @@ test.describe('集計 - 詳細権限設定', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         test.setTimeout(120000);
         test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
@@ -2936,7 +2935,6 @@ test.describe('チャート - 詳細権限設定', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         test.setTimeout(120000);
         test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
@@ -3283,7 +3281,6 @@ test.describe('チャート・集計 - バグ修正確認', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000);
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});

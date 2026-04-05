@@ -358,11 +358,14 @@ test.describe('チャート - 基本機能', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             test.setTimeout(120000); // ログインに時間がかかる場合があるためタイムアウト延長（5分に延長）
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
             // fixtureのpageは古いstorageStateのため新環境に明示的ログイン
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
@@ -1048,7 +1051,6 @@ test.describe('集計・チャート - 詳細権限設定', () => {
     test.beforeEach(async ({ page }) => {
         // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             // 長時間テストスイート実行後の遅延に対応するためタイムアウトを延長（詳細権限設定は時間がかかるため15分）
             test.setTimeout(120000);
             test.skip(fileBeforeAllFailed, 'ファイルレベルbeforeAllが失敗したためスキップ');
