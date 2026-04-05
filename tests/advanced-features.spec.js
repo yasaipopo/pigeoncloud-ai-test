@@ -374,10 +374,12 @@ test.describe('追加実装テスト（314-579系）', () => {
             const context = env.context;
             const page = await context.newPage();
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
-            await page.locator('button[type=submit].btn-primary').first().click();
-            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            if (page.url().includes('/login')) {
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            }
             await createAllTypeData(page, 3).catch(e => {
                 console.error('[beforeAll] createAllTypeData失敗:', e.message);
             });
