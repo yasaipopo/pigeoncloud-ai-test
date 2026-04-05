@@ -7,7 +7,7 @@
  * ルートガードの非同期 API 呼び出しが間に合わずダッシュボードにリダイレクトされることがある。
  *
  * 解決策:
- * 1. まずダッシュボードに goto してAngularメニューを完全ロード
+ * 1. まずダッシュボードに goto してAngularメニューを完全ロード（サイドバーリンクが表示されるまで待機）
  * 2. サイドバーリンクをクリック（SPA ナビゲーション = ルートガード問題を回避）
  * 3. SPA nav 失敗時は direct goto でフォールバック
  *
@@ -43,10 +43,13 @@ async function navigateToTable(page, baseUrl, tableId, options = {}) {
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
-        // 優先: サイドバーリンクからAngular SPA ナビゲーションで遷移
-        // （ルートガードの非同期API呼び出しを回避できる）
+        // サイドバーリンクが非同期APIでロードされるまで待つ（最大10秒）
         const tableLink = page.locator(`a[href*="${targetPath}"]`).first();
-        if (await tableLink.count() > 0) {
+        await tableLink.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+
+        if (await tableLink.isVisible().catch(() => false)) {
+            // 優先: サイドバーリンクをクリック（SPA ナビゲーション）
+            // ルートガードの非同期API呼び出しタイミング問題を回避できる
             await tableLink.click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
@@ -56,7 +59,7 @@ async function navigateToTable(page, baseUrl, tableId, options = {}) {
             }
             console.log(`[navigateToTable] SPA nav 後 URL 不一致: ${page.url()}`);
         } else {
-            console.log(`[navigateToTable] サイドバーリンクが見つからない (attempt ${attempt + 1})`);
+            console.log(`[navigateToTable] サイドバーリンクが10秒以内に表示されなかった (attempt ${attempt + 1})`);
         }
 
         // フォールバック: direct goto で遷移試行
