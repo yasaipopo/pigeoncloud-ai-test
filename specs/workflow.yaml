@@ -2,7 +2,7 @@ group: ワークフロー
 spec_file: tests/workflow.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 106-01
+- case_no: wf-010
   sheet: B
   feature: ワークフロー
   category: |-
@@ -16,7 +16,26 @@ cases:
     組織(1人)で引き上げ承認ができないこと。
     ※「引き上げ承認」ボタンが表示されないこと。
   movie: WF01
-  detailed_flow: |
+  detailed_flow: |-
+    【WF01 テストフロー】この動画で確認するテスト番号:
+      wf-010         (旧: 106-01)  ワークフロー
+      wf-020         (旧: 106-02)  ワークフロー
+      wf-030         (旧: 106-03)  ワークフロー
+      wf-040         (旧: 106-04)  ワークフロー
+      wf-050         (旧: 106-05)  ワークフロー
+      wf-060         (旧: 106-06)  ワークフロー
+      wf-070         (旧: 106-07)  ワークフロー
+      wf-080         (旧: 106-08)  ワークフロー
+      wf-090         (旧: 106-09)  ワークフロー
+      wf-100         (旧: 106-10)  ワークフロー
+      wf-110         (旧: 106-11)  ワークフロー
+      wf-120         (旧: 106-12)  ワークフロー
+      wf-130         (旧: 106-13)  ワークフロー
+      wf-140         (旧: 106-14)  ワークフロー
+      wf-150         (旧: 106-15)  ワークフロー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定 `/admin/dataset/edit/{tableId}` のワークフロータブを開く
     3. 「ワークフロー」チェックボックスをONにする
@@ -25,7 +44,8 @@ cases:
     6. 承認フロー: ユーザーA → 組織(1人の承認が必要) でワークフロー申請を作成する
     7. 組織メンバーでログインし、レコード詳細画面 `/admin/dataset__{tableId}/view/{recordId}` を開く
     8. 「引き上げ承認」ボタンが表示されていないことを `expect(page.locator('button:has-text("引き上げ承認")')).not.toBeVisible()` で確認する
-- case_no: 106-02
+  old_case_no: 106-01
+- case_no: wf-020
   sheet: B
   feature: ワークフロー
   category: |-
@@ -39,13 +59,9 @@ cases:
     組織(全員)で引き上げ承認ができないこと。
     ※「引き上げ承認」ボタンが表示されないこと。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. ユーザーA → 組織(全員の承認が必要) でワークフロー申請を作成する
-    4. 組織メンバーでログインし、レコード詳細画面を開く
-    5. 「引き上げ承認」ボタンが表示されていないことを `expect(page.locator('button:has-text("引き上げ承認")')).not.toBeVisible()` で確認する
-- case_no: 106-03
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-02
+- case_no: wf-030
   sheet: B
   feature: ワークフロー
   category: |-
@@ -57,15 +73,9 @@ cases:
     ②Bさん(ユーザー)で引き上げ承認できるか確認。
   expected: Bさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. ユーザーA → ユーザーB の2段階ワークフロー申請を作成する
-    4. ユーザーBでログインし、レコード詳細画面を開く
-    5. 「引き上げ承認」ボタンが表示されることを `expect(page.locator('button:has-text("引き上げ承認")')).toBeVisible()` で確認する
-    6. 「引き上げ承認」ボタンをクリックする
-    7. 承認完了メッセージまたはステータス変化を確認する
-- case_no: 106-04
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-03
+- case_no: wf-040
   sheet: B
   feature: ワークフロー
   category: |-
@@ -77,15 +87,9 @@ cases:
     ②Aさん(ユーザー)で引き上げ承認できるか確認。
   expected: Aさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(1人の承認が必要) → ユーザーA の2段階ワークフロー申請を作成する
-    4. 組織メンバーで1段階目を承認する
-    5. ユーザーAでログインし、レコード詳細画面を開く
-    6. 「引き上げ承認」ボタンが表示されることを確認する
-    7. 引き上げ承認をクリックし、完了を確認する
-- case_no: 106-05
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-04
+- case_no: wf-050
   sheet: B
   feature: ワークフロー
   category: |-
@@ -99,13 +103,9 @@ cases:
     組織(1人)で引き上げ承認ができないこと。
     ※「引き上げ承認」ボタンが表示されないこと。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(1人の承認が必要) → 組織(1人の承認が必要) でワークフロー申請を作成する
-    4. 組織メンバーでログインし、レコード詳細画面を開く
-    5. 「引き上げ承認」ボタンが表示されていないことを確認する
-- case_no: 106-06
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-05
+- case_no: wf-060
   sheet: B
   feature: ワークフロー
   category: |-
@@ -119,13 +119,9 @@ cases:
     組織(全員)で引き上げ承認ができないこと。
     ※「引き上げ承認」ボタンが表示されないこと。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(1人の承認が必要) → 組織(全員の承認が必要) でワークフロー申請を作成する
-    4. 組織(全員)のメンバーでログインし、レコード詳細画面を開く
-    5. 「引き上げ承認」ボタンが表示されていないことを確認する
-- case_no: 106-07
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-06
+- case_no: wf-070
   sheet: B
   feature: ワークフロー
   category: |-
@@ -137,15 +133,9 @@ cases:
     ②Aさん(ユーザー)で引き上げ承認できるか確認。
   expected: Aさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(全員の承認が必要) → ユーザーA でワークフロー申請を作成する
-    4. 組織メンバー全員で承認する
-    5. ユーザーAでログインし、レコード詳細画面を開く
-    6. 「引き上げ承認」ボタンが表示されることを確認する
-    7. 引き上げ承認をクリックし、完了を確認する
-- case_no: 106-08
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-07
+- case_no: wf-080
   sheet: B
   feature: ワークフロー
   category: |-
@@ -159,13 +149,9 @@ cases:
     組織(1人)で引き上げ承認ができないこと。
     ※「引き上げ承認」ボタンが表示されないこと。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(全員の承認が必要) → 組織(1人の承認が必要) でワークフロー申請を作成する
-    4. 組織(1人)のメンバーでログインし、レコード詳細画面を開く
-    5. 「引き上げ承認」ボタンが表示されていないことを確認する
-- case_no: 106-09
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-08
+- case_no: wf-090
   sheet: B
   feature: ワークフロー
   category: |-
@@ -179,13 +165,9 @@ cases:
     組織(全員)で引き上げ承認ができないこと。
     ※「引き上げ承認」ボタンが表示されないこと。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(全員の承認が必要) → 組織(全員の承認が必要) でワークフロー申請を作成する
-    4. 組織(全員)のメンバーでログインし、レコード詳細画面を開く
-    5. 「引き上げ承認」ボタンが表示されていないことを確認する
-- case_no: 106-10
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-09
+- case_no: wf-100
   sheet: B
   feature: ワークフロー
   category: |-
@@ -197,14 +179,9 @@ cases:
     ②Bさん(ユーザー)で引き上げ承認できるか確認。
   expected: Bさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. ユーザーA → ユーザーB → ユーザーC の3段階ワークフロー申請を作成する
-    4. ユーザーBでログインし、レコード詳細画面を開く
-    5. 「引き上げ承認」ボタンが表示されることを確認する
-    6. 引き上げ承認をクリックし、C段階に進むことを確認する
-- case_no: 106-11
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-10
+- case_no: wf-110
   sheet: B
   feature: ワークフロー
   category: |-
@@ -216,15 +193,9 @@ cases:
     ②Cさん(ユーザー)で引き上げ承認できるか確認。
   expected: Cさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. ユーザーA → ユーザーB → ユーザーC の3段階ワークフロー申請を作成する
-    4. ユーザーBで1段階目を承認する
-    5. ユーザーCでログインし、レコード詳細画面を開く
-    6. 「引き上げ承認」ボタンが表示されることを確認する
-    7. 引き上げ承認をクリックし、最終承認完了を確認する
-- case_no: 106-12
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-11
+- case_no: wf-120
   sheet: B
   feature: ワークフロー
   category: |-
@@ -236,14 +207,9 @@ cases:
     ②Aさん(ユーザー)で引き上げ承認できるか確認。
   expected: Aさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(1人の承認が必要) → ユーザーA → ユーザーB の3段階申請を作成する
-    4. ユーザーAでログインし、レコード詳細画面を開く
-    5. 「引き上げ承認」ボタンが表示されることを確認する
-    6. 引き上げ承認をクリックし、B段階に進むことを確認する
-- case_no: 106-13
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-12
+- case_no: wf-130
   sheet: B
   feature: ワークフロー
   category: |-
@@ -255,14 +221,9 @@ cases:
     ②Bさん(ユーザー)で引き上げ承認できるか確認。
   expected: Bさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(1人の承認が必要) → ユーザーA → ユーザーB の3段階申請を作成する
-    4. ユーザーAが1段階目の引き上げ承認をする
-    5. ユーザーBでログインし、「引き上げ承認」ボタンが表示されることを確認する
-    6. 引き上げ承認をクリックし、最終承認完了を確認する
-- case_no: 106-14
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-13
+- case_no: wf-140
   sheet: B
   feature: ワークフロー
   category: |-
@@ -274,14 +235,9 @@ cases:
     ②Aさん(ユーザー)で引き上げ承認できるか確認。
   expected: Aさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(全員の承認が必要) → ユーザーA → ユーザーB の3段階申請を作成する
-    4. 組織全員で1段階目を承認する
-    5. ユーザーAでログインし、「引き上げ承認」ボタンが表示されることを確認する
-    6. 引き上げ承認をクリックし、B段階に進むことを確認する
-- case_no: 106-15
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-14
+- case_no: wf-150
   sheet: B
   feature: ワークフロー
   category: |-
@@ -293,14 +249,9 @@ cases:
     ②Bさん(ユーザー)で引き上げ承認できるか確認。
   expected: Bさん(ユーザー)で引き上げ承認ができること。
   movie: WF01
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローと引き上げ承認機能をONにする
-    3. 組織(全員の承認が必要) → ユーザーA → ユーザーB の3段階申請を作成する
-    4. 組織全員で1段階目を承認し、ユーザーAが引き上げ承認をする
-    5. ユーザーBでログインし、「引き上げ承認」ボタンが表示されることを確認する
-    6. 引き上げ承認をクリックし、最終承認完了を確認する
-- case_no: 111-01
+  detailed_flow: WF01テストフロー参照（wf-010 のdetailed_flowと同一）
+  old_case_no: 106-15
+- case_no: wf-160
   sheet: B
   feature: ワークフロー
   category: ''
@@ -311,7 +262,26 @@ cases:
     一括承認
     ・1つ選択
   movie: WF02
-  detailed_flow: |
+  detailed_flow: |-
+    【WF02 テストフロー】この動画で確認するテスト番号:
+      wf-160         (旧: 111-01)  ワークフロー
+      wf-170         (旧: 111-02)  ワークフロー
+      wf-180         (旧: 111-03)  ワークフロー
+      wf-190         (旧: 111-04)  ワークフロー
+      wf-200         (旧: 111-05)  ワークフロー
+      wf-210         (旧: 111-06)  ワークフロー
+      wf-220         (旧: 111-07)  ワークフロー
+      wf-230         (旧: 111-08)  ワークフロー
+      wf-240         (旧: 111-09)  ワークフロー
+      wf-250         (旧: 111-10)  ワークフロー
+      wf-260         (旧: 111-11)  ワークフロー
+      wf-270         (旧: 111-12)  ワークフロー
+      wf-280         (旧: 111-13)  ワークフロー
+      wf-290         (旧: 111-14)  ワークフロー
+      wf-300         (旧: 111-15)  ワークフロー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、ユーザーA → ユーザーB のフローを設定する
     3. テーブル一覧 `/admin/dataset__{tableId}` で新規レコードを追加し、ワークフロー申請を行う
@@ -319,7 +289,8 @@ cases:
     5. 一覧ヘッダーの「一括承認」ボタン `button:has-text("一括承認")` をクリックする
     6. 承認確認モーダルが表示されることを確認し、「承認」をクリックする
     7. 成功メッセージが表示され、WFステータスが「承認済み」に変わることを確認する
-- case_no: 111-02
+  old_case_no: 111-01
+- case_no: wf-170
   sheet: B
   feature: ワークフロー
   category: |-
@@ -330,15 +301,9 @@ cases:
     ②該当のテーブル一覧より、①の申請を複数チェックし「一括承認」をクリック
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを追加し、それぞれワークフロー申請を行う
-    4. 複数のレコードのチェックボックスをすべて選択する
-    5. 「一括承認」ボタンをクリックする
-    6. 承認確認モーダルで「承認」をクリックする
-    7. 選択した複数レコードすべてのWFステータスが「承認済み」に変わることを確認する
-- case_no: 111-03
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-02
+- case_no: wf-180
   sheet: B
   feature: ワークフロー
   category: |-
@@ -350,15 +315,9 @@ cases:
     ③承認時コメント入力を行う
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを追加し、ワークフロー申請を行う
-    4. 複数のレコードを選択して「一括承認」をクリックする
-    5. コメント入力欄に「一括承認テストコメント」を入力する
-    6. 「承認」をクリックする
-    7. 承認が完了し、入力したコメントが承認履歴に表示されることを確認する
-- case_no: 111-04
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-03
+- case_no: wf-190
   sheet: B
   feature: ワークフロー
   category: |-
@@ -370,14 +329,9 @@ cases:
     ③承認時コメント入力を行わない
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを追加し、ワークフロー申請を行う
-    4. 複数のレコードを選択して「一括承認」をクリックする
-    5. コメント入力欄を空のままにして「承認」をクリックする
-    6. エラーなく承認が完了することを確認する
-- case_no: 111-05
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-04
+- case_no: wf-200
   sheet: B
   feature: ワークフロー
   category: |-
@@ -389,15 +343,9 @@ cases:
     ※下書きや申請取り下げ後のレコードに対して実施
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. レコードを追加し、下書き保存または申請取り下げ状態にする
-    4. テーブル一覧で該当レコードのチェックボックスを1つ選択する
-    5. 「一括削除」ボタン `button:has-text("一括削除")` をクリックする
-    6. 削除確認モーダルで「削除」をクリックする
-    7. レコードが一覧から消えることを確認する
-- case_no: 111-06
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-05
+- case_no: wf-210
   sheet: B
   feature: ワークフロー
   category: |-
@@ -409,14 +357,9 @@ cases:
     ※下書きや申請取り下げ後のレコードに対して実施
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを下書きまたは取り下げ状態にする
-    4. 複数のレコードを選択して「一括削除」をクリックする
-    5. 削除確認モーダルで「削除」をクリックする
-    6. 選択した複数レコードがすべて削除されることを確認する
-- case_no: 111-07
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-06
+- case_no: wf-220
   sheet: B
   feature: ワークフロー
   category: |-
@@ -428,14 +371,9 @@ cases:
     ③承認時コメント入力を行う
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを下書き/取り下げ状態にする
-    4. 複数のレコードを選択して「一括削除」をクリックする
-    5. コメント入力欄にコメントを入力して「削除」をクリックする
-    6. エラーなく削除が完了することを確認する
-- case_no: 111-08
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-07
+- case_no: wf-230
   sheet: B
   feature: ワークフロー
   category: |-
@@ -447,14 +385,9 @@ cases:
     ③承認時コメント入力を行わない
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを下書き/取り下げ状態にする
-    4. 複数のレコードを選択して「一括削除」をクリックする
-    5. コメント入力欄を空のまま「削除」をクリックする
-    6. エラーなく削除が完了することを確認する
-- case_no: 111-09
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-08
+- case_no: wf-240
   sheet: B
   feature: ワークフロー
   category: |-
@@ -465,15 +398,9 @@ cases:
     ②該当のテーブル一覧より、①の申請を1つチェックし「一括否認」をクリック
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. レコードを追加し、ワークフロー申請を行う
-    4. テーブル一覧で申請済みレコードのチェックボックスを1つ選択する
-    5. 「一括否認」ボタン `button:has-text("一括否認")` をクリックする
-    6. 否認確認モーダルで「否認」をクリックする
-    7. レコードのWFステータスが「否認」に変わることを確認する
-- case_no: 111-10
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-09
+- case_no: wf-250
   sheet: B
   feature: ワークフロー
   category: |-
@@ -484,14 +411,9 @@ cases:
     ②該当のテーブル一覧より、①の申請を複数チェックし「一括否認」をクリック
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを追加し、ワークフロー申請を行う
-    4. 複数のレコードを選択して「一括否認」をクリックする
-    5. 否認確認モーダルで「否認」をクリックする
-    6. 複数レコードすべてのWFステータスが「否認」に変わることを確認する
-- case_no: 111-11
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-10
+- case_no: wf-260
   sheet: B
   feature: ワークフロー
   category: |-
@@ -503,14 +425,9 @@ cases:
     ③承認時コメント入力を行う
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを申請状態にする
-    4. 複数のレコードを選択して「一括否認」をクリックする
-    5. コメント入力欄にコメントを入力して「否認」をクリックする
-    6. エラーなく否認が完了し、コメントが履歴に表示されることを確認する
-- case_no: 111-12
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-11
+- case_no: wf-270
   sheet: B
   feature: ワークフロー
   category: |-
@@ -522,14 +439,9 @@ cases:
     ③承認時コメント入力を行わない
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを申請状態にする
-    4. 複数のレコードを選択して「一括否認」をクリックする
-    5. コメント入力欄を空のまま「否認」をクリックする
-    6. エラーなく否認が完了することを確認する
-- case_no: 111-13
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-12
+- case_no: wf-280
   sheet: B
   feature: ワークフロー
   category: |-
@@ -540,15 +452,9 @@ cases:
     ②該当のテーブル一覧より、①の申請を1つチェックし「一括取り下げ」をクリック
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. レコードを追加し、ワークフロー申請を行う
-    4. 申請者でテーブル一覧を開き、申請済みレコードを1つ選択する
-    5. 「一括取り下げ」ボタン `button:has-text("一括取り下げ")` をクリックする
-    6. 取り下げ確認モーダルで「取り下げ」をクリックする
-    7. レコードのWFステータスが「取り下げ」に変わることを確認する
-- case_no: 111-14
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-13
+- case_no: wf-290
   sheet: B
   feature: ワークフロー
   category: |-
@@ -559,15 +465,9 @@ cases:
     ②該当のテーブル一覧より、①の申請を複数チェックし「一括取り下げ」をクリック
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを申請状態にする
-    4. 申請者でテーブル一覧を開き、複数の申請済みレコードを選択する
-    5. 「一括取り下げ」ボタンをクリックする
-    6. 取り下げ確認モーダルで「取り下げ」をクリックする
-    7. 複数レコードすべてのWFステータスが「取り下げ」に変わることを確認する
-- case_no: 111-15
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-14
+- case_no: wf-300
   sheet: B
   feature: ワークフロー
   category: |-
@@ -579,14 +479,9 @@ cases:
     ③承認時コメント入力を行う
   expected: エラーなく処理が完了すること。
   movie: WF02
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数のレコードを申請状態にする
-    4. 複数のレコードを選択して「一括取り下げ」をクリックする
-    5. コメント入力欄にコメントを入力して「取り下げ」をクリックする
-    6. エラーなく取り下げが完了し、コメントが履歴に表示されることを確認する
-- case_no: 111-16
+  detailed_flow: WF02テストフロー参照（wf-160 のdetailed_flowと同一）
+  old_case_no: 111-15
+- case_no: wf-310
   sheet: B
   feature: ワークフロー
   category: |-
@@ -598,169 +493,124 @@ cases:
     ③承認時コメント入力を行わない
   expected: エラーなく処理が完了すること。
   movie: WF03
-  detailed_flow: |
+  detailed_flow: |-
+    【WF03 テストフロー】この動画で確認するテスト番号:
+      wf-310         (旧: 111-16)  ワークフロー
+      wf-320         (旧: 11-1)    ワークフロー
+      wf-330         (旧: 11-2)    ワークフロー
+      wf-340         (旧: 11-3)    ワークフロー
+      wf-350         (旧: 11-4)    ワークフロー
+      wf-360         (旧: 11-5)    ワークフロー
+      wf-370         (旧: 11-6)    ワークフロー
+      wf-380         (旧: 11-7)    ワークフロー
+      wf-390         (旧: 11-8)    ワークフロー
+      wf-400         (旧: 11-9)    ワークフロー
+      wf-410         (旧: 166)     ワークフロー
+      wf-420         (旧: 21-1)    ワークフロー
+      wf-430         (旧: 21-2)    ワークフロー
+      wf-440         (旧: 21-3)    ワークフロー
+      wf-450         (旧: 21-4)    ワークフロー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにする
     3. 複数のレコードを申請状態にする
     4. 複数のレコードを選択して「一括取り下げ」をクリックする
     5. コメント入力欄を空のまま「取り下げ」をクリックする
     6. エラーなく取り下げが完了することを確認する
-- case_no: 11-1
+  old_case_no: 111-16
+- case_no: wf-320
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①該当テーブルに対してワークフロー設定を行う。
   expected: エラーなく承認機能の実装が行えること。
   movie: WF03
-  detailed_flow: |
-    1. テーブル管理 `/admin/dataset/edit/{tableId}` を開きワークフロータブに移動する
-    2. 「ワークフロー」スイッチをONにする (`dataset-workflow-options input[type=checkbox]`をクリック)
-    3. 「保存」ボタンをクリックして設定を保存する
-    4. 保存完了メッセージが表示されることを確認する
-    5. テーブル一覧 `/admin/dataset__{tableId}` を開き、「追加」ボタンをクリックする
-    6. レコード登録フォームでワークフロー申請フォームが表示されることを確認する
-    7. `expect(page.locator('[class*="workflow"], .wf-form')).toBeVisible()` で確認する
-- case_no: 11-2
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-1
+- case_no: wf-330
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①ユーザーAがBに対して申請し、承認・否認されるかどうか
   expected: ・ユーザーAが申請しBが承認できることが正常に動作すること。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、設定を保存する
-    3. テスト用ユーザーA、Bを作成する (`/api/admin/debug/create-user`)
-    4. ユーザーAでログインし、テーブル一覧からレコードを追加する
-    5. 申請フォームでユーザーBを承認者として選択し、「申請」をクリックする
-    6. ユーザーBでログインし、テーブル一覧を開く
-    7. 申請中レコードのWFバッジが表示されることを確認する
-    8. レコード詳細画面で「承認」ボタンをクリックし、承認完了を確認する
-- case_no: 11-3
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-2
+- case_no: wf-340
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①ユーザーAがB、 C両方に申請し、両方OKで承認されるかどうか、NGの時に否認されるかどうか。また、Aの申請時はBに、Bが承認したときにはCに、C承認時はAにメール通知と、画面上での通知が正しくいっているか
   expected: ・多段承認フロー（A申請→B承認→C最終承認）ができることが正常に動作すること。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. テスト用ユーザーA、B、Cを作成する
-    4. ユーザーAでログインし、レコードを追加してB→Cの2段階承認申請をする
-    5. ユーザーBに通知バッジが表示されることを確認する
-    6. ユーザーBでログインし、承認をクリックする
-    7. ユーザーCに通知バッジが表示されることを確認する
-    8. ユーザーCでログインし、最終承認をクリックする
-    9. ユーザーAに承認完了通知が届くことを確認する
-    10. 別レコードでユーザーBが否認した場合にユーザーAに否認通知が届くことを確認する
-- case_no: 11-4
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-3
+- case_no: wf-350
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①否認された後のフロー
   expected: 編集から再申請出来できればOK
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用ユーザーA、Bを作成する
-    3. ユーザーAでレコードを追加し、ユーザーBを承認者として申請する
-    4. ユーザーBでログインし、否認をクリックする
-    5. ユーザーAでログインし、否認されたレコードを編集する
-    6. 再申請ボタンが表示されることを確認する
-    7. 「再申請」ボタン `button:has-text("再申請")` をクリックし、申請完了を確認する
-- case_no: 11-5
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-4
+- case_no: wf-360
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①申請相手の組織の誰かがOK・全員がOK で承認になる場合
   expected: 承認されていることが確認でればOK
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. テスト用組織とユーザーを作成し、組織に複数メンバーを追加する
-    4. レコードを追加し、承認者として組織(1人の承認が必要)を選択して申請する
-    5. 組織メンバーの1人でログインし、承認をクリックする
-    6. WFステータスが「承認済み」になることを確認する（1人でOK）
-    7. 別のレコードで組織(全員の承認が必要)を選択して申請する
-    8. 組織メンバー全員が承認して初めて「承認済み」になることを確認する
-- case_no: 11-6
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-5
+- case_no: wf-370
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①ワークフロー承認者はデータ編集可能　にチェックするしないで反映されるか
   expected: ・承認者データ編集可能設定が申請フローに反映されることが正常に動作すること。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「ワークフロー承認者はデータ編集可能」スイッチをONにして保存する
-    4. レコードを追加し、テスト用ユーザーBを承認者として申請する
-    5. ユーザーBでログインし、レコード詳細画面を開く
-    6. 編集ボタンまたは編集可能フィールドが表示されることを確認する
-    7. フィールドを編集し、保存が成功することを確認する
-- case_no: 11-7
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-6
+- case_no: wf-380
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①再申請のチェックボックス　承認者申請画面の再編集できるか
   expected: ・一度承認後に再申請が可能な設定ができることが正常に動作すること。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「一度承認されたデータも再申請可能」スイッチをONにして保存する
-    4. レコードを追加し、承認フローを完了させる（申請→承認）
-    5. 承認済みレコードを開き、「再申請」ボタンが表示されることを確認する
-    6. `expect(page.locator('button:has-text("再申請")')).toBeVisible()` で確認する
-- case_no: 11-8
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-7
+- case_no: wf-390
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①ワークフローのフローを限定する　承認者の固定、条件指定（組織ごとに）
   expected: ・ワークフローのフロー固定設定が機能することが正常に動作すること。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「ワークフローのフローを固定する」スイッチをONにする
-    4. 「テンプレートの追加」ボタンをクリックする
-    5. テンプレート名を入力し、条件（ログインユーザーが特定ユーザーと一致）を設定する
-    6. 承認フロー（ユーザーを選択）を追加して保存する
-    7. 対象ユーザーでログインし、新規レコード追加時にフローが固定されていることを確認する
-    8. 承認者を変更できないことを確認する
-- case_no: 11-9
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-8
+- case_no: wf-400
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①否認→否認された申請を再編集→再申請→承認のフロー
   expected: ・否認→再編集→再申請→承認の完全フローが動作することが正常に動作すること。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用ユーザーA、Bを作成する
-    3. レコードを追加し、ユーザーBを承認者として申請する
-    4. ユーザーBで否認する
-    5. ユーザーAで否認されたレコードを編集して再申請する
-    6. ユーザーBで承認する
-    7. WFステータスが「承認済み」になることを確認する
-- case_no: '166'
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 11-9
+- case_no: wf-410
   sheet: B
   feature: ワークフロー
   category: 自分自身を承認者に入れていた場合
   description: ①自分自身を承認者に入れていた場合や、自分自身が引き上げ承認した場合、自分自身が承認組織・役職に含まれている場合、問題ないか確認する。
   expected: 全ての動作に問題やエラー発生がない事を確認する。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、ログインユーザー自身を承認者に設定する
-    3. レコードを追加し、自分自身を承認者として申請する
-    4. 自分でログインし、承認フォームを開く
-    5. 承認ボタンが正常に機能することを確認する（エラーなし）
-    6. `expect(page.locator('body')).not.toContainText('Internal Server Error')` で確認する
-    7. 引き上げ承認機能ONの状態でも同様にエラーが出ないことを確認する
-- case_no: 21-1
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: '166'
+- case_no: wf-420
   sheet: B
   feature: ワークフロー
   category: 設定
@@ -773,17 +623,9 @@ cases:
     ② ①で設定したテーブルで追加登録を行いワークフロー申請を行う。
   expected: ワークフロー承認者にて、申請データの編集が可能であることを確認する。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定 `/admin/dataset/edit/{tableId}` のワークフロータブを開く
-    3. 「ワークフロー」スイッチをONにする
-    4. 「ワークフロー承認者はデータ編集可能」スイッチをONにして保存する
-    5. テスト用ユーザーBを作成する
-    6. レコードを追加し、ユーザーBを承認者として申請する
-    7. ユーザーBでログインし、申請中レコードの詳細を開く
-    8. フィールドが編集可能状態であることを確認し、値を変更して保存する
-    9. 保存が成功することを `expect(page.locator('.alert-success, [class*="success"]')).toBeVisible()` で確認する
-- case_no: 21-2
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 21-1
+- case_no: wf-430
   sheet: B
   feature: ワークフロー
   category: 設定
@@ -796,16 +638,9 @@ cases:
     ② ①で設定したテーブルで追加登録を行いワークフロー申請を行い最終承認まで完了する
   expected: 承認完了後に、データ変更し再申請が可能であることを確認する。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「一度承認されたデータも再申請可能」スイッチをONにして保存する
-    4. レコードを追加し、テスト用ユーザーBを承認者として申請する
-    5. ユーザーBで最終承認をクリックし、承認完了させる
-    6. 申請者でレコードを開き、フィールドを変更する
-    7. 「再申請」ボタン `button:has-text("再申請")` が表示されることを確認する
-    8. 「再申請」をクリックし、申請フローが再開されることを確認する
-- case_no: 21-3
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 21-2
+- case_no: wf-440
   sheet: B
   feature: ワークフロー
   category: 設定
@@ -824,16 +659,9 @@ cases:
     　　・ユーザー：マスターAを選択
   expected: 設定通り、ワークフローのフローの固定ができていることを確認する。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「ワークフローのフローを固定する」スイッチをONにする
-    4. 「テンプレートの追加」ボタンをクリックし、条件「ログインユーザーが次と一致: userA」を設定する
-    5. 承認フローにユーザー（マスターA）を追加して保存する
-    6. userAでログインし、新規レコード追加画面を開く
-    7. 申請フォームでフローが固定され、設定した承認者が自動設定されていることを確認する
-    8. 申請ボタンをクリックし、エラーなく申請が完了することを確認する
-- case_no: 21-4
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 21-3
+- case_no: wf-450
   sheet: B
   feature: ワークフロー
   category: 取り下げ
@@ -843,15 +671,9 @@ cases:
     ③ 申請中のレコードを開き、申請の取り下げ処理を行う
   expected: ワークフロー申請の取り下げがエラーなく完了すること。
   movie: WF03
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用ユーザーBを作成する
-    3. レコードを追加し、コメントを入力してユーザーBを承認者として申請する
-    4. 申請中のレコード詳細画面を開く
-    5. 「申請取り下げ」または「取り下げ」ボタンをクリックする
-    6. 取り下げ確認モーダルが表示されることを確認し、「取り下げ」をクリックする
-    7. WFステータスが「取り下げ」に変わることを確認する
-- case_no: 28-1
+  detailed_flow: WF03テストフロー参照（wf-310 のdetailed_flowと同一）
+  old_case_no: 21-4
+- case_no: wf-460
   sheet: B
   feature: ワークフロー
   category: |-
@@ -866,7 +688,26 @@ cases:
 
     削除した承認ユーザー名が表示されたままとなっていること
   movie: WF04
-  detailed_flow: |
+  detailed_flow: |-
+    【WF04 テストフロー】この動画で確認するテスト番号:
+      wf-460         (旧: 28-1)    ワークフロー
+      wf-470         (旧: 28-2)    ワークフロー
+      wf-480         (旧: 28-3)    ワークフロー
+      wf-490         (旧: 28-4)    ワークフロー
+      wf-500         (旧: 296)     ワークフロー
+      wf-510         (旧: 36-1)    ワークフロー
+      wf-520         (旧: 36-2)    ワークフロー
+      wf-530         (旧: 395-1)   ワークフロー
+      wf-540         (旧: 395-2)   ワークフロー
+      wf-550         (旧: 395-3)   ワークフロー
+      wf-560         (旧: 395-4)   ワークフロー
+      wf-570         (旧: 395-5)   ワークフロー
+      wf-580         (旧: 395-6)   ワークフロー
+      wf-590         (旧: 395-7)   ワークフロー
+      wf-600         (旧: 395-8)   ワークフロー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、テスト用ユーザーBを作成する（承認者用）
     3. レコードを追加し、ユーザーBを承認者として申請する
@@ -875,7 +716,8 @@ cases:
     6. 完了済みレコードの詳細画面を開く
     7. 承認履歴に削除前のユーザーB名が表示されたままであることを確認する
     8. エラーが発生しないことを `expect(page.locator('body')).not.toContainText('Internal Server Error')` で確認する
-- case_no: 28-2
+  old_case_no: 28-1
+- case_no: wf-470
   sheet: B
   feature: ワークフロー
   category: |-
@@ -890,15 +732,9 @@ cases:
 
     削除した承認組織が「!削除された組織!(XX)」と表示されていること。
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用組織を作成する
-    3. レコードを追加し、組織を承認者として申請する
-    4. 組織メンバーで承認をクリックし、ワークフローを完了させる
-    5. 管理者で承認に使用した組織を削除する
-    6. 完了済みレコードの詳細画面を開く
-    7. 承認履歴に「!削除された組織!(XX)」と表示されることを `expect(page.locator('text=!削除された組織!')).toBeVisible()` で確認する
-- case_no: 28-3
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 28-2
+- case_no: wf-480
   sheet: B
   feature: ワークフロー
   category: |-
@@ -912,15 +748,9 @@ cases:
 
     削除した承認ユーザー名が表示されたままとなっていること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用ユーザーBを作成する
-    3. レコードを追加し、ユーザーBを承認者として申請する（申請中の状態にする）
-    4. 管理者でユーザーBを削除または無効化する
-    5. 申請中レコードの詳細画面を開く
-    6. ユーザーBの名前が表示されたままであることを確認する
-    7. エラーが発生しないことを確認する
-- case_no: 28-4
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 28-3
+- case_no: wf-490
   sheet: B
   feature: ワークフロー
   category: |-
@@ -934,162 +764,108 @@ cases:
 
     削除した承認組織が「!削除された組織!(XX)」と表示されていること。
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用組織を作成する
-    3. レコードを追加し、組織を承認者として申請する（申請中の状態にする）
-    4. 管理者で承認に使用した組織を削除する
-    5. 申請中レコードの詳細画面を開く
-    6. 承認者欄に「!削除された組織!(XX)」と表示されることを確認する
-- case_no: '296'
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 28-4
+- case_no: wf-500
   sheet: B
   feature: ワークフロー
   category: 一つ戻す機能
   description: ①https://loftal.pigeon-cloud.com/admin/dataset__90/view/245
   expected: ・ワークフローの一つ戻す機能が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「フローを一つ戻す機能」スイッチをONにして保存する
-    4. テスト用ユーザーA、B、Cを作成し、3段階承認フロー（A→B→C）でレコードを申請する
-    5. ユーザーBで1段階目を承認する
-    6. ユーザーCの承認画面を開く
-    7. 「フローを戻す」または「差し戻す」ボタンが表示されることを確認する
-    8. ボタンをクリックし、フローがユーザーBに戻ることを確認する
-- case_no: 36-1
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: '296'
+- case_no: wf-510
   sheet: B
   feature: ワークフロー
   category: 通知(ユーザー)
   description: ①「ユーザー」を申請者としてワークフロー申請を行う。
   expected: 申請者としてセットした「ユーザー」に対して通知が届くこと。
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用ユーザーAを作成する
-    3. レコードを追加し、ユーザーAを承認者として申請する
-    4. ユーザーAでログインし、通知バッジ（ヘッダーのベルアイコン横）が表示されることを確認する
-    5. `expect(page.locator('[class*="notification-badge"], .fa-bell + .badge')).toBeVisible()` で確認する
-    6. 通知ログ `/admin/notification_log` にユーザーA宛の通知が記録されていることを確認する
-- case_no: 36-2
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 36-1
+- case_no: wf-520
   sheet: B
   feature: ワークフロー
   category: 通知(組織)
   description: ①「組織」を申請者としてワークフロー申請を行う。
   expected: 申請者としてセットした「組織」に紐づいたユーザーに対して通知が届くこと。
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用組織とメンバーを作成する
-    3. レコードを追加し、組織を承認者として申請する
-    4. 組織に紐づいた各ユーザーでログインし、通知バッジが表示されることを確認する
-    5. 通知ログ `/admin/notification_log` で組織メンバーへの通知が記録されていることを確認する
-- case_no: 395-1
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 36-2
+- case_no: wf-530
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①申請時の件名と本文を変更を有効にして通知を確認する
   expected: ・申請時の通知件名・本文を変更を有効にして通知が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「申請時の件名と本文を変更」スイッチをONにする
-    4. 展開したフォームに件名「テスト申請件名」と本文「テスト申請本文」を入力して保存する
-    5. レコードを追加し、テスト用ユーザーBを承認者として申請する
-    6. `waitForEmail()` でカスタム件名「テスト申請件名」のメールが届くことを確認する
-- case_no: 395-2
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 395-1
+- case_no: wf-540
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①申請時の件名と本文を変更を無効にして通知を確認する
   expected: ・申請時の通知件名・本文を変更を無効にして通知が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「申請時の件名と本文を変更」スイッチをOFFのまま保存する
-    4. レコードを追加し、テスト用ユーザーBを承認者として申請する
-    5. `waitForEmail()` でデフォルト件名（カスタム件名でないこと）のメールが届くことを確認する
-- case_no: 395-3
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 395-2
+- case_no: wf-550
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①否認時の件名と本文を変更を有効にして通知を確認する
   expected: ・否認時の通知件名・本文を変更を有効にして通知が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「否認時の件名と本文を変更」スイッチをONにし、カスタム件名・本文を設定して保存する
-    4. レコードを申請し、テスト用ユーザーBが否認する
-    5. `waitForEmail()` でカスタム件名の否認通知メールが届くことを確認する
-- case_no: 395-4
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 395-3
+- case_no: wf-560
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①否認時の件名と本文を変更を無効にして通知を確認する
   expected: ・否認時の通知件名・本文を変更を無効にして通知が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「否認時の件名と本文を変更」スイッチをOFFのまま保存する
-    4. レコードを申請し、テスト用ユーザーBが否認する
-    5. `waitForEmail()` でデフォルト件名の否認通知メールが届くことを確認する
-- case_no: 395-5
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 395-4
+- case_no: wf-570
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①完了時の件名と本文を変更を有効にして通知を確認する
   expected: ・完了時の通知件名・本文を変更を有効にして通知が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「完了時の件名と本文を変更」スイッチをONにし、カスタム件名・本文を設定して保存する
-    4. レコードを申請し、テスト用ユーザーBが承認して完了させる
-    5. `waitForEmail()` でカスタム件名の完了通知メールが届くことを確認する
-- case_no: 395-6
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 395-5
+- case_no: wf-580
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①完了時の件名と本文を変更を無効にして通知を確認する
   expected: ・完了時の通知件名・本文を変更を無効にして通知が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「完了時の件名と本文を変更」スイッチをOFFのまま保存する
-    4. レコードを申請し、テスト用ユーザーBが承認して完了させる
-    5. `waitForEmail()` でデフォルト件名の完了通知メールが届くことを確認する
-- case_no: 395-7
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 395-6
+- case_no: wf-590
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①取り下げ時の件名と本文を変更を有効にして通知を確認する
   expected: ・取り下げ時の通知件名・本文を変更を有効にして通知が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「取り下げ時の件名と本文を変更」スイッチをONにし、カスタム件名・本文を設定して保存する
-    4. レコードを申請し、申請者が取り下げを行う
-    5. `waitForEmail()` でカスタム件名の取り下げ通知メールが届くことを確認する
-- case_no: 395-8
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 395-7
+- case_no: wf-600
   sheet: B
   feature: ワークフロー
   category: ''
   description: ①取り下げ時の件名と本文を変更を無効にして通知を確認する
   expected: ・取り下げ時の通知件名・本文を変更を無効にして通知が正常に動作すること
   movie: WF04
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「取り下げ時の件名と本文を変更」スイッチをOFFのまま保存する
-    4. レコードを申請し、申請者が取り下げを行う
-    5. `waitForEmail()` でデフォルト件名の取り下げ通知メールが届くことを確認する
-- case_no: 396-1
+  detailed_flow: WF04テストフロー参照（wf-460 のdetailed_flowと同一）
+  old_case_no: 395-8
+- case_no: wf-610
   sheet: B
   feature: ワークフロー
   category: 条件分岐
@@ -1098,7 +874,26 @@ cases:
     ②フィールド値がXの場合のみ承認ステップが発動する設定が可能であること。
   expected: 条件追加ボタンが表示され、フィールドと条件値を設定できること。
   movie: WF05
-  detailed_flow: |
+  detailed_flow: |-
+    【WF05 テストフロー】この動画で確認するテスト番号:
+      wf-610         (旧: 396-1)   ワークフロー
+      wf-620         (旧: 396-2)   ワークフロー
+      wf-630         (旧: 397-1)   ワークフロー
+      wf-640         (旧: 397-2)   ワークフロー
+      wf-650         (旧: 398-1)   ワークフロー
+      wf-660         (旧: 398-2)   ワークフロー
+      wf-670         (旧: 399-1)   ワークフロー
+      wf-680         (旧: 399-2)   ワークフロー
+      wf-690         (旧: 64-1)    ワークフロー
+      wf-700         (旧: 68-1)    ワークフロー
+      wf-710         (旧: 68-2)    ワークフロー
+      wf-720         (旧: 68-3)    ワークフロー
+      wf-730         (旧: 68-4)    ワークフロー
+      wf-740         (旧: 68-5)    ワークフロー
+      wf-750         (旧: 68-6)    ワークフロー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
     3. 「テンプレートの追加」をクリックし、テンプレートが表示されることを確認する
@@ -1106,7 +901,8 @@ cases:
     5. フィールド選択ドロップダウンと条件値入力フォームが表示されることを確認する
     6. フィールドと条件値を設定し、承認ステップ（承認者）を追加して保存する
     7. 設定が保存されることを確認する
-- case_no: 396-2
+  old_case_no: 396-1
+- case_no: wf-620
   sheet: B
   feature: ワークフロー
   category: 条件分岐
@@ -1115,15 +911,9 @@ cases:
     ②レコード作成時の条件でどのテンプレートを使用するかを分岐できること。
   expected: テンプレート条件として「条件追加」ボタンが表示され、フィールドと条件値を設定できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. 「テンプレートの追加」をクリックする
-    4. テンプレートレベルで「条件追加」ボタンをクリックする
-    5. テンプレート適用条件のフィールドと値を設定できることを確認する
-    6. 複数テンプレートを追加し、それぞれ異なる条件を設定できることを確認する
-    7. 保存して設定が反映されることを確認する
-- case_no: 397-1
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 396-2
+- case_no: wf-630
   sheet: B
   feature: ワークフロー
   category: フィールド承認者
@@ -1132,29 +922,18 @@ cases:
     ②レコード内のユーザーフィールドの値が承認者になるパターン。
   expected: 承認者タイプのラジオボタンで「項目」が選択でき、ユーザーフィールドを選択するドロップダウンが表示されること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブルにユーザーフィールド（他テーブル参照）を追加する
-    3. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    4. テンプレートを追加し、承認ステップで承認者タイプのラジオボタンを確認する
-    5. 「項目（ユーザーフィールド）」のラジオボタンが選択できることを確認する
-    6. ラジオボタンを選択するとユーザーフィールドを選択するドロップダウンが表示されることを確認する
-- case_no: 397-2
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 397-1
+- case_no: wf-640
   sheet: B
   feature: ワークフロー
   category: フィールド承認者
   description: ①AND/OR欄でも承認者タイプに「項目」を設定できること（同フロー内の複合承認者として）。
   expected: 「同承認フロー内で追加」ボタン押下後、AND/OR条件の承認者タイプとして「項目」が選択でき、ユーザーフィールドを指定できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブルにユーザーフィールドを追加する
-    3. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    4. テンプレートを追加し、承認ステップを設定する
-    5. 「同承認フロー内で追加」ボタンをクリックする
-    6. AND/OR条件の承認者タイプとして「項目」を選択できることを確認する
-    7. ユーザーフィールドを指定するドロップダウンが表示されることを確認する
-- case_no: 398-1
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 397-2
+- case_no: wf-650
   sheet: B
   feature: ワークフロー
   category: AND/OR複合承認
@@ -1163,14 +942,9 @@ cases:
     ②「同承認フロー内で同時に承認するユーザー/組織を追加」ボタンで2人目以降の承認者を追加できること。
   expected: AND/OR追加ボタンが表示され、追加後に2つ目の承認者設定フォームとAND/OR選択ドロップダウンが表示されること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. テンプレートを追加し、承認ステップを設定する
-    4. 「同承認フロー内で同時に承認するユーザー/組織を追加」ボタンをクリックする
-    5. 2つ目の承認者設定フォームが表示されることを確認する
-    6. AND/OR選択ドロップダウンが表示されることを確認する
-- case_no: 398-2
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 398-1
+- case_no: wf-660
   sheet: B
   feature: ワークフロー
   category: AND/OR複合承認
@@ -1179,40 +953,27 @@ cases:
     ②ANDは全員承認、ORはいずれか承認を意味する。
   expected: AND/OR選択ドロップダウンで「AND」「OR」を選択できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. テンプレートを追加し、「同承認フロー内で追加」で2人目の承認者を追加する
-    4. AND/OR選択ドロップダウンで「AND」を選択できることを確認する
-    5. 「OR」を選択できることを確認する
-    6. 設定を保存し、AND/OR設定が保持されることを確認する
-- case_no: 399-1
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 398-2
+- case_no: wf-670
   sheet: B
   feature: ワークフロー
   category: 差し戻し詳細
   description: ①複数テンプレートが存在する場合、それぞれに異なるワークフローフローを設定できること。
   expected: テンプレートを複数追加でき、各テンプレートに独立したフロー設定が可能であること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. 「テンプレートの追加」を複数回クリックして複数テンプレートを作成する
-    4. 各テンプレートに異なる条件と承認フローを設定する
-    5. 保存後、再度設定画面を開き、各テンプレートに独立したフロー設定が保持されていることを確認する
-- case_no: 399-2
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 399-1
+- case_no: wf-680
   sheet: B
   feature: ワークフロー
   category: 差し戻し詳細
   description: ①ワークフロー承認完了後の権限グループ設定（承認後もデータ編集できるユーザーの設定）が確認できること。
   expected: ワークフロー設定に「承認後もデータを編集できる権限グループ」の設定UIが存在すること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「承認後も編集可能」スイッチをONにする
-    4. 展開した設定UIに権限グループ設定フォームが表示されることを確認する
-    5. `expect(page.locator('text=承認後も編集できる権限グループ, [class*="approval-edit"]')).toBeVisible()` で確認する
-- case_no: 64-1
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 399-2
+- case_no: wf-690
   sheet: B
   feature: ワークフロー
   category: 申請取り下げ
@@ -1221,15 +982,9 @@ cases:
     ②コメント欄へコメントを入力し、申請取り下げ処理を行う。
   expected: ワークフロー設定を行ったユーザーに対して通知が行われコメントの内容も確認できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用ユーザーBを作成する
-    3. レコードを追加し、ユーザーBを承認者として申請する
-    4. 取り下げフォームでコメント欄に「取り下げテストコメント」を入力する
-    5. 「申請取り下げ」ボタンをクリックする
-    6. ワークフロー設定者（管理者）のメールに取り下げ通知が届くことを確認する
-    7. レコード詳細の承認履歴にコメントが表示されることを確認する
-- case_no: 68-1
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 64-1
+- case_no: wf-700
   sheet: B
   feature: ワークフロー
   category: 役職指定
@@ -1241,16 +996,9 @@ cases:
     エラーなくワークフロー処理が行われること。
     承認時のコメントが確認できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テスト用組織と役職を設定し、ユーザーBをその組織・役職に紐づける
-    3. テーブルのワークフローをONにする
-    4. テーブル一覧からレコードを追加し、申請フォームを開く
-    5. 承認者タイプで「組織(役職)」／「一人の承認が必要」を選択する
-    6. 組織と役職を選択し、「申請」ボタンをクリックする
-    7. ユーザーBでログインし、申請中レコードを開いてコメントを入力し「承認」をクリックする
-    8. 承認完了メッセージを確認し、承認コメントが履歴に表示されることを確認する
-- case_no: 68-2
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 68-1
+- case_no: wf-710
   sheet: B
   feature: ワークフロー
   category: 役職指定
@@ -1262,14 +1010,9 @@ cases:
     エラーなくワークフロー処理が行われること。
     否認時のコメントが確認できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テスト用組織と役職を設定し、ユーザーBをその組織・役職に紐づける
-    3. テーブルのワークフローをONにし、ワークフロー申請を開く
-    4. 承認者タイプで「組織(役職)」／「一人の承認が必要」を選択し、組織と役職を選択して申請する
-    5. ユーザーBでログインし、申請中レコードを開いてコメントを入力し「否認」をクリックする
-    6. 否認完了を確認し、否認コメントが履歴に表示されることを確認する
-- case_no: 68-3
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 68-2
+- case_no: wf-720
   sheet: B
   feature: ワークフロー
   category: 役職指定
@@ -1281,13 +1024,9 @@ cases:
     エラーなくワークフロー処理が行われること。
     承認時のコメントが確認できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テスト用組織と役職を設定し、複数ユーザーをその組織・役職に紐づける
-    3. ワークフロー申請で「組織(役職)」／「全員の承認が必要」を選択して申請する
-    4. 組織・役職に紐づく全ユーザーでそれぞれコメントを入力して「承認」をクリックする
-    5. 全員が承認して初めてWFステータスが「承認済み」になることを確認する
-- case_no: 68-4
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 68-3
+- case_no: wf-730
   sheet: B
   feature: ワークフロー
   category: 役職指定
@@ -1299,13 +1038,9 @@ cases:
     エラーなくワークフロー処理が行われること。
     それぞれ入力したコメントが確認できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テスト用組織と役職を設定し、複数ユーザーをその組織・役職に紐づける
-    3. ワークフロー申請で「組織(役職)」／「全員の承認が必要」を選択して申請する
-    4. 組織・役職の1名がコメントを入力して「否認」をクリックする
-    5. WFステータスが「否認」になることを確認し、コメントが履歴に表示されることを確認する
-- case_no: 68-5
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 68-4
+- case_no: wf-740
   sheet: B
   feature: ワークフロー
   category: ワークフロー固定：「組織(役職)」／「一人の承認が必要」)
@@ -1317,14 +1052,9 @@ cases:
     エラーなくワークフロー処理が行われること。
     それぞれ入力したコメントが確認できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. テンプレートで承認者タイプを「組織(役職)」／「一人の承認が必要」に固定設定する
-    4. 申請フォームでフローが固定されていることを確認し、コメントを入力して「申請」をクリックする
-    5. 組織・役職に紐づくユーザーでコメントを入力して「承認」をクリックする
-    6. 承認完了を確認し、各コメントが履歴に表示されることを確認する
-- case_no: 68-6
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 68-5
+- case_no: wf-750
   sheet: B
   feature: ワークフロー
   category: ワークフロー固定：「組織(役職)」／「一人の承認が必要」)
@@ -1336,14 +1066,9 @@ cases:
     エラーなくワークフロー処理が行われること。
     それぞれ入力したコメントが確認できること。
   movie: WF05
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. テンプレートで「組織(役職)」／「一人の承認が必要」を固定設定する
-    4. 申請フォームでコメントを入力して「申請」をクリックする
-    5. 組織・役職のユーザーでコメントを入力して「否認」をクリックする
-    6. 否認完了を確認し、コメントが履歴に表示されることを確認する
-- case_no: 68-7
+  detailed_flow: WF05テストフロー参照（wf-610 のdetailed_flowと同一）
+  old_case_no: 68-6
+- case_no: wf-760
   sheet: B
   feature: ワークフロー
   category: ワークフロー固定：「組織(役職)」／「全員の承認が必要」)
@@ -1355,14 +1080,34 @@ cases:
     エラーなくワークフロー処理が行われること。
     それぞれ入力したコメントが確認できること。
   movie: WF06
-  detailed_flow: |
+  detailed_flow: |-
+    【WF06 テストフロー】この動画で確認するテスト番号:
+      wf-760         (旧: 68-7)    ワークフロー
+      wf-770         (旧: 68-8)    ワークフロー
+      wf-780         (旧: 278)     ワークフロー
+      wf-790         (旧: 333)     ワークフロー
+      wf-800         (旧: 363)     ワークフロー
+      wf-810         (旧: 382)     ワークフロー
+      wf-820         (旧: 394)     ワークフロー
+      wf-830         (旧: 397)     ワークフロー
+      wf-840         (旧: 409)     ワークフロー
+      wf-850         (旧: 418)     ワークフロー
+      wf-860         (旧: 431)     ワークフロー
+      wf-870         (旧: 434)     ワークフロー
+      wf-880         (旧: 435)     ワークフロー
+      wf-890         (旧: 446)     ワークフロー
+      wf-900         (旧: 455)     ワークフロー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
     3. テンプレートで「組織(役職)」／「全員の承認が必要」を固定設定する
     4. 申請フォームでコメントを入力して「申請」をクリックする
     5. 組織・役職の全ユーザーでそれぞれコメントを入力して「承認」をクリックする
     6. 全員承認後にWFステータスが「承認済み」になることを確認する
-- case_no: 68-8
+  old_case_no: 68-7
+- case_no: wf-770
   sheet: B
   feature: ワークフロー
   category: ワークフロー固定：「組織(役職)」／「全員の承認が必要」)
@@ -1374,29 +1119,18 @@ cases:
     エラーなくワークフロー処理が行われること。
     それぞれ入力したコメントが確認できること。
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. テンプレートで「組織(役職)」／「全員の承認が必要」を固定設定する
-    4. 申請フォームでコメントを入力して「申請」をクリックする
-    5. 組織・役職の1名がコメントを入力して「否認」をクリックする
-    6. WFステータスが「否認」になることを確認する
-- case_no: '278'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: 68-8
+- case_no: wf-780
   sheet: B
   feature: ワークフロー
-  description: "①【バグ修正確認】対象テーブル：従事者一覧 \n対象項目：申請受付番号、顔写真\n\n\n添付画像の通り、\n画像のルックアップのコピーがある場合、レコード登録ができないです。\n②画像のルックアップのコピーを外すと、レコード登録登録できるので、\nそこが影響していると思います。"
+  description: "①【バグ修正確認】対象テーブル：従事者一覧 \n対象項目：申請受付番号、顔写真\n\n\n添付画像の通り、\n画像のルックアップのコピーがある場合、レコード登録ができないです。\n②画像のルックアップのコピーを外すと、レコード登録登録できるので、\n\
+    そこが影響していると思います。"
   expected: バグが修正され、正常に動作すること。(対象テーブル：従事者一覧  対象項目：申請受付番号、顔写真   添付画像の通り、 画像のルックアップのコピーがある場合、レコード登録ができないです。   画像のルックアップのコピーを外すと、レコード登)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブルに画像フィールドとそのルックアップコピーフィールドを追加する
-    3. テーブル設定でワークフローをONにする
-    4. テーブル一覧から新規レコード追加画面を開く
-    5. 画像ルックアップのコピー項目を含む全フィールドに値を入力する
-    6. 「登録」または「保存」ボタンをクリックする
-    7. エラーなくレコードが登録されることを確認する
-    8. `expect(page.locator('.alert-danger, .error-message')).not.toBeVisible()` でエラーがないことを確認する
-- case_no: '333'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '278'
+- case_no: wf-790
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1411,14 +1145,9 @@ cases:
     ⑤（問題なし）
   expected: 機能改善が正しく反映されていること。(ワークフローで承認者となるユーザーを選択する際に、 名前の一部を手入力して検索できるようにして欲しい。 （組織を選択する際はそれができるので、それと同様に。）  1枚目：名前検索できない。（改良してい)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用ユーザーを数名作成する
-    3. レコードを追加し、申請フォームの承認者選択フォームを開く
-    4. ユーザー選択フォームのテキスト入力欄に名前の一部（例: "テスト"）を入力する
-    5. 入力に応じてユーザーリストが絞り込まれることを確認する
-    6. `expect(page.locator('[class*="approver-list"] li, [class*="user-suggest"]')).toBeVisible()` で確認する
-- case_no: '363'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '333'
+- case_no: wf-800
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1432,17 +1161,12 @@ cases:
     「設備投資番号」が一瞬表示されて、すぐに消えてしまいました。
     ②F5を押すとまた一瞬表示されてすぐに消えます。
     ③ワークフローが要確認の。
-  expected: 機能改善が正しく反映されていること。(DB名：q6p0sl0i6o テーブル名：設備投資申請 項目：設備投資番号  「設備投資番号」項目の表示条件設定を、 「ワークフロー」「が次と一致」「申請中」「申請中（要確認）」と設定していて、 要確)
+  expected: 機能改善が正しく反映されていること。(DB名：q6p0sl0i6o テーブル名：設備投資申請 項目：設備投資番号  「設備投資番号」項目の表示条件設定を、 「ワークフロー」「が次と一致」「申請中」「申請中（要確認）」と設定していて、
+    要確)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. ワークフローONのテーブルに表示条件設定（ワークフロー=申請中の時のみ表示）のフィールドを追加する
-    3. レコードを申請状態（WFステータス=要確認）にする
-    4. レコードの編集画面を開く
-    5. 表示条件が設定されたフィールドが正しく表示・維持されることを確認する
-    6. ページリロード後も同様にフィールドが表示されることを確認する
-    7. フィールドが一瞬表示されてすぐ消える現象が起きないことを確認する
-- case_no: '382'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '363'
+- case_no: wf-810
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1450,14 +1174,9 @@ cases:
     ②※組織の場合は、全員が承認したタイミングだけ通知する。
   expected: エラーなく正常に動作すること。(現状、ワークフローの通知メールはデフォルトでされるようになっていますが、こちらをオフにする機能を実装希望です。 ※組織の場合は、全員が承認したタイミングだけ通知する)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、通知設定を確認する
-    3. 「組織の全員が承認時のみに通知」スイッチをONにして保存する
-    4. 組織（複数メンバー）を承認者にしてレコードを申請する
-    5. 組織メンバーの1人が承認してもメール通知が送られないことを確認する
-    6. 全員が承認した時点で初めてメール通知が届くことを確認する
-- case_no: '394'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '382'
+- case_no: wf-820
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1469,14 +1188,9 @@ cases:
     ③）
   expected: バグが修正され、正常に動作すること。(対象テーブル：「申請」（dataset__31）  ワークフローに「自分のメイン組織の部長」を入れているが、 申請すると自分のメイン組織ではない人が選ばれてしまう。（添付を参照ください。）)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. テンプレートで承認者として「自分のメイン組織の部長」（役職指定）を設定する
-    4. メイン組織が設定されたテスト用ユーザーでレコードを申請する
-    5. 申請フォームで選択された承認者が申請ユーザーのメイン組織の部長であることを確認する
-    6. 他の組織の部長ではなく正しい部長が選択されていることを確認する
-- case_no: '397'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '394'
+- case_no: wf-830
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1490,14 +1204,9 @@ cases:
     一つ目の子
   expected: バグが修正され、正常に動作すること。(子テーブルごとに表示条件設定を独立させるよう修正希望です。  「test1【親】」テーブルにある子テーブルの「申請者情報【新規】」という項目は、 同じく子テーブルの「申請種別」で①か③が選択されたとき)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブルに子テーブルフィールドを追加し、子テーブルに表示条件設定のフィールドを追加する
-    3. レコードの子テーブルに1行目のデータを追加する
-    4. 子テーブルに2行目のデータを追加する
-    5. 2行目の条件と異なる選択をしても、1行目のフィールド表示に影響しないことを確認する
-    6. 各行の表示条件が独立して動作することを確認する
-- case_no: '409'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '397'
+- case_no: wf-840
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1505,14 +1214,9 @@ cases:
     ②内部統制用CSVダウンロード（添付ファイルの7その他を参照）
   expected: エラーなく正常に動作すること。(【有償対応】 内部統制用CSVダウンロード（添付ファイルの7その他を参照）)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. テーブル一覧 `/admin/dataset__{tableId}` の「CSV UP/DL」ドロップダウンを開く
-    4. 「内部統制CSV」または該当するダウンロードオプションが表示されることを確認する
-    5. ダウンロードをクリックし、CSVファイルがダウンロードされることを確認する
-    6. `expect(page.locator('text=内部統制')).toBeVisible()` で確認する
-- case_no: '418'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '409'
+- case_no: wf-850
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1520,15 +1224,9 @@ cases:
     ②全ての承認が完了後でも変更可能にしたい（添付ファイルの7その他を参照）
   expected: エラーなく正常に動作すること。(【有償対応】 全ての承認が完了後でも変更可能にしたい（添付ファイルの7その他を参照）)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「承認後も編集可能」スイッチをONにし、対象権限グループを設定して保存する
-    4. レコードを申請し、承認フローを完了させる（最終承認）
-    5. 対象権限グループのユーザーでレコードを開く
-    6. フィールドが編集可能であることを確認する
-    7. `expect(page.locator('input[type=text]:not([disabled])')).toBeVisible()` で確認する
-- case_no: '431'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '418'
+- case_no: wf-860
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1539,16 +1237,12 @@ cases:
     ⑤## 仕様書。
     ⑥* チケットを二つに切っています。
     ⑦*。
-  expected: 'エラーなく正常に動作すること。(【有償対応】 各申請画面でのフロー設定（添付ファイルの2を参照）  ## 開発内容 * 承認ルートの申請前、或いは申請中に固定になっていても、固定以降で追加および追加したルートの編集、削除ができる ()'
+  expected: 'エラーなく正常に動作すること。(【有償対応】 各申請画面でのフロー設定（添付ファイルの2を参照）  ## 開発内容 * 承認ルートの申請前、或いは申請中に固定になっていても、固定以降で追加および追加したルートの編集、削除ができる
+    ()'
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」と「フロー固定時に承認者を追加できる」をONにする
-    3. 固定テンプレートをA→Bの2段階で設定して保存する
-    4. レコードを申請し（固定フロー: A→B）、申請後の承認フォームを開く
-    5. 固定以降に新しい承認者Cを追加できることを確認する
-    6. 追加した承認者Cを編集・削除できることを確認する
-- case_no: '434'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '431'
+- case_no: wf-870
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1559,14 +1253,9 @@ cases:
     ⑤h。
   expected: 'エラーなく正常に動作すること。(### 要望 要望No.1 : 「複数の部署に所属している場合、申請する部署を選ぶことができる。」「申請部署をユーザー情報テーブルの登録組織から選択する」 https://docs.google.co)'
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. 複数組織に所属するテスト用ユーザーを作成する
-    4. レコードの申請フォームを開く
-    5. 申請部署を選択するドロップダウンが表示されることを確認する
-    6. 申請部署を選択でき、そのフローで申請できることを確認する
-- case_no: '435'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '434'
+- case_no: wf-880
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1579,17 +1268,12 @@ cases:
     の3点お願いしましたが、解消されなかったようです。
     ③こちら修正可能でしょうか。
     ④※ワークフロー機能をご利用なので、高速化が付けられ。
-  expected: バグが修正され、正常に動作すること。(ワークフロー設定内の「承認後も編集可能」にチェック後、ユーザーを選択する画面に 遷移すると、画面全体が薄暗くなり操作不能になる現象が発生しているそうです。 コピー環境では再現されなかったため、 ・テー)
+  expected: バグが修正され、正常に動作すること。(ワークフロー設定内の「承認後も編集可能」にチェック後、ユーザーを選択する画面に 遷移すると、画面全体が薄暗くなり操作不能になる現象が発生しているそうです。 コピー環境では再現されなかったため、
+    ・テー)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「承認後も編集可能」スイッチをONにする
-    4. ユーザー選択ドロップダウンを開こうとする
-    5. 画面全体が薄暗くなって操作不能にならないことを確認する
-    6. `expect(page.locator('.modal-backdrop')).not.toBeVisible()` でオーバーレイが出ていないことを確認する
-    7. ユーザー選択後、正常にフォームを操作できることを確認する
-- case_no: '446'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '435'
+- case_no: wf-890
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1603,14 +1287,9 @@ cases:
     ⑧「合致するワークフローテ。
   expected: バグが修正され、正常に動作すること。(DB名：midac テーブル：dataset__52、dataset__54  コピー環境で確認されました。 大橋 健（sales+7@loftal.jp）さんでログインし、 dataset__52で)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 新規レコード追加画面を開き、「申請」ボタンをクリックする
-    4. ワークフロー申請画面がローディング状態で止まらないことを確認する
-    5. `expect(page.locator('.loading-spinner, .loader')).not.toBeVisible({ timeout: 10000 })` で確認する
-    6. 「合致するワークフローテンプレートがありません」エラーが表示されないことを確認する
-- case_no: '455'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '446'
+- case_no: wf-900
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1620,13 +1299,9 @@ cases:
     ②添付画像のようなワークフロー条件を設定したところ、添付CSVがダウンロードされました。
   expected: エラーなく正常に動作すること。(「申請ワークフローのcsvインポート」について 検証環境で確認したところ、添付画像の箇所からCSVダウンロードをすると、 ダウンロードしたCSVの文字すべてが文字化けするため修正希望です。  添付画像)
   movie: WF06
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにして条件付きテンプレートを設定する
-    3. テーブル一覧の「CSV UP/DL」からワークフロー条件CSVをダウンロードする
-    4. ダウンロードしたCSVファイルの内容を確認する
-    5. 文字化けがなく日本語が正常に表示されることを確認する
-- case_no: '457'
+  detailed_flow: WF06テストフロー参照（wf-760 のdetailed_flowと同一）
+  old_case_no: '455'
+- case_no: wf-910
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1637,14 +1312,34 @@ cases:
     ⑤h。
   expected: 'エラーなく正常に動作すること。(### 要望 要望No.8 : 「同じ承認者(ユーザーID）が続く場合、Skipさせたい。もしくは固定ルートに登録のない役職承認者がいなければSkipさせたい」 https://docs.google)'
   movie: WF07
-  detailed_flow: |
+  detailed_flow: |-
+    【WF07 テストフロー】この動画で確認するテスト番号:
+      wf-910         (旧: 457)     ワークフロー
+      wf-920         (旧: 463)     ワークフロー
+      wf-930         (旧: 464)     ワークフロー
+      wf-940         (旧: 469)     ワークフロー
+      wf-950         (旧: 480)     ワークフロー
+      wf-960         (旧: 484)     ワークフロー
+      wf-970         (旧: 506)     ワークフロー
+      wf-980         (旧: 510)     ワークフロー
+      wf-990         (旧: 512)     ワークフロー
+      wf-1000        (旧: 513)     ワークフロー
+      wf-1010        (旧: 574)     ワークフロー
+      wf-1020        (旧: 582)     ワークフロー
+      wf-1030        (旧: 600)     ワークフロー
+      wf-1040        (旧: 613)     ワークフロー
+      wf-1050        (旧: 621)     ワークフロー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
     3. 同一ユーザーが連続するテンプレートを設定する（例: A → A → B）
     4. 対象ユーザーでレコードを申請する
     5. 同一承認者の2回目の承認がスキップされることを確認する
     6. または「同一承認者の承認スキップ機能」スイッチが設定可能であることを確認する
-- case_no: '463'
+  old_case_no: '457'
+- case_no: wf-920
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1656,13 +1351,9 @@ cases:
     ⑥https://l。
   expected: エラーなく正常に動作すること。(### 修正依頼 1. 項目の変数 ({}で表現するやつ) の選択肢として固定テキストの項目も出てしまうので、固定テキストは表示しないようにしたい 2. 項目が空のときに{項目名}として表示されてしま)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、通知メールカスタマイズで件名テンプレートを開く
-    3. 件名/本文のテンプレート変数選択ドロップダウンを開く
-    4. 固定テキストフィールドが変数選択肢に表示されないことを確認する
-    5. 変数（例: {申請内容}）を挿入し、値が空のフィールドで通知確認した際に変数が空に置換されることを確認する
-- case_no: '464'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '463'
+- case_no: wf-930
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1673,13 +1364,9 @@ cases:
     ⑤https://www.notion.s。
   expected: 'エラーなく正常に動作すること。(### 要望 要望No.4 : 「閲覧権限に対して役職を追加するのではなく、承認者が閲覧できるようにする条件を追加できる」 https://docs.google.com/spreadsheets/d)'
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 「フローを固定する」をONにし、テンプレートの閲覧権限設定を確認する
-    4. 「承認者が次と一致: ログインユーザー」の閲覧条件を設定できることを確認する
-    5. 設定を保存し、該当承認者でログインした場合のみ閲覧できることを確認する
-- case_no: '469'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '464'
+- case_no: wf-940
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1690,14 +1377,9 @@ cases:
     ⑤https://www.notion.so/and-or-d234d19e05f745b88。
   expected: 'エラーなく正常に動作すること。(### 要望 要望No.21 : 「承認者の複数設定 (and/or)」 https://docs.google.com/spreadsheets/d/1bLuTPa5myHzfdUx_wVDnk5b)'
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. テンプレートを追加し、「同承認フロー内で追加」ボタンをクリックする
-    4. AND/OR選択ドロップダウンが表示されることを確認する
-    5. AND（全員承認）、OR（いずれか承認）を選択でき、保存できることを確認する
-    6. レコードを申請し、AND/OR設定通りに承認が動作することを確認する
-- case_no: '480'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '469'
+- case_no: wf-950
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1708,14 +1390,9 @@ cases:
     ⑤添付画像のように一度申請したも。
   expected: バグが修正され、正常に動作すること。(テーブル名：技術・原価問合せ（dataset__57）  ワークフローのテンプレートを表示する機能を先月リリースしてもらう際に、 ワークフロー進行中の編集画面でテンプレートと組織を出さないようにしても)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テンプレートを設定する
-    3. レコードを申請し、否認または取り下げの状態にする
-    4. 否認/取り下げ後のレコードの編集画面を開く
-    5. テンプレートと組織のセレクトボックスが表示されることを確認する
-    6. ワークフローの変更（テンプレート変更）が可能であることを確認する
-- case_no: '484'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '480'
+- case_no: wf-960
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1727,16 +1404,12 @@ cases:
     コピー環境で再現しました。
     ②ビューの「行に色を付ける」で、ワークフローが申請中（要確認）」か、「否認」の時だけセルを赤色を変える設定にしてあるのですが、
     一部の「承認済み」のセルも赤色に変わってしまっています。
-  expected: バグが修正され、正常に動作すること。(DB名：midac テーブル名：外部コミュニケーション 申請者：大橋 健（sales+7@loftal.jp） 承認者：國弘彩（sales+2@loftal.jp）  コピー環境で再現しました。 ビュ)
+  expected: バグが修正され、正常に動作すること。(DB名：midac テーブル名：外部コミュニケーション 申請者：大橋 健（sales+7@loftal.jp） 承認者：國弘彩（sales+2@loftal.jp）  コピー環境で再現しました。
+    ビュ)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. ビュー設定でWFステータス（申請中/否認）の場合にセルに色を付ける設定をする
-    4. 承認済みレコードを複数作成する
-    5. 承認済みレコードのセルが赤色（否認/申請中の色）にならないことを確認する
-    6. 実際に否認されたレコードのみが赤色になることを確認する
-- case_no: '506'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '484'
+- case_no: wf-970
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1752,14 +1425,9 @@ cases:
     ③レコード作成の際、該当。
   expected: バグが修正され、正常に動作すること。(テーブル名：テストテーブル（dataset__487） 項目名：申請者  ・不具合内容 他テーブル参照項目で、デフォルト値を設定すると、 レコード作成の時点でルックアップが反映されないようですので、修)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブルにユーザーテーブルの他テーブル参照フィールド（デフォルト値=ログインユーザー、ルックアップ設定あり）を追加する
-    3. テーブル設定でワークフローをONにする
-    4. 新規レコード追加画面を開く
-    5. ログインユーザーのデフォルト値が設定され、ルックアップフィールドが自動反映されることを確認する
-    6. `expect(page.locator('[class*="lookup-field"]:not(:empty)')).toBeVisible()` で確認する
-- case_no: '510'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '506'
+- case_no: wf-980
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1767,14 +1435,9 @@ cases:
     ②https://www.notion.so/53892dd6e0ca4b6dac52003a691e2a52。
   expected: エラーなく正常に動作すること。(承認者の移動 https://www.notion.so/53892dd6e0ca4b6dac52003a691e2a52)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. 複数段階の承認フロー（A→B→C）でレコードを申請する
-    4. 申請中の承認フォームで承認者の順序変更（ドラッグ&ドロップ）が可能であることを確認する
-    5. ユーザーBの位置をCの後ろに移動できることを確認する
-    6. 移動後に承認フローが変更されていることを確認する
-- case_no: '512'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '510'
+- case_no: wf-990
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1787,16 +1450,12 @@ cases:
     ②・詳細
     該当項目は、以下のように必須条件設定がされています。
     ③ワークフロー　が次と。
-  expected: バグが修正され、正常に動作すること。(テーブル名：運転日報（dataset__365） 項目名：「運転後）酒気帯びしてません」（いずれもYes/No項目）  ・不具合内容 必須条件設定で、ワークフローの申請状態を設定しても、 申請状態が条)
+  expected: バグが修正され、正常に動作すること。(テーブル名：運転日報（dataset__365） 項目名：「運転後）酒気帯びしてません」（いずれもYes/No項目）  ・不具合内容 必須条件設定で、ワークフローの申請状態を設定しても、
+    申請状態が条)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブルにYes/No項目を追加し、必須条件設定でワークフロー状態（申請中）の場合に必須にする
-    3. テーブル設定でワークフローをONにする
-    4. 申請状態のレコードを開き、Yes/No項目を空のまま保存しようとする
-    5. 必須エラーが表示されることを確認する
-    6. `expect(page.locator('[class*="required-error"], [class*="required"]')).toBeVisible()` で確認する
-- case_no: '513'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '512'
+- case_no: wf-1000
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1804,14 +1463,9 @@ cases:
     ②例えば、Aさん→Bさん→Cさんというワークフローで固定している場合に、Dさんを新たにワークフローの申請フォームで追加すると、BさんとCさんの間に移動できないが、できるようにしたい。
   expected: エラーなく正常に動作すること。(「ワークフローのフローの固定時に承認者を追加できる」が有効の時に、固定している承認者の間に追加した承認者を移動できる。 例えば、Aさん→Bさん→Cさんというワークフローで固定している場合に、Dさんを新)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」と「フロー固定時に承認者を追加できる」をONにする
-    3. 固定テンプレートをA→B→Cの3段階で設定する
-    4. レコードを申請し、固定フロー後に新しい承認者Dを追加する
-    5. DをBとCの間に移動（ドラッグ&ドロップ）できることを確認する
-    6. 移動後にA→B→D→Cの順序になっていることを確認する
-- case_no: '574'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '513'
+- case_no: wf-1010
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1819,15 +1473,9 @@ cases:
     ②https://loftal.slack.com/archives/C05CK6Z7YDQ/p1719363658881569。
   expected: バグが修正され、正常に動作すること。(ワークフローで承認者に設定していたユーザーを無効ユーザーにすると、承認履歴から承認者氏名が消えてしまいますので、表示されるよう修正いただけますでしょうか。  https://loftal.slack.)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、テスト用ユーザーBを作成する
-    3. レコードを申請し、ユーザーBが承認する（承認履歴にユーザーB名が記録される）
-    4. 管理者でユーザーBを無効ユーザーに変更する
-    5. 承認済みレコードの詳細画面を開く
-    6. 承認履歴にユーザーBの氏名が表示されることを確認する（消えないこと）
-    7. `expect(page.locator('[class*="approval-history"]')).not.toBeEmpty()` で確認する
-- case_no: '582'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '574'
+- case_no: wf-1020
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1841,14 +1489,9 @@ cases:
     ③「部署」で選択した組織で、「申請者」に表示されるユーザーの絞り。
   expected: バグが修正され、正常に動作すること。(テーブル名：安否確認連絡先（dataset__188）  ・不具合内容 ユーザーテーブルの他テーブル参照で「他の項目で値の絞り込みを行う」を行った場合に、 参照先のテーブルの項目が選択できないので、修)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブルにユーザーテーブルの他テーブル参照フィールド（「他の項目で値の絞り込み」設定あり）を追加する
-    3. テーブル設定でワークフローをONにする
-    4. レコード追加画面を開き、部署フィールドで組織を選択する
-    5. 申請者フィールドで選択した組織に属するユーザーのみが表示されることを確認する
-    6. フィールドの絞り込みが正常に動作することを確認する
-- case_no: '600'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '582'
+- case_no: wf-1030
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1859,14 +1502,9 @@ cases:
     ③※CSVファイルの中身は「一人の承認が必要」の内容は含まれているように。
   expected: バグが修正され、正常に動作すること。(以下ワークフローのインポート機能ですが 現在のStaging環境だと【組織に対する条件：一人の承認が必要】にチェック入れた状態で「エスクポート」→「インポート」すると インポート時、【組織に対する条件)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにして組織条件付きテンプレートを設定する
-    3. 「組織に対する条件: 一人の承認が必要」にチェックを入れて設定を保存する
-    4. テーブルのワークフロー設定をCSVエクスポートする
-    5. エクスポートしたCSVを使ってワークフロー設定をインポートする
-    6. インポート後、「組織に対する条件: 一人の承認が必要」のチェックが維持されていることを確認する
-- case_no: '613'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '600'
+- case_no: wf-1040
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1876,14 +1514,9 @@ cases:
     ④https://loftal.slack.com/archives/C05CK6Z7YDQ/p1724120823680169。
   expected: エラーなく正常に動作すること。(サイドメニューで、テーブル名が長くなり、末尾が…になっている場合、 添付画像一枚目のようにワークフローのバッヂが表示されないため、 これを添付画像二枚目のように表示させるよう修正いただけますでしょうか)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、申請中のレコードを作成する
-    3. テーブル名を長い文字列（例: 30文字以上）に変更する
-    4. サイドメニューでテーブル名が「…」で省略表示されることを確認する
-    5. 省略表示されたテーブル名の隣にワークフローバッジ（赤い数字）が表示されることを確認する
-    6. `expect(page.locator('nav li:has([href*="dataset__{tableId}"]) .badge')).toBeVisible()` で確認する
-- case_no: '621'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '613'
+- case_no: wf-1050
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1896,14 +1529,9 @@ cases:
     ③（添付画像一。
   expected: バグが修正され、正常に動作すること。(テーブル名：注文書_生産技術部（dataset__298）  一部ワークフローテンプレートで、下書き保存をしてからでないと正しいテンプレートが表示されず、条件と異なるテンプレートが表示されてしまうよう)
   movie: WF07
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
-    3. 複数テンプレートを設定し、1つのテンプレートに複数条件（フィールド値+金額条件）を設定する
-    4. 条件に合致するレコードを作成し（下書き保存なし）、申請フォームを開く
-    5. 正しいテンプレートが自動選択されていることを確認する
-    6. 下書き保存なしでも正しいテンプレートが表示されることを確認する
-- case_no: '645'
+  detailed_flow: WF07テストフロー参照（wf-910 のdetailed_flowと同一）
+  old_case_no: '621'
+- case_no: wf-1060
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1915,14 +1543,21 @@ cases:
     ②https://docs
   expected: バグが修正され、正常に動作すること。(No.132：ワークフローの左メニューの赤い数字（バッチ）が正しくない 以前、治っていると言われたが、治っていないものもあり。  エラー���細 ①https://docs.google.com/sp)
   movie: WF08
-  detailed_flow: |
+  detailed_flow: |-
+    【WF08 テストフロー】この動画で確認するテスト番号:
+      wf-1060        (旧: 645)     ワークフロー
+      wf-1070        (旧: 697)     ワークフロー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、複数のレコードを申請状態にする
     3. サイドメニューの対象テーブルリンク横のバッジ（赤い数字）を確認する
     4. バッジの数字が実際の申請中レコード数と一致することを確認する
     5. 1件承認してバッジの数字が減ることを確認する
     6. `expect(page.locator('nav a[href*="dataset__"] .badge').first()).toBeVisible()` で確認する
-- case_no: '697'
+  old_case_no: '645'
+- case_no: wf-1070
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1933,17 +1568,12 @@ cases:
     ⑤下書き保存を押したときは、その項目が空欄でも下書き保存ができるようにするという機能を実装いただけますでしょうか。
     ⑥（CSVアップロードの際にも適用されるようにしていただきたいです）
     ⑦http。
-  expected: エラーなく正常に動作すること。(各項目の項目設定で、 「必須設定にする」をONにした時、且つワークフローがONの時に、 「ワークフロー下書き保存の場合は必須にしない」 というチェックボックスを出し、それにチェックされてたら、 下書き)
+  expected: エラーなく正常に動作すること。(各項目の項目設定で、 「必須設定にする」をONにした時、且つワークフローがONの時に、 「ワークフロー下書き保存の場合は必須にしない」 というチェックボックスを出し、それにチェックされてたら、
+    下書き)
   movie: WF08
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブルのフィールド設定で「必須設定にする」をONにする
-    3. テーブル設定でワークフローをONにする
-    4. フィールド設定で「ワークフロー下書き保存の場合は必須にしない」チェックボックスが表示されることを確認する
-    5. チェックボックスをONにして保存する
-    6. 新規レコード追加画面で必須フィールドを空のまま「下書き保存」をクリックする
-    7. バリデーションエラーが出ずに下書き保存できることを確認する
-- case_no: '520'
+  detailed_flow: WF08テストフロー参照（wf-1060 のdetailed_flowと同一）
+  old_case_no: '697'
+- case_no: wf-1080
   sheet: B
   feature: ワークフロー設定
   description: |-
@@ -1954,7 +1584,12 @@ cases:
     ⑤再度設定画面を開き、2人目以降の役職が正しく保存・表示されていることを確認する
   expected: ワークフローのAND/OR並行承認で2人目以降の役職選択が正しく保存・表示されること
   movie: UC06
-  detailed_flow: |
+  detailed_flow: |-
+    【UC06 テストフロー】この動画で確認するテスト番号:
+      wf-1080        (旧: 520)     ワークフロー設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
     3. テンプレートを追加し、「同承認フロー内で追加」ボタンでAND/OR承認者を設定する
@@ -1962,7 +1597,8 @@ cases:
     5. 設定を保存する
     6. テーブル設定を再度開いてワークフロータブを確認する
     7. 2人目以降の役職選択が正しく保存・表示されることを確認する
-- case_no: '577'
+  old_case_no: '520'
+- case_no: wf-1090
   sheet: B
   feature: WF閲覧権限
   description: |-
@@ -1972,7 +1608,13 @@ cases:
     ④後付けユーザーでログインし、該当レコードが閲覧できることを確認する
   expected: WF閲覧権限で「承認者=ログインユーザー」設定時、組織・役職を後付けしたユーザーでも該当レコードを閲覧できること
   movie: UC09
-  detailed_flow: |
+  detailed_flow: |-
+    【UC09 テストフロー】この動画で確認するテスト番号:
+      wf-1090        (旧: 577)     WF閲覧権限
+      wf-1100        (旧: 588)     WF無効ユーザー
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
     3. テンプレートの閲覧権限設定で「承認者が次と一致: ログインユーザー」を設定する
@@ -1980,7 +1622,8 @@ cases:
     5. そのユーザーを承認者として設定したレコードを申請して「要確認」状態にする
     6. 後付けで組織・役職を追加したユーザーでログインする
     7. 対象レコードが閲覧できること（一覧に表示されること）を確認する
-- case_no: '588'
+  old_case_no: '577'
+- case_no: wf-1100
   sheet: B
   feature: WF無効ユーザー
   description: |-
@@ -1990,15 +1633,9 @@ cases:
     ④進行中のWFで承認者が無効化された場合、自動で取り下げになることを確認する
   expected: WF承認者が無効/削除済みの場合、申請時にエラー表示で取り下げになること。進行中に承認者が無効化された場合も自動取り下げになること
   movie: UC09
-  detailed_flow: |
-    1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
-    2. テーブル設定でワークフローをONにする
-    3. テスト用ユーザーBを作成し、承認者として申請する
-    4. ユーザーBを無効ユーザーまたは削除済みユーザーに変更する
-    5. 別のレコードで無効ユーザーを承認者として申請しようとする
-    6. エラーメッセージが表示されることを確認する
-    7. 進行中のWFで承認者が無効化された場合、WFが自動で取り下げになることを確認する
-- case_no: '594'
+  detailed_flow: UC09テストフロー参照（wf-1090 のdetailed_flowと同一）
+  old_case_no: '588'
+- case_no: wf-1110
   sheet: B
   feature: WF履歴
   description: |-
@@ -2008,14 +1645,20 @@ cases:
     ④WF履歴が非表示になっていることを確認する
   expected: WFを無効化したテーブルのレコード詳細画面にWF履歴が表示されないこと
   movie: UC10
-  detailed_flow: |
+  detailed_flow: |-
+    【UC10 テストフロー】この動画で確認するテスト番号:
+      wf-1110        (旧: 594)     WF履歴
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、申請・承認してWF履歴が生成されたレコードを作成する
     3. テーブル設定でワークフローをOFFにして保存する
     4. WFを使用していたレコードの詳細画面 `/admin/dataset__{tableId}/view/{recordId}` を開く
     5. WF履歴セクションが非表示になっていることを確認する
     6. `expect(page.locator('[class*="workflow-history"]')).not.toBeVisible()` で確認する
-- case_no: '638'
+  old_case_no: '594'
+- case_no: wf-1120
   sheet: B
   feature: ワークフロー承認
   description: |-
@@ -2024,14 +1667,20 @@ cases:
     ③申請フローNo.が変わった際にステップ番号も正しく切り替わることを確認する
   expected: ワークフローで申請フローNo.が変わった際にステップ番号が正しく切り替わること
   movie: UC11
-  detailed_flow: |
+  detailed_flow: |-
+    【UC11 テストフロー】この動画で確認するテスト番号:
+      wf-1120        (旧: 638)     ワークフロー承認
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、「フローを固定する」をONにする
     3. 複数テンプレート（申請フローNo.が異なる）を設定する
     4. 条件に応じてテンプレートが切り替わるレコードを申請する
     5. 承認を進め、申請フローNo.が変わるタイミングでステップ番号を確認する
     6. ステップ番号が正しく切り替わることを確認する
-- case_no: '470'
+  old_case_no: '638'
+- case_no: wf-1130
   sheet: B
   feature: ワークフロー否認/取り下げ後のデータ編集
   description: |-
@@ -2043,7 +1692,12 @@ cases:
     ⑥テンプレート/組織のセレクトボックスが正しく表示されることを確認する
   expected: ワークフローの否認・取り下げ後にデータを編集した際、条件に合ったワークフローへ切り替わり、セレクトボックスも正常に表示されること
   movie: UC05
-  detailed_flow: |
+  detailed_flow: |-
+    【UC05 テストフロー】この動画で確認するテスト番号:
+      wf-1130        (旧: 470)     ワークフロー否認/取り下げ後のデータ編集
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll: debug APIでALLテストテーブルを作成し、tableIdを取得する
     2. テーブル設定でワークフローをONにし、テンプレートを設定する
     3. レコードを申請し、テスト用ユーザーBが否認する
@@ -2051,6 +1705,7 @@ cases:
     5. 条件に合った別のテンプレートに切り替わることを確認する
     6. テンプレート/組織のセレクトボックスが正しく表示されることを確認する
     7. 別のレコードで取り下げ後も同様の動作を確認する
+  old_case_no: '470'
 actual_steps:
 - case_no: 106-01
   status: partial

@@ -2,13 +2,23 @@ group: ダッシュボード
 spec_file: tests/dashboard.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: DB-01
+- case_no: dash-010
   feature: ダッシュボード
   description: ①ダッシュボード画面が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: DB01
-  detailed_flow: |
+  detailed_flow: |-
+    【DB01 テストフロー】この動画で確認するテスト番号:
+      dash-010       (旧: DB-01)   ダッシュボード
+      dash-020       (旧: DB-02)   ダッシュボード
+      dash-030       (旧: DB-03)   ダッシュボード
+      dash-040       (旧: DB-04)   ダッシュボード
+      dash-050       (旧: DB-05)   ダッシュボード
+      dash-060       (旧: DB-06)   ダッシュボード
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. ログイン後、ダッシュボード（/admin/dashboard）に遷移する
     2. .navbar が表示されていることを確認
     3. ページタイトルが「ダッシュボード一覧」を含むことを確認
@@ -16,82 +26,48 @@ cases:
     5. 掲示板セクション（「掲示板」テキスト）が表示されていることを確認
     6. 「ウィジェットを追加」ボタンが表示されていることを確認
     7. bodyのテキストに「Internal Server Error」が含まれないことを確認
-
-- case_no: DB-02
+  old_case_no: DB-01
+- case_no: dash-020
   feature: ダッシュボード
   description: ①新しいダッシュボードタブを作成できること
   expected: |
     新しいダッシュボードタブを作成できること
   movie: DB01
-  detailed_flow: |
-    1. ダッシュボード（/admin/dashboard）を開く
-    2. HOMEタブの右にあるタブ追加ボタン（tablist内のbutton ""）をクリック
-    3. 「ダッシュボード」モーダル（dialog）が表示されることを確認
-    4. 「ダッシュボード名」テキストボックスにテスト用タブ名（例: 'テストダッシュボード'）を入力
-    5. 「送信」ボタンをクリック
-    6. モーダルが閉じることを確認
-    7. 新しいタブ（'テストダッシュボード'）がtablistに表示されることを確認
-
-- case_no: DB-03
+  detailed_flow: DB01テストフロー参照（dash-010 のdetailed_flowと同一）
+  old_case_no: DB-02
+- case_no: dash-030
   feature: ダッシュボード
   description: ①ダッシュボードにビューコンテンツを追加できること
   expected: |
     ダッシュボードにビューコンテンツを追加できること
   movie: DB01
-  detailed_flow: |
-    1. DB-02で作成したタブを選択する（タブをクリック）
-    2. 「ウィジェットを追加」ボタンをクリック
-    3. ビュー追加モーダル（heading "ビュー"）が表示されることを確認
-    4. 「テーブル」comboboxからテーブルを選択（例: ALLテストテーブル）
-    5. 表示タイプ「データ」（radio "データ" checked）がデフォルト選択されていることを確認
-    6. ダッシュボード表示サイズ（combobox: 小/中/大）がデフォルト「大」であることを確認
-    7. 「詳細設定」ボタンをクリックし、追加の設定画面が表示されることを確認
-    8. モーダル内の送信/保存ボタンをクリックしてウィジェットを追加
-    9. ダッシュボード上にビューウィジェットが表示されることを確認
-
-- case_no: DB-04
+  detailed_flow: DB01テストフロー参照（dash-010 のdetailed_flowと同一）
+  old_case_no: DB-03
+- case_no: dash-040
   feature: ダッシュボード
   description: ①ダッシュボードに掲示板コンテンツを追加できること
   expected: |
     ダッシュボードに掲示板コンテンツを追加できること
   movie: DB01
-  detailed_flow: |
-    1. DB-02で作成したタブが選択されている状態で操作
-    2. 掲示板の編集ボタン（掲示板セクション内の鉛筆アイコン）をクリック
-       ※掲示板はHOMEタブにデフォルト配置されている
-       または「ウィジェットを追加」から掲示板タイプを選択
-    3. 掲示板編集エリア（Froalaエディタ等のリッチテキストエディタ）が表示されることを確認
-    4. テスト用テキスト（例: 'テスト掲示板コンテンツ'）を入力
-    5. 保存ボタンをクリック
-    6. 掲示板に入力したテキストが表示されることを確認
-
-- case_no: DB-05
+  detailed_flow: DB01テストフロー参照（dash-010 のdetailed_flowと同一）
+  old_case_no: DB-04
+- case_no: dash-050
   feature: ダッシュボード
   description: ①ダッシュボードタブを削除できること
   expected: |
     ダッシュボードタブを削除できること
   movie: DB01
-  detailed_flow: |
-    1. DB-02で作成した「テストダッシュボード」タブを選択
-    2. タブの削除ボタン（タブ内の×アイコン、またはタブ右クリック→削除）をクリック
-    3. 確認ダイアログが表示される場合は「OK」/「削除」をクリック
-    4. タブが削除されて「テストダッシュボード」がtablistから消えることを確認
-    5. HOMEタブに自動的に戻ることを確認
-
-- case_no: DB-06
+  detailed_flow: DB01テストフロー参照（dash-010 のdetailed_flowと同一）
+  old_case_no: DB-05
+- case_no: dash-060
   feature: ダッシュボード
   description: ①デフォルトダッシュボード（HOMEタブ）が表示されること
   expected: |
     デフォルトダッシュボード（HOMEタブ）が表示されること
   movie: DB01
-  detailed_flow: |
-    1. ダッシュボード（/admin/dashboard）を開く
-    2. HOMEタブがデフォルトで選択状態（tab[selected] "HOME"）であることを確認
-    3. 掲示板セクションが表示されていることを確認
-    4. 掲示板内に「ピジョンクラウドへようこそ！」等のデフォルトテキストが含まれることを確認
-    5. 「ウィジェットを追加」ボタンが表示されていることを確認
-
-- case_no: '806'
+  detailed_flow: DB01テストフロー参照（dash-010 のdetailed_flowと同一）
+  old_case_no: DB-06
+- case_no: dash-070
   sheet: B
   feature: ダッシュボード集計
   description: |-
@@ -101,7 +77,12 @@ cases:
     ④集計結果が正しく並び替えられることを確認する
   expected: ダッシュボードに配置した集計結果の並び替えが正常に動作すること
   movie: UC21
-  detailed_flow: |
+  detailed_flow: |-
+    【UC21 テストフロー】この動画で確認するテスト番号:
+      dash-070       (旧: 806)     ダッシュボード集計
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. ダッシュボード（/admin/dashboard）を開く
     2. 「ウィジェットを追加」ボタンをクリック
     3. ビュー追加モーダルで:
@@ -113,3 +94,4 @@ cases:
     7. 並び替えボタンをクリック
     8. 集計結果の行順序が変わることを確認（昇順/降順切り替え）
     9. テスト後: 追加したウィジェットを削除してクリーンアップ
+  old_case_no: '806'

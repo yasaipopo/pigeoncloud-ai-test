@@ -2,13 +2,23 @@ group: 支払い・プラン管理
 spec_file: tests/payment.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: PAY-01
+- case_no: pay-010
   feature: 支払い
   description: ①支払いページが表示されること
   expected: |
     支払いページが表示されること
   movie: PM01
-  detailed_flow: |
+  detailed_flow: |-
+    【PM01 テストフロー】この動画で確認するテスト番号:
+      pay-010        (旧: PAY-01)  支払い
+      pay-020        (旧: PAY-02)  支払い
+      pay-030        (旧: PAY-03)  支払い
+      pay-040        (旧: PAY-04)  支払い
+      pay-050        (旧: PAY-05)  支払い
+      pay-060        (旧: PAY-06)  支払い
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # PAY-01: 支払いページが表示されること
 
     ## 前提
@@ -34,243 +44,48 @@ cases:
     ## 注意
     - `/admin/payment` は Angular SPA のルート。PHP には届かないため `/admin/dataset/payment/pay` が正確なパス
     - トライアル環境ではページが表示されるが「有料プラン契約」のフォームが表示される（is_update=false）
-
-- case_no: PAY-02
+  old_case_no: PAY-01
+- case_no: pay-020
   feature: 支払い
   description: ①プラン変更フォームと料金情報が表示されること
   expected: |
     プラン変更フォームと料金情報が表示されること
   movie: PM01
-  detailed_flow: |
-    # PAY-02: プラン変更フォームと料金情報が表示されること
-
-    ## 前提
-    - PAY-01 と同じページ（続けてテスト可）
-
-    ## 操作手順
-    1. `page.goto(BASE_URL + '/admin/dataset/payment/pay')` でアクセス
-    2. `page.waitForSelector('.plan-card', { timeout: 15000 })` で読み込み待機
-
-    ## 確認事項（expect）
-    - 「プラン変更」見出しが表示されていること
-      ```javascript
-      await expect(page.locator('h3.plan-header, h3:has-text("プラン変更")')).toBeVisible({ timeout: 15000 });
-      ```
-    - ユーザー数入力フィールドが表示されていること
-      ```javascript
-      await expect(page.locator('#user_input')).toBeVisible();
-      ```
-    - プラン選択ラジオボタン（ユーザー数プラン/ログイン数プラン）が表示されていること
-      ```javascript
-      await expect(page.locator('#user_num')).toBeVisible();
-      await expect(page.locator('#login_num')).toBeVisible();
-      ```
-    - 追加容量オプションの select が表示されていること
-      ```javascript
-      await expect(page.locator('select[ng-reflect-model]').first()).toBeVisible();
-      ```
-    - 料金明細テーブルが表示されていること
-      ```javascript
-      await expect(page.locator('table').filter({ hasText: '料金明細' }).first()).toBeVisible();
-      // または
-      await expect(page.locator('h4:has-text("料金明細")')).toBeVisible();
-      ```
-    - 「お支払い金額（税込）」セクションが表示されていること
-      ```javascript
-      await expect(page.locator('#price_calc')).toBeVisible();
-      ```
-
-- case_no: PAY-03
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-02
+- case_no: pay-030
   feature: 支払い
   description: ①Stripe checkoutの関連iframeが存在すること
   expected: |
     Stripe checkoutの関連iframeが存在すること
   movie: PM01
-  detailed_flow: |
-    # PAY-03: Stripe checkoutの関連iframeが存在すること
-
-    ## 前提
-    - PAY-02 と同じページ（続けてテスト可）
-
-    ## 操作手順
-    1. `page.goto(BASE_URL + '/admin/dataset/payment/pay')` でアクセス
-    2. `page.waitForSelector('.plan-card', { timeout: 15000 })` で読み込み待機
-    3. Stripe.js/Checkout.js の読み込みを待機: `page.waitForTimeout(3000)`
-
-    ## 確認事項（expect）
-    - Stripe の checkout.js スクリプトが読み込まれていること（head または body に script タグが存在する）
-      ```javascript
-      const stripeScripts = await page.evaluate(() => {
-        const scripts = Array.from(document.querySelectorAll('script'));
-        return scripts.filter(s => s.src.includes('stripe')).map(s => s.src);
-      });
-      expect(stripeScripts.length).toBeGreaterThan(0);
-      ```
-    - Stripe v3 スクリプトが含まれること
-      ```javascript
-      expect(stripeScripts.some(src => src.includes('js.stripe.com/v3'))).toBe(true);
-      ```
-    - Checkout.js スクリプトが含まれること（または checkout.stripe.com のスクリプト）
-      ```javascript
-      expect(stripeScripts.some(src => src.includes('checkout.stripe.com') || src.includes('js.stripe.com/v3'))).toBe(true);
-      ```
-
-    ## 補足
-    - loadStripeJs() メソッドが `https://js.stripe.com/v3/` と `https://checkout.stripe.com/checkout.js` を動的に読み込む
-    - stripe-js / stripe-checkout の id を持つ script タグが DOM に存在することを確認
-
-- case_no: PAY-04
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-03
+- case_no: pay-040
   feature: 支払い
   description: ①テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
   expected: |
     テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
   movie: PM01
-  detailed_flow: |
-    # PAY-04: テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
-
-    ## 前提
-    - トライアル環境（is_update=false）でテスト
-    - 利用規約に同意した状態でクレジットカード支払いを選択済み
-
-    ## 操作手順
-    1. `page.goto(BASE_URL + '/admin/dataset/payment/pay')` でアクセス
-    2. `page.waitForSelector('.plan-card', { timeout: 15000 })` 待機
-    3. 利用規約チェックボックスにチェック（初回は未チェック）
-       ```javascript
-       await page.click('#aggrement_checkbox');
-       ```
-    4. 「クレジットカード支払い」ラジオを選択
-       ```javascript
-       await page.click('#pay_as_stripe');
-       ```
-    5. 「クレジットカード支払いに進む」ボタンをクリック
-       ```javascript
-       await page.click('button:has-text("クレジットカード支払いに進む")');
-       ```
-    6. Stripe Checkout モーダルが開くのを待機
-       ```javascript
-       await page.waitForSelector('iframe[name*="stripe"], iframe[src*="stripe"], .stripe-checkout iframe', { timeout: 10000 });
-       ```
-
-    ## 確認事項（expect）
-    - Stripe Checkout モーダルの iframe が表示されること
-      ```javascript
-      const stripeFrame = page.frameLocator('iframe[src*="checkout.stripe.com"], iframe[name*="stripe"]').first();
-      await expect(stripeFrame.locator('input[name="cardnumber"], input[placeholder*="card"], input[autocomplete="cc-number"]').first()).toBeVisible({ timeout: 15000 });
-      ```
-    - カード番号入力欄にテストカード番号を入力できること
-      ```javascript
-      await stripeFrame.locator('input[name="cardnumber"]').fill('4242424242424242');
-      ```
-
-    ## 注意
-    - Stripe Checkout モーダルは iframe で表示される。frameLocator を使用すること
-    - テストカード番号: 4242 4242 4242 4242 (Stripe テスト用)
-    - 実際の決済は行わない（入力できることのみ確認）
-    - makePayment() が stripePaymentHandler.open() を呼ぶ。stripePaymentHandler が初期化されていない場合はエラートースト表示
-
-- case_no: PAY-05
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-04
+- case_no: pay-050
   feature: 支払い
   description: ①ユーザー数の範囲外入力でバリデーションエラーが表示されること
   expected: |
     ユーザー数の範囲外入力でバリデーションエラーが表示されること
   movie: PM01
-  detailed_flow: |
-    # PAY-05: ユーザー数の範囲外入力でバリデーションエラーが表示されること
-
-    ## 前提
-    - PAY-02 と同じページ
-
-    ## 操作手順（下限テスト: 4ユーザー）
-    1. `page.goto(BASE_URL + '/admin/dataset/payment/pay')` でアクセス
-    2. `page.waitForSelector('#user_input', { timeout: 15000 })` 待機
-    3. ユーザー数に 4 を入力（5未満は無効）
-       ```javascript
-       await page.fill('#user_input', '4');
-       await page.dispatchEvent('#user_input', 'input');
-       ```
-    4. バリデーションエラーが表示されることを確認
-       ```javascript
-       await expect(page.locator('.text-danger:has-text("ユーザー数は5~3000の範囲で選択して下さい")')).toBeVisible({ timeout: 5000 });
-       ```
-
-    ## 操作手順（上限テスト: 3001ユーザー）
-    5. ユーザー数に 3001 を入力（3000超は無効）
-       ```javascript
-       await page.fill('#user_input', '3001');
-       await page.dispatchEvent('#user_input', 'input');
-       ```
-    6. バリデーションエラーが表示されることを確認
-       ```javascript
-       await expect(page.locator('.text-danger:has-text("ユーザー数は5~3000の範囲で選択して下さい")')).toBeVisible({ timeout: 5000 });
-       ```
-
-    ## 操作手順（正常値に戻す）
-    7. ユーザー数に 5 を入力してエラーが消えることを確認
-       ```javascript
-       await page.fill('#user_input', '5');
-       await page.dispatchEvent('#user_input', 'input');
-       await expect(page.locator('.text-danger:has-text("ユーザー数は5~3000の範囲で選択して下さい")')).not.toBeVisible({ timeout: 3000 });
-       ```
-
-    ## 確認事項（expect）
-    - `is_valid_num = false` のとき `.text-danger` テキスト「※ユーザー数は5~3000の範囲で選択して下さい。」が表示される
-    - セレクター: `.text-danger` または `div.text-danger.mt-2`
-    - Angular [(ngModel)] バインディングの `onQuantityChange()` が呼ばれてバリデーション実行
-
-    ## 注意
-    - Angular Reactive Forms でなく ngModel バインディングのため、`fill()` 後に `input` イベントのディスパッチが必要
-
-- case_no: PAY-06
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-05
+- case_no: pay-060
   feature: 支払い
   description: ①支払い履歴APIエンドポイントが存在すること
   expected: |
     支払い履歴APIエンドポイントが存在すること
   movie: PM01
-  detailed_flow: |
-    # PAY-06: 支払い履歴APIエンドポイントが存在すること
-
-    ## 前提
-    - ログイン済み（admin権限）
-
-    ## 操作手順
-    1. `page.goto(BASE_URL + '/admin/dashboard')` でダッシュボードに移動（cookieを有効にする）
-    2. API エンドポイントへの GET リクエストを実行してステータスコードを確認
-       ```javascript
-       const response = await page.evaluate(async () => {
-         const res = await fetch('/api/admin/showPaymentPage', {
-           method: 'GET',
-           credentials: 'include',
-           headers: { 'X-Requested-With': 'XMLHttpRequest' }
-         });
-         return { status: res.status, body: await res.text() };
-       });
-       ```
-
-    ## 確認事項（expect）
-    - `/api/admin/showPaymentPage` エンドポイントが 200 を返すこと
-      ```javascript
-      expect(response.status).toBe(200);
-      ```
-    - レスポンスに `result: success` が含まれること（404 や 500 でないこと）
-      ```javascript
-      expect(response.body).toContain('success');
-      ```
-    - 補足: `download-stripe-invoice` エンドポイントのルートが存在することも確認可能
-      ```javascript
-      // ルーティング定義として /api/admin/download-stripe-invoice/{id} が存在する
-      // 実際のinvoice IDがない場合は 404 が返るが、エンドポイント自体は存在する（500でない）
-      const dlResponse = await page.evaluate(async () => {
-        const res = await fetch('/api/admin/download-stripe-invoice/999', {
-          credentials: 'include',
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        return res.status;
-      });
-      expect(dlResponse).not.toBe(500);
-      ```
-
-- case_no: '715'
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-06
+- case_no: pay-070
   sheet: B
   feature: カードブランド表示
   description: |-
@@ -280,7 +95,12 @@ cases:
     ④ブランド表示がカード情報更新ボタンの上に正しく配置されていることを確認する
   expected: 支払いページでクレジットカードのブランド（アイコン+名前）が正しく表示されること
   movie: UC16
-  detailed_flow: |
+  detailed_flow: |-
+    【UC16 テストフロー】この動画で確認するテスト番号:
+      pay-070        (旧: 715)     カードブランド表示
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 715: カードブランド表示
 
     ## 前提
@@ -331,8 +151,8 @@ cases:
     - `stripe_credit_card['brand']` は Stripe API の card オブジェクトから取得（visa, mastercard, amex 等）
     - 現在の payment-page.component.html には `brand` フィールドの直接表示はない可能性がある
     - ケース715の要件（カードブランドアイコン+名前表示）が未実装の場合は product-bugs.md に記録
-
-- case_no: '355'
+  old_case_no: '715'
+- case_no: pay-080
   sheet: B
   feature: 領収書ダウンロード
   description: |-
@@ -342,7 +162,12 @@ cases:
     ④ダウンロードされたPDFに全項目が正しく印字されていることを確認する
   expected: 契約済み環境で請求情報メニューが表示され、領収書がダウンロードでき、全項目が印字されていること
   movie: UC03
-  detailed_flow: |
+  detailed_flow: |-
+    【UC03 テストフロー】この動画で確認するテスト番号:
+      pay-080        (旧: 355)     領収書ダウンロード
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 355: 領収書ダウンロード
 
     ## 前提
@@ -409,8 +234,8 @@ cases:
     ## 注意
     - テスト環境（トライアル）では「請求情報」メニューが表示されない。本番または契約済み環境でテスト
     - 実際のPDFダウンロード内容の確認（印字項目）は自動テストでは困難。ボタン表示とAPIレスポンスの確認を中心とする
-
-- case_no: '573'
+  old_case_no: '355'
+- case_no: pay-090
   sheet: B
   feature: 決済の即時反映（ユーザー数変更）
   description: |-
@@ -420,7 +245,12 @@ cases:
     ④増やした場合は即時反映され、追加ユーザーが作成可能なことを確認する
   expected: 決済後のユーザー数変更が即時反映され、制限以下への変更時にはエラーが表示されること
   movie: UC09
-  detailed_flow: |
+  detailed_flow: |-
+    【UC09 テストフロー】この動画で確認するテスト番号:
+      pay-090        (旧: 573)     決済の即時反映（ユーザー数変更）
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 573: 決済の即時反映（ユーザー数変更）
 
     ## 前提
@@ -491,3 +321,4 @@ cases:
     - 本番環境では即時反映されるため、テスト後に元の値に戻すこと
     - `stripePaymentUpdateRequest` コントローラーが `stripe-payment-update` API を処理する
     - 「即時適用」は PHP 側で `stripePaymentUpdateRequest` が Stripe API を直接更新（翌月ではなく即時）
+  old_case_no: '573'

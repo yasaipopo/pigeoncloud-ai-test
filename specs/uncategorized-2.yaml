@@ -2,7 +2,7 @@ group: 未分類 Part2
 spec_file: tests/uncategorized-2.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: '505'
+- case_no: unc2-010
   feature: ルックアップ
   description: |-
     ①テーブル一覧画面を開く
@@ -11,12 +11,32 @@ cases:
   expected: ルックアップが正常に動作すること
   movie: U201
   detailed_flow: |-
+    【U201 テストフロー】この動画で確認するテスト番号:
+      unc2-010       (旧: 505)     ルックアップ
+      unc2-020       (旧: 506)     ワークフロー設定
+      unc2-030       (旧: 507)     テーブル一覧
+      unc2-040       (旧: 508)     ルックアップ・関連レコード表示条件
+      unc2-050       (旧: 509)     数値項目
+      unc2-060       (旧: 510)     ワークフロー設定
+      unc2-070       (旧: 511)     集計
+      unc2-080       (旧: 512)     ワークフロー設定
+      unc2-090       (旧: 513)     ワークフロー設定
+      unc2-100       (旧: 514)     ユーザー管理
+      unc2-110       (旧: 515)     ユーザー管理
+      unc2-120       (旧: 516)     テーブル一覧
+      unc2-130       (旧: 517)     フィールド設定
+      unc2-140       (旧: 518)     テーブル一覧
+      unc2-150       (旧: 520)     ワークフロー設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
     2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
     3. ルックアップフィールドの列セルを page.locator('td[data-field-type="lookup"]') で取得
     4. セル内テキストが空でないこと（「-」または実際の参照先テキスト）を確認
     5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '506'
+  old_case_no: '505'
+- case_no: unc2-020
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -24,13 +44,9 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること（#issue819）
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. page.locator('app-workflow-setting') または設定フォーム領域が表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. ページに500エラー表示がないことを確認（page.locator('.error-page') が存在しないこと）
-- case_no: '507'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '506'
+- case_no: unc2-030
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -38,13 +54,9 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue791）
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('table thead tr') でヘッダー行の読み込みを待機
-    3. page.locator('table thead th').count() でヘッダー列数が1以上であることを確認
-    4. 各ヘッダーセルのテキストが空でないことを確認（page.locator('table thead th').nth(0).innerText() が空でない）
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '508'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '507'
+- case_no: unc2-040
   feature: ルックアップ・関連レコード表示条件
   description: |-
     ①テーブルAに他テーブル参照フィールドを作成し、ルックアップを設定する
@@ -54,14 +66,9 @@ cases:
   expected: ルックアップが他テーブル参照の場合でも、関連レコード一覧の表示条件が正常に動作すること
   movie: U201
   target_spec: fields
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. 他テーブル参照フィールドを含む行のレコード詳細リンクをクリック
-    4. 詳細画面で関連レコード一覧セクションが表示されることを確認（page.locator('.related-records') が存在する）
-    5. 関連レコード一覧の件数が表示条件に基づいて絞り込まれていることを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '509'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '508'
+- case_no: unc2-050
   feature: 数値項目
   description: |-
     ①テーブル一覧画面を開く
@@ -69,13 +76,9 @@ cases:
     ③桁区切り表示設定が有効な数値に桁区切りが正しく表示されていることを確認する
   expected: 桁区切り表示設定が有効な数値項目に桁区切りが正しく表示されること
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. 数値フィールドのセルを page.locator('td[data-field-type="number"]').first() で取得
-    4. セル内テキストを取得し、1000以上の数値の場合にカンマ区切り（例: "1,234"）が含まれることを確認
-    5. bodyText に "NaN" が含まれないことを確認
-- case_no: '510'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '509'
+- case_no: unc2-060
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -83,13 +86,9 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること（#issue812）
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ワークフロー設定フォームが表示されることを確認（page.locator('h2, h3').filter({hasText: 'ワークフロー'}) が存在する）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. ページURLが /setting/workflow を含むことを確認
-- case_no: '511'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '510'
+- case_no: unc2-070
   feature: 集計
   description: |-
     ①テーブル一覧画面を開く
@@ -97,13 +96,9 @@ cases:
     ③SUM計算結果がNaN等のエラーなく正しい値で表示されることを確認する
   expected: SUM計算項目がエラーなく正しい値で表示されること
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. 計算フィールドのセルを page.locator('td[data-field-type="calc"]') で取得
-    4. 各セルのテキストに "NaN" または "undefined" が含まれないことを確認
-    5. 数値フィールドのSUM表示行（集計行）が存在する場合、その値が数値であることを確認
-- case_no: '512'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '511'
+- case_no: unc2-080
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -111,13 +106,9 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること（#issue795）
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. page.locator('.setting-content, main').isVisible() でメインコンテンツが表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. コンソールエラーが発生していないことを確認
-- case_no: '513'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '512'
+- case_no: unc2-090
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -125,13 +116,9 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること（#issue818）
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ワークフロー設定ページのメインコンテンツが表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. ページに「ワークフロー」関連のUI要素（タブ・フォーム等）が表示されていることを確認
-- case_no: '514'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '513'
+- case_no: unc2-100
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -139,13 +126,9 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること（#issue826）
   movie: U201
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルが表示されることを確認（page.locator('table tbody tr').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. ページタイトルまたは見出しに「ユーザー」が含まれることを確認
-- case_no: '515'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '514'
+- case_no: unc2-110
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -153,13 +136,9 @@ cases:
     ③マスターユーザーから全ユーザーのUP/DL履歴が確認できることを確認する
   expected: マスターユーザーから全ユーザーのUP/DL履歴がユーザー管理画面で確認できること（#issue673）
   movie: U201
-  detailed_flow: |-
-    1. /admin/csv にアクセスしてCSV UP/DL履歴画面を開く（マスターユーザーでログイン済み）
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. 履歴テーブルが表示されることを確認（page.locator('table tbody tr').count() が0以上）
-    4. テーブル行に「ユーザー名」や「実行者」列が存在し、複数ユーザーの履歴が表示されることを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '516'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '515'
+- case_no: unc2-120
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -167,14 +146,9 @@ cases:
     ③1行あたりの項目数が制限どおりであることを確認する
   expected: 1行に表示される項目数が設定通りに制限されること
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. 最初のレコード行の編集ボタン（鉛筆アイコン）をクリックして編集画面を開く
-    4. 編集フォームが表示されることを確認（page.locator('.modal .form-group, form .form-group') が存在）
-    5. 1行あたりの項目数がテーブル設定の「列数」設定に従っていることを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '517'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '516'
+- case_no: unc2-130
   feature: フィールド設定
   description: |-
     ①テーブル一覧画面を開く
@@ -182,13 +156,9 @@ cases:
     ③テーブル一覧がエラーなく表示されることを確認する
   expected: 必須条件設定で他の項目を条件利用してもテーブル一覧が正常に表示されること（#issue834）
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. テーブルヘッダーが正常表示されることを確認（page.locator('table thead th').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. 必須フィールドを含むレコードの新規作成フォームを開いて、必須項目マーク（*）が表示されることを確認
-- case_no: '518'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '517'
+- case_no: unc2-140
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -196,13 +166,9 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue740）
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('table thead tr') でヘッダー行の読み込みを待機
-    3. page.locator('table thead th').count() でヘッダー列数が1以上であることを確認
-    4. ヘッダーセルのテキストが空でない（''でない）ことをallInnerTexts()で確認
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '520'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '518'
+- case_no: unc2-150
   feature: ワークフロー設定
   description: |-
     ①ワークフロー設定画面を開く
@@ -212,16 +178,9 @@ cases:
     ⑤再度設定画面を開き、2人目以降の役職が正しく保存・表示されていることを確認する
   expected: ワークフローのAND/OR並行承認で2人目以降の役職選択が正しく保存・表示されること
   movie: U201
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. 「並行承認（AND/OR）」設定を有効化するトグル/チェックボックスをクリック
-    4. 承認者追加ボタン（「+ 承認者を追加」等）をクリックして2人目の承認者欄を表示
-    5. 2人目の「役職」セレクトボックスから任意の役職を選択
-    6. 保存ボタンをクリック
-    7. ページをリロード（/admin/dataset__{tableId}/setting/workflow に再アクセス）
-    8. 2人目の承認者の役職が保存した値で表示されていることを確認
-- case_no: '521'
+  detailed_flow: U201テストフロー参照（unc2-010 のdetailed_flowと同一）
+  old_case_no: '520'
+- case_no: unc2-160
   feature: ワークフロー
   description: |
     ①ワークフローが設定されたテーブルで申請画面を開く
@@ -233,6 +192,25 @@ cases:
     組織未選択時にバリデーションエラーが表示され、正しく選択後に再申請してもエラーが発生しないこと
   movie: U202
   detailed_flow: |-
+    【U202 テストフロー】この動画で確認するテスト番号:
+      unc2-160       (旧: 521)     ワークフロー
+      unc2-170       (旧: 522)     WF並行承認・同一承認者スキップ
+      unc2-180       (旧: 523)     ダッシュボード
+      unc2-190       (旧: 528)     親子テーブル削除権限
+      unc2-200       (旧: 529)     テーブル設定
+      unc2-210       (旧: 530)     ユーザー管理
+      unc2-220       (旧: 531)     フィールド設定
+      unc2-230       (旧: 533)     公開フォーム
+      unc2-240       (旧: 534)     他テーブル参照
+      unc2-250       (旧: 535)     ダッシュボード
+      unc2-260       (旧: 536)     ユーザー管理
+      unc2-270       (旧: 537)     WFステータス変更・カスタム通知
+      unc2-280       (旧: 538)     CSV
+      unc2-290       (旧: 539)     テーブル一覧
+      unc2-300       (旧: 544)     フィルタ後の一括編集
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dataset__{tableId} にアクセスしてワークフロー設定済みテーブルを開く
     2. 新規レコードを作成するか既存レコードの詳細画面を開く
     3. 「申請」ボタンをクリックして申請モーダルを表示
@@ -240,7 +218,8 @@ cases:
     5. バリデーションエラーメッセージが表示されることを確認（page.locator('.alert-danger, .error-message') が表示される）
     6. 「組織」セレクトボックスから有効な組織を選択して再度申請ボタンをクリック
     7. エラーが発生せず申請が完了することを確認（成功メッセージまたはステータス変更を確認）
-- case_no: '522'
+  old_case_no: '521'
+- case_no: unc2-170
   feature: WF並行承認・同一承認者スキップ
   description: |-
     ①ワークフローを作成し、並行承認（AND/OR）を設定する
@@ -251,16 +230,9 @@ cases:
   expected: 並行承認AND/ORで同一承認者スキップ有効時にテーブル一覧がエラーなく表示されること
   movie: U202
   target_spec: workflow
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. 「並行承認（AND/OR）」を有効化して複数承認者を設定
-    3. 「同一承認者スキップ」トグルを有効にして保存
-    4. /admin/dataset__{tableId} に戻りレコード詳細で申請ボタンをクリックして申請を実行
-    5. 申請後に /admin/dataset__{tableId} の一覧画面を開く
-    6. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-    8. 一覧が正常に表示されること（テーブル行が存在する）を確認
-- case_no: '523'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '522'
+- case_no: unc2-180
   feature: ダッシュボード
   description: |-
     ①ダッシュボードを開く
@@ -268,13 +240,9 @@ cases:
     ③ウィジェット等の表示に異常がないことを確認する
   expected: ダッシュボードがエラーなく正常に表示されること
   movie: U202
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボード画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ダッシュボードのメインコンテンツ領域が表示されることを確認（page.locator('main') が存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. ウィジェットが存在する場合、page.locator('.widget, .dashboard-widget') が表示されることを確認
-- case_no: '528'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '523'
+- case_no: unc2-190
   feature: 親子テーブル削除権限
   description: |-
     ①親テーブルと子テーブルの関係を設定する
@@ -285,16 +253,9 @@ cases:
   expected: 親テーブル削除権限あり・子テーブル削除権限なしの場合に、子テーブルのレコード削除が禁止されること
   movie: U202
   target_spec: users-permissions
-  detailed_flow: |-
-    1. マスターユーザーで /admin/users にアクセスしテストユーザー（ishikawa+N@loftal.jp）を作成
-    2. /admin/dataset__{parentTableId}/setting/permission にアクセスして権限設定を開く
-    3. 作成したテストユーザーに「削除」権限を付与して保存
-    4. 子テーブル(/admin/dataset__{childTableId}/setting/permission)の権限設定で削除権限を付与しない状態を確認
-    5. テストユーザーでログインし直す
-    6. /admin/dataset__{childTableId} の子テーブル一覧を開く
-    7. レコード行の削除ボタンが非表示または disabled であることを確認（page.locator('.btn-delete').count() === 0 または disabled）
-    8. /admin/dataset__{parentTableId} の親テーブルを開き削除ボタンが存在することを確認
-- case_no: '529'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '528'
+- case_no: unc2-200
   feature: テーブル設定
   description: |-
     ①テーブル設定画面を開く
@@ -302,13 +263,9 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること
   movie: U202
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ページに「ワークフロー」設定エリアが表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. ページURL が /setting/workflow を含むことを確認
-- case_no: '530'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '529'
+- case_no: unc2-210
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -316,13 +273,9 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること（#issue704）
   movie: U202
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルが表示されることを確認（page.locator('table tbody tr').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. ユーザー行に名前・メールアドレス等の列が正しく表示されることを確認
-- case_no: '531'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '530'
+- case_no: unc2-220
   feature: フィールド設定
   description: |-
     ①テーブル一覧画面を開く
@@ -330,13 +283,9 @@ cases:
     ③型エラーが発生せず正常に表示されることを確認する
   expected: 選択肢（複数項目）で型エラーが発生せずテーブル一覧が正常に表示されること（#issue856）
   movie: U202
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. 選択肢（複数）フィールドの列セルを確認（page.locator('td[data-field-type="select_multiple"], td[data-field-type="checkbox"]') を取得）
-    4. セル内テキストに "TypeError" または "undefined" が含まれないことを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '533'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '531'
+- case_no: unc2-230
   feature: 公開フォーム
   description: |-
     ①公開フォームにファイル添付フィールドを含むテーブルを設定する
@@ -345,16 +294,9 @@ cases:
     ④テーブルに添付ファイルが正しく反映されていることを確認する
   expected: 未ログイン状態の公開フォームからファイル添付して送信した場合、テーブルに添付ファイルが反映されること
   movie: U202
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/public_form にアクセスして公開フォーム設定を確認
-    2. ファイル添付フィールドが公開フォームに含まれていることを確認し、公開フォームURLを取得
-    3. page.context().clearCookies() でログアウト状態にする
-    4. 取得した公開フォームURL（例: /form/{token}）にアクセス
-    5. page.setInputFiles('input[type=file]', '/app/test_files/ok.png') でファイルを添付
-    6. 送信ボタンをクリックして送信完了メッセージが表示されることを確認
-    7. マスターユーザーで再ログインして /admin/dataset__{tableId} を開く
-    8. 最新レコードにファイルが添付されていることを確認（ファイルアイコンまたはリンクが存在）
-- case_no: '534'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '533'
+- case_no: unc2-240
   feature: 他テーブル参照
   description: |
     ①大分類→中分類→小分類のように連鎖する他テーブル参照項目を設定する
@@ -365,16 +307,9 @@ cases:
   expected: |
     連鎖する他テーブル参照で親カテゴリの選択に応じて子カテゴリの選択肢が正しく絞り込まれること
   movie: U202
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスして他テーブル参照フィールドを持つテーブル一覧を開く
-    2. 「新規作成」ボタンをクリックしてレコード作成フォームを開く
-    3. 「大分類」他テーブル参照フィールドの検索/選択ボタンをクリック
-    4. モーダルが開き参照先の大分類レコード一覧が表示されることを確認
-    5. 任意の大分類レコードを選択してモーダルを閉じる
-    6. 「中分類」フィールドの選択肢が大分類に絞り込まれていることを確認（別の大分類のレコードが表示されない）
-    7. 中分類を選択後、「小分類」フィールドの選択肢も絞り込まれていることを確認
-    8. 保存ボタンをクリックして保存後、詳細画面で正しい値が表示されることを確認
-- case_no: '535'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '534'
+- case_no: unc2-250
   feature: ダッシュボード
   description: |-
     ①ダッシュボードを開く
@@ -382,12 +317,9 @@ cases:
     ③ウィジェット等の表示に異常がないことを確認する
   expected: ダッシュボードがエラーなく正常に表示されること
   movie: U202
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボード画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ダッシュボードのメインコンテンツ領域が表示されることを確認（page.locator('main') が存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '536'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '535'
+- case_no: unc2-260
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -395,12 +327,9 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること（#issue837）
   movie: U202
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルが表示されることを確認（page.locator('table tbody tr').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '537'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '536'
+- case_no: unc2-270
   feature: WFステータス変更・カスタム通知
   description: |-
     ①ワークフローのステータス変更アクションを設定する
@@ -411,15 +340,9 @@ cases:
   expected: ワークフローステータス変更アクション時にカスタム通知内容が正しく送信されること
   movie: U202
   target_spec: workflow
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. ワークフローの「アクション」設定で「ステータス変更」アクションを追加
-    3. アクションの「通知内容」に任意のカスタムテキスト（例: "テスト通知_537"）を入力して保存
-    4. /admin/dataset__{tableId} で新規レコードを作成し申請ボタンをクリック
-    5. 別ユーザーまたは同ユーザーで承認操作を実行してステータスを変更
-    6. /admin/notification_log にアクセスして通知ログを確認
-    7. 通知ログにカスタム設定のテキスト（"テスト通知_537"）が含まれることを確認
-- case_no: '538'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '537'
+- case_no: unc2-280
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -427,13 +350,9 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること
   movie: U202
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. CSVダウンロードボタン（page.locator('button:has-text("CSV"), a:has-text("CSV")') ）が表示されることを確認
-    4. CSVダウンロードボタンをクリックしてダウンロードが実行されることを確認（エラーダイアログが出ないこと）
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '539'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '538'
+- case_no: unc2-290
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -441,13 +360,9 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue742）
   movie: U202
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('table thead tr') でヘッダー行の読み込みを待機
-    3. page.locator('table thead th').count() でヘッダー列数が1以上であることを確認
-    4. ヘッダーセルのテキストが空でないことを確認
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '544'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '539'
+- case_no: unc2-300
   feature: フィルタ後の一括編集
   description: |-
     ①テーブル一覧画面でフィルタを適用して表示件数を絞り込む
@@ -457,16 +372,9 @@ cases:
   expected: 一覧画面でフィルタ後に一括編集した場合、フィルタ対象のレコードのみが更新されること
   movie: U202
   target_spec: records
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く（事前に複数レコードを作成）
-    2. フィルタボタンをクリックして絞り込み条件を設定（例: テキストフィールドが "A" で始まる条件）
-    3. フィルタ適用後の件数を記録（filteredCount）
-    4. 全選択チェックボックスをクリックしてフィルタ適用中の全レコードを選択
-    5. 「一括編集」ボタンをクリックして一括編集モーダルを開く
-    6. 変更するフィールドを選択して新しい値（例: "batch_edit_544"）を入力し実行
-    7. フィルタを解除して全レコードを表示
-    8. 編集対象だったレコードのみ値が変更され、フィルタ外レコードは変更されていないことを確認
-- case_no: '545'
+  detailed_flow: U202テストフロー参照（unc2-160 のdetailed_flowと同一）
+  old_case_no: '544'
+- case_no: unc2-310
   feature: ファイルフィールド
   description: |-
     ①テーブル一覧画面を開く
@@ -475,13 +383,33 @@ cases:
   expected: 複数ファイル項目でファイル未選択時にバリデーションが正しく動作すること（#issue869）
   movie: U203
   detailed_flow: |-
+    【U203 テストフロー】この動画で確認するテスト番号:
+      unc2-310       (旧: 545)     ファイルフィールド
+      unc2-320       (旧: 547)     テーブル一覧
+      unc2-330       (旧: 549)     WF通知
+      unc2-340       (旧: 550)     他テーブル参照
+      unc2-350       (旧: 551)     絞り込み後の一括削除件数表示
+      unc2-360       (旧: 552)     フィルタ
+      unc2-370       (旧: 554)     OR条件フィルタ
+      unc2-380       (旧: 555)     計算項目
+      unc2-390       (旧: 556)     ダッシュボード
+      unc2-400       (旧: 557)     帳票
+      unc2-410       (旧: 558)     計算項目
+      unc2-420       (旧: 559)     ユーザー管理
+      unc2-430       (旧: 561)     集計・日付型の最大最小
+      unc2-440       (旧: 564)     ファイルフィールド
+      unc2-450       (旧: 567)     ワークフロー設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
     2. 「新規作成」ボタンをクリックして新規レコード作成フォームを開く
     3. 複数ファイルフィールドの「ファイルを追加」ボタンが表示されることを確認
     4. ファイルを添付せずに保存ボタンをクリック（ファイル必須フィールドの場合）
     5. バリデーションエラーが表示されるか、またはファイルなしで保存できることを確認
     6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '547'
+  old_case_no: '545'
+- case_no: unc2-320
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -489,12 +417,9 @@ cases:
     ③エラーが発生しないことを確認する
   expected: テーブル一覧画面がエラーなく正常に表示されること（#issue828）
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. テーブル一覧が表示されることを確認（page.locator('table') が存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '549'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '547'
+- case_no: unc2-330
   feature: WF通知
   description: |-
     ①通知設定でアクション「ワークフローステータス変更時」トリガー「申請時」を設定する
@@ -503,15 +428,9 @@ cases:
     ④通知メールの本文が設定した内容で送信されることを確認する（デフォルト本文にならないこと）
   expected: WFステータス変更の通知で「申請時」トリガーは申請タイミングのみ発火し、通知本文も設定内容が反映されること
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/notification にアクセスして通知設定を開く
-    2. 「新規追加」ボタンをクリックしてアクション「ワークフローステータス変更時」・トリガー「申請時」を選択
-    3. 通知本文に任意のカスタムテキスト（例: "WF申請通知_549"）を入力して保存
-    4. /admin/dataset__{tableId} でレコードを申請する
-    5. /admin/notification_log にアクセスして通知ログを確認
-    6. 申請時の通知ログにカスタムテキスト（"WF申請通知_549"）が含まれることを確認
-    7. 承認操作を実行後、通知ログに追加の通知が発生していないことを確認（承認時は通知が飛ばない）
-- case_no: '550'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '549'
+- case_no: unc2-340
   feature: 他テーブル参照
   description: |
     ①他テーブル参照項目があるレコードの編集画面を開く
@@ -522,15 +441,9 @@ cases:
   expected: |
     他テーブル参照の検索モーダルが正常に表示され、キーワード検索でレコードを絞り込み・選択できること
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. 他テーブル参照フィールドを含むレコードの編集ボタンをクリック（または新規作成）
-    3. 他テーブル参照フィールドの虫眼鏡アイコン（検索ボタン）をクリック
-    4. 参照先テーブルのレコード一覧が表示されるモーダルが開くことを確認（page.locator('.modal.show') が表示される）
-    5. モーダル内の検索バーにキーワード（例: "テスト"）を入力してEnterまたは検索ボタンをクリック
-    6. 検索結果が絞り込まれることを確認（件数が変化または該当レコードのみ表示）
-    7. 任意のレコードをクリックして選択し、モーダルが閉じてフィールドに値が入力されることを確認
-- case_no: '551'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '550'
+- case_no: unc2-350
   feature: 絞り込み後の一括削除件数表示
   description: |-
     ①テーブル一覧画面でフィルタまたは検索で表示件数を絞り込む
@@ -540,14 +453,9 @@ cases:
   expected: フィルター・検索で絞り込み後の一括削除確認メッセージに正しい件数が表示されること
   movie: U203
   target_spec: records
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く（事前に複数レコードを作成）
-    2. 検索バーにキーワードを入力して件数を絞り込む（filteredCount を記録）
-    3. 全選択チェックボックスをクリックして絞り込まれた全レコードを選択
-    4. 「一括削除」ボタンをクリック
-    5. 確認ダイアログに表示される件数が filteredCount と一致することを確認
-    6. 削除を実行して、絞り込み対象のレコードのみが削除されたことを確認（フィルタ解除後に残存レコード数を確認）
-- case_no: '552'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '551'
+- case_no: unc2-360
   feature: フィルタ
   description: |-
     ①テーブル一覧画面を開く
@@ -555,15 +463,9 @@ cases:
     ③絞り込み操作がエラーなく正常に動作することを確認する
   expected: フィルタ・絞り込み機能がエラーなく正常に動作すること
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. フィルタボタン（page.locator('button:has-text("絞り込み"), button[aria-label*="filter"]')）をクリック
-    4. フィルタ条件設定フォームが表示されることを確認
-    5. 任意の条件を設定して適用ボタンをクリック
-    6. 絞り込み結果がエラーなく表示されることを確認
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '554'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '552'
+- case_no: unc2-370
   feature: OR条件フィルタ
   description: |-
     ①フィルタ条件で「いずれかの項目」（OR条件）を設定する
@@ -572,16 +474,9 @@ cases:
     ④いずれかの条件がtrueのレコードが正しく絞り込まれることを確認する
   expected: フィルタの「いずれかの項目」（OR条件）で複数条件を設定した場合に正しく絞り込みが行われること
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. フィルタボタンをクリックしてフィルタ設定パネルを開く
-    3. 「OR条件」または「いずれかの項目」モードを選択
-    4. 条件1: テキストフィールドが "A" を含む 等を設定
-    5. 「条件を追加」ボタンをクリックして条件2: テキストフィールドが "B" を含む 等を設定
-    6. 適用ボタンをクリックしてフィルタを実行
-    7. 条件1または条件2のいずれかを満たすレコードのみが表示されることを確認
-    8. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '555'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '554'
+- case_no: unc2-380
   feature: 計算項目
   description: |-
     ①テーブル一覧画面を開く
@@ -589,15 +484,9 @@ cases:
     ③子テーブルの計算項目がリアルタイムで更新されることを確認する
   expected: 子テーブルの計算項目がリアルタイムで更新されること（#issue696）
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{parentTableId} にアクセスして親テーブル一覧を開く
-    2. 子テーブルを持つレコードの詳細画面を開く
-    3. 子テーブルの計算項目の初期値を記録
-    4. 親レコードの数値フィールドの値を変更して保存
-    5. 子テーブルセクションで計算項目の値がリアルタイムで更新されていることを確認
-    6. ページをリロードして計算値が正しく反映されていることを再確認
-    7. bodyText に "NaN" が含まれないことを確認
-- case_no: '556'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '555'
+- case_no: unc2-390
   feature: ダッシュボード
   description: |-
     ①ダッシュボードを開く
@@ -605,12 +494,9 @@ cases:
     ③ウィジェット等の表示に異常がないことを確認する
   expected: ダッシュボードがエラーなく正常に表示されること
   movie: U203
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボード画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ダッシュボードのメインコンテンツ領域が表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '557'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '556'
+- case_no: unc2-400
   feature: 帳票
   description: |-
     ①テーブル一覧画面を開く
@@ -618,14 +504,9 @@ cases:
     ③帳票出力時にエラーが発生しないことを確認する
   expected: Excelテーブル機能セルを含む帳票出力時にエラーが発生しないこと
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/report にアクセスして帳票設定を確認
-    2. 帳票設定が存在する場合、帳票名をクリックして設定を確認（Excelテーブル機能セルが含まれている）
-    3. /admin/dataset__{tableId} の一覧からレコードを1件選択してチェックを入れる
-    4. 帳票ダウンロードボタンをクリック
-    5. ダウンロードが実行されてエラーダイアログが表示されないことを確認
-    6. /admin/job_logs にアクセスしてリクエストログにエラーが記録されていないことを確認
-- case_no: '558'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '557'
+- case_no: unc2-410
   feature: 計算項目
   description: |-
     ①テーブル一覧画面を開く
@@ -633,13 +514,9 @@ cases:
     ③子テーブルの計算項目がリアルタイムで更新されることを確認する
   expected: 子テーブルの計算項目がリアルタイムで更新されること
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{parentTableId} にアクセスして親テーブル一覧を開く
-    2. 子テーブルを持つレコードの詳細画面を開く
-    3. 親レコードの数値フィールドを編集して保存
-    4. 子テーブルセクションの計算項目が更新されていることを確認
-    5. bodyText に "NaN" または "undefined" が含まれないことを確認
-- case_no: '559'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '558'
+- case_no: unc2-420
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -647,12 +524,9 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること（#issue753）
   movie: U203
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルが表示されることを確認（page.locator('table tbody tr').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '561'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '559'
+- case_no: unc2-430
   feature: 集計・日付型の最大最小
   description: |-
     ①テーブル設定画面で集計設定を開く
@@ -662,15 +536,9 @@ cases:
   expected: 集計の最大・最小の対象項目に日付・日時・時間フィールドが選択でき、正しく集計されること
   movie: U203
   target_spec: chart-calendar
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/aggregate にアクセスして集計設定を開く
-    2. 「集計を追加」ボタンをクリックして集計設定フォームを開く
-    3. 集計方法のセレクトボックスから「最大」を選択
-    4. 対象項目の選択肢に日付・日時・時間型のフィールドが表示されることを確認
-    5. 日付フィールドを選択して保存ボタンをクリック
-    6. /admin/dataset__{tableId} の一覧画面に戻り、集計行で日付型の最大値が正しく表示されることを確認
-    7. 同様に「最小」を設定して最小日付が正しく表示されることを確認
-- case_no: '564'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '561'
+- case_no: unc2-440
   feature: ファイルフィールド
   description: |-
     ①必須設定されたファイルフィールドを含むレコード作成画面を開く
@@ -680,15 +548,9 @@ cases:
     ⑤複数件連続してファイル添付・保存を繰り返し、エラーが再発しないことを確認する
   expected: 必須設定のファイルフィールドにファイルを添付して保存した際、「添付されていない」エラーが発生しないこと
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. 「新規作成」ボタンをクリックしてレコード作成フォームを開く
-    3. ファイルフィールドの「ファイルを選択」ボタンをクリックして /app/test_files/ok.png を添付
-    4. page.evaluate で change イベントを手動発火（Laddaボタン対策）
-    5. 保存ボタンをクリックして保存を実行
-    6. 「添付されていません」エラーが表示されないことを確認（page.locator('.alert-danger:has-text("添付されていません")').count() === 0）
-    7. 保存成功を確認後、再度「新規作成」を開いてファイル添付・保存を2回繰り返して同エラーが出ないことを確認
-- case_no: '567'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '564'
+- case_no: unc2-450
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -696,12 +558,9 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること（#issue938）
   movie: U203
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ワークフロー設定フォームが表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '568'
+  detailed_flow: U203テストフロー参照（unc2-310 のdetailed_flowと同一）
+  old_case_no: '567'
+- case_no: unc2-460
   feature: 帳票
   description: |-
     ①テーブル一覧画面を開く
@@ -710,12 +569,32 @@ cases:
   expected: 画像項目がテーブル一覧で正常に表示されること
   movie: U204
   detailed_flow: |-
+    【U204 テストフロー】この動画で確認するテスト番号:
+      unc2-460       (旧: 568)     帳票
+      unc2-470       (旧: 573)     ユーザー管理
+      unc2-480       (旧: 574)     ワークフロー設定
+      unc2-490       (旧: 575)     テーブル一覧
+      unc2-500       (旧: 576)     テーブル一覧
+      unc2-510       (旧: 577)     WF閲覧権限
+      unc2-520       (旧: 578)     帳票
+      unc2-530       (旧: 579)     帳票
+      unc2-540       (旧: 581)     ダッシュボード正常表示
+      unc2-550       (旧: 582)     ダッシュボード
+      unc2-560       (旧: 583)     テーブル一覧
+      unc2-570       (旧: 584)     帳票
+      unc2-580       (旧: 587)     セキュリティ設定
+      unc2-590       (旧: 588)     WF無効ユーザー
+      unc2-600       (旧: 589)     リッチテキスト
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
     2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
     3. 画像フィールドのセルを確認（page.locator('td img, td[data-field-type="image"]') が存在する場合）
     4. 画像がエラーアイコン（broken image）でなく正常に表示されていることを確認（naturalWidth > 0）
     5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '573'
+  old_case_no: '568'
+- case_no: unc2-470
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -723,12 +602,9 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること
   movie: U204
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルが表示されることを確認（page.locator('table tbody tr').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '574'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '573'
+- case_no: unc2-480
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -736,12 +612,9 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること（#issue990）
   movie: U204
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ワークフロー設定フォームが表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '575'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '574'
+- case_no: unc2-490
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -749,13 +622,9 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue913）
   movie: U204
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('table thead tr') でヘッダー行の読み込みを待機
-    3. page.locator('table thead th').count() でヘッダー列数が1以上であることを確認
-    4. ヘッダーセルのテキストが空でないことを確認
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '576'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '575'
+- case_no: unc2-500
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -763,12 +632,9 @@ cases:
     ③エラーが発生しないことを確認する
   expected: テーブル一覧画面がエラーなく正常に表示されること（#issue940）
   movie: U204
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. テーブル一覧が表示されることを確認（page.locator('table') が存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '577'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '576'
+- case_no: unc2-510
   feature: WF閲覧権限
   description: |-
     ①ワークフロー設定でフローに閲覧権限「承認者が次と一致: ログインユーザー」を設定する
@@ -777,15 +643,9 @@ cases:
     ④後付けユーザーでログインし、該当レコードが閲覧できることを確認する
   expected: WF閲覧権限で「承認者=ログインユーザー」設定時、組織・役職を後付けしたユーザーでも該当レコードを閲覧できること
   movie: U204
-  detailed_flow: |-
-    1. テストユーザー（ishikawa+N@loftal.jp）を作成し、後から組織・役職を設定する
-    2. /admin/dataset__{tableId}/setting/workflow にアクセスしてワークフロー設定を開く
-    3. フローの閲覧権限を「承認者が次と一致: ログインユーザー」に設定し、承認者にテストユーザーを設定して保存
-    4. マスターユーザーでレコードを申請してステータスを「要確認」にする
-    5. テストユーザーでログインし直す
-    6. /admin/dataset__{tableId} の一覧で「要確認」レコードが表示されることを確認
-    7. レコード詳細画面を開けることを確認（アクセス拒否にならない）
-- case_no: '578'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '577'
+- case_no: unc2-520
   feature: 帳票
   description: |
     ①帳票テンプレート（Excel）に「${テーブル名.項目名}」の変数式を150行以上設定する
@@ -794,14 +654,9 @@ cases:
   expected: |
     Excelテンプレートの300行目までの変数式が正しく反映されてダウンロードされること
   movie: U204
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/report にアクセスして帳票設定を開く
-    2. 150行以上の変数式が含まれる帳票テンプレートが設定されていることを確認
-    3. /admin/dataset__{tableId} の一覧でレコードを選択して帳票ダウンロードボタンをクリック
-    4. ダウンロードが完了してエラーが表示されないことを確認
-    5. /admin/job_logs にアクセスして帳票出力ログにエラーが記録されていないことを確認
-    6. ダウンロードされたファイルにエラーが含まれていないことを確認（ダウンロードイベントが発火する）
-- case_no: '579'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '578'
+- case_no: unc2-530
   feature: 帳票
   description: |-
     ①テーブル一覧画面を開く
@@ -809,13 +664,9 @@ cases:
     ③テーブル一覧がエラーなく正常に表示されることを確認する
   expected: 帳票の子テーブル連番を使用してもテーブル一覧が正常に表示されること
   movie: U204
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. テーブル一覧が表示されることを確認（page.locator('table') が存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-    5. 帳票設定で子テーブル連番（INDEX関数）が使用されていても一覧表示が壊れていないことを確認
-- case_no: '581'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '579'
+- case_no: unc2-540
   feature: ダッシュボード正常表示
   description: |-
     ①ダッシュボード画面を開く
@@ -824,13 +675,9 @@ cases:
   expected: ダッシュボードがエラーなく正常に表示されること
   movie: U204
   target_spec: dashboard
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボード画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ダッシュボードのメインコンテンツ領域が表示されることを確認
-    4. ウィジェットが存在する場合、canvas要素や集計表が表示されていることを確認（page.locator('canvas, .chart-container') の存在確認）
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '582'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '581'
+- case_no: unc2-550
   feature: ダッシュボード
   description: |-
     ①ダッシュボードを開く
@@ -838,12 +685,9 @@ cases:
     ③ウィジェット等の表示に異常がないことを確認する
   expected: ダッシュボードがエラーなく正常に表示されること
   movie: U204
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボード画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ダッシュボードのメインコンテンツ領域が表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '583'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '582'
+- case_no: unc2-560
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -851,13 +695,9 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue867）
   movie: U204
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('table thead tr') でヘッダー行の読み込みを待機
-    3. page.locator('table thead th').count() でヘッダー列数が1以上であることを確認
-    4. ヘッダーセルのテキストが空でないことを確認
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '584'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '583'
+- case_no: unc2-570
   feature: 帳票
   description: |-
     ①テーブル一覧画面を開く
@@ -865,13 +705,9 @@ cases:
     ③全シートで$変数式が正しく反映されることを確認する
   expected: 帳票のExcel複数シートで$変数式が正しく反映されること
   movie: U204
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/report にアクセスして帳票設定を確認
-    2. 複数シートを持つExcelテンプレートが設定されていることを確認
-    3. /admin/dataset__{tableId} の一覧でレコードを選択して帳票ダウンロードボタンをクリック
-    4. ダウンロードが完了してエラーが表示されないことを確認（エラーダイアログなし）
-    5. /admin/job_logs でリクエストログにエラーが記録されていないことを確認
-- case_no: '587'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '584'
+- case_no: unc2-580
   feature: セキュリティ設定
   description: |-
     ①マイページを開く
@@ -879,14 +715,9 @@ cases:
     ③2段階認証の設定操作がエラーなく行えることを確認する
   expected: マイページから2段階認証の設定が正常に行えること
   movie: U204
-  detailed_flow: |-
-    1. /admin/mypage にアクセスしてマイページを開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. 「2段階認証」セクションが表示されることを確認（page.locator(':has-text("2段階認証")') が存在）
-    4. 2段階認証の設定ボタン/トグルが表示されていることを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-    6. 設定操作（有効化/無効化）がクリック可能な状態であることを確認
-- case_no: '588'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '587'
+- case_no: unc2-590
   feature: WF無効ユーザー
   description: |-
     ①ワークフローの承認者に無効ユーザーまたは削除済みユーザーを含む設定にする
@@ -895,15 +726,9 @@ cases:
     ④進行中のWFで承認者が無効化された場合、自動で取り下げになることを確認する
   expected: WF承認者が無効/削除済みの場合、申請時にエラー表示で取り下げになること。進行中に承認者が無効化された場合も自動取り下げになること
   movie: U204
-  detailed_flow: |-
-    1. テストユーザーを作成してワークフローの承認者に設定する
-    2. /admin/dataset__{tableId} でレコードを作成して申請する（正常に申請できることを確認）
-    3. /admin/users でテストユーザーを「無効化」する
-    4. 新しいレコードを作成して再度申請する
-    5. 申請時に「○○さんが無効ユーザーです」等のエラーメッセージが表示されることを確認
-    6. ステータスが申請取り下げ状態になることを確認（WFステータスが「取り下げ」または申請前の状態）
-    7. 進行中のWFについて、承認者無効化後に自動取り下げになっていることを確認
-- case_no: '589'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '588'
+- case_no: unc2-600
   feature: リッチテキスト
   description: |
     ①リッチテキスト項目があるレコードの編集画面をモバイルブラウザで開く
@@ -914,16 +739,9 @@ cases:
   expected: |
     モバイルでリッチテキストの拡大編集後、前の画面に正常に戻れ、編集内容が保存されること
   movie: U204
-  detailed_flow: |-
-    1. page.setViewportSize({ width: 390, height: 844 }) でモバイルビューポートに設定
-    2. /admin/dataset__{tableId} にアクセスしてレコードの編集フォームを開く
-    3. リッチテキストフィールドの拡大ボタン（page.locator('.richtext-expand-btn, button[aria-label*="expand"]')）をクリック
-    4. 拡大モーダル/全画面エディタが表示されることを確認
-    5. テキスト入力欄に "リッチテキストテスト_589" を入力
-    6. 「戻る」または「閉じる」ボタンをクリックして前の画面に戻る
-    7. 元の編集フォームが正常に表示されることを確認（画面が壊れていない）
-    8. 保存ボタンをクリックして保存後、詳細画面で入力したテキストが表示されることを確認
-- case_no: '590'
+  detailed_flow: U204テストフロー参照（unc2-460 のdetailed_flowと同一）
+  old_case_no: '589'
+- case_no: unc2-610
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -932,12 +750,32 @@ cases:
   expected: ルックアップが正常に動作すること（#issue571）
   movie: U205
   detailed_flow: |-
+    【U205 テストフロー】この動画で確認するテスト番号:
+      unc2-610       (旧: 590)     ユーザー管理
+      unc2-620       (旧: 591)     帳票一括ダウンロード
+      unc2-630       (旧: 593)     ワークフロー
+      unc2-640       (旧: 594)     WF履歴
+      unc2-650       (旧: 595)     計算項目
+      unc2-660       (旧: 596)     カレンダー
+      unc2-670       (旧: 597)     ワークフロー設定
+      unc2-680       (旧: 599)     日時項目
+      unc2-690       (旧: 600)     CSV
+      unc2-700       (旧: 601)     帳票設定
+      unc2-710       (旧: 602)     CSV
+      unc2-720       (旧: 603)     コネクト
+      unc2-730       (旧: 605)     CSV
+      unc2-740       (旧: 606)     子テーブル・最終更新者表示
+      unc2-750       (旧: 607)     テーブル一覧
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
     2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
     3. ルックアップフィールドのセルが表示されていることを確認
     4. セル内テキストに "undefined" または "null" が含まれないことを確認
     5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '591'
+  old_case_no: '590'
+- case_no: unc2-620
   feature: 帳票一括ダウンロード
   description: |-
     ①帳票登録済みのレコードが複数ある状態にする
@@ -947,14 +785,9 @@ cases:
   expected: 帳票の一括ダウンロード（ZIP）が正常に動作し、選択したレコードの帳票がまとめてダウンロードできること
   movie: U205
   target_spec: reports
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/report に帳票テンプレートが設定されていることを確認
-    2. /admin/dataset__{tableId} にアクセスして一覧画面を開く
-    3. 複数レコード（2〜3件）のチェックボックスをクリックして選択
-    4. 「帳票ダウンロード」または「一括ダウンロード」ボタンをクリック
-    5. ダウンロードが開始されてエラーが表示されないことを確認
-    6. ダウンロードされたファイルがZIP形式であることを確認（page.waitForEvent('download') でファイル名を確認）
-- case_no: '593'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '591'
+- case_no: unc2-630
   feature: ワークフロー
   description: |-
     ①テーブル一覧画面を開く
@@ -962,13 +795,9 @@ cases:
     ③バッジ数がNaN・undefinedでなく正しい数値で表示されていることを確認する
   expected: ワークフローバッジ数が正しい数値で表示されること
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてテーブル一覧を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. サイドメニューのWFバッジ要素（page.locator('.wf-badge, .badge[data-type="workflow"]')）のテキストを取得
-    4. バッジテキストが数値（0以上の整数）であることを確認（NaN や undefined でない）
-    5. bodyText に "NaN" が含まれないことを確認
-- case_no: '594'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '593'
+- case_no: unc2-640
   feature: WF履歴
   description: |-
     ①過去にワークフローを使用していたテーブルを開く
@@ -977,13 +806,9 @@ cases:
     ④WF履歴が非表示になっていることを確認する
   expected: WFを無効化したテーブルのレコード詳細画面にWF履歴が表示されないこと
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセスして、ワークフロー設定を「無効」にして保存
-    2. /admin/dataset__{tableId} にアクセスして一覧を開く
-    3. 過去にWF申請されたレコードの詳細画面を開く（またはWFが有効だった時のレコードを開く）
-    4. 詳細画面にWF履歴セクション（page.locator('.wf-history, :has-text("ワークフロー履歴")')）が存在しないことを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '595'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '594'
+- case_no: unc2-650
   feature: 計算項目
   description: |
     ①関連レコード一覧を持つテーブルを用意する
@@ -994,14 +819,9 @@ cases:
   expected: |
     関連レコード一覧内の項目をSUMで計算した結果が、親レコードの計算項目に正しく表示されること
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{parentTableId} にアクセスしてレコード詳細画面を開く（関連レコード一覧が存在するレコード）
-    2. 関連レコード一覧に数値フィールドを持つ子レコードを複数件（例: 100, 200, 300）追加
-    3. 保存後に親レコードの詳細画面を開く
-    4. SUM計算項目の値が追加した数値の合計（600）と一致することを確認
-    5. さらに関連レコードを追加して計算値が自動更新されることを確認
-    6. bodyText に "NaN" が含まれないことを確認
-- case_no: '596'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '595'
+- case_no: unc2-660
   feature: カレンダー
   description: |-
     ①テーブル一覧画面を開く
@@ -1009,13 +829,9 @@ cases:
     ③カレンダーがエラーなく正常に表示されることを確認する
   expected: カレンダービューがエラーなく正常に表示されること（#issue945）
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. ビュー切り替えボタンからカレンダービューを選択（page.locator('button[aria-label*="カレンダー"], button:has-text("カレンダー")')）
-    3. page.waitForSelector('.fc, .calendar-container') でカレンダーの読み込みを待機
-    4. カレンダーが表示されることを確認（月/週表示のグリッドが存在）
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '597'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '596'
+- case_no: unc2-670
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -1023,15 +839,9 @@ cases:
     ③エラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること（#issue1029）
   movie: U205
-  detailed_flow: |-
-    1. テストユーザーを作成し、ワークフローの承認者に設定してレコードを申請・承認する（WF履歴を作成）
-    2. テストユーザーを無効化または削除する
-    3. /admin/dataset__{tableId}/setting/workflow にアクセス
-    4. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    5. ワークフロー設定画面がエラーなく表示されることを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-    7. 過去のWF履歴でユーザー名が「(削除済み)」等の表示で残っていることを確認（消えていない）
-- case_no: '599'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '597'
+- case_no: unc2-680
   feature: 日時項目
   description: |-
     ①テーブル一覧画面を開く
@@ -1039,13 +849,9 @@ cases:
     ③テーブル一覧が正常に表示されることを確認する
   expected: 日時項目の時刻のみ選択設定でテーブル一覧が正常に表示されること（#issue1063）
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. 日時フィールドの列セルが表示されることを確認（page.locator('td[data-field-type="datetime"]') が存在）
-    4. 日時フィールドのセル内容に "Invalid Date" が含まれないことを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '600'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '599'
+- case_no: unc2-690
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1053,13 +859,9 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue975）
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. CSVダウンロードボタンが表示されることを確認（page.locator('button:has-text("CSV"), a:has-text("CSV")').count() が1以上）
-    4. CSVダウンロードをクリックしてダウンロードが実行されることを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '601'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '600'
+- case_no: unc2-700
   feature: 帳票設定
   description: |-
     ①テーブル設定画面から帳票設定タブを開く
@@ -1067,12 +869,9 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 帳票設定画面がエラーなく正常に表示されること（#issue1013）
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/report にアクセスして帳票設定画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. 帳票設定フォームが表示されることを確認（帳票名・テンプレートアップロード欄等が存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '602'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '601'
+- case_no: unc2-710
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1080,13 +879,9 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue982）
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. CSVダウンロードボタンが表示されることを確認
-    3. CSVダウンロードを実行してエラーが表示されないことを確認
-    4. /admin/csv にアクセスして履歴に正常完了ステータスが表示されることを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '603'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '602'
+- case_no: unc2-720
   feature: コネクト
   description: |-
     ①コネクトでトリガー「WF完了」を設定し、コピー先テーブルに重複禁止フィールドを設定する
@@ -1095,14 +890,9 @@ cases:
     ④画面がローディングのまま固まらないことを確認する
   expected: コネクトのWF完了トリガーでコピー先の重複禁止エラー時に適切なエラーメッセージが表示され、画面が固まらないこと
   movie: U205
-  detailed_flow: |-
-    1. /admin/rpa にアクセスしてコネクト設定を開く
-    2. トリガー「WF完了」・アクション「レコードコピー」を設定し、コピー先テーブルに重複禁止フィールドがある構成を確認
-    3. コピー先テーブルに重複するデータを事前に登録する
-    4. /admin/dataset__{tableId} でWFレコードを作成して申請・承認を実行（WF完了トリガーを発火）
-    5. コネクト実行後のエラー表示を確認（page.locator('.alert, .error-message') のテキストが "[object object]" でなく具体的なメッセージであること）
-    6. page.locator('.loading, .spinner') が5秒以内に消えることを確認（画面固まらない）
-- case_no: '605'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '603'
+- case_no: unc2-730
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1110,12 +900,9 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue769）
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. CSVダウンロードボタンが表示されることを確認
-    3. CSVダウンロードを実行してエラーが表示されないことを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '606'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '605'
+- case_no: unc2-740
   feature: 子テーブル・最終更新者表示
   description: |-
     ①子テーブルを持つテーブル構成を用意する
@@ -1125,14 +912,9 @@ cases:
   expected: 子テーブルのレコード作成直後から最終更新者が表示されること（更新操作なしでも作成者が表示）
   movie: U205
   target_spec: records
-  detailed_flow: |-
-    1. /admin/dataset__{childTableId} にアクセスして子テーブル一覧を開く
-    2. 「新規作成」ボタンをクリックして子レコードを作成（任意のデータを入力して保存）
-    3. 一覧画面に戻り作成直後のレコード行を確認
-    4. 「最終更新者」列に現在ログイン中のユーザー名が表示されていることを確認（空でない）
-    5. ページをリロードして最終更新者が引き続き表示されることを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '607'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '606'
+- case_no: unc2-750
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -1140,12 +922,9 @@ cases:
     ③エラーが発生しないことを確認する
   expected: テーブル一覧画面がエラーなく正常に表示されること（#issue1074）
   movie: U205
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. テーブル一覧が表示されることを確認（page.locator('table') が存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '608'
+  detailed_flow: U205テストフロー参照（unc2-610 のdetailed_flowと同一）
+  old_case_no: '607'
+- case_no: unc2-760
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1154,11 +933,31 @@ cases:
   expected: CSV操作機能がエラーなく正常に動作すること（#issue1065）
   movie: U206
   detailed_flow: |-
+    【U206 テストフロー】この動画で確認するテスト番号:
+      unc2-760       (旧: 608)     CSV
+      unc2-770       (旧: 609)     FTP連携
+      unc2-780       (旧: 610)     他テーブル参照
+      unc2-790       (旧: 611)     CSV
+      unc2-800       (旧: 612)     ビュー権限デフォルト変更
+      unc2-810       (旧: 613)     レイアウト
+      unc2-820       (旧: 614)     ダッシュボード
+      unc2-830       (旧: 615)     ダッシュボード
+      unc2-840       (旧: 616)     テーブル一覧
+      unc2-850       (旧: 617)     レコード一括操作
+      unc2-860       (旧: 618)     ダッシュボード
+      unc2-870       (旧: 619)     CSV
+      unc2-880       (旧: 620)     ユーザー管理
+      unc2-890       (旧: 621)     ワークフロー設定
+      unc2-900       (旧: 622)     他テーブル参照・値絞り込みのユーザー権限対応
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
     2. CSVダウンロードボタンが表示されることを確認
     3. CSVダウンロードを実行してエラーが表示されないことを確認
     4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '609'
+  old_case_no: '608'
+- case_no: unc2-770
   feature: FTP連携
   description: |-
     ①FTP連携を設定し、実行する
@@ -1166,14 +965,9 @@ cases:
     ③どのテーブルで発生したエラーかが通知に含まれていることを確認する
   expected: FTP処理の失敗・一部成功時にどのテーブルのエラーかが通知に含まれること
   movie: U206
-  detailed_flow: |-
-    1. /admin/system_setting にアクセスしてシステム設定画面を開く
-    2. FTP連携設定画面を開き（該当メニュー）、不正なFTPサーバー情報または存在しないファイルパスを設定
-    3. FTP連携を手動実行（または自動実行が発生するように設定）
-    4. /admin/notification_log にアクセスして通知ログを確認
-    5. エラー通知にテーブル名が含まれていることを確認（例: "テーブル名: ALLテストテーブル" 等）
-    6. "[object object]" 等の不正な文字列が含まれていないことを確認
-- case_no: '610'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '609'
+- case_no: unc2-780
   feature: 他テーブル参照
   description: |
     ①他テーブル参照項目の「表示項目」が空欄の状態でテーブルを更新する
@@ -1183,14 +977,9 @@ cases:
   expected: |
     他テーブル参照の表示項目が空欄の場合はバリデーションエラーで更新不可となり、正しく設定後はレコードが表示されること
   movie: U206
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/fields にアクセスして他テーブル参照フィールドの設定を開く
-    2. フィールドの「表示項目」設定を空欄にして保存ボタンをクリック
-    3. バリデーションエラーメッセージが表示されることを確認（「表示項目は必須です」等）
-    4. 保存が実行されないことを確認（URL変化なし）
-    5. 「表示項目」に参照先テーブルの任意のフィールドを選択して保存
-    6. /admin/dataset__{tableId} の一覧画面に戻り、他テーブル参照のセルが正常に表示されることを確認
-- case_no: '611'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '610'
+- case_no: unc2-790
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1198,12 +987,9 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue936）
   movie: U206
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. CSVダウンロードボタンが表示されることを確認
-    3. CSVダウンロードを実行してエラーが表示されないことを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '612'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '611'
+- case_no: unc2-800
   feature: ビュー権限デフォルト変更
   description: |-
     ①ビュー設定タブを開く
@@ -1213,14 +999,9 @@ cases:
   expected: ビュー設定タブの権限デフォルトが「自分のみ表示」に変更されていること
   movie: U206
   target_spec: layout-ui
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/view にアクセスしてビュー設定を開く
-    2. 「ビューを追加」または「新規ビュー作成」ボタンをクリック
-    3. 権限設定のデフォルト値が「自分のみ表示」になっていることを確認
-    4. 権限を「全員に表示」に変更して保存ボタンをクリック
-    5. /admin/dataset__{tableId}/setting/view に再アクセスして保存したビューを開く
-    6. 権限設定が「全員に表示」で保持されていることを確認
-- case_no: '613'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '612'
+- case_no: unc2-810
   feature: レイアウト
   description: |-
     ①テーブル一覧画面を開く
@@ -1228,13 +1009,9 @@ cases:
     ③長いテーブル名が省略表示でも正しく表示されていることを確認する
   expected: サイドメニューにテーブル名が正しく表示されること
   movie: U206
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボードを開く
-    2. サイドメニューのテーブル一覧を確認（page.locator('nav a[href*="/admin/dataset"]') が存在）
-    3. テーブル名のテキストが表示されていることを確認（空でない）
-    4. 長いテーブル名が "..." で省略表示されているか、または全文表示されているかを確認（どちらでも可）
-    5. テーブル名がスタイル的に崩れていないことを確認（overflow: hiddenまたはellipsisが適用）
-- case_no: '614'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '613'
+- case_no: unc2-820
   feature: ダッシュボード
   description: |-
     ①ダッシュボードを開く
@@ -1242,15 +1019,9 @@ cases:
     ③データ項目・Y軸の並び替え設定後もテーブル一覧が正常表示されることを確認する
   expected: チャートのデータ項目・Y軸の並び替え機能追加後もテーブル一覧が正常に表示されること
   movie: U206
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボードを開く
-    2. チャートウィジェットを追加または既存のチャートウィジェットの設定を開く
-    3. データ項目の並び替えボタン（ドラッグハンドルまたは矢印ボタン）をクリックして順序を変更
-    4. Y軸の並び替えも同様に操作
-    5. 設定を保存して /admin/dataset__{tableId} のテーブル一覧を開く
-    6. テーブル一覧がエラーなく正常に表示されることを確認
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '615'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '614'
+- case_no: unc2-830
   feature: ダッシュボード
   description: |-
     ①ダッシュボードを開く
@@ -1258,13 +1029,9 @@ cases:
     ③凡例が6個以上ある場合でもチャートが正常に表示されることを確認する
   expected: 凡例が多数あるチャートがダッシュボードで正常に表示されること
   movie: U206
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボードを開く
-    2. チャートウィジェットが存在する場合、凡例が6個以上含まれるチャートを確認
-    3. チャートのcanvas要素が表示されていることを確認（page.locator('canvas').first().isVisible()）
-    4. 凡例エリアが表示されていることを確認（page.locator('.chart-legend, .legend').isVisible()）
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '616'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '615'
+- case_no: unc2-840
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -1272,12 +1039,9 @@ cases:
     ③データ項目・Y軸の並び替え設定後もテーブル一覧が正常表示されることを確認する
   expected: チャートのデータ項目・Y軸の並び替え機能追加後もテーブル一覧が正常に表示されること
   movie: U206
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. テーブル一覧が表示されることを確認（page.locator('table') が存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '617'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '616'
+- case_no: unc2-850
   feature: レコード一括操作
   description: |-
     ①テーブル一覧画面を開く
@@ -1287,16 +1051,9 @@ cases:
     ⑤一括編集ボタンでも同様の注意書きが表示されることを確認する
   expected: 全データ選択時の一括削除・一括編集ポップアップに赤文字で全データ削除の注意書きが表示されること
   movie: U206
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. ヘッダー行の全選択チェックボックスをクリックして全レコードを選択
-    3. 「一括削除」ボタンをクリックして確認ダイアログを表示
-    4. ダイアログに赤文字で「全データが削除されます」またはそれに類する警告テキストが表示されることを確認
-    5. ダイアログをキャンセルする
-    6. 「一括編集」ボタンをクリックして確認ダイアログを表示
-    7. 同様の全データ警告テキストが表示されることを確認
-    8. ダイアログをキャンセルする（実際の削除・編集は実行しない）
-- case_no: '618'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '617'
+- case_no: unc2-860
   feature: ダッシュボード
   description: |-
     ①ダッシュボードを開く
@@ -1304,12 +1061,9 @@ cases:
     ③ウィジェット等の表示に異常がないことを確認する
   expected: ダッシュボードがエラーなく正常に表示されること
   movie: U206
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボード画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ダッシュボードのメインコンテンツ領域が表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '619'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '618'
+- case_no: unc2-870
   feature: CSV
   description: |
     ①子テーブルのテーブル設定で「CSVにテーブル名を含める」を有効にする
@@ -1319,15 +1073,9 @@ cases:
   expected: |
     子テーブルCSVダウンロード時、「テーブル名」列と「親テーブルのID」列の値が逆にならず正しく出力されること
   movie: U206
-  detailed_flow: |-
-    1. /admin/dataset__{childTableId}/setting にアクセスして子テーブルの設定を開く
-    2. 「CSVにテーブル名を含める」設定を有効にして保存
-    3. /admin/dataset__{childTableId} にアクセスして子テーブル一覧を開く
-    4. CSVダウンロードを実行（page.waitForEvent('download') でダウンロードを待機）
-    5. ダウンロードされたCSVをパースして「テーブル名」列と「親テーブルのID」列の値を確認
-    6. 「テーブル名」列に実際のテーブル名（数値IDでなくテーブル名）が入っていることを確認
-    7. 「親テーブルのID」列に親レコードのID（テーブル名でなくID）が入っていることを確認（逆転していない）
-- case_no: '620'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '619'
+- case_no: unc2-880
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -1335,12 +1083,9 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること（#issue950）
   movie: U206
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルが表示されることを確認（page.locator('table tbody tr').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '621'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '620'
+- case_no: unc2-890
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -1348,12 +1093,9 @@ cases:
     ③設定ページでエラーが発生しないことを確認する
   expected: ワークフロー設定画面がエラーなく正常に表示されること（#issue1030）
   movie: U206
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセス
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ワークフロー設定フォームが表示されることを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '622'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '621'
+- case_no: unc2-900
   feature: 他テーブル参照・値絞り込みのユーザー権限対応
   description: |-
     ①他テーブル参照フィールドに「別の項目で値を絞り込む」設定を行う
@@ -1363,14 +1105,9 @@ cases:
   expected: 他テーブル参照の値の絞り込み設定が、全ユーザーで正常に動作すること
   movie: U206
   target_spec: fields
-  detailed_flow: |-
-    1. マスターユーザーで /admin/dataset__{tableId} のレコード編集フォームを開く
-    2. 他テーブル参照フィールドの検索ボタンをクリックしてモーダルを開く
-    3. 「別の項目で値を絞り込む」設定が有効の場合、絞り込み条件に基づいて候補が絞られていることを確認
-    4. テストユーザー（一般権限）でログインし直す
-    5. 同じテーブルの同じフィールドで絞り込みが同様に動作することを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '623'
+  detailed_flow: U206テストフロー参照（unc2-760 のdetailed_flowと同一）
+  old_case_no: '622'
+- case_no: unc2-910
   feature: ルックアップ
   description: |-
     ①テーブル一覧画面を開く
@@ -1379,12 +1116,32 @@ cases:
   expected: ルックアップが正常に動作すること（#issue1108）
   movie: U207
   detailed_flow: |-
+    【U207 テストフロー】この動画で確認するテスト番号:
+      unc2-910       (旧: 623)     ルックアップ
+      unc2-920       (旧: 624)     フィルタ
+      unc2-930       (旧: 625)     テーブル一覧
+      unc2-940       (旧: 626)     CSV DL
+      unc2-950       (旧: 627)     ユーザー管理
+      unc2-960       (旧: 628)     計算項目
+      unc2-970       (旧: 629)     通知設定
+      unc2-980       (旧: 630)     ユーザー管理
+      unc2-990       (旧: 631)     集計
+      unc2-1000      (旧: 633)     フィールド名スペース登録時の表示
+      unc2-1010      (旧: 634)     レコード一覧
+      unc2-1020      (旧: 635)     ユーザー管理
+      unc2-1030      (旧: 636)     レコード操作
+      unc2-1040      (旧: 637)     計算項目
+      unc2-1050      (旧: 639)     UI
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
     2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
     3. ルックアップフィールドのセルが表示されていることを確認
     4. セル内テキストに "undefined" または "null" が含まれないことを確認
     5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '624'
+  old_case_no: '623'
+- case_no: unc2-920
   feature: フィルタ
   description: |-
     ①テーブル一覧画面を開く
@@ -1392,13 +1149,9 @@ cases:
     ③絞り込み操作がエラーなく正常に動作することを確認する
   expected: フィルタ・絞り込み機能がエラーなく正常に動作すること（#issue949）
   movie: U207
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. フィルタボタンをクリックしてフィルタ設定パネルを開く
-    3. 任意の条件を設定して適用ボタンをクリック
-    4. 絞り込み結果がエラーなく表示されることを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '625'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '624'
+- case_no: unc2-930
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -1406,13 +1159,9 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue1005）
   movie: U207
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('table thead tr') でヘッダー行の読み込みを待機
-    3. page.locator('table thead th').count() でヘッダー列数が1以上であることを確認
-    4. ヘッダーセルのテキストが空でないことを確認
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '626'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '625'
+- case_no: unc2-940
   feature: CSV DL
   description: |-
     ①ユーザー管理テーブルを開く
@@ -1421,13 +1170,9 @@ cases:
     ④レコードID1001以上のユーザーの組織欄が空欄にならず、正しく出力されていることを確認する
   expected: ユーザーテーブルのCSVダウンロードでレコードID1001以上のユーザーの組織が正しく出力されること
   movie: U207
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. CSVダウンロードボタンをクリックしてCSVをダウンロード（page.waitForEvent('download') で待機）
-    3. ダウンロードされたCSVを読み込んでパース
-    4. IDが1001以上の行を抽出して「組織」列が空欄でないことを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '627'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '626'
+- case_no: unc2-950
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -1435,13 +1180,9 @@ cases:
     ③各ユーザーの役職が正しく表示されていることを確認する
   expected: ユーザー管理画面のテーブル一覧で役職が正しく表示されること（#issue892）
   movie: U207
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルの「役職」列を確認（page.locator('table th:has-text("役職")') が存在）
-    4. 役職が設定されているユーザーの行で役職名が表示されていることを確認（空でない）
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '628'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '627'
+- case_no: unc2-960
   feature: 計算項目
   description: |-
     ①テーブル一覧画面を開く
@@ -1449,13 +1190,9 @@ cases:
     ③計算結果が正しく表示されることを確認する
   expected: nextWeekDay関数を使用した計算項目が正しく表示されること（#issue706）
   movie: U207
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. nextWeekDay関数を使用した計算フィールドのセルを確認
-    4. セル内テキストが "NaN"・"Invalid Date"・"undefined" でなく、有効な日付形式（例: YYYY/MM/DD）で表示されることを確認
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '629'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '628'
+- case_no: unc2-970
   feature: 通知設定
   description: |-
     ①テーブル設定画面から通知設定タブを開く
@@ -1463,12 +1200,9 @@ cases:
     ③設定画面でエラーが発生しないことを確認する
   expected: 通知設定画面がエラーなく正常に表示されること（#issue970）
   movie: U207
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/notification にアクセスして通知設定を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. 通知設定フォームが表示されることを確認（「通知を追加」ボタンが存在）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '630'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '629'
+- case_no: unc2-980
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -1476,12 +1210,9 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること（#issue519）
   movie: U207
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルが表示されることを確認（page.locator('table tbody tr').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '631'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '630'
+- case_no: unc2-990
   feature: 集計
   description: |-
     ①ダッシュボードを開く
@@ -1489,12 +1220,9 @@ cases:
     ③チャートがエラーなく正常に表示されることを確認する
   expected: チャートがダッシュボードで正常に表示されること（#issue553）
   movie: U207
-  detailed_flow: |-
-    1. /admin/dashboard にアクセスしてダッシュボードを開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. チャートウィジェットが存在する場合、canvas要素が表示されていることを確認（page.locator('canvas').first().isVisible()）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '633'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '631'
+- case_no: unc2-1000
   feature: フィールド名スペース登録時の表示
   description: |-
     ①テーブル設定画面でフィールドを追加する
@@ -1503,15 +1231,9 @@ cases:
   expected: 項目名にスペースのみを登録してもテーブル設定画面で項目が正常に表示されること（非表示にならないこと）
   movie: U207
   target_spec: fields
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/fields にアクセスしてフィールド設定を開く
-    2. 「フィールドを追加」ボタンをクリック
-    3. 項目名に半角スペース「 」のみを入力
-    4. 保存ボタンをクリック
-    5. バリデーションエラーが表示される場合、エラーメッセージを確認（正常動作）
-    6. 保存が成功した場合、フィールド設定画面でそのフィールドが一覧に表示されていることを確認（非表示にならない）
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '634'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '633'
+- case_no: unc2-1010
   feature: レコード一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -1519,16 +1241,9 @@ cases:
     ③チェックボックスとテーブル行が正常に表示されていることを確認する
   expected: 複数パターンの一覧操作後もチェックボックスとテーブル行が正常に表示されること
   movie: U207
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. 2ページ目に遷移する（ページネーションがある場合）
-    3. 1ページ目に戻る
-    4. フィルタを適用して絞り込む
-    5. フィルタを解除する
-    6. 各操作後にチェックボックス列が表示されていることを確認（page.locator('td input[type=checkbox]') が存在）
-    7. テーブル行が正常に表示されていることを確認（行数が0でない）
-    8. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '635'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '634'
+- case_no: unc2-1020
   feature: ユーザー管理
   description: |-
     ①ユーザー管理画面を開く
@@ -1536,12 +1251,9 @@ cases:
     ③画面でエラーが発生しないことを確認する
   expected: ユーザー管理画面がエラーなく正常に表示されること（#issue1140）
   movie: U207
-  detailed_flow: |-
-    1. /admin/users にアクセスしてユーザー管理画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. ユーザー一覧テーブルが表示されることを確認（page.locator('table tbody tr').count() が1以上）
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '636'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '635'
+- case_no: unc2-1030
   feature: レコード操作
   description: |-
     ①テーブル一覧画面を開く
@@ -1549,15 +1261,9 @@ cases:
     ③重複エラーが正しく表示されることを確認する
   expected: 重複データに対して適切なエラーが表示されること（#issue732）
   movie: U207
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. 「新規作成」ボタンをクリックしてレコード作成フォームを開く
-    3. 重複禁止フィールドに既存レコードと同じ値を入力
-    4. 保存ボタンをクリック
-    5. 「重複しています」等のバリデーションエラーメッセージが表示されることを確認
-    6. エラーメッセージが "[object object]" でなく日本語で表示されることを確認
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '637'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '636'
+- case_no: unc2-1040
   feature: 計算項目
   description: |-
     ①テーブル一覧画面を開く
@@ -1565,14 +1271,9 @@ cases:
     ③計算結果がNaN等のエラーなく正しい値で表示されることを確認する
   expected: 計算項目がNaN等のエラーなく正しい値で表示されること
   movie: U207
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. 計算フィールドの列セルを取得して値を確認
-    4. セル内テキストに "NaN" が含まれないことを確認
-    5. セル内テキストに "undefined" または "null" が含まれないことを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '639'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '637'
+- case_no: unc2-1050
   feature: UI
   description: |
     ①テーブルのレコード一覧画面を開く
@@ -1582,16 +1283,9 @@ cases:
   expected: |
     一覧画面では「テーブル名 - PigeonCloud」、詳細画面では「テーブル名-ID:番号 - PigeonCloud」がブラウザタブに表示されること
   movie: U207
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. ブラウザタブのタイトルを取得（await page.title()）
-    4. タイトルに " - PigeonCloud" が含まれることを確認
-    5. 任意のレコード行をクリックして詳細画面を開く
-    6. page.waitForSelector('.record-detail, .detail-form') で詳細画面の読み込みを待機
-    7. 詳細画面のタイトルに "ID:" が含まれることを確認（例: "テーブル名-ID:1 - PigeonCloud"）
-    8. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '640'
+  detailed_flow: U207テストフロー参照（unc2-910 のdetailed_flowと同一）
+  old_case_no: '639'
+- case_no: unc2-1060
   feature: 集計
   description: |-
     ①ダッシュボードを開く
@@ -1600,11 +1294,31 @@ cases:
   expected: チャートがダッシュボードで正常に表示されること（#issue932）
   movie: U208
   detailed_flow: |-
+    【U208 テストフロー】この動画で確認するテスト番号:
+      unc2-1060      (旧: 640)     集計
+      unc2-1070      (旧: 642)     CSV
+      unc2-1080      (旧: 643)     CSV
+      unc2-1090      (旧: 645)     ワークフロー設定
+      unc2-1100      (旧: 646)     他テーブル参照
+      unc2-1110      (旧: 647)     フィルタ
+      unc2-1120      (旧: 650)     CSV
+      unc2-1130      (旧: 651)     SMTP設定
+      unc2-1140      (旧: 652)     計算項目
+      unc2-1150      (旧: 653)     コメント
+      unc2-1160      (旧: 654)     テーブル一覧
+      unc2-1170      (旧: 655)     帳票出力・計算項目の日付フォーマット
+      unc2-1180      (旧: 656)     CSV
+      unc2-1190      (旧: 657)     テーブル一覧
+      unc2-1200      (旧: 658)     通知設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dashboard にアクセスしてダッシュボードを開く
     2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
     3. チャートウィジェットが存在する場合、canvas要素が表示されていることを確認（page.locator('canvas').first().isVisible()）
     4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '642'
+  old_case_no: '640'
+- case_no: unc2-1070
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1612,14 +1326,9 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue1162）
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. CSVダウンロードボタンが表示されることを確認
-    3. CSVダウンロードを実行してエラーが表示されないことを確認
-    4. /admin/csv にアクセスしてCSV履歴一覧を開く
-    5. 最新のCSV実行ステータスが「完了」または「成功」であることを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '643'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '642'
+- case_no: unc2-1080
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1627,14 +1336,9 @@ cases:
     ③テーブル一覧が正常に表示されることを確認する
   expected: 主キー設定の上限拡張後もテーブル一覧が正常に表示されること（#issue1163）
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/fields にアクセスしてフィールド設定を開く
-    2. 主キー（ユニークキー）設定の箇所を確認
-    3. 5項目以上の主キーが設定可能であることを確認（設定ボタン/チェックボックスが6個目以降も有効）
-    4. 設定を保存して /admin/dataset__{tableId} の一覧画面を開く
-    5. テーブル一覧がエラーなく表示されることを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '645'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '643'
+- case_no: unc2-1090
   feature: ワークフロー設定
   description: |-
     ①テーブル設定画面からワークフロー設定タブを開く
@@ -1642,14 +1346,9 @@ cases:
     ③バッジ数がNaN・undefinedでなく正しい数値で表示されていることを確認する
   expected: ワークフローバッジ数が正しい数値で表示されること（#issue1129）
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/workflow にアクセスしてWF設定画面を開く
-    2. page.waitForSelector('.navbar') でナビゲーション読み込みを待機
-    3. サイドメニューのWFバッジ要素（page.locator('.wf-badge, .badge[data-type="workflow"], nav .badge')）のテキストを取得
-    4. バッジテキストが数値（0以上の整数）であることを確認（"NaN" や "undefined" でない）
-    5. bodyText に "NaN" が含まれないことを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '646'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '645'
+- case_no: unc2-1100
   feature: 他テーブル参照
   description: |-
     ①テーブル一覧画面を開く
@@ -1657,13 +1356,9 @@ cases:
     ③レコード一覧が正常に表示されることを確認する
   expected: 他テーブル参照の複数値登録許可設定でテーブル一覧が正常に表示されること（#issue1028）
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. 他テーブル参照（複数値登録許可）フィールドの列セルが表示されることを確認
-    4. セル内に複数の参照値がカンマ区切りまたはタグ形式で表示されていることを確認（または空表示でもエラーでないことを確認）
-    5. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '647'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '646'
+- case_no: unc2-1110
   feature: フィルタ
   description: |
     ①日時項目があるテーブルでフィルタを作成する
@@ -1674,16 +1369,9 @@ cases:
   expected: |
     月末日でも相対値「今月」フィルタが正しく動作し、当月のデータのみが表示されること
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. 当月のデータ（例: 今月の1日と月末日に日時フィールドを持つレコード）が存在することを確認
-    3. フィルタボタンをクリックしてフィルタ設定パネルを開く
-    4. 日時フィールドを選択し、条件「が次と一致」、値「相対値：今月」を設定
-    5. フィルタを適用して絞り込み結果を確認
-    6. 翌月以降のデータが結果に含まれていないことを確認
-    7. 当月の月末日のデータが含まれていることを確認
-    8. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '650'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '647'
+- case_no: unc2-1120
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1691,12 +1379,9 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. CSVダウンロードボタンが表示されることを確認
-    3. CSVダウンロードを実行してエラーが表示されないことを確認
-    4. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '651'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '650'
+- case_no: unc2-1130
   feature: SMTP設定
   description: |-
     ①システム設定のSMTP設定画面を開く
@@ -1706,15 +1391,9 @@ cases:
     ⑤ダッシュボードに戻りエラーが発生しないことを確認する
   expected: SMTP設定が正常に動作し、テストメール送信が成功すること
   movie: U208
-  detailed_flow: |-
-    1. /admin/system_setting にアクセスしてシステム設定画面を開く
-    2. SMTP設定セクションを開く（page.locator(':has-text("SMTP"), :has-text("メール設定")')）
-    3. SMTPホスト・ポート・ユーザー・パスワードを入力
-    4. 「テスト送信」または「テストメール送信」ボタンをクリック
-    5. 成功メッセージ（「送信しました」等）が表示されることを確認
-    6. 設定を保存して /admin/dashboard に戻る
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '652'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '651'
+- case_no: unc2-1140
   feature: 計算項目
   description: |
     ①関連レコード一覧を持つテーブルで、親テーブルにSUM計算項目を設定する
@@ -1725,14 +1404,9 @@ cases:
   expected: |
     関連レコードの表示条件が他テーブル参照の場合でも、SUM計算項目の結果が正しく表示されること
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{parentTableId} の親レコード詳細画面を開く（関連レコード一覧と他テーブル参照条件が設定済みの構成）
-    2. 関連レコード一覧（表示条件に他テーブル参照を使用）に数値データを複数件追加（例: 100, 200）
-    3. 保存後に親レコードの詳細画面に戻る
-    4. SUM計算項目の値が合計値（例: 300）と一致することを確認
-    5. 計算項目に "NaN" が表示されないことを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '653'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '652'
+- case_no: unc2-1150
   feature: コメント
   description: |-
     ①テーブル一覧画面を開く
@@ -1740,16 +1414,9 @@ cases:
     ③メンション操作時にエラーが発生しないことを確認する
   expected: コメントで組織へメンションする際にエラーが発生しないこと（#issue974）
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてレコードを1件開く（詳細画面）
-    2. コメント入力欄を確認（page.locator('textarea[placeholder*="コメント"], .comment-input')）
-    3. コメント欄に "@" を入力してメンション候補を表示
-    4. 組織名の候補が表示されることを確認（page.locator('.mention-list, .mention-dropdown') が表示）
-    5. 候補から組織を選択してコメントを入力
-    6. 送信ボタンをクリックしてコメントを送信
-    7. コメントが正常に投稿され、エラーが表示されないことを確認
-    8. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '654'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '653'
+- case_no: unc2-1160
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -1757,13 +1424,9 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue984）
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('table thead tr') でヘッダー行の読み込みを待機
-    3. page.locator('table thead th').count() でヘッダー列数が1以上であることを確認
-    4. ヘッダーセルのテキストが空でないことを確認
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '655'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '654'
+- case_no: unc2-1170
   feature: 帳票出力・計算項目の日付フォーマット
   description: |-
     ①計算項目を作成し、計算値の種類を「日付」に設定する
@@ -1773,15 +1436,9 @@ cases:
   expected: 計算値の種類が日付/日時の計算項目を帳票出力したとき、表示フォーマット通りに出力されること
   movie: U208
   target_spec: reports
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/fields にアクセスして計算項目を作成
-    2. 計算値の種類を「日付」に設定し、表示フォーマットを「Y年m月末日」に設定して保存
-    3. /admin/dataset__{tableId} で新規レコードを作成して保存
-    4. レコード詳細画面で計算項目の値が「YYYY年MM月末日」形式で表示されることを確認
-    5. 帳票出力ボタンをクリックしてダウンロードを実行
-    6. ダウンロードが完了してエラーが表示されないことを確認
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '656'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '655'
+- case_no: unc2-1180
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1789,14 +1446,9 @@ cases:
     ③CSVダウンロード/アップロード機能がエラーなく動作することを確認する
   expected: CSV操作機能がエラーなく正常に動作すること（#issue1191）
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. CSVダウンロードボタンが表示されることを確認
-    3. CSVダウンロードを実行してエラーが表示されないことを確認
-    4. ダウンロードされたCSVをアップロード操作（CSVアップロードボタンをクリックしてファイル選択）
-    5. アップロードが正常に完了し、/admin/csv 履歴で「完了」ステータスを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '657'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '656'
+- case_no: unc2-1190
   feature: テーブル一覧
   description: |-
     ①テーブル一覧画面を開く
@@ -1804,13 +1456,9 @@ cases:
     ③全フィールドのヘッダーが正しく表示されていることを確認する
   expected: テーブル一覧画面のフィールドヘッダーがエラーなく正常に表示されること（#issue1047）
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('table thead tr') でヘッダー行の読み込みを待機
-    3. page.locator('table thead th').count() でヘッダー列数が1以上であることを確認
-    4. ヘッダーセルのテキストが空でないことを確認
-    5. bodyText に "Internal Server Error" または "undefined" が含まれないことを確認
-- case_no: '658'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '657'
+- case_no: unc2-1200
   feature: 通知設定
   description: |-
     ①通知設定画面を開く
@@ -1819,15 +1467,9 @@ cases:
     ④選択して保存し、通知が正しく送信されることを確認する
   expected: 通知設定の通知先メールアドレスに「ログインユーザーのメールアドレス」が選択可能で、通知が正しく送信されること
   movie: U208
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/notification にアクセスして通知設定を開く
-    2. 「通知を追加」ボタンをクリックして新規通知設定を開く
-    3. 通知先メールアドレスの選択ドロップダウンを開く
-    4. 「ログインユーザーのメールアドレス」の選択肢が存在することを確認
-    5. その選択肢を選択して設定を保存
-    6. 保存が成功したことを確認（成功メッセージ表示またはURL変化）
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '659'
+  detailed_flow: U208テストフロー参照（unc2-1060 のdetailed_flowと同一）
+  old_case_no: '658'
+- case_no: unc2-1210
   feature: フィルタ
   description: |
     ①年度開始月が4月のテーブルで集計フィルタを作成する
@@ -1839,6 +1481,22 @@ cases:
     相対値「来年度」のフィルタが年度開始月に基づいて正しく絞り込まれ、年度範囲外のデータが含まれないこと
   movie: U209
   detailed_flow: |-
+    【U209 テストフロー】この動画で確認するテスト番号:
+      unc2-1210      (旧: 659)     フィルタ
+      unc2-1220      (旧: 660)     公開フォーム
+      unc2-1230      (旧: 661)     チャートプレビュー・期間切り替え
+      unc2-1240      (旧: 662)     計算項目
+      unc2-1250      (旧: 663)     レコード一括操作
+      unc2-1260      (旧: 664)     ルックアップ
+      unc2-1270      (旧: 665)     CSV
+      unc2-1280      (旧: 666)     CSV・子テーブル他テーブル参照
+      unc2-1290      (旧: 667)     CSV
+      unc2-1300      (旧: 668)     フィルタ
+      unc2-1310      (旧: 669)     画像フィールド
+      unc2-1320      (旧: 670)     通知・メール
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
     2. 来年度の開始日（例: 翌年4月1日）と終了日のデータが存在することを確認（または事前に作成）
     3. フィルタボタンをクリックしてフィルタ設定パネルを開く
@@ -1847,7 +1505,8 @@ cases:
     6. 来年度の開始日（4月1日）のデータが含まれていることを確認
     7. 翌翌年度のデータが結果に含まれていないことを確認
     8. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '660'
+  old_case_no: '659'
+- case_no: unc2-1220
   feature: 公開フォーム
   description: |-
     ①テーブル一覧画面を開く
@@ -1855,14 +1514,9 @@ cases:
     ③テーブル一覧がエラーなく正常に表示されることを確認する
   expected: 公開フォーム設定後もテーブル一覧が正常に表示されること（#issue976）
   movie: U209
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/public_form にアクセスして公開フォーム設定を開く
-    2. 公開フォームを有効化して設定を保存
-    3. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    4. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    5. テーブル一覧がエラーなく表示されることを確認（行数が0以上）
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '661'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '660'
+- case_no: unc2-1230
   feature: チャートプレビュー・期間切り替え
   description: |-
     ①チャートを作成し、プレビュー画面を開く
@@ -1874,17 +1528,9 @@ cases:
   expected: チャートプレビュー画面の前後切り替えボタン（≪≫）で期間テキスト表示が正しく更新されること
   movie: U209
   target_spec: chart-calendar
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/chart にアクセスしてチャート設定を開く
-    2. 既存のチャートのプレビューボタンをクリックしてプレビュー画面を開く
-    3. 現在の期間テキストを記録（例: "2026年3月"）
-    4. 「≪」（前へ）ボタンをクリック
-    5. 期間テキストが前の期間（例: "2026年2月"）に変わることを確認
-    6. 「≫」（次へ）ボタンをクリック
-    7. 期間テキストが元の期間（例: "2026年3月"）に戻ることを確認
-    8. 相対値切り替えボタン（≪≫）も同様に操作して期間テキストが更新されることを確認
-    9. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '662'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '661'
+- case_no: unc2-1240
   feature: 計算項目
   description: |-
     ①テーブル一覧画面を開く
@@ -1892,15 +1538,9 @@ cases:
     ③SUM計算結果がNaN等のエラーなく正しい値で表示されることを確認する
   expected: SUM計算項目がエラーなく正しい値で表示されること
   movie: U209
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. SUM計算フィールドの列セルを取得して値を確認
-    4. セル内テキストに "NaN" が含まれないことを確認
-    5. セル内テキストに "undefined" または "null" が含まれないことを確認
-    6. 数値が表示されていることを確認（空白でない行が存在）
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '663'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '662'
+- case_no: unc2-1250
   feature: レコード一括操作
   description: |-
     ①テーブル一覧画面を開く
@@ -1908,16 +1548,9 @@ cases:
     ③設定変更後もテーブル一覧がエラーなく表示されることを確認する
   expected: 一括否認・一括削除ボタンの非表示設定が正常に動作すること（#issue1198）
   movie: U209
-  detailed_flow: |-
-    1. /admin/dataset__{tableId}/setting/view にアクセスしてビュー設定を開く
-    2. 「一括否認ボタンを非表示」および「一括削除ボタンを非表示」の設定チェックボックスをONにして保存
-    3. /admin/dataset__{tableId} にアクセスしてテーブル一覧を開く
-    4. 全選択チェックボックスをクリックして全レコードを選択
-    5. 「一括否認」ボタンが表示されていないことを確認（page.locator('button:has-text("一括否認")').count() が0）
-    6. 「一括削除」ボタンが表示されていないことを確認（page.locator('button:has-text("一括削除")').count() が0）
-    7. テーブル一覧がエラーなく表示されることを確認
-    8. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '664'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '663'
+- case_no: unc2-1260
   feature: ルックアップ
   description: |-
     ①ルックアップで日付項目を表示するフィールドを設定する
@@ -1926,14 +1559,9 @@ cases:
     ④ルックアップ先のフォーマットに合わせて表示されることを確認する（yyyy-mm-dd固定にならないこと）
   expected: ルックアップで表示した日付項目がルックアップ先のフォーマット設定に従って表示されること
   movie: U209
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. page.waitForSelector('.table-responsive') でテーブル読み込みを待機
-    3. ルックアップ日付フィールドのセルを取得
-    4. セル内テキストが "yyyy-mm-dd" 固定形式でなく、ルックアップ先テーブルの日付フォーマット設定に基づいた形式（例: "YYYY/MM/DD" や "YYYY年M月D日"）で表示されることを確認
-    5. セル内テキストに "Invalid Date" が含まれないことを確認
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '665'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '664'
+- case_no: unc2-1270
   feature: CSV
   description: |
     ①他テーブル参照で日時項目を参照しているテーブルを用意する
@@ -1944,15 +1572,9 @@ cases:
   expected: |
     他テーブル参照の日時項目で一桁の月日が含まれる場合でもCSVアップロードがエラーなく完了すること
   movie: U209
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く（他テーブル参照日時項目を持つテーブル）
-    2. 参照先テーブルに一桁月（例: 6月5日）の日時データを持つレコードが存在することを確認
-    3. CSVダウンロードを実行して csvファイルをダウンロード
-    4. CSVアップロードボタンをクリックしてダウンロードしたCSVをアップロード
-    5. /admin/csv にアクセスしてCSV履歴を確認
-    6. ステータスが「完了」であり「選択肢に存在しない値」エラーが表示されていないことを確認
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '666'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '665'
+- case_no: unc2-1280
   feature: CSV・子テーブル他テーブル参照
   description: |-
     ①子テーブルを含むテーブルでCSVダウンロードを実行する
@@ -1962,16 +1584,9 @@ cases:
   expected: 子テーブルを含むCSVアップロードで、他テーブル参照の値が正しく各行に反映されること
   movie: U209
   target_spec: csv-export
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスして子テーブルを含む親テーブルを開く
-    2. CSVダウンロードを実行して子テーブルデータを含むCSVをダウンロード
-    3. ダウンロードしたCSVを開いて子テーブル部分の他テーブル参照フィールド値を確認（複数行で異なる値）
-    4. CSVの他テーブル参照値を意図的に別の値に変更してCSVを保存
-    5. 変更したCSVをアップロード
-    6. /admin/csv 履歴でアップロード完了を確認
-    7. /admin/dataset__{tableId} で各レコードの子テーブルを開いて他テーブル参照値が各行ごとに正しく反映されていることを確認（全て同じ値に変わっていない）
-    8. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '667'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '666'
+- case_no: unc2-1290
   feature: CSV
   description: |-
     ①テーブル一覧画面を開く
@@ -1979,15 +1594,9 @@ cases:
     ③エラーが発生しないことを確認する
   expected: テーブル一覧画面がエラーなく正常に表示されること（#issue1216）
   movie: U209
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. CSVアップロードボタンをクリックしてファイル選択ダイアログを開く
-    3. テストCSVファイルを選択して「リセットしてアップロード」オプションを選択
-    4. アップロードを実行
-    5. /admin/csv にアクセスしてCSV履歴でアップロード結果を確認
-    6. エラーが表示されていないことを確認
-    7. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '668'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '667'
+- case_no: unc2-1300
   feature: フィルタ
   description: |-
     ①テーブル一覧画面を開く
@@ -1995,14 +1604,9 @@ cases:
     ③絞り込み操作がエラーなく正常に動作することを確認する
   expected: フィルタ・絞り込み機能がエラーなく正常に動作すること（#issue1217）
   movie: U209
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスしてALLテストテーブル一覧を開く
-    2. フィルタボタンをクリックしてフィルタ設定パネルを開く
-    3. 任意の条件を設定して適用ボタンをクリック
-    4. 絞り込み結果がエラーなく表示されることを確認
-    5. フィルタを解除して全件表示に戻る
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '669'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '668'
+- case_no: unc2-1310
   feature: 画像フィールド
   description: |-
     ①画像フィールドを含むレコード詳細画面を開く
@@ -2011,14 +1615,9 @@ cases:
     ④表示される画素数が実際の画像サイズと一致していることを確認する
   expected: 画像フィールドでファイルサイズと正しい画素数（幅x高さ）が表示されること
   movie: U209
-  detailed_flow: |-
-    1. /admin/dataset__{tableId} にアクセスして画像フィールドを含むレコードを1件開く（詳細画面）
-    2. 画像フィールドの情報表示エリアを確認（page.locator('.file-info, .image-info')）
-    3. ファイルサイズが表示されていることを確認（例: "90KB" または "90 KB" のテキストが存在）
-    4. 画素数が表示されていることを確認（例: "800x800px" または "800x800pic" のテキストが存在）
-    5. 表示される幅・高さが実際の画像サイズと一致していることを確認（縦横が入れ替わっていない）
-    6. bodyText に "Internal Server Error" が含まれないことを確認
-- case_no: '670'
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '669'
+- case_no: unc2-1320
   feature: 通知・メール
   description: |
     ①システム設定でメール受信取込機能を有効にする
@@ -2028,12 +1627,5 @@ cases:
   expected: |
     メール受信取込機能の設定画面が正常に表示され、設定の保存がエラーなく完了すること
   movie: U209
-  detailed_flow: |-
-    1. /admin/system_setting にアクセスしてシステム設定画面を開く
-    2. 「メール受信取込」設定セクションを開く（page.locator(':has-text("メール受信取込")')）
-    3. 機能を有効化するトグルをONにする
-    4. 取込先テーブルの選択ドロップダウンからテーブルを選択
-    5. メールフィールドと取込先フィールドのマッピングを設定
-    6. 保存ボタンをクリックして設定を保存
-    7. 成功メッセージが表示されることを確認
-    8. bodyText に "Internal Server Error" が含まれないことを確認
+  detailed_flow: U209テストフロー参照（unc2-1210 のdetailed_flowと同一）
+  old_case_no: '670'

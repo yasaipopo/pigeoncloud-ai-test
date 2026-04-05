@@ -2,14 +2,22 @@ group: 共通設定・システム設定・契約設定
 spec_file: tests/system-settings.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 10-1
+- case_no: sys-010
   sheet: A
   feature: 共通設定
   category: テーブル
   description: ①テーブルの順番入れ替えを行う。
   expected: エラーなくテーブルの順番変更が行えること。
   movie: SS03
-  detailed_flow: |
+  detailed_flow: |-
+    【SS03 テストフロー】この動画で確認するテスト番号:
+      sys-010        (旧: 10-1)    共通設定
+      sys-020        (旧: 10-2)    共通設定
+      sys-030        (旧: 10-3)    共通設定
+      sys-040        (旧: 10-4)    共通設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # テーブル定義一覧でドラッグ&ドロップによる並び替えを確認
     1. テーブル管理ページへ遷移: `await page.goto(BASE_URL + '/admin/dataset')`
     2. Angularロード待機: `await waitForAngular(page)`
@@ -22,76 +30,35 @@ cases:
     - 「メニュー並び替え」ボタンが存在すること
     - ドラッグ操作後に並び順が変更されること（または保存UIが表示されること）
     - エラーが出ないこと（Internal Server Error を含まない）
-
-- case_no: 10-2
+  old_case_no: 10-1
+- case_no: sys-020
   sheet: A
   feature: 共通設定
   category: テーブル
   description: ①テーブル情報詳細表示を行う。
   expected: エラーなくテーブル詳細情報の表示が行えること。
   movie: SS03
-  detailed_flow: |
-    # テーブル一覧からテーブル詳細（フィールド定義一覧）を表示
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. テーブル管理ページへ遷移: `await page.goto(BASE_URL + '/admin/dataset')`
-    3. Angularロード待機
-    4. ALLテストテーブルの詳細ボタン（infoアイコンまたは行クリック）を探す
-    5. テーブル名「ALLテストテーブル」の行の詳細ボタンをクリック: `await page.locator('a[href*="dataset__' + tableId + '"]').first().click()`
-    6. ALLテストテーブルのフィールド定義一覧またはテーブル詳細ページが表示される: `await expect(page).toHaveURL(new RegExp('/admin/dataset__' + tableId))`
-    7. テーブル名が表示されていることを確認: `await expect(page.locator('h1, h2, h3, h4, h5')).toContainText('ALLテスト')`
-    8. フィールド一覧が表示されていることを確認（フィールドIDと名前が表示される）
-    # Assert
-    - テーブル詳細ページが表示されること
-    - テーブル名・フィールド情報が表示されること
-    - エラーが出ないこと
-
-- case_no: 10-3
+  detailed_flow: SS03テストフロー参照（sys-010 のdetailed_flowと同一）
+  old_case_no: 10-2
+- case_no: sys-030
   sheet: A
   feature: 共通設定
   category: テーブル
   description: ①テーブル定義の変更を行う。
   expected: エラーなくテーブル定義の変更が行えること。
   movie: SS03
-  detailed_flow: |
-    # テーブル定義の変更（フィールド設定変更）を確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. テーブル管理ページへ遷移: `await page.goto(BASE_URL + '/admin/dataset')`
-    3. Angularロード待機
-    4. テーブル一覧でALLテストテーブルの設定ボタン（鉛筆アイコン等）を探す
-    5. ALLテストテーブルのフィールド定義ページへ: ギアアイコンボタンをクリックして「テーブル設定」を選択
-    6. テーブル定義編集ページが表示されることを確認: `await expect(page).toHaveURL(new RegExp('/admin/dataset/edit/' + tableId + '|/admin/dataset__' + tableId + '/field'))`
-    7. テーブル名または説明フィールドを変更（テスト後に元に戻す）
-    8. 保存ボタンをクリック: `await page.locator('button:has-text("保存"), button:has-text("更新")').click()`
-    9. 保存成功のアラートまたはページ遷移を確認
-    # Assert
-    - テーブル定義の編集UIが表示されること
-    - 変更を保存できること
-    - エラーが出ないこと
-
-- case_no: 10-4
+  detailed_flow: SS03テストフロー参照（sys-010 のdetailed_flowと同一）
+  old_case_no: 10-3
+- case_no: sys-040
   sheet: A
   feature: 共通設定
   category: テーブル
   description: ①テーブルの削除を行う。
   expected: エラーなくテーブルの削除が行えること。
   movie: SS03
-  detailed_flow: |
-    # テーブル削除の動作確認（テスト専用の一時テーブルを作成して削除）
-    # 注意: ALLテストテーブルは削除しない。専用の一時テーブルを使用
-    1. debug APIで一時テーブルを作成: `await debugApiPost(page, '/admin/debug/create-all-type-table')`（または通常UIでテーブル作成）
-    2. テーブル管理ページへ遷移: `await page.goto(BASE_URL + '/admin/dataset')`
-    3. Angularロード待機
-    4. 作成したテーブルの行を特定
-    5. ギアメニューから「テーブル削除」を選択: `await page.locator('button#table-setting-btn').click()`, `await page.locator('text=テーブル削除').click()`
-    6. 確認ダイアログが表示される
-    7. 「削除する」ボタンをクリック: `await page.locator('#confirm-submit-btn:has-text("削除")').click()`
-    8. テーブル一覧から削除したテーブルが消えることを確認
-    # Assert
-    - テーブルを削除できること
-    - 削除後にテーブル一覧から消えること
-    - エラーが出ないこと
-
-- case_no: 24-1
+  detailed_flow: SS03テストフロー参照（sys-010 のdetailed_flowと同一）
+  old_case_no: 10-4
+- case_no: sys-050
   sheet: A
   feature: その他設定
   category: 新規ユーザーログイン時のパスワードリセット
@@ -103,7 +70,18 @@ cases:
     ③新規ユーザーでログイン
   expected: 新規ユーザーで初回ログイン時、パスワード変更が画面が表示されないこと。
   movie: SS01
-  detailed_flow: |
+  detailed_flow: |-
+    【SS01 テストフロー】この動画で確認するテスト番号:
+      sys-050        (旧: 24-1)    その他設定
+      sys-060        (旧: 24-2)    その他設定
+      sys-070        (旧: 58-1)    その他設定
+      sys-080        (旧: 58-2)    その他設定
+      sys-140        (旧: 8-1)     その他設定
+      sys-150        (旧: 8-2)     その他設定
+      sys-280        (旧: 89-1)    その他設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # パスワードリセットOFF設定で初回ログインのパスワード変更画面が表示されないことを確認
     1. その他設定ページへ遷移: `await page.goto(BASE_URL + '/admin/admin_setting/edit/1')`
     2. Angularロード待機
@@ -118,8 +96,8 @@ cases:
     # Assert
     - 「新規ユーザーのログイン時のパスワードリセットをOFFにする」ONの状態で初回ログイン時にパスワード変更画面が表示されないこと
     - ダッシュボードに直接遷移できること
-
-- case_no: 24-2
+  old_case_no: 24-1
+- case_no: sys-060
   sheet: A
   feature: その他設定
   category: 新規ユーザーログイン時のパスワードリセット
@@ -131,22 +109,9 @@ cases:
     ③新規ユーザーでログイン
   expected: 新規ユーザーで初回ログイン時、パスワード変更が画面が表示されること。
   movie: SS01
-  detailed_flow: |
-    # パスワードリセットON設定で初回ログインのパスワード変更画面が表示されることを確認
-    1. その他設定ページへ遷移: `await page.goto(BASE_URL + '/admin/admin_setting/edit/1')`
-    2. Angularロード待機
-    3. 「新規ユーザーのログイン時のパスワードリセットをOFFにする」チェックボックスをOFF（未チェック）にする
-    4. 「更新」または「保存」ボタンをクリック
-    5. 保存成功を確認
-    6. debug APIで新規ユーザーを作成: `await debugApiPost(page, '/admin/debug/create-user')`
-    7. 作成されたユーザーID（例: ishikawa+N@loftal.jp）とパスワード（admin）を取得
-    8. 新規ユーザーとしてログイン
-    9. パスワード変更画面が表示されることを確認: `await expect(page.locator('text=パスワード変更, text=新しいパスワード, h1:has-text("パスワード")')).toBeVisible()`
-    10. テスト後: その他設定を元の状態に戻す
-    # Assert
-    - 「新規ユーザーのログイン時のパスワードリセットをOFFにする」OFFの状態で初回ログイン時にパスワード変更画面が表示されること
-
-- case_no: 58-1
+  detailed_flow: SS01テストフロー参照（sys-050 のdetailed_flowと同一）
+  old_case_no: 24-2
+- case_no: sys-070
   sheet: A
   feature: その他設定
   category: ログイン時に利用規約を表示する
@@ -156,25 +121,9 @@ cases:
     ③「通常ユーザー」でログインする。
   expected: マスターユーザー／通常ユーザーともにログイン時に利用規約が表示されること。
   movie: SS01
-  detailed_flow: |
-    # 利用規約表示設定ONでログイン時に利用規約が表示されることを確認
-    1. その他設定ページへ遷移: `await page.goto(BASE_URL + '/admin/admin_setting/edit/1')`
-    2. Angularロード待機
-    3. 「初回ログイン時に利用規約を表示する」チェックボックスをONにする
-    4. 「更新」ボタンをクリック
-    5. 保存成功を確認
-    6. ログアウトして再度マスターユーザー（admin）でログイン
-    7. 利用規約ページが表示されることを確認: `await expect(page.locator('text=利用規約, [class*="terms"], h1:has-text("利用規約")')).toBeVisible()`
-    8. 「同意する」ボタンをクリック
-    9. ダッシュボードに遷移することを確認
-    10. debug APIで通常ユーザーを作成してログイン
-    11. 通常ユーザーにも利用規約が表示されることを確認
-    12. テスト後: その他設定のチェックを元に戻す
-    # Assert
-    - マスターユーザーのログイン時に利用規約が表示されること
-    - 通常ユーザーのログイン時にも利用規約が表示されること
-
-- case_no: 58-2
+  detailed_flow: SS01テストフロー参照（sys-050 のdetailed_flowと同一）
+  old_case_no: 58-1
+- case_no: sys-080
   sheet: A
   feature: その他設定
   category: ログイン時に利用規約を表示しない
@@ -184,29 +133,25 @@ cases:
     ③「通常ユーザー」でログインする。
   expected: マスターユーザー／通常ユーザーともにログイン時に利用規約が表示されなくなること。
   movie: SS01
-  detailed_flow: |
-    # 利用規約表示設定OFFでログイン時に利用規約が表示されないことを確認
-    1. その他設定ページへ遷移: `await page.goto(BASE_URL + '/admin/admin_setting/edit/1')`
-    2. Angularロード待機
-    3. 「初回ログイン時に利用規約を表示する」チェックボックスをOFF（未チェック）にする
-    4. 「更新」ボタンをクリック
-    5. 保存成功を確認
-    6. ログアウトして再度マスターユーザー（admin）でログイン
-    7. 利用規約ページが表示されないことを確認（直接ダッシュボードへ遷移）: `await expect(page).toHaveURL(/dashboard/)`
-    8. 利用規約を示すテキストが存在しないことを確認: `await expect(page.locator('text=利用規約')).not.toBeVisible()`
-    9. テスト後: 設定を元の状態に戻す
-    # Assert
-    - チェックOFF後にマスターユーザーでログインした際に利用規約が表示されないこと
-    - ダッシュボードに直接遷移できること
-
-- case_no: 7-1
+  detailed_flow: SS01テストフロー参照（sys-050 のdetailed_flowと同一）
+  old_case_no: 58-2
+- case_no: sys-090
   sheet: A
   feature: システム利用状況
   category: '-'
   description: ①ユーザー数を増やす。
   expected: システム利用状況のユーザー数の表示が増えること。
   movie: SS04
-  detailed_flow: |
+  detailed_flow: |-
+    【SS04 テストフロー】この動画で確認するテスト番号:
+      sys-090        (旧: 7-1)     システム利用状況
+      sys-100        (旧: 7-2)     システム利用状況
+      sys-110        (旧: 7-3)     システム利用状況
+      sys-120        (旧: 7-4)     システム利用状況
+      sys-130        (旧: 7-5)     システム利用状況
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # ユーザーを追加してシステム利用状況のユーザー数が増えることを確認
     1. システム利用状況ページへ遷移: `await page.goto(BASE_URL + '/admin/info/management')`
     2. Angularロード待機
@@ -218,140 +163,85 @@ cases:
     # Assert
     - ユーザー追加後にシステム利用状況のユーザー数が増えること（または /admin/admin ページでユーザー一覧件数が増えること）
     - エラーが出ないこと
-
-- case_no: 7-2
+  old_case_no: 7-1
+- case_no: sys-100
   sheet: A
   feature: システム利用状況
   category: '-'
   description: ①ユーザー数を減らす。
   expected: システム利用状況のユーザー数の表示が減ること。
   movie: SS04
-  detailed_flow: |
-    # ユーザーを削除してシステム利用状況のユーザー数が減ることを確認
-    1. システム利用状況ページへ遷移: `await page.goto(BASE_URL + '/admin/info/management')`
-    2. Angularロード待機
-    3. ユーザー管理ページへ遷移: `await page.goto(BASE_URL + '/admin/admin')`
-    4. 現在のユーザー数を記録: `const beforeCount = await page.locator('table tbody tr').count()`
-    5. テストユーザーを削除（debug APIで作成済みのユーザー）
-    6. ページをリロード
-    7. ユーザー一覧の件数が減っていることを確認: `expect(await page.locator('table tbody tr').count()).toBeLessThan(beforeCount)`
-    8. システム利用状況ページで確認: `await page.goto(BASE_URL + '/admin/info/management')`
-    # Assert
-    - ユーザー削除後にユーザー管理の件数が減ること
-    - エラーが出ないこと
-
-- case_no: 7-3
+  detailed_flow: SS04テストフロー参照（sys-090 のdetailed_flowと同一）
+  old_case_no: 7-2
+- case_no: sys-110
   sheet: A
   feature: システム利用状況
   category: '-'
   description: ①テーブル数を増やす。
   expected: システム利用状況のテーブル数の表示が増えること。
   movie: SS04
-  detailed_flow: |
-    # テーブルを作成してシステム利用状況のテーブル数が増えることを確認
-    1. システム利用状況ページへ遷移: `await page.goto(BASE_URL + '/admin/info/management')`
-    2. Angularロード待機
-    3. 現在のテーブル数を記録: `const beforeText = await page.locator('text=テーブル数').first().textContent()`
-    4. debug APIでテーブル作成: `await debugApiPost(page, '/admin/debug/create-all-type-table')`
-    5. システム利用状況ページをリロード
-    6. テーブル数が増えていることを確認
-    # Assert
-    - テーブル作成後にシステム利用状況のテーブル数が増えること
-    - エラーが出ないこと
-
-- case_no: 7-4
+  detailed_flow: SS04テストフロー参照（sys-090 のdetailed_flowと同一）
+  old_case_no: 7-3
+- case_no: sys-120
   sheet: A
   feature: システム利用状況
   category: '-'
   description: ①テーブル数を減らす。
   expected: システム利用状況のテーブル数の表示が減ること。
   movie: SS04
-  detailed_flow: |
-    # テーブルを削除してシステム利用状況のテーブル数が減ることを確認
-    1. システム利用状況ページへ遷移: `await page.goto(BASE_URL + '/admin/info/management')`
-    2. Angularロード待機
-    3. テーブル管理ページへ遷移: `await page.goto(BASE_URL + '/admin/dataset')`
-    4. テーブル一覧のテーブル数を記録
-    5. 一時的に作成したテーブルを削除（ギアメニュー→テーブル削除）
-    6. 確認ダイアログで削除実行
-    7. システム利用状況ページをリロードしてテーブル数が減っていることを確認
-    # Assert
-    - テーブル削除後にシステム利用状況のテーブル数が減ること
-    - エラーが出ないこと
-
-- case_no: 7-5
+  detailed_flow: SS04テストフロー参照（sys-090 のdetailed_flowと同一）
+  old_case_no: 7-4
+- case_no: sys-130
   sheet: A
   feature: システム利用状況
   category: '-'
   description: ①メール通知を実施する。
   expected: システム利用状況のメール通知数の表示が増えること。
   movie: SS04
-  detailed_flow: |
-    # メール通知を実行してシステム利用状況のメール通知数が増えることを確認
-    # 注意: 実際のメール送信が必要なため、SMTPが設定されている環境でのみ有効
-    1. システム利用状況ページへ遷移: `await page.goto(BASE_URL + '/admin/info/management')`
-    2. Angularロード待機
-    3. 現在のメール通知回数を記録: `const beforeText = await page.locator('text=メール通知').first().textContent()`
-    4. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    5. ALLテストテーブルのレコード一覧へ遷移
-    6. テストレコードの通知設定が有効な場合、レコードを作成または更新してメール通知を発火
-    7. システム利用状況ページをリロード
-    8. メール通知回数が増えていることを確認（SMTPが設定済みの場合）
-    # Assert
-    - メール通知実行後にシステム利用状況のメール通知数が増えること（SMTP設定済みの場合のみ）
-    - エラーが出ないこと
-
-- case_no: 8-1
+  detailed_flow: SS04テストフロー参照（sys-090 のdetailed_flowと同一）
+  old_case_no: 7-5
+- case_no: sys-140
   sheet: A
   feature: その他設定
   category: 二段階認証
   description: ①二段階認証を有効化する。
   expected: 2段階認証の設定が行われること。
   movie: SS01
-  detailed_flow: |
-    # 二段階認証を有効化して設定が保存されることを確認
-    1. その他設定ページへ遷移: `await page.goto(BASE_URL + '/admin/admin_setting/edit/1')`
-    2. Angularロード待機
-    3. 「二段階認証を有効にする」のチェックボックスを探す: `await page.locator('label:has-text("二段階認証")')`
-    4. チェックボックスを確認（現在の状態を記録）
-    5. チェックボックスをONにする: `await page.locator('input[type="checkbox"]:near(:text("二段階認証"))').check()`
-    6. 「更新」ボタンをクリック: `await page.locator('button:has-text("更新"), button:has-text("保存")').click()`
-    7. 保存成功（アラートまたはページ更新）を確認
-    8. ページをリロードして設定が保持されることを確認: `await expect(page.locator('input[type="checkbox"]:near(:text("二段階認証"))')).toBeChecked()`
-    9. テスト後: チェックを元の状態に戻す
-    # Assert
-    - 二段階認証チェックボックスがONになること
-    - 設定が保存・保持されること
-    - エラーが出ないこと
-
-- case_no: 8-2
+  detailed_flow: SS01テストフロー参照（sys-050 のdetailed_flowと同一）
+  old_case_no: 8-1
+- case_no: sys-150
   sheet: A
   feature: その他設定
   category: 二段階認証
   description: ①二段階認証を無効化する。
   expected: 2段階認証の設定が解除されること。
   movie: SS01
-  detailed_flow: |
-    # 二段階認証を無効化して設定が保存されることを確認
-    1. その他設定ページへ遷移: `await page.goto(BASE_URL + '/admin/admin_setting/edit/1')`
-    2. Angularロード待機
-    3. 「二段階認証を有効にする」チェックボックスをOFFにする
-    4. 「更新」ボタンをクリック
-    5. 保存成功を確認
-    6. ページをリロードしてチェックがOFFになっていることを確認: `await expect(page.locator('input[type="checkbox"]:near(:text("二段階認証"))')).not.toBeChecked()`
-    # Assert
-    - 二段階認証チェックボックスがOFFになること
-    - 設定が保存・保持されること
-    - エラーが出ないこと
-
-- case_no: 9-10
+  detailed_flow: SS01テストフロー参照（sys-050 のdetailed_flowと同一）
+  old_case_no: 8-2
+- case_no: sys-160
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①レコードの詳細情報表示を行う。
   expected: エラーなくレコードの詳細情報表示が行えること。
   movie: SS02
-  detailed_flow: |
+  detailed_flow: |-
+    【SS02 テストフロー】この動画で確認するテスト番号:
+      sys-160        (旧: 9-10)    共通設定
+      sys-170        (旧: 9-11)    共通設定
+      sys-180        (旧: 9-12)    共通設定
+      sys-190        (旧: 9-1)     共通設定
+      sys-200        (旧: 9-4)     共通設定
+      sys-210        (旧: 9-5)     共通設定
+      sys-220        (旧: 9-6)     共通設定
+      sys-230        (旧: 9-8)     共通設定
+      sys-240        (旧: 9-9)     共通設定
+      sys-290        (旧: 9-2)     共通設定
+      sys-300        (旧: 9-3)     共通設定
+      sys-310        (旧: 9-7)     共通設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # レコード詳細ページの表示確認
     1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
     2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
@@ -364,194 +254,80 @@ cases:
     - レコード詳細ページが表示されること
     - フィールド名と値が表示されること
     - エラーが出ないこと
-
-- case_no: 9-11
+  old_case_no: 9-10
+- case_no: sys-170
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①レコード編集を行う。
   expected: エラーなくレコードの編集が行えること。
   movie: SS02
-  detailed_flow: |
-    # レコード編集の確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 最初のレコードの編集ボタン（鉛筆アイコン）をクリック: `await page.locator('table tbody tr:first-child').locator('button:has(.fa-edit), button:has(.fa-pencil)').click()`
-    5. レコード編集モーダルまたは編集ページが表示されることを確認
-    6. テキストフィールドを変更: `await page.locator('input[name*="field"]:visible').first().fill('edited_value')`
-    7. 「保存」または「更新」ボタンをクリック
-    8. 保存成功（アラートまたはモーダル閉じる）を確認
-    9. 一覧に変更が反映されていることを確認
-    # Assert
-    - レコード編集UIが表示されること
-    - 変更を保存できること
-    - 保存後に一覧に変更が反映されること
-    - エラーが出ないこと
-
-- case_no: 9-12
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-11
+- case_no: sys-180
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①レコード削除を行う。
   expected: エラーなくレコードの削除が行えること。
   movie: SS02
-  detailed_flow: |
-    # レコード削除の確認（テスト専用の追加レコードを削除）
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. テスト用レコードを事前に作成: `await debugApiPost(page, '/admin/debug/create-all-type-data', { count: 1, pattern: 'fixed' })`
-    3. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    4. Angularロード待機
-    5. 現在のレコード件数を記録: `const beforeCount = await page.locator('table tbody tr').count()`
-    6. 削除対象レコードの削除ボタン（ゴミ箱アイコン）をクリック: `await page.locator('table tbody tr:last-child').locator('button:has(.fa-trash)').click()`
-    7. 確認ダイアログで「削除する」をクリック: `await page.locator('#confirm-submit-btn:has-text("削除")').click()`
-    8. レコード件数が減ったことを確認
-    # Assert
-    - レコードを削除できること
-    - 削除後にレコード一覧の件数が減ること
-    - エラーが出ないこと
-
-- case_no: 9-1
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-12
+- case_no: sys-190
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①追加を選択しレコードの追加を行う。
   expected: エラーなくレコード追加が可能なこと。
   movie: SS02
-  detailed_flow: |
-    # レコード追加の確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 現在のレコード件数を記録: `const beforeCount = await page.locator('table tbody tr').count()`
-    5. 「+」追加ボタンをクリック: `await page.locator('button:has(.fa-plus)').first().click()`
-    6. レコード追加モーダルまたは新規ページが表示されることを確認
-    7. テキストフィールドに値を入力: `await page.locator('input[name*="field"]:visible').first().fill('new_record_test')`
-    8. 「保存」または「追加」ボタンをクリック
-    9. 保存成功を確認
-    10. レコード件数が1件増えていることを確認
-    # Assert
-    - レコード追加UIが表示されること
-    - 新規レコードを保存できること
-    - 保存後にレコード一覧の件数が増えること
-    - エラーが出ないこと
-
-- case_no: 9-4
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-1
+- case_no: sys-200
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①全てのデータ削除を選択する。
   expected: エラーなく該当テーブルのレコード情報が全て削除されること。
   movie: SS02
-  detailed_flow: |
-    # 全データ削除の確認（テスト用の一時テーブルを使用）
-    # 注意: ALLテストテーブルは使用しない。一時テーブルを作成して実行
-    1. テスト用の一時テーブルを作成してレコードを追加（debug API使用）
-    2. レコード一覧へ遷移
-    3. バーメニュー（fa-bars）をクリック
-    4. ドロップダウンに「全データ削除」が存在する場合はクリック
-    5. 確認ダイアログが表示されることを確認
-    6. 「はい」または「削除する」をクリック
-    7. 全レコードが削除されて「データがありません」等の表示になることを確認
-    # Assert
-    - 全データ削除後にレコード一覧が空になること
-    - エラーが出ないこと
-
-- case_no: 9-5
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-4
+- case_no: sys-210
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①集計を選択しデータ集計を行う。
   expected: エラーなく設定した情報が集計し表示されること。
   movie: SS02
-  detailed_flow: |
-    # レコード一覧の集計機能確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. バーメニュー（fa-bars）をクリック
-    5. ドロップダウンから「集計」を選択: `await page.locator('.dropdown-menu.show a:has-text("集計")').click()`
-    6. 集計設定モーダルが表示されることを確認
-    7. 集計フィールドを選択（数値フィールド「数値_整数」等）
-    8. 集計種類（合計・平均・最大・最小等）を選択
-    9. 保存または適用をクリック
-    10. 集計結果が一覧画面またはモーダルに表示されることを確認
-    # Assert
-    - 集計設定UIが表示されること
-    - 集計を実行して結果が表示されること
-    - エラーが出ないこと
-
-- case_no: 9-6
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-5
+- case_no: sys-220
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①チャート追加を行う。
   expected: エラーなく設定した内容でチャート追加が行われること。
   movie: SS02
-  detailed_flow: |
-    # チャート追加機能の確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. バーメニュー（fa-bars）をクリック
-    5. ドロップダウンから「チャート」を選択: `await page.locator('.dropdown-menu.show a:has-text("チャート")').click()`
-    6. チャート設定モーダルまたはページが表示されることを確認
-    7. チャートの種類（棒グラフ・折れ線・円グラフ等）を選択
-    8. X軸・Y軸に使用するフィールドを選択
-    9. 「保存」または「追加」をクリック
-    10. チャートが表示されることを確認
-    # Assert
-    - チャート設定UIが表示されること
-    - チャートを設定・保存できること
-    - エラーが出ないこと
-
-- case_no: 9-8
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-6
+- case_no: sys-230
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①データ検索を行う。
   expected: エラーなく検索結果に基づいた内容でレコード検索が行えること。
   movie: SS02
-  detailed_flow: |
-    # レコード一覧の簡易検索確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 全レコード件数を記録: `const totalCount = await page.locator('table tbody tr').count()`
-    5. 簡易検索フィールドに検索ワードを入力: `await page.fill('#search_input', 'fixed')`
-    6. Enterキーで検索実行: `await page.keyboard.press('Enter')`
-    7. Angularロード待機
-    8. 検索結果が表示されること（「データがありません」または件数が変化）を確認
-    9. 検索をクリアして全件表示に戻ることを確認
-    # Assert
-    - 検索フィールドが表示されること
-    - 検索ワードを入力して検索できること
-    - 検索結果が表示されること（エラーなし）
-
-- case_no: 9-9
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-8
+- case_no: sys-240
   sheet: A
   feature: 共通設定
   category: レコード
   description: ①データ編集を行う。
   expected: エラーなくレコード編集が行えること。
   movie: SS02
-  detailed_flow: |
-    # インライン編集またはモーダル編集の確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 「編集モード」ボタンをクリック: `await page.locator('button:has-text("編集モード")').click()`
-    5. 編集モードに切り替わることを確認（行が編集可能になる）
-    6. 最初のレコードのテキストフィールドをクリックして値を変更: `await page.locator('table tbody tr:first-child td').nth(1).dblclick()`
-    7. 値を入力: `await page.keyboard.type('edited_inline_value')`
-    8. Tabキーまたは他のセルをクリックして確定
-    9. 変更が保存されることを確認
-    # Assert
-    - 編集モードが有効化されること
-    - セルを編集して保存できること
-    - エラーが出ないこと
-
-- case_no: 130-01
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-9
+- case_no: sys-250
   sheet: B
   feature: 契約設定
   category: |-
@@ -565,12 +341,19 @@ cases:
     　ID：ishikawa-buyer@loftal.jp ／password:testtest
   expected: 契約が問題なく完了すること。
   movie: SS05
-  detailed_flow: |
+  detailed_flow: |-
+    【SS05 テストフロー】この動画で確認するテスト番号:
+      sys-250        (旧: 130-01)  契約設定
+      sys-260        (旧: 131-02)  契約設定
+      sys-270        (旧: 284-1)   契約設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # ※機能変更に伴い本テスト不要（Paypalサブスクリプション機能廃止）
     # → テストをスキップ
     1. `test.skip(true, '機能変更に伴い不要 - Paypal支払いは廃止済み')`
-
-- case_no: 131-02
+  old_case_no: 130-01
+- case_no: sys-260
   sheet: B
   feature: 契約設定
   category: |-
@@ -587,25 +370,20 @@ cases:
     　※(注)カードの有効期限については未来日付にすること。
   expected: 契約が問題なく完了すること。
   movie: SS05
-  detailed_flow: |
-    # ※機能変更に伴い本テスト不要（カード支払い機能廃止）
-    # → テストをスキップ
-    1. `test.skip(true, '機能変更に伴い不要 - カード支払い機能は廃止済み')`
-
-- case_no: 284-1
+  detailed_flow: SS05テストフロー参照（sys-250 のdetailed_flowと同一）
+  old_case_no: 131-02
+- case_no: sys-270
   sheet: B
   feature: 契約設定
   category: クレジットカード払い(Stripe)
-  description: "①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET PAYMENT DONE」が表示されることを確認する。 \n→契約設定がリセットされる事を確認する。 \n② メニューより、「契約設定」→「クレジットカード支払い」を選択する。\n③以下URLよりテスト用のクレカ番号を確認し、契約内容入力後手続きを進める。\n\
-    https://stripe.com/docs/testing#cards\n④契約が完了したを確認する。\n⑤メニューより、「契約設定」を選択する。\n\nhttps://henmi022.pigeon-demo.com/api/admin/debug-reset-payment"
+  description: "①「https://demo-cw.pigeon-demo.com/api/admin/debug-reset-payment」を実行し「RESET PAYMENT DONE」が表示されることを確認する。 \n\
+    →契約設定がリセットされる事を確認する。 \n② メニューより、「契約設定」→「クレジットカード支払い」を選択する。\n③以下URLよりテスト用のクレカ番号を確認し、契約内容入力後手続きを進める。\nhttps://stripe.com/docs/testing#cards\n\
+    ④契約が完了したを確認する。\n⑤メニューより、「契約設定」を選択する。\n\nhttps://henmi022.pigeon-demo.com/api/admin/debug-reset-payment"
   expected: 現在のプランの表示が契約通りの内容となること。
   movie: SS05
-  detailed_flow: |
-    # Stripe外部サービス連携のため手動テストのみ（E2Eテストは実装しない）
-    # → テストをスキップ
-    1. `test.skip(true, '外部サービス連携（Stripe）のため手動確認のみ')`
-
-- case_no: 89-1
+  detailed_flow: SS05テストフロー参照（sys-250 のdetailed_flowと同一）
+  old_case_no: 284-1
+- case_no: sys-280
   sheet: B
   feature: その他設定
   category: パスワードの定期変更を促す機能
@@ -622,82 +400,27 @@ cases:
     設定通りの処理となること。
     また、他の「その他設定」の設定項目へ無影響であることを確認する。
   movie: SS01
-  detailed_flow: |
-    # パスワード定期変更間隔設定が正しく保存され、他の設定に影響しないことを確認
-    1. その他設定ページへ遷移: `await page.goto(BASE_URL + '/admin/admin_setting/edit/1')`
-    2. Angularロード待機
-    3. 各設定の現在値を記録
-    4. 以下の設定を行う:
-       - 「二段階認証を有効にする」→ 有効（チェックON）
-       - 「新規ユーザーのログイン時のパスワードリセットをOFFにする」→ 有効（チェックON）
-       - 「初回ログイン時に利用規約を表示する」→ 有効（チェックON）
-       - 「通知の送信メールアドレスをSMTPで指定」→ 無効（チェックOFF）
-       - 「ロック自動解除時間(分)」→ 5
-       - 「パスワード強制変更画面表示の間隔日数」→ 1
-    5. 「更新」ボタンをクリック
-    6. 保存成功を確認
-    7. ページをリロードして各設定値が保持されていることを確認
-    8. テスト後: 全ての設定を元の値に戻す
-    # Assert
-    - 「パスワード強制変更画面表示の間隔日数」に「1」が設定・保存されること
-    - 他の設定項目が正しく保存されること（干渉なし）
-    - エラーが出ないこと
-
-- case_no: 9-2
+  detailed_flow: SS01テストフロー参照（sys-050 のdetailed_flowと同一）
+  old_case_no: 89-1
+- case_no: sys-290
   sheet: B
   feature: 共通設定
   category: レコード
   description: ①CSVダウンロードを選択する。
   expected: エラーなく該当テーブルのレコード情報がCSV形式のファイルでダウンロードされること。
   movie: SS02
-  detailed_flow: |
-    # CSVダウンロード機能の確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. バーメニュー（fa-bars）をクリック
-    5. ドロップダウンから「CSVダウンロード」を選択: `await page.locator('.dropdown-menu.show a:has-text("CSVダウンロード")').click()`
-    6. ダウンロード確認ダイアログまたはモーダルが表示されることを確認
-    7. Playwrightのdownloadイベントを待機してCSVファイルがダウンロードされることを確認:
-       ```
-       const [download] = await Promise.all([
-         page.waitForEvent('download'),
-         page.locator('button:has-text("ダウンロード"), button:has-text("OK")').click()
-       ]);
-       await download.saveAs('/tmp/test-download.csv');
-       ```
-    8. ダウンロードファイルが存在することを確認
-    # Assert
-    - CSVダウンロードが実行できること
-    - ファイルが正常にダウンロードされること
-    - エラーが出ないこと
-
-- case_no: 9-3
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-2
+- case_no: sys-300
   sheet: B
   feature: 共通設定
   category: レコード
   description: ①CSVアップロードを選択する。
   expected: エラーなくCSV形式のファイルでレコード情報へアップロードできること。
   movie: SS02
-  detailed_flow: |
-    # CSVアップロード機能の確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. バーメニュー（fa-bars）をクリック
-    5. ドロップダウンから「CSVアップロード」を選択: `await page.locator('.dropdown-menu.show a:has-text("CSVアップロード")').click()`
-    6. CSVアップロードモーダルが表示されることを確認
-    7. テスト用CSVファイルをアップロード: `await page.setInputFiles('#inputCsv', '/app/test_files/稼働_2M.csv')`
-    8. `await page.evaluate(() => document.querySelector('#inputCsv').dispatchEvent(new Event('change')))`
-    9. 「アップロード」ボタンをクリック
-    10. アップロード処理が開始することを確認（CSV履歴ページで確認）: `await page.goto(BASE_URL + '/admin/csv')`
-    11. CSVアップロード履歴に処理中または完了のエントリが表示されることを確認
-    # Assert
-    - CSVアップロードモーダルが表示されること
-    - ファイルをアップロードできること
-    - エラーが出ないこと
-
-- case_no: 9-7
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-3
+- case_no: sys-310
   sheet: B
   feature: 共通設定
   category: レコード
@@ -706,26 +429,9 @@ cases:
     エラーなく帳票登録が行えること。
     帳票登録後、レコード詳細を表示すると「帳票出力」ボタンが表示されること。
   movie: SS02
-  detailed_flow: |
-    # 帳票登録と帳票出力ボタン表示の確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. バーメニュー（fa-bars）をクリック
-    5. ドロップダウンから「帳票登録」を選択: `await page.locator('.dropdown-menu.show a:has-text("帳票登録")').click()`
-    6. 帳票登録モーダルが表示されることを確認
-    7. 帳票ファイルをアップロード: `await page.setInputFiles('input[type="file"]', '/app/test_files/cs.pdf')`
-    8. 帳票名を入力
-    9. 「登録」または「保存」ボタンをクリック
-    10. 帳票が登録されたことを確認
-    11. レコード詳細ページへ: 最初のレコードの詳細を表示
-    12. 「帳票出力」ボタンが表示されることを確認: `await expect(page.locator('button:has-text("帳票出力"), button:has-text("帳票")')).toBeVisible()`
-    # Assert
-    - 帳票登録が完了すること
-    - レコード詳細に「帳票出力」ボタンが表示されること
-    - エラーが出ないこと
-
-- case_no: '391'
+  detailed_flow: SS02テストフロー参照（sys-160 のdetailed_flowと同一）
+  old_case_no: 9-7
+- case_no: sys-320
   sheet: B
   feature: その他設定
   description: |-
@@ -736,7 +442,12 @@ cases:
     ⑤アラートが自動で消えずに表示され続けることを確認する
   expected: 「アラートを自動で閉じない」設定を有効にした場合、アラートが自動で閉じずに表示され続けること
   movie: UC04
-  detailed_flow: |
+  detailed_flow: |-
+    【UC04 テストフロー】この動画で確認するテスト番号:
+      sys-320        (旧: 391)     その他設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 「アラートを自動で閉じない」設定でアラートが自動消去されないことを確認
     1. その他設定ページへ遷移: `await page.goto(BASE_URL + '/admin/admin_setting/edit/1')`
     2. Angularロード待機
@@ -754,8 +465,8 @@ cases:
     - アラートが表示されること
     - 5秒後もアラートが自動で消えていないこと
     - エラーが出ないこと
-
-- case_no: 839-1
+  old_case_no: '391'
+- case_no: sys-330
   sheet: A
   feature: SSO設定
   category: セキュリティ
@@ -778,8 +489,8 @@ cases:
     - SSO設定ページ（/admin/sso-settings）が表示されること
     - 識別子・応答URL・XMLアップロードUIが存在すること
     - Google/MicrosoftのSAML設定セクションが存在すること
-
-- case_no: 839-2
+  old_case_no: 839-1
+- case_no: sys-340
   sheet: A
   feature: SSO設定
   category: セキュリティ
@@ -797,8 +508,8 @@ cases:
     # Assert
     - 識別子のコピーボタンが表示されること
     - 応答URLのコピーボタンが表示されること
-
-- case_no: 840-1
+  old_case_no: 839-2
+- case_no: sys-350
   sheet: A
   feature: クライアント証明書管理
   category: セキュリティ
@@ -820,8 +531,8 @@ cases:
     - クライアント証明書管理UIが表示されること
     - 証明書一覧・発行・失効機能のUIが確認できること
     - エラーが出ないこと（機能が存在しない場合はskip）
-
-- case_no: 841-1
+  old_case_no: 840-1
+- case_no: sys-360
   sheet: A
   feature: ログアーカイブ
   category: ログ
@@ -842,8 +553,8 @@ cases:
     - ログアーカイブページが表示されること
     - アーカイブ済みログの一覧が表示されること
     - エラーが出ないこと
-
-- case_no: 843-1
+  old_case_no: 841-1
+- case_no: sys-370
   sheet: A
   feature: Googleマップフィールド
   category: フィールド連携
@@ -864,8 +575,8 @@ cases:
     - Googleマップフィールドの地図UIまたは住所入力欄が表示されること
     - エラーが出ないこと
     - フィールドが存在しない場合はtest.skipで対応
-
-- case_no: 844-1
+  old_case_no: 843-1
+- case_no: sys-380
   sheet: A
   feature: API公開設定
   category: 外部連携
@@ -888,8 +599,8 @@ cases:
     - API公開設定UIが表示されること
     - API公開のON/OFF設定UIが存在すること
     - APIキーまたはエンドポイントURLが確認できること
-
-- case_no: 845-1
+  old_case_no: 844-1
+- case_no: sys-390
   sheet: A
   feature: freee連携設定
   category: 外部連携
@@ -909,7 +620,7 @@ cases:
     # Assert
     - freee連携設定UIが表示される場合は設定フォームが存在すること
     - 機能が存在しない場合はtest.skipで対応
-
+  old_case_no: 845-1
 actual_steps:
 - case_no: 7-1
   status: partial

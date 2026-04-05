@@ -2,7 +2,7 @@ group: フィルタ
 spec_file: tests/filters.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: '234'
+- case_no: fil-010
   sheet: B
   feature: フィルタタイプ
   category: |-
@@ -12,7 +12,17 @@ cases:
   description: ①フィルタ／集計より、全種類のフィルタタイプおよび権限周りの動作確認を行う。
   expected: ・フィルタ設定画面が表示され、フィルタタイプを選択できることが正常に動作すること。
   movie: FL01
-  detailed_flow: |
+  detailed_flow: |-
+    【FL01 テストフロー】この動画で確認するテスト番号:
+      fil-010        (旧: 234)     フィルタタイプ
+      fil-020        (旧: 244)     フィルタ
+      fil-030        (旧: 245)     フィルタ
+      fil-040        (旧: 246)     フィルタ
+      fil-050        (旧: 247)     フィルタ
+      fil-060        (旧: 248)     フィルタ
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 前提: ALLテストテーブル(getAllTypeTableId)のIDを使用
     1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
     2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
@@ -27,32 +37,17 @@ cases:
     - `.navbar` が表示されていること
     - フィルタ設定UIが表示されること
     - エラーが出ないこと（Internal Server Errorを含まない）
-
-- case_no: '244'
+  old_case_no: '234'
+- case_no: fil-020
   sheet: B
   feature: フィルタ
   category: 高度な検索
   description: ①https://loftal.pigeon-cloud.com/admin/dataset__90/view/191
   expected: ・高度な検索（フィルタの複合条件）が設定できること
   movie: FL01
-  detailed_flow: |
-    # 前提: ALLテストテーブルのIDを使用
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機: `await waitForAngular(page)`
-    4. 絞り込みボタン（虫眼鏡）をクリック: `await page.locator('button:has(.fa-search)').click()`
-    5. フィルタパネルが表示されるのを待機
-    6. 「高度な機能」または「AND/OR」切り替えリンク/ボタンを探す: `await page.locator('text=高度な機能, button:has-text("高度")').first()`
-    7. 「高度な機能」をクリックして複合条件UIを表示
-    8. 条件追加ボタンをクリック: `await page.locator('button:has-text("条件を追加"), button:has(.fa-plus)').first().click()`
-    9. 2つ目の条件フォームが表示されることを確認
-    10. AND/OR切り替えUIが表示されることを確認: `await expect(page.locator('text=AND, text=OR, [class*="andor"]')).toBeVisible()`
-    # Assert
-    - 高度な検索UIが表示されること
-    - 複数条件の追加が可能であること
-    - AND/OR切り替えが存在すること
-
-- case_no: '245'
+  detailed_flow: FL01テストフロー参照（fil-010 のdetailed_flowと同一）
+  old_case_no: '244'
+- case_no: fil-030
   sheet: B
   feature: フィルタ
   category: フィルタ作成・適用
@@ -61,53 +56,18 @@ cases:
     ②フィルタ適用後にレコードが絞り込まれること。
   expected: フィルタ作成UIが表示され、条件を設定して保存・適用できること。
   movie: FL01
-  detailed_flow: |
-    # 前提: ALLテストテーブル + レコード3件以上あること
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機: `await waitForAngular(page)`
-    4. 適用前のレコード件数を記録: `const beforeCount = await page.locator('table tbody tr').count()`
-    5. 絞り込みボタン（虫眼鏡）をクリック: `await page.locator('button:has(.fa-search)').click()`
-    6. フィルタパネルが表示されるのを待機: `await page.waitForSelector('.filter-panel, pfc-filter, [class*="search-panel"]', { timeout: 10000 })`
-    7. フィールド選択ドロップダウンで「テキスト」フィールドを選択
-    8. 条件種別で「を含む」を選択
-    9. 検索値に固定値（例: "fixed_text"）を入力
-    10. 「適用」または「検索」ボタンをクリック: `await page.locator('button:has-text("適用"), button:has-text("検索")').first().click()`
-    11. Angularロード待機
-    12. レコード件数が変化したことを確認（またはフィルタ状態が表示されること）
-    13. フィルタ状態バッジ/表示が画面に現れることを確認
-    # Assert
-    - フィルタ設定UIが表示されること
-    - 条件を設定して適用できること
-    - フィルタが適用されたことが視覚的に確認できること（件数変化またはフィルタ状態表示）
-
-- case_no: '246'
+  detailed_flow: FL01テストフロー参照（fil-010 のdetailed_flowと同一）
+  old_case_no: '245'
+- case_no: fil-040
   sheet: B
   feature: フィルタ
   category: フィルタ保存・更新
   description: ①作成したフィルタに名前を付けて保存し、次回アクセス時に保存済みフィルタとして選択できること。
   expected: フィルタを保存でき、保存済みフィルタ一覧に表示されること。
   movie: FL01
-  detailed_flow: |
-    # 前提: ALLテストテーブルを使用
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機: `await waitForAngular(page)`
-    4. 絞り込みボタン（虫眼鏡）をクリック: `await page.locator('button:has(.fa-search)').click()`
-    5. フィルタパネルが表示されるのを待機
-    6. フィールド・条件・値を設定（テキストフィールドで「を含む」条件）
-    7. フィルタ名入力フィールドを探す: `await page.locator('input[placeholder*="フィルタ名"], input[name*="filter_name"]')`
-    8. フィルタ名を入力: `await page.fill('input[placeholder*="フィルタ名"]', 'テスト用フィルタ_246')`
-    9. 「保存」ボタンをクリック: `await page.locator('button:has-text("保存")').click()`
-    10. 保存成功を確認（アラートまたはフィルタ名がプルダウンに表示）
-    11. ページをリロード: `await page.reload()`
-    12. Angularロード待機
-    13. カスタムフィルタプルダウン（custom-filter-pulldown）に「テスト用フィルタ_246」が表示されることを確認
-    # Assert
-    - フィルタが保存できること
-    - 保存後のフィルタ一覧に保存したフィルタ名が表示されること
-
-- case_no: '247'
+  detailed_flow: FL01テストフロー参照（fil-010 のdetailed_flowと同一）
+  old_case_no: '246'
+- case_no: fil-050
   sheet: B
   feature: フィルタ
   category: フィルタ削除
@@ -116,23 +76,9 @@ cases:
     ②削除後は一覧から消えること。
   expected: フィルタ削除後に一覧から消えること。
   movie: FL01
-  detailed_flow: |
-    # 前提: 事前にフィルタを保存しておく（case_no 246 のフローで作成）
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. カスタムフィルタプルダウンを開く: `await page.locator('custom-filter-pulldown button').first().click()`
-    5. フィルタ一覧が表示されることを確認
-    6. 削除対象フィルタの削除ボタン（ゴミ箱アイコン）を探す: `await page.locator('[class*="filter-delete"], button:has(.fa-trash)').first()`
-    7. 削除ボタンをクリック
-    8. 確認ダイアログが表示される場合は「はい」をクリック: `await page.locator('button:has-text("はい"), button:has-text("削除")').click()`
-    9. フィルタ一覧から削除されたフィルタが消えることを確認
-    10. もしくはフィルタ設定一覧ページ（テーブル設定→フィルタ設定）でフィルタが消えていることを確認
-    # Assert
-    - 削除操作後にフィルタ一覧から対象フィルタが消えること
-    - エラーが出ないこと
-
-- case_no: '248'
+  detailed_flow: FL01テストフロー参照（fil-010 のdetailed_flowと同一）
+  old_case_no: '247'
+- case_no: fil-060
   sheet: B
   feature: フィルタ
   category: 高度な検索・複合条件
@@ -141,34 +87,24 @@ cases:
     ②AND/OR条件の切り替えが可能であること。
   expected: 高度な検索UIが表示され、複数条件を設定して検索を実行できること。
   movie: FL01
-  detailed_flow: |
-    # 前提: ALLテストテーブル + レコード3件以上
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 絞り込みボタン（虫眼鏡）をクリック: `await page.locator('button:has(.fa-search)').click()`
-    5. フィルタパネルが表示されるのを待機
-    6. 「高度な機能」リンク/ボタンをクリック
-    7. AND/OR切り替えボタンが表示されることを確認: `await expect(page.locator('button:has-text("AND"), button:has-text("OR"), text=AND, text=OR')).toBeVisible()`
-    8. 条件1: テキストフィールドを選択し「を含む」で値を設定
-    9. 「条件を追加」ボタンをクリック: `await page.locator('button:has-text("条件を追加"), button:has(.fa-plus)').first().click()`
-    10. 条件2: 数値フィールドを選択し「より大きい」で値を設定
-    11. AND→ORに切り替えるボタンをクリックして確認
-    12. 「検索」または「適用」をクリック
-    13. 結果が表示されることを確認
-    # Assert
-    - 高度な検索UIが表示されること
-    - 複数条件が設定できること
-    - AND/OR切り替えが動作すること
-    - 検索結果が表示されること（エラーなし）
-
-- case_no: '266'
+  detailed_flow: FL01テストフロー参照（fil-010 のdetailed_flowと同一）
+  old_case_no: '248'
+- case_no: fil-070
   sheet: B
   feature: 文字列
   description: ①【機能改善確認】ダッシュボードにて表示中のテーブルで、【自分のみ表示】のフィルタ権限に対し、マスター権限では見られるようにアップデートしていただきたいです。
   expected: 機能改善が正しく反映されていること。(ダッシュボードにて表示中のテーブルで、【自分のみ表示】のフィルタ権限に対し、マスター権限では見られるようにアップデートしていただきたいです。)
   movie: FL02
-  detailed_flow: |
+  detailed_flow: |-
+    【FL02 テストフロー】この動画で確認するテスト番号:
+      fil-070        (旧: 266)     文字列
+      fil-080        (旧: 280)     文字列
+      fil-110        (旧: 332)     文字列
+      fil-120        (旧: 334)     文字列
+      fil-130        (旧: 335)     文字列
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # マスター権限ユーザーで「自分のみ表示」フィルタが設定されたテーブルのレコードを閲覧できることを確認
     1. マスターユーザー（admin）でログイン
     2. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
@@ -181,8 +117,8 @@ cases:
     # Assert
     - マスターユーザーで「自分のみ表示」フィルタ設定のテーブルでもレコードが表示されること
     - エラーが出ないこと（Internal Server Error を含まない）
-
-- case_no: '280'
+  old_case_no: '266'
+- case_no: fil-080
   sheet: B
   feature: 文字列
   description: |-
@@ -190,26 +126,30 @@ cases:
     ②8月のアップデートにて修正予定とお伝えしております。
   expected: 機能改善が正しく反映されていること。(権限設定内にある登録ユーザーの並び替えが反映されないため、修正希望です。 8月のアップデートにて修正予定とお伝えしております。)
   movie: FL02
-  detailed_flow: |
-    # 権限設定内ユーザー並び替えの確認
-    1. ユーザーメニューから「権限設定」を選択（または /admin/grant にアクセス）
-    2. 権限設定ページが表示されることを確認: `await expect(page.locator('.navbar')).toBeVisible()`
-    3. ユーザー一覧が表示されていることを確認
-    4. ドラッグ&ドロップで並び替えを試みる（または並び替えUIが存在することを確認）
-    5. 並び替えボタン/UIが存在する場合: 2番目のユーザーを1番目に移動
-    6. 保存ボタンをクリック: `await page.locator('button:has-text("保存"), button:has-text("更新")').click()`
-    7. ページをリロードして並び順が保持されていることを確認
-    # Assert
-    - 並び替え後の順序がリロード後も保持されること
-    - エラーが出ないこと
-
-- case_no: '287'
+  detailed_flow: FL02テストフロー参照（fil-070 のdetailed_flowと同一）
+  old_case_no: '280'
+- case_no: fil-090
   sheet: B
   feature: 文字列
   description: ①【バグ修正確認】テーブル画面の項目名横の検索マークを押し、「11」月と入れたいところを、「1」まで入力したところで検索が行われてしまうため、修正希望。
   expected: バグが修正され、正常に動作すること。(テーブル画面の項目名横の検索マークを押し、「11」月と入れたいところを、「1」まで入力したところで検索が行われてしまうため、修正希望。)
   movie: FL03
-  detailed_flow: |
+  detailed_flow: |-
+    【FL03 テストフロー】この動画で確認するテスト番号:
+      fil-090        (旧: 287)     文字列
+      fil-100        (旧: 301)     文字列
+      fil-140        (旧: 344)     文字列
+      fil-150        (旧: 354)     文字列
+      fil-160        (旧: 385)     文字列
+      fil-170        (旧: 412)     文字列
+      fil-180        (旧: 413)     文字列
+      fil-190        (旧: 445)     文字列
+      fil-200        (旧: 461)     文字列
+      fil-210        (旧: 500)     文字列
+      fil-220        (旧: 535)     追加実装
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 項目名横の虫眼鏡検索での入力遅延確認
     1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
     2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
@@ -225,8 +165,8 @@ cases:
     - 「1」入力時点で検索が実行されないこと（入力中はデバウンス待機）
     - 「11」入力完了後に正しく検索が実行されること
     - 検索結果が表示されること（エラーなし）
-
-- case_no: '301'
+  old_case_no: '287'
+- case_no: fil-100
   sheet: B
   feature: 文字列
   description: |-
@@ -234,21 +174,9 @@ cases:
     ②で設定した項目で、検索しても「データはありません」と出てしまいます。
   expected: バグが修正され、正常に動作すること。(DATE_FORMAT({帰着日},"%m") で設定した項目で、検索しても「データはありません」と出てしまいます。)
   movie: FL03
-  detailed_flow: |
-    # 計算項目（DATE_FORMAT）での検索動作確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. ALLテストテーブルに「計算_日付フォーマット」フィールドが存在することを確認
-    5. 簡易検索フィールドに計算フィールドの値（月数値など）を入力: `await page.fill('#search_input', '01')`
-    6. Enterキーまたは検索実行: `await page.keyboard.press('Enter')`
-    7. Angularロード待機
-    8. 「データはありません」が表示されていないことを確認（または結果が返ること）
-    9. あるいはヘッダーの虫眼鏡から計算項目の値で検索して結果が返ることを確認
-    # Assert
-    - DATE_FORMAT系の計算項目で検索を実行してデータが返ること（「データはありません」が誤表示されないこと）
-
-- case_no: '332'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '301'
+- case_no: fil-110
   sheet: B
   feature: 文字列
   description: |-
@@ -257,44 +185,17 @@ cases:
     ③対象のテーブル名・・・ID146：テスト。
   expected: バグが修正され、正常に動作すること。(2つのフィルタに対して、 「全てのユーザーのデフォルトにする」にチェックができてしまう。   対象のテーブル名・・・ID146：テスト)
   movie: FL02
-  detailed_flow: |
-    # 「全てのユーザーのデフォルトにする」チェックが複数フィルタに同時設定できないことを確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. フィルタ設定UIを開く（絞り込みボタンをクリック）
-    5. フィルタ1を設定して「全てのユーザーのデフォルトにする」チェックを入れて保存
-    6. フィルタ2を新たに設定して「全てのユーザーのデフォルトにする」チェックを入れようとする
-    7. バグ修正後: フィルタ2の「全てのユーザーのデフォルトにする」チェックが無効化または警告が表示されること
-    8. もしくは先にチェックを入れたフィルタ1の「デフォルト」が解除されること
-    # Assert
-    - 「全てのユーザーのデフォルトにする」が同時に複数フィルタにチェックできないこと
-    - エラーが出ないこと
-
-- case_no: '334'
+  detailed_flow: FL02テストフロー参照（fil-070 のdetailed_flowと同一）
+  old_case_no: '332'
+- case_no: fil-120
   sheet: B
   feature: 文字列
   description: ①【バグ修正確認】ビューを編集した後、表示ボタンを押すと表示がカスタムになりますが、それを押すと、フィルタモードに切り替わっているので、こちら修正希望です。
   expected: バグが修正され、正常に動作すること。(ビューを編集した後、表示ボタンを押すと表示がカスタムになりますが、それを押すと、フィルタモードに切り替わっているので、こちら修正希望です。)
   movie: FL02
-  detailed_flow: |
-    # ビュー編集後の表示モード確認（フィルタモードに切り替わらないこと）
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. カードヘッダーのバーメニュー（fa-bars）から「ビュー作成」を選択
-    5. ビュー設定モーダルが表示される
-    6. ビューの設定（表示フィールドの選択等）を行い保存
-    7. カスタムフィルタプルダウン（custom-filter-pulldown）に作成したビューが表示されることを確認
-    8. 作成したビューを選択（「表示」ボタン相当）
-    9. フィルタモード（絞り込み状態）になっていないことを確認
-    10. ビューモードとして適用されていること（フィルタ設定UIが勝手に開かないこと）を確認
-    # Assert
-    - ビュー選択後にフィルタモードに切り替わらないこと
-    - ビューの列設定が反映されること
-    - エラーが出ないこと
-
-- case_no: '335'
+  detailed_flow: FL02テストフロー参照（fil-070 のdetailed_flowと同一）
+  old_case_no: '334'
+- case_no: fil-130
   sheet: B
   feature: 文字列
   description: |-
@@ -302,21 +203,9 @@ cases:
     ②テーブルを開いたとき、別のフィルターが表示されてしまう件を修正希望です。
   expected: バグが修正され、正常に動作すること。(フィルタのデフォルト設定で、「全てのユーザーのデフォルトにする」にチェックが入っていても、 テーブルを開いたとき、別のフィルターが表示されてしまう件を修正希望です。)
   movie: FL02
-  detailed_flow: |
-    # 全ユーザーデフォルトフィルタが正しく適用されることを確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. フィルタAを作成し「全てのユーザーのデフォルトにする」を有効にして保存
-    3. フィルタBを別途作成（デフォルトなし）
-    4. ページをリロード: `await page.reload()`
-    5. Angularロード待機
-    6. テーブル一覧を開いた際にフィルタAがデフォルトとして適用されていることを確認
-    7. カスタムフィルタプルダウンでフィルタAが選択状態になっていることを確認
-    8. フィルタB（デフォルトでないもの）が適用されていないことを確認
-    # Assert
-    - テーブルを開いた際に「全てのユーザーのデフォルトにする」に設定したフィルタAが適用されること
-    - 別のフィルタが誤って表示されないこと
-
-- case_no: '344'
+  detailed_flow: FL02テストフロー参照（fil-070 のdetailed_flowと同一）
+  old_case_no: '335'
+- case_no: fil-140
   sheet: B
   feature: 文字列
   description: |-
@@ -325,47 +214,20 @@ cases:
     ③「組織」項目でのみ並び替えができないため、修正いただけますでしょうか。
   expected: バグが修正され、正常に動作すること。(ユーザー管理テーブルの一覧で項目名をクリックしたとき、 他の項目ではすべて並び替えができるのですが、 「組織」項目でのみ並び替えができないため、修正いただけますでしょうか。)
   movie: FL03
-  detailed_flow: |
-    # ユーザー管理テーブルの「組織」項目で並び替えができることを確認
-    1. ユーザー管理ページへ: `await page.goto(BASE_URL + '/admin/admin')`
-    2. Angularロード待機: `await waitForAngular(page)`
-    3. ユーザー一覧のテーブルヘッダーが表示されることを確認
-    4. 「組織」列ヘッダーを探す: `await page.locator('th:has-text("組織"), th:has-text("division")')`
-    5. 「組織」列ヘッダーをクリック（昇順ソート）
-    6. Angularロード待機
-    7. ソートが適用されたことを確認（ソートインジケーターが表示される、またはデータ順序が変わる）
-    8. 再度クリックして降順に切り替わることを確認
-    # Assert
-    - 「組織」ヘッダーをクリックすると並び替えが実行されること
-    - ソートインジケーター（▲▼）が表示されること
-    - エラーが出ないこと
-
-- case_no: '354'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '344'
+- case_no: fil-150
   sheet: B
   feature: 文字列
   description: |-
     ①【バグ修正確認】「印刷作業記録」テーブルの一覧画面「商品名」横の虫眼鏡マークから、例えば「ドライ」というワードで検索すると、「データがありません」となります。
     ②ですが、簡易検索で検索すれば、「4.4oz ドライTシャツ」等が検索結果に出るので、項目横虫眼鏡からの検索でも正しい結果が出るよう修正希望です。
-  expected: バグが修正され、正常に動作すること。(「印刷作業記録」テーブルの一覧画面「商品名」横の虫眼鏡マークから、例えば「ドライ」というワードで検索すると、「データがありません」となります。 ですが、簡易検索で検索すれば、「4.4oz ドライTシャ)
+  expected: バグが修正され、正常に動作すること。(「印刷作業記録」テーブルの一覧画面「商品名」横の虫眼鏡マークから、例えば「ドライ」というワードで検索すると、「データがありません」となります。 ですが、簡易検索で検索すれば、「4.4oz
+    ドライTシャ)
   movie: FL03
-  detailed_flow: |
-    # テキストフィールドのヘッダー検索（虫眼鏡）と簡易検索で同じ結果が返ることを確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 簡易検索フィールドにキーワード（例: "fixed"）を入力: `await page.fill('#search_input', 'fixed')`
-    5. Enterキーで検索実行: `await page.keyboard.press('Enter')`
-    6. 簡易検索での結果件数を記録: `const simpleCount = await page.locator('table tbody tr').count()`
-    7. 検索をクリア
-    8. テーブルヘッダーの「テキスト」列の虫眼鏡アイコンをクリック
-    9. 同じキーワード「fixed」を入力して検索実行
-    10. ヘッダー検索での結果件数を記録
-    11. 両方の結果件数が一致すること（または両方で結果が返ること）を確認
-    # Assert
-    - ヘッダー虫眼鏡検索で「データがありません」が誤表示されないこと
-    - ヘッダー検索と簡易検索で同等の結果が返ること
-
-- case_no: '385'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '354'
+- case_no: fil-160
   sheet: B
   feature: 文字列
   description: |-
@@ -375,22 +237,9 @@ cases:
     ④※全角半角が混ざったワードにはHITすることは難しい旨お伝え済み。
   expected: エラーなく正常に動作すること。(検索において、半角と全角が識別されてしまうのですが、 検索ワードをどちらで入れてもヒットするようにしていただきたいです。  （例）現状、タンクとﾀﾝｸでは別物と認識されてしまう  ※全角半角が混ざった)
   movie: FL03
-  detailed_flow: |
-    # 全角/半角カナの検索統合確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 事前にテキストフィールドに「タンク」（全角カナ）を含むレコードを作成（または既存データを確認）
-    5. 簡易検索に全角カタカナ「タンク」を入力して検索: `await page.fill('#search_input', 'タンク')`
-    6. Enterキーで検索実行
-    7. 全角カタカナ検索の結果件数を記録
-    8. 検索をクリアして半角カタカナ「ﾀﾝｸ」で検索
-    9. 半角カタカナ検索の結果件数を記録
-    10. 両方の件数が一致すること（同じレコードがヒットすること）を確認
-    # Assert
-    - 全角カタカナ「タンク」と半角カタカナ「ﾀﾝｸ」で同じ検索結果が得られること
-
-- case_no: '412'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '385'
+- case_no: fil-170
   sheet: B
   feature: 文字列
   description: |-
@@ -400,22 +249,9 @@ cases:
     ④（数字例：１２３⇔123）
   expected: 機能改善が正しく反映されていること。(検索において、英数字の半角と全角が識別されてしまうのですが、 検索ワードをどちらで入れてもヒットするようにしていただきたいです。  （英字例：ＳＭＣ⇔SMC） （数字例：１２３⇔123）)
   movie: FL03
-  detailed_flow: |
-    # 英数字の全角/半角検索統合確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 簡易検索に半角英字「fixed」を入力して検索
-    5. 結果件数を記録（例: N件）
-    6. 検索をクリアして全角英字「ｆｉｘｅｄ」で検索
-    7. 結果件数が同じであることを確認（N件）
-    8. 数値フィールドで半角数字「1」で検索
-    9. 全角数字「１」で同じ結果が得られることを確認
-    # Assert
-    - 半角英字と全角英字で同じ検索結果が得られること
-    - 半角数字と全角数字で同じ検索結果が得られること
-
-- case_no: '413'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '412'
+- case_no: fil-180
   sheet: B
   feature: 文字列
   description: |-
@@ -424,21 +260,9 @@ cases:
     「たんく」「タンク」「ﾀﾝｸ」どれで検索しても、3種類とも検索されてほしい。
   expected: バグが修正され、正常に動作すること。(ひらがな、全角、半角すべてで検索されるように修正希望です。  例： 「たんく」「タンク」「ﾀﾝｸ」どれで検索しても、3種類とも検索されてほしい。)
   movie: FL03
-  detailed_flow: |
-    # ひらがな・カタカナ・半角カタカナの相互検索確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. まずひらがな「ふぃくすど」等で検索（またはテスト用データに合わせた語句）
-    5. 全角カタカナ「タンク」で検索 → 結果件数を記録
-    6. ひらがな「たんく」で検索 → 件数が一致することを確認
-    7. 半角カタカナ「ﾀﾝｸ」で検索 → 件数が一致することを確認
-    8. 「データがありません」が誤表示されないことを確認
-    # Assert
-    - ひらがな・カタカナ・半角カタカナで同じ検索結果が得られること
-    - 「データがありません」が誤表示されないこと
-
-- case_no: '445'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '413'
+- case_no: fil-190
   sheet: B
   feature: 文字列
   description: |-
@@ -447,20 +271,9 @@ cases:
     ③ビューの並び順などで並び替えができないため）
   expected: 機能改善が正しく反映されていること。(他テーブル参照項目の「複数の値の登録を許可する」にチェックが入っている項目は、ビューの並び順の選択肢に出ないように修正希望です。 （他テーブル参照項目の「複数の値の登録を許可する」にチェックが入ってい)
   movie: FL03
-  detailed_flow: |
-    # 複数値参照フィールドがビューのソート選択肢に含まれないことを確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. カードヘッダーのバーメニュー（fa-bars）から「ビュー作成」を選択
-    5. ビュー設定モーダルが表示される
-    6. 並び順（ソート）設定の選択肢を確認
-    7. 「複数の値の登録を許可する」が有効な参照フィールド（例: テキスト_複数、数値_複数）が並び順の選択肢に表示されていないことを確認
-    8. ALLテストテーブルの「参照_マスタ（複数）」等の多値参照フィールドがソート選択肢から除外されていることを確認
-    # Assert
-    - 複数値参照フィールドがビューのソート（並び順）選択肢に表示されないこと
-
-- case_no: '461'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '445'
+- case_no: fil-200
   sheet: B
   feature: 文字列
   description: |-
@@ -468,45 +281,20 @@ cases:
     ②動作の動画を撮影しましたので参考にしていただければと思います。
     ③また、ブラウザ更新のあとにもう一度同じワードを項目横の虫眼鏡マークから検索を行うと、フィルタボタンが反応します。
     ④ブラウザ更新を行わなくても、フィルタボタンが押せるように修正していただけますでしょ。
-  expected: バグが修正され、正常に動作すること。(項目横の虫眼鏡から検索を行った後、フィルタボタンが（カスタム）のまま反応しなくなり、ブラウザ更新を行うと反応するようになります。 動作の動画を撮影しましたので参考にしていただければと思います。 また、)
+  expected: バグが修正され、正常に動作すること。(項目横の虫眼鏡から検索を行った後、フィルタボタンが（カスタム）のまま反応しなくなり、ブラウザ更新を行うと反応するようになります。 動作の動画を撮影しましたので参考にしていただければと思います。
+    また、)
   movie: FL03
-  detailed_flow: |
-    # ヘッダー虫眼鏡検索後もフィルタプルダウンが正常動作することを確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. テーブルヘッダーの「テキスト」列の虫眼鏡アイコンをクリック
-    5. キーワードを入力して検索実行
-    6. 「カスタム」状態のフィルタボタン（custom-filter-pulldown）をクリックできることを確認
-    7. ブラウザリロードせずにフィルタプルダウンが開くことを確認: `await page.locator('custom-filter-pulldown button').first().click()`
-    8. フィルタプルダウンメニューが表示されることを確認（固まっていないこと）
-    # Assert
-    - ヘッダー虫眼鏡検索後もフィルタプルダウンがクリックできること
-    - ブラウザリロードなしでフィルタプルダウンが開くこと
-    - エラーが出ないこと
-
-- case_no: '500'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '461'
+- case_no: fil-210
   sheet: B
   feature: 文字列
   description: ①【バグ修正確認】フィルタで日時型 (yyyy/mm/dd hh:mm:ssのように時間も持っている型の項目) の項目を相対値で検索する時に、「時間も設定」にチェックを入れている状態じゃないと、検索結果が0になる
   expected: バグが修正され、正常に動作すること。(フィルタで日時型 (yyyy/mm/dd hh:mm:ssのように時間も持っている型の項目) の項目を相対値で検索する時に、「時間も設定」にチェックを入れている状態じゃないと、検索結果が0になる)
   movie: FL03
-  detailed_flow: |
-    # 日時型フィールドの相対値検索（「時間も設定」なし）で結果が返ることを確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 絞り込みボタン（虫眼鏡）をクリック
-    5. フィルタパネルが表示される
-    6. 日時フィールド（「日時」）を選択
-    7. 条件として「相対値」または「今日」「今週」等を選択
-    8. 「時間も設定」チェックボックスを**オフ**にしたまま検索実行
-    9. 結果が0件にならないことを確認（日時フィールドに値があるレコードが返ること）
-    # Assert
-    - 「時間も設定」チェックなしで日時型の相対値検索を実行した場合も正しく結果が返ること
-    - 「データがありません」が誤表示されないこと
-
-- case_no: '535'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '500'
+- case_no: fil-220
   sheet: B
   feature: 追加実装
   description: |-
@@ -519,23 +307,9 @@ cases:
     ③ht。
   expected: バグが修正され、正常に動作すること。(テーブル名：名刺情報（dataset__17） 項目名：メルマガ配信不要（計算項目）  ・不具合内容 計算項目の値を、絞り込みや簡易検索、項目名横検索しても「データはありません」となってしまいますので)
   movie: FL03
-  detailed_flow: |
-    # 計算フィールドでの検索動作確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. ALLテストテーブルには「計算_加算」「計算_乗算」等の計算フィールドが存在する
-    5. 絞り込みボタン（虫眼鏡）をクリック
-    6. フィルタパネルで「計算_加算」フィールドを選択
-    7. 条件として「より大きい」を選択し、値「0」を入力
-    8. 検索を実行
-    9. 結果が0件にならないことを確認（計算フィールドの値でレコードが絞り込まれること）
-    10. 簡易検索でも計算フィールド値で検索できることを確認
-    # Assert
-    - 計算フィールドで絞り込み検索を実行してデータが返ること
-    - 「データはありません」が誤表示されないこと
-
-- case_no: '624'
+  detailed_flow: FL03テストフロー参照（fil-090 のdetailed_flowと同一）
+  old_case_no: '535'
+- case_no: fil-230
   sheet: B
   feature: 追加実装
   description: |-
@@ -551,7 +325,14 @@ cases:
     ⑩子テーブルの項目B。
   expected: 機能改善が正しく反映されていること。(現状、親テーブルで、 　　　子テーブルの項目A　が次と一致　OK AND　子テーブルの項目B　が次と一致　HELLO として絞り込みを行った場合、以下の子テーブルが含まれる親レコードが絞り込まれます。)
   movie: FL04
-  detailed_flow: |
+  detailed_flow: |-
+    【FL04 テストフロー】この動画で確認するテスト番号:
+      fil-230        (旧: 624)     追加実装
+      fil-240        (旧: 634)     追加実装
+      fil-250        (旧: 771)     追加実装
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 親テーブルで子テーブル複合条件による絞り込みの正確性確認
     1. 親テーブル（ALLテストテーブル）のレコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
     2. Angularロード待機
@@ -564,8 +345,8 @@ cases:
     # Assert
     - 子テーブルのAND複合条件が正確に機能すること（同一子レコードが全条件を満たす場合のみヒット）
     - 誤った親レコードが表示されないこと
-
-- case_no: '634'
+  old_case_no: '624'
+- case_no: fil-240
   sheet: B
   feature: 追加実装
   description: |-
@@ -574,23 +355,9 @@ cases:
     ③https://loftal.slack.com/archives/C05CK6Z7YDQ/。
   expected: 機能改善が正しく反映されていること。(現在の仕様では、フィルタを利用した一括編集は、フィルタを保存した状態でない（つまり表示のみの状態である）と、フィルタとして認識されず、全件が編集対象になってしまいますが、 これを、フィルタを保存しない)
   movie: FL04
-  detailed_flow: |
-    # フィルタ適用中（未保存状態）の一括編集が絞り込み件数のみに適用されることを確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 全レコード件数を記録: `const totalCount = await page.locator('table tbody tr').count()`
-    5. 絞り込みボタン（虫眼鏡）をクリック
-    6. フィルタ条件を設定（保存せずに「適用」のみ）: テキストフィールドで特定値を条件に設定
-    7. フィルタ適用後の件数を確認（全件より少ない）: `const filteredCount = await page.locator('table tbody tr').count()`
-    8. バーメニュー（fa-bars）から「一括編集」を選択
-    9. 一括編集モーダルが表示される
-    10. 一括編集の対象件数が filteredCount であることを確認（totalCountではない）
-    # Assert
-    - フィルタ未保存状態でも一括編集の対象が絞り込み後の件数のみであること
-    - 全件（totalCount）が対象になっていないこと
-
-- case_no: '771'
+  detailed_flow: FL04テストフロー参照（fil-230 のdetailed_flowと同一）
+  old_case_no: '634'
+- case_no: fil-250
   sheet: B
   feature: 追加実装
   description: |-
@@ -606,25 +373,12 @@ cases:
     ②・詳細
     添付画像一枚目は、フィルタの設定画面になります。
     ③このフィルタを選択し、「検索内容」をクリッ。
-  expected: バグが修正され、正常に動作すること。(テーブル：営業活動記録（dataset__119） フィルタ：札幌抽出  ・事象 絞り込みで、「高度な機能」を使用した時、 フィルタを表示するだけだと、 検索内容を閉じて、もう一度開いたときに、 絞り)
+  expected: バグが修正され、正常に動作すること。(テーブル：営業活動記録（dataset__119） フィルタ：札幌抽出  ・事象 絞り込みで、「高度な機能」を使用した時、 フィルタを表示するだけだと、 検索内容を閉じて、もう一度開いたときに、
+    絞り)
   movie: FL04
-  detailed_flow: |
-    # 高度な機能（変数）設定後、フィルタパネルを閉じ→再度開くと変数値が保持されることを確認
-    1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
-    2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
-    3. Angularロード待機
-    4. 絞り込みボタン（虫眼鏡）をクリック
-    5. 「高度な機能」をクリック
-    6. 変数（例: 現在のユーザー名、入力変数等）を使用した条件を設定
-    7. 変数の値を記録: `const inputValue = await page.locator('input[placeholder*="変数"]').first().inputValue()`
-    8. フィルタパネルを閉じる（Escキーまたは閉じるボタン）
-    9. 再度絞り込みボタンをクリック
-    10. 変数の値が保持されていることを確認: `await expect(page.locator('input[placeholder*="変数"]').first()).toHaveValue(inputValue)`
-    # Assert
-    - フィルタパネルを閉じて再度開いても変数値が消えていないこと
-    - 高度な機能の設定が保持されること
-
-- case_no: '554'
+  detailed_flow: FL04テストフロー参照（fil-230 のdetailed_flowと同一）
+  old_case_no: '771'
+- case_no: fil-260
   sheet: B
   feature: OR条件フィルタ
   description: |-
@@ -634,7 +388,12 @@ cases:
     ④いずれかの条件がtrueのレコードが正しく絞り込まれることを確認する
   expected: フィルタの「いずれかの項目」（OR条件）で複数条件を設定した場合に正しく絞り込みが行われること
   movie: UC08
-  detailed_flow: |
+  detailed_flow: |-
+    【UC08 テストフロー】この動画で確認するテスト番号:
+      fil-260        (旧: 554)     OR条件フィルタ
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # OR条件フィルタで複数条件を設定し正しく絞り込まれることを確認
     1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
     2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
@@ -654,8 +413,8 @@ cases:
     - OR条件で複数条件を設定できること
     - OR条件適用後に正しい件数のレコードが表示されること
     - エラーが出ないこと
-
-- case_no: '823'
+  old_case_no: '554'
+- case_no: fil-270
   sheet: B
   feature: フィルタUI
   description: |-
@@ -665,7 +424,12 @@ cases:
     ④見切れていたフィルタが選択可能であることを確認する
   expected: フィルタ選択ドロップダウンでフィルタ数が多い場合もスクロールバーが正しく機能し、全フィルタが選択可能なこと
   movie: UC22
-  detailed_flow: |
+  detailed_flow: |-
+    【UC22 テストフロー】この動画で確認するテスト番号:
+      fil-270        (旧: 823)     フィルタUI
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # フィルタが多い場合のスクロール確認
     1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
     2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
@@ -680,8 +444,8 @@ cases:
     - フィルタ数が多い場合もドロップダウンにスクロールバーが表示されること
     - 最下部のフィルタが選択可能であること
     - 見切れていないこと
-
-- case_no: '427'
+  old_case_no: '823'
+- case_no: fil-280
   sheet: B
   feature: 日時項目のフィルター検索
   description: |-
@@ -692,7 +456,12 @@ cases:
     ⑤絞り込みでの日時検索で時間設定が正しく動作することを確認する
   expected: 日時項目の「=」条件・簡易検索・絞り込みの全パターンで正しく検索結果が返ること
   movie: UC05
-  detailed_flow: |
+  detailed_flow: |-
+    【UC05 テストフロー】この動画で確認するテスト番号:
+      fil-280        (旧: 427)     日時項目のフィルター検索
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 日時項目のフィルター検索（=条件・簡易検索・絞り込み）の動作確認
     1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
     2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
@@ -711,8 +480,8 @@ cases:
     - 簡易検索でも日時値で検索できること
     - ヘッダー検索でも時間を含む日時で正しく検索できること
     - いずれのパターンでもエラーが出ないこと
-
-- case_no: '739'
+  old_case_no: '427'
+- case_no: fil-290
   sheet: B
   feature: 「他の項目を条件で利用する」フィルタの項目名表示
   description: |-
@@ -722,7 +491,12 @@ cases:
     ④条件に設定した項目が「field__XXX」ではなく、正しい項目名で表示されていることを確認する
   expected: 絞り込みの「他の項目を条件で利用する」で設定した項目が、保存後もフィールドIDではなく項目名で表示されること
   movie: UC17
-  detailed_flow: |
+  detailed_flow: |-
+    【UC17 テストフロー】この動画で確認するテスト番号:
+      fil-290        (旧: 739)     「他の項目を条件で利用する」フィルタの項目名表示
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 「他の項目を条件で利用する」設定後、フィールド名が正しく表示されることを確認
     1. テーブルID取得: `const tableId = await getAllTypeTableId(page)`
     2. レコード一覧へ遷移: `await page.goto(BASE_URL + '/admin/dataset__' + tableId)`
@@ -738,7 +512,7 @@ cases:
     # Assert
     - 保存後のフィルタ設定で「他の項目を条件で利用する」の値がフィールドIDではなく項目名で表示されること
     - 「field__XXX」形式の生IDが表示されていないこと
-
+  old_case_no: '739'
 actual_steps:
 - case_no: '234'
   status: partial

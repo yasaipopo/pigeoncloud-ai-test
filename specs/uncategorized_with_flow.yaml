@@ -2,7 +2,7 @@ group: 未分類（機能名なし）
 spec_file: tests/uncategorized.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: unc-010
+- case_no: uncf-010
   sheet: A
   feature: フィールド設定
   description: |-
@@ -17,34 +17,33 @@ cases:
   movie: UC01
   detailed_flow: |-
     【UC01 テストフロー】この動画で確認するテスト番号:
-      unc-010        (旧: 145-01)  フィールド設定
-      unc-020        (旧: 128)     追加オプション→その他
-      unc-030        (旧: 129)     追加オプション→その他
-      unc-040        (旧: 146-01)  スマートフォン表示
-      unc-050        (旧: 191)     表示幅の設定
-      unc-060        (旧: 211)     大量データ
-      unc-070        (旧: 245)     レコード一覧
-      unc-080        (旧: 250)     フィールド削除・表示条件警告
-      unc-090        (旧: 262)     権限設定
-      unc-100        (旧: 267)     2段階認証
-      unc-110        (旧: 270)     検索
-      unc-120        (旧: 273)     自動採番デフォルトフォーマット
-      unc-130        (旧: 275)     フィールド設定
+      uncf-010       (旧: 145-01)  フィールド設定
+      uncf-020       (旧: 128)     追加オプション→その他
+      uncf-030       (旧: 129)     追加オプション→その他
+      uncf-040       (旧: 146-01)  スマートフォン表示
+      uncf-050       (旧: 191)     表示幅の設定
+      uncf-060       (旧: 211)     大量データ
+      uncf-070       (旧: 245)     レコード一覧
+      uncf-080       (旧: 250)     フィールド削除・表示条件警告
+      uncf-090       (旧: 262)     権限設定
+      uncf-100       (旧: 267)     2段階認証
+      uncf-110       (旧: 270)     検索
+      uncf-120       (旧: 273)     自動採番デフォルトフォーマット
+      uncf-130       (旧: 275)     フィールド設定
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId)` → waitForAngular(page)
-    4. `await page.goto(BASE_URL + "/admin/dataset__{tableId}/setting")` → waitForAngular(page)
-    5. 「一覧表示文字数」に5を設定して保存する: `await page.locator('button:has-text("保存"), button:has-text("更新")').first().click()` → 保存完了を待機
-    6. 一覧画面に戻り、文字列(一行)列の表示を確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 5文字を超えるデータが「...」で省略表示されていることを確認する: `await expect(page.locator("...")).toBeVisible()` で「5文字を超えるデータが「...」で省略を」の表示を確認
-    8. フィールド設定で「一覧表示文字数」を空（無制限）に戻して保存する: `await page.locator('button:has-text("保存"), button:has-text("更新")').first().click()` → 保存完了を待機
-    9. 一覧画面で省略なしの全文表示に戻ることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    10. 最終確認: `一覧表示文字数を設定した場合、設定文字数を超える部分が「...」で省略表示されること。設定解除で全文表示に戻ること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId} にナビゲートし、waitForAngular(page)で待機する
+    3. TEST_BASE_URL/admin/dataset__{tableId}/field にナビゲートし、waitForAngular(page)で待機する
+    4. 「一覧表示文字数」に5を設定して保存する: page.locator('textarea, input[type="text"]').first().fill("テスト入力値") を実行する
+    5. 一覧画面に戻り、文字列(一行)列の表示を確認する
+    6. 5文字を超えるデータが「...」で省略表示されていることを確認する: 対象要素が page.locator(...).isVisible() で確認する
+    7. フィールド設定で「一覧表示文字数」を空（無制限）に戻して保存する: page.locator('textarea, input[type="text"]').first().fill("テスト入力値") を実行する
+    8. 一覧画面で省略なしの全文表示に戻ることを確認する
+    9. 最終確認: 一覧表示文字数を設定した場合、設定文字数を超える部分が「...」で省略表示されること。設定解除で全文表示に戻ること - expect()で検証する
   old_case_no: 145-01
-- case_no: unc-020
+- case_no: uncf-020
   sheet: B
   feature: 追加オプション→その他
   description: |-
@@ -56,9 +55,9 @@ cases:
     ⑥⑤で作成したファイルを開き、データ登録が可能な事を確認する。
   expected: HTMLファイルから、問題なく該当データベースへの「登録」が実施可能なこと。
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '128'
-- case_no: unc-030
+- case_no: uncf-030
   sheet: B
   feature: 追加オプション→その他
   description: |-
@@ -70,9 +69,9 @@ cases:
     ⑥⑤のURLより、データ登録 が可能な事を確認する。
   expected: URLから、問題なく該当データベースへの「登録」が実施可能なこと。
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '129'
-- case_no: unc-040
+- case_no: uncf-040
   sheet: B
   feature: スマートフォン表示
   description: |-
@@ -81,28 +80,28 @@ cases:
     ③ブラウザがズームしないことを確認する
   expected: 選択肢フィールドをタップしてもブラウザのズームが発生しないこと
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: 146-01
-- case_no: unc-050
+- case_no: uncf-050
   sheet: B
   feature: 表示幅の設定
   description: ①UI上から列の表示幅の設定を行う
   expected: エラーなく表示幅の設定が行えること。
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '191'
-- case_no: unc-060
+- case_no: uncf-060
   sheet: B
   feature: 大量データ
   description: ①10万件データを登録したテーブルに対してキャッシュ周りのテストを実施する。
   expected: ・全てエラーなく処理が完了すること
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '211'
-- case_no: unc-070
+- case_no: uncf-070
   sheet: B
   feature: レコード一覧
-  description: |-
+  description: |
     ①ALLテストテーブルのレコード一覧を開く
     ②一覧画面のヘッダー行を確認する
     ③「最終更新者」列が表示されていることを確認する
@@ -111,9 +110,9 @@ cases:
   expected: |
     レコード一覧に「最終更新者」列が表示され、レコード編集後に編集ユーザー名が反映されること
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '245'
-- case_no: unc-080
+- case_no: uncf-080
   sheet: B
   feature: フィールド削除・表示条件警告
   description: |-
@@ -125,9 +124,9 @@ cases:
   expected: フィールド削除時に表示条件の紐づけ警告がモーダルに表示され、削除後は「!!存在しない項目!!」と表示されること
   movie: UC01
   target_spec: fields
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '250'
-- case_no: unc-090
+- case_no: uncf-090
   sheet: B
   feature: 権限設定
   description: |-
@@ -138,9 +137,9 @@ cases:
     ⑤テーブル権限・項目権限の両方が正しく保存されていることを確認する
   expected: テーブル権限設定と項目権限設定を組み合わせて設定しても、先に設定した権限がリセットされないこと
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '262'
-- case_no: unc-100
+- case_no: uncf-100
   sheet: B
   feature: 2段階認証
   description: |-
@@ -150,12 +149,12 @@ cases:
     ④メールアドレスでないためエラーが表示されることを確認する
   expected: ログインIDがメールアドレス形式でない場合、2段階認証の設定でエラーが表示されること
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '267'
-- case_no: unc-110
+- case_no: uncf-110
   sheet: B
   feature: 検索
-  description: |-
+  description: |
     ①複数値を許可した他テーブル参照項目があるテーブルを開く
     ②簡易検索バーにキーワードを入力して検索する
     ③検索結果が正常に表示されることを確認する
@@ -164,9 +163,9 @@ cases:
   expected: |
     複数値の他テーブル参照項目でも簡易検索・項目別検索が正常に動作し、検索結果が表示されること
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '270'
-- case_no: unc-120
+- case_no: uncf-120
   sheet: B
   feature: 自動採番デフォルトフォーマット
   description: |-
@@ -177,9 +176,9 @@ cases:
   expected: 自動採番フォーマットが空のとき、デフォルト形式「ID-{YYYY}-{MM}-{ID:4:0000}」で採番されること
   movie: UC01
   target_spec: fields
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '273'
-- case_no: unc-130
+- case_no: uncf-130
   sheet: B
   feature: フィールド設定
   description: |-
@@ -190,9 +189,9 @@ cases:
     ⑤一覧画面で日時がデフォルトフォーマットに戻っていることを確認する（カスタムフォーマットが残っていないこと）
   expected: 日時フィールドの表示フォーマット指定を解除した場合、デフォルトフォーマットに正しく戻ること
   movie: UC01
-  detailed_flow: UC01テストフロー参照（unc-010 のdetailed_flowと同一）
+  detailed_flow: UC01テストフロー参照（uncf-010 のdetailed_flowと同一）
   old_case_no: '275'
-- case_no: unc-140
+- case_no: uncf-140
   sheet: B
   feature: 詳細画面UI
   description: |-
@@ -204,34 +203,33 @@ cases:
   movie: UC02
   detailed_flow: |-
     【UC02 テストフロー】この動画で確認するテスト番号:
-      unc-140        (旧: 276)     詳細画面UI
-      unc-150        (旧: 282)     レコード編集
-      unc-160        (旧: 283)     権限設定・編集不可項目
-      unc-170        (旧: 290)     文字列
-      unc-180        (旧: 291)     文字列
-      unc-190        (旧: 292)     文字列
-      unc-200        (旧: 293)     ダッシュボード
-      unc-210        (旧: 294)     文字列
-      unc-220        (旧: 308)     計算項目
-      unc-230        (旧: 312)     一括編集
-      unc-240        (旧: 315)     ダッシュボード集計・絞り込み条件
-      unc-250        (旧: 319)     システム設定
-      unc-260        (旧: 320)     項目複製
+      uncf-140       (旧: 276)     詳細画面UI
+      uncf-150       (旧: 282)     レコード編集
+      uncf-160       (旧: 283)     権限設定・編集不可項目
+      uncf-170       (旧: 290)     文字列
+      uncf-180       (旧: 291)     文字列
+      uncf-190       (旧: 292)     文字列
+      uncf-200       (旧: 293)     ダッシュボード
+      uncf-210       (旧: 294)     文字列
+      uncf-220       (旧: 308)     計算項目
+      uncf-230       (旧: 312)     一括編集
+      uncf-240       (旧: 315)     ダッシュボード集計・絞り込み条件
+      uncf-250       (旧: 319)     システム設定
+      uncf-260       (旧: 320)     項目複製
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId + "/view/" + recordId)` → waitForAngular(page)
-    4. 画面右下に「戻る」ボタンが表示されていることを確認する: `await expect(page.locator("...")).toBeVisible()` で「画面右下に「戻る」ボタンがを」の表示を確認
-    5. 「戻る」ボタンをクリックする: 対象ボタンを特定し `await page.locator('...').click()` を実行する
-    6. 前の画面（一覧画面等）に正しく戻ることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 最終確認: `レコード詳細画面に「戻る」ボタンが表示され、クリックで前の画面に戻れること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId}/view/{recordId} にナビゲートし、waitForAngular(page)で待機する
+    3. 画面右下に「戻る」ボタンが表示されていることを確認する: 対象要素が page.locator(...).isVisible() で確認する
+    4. 「戻る」ボタンをクリックする
+    5. 前の画面（一覧画面等）に正しく戻ることを確認する
+    6. 最終確認: レコード詳細画面に「戻る」ボタンが表示され、クリックで前の画面に戻れること - expect()で検証する
   old_case_no: '276'
-- case_no: unc-150
+- case_no: uncf-150
   sheet: B
   feature: レコード編集
-  description: |-
+  description: |
     ①ALLテストテーブルのレコード編集画面を開く
     ②各フィールドに値を入力して保存する
     ③保存後にエラーが発生しないことを確認する
@@ -239,9 +237,9 @@ cases:
   expected: |
     レコード編集画面で値を入力・保存でき、保存後の詳細画面で正しい値が表示されること
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '282'
-- case_no: unc-160
+- case_no: uncf-160
   sheet: B
   feature: 権限設定・編集不可項目
   description: |-
@@ -252,9 +250,9 @@ cases:
   expected: 「高度な設定」項目権限設定を追加しても、「編集不可項目」の設定が外れないこと
   movie: UC02
   target_spec: users-permissions
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '283'
-- case_no: unc-170
+- case_no: uncf-170
   sheet: B
   feature: 文字列
   description: |-
@@ -263,17 +261,17 @@ cases:
     その後スクロールで画面をフォームに戻しても、文字を打つと画面が勝手に上がってしまいます。
   expected: 先事象が発生しないこと。
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '290'
-- case_no: unc-180
+- case_no: uncf-180
   sheet: B
   feature: 文字列
   description: ①A→B→C→Aのように、その他参照テーブルが循環するように設定する。
   expected: エラー出力となること。
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '291'
-- case_no: unc-190
+- case_no: uncf-190
   sheet: B
   feature: 文字列
   description: |-
@@ -281,9 +279,9 @@ cases:
     ②※印刷はブラウザの機能を利用して印刷。
   expected: 登録したスケジュールが問題なく印刷されること。色など含めて印刷された内容に問題がないこと。
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '292'
-- case_no: unc-200
+- case_no: uncf-200
   sheet: B
   feature: ダッシュボード
   description: |-
@@ -295,22 +293,22 @@ cases:
     ⑥作成したダッシュボードを削除する
   expected: 複数ダッシュボードを作成・切り替え・権限設定できること
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '293'
-- case_no: unc-210
+- case_no: uncf-210
   sheet: B
   feature: 文字列
   description: |-
     ①同一ユーザー(1ユーザー)で4端末からログインを行う。
     ②※端末ログイン後はログイン状態を維持する。
-  expected: |
+  expected: |-
     4端末目のログインの際、「4端末目のログインのため、最初の端末が自動ログアウトされました」のエラーが出力されログインできること。
 
     最初の端末は自動ログアウトさていること。
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '294'
-- case_no: unc-220
+- case_no: uncf-220
   sheet: B
   feature: 計算項目
   description: |-
@@ -320,12 +318,12 @@ cases:
     ④子テーブルの計算項目がリアルタイムで再計算されることを確認する
   expected: 親テーブル編集画面で子テーブルの計算項目がリアルタイムに更新されること
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '308'
-- case_no: unc-230
+- case_no: uncf-230
   sheet: B
   feature: 一括編集
-  description: |-
+  description: |
     ①ALLテストテーブルのレコード一覧を開く
     ②複数のレコードをチェックボックスで選択する
     ③一括編集ボタンをクリックする
@@ -335,9 +333,9 @@ cases:
   expected: |
     一括編集モーダルで選択レコードのIDが確認でき、選択したレコードのみが更新されること
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '312'
-- case_no: unc-240
+- case_no: uncf-240
   sheet: B
   feature: ダッシュボード集計・絞り込み条件
   description: |-
@@ -348,9 +346,9 @@ cases:
   expected: ダッシュボードに表示される集計に、設定した絞り込み条件が正しく反映されていること
   movie: UC02
   target_spec: dashboard
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '315'
-- case_no: unc-250
+- case_no: uncf-250
   sheet: B
   feature: システム設定
   description: |-
@@ -361,9 +359,9 @@ cases:
     ⑤認証方式を「LOGIN」に設定して保存し、再度開いて設定が保持されていることを確認する
   expected: SMTP認証方式のプルダウンからLOGIN/PLAIN/CRAM-MD5を選択でき、選択なしでも保存可能であること
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '319'
-- case_no: unc-260
+- case_no: uncf-260
   sheet: B
   feature: 項目複製
   description: |-
@@ -373,12 +371,12 @@ cases:
     ④同じ設定のフィールドが新しく追加されることを確認する
   expected: テーブル設定で項目の複製ボタンが機能し、同じ設定のフィールドが新規追加されること
   movie: UC02
-  detailed_flow: UC02テストフロー参照（unc-140 のdetailed_flowと同一）
+  detailed_flow: UC02テストフロー参照（uncf-140 のdetailed_flowと同一）
   old_case_no: '320'
-- case_no: unc-270
+- case_no: uncf-270
   sheet: B
   feature: フィルタ
-  description: |-
+  description: |
     ①ALLテストテーブルでフィルタ設定画面を開く
     ②フィルタの種類を「混合」に設定する
     ③混合フィルタでは「絞り込み」「集計」「項目」「並び順」「行に色をつける」「設定」「デフォルト設定」の6タブが表示されることを確認する
@@ -388,30 +386,29 @@ cases:
   movie: UC03
   detailed_flow: |-
     【UC03 テストフロー】この動画で確認するテスト番号:
-      unc-270        (旧: 323)     フィルタ
-      unc-280        (旧: 324)     一覧編集モード・値保持
-      unc-290        (旧: 326)     文字列
-      unc-300        (旧: 330)     グループ・チャート・ユーザー管理
-      unc-310        (旧: 341)     文字列
-      unc-320        (旧: 342)     テーブルJSON
-      unc-330        (旧: 349)     テーブル設定
-      unc-340        (旧: 352)     計算項目・参照フィールド保護
-      unc-350        (旧: 357)     認証・セキュリティ
-      unc-360        (旧: 360)     ユーザー管理
-      unc-370        (旧: 361)     メニュー並び替え
-      unc-380        (旧: 362)     権限設定・複数編集条件
+      uncf-270       (旧: 323)     フィルタ
+      uncf-280       (旧: 324)     一覧編集モード・値保持
+      uncf-290       (旧: 326)     文字列
+      uncf-300       (旧: 330)     グループ・チャート・ユーザー管理
+      uncf-310       (旧: 341)     文字列
+      uncf-320       (旧: 342)     テーブルJSON
+      uncf-330       (旧: 349)     テーブル設定
+      uncf-340       (旧: 352)     計算項目・参照フィールド保護
+      uncf-350       (旧: 357)     認証・セキュリティ
+      uncf-360       (旧: 360)     ユーザー管理
+      uncf-370       (旧: 361)     メニュー並び替え
+      uncf-380       (旧: 362)     権限設定・複数編集条件
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId)` → waitForAngular(page)
-    4. フィルタの種類を「混合」に設定する
-    5. 混合フィルタでは「絞り込み」「集計」「項目」「並び順」「行に色をつける」「設定」「デフォルト設定」の6タブが表示されることを確認する: `await expect(page.locator("...")).toBeVisible()` で「混合フィルタでは「絞り込み」「集計」「項目」「並び順」「行に色をつける」「設定」「デフォルト設定」の6タブがを」の表示を確認
-    6. チャートフィルタでは「混合」ボタンが押せないことを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 最終確認: `混合フィルタで6つのタブが正常に表示され、チャートフィルタでは混合が選択不可であること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId} にナビゲートし、waitForAngular(page)で待機する
+    3. フィルタの種類を「混合」に設定する
+    4. 混合フィルタでは「絞り込み」「集計」「項目」「並び順」「行に色をつける」「設定」「デフォルト設定」の6タブが表示されることを確認する
+    5. チャートフィルタでは「混合」ボタンが押せないことを確認する
+    6. 最終確認: 混合フィルタで6つのタブが正常に表示され、チャートフィルタでは混合が選択不可であること - expect()で検証する
   old_case_no: '323'
-- case_no: unc-280
+- case_no: uncf-280
   sheet: B
   feature: 一覧編集モード・値保持
   description: |-
@@ -422,9 +419,9 @@ cases:
   expected: 一覧編集モードで変更した値が詳細画面でも正しく反映されていること
   movie: UC03
   target_spec: records
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '324'
-- case_no: unc-290
+- case_no: uncf-290
   sheet: B
   feature: 文字列
   description: |-
@@ -433,9 +430,9 @@ cases:
     この条件のとき、すべての編集権限がないユーザーもレコードを編集できてしまっていたので、修正
   expected: ・編集権限なしの場合に編集条件も適用されないこと
   movie: UC03
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '326'
-- case_no: unc-300
+- case_no: uncf-300
   sheet: B
   feature: グループ・チャート・ユーザー管理
   description: |-
@@ -446,17 +443,17 @@ cases:
     ⑤パスワード再発行オプションが表示されることを確認する（オプション機能）
   expected: グループ並び替え機能が動作し、前期比チャート表示とパスワード再発行機能が利用可能であること
   movie: UC03
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '330'
-- case_no: unc-310
+- case_no: uncf-310
   sheet: B
   feature: 文字列
   description: ①子テーブルを設定し、レコード詳細画面を表示
   expected: 子テーブルの表示に余計な空白欄が表示されないこと
   movie: UC03
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '341'
-- case_no: unc-320
+- case_no: uncf-320
   sheet: B
   feature: テーブルJSON
   description: |-
@@ -467,12 +464,12 @@ cases:
     ⑤インポートが正常に完了することを確認する
   expected: テーブルJSONエクスポート・インポート時に添付ファイルがあっても不要なローディング表示が出ないこと
   movie: UC03
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '342'
-- case_no: unc-330
+- case_no: uncf-330
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面を開く
     ②「テーブルの削除ロック」チェックボックスをONにして保存する
     ③テーブル削除を試み、削除できないことを確認する
@@ -481,9 +478,9 @@ cases:
   expected: |
     削除ロックON時はテーブル削除ができず、OFF時は削除可能であること
   movie: UC03
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '349'
-- case_no: unc-340
+- case_no: uncf-340
   sheet: B
   feature: 計算項目・参照フィールド保護
   description: |-
@@ -495,9 +492,9 @@ cases:
   expected: 計算項目で参照されているフィールドは名称変更・削除ができないこと
   movie: UC03
   target_spec: fields
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '352'
-- case_no: unc-350
+- case_no: uncf-350
   sheet: B
   feature: 認証・セキュリティ
   description: |-
@@ -509,9 +506,9 @@ cases:
     ⑥別のメールアドレスでは正常にログインできることを確認する（IPベースでなくメールアドレスベースであること）
   expected: 同一メールアドレスで1日10回以上ログインに失敗した場合、その日はそのアカウントでログインできなくなること。他アカウントは影響を受けないこと
   movie: UC03
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '357'
-- case_no: unc-360
+- case_no: uncf-360
   sheet: B
   feature: ユーザー管理
   description: |-
@@ -521,12 +518,12 @@ cases:
     ④デフォルト項目（編集不可に設定された項目）が編集できない状態であることを確認する
   expected: ユーザーテーブルの編集不可項目（デフォルト項目）が正しく編集不可になっていること
   movie: UC03
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '360'
-- case_no: unc-370
+- case_no: uncf-370
   sheet: B
   feature: メニュー並び替え
-  description: |-
+  description: |
     ①サイドメニューのフォルダ内に多数（30件以上）のテーブルを作成する
     ②「メニュー並び替え」画面を開く
     ③フォルダ内の全テーブルが一覧に表示されていることを確認する
@@ -534,9 +531,9 @@ cases:
   expected: |
     メニュー並び替え画面でフォルダ内の全テーブルが表示され、並び替え操作が可能であること
   movie: UC03
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '361'
-- case_no: unc-380
+- case_no: uncf-380
   sheet: B
   feature: 権限設定・複数編集条件
   description: |-
@@ -548,9 +545,9 @@ cases:
   expected: 複数の権限に異なる編集条件が設定されている場合、各ユーザーは自分の権限の編集条件のみ適用されること
   movie: UC03
   target_spec: users-permissions
-  detailed_flow: UC03テストフロー参照（unc-270 のdetailed_flowと同一）
+  detailed_flow: UC03テストフロー参照（uncf-270 のdetailed_flowと同一）
   old_case_no: '362'
-- case_no: unc-390
+- case_no: uncf-390
   sheet: B
   feature: CSV操作
   description: |-
@@ -565,34 +562,33 @@ cases:
   movie: UC04
   detailed_flow: |-
     【UC04 テストフロー】この動画で確認するテスト番号:
-      unc-390        (旧: 367)     CSV操作
-      unc-400        (旧: 370)     ヘッダー固定
-      unc-410        (旧: 371)     通知・メール
-      unc-420        (旧: 373)     PigeonAI動作確認
-      unc-430        (旧: 390)     通知設定
-      unc-440        (旧: 391)     その他設定
-      unc-450        (旧: 398)     フィールド設定
-      unc-460        (旧: 401)     文字列
-      unc-470        (旧: 402)     テーブルコピー・権限グループ独立性
-      unc-480        (旧: 403)     文字列
-      unc-490        (旧: 419)     ユーザー管理
-      unc-500        (旧: 420)     テーブル設定
-      unc-510        (旧: 422)     テーブル管理
+      uncf-390       (旧: 367)     CSV操作
+      uncf-400       (旧: 370)     ヘッダー固定
+      uncf-410       (旧: 371)     通知・メール
+      uncf-420       (旧: 373)     PigeonAI動作確認
+      uncf-430       (旧: 390)     通知設定
+      uncf-440       (旧: 391)     その他設定
+      uncf-450       (旧: 398)     フィールド設定
+      uncf-460       (旧: 401)     文字列
+      uncf-470       (旧: 402)     テーブルコピー・権限グループ独立性
+      uncf-480       (旧: 403)     文字列
+      uncf-490       (旧: 419)     ユーザー管理
+      uncf-500       (旧: 420)     テーブル設定
+      uncf-510       (旧: 422)     テーブル管理
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/csv")` → waitForAngular(page)
-    4. CSVアップロードを実行する
-    5. `await page.goto(BASE_URL + "/admin/csv")` → waitForAngular(page)
-    6. 「キャンセル」ボタンが表示されることを確認する: `await expect(page.locator("...")).toBeVisible()` で「「キャンセル」ボタンがを」の表示を確認
-    7. キャンセルボタンをクリックし、処理がキャンセルされることを確認する: `await page.locator('button:has-text("キャンセル")').click()`
-    8. CSVダウンロードを実行し、同様にダウンロード中にキャンセルできることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    9. 処理完了後はキャンセルボタンが表示されないことを確認する: `await expect(page.locator("...")).toHaveCount(0)` または `.not.toBeVisible()` で確認
-    10. 最終確認: `CSV操作（アップロード・ダウンロード）の処理中にキャンセルが可能であること。処理完了後はキャンセルボタンが非表示になること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. CSV UP/DL履歴画面（/admin/csv）を開く
+    3. CSVアップロードを実行する
+    4. TEST_BASE_URL/admin/dataset__{tableId}/view/{recordId} にナビゲートし、waitForAngular(page)で待機する
+    5. 「キャンセル」ボタンが表示されることを確認する: 対象要素が page.locator(...).isVisible() で確認する
+    6. キャンセルボタンをクリックし、処理がキャンセルされることを確認する
+    7. CSVダウンロードを実行し、同様にダウンロード中にキャンセルできることを確認する
+    8. 処理完了後はキャンセルボタンが表示されないことを確認する: 対象要素が非表示 page.locator(...).count() === 0 であることを確認する
+    9. 最終確認: CSV操作（アップロード・ダウンロード）の処理中にキャンセルが可能であること。処理完了後はキャンセルボタンが非表示になる - expect()で検証する
   old_case_no: '367'
-- case_no: unc-400
+- case_no: uncf-400
   sheet: B
   feature: ヘッダー固定
   description: |-
@@ -602,12 +598,12 @@ cases:
     ④ヘッダー1行目が画面上部に固定表示されることを確認する
   expected: テーブル一覧でスクロール時にヘッダー1行目が固定表示されること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '370'
-- case_no: unc-410
+- case_no: uncf-410
   sheet: B
   feature: 通知・メール
-  description: |-
+  description: |
     ①通知設定画面を開く
     ②メール通知の配信状況一覧を確認する
     ③配信ステータスに「開封済み」「クリック済み」が表示列として存在することを確認する
@@ -615,9 +611,9 @@ cases:
   expected: |
     メール配信状況に「開封済み」「クリック済み」のステータスが表示され、SMTP未設定時のみ追跡機能が有効であること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '371'
-- case_no: unc-420
+- case_no: uncf-420
   sheet: B
   feature: PigeonAI動作確認
   description: |-
@@ -628,9 +624,9 @@ cases:
   expected: PigeonAI機能が正常に動作し、質問に対して回答が返ること
   movie: UC04
   target_spec: dashboard
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '373'
-- case_no: unc-430
+- case_no: uncf-430
   sheet: B
   feature: 通知設定
   description: |-
@@ -643,9 +639,9 @@ cases:
     ⑦権限設定で特定テーブルのみ権限ありのユーザーで通知設定が正しく機能することを確認する
   expected: 通知設定にテーブルを直接セットする形で設定でき、権限設定と正しく連動すること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '390'
-- case_no: unc-440
+- case_no: uncf-440
   sheet: B
   feature: その他設定
   description: |-
@@ -656,21 +652,21 @@ cases:
     ⑤アラートが自動で消えずに表示され続けることを確認する
   expected: 「アラートを自動で閉じない」設定を有効にした場合、アラートが自動で閉じずに表示され続けること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '391'
-- case_no: unc-450
+- case_no: uncf-450
   sheet: B
   feature: フィールド設定
-  description: |-
+  description: |
     ①日時フィールドを含むテーブルのレコード編集画面を開く
     ②日時入力フィールドをクリックまたはTabキーでフォーカスする
     ③日時フィールドにinputmode="numeric"属性が設定されていることを確認する
   expected: |
     日時フィールドにフォーカスした際、inputmode属性により半角英数入力モードが推奨されること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '398'
-- case_no: unc-460
+- case_no: uncf-460
   sheet: B
   feature: 文字列
   description: |-
@@ -678,9 +674,9 @@ cases:
     ②csvダウンロードで組織がidになっていたので、修正。
   expected: ・ユーザーテーブルに計算項目がある場合のCSVダウンロードで組織名が正しく出力されること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '401'
-- case_no: unc-470
+- case_no: uncf-470
   sheet: B
   feature: テーブルコピー・権限グループ独立性
   description: |-
@@ -691,9 +687,9 @@ cases:
   expected: コピーされたテーブルの権限グループ編集が、コピー元テーブルの権限グループに影響しないこと
   movie: UC04
   target_spec: users-permissions
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '402'
-- case_no: unc-480
+- case_no: uncf-480
   sheet: B
   feature: 文字列
   description: |-
@@ -701,9 +697,9 @@ cases:
     ②※本機能廃止のためテスト不要。
   expected: 一覧画面で検索している際や、ページングまたいでもちゃんと詳細が出るかどうかテスト
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '403'
-- case_no: unc-490
+- case_no: uncf-490
   sheet: B
   feature: ユーザー管理
   description: |-
@@ -714,9 +710,9 @@ cases:
     ⑤テストユーザーの状態を「有効」に戻す
   expected: ユーザーの状態を無効にした場合、ページリロードやログアウト/再ログインなしで即座に利用不可と表示されること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '419'
-- case_no: unc-500
+- case_no: uncf-500
   sheet: B
   feature: テーブル設定
   description: |-
@@ -727,12 +723,12 @@ cases:
     ⑤ドロップ後に項目が指定した位置に正しく配置されることを確認する
   expected: テーブル設定で項目のドラッグ＆ドロップ移動時にドロップ位置のインジケータが正しく表示され、移動が正常に完了すること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '420'
-- case_no: unc-510
+- case_no: uncf-510
   sheet: B
   feature: テーブル管理
-  description: |-
+  description: |
     ①テーブル管理画面を開く
     ②グループが表示されていることを確認する
     ③グループ名の横にある削除アイコンをクリックする
@@ -742,9 +738,9 @@ cases:
   expected: |
     グループ削除後、グループ内のテーブルが親グループまたは「グループなし」に移動すること
   movie: UC04
-  detailed_flow: UC04テストフロー参照（unc-390 のdetailed_flowと同一）
+  detailed_flow: UC04テストフロー参照（uncf-390 のdetailed_flowと同一）
   old_case_no: '422'
-- case_no: unc-520
+- case_no: uncf-520
   sheet: B
   feature: 権限グループ名重複バリデーション
   description: |-
@@ -758,31 +754,30 @@ cases:
   target_spec: users-permissions
   detailed_flow: |-
     【UC05 テストフロー】この動画で確認するテスト番号:
-      unc-520        (旧: 424)     権限グループ名重複バリデーション
-      unc-530        (旧: 429)     リクエストログ
-      unc-540        (旧: 442)     レコード一括操作
-      unc-550        (旧: 443)     CSV
-      unc-560        (旧: 448)     計算項目・値の重複禁止
-      unc-570        (旧: 453)     ファイルアップロード
-      unc-580        (旧: 459)     文字列
-      unc-590        (旧: 460)     関連レコード一覧
-      unc-600        (旧: 465)     ワークフロー
-      unc-610        (旧: 466)     WF承認スキップ・組織/項目対応
-      unc-620        (旧: 474)     ワークフロー
-      unc-630        (旧: 475)     レコードコピー
+      uncf-520       (旧: 424)     権限グループ名重複バリデーション
+      uncf-530       (旧: 429)     リクエストログ
+      uncf-540       (旧: 442)     レコード一括操作
+      uncf-550       (旧: 443)     CSV
+      uncf-560       (旧: 448)     計算項目・値の重複禁止
+      uncf-570       (旧: 453)     ファイルアップロード
+      uncf-580       (旧: 459)     文字列
+      uncf-590       (旧: 460)     関連レコード一覧
+      uncf-600       (旧: 465)     ワークフロー
+      uncf-610       (旧: 466)     WF承認スキップ・組織/項目対応
+      uncf-620       (旧: 474)     ワークフロー
+      uncf-630       (旧: 475)     レコードコピー
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. テーブル権限設定で権限グループを作成する
-    4. 同じ名前の権限グループが既に存在する状態で更新ボタンを押す: `await page.locator('button:has-text("テーブルを更新"), button:has-text("保存")').first().click()` → waitForAngular(page)
-    5. 重複エラーのバリデーションメッセージが表示されることを確認: `await expect(page.locator("...")).toBeVisible()` で「重複エラーのバリデーションメッセージがを確認」の表示を確認
-    6. 既存の権限グループ名を別の既存名に変更して更新を試みる
-    7. 重複エラーのバリデーションメッセージが表示されることを確認: `await expect(page.locator("...")).toBeVisible()` で「重複エラーのバリデーションメッセージがを確認」の表示を確認
-    8. 最終確認: `権限グループ名の重複時にバリデーションエラーが表示されること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. テーブル権限設定で権限グループを作成する
+    3. 同じ名前の権限グループが既に存在する状態で更新ボタンを押す
+    4. 重複エラーのバリデーションメッセージが表示されることを確認: 対象要素が page.locator(...).isVisible() で確認する
+    5. 既存の権限グループ名を別の既存名に変更して更新を試みる
+    6. 重複エラーのバリデーションメッセージが表示されることを確認: 対象要素が page.locator(...).isVisible() で確認する
+    7. 最終確認: 権限グループ名の重複時にバリデーションエラーが表示されること - expect()で検証する
   old_case_no: '424'
-- case_no: unc-530
+- case_no: uncf-530
   sheet: B
   feature: リクエストログ
   description: |-
@@ -792,9 +787,9 @@ cases:
     ④テーブル名がIDではなく表示名で記録されていることを確認する
   expected: リクエストログにテーブル名が正しく記録されていること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '429'
-- case_no: unc-540
+- case_no: uncf-540
   sheet: B
   feature: レコード一括操作
   description: |-
@@ -805,12 +800,12 @@ cases:
     ⑤同様に一括更新を実行し、処理後にチェックが外れることを確認する
   expected: 一括削除・一括更新の処理後に全選択チェックボックスが自動で外れること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '442'
-- case_no: unc-550
+- case_no: uncf-550
   sheet: B
   feature: CSV
-  description: |-
+  description: |
     ①CSVアップロード設定画面を開く
     ②CSVアップロードの各種設定項目が表示されていることを確認する
     ③CSVファイルをアップロードする
@@ -819,9 +814,9 @@ cases:
   expected: |
     CSVアップロード設定が正常に表示され、アップロード処理が完了すること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '443'
-- case_no: unc-560
+- case_no: uncf-560
   sheet: B
   feature: 計算項目・値の重複禁止
   description: |-
@@ -833,9 +828,9 @@ cases:
   expected: 計算項目に「値の重複を禁止する」機能が存在し、有効にした場合に重複値でエラーが表示されること
   movie: UC05
   target_spec: fields
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '448'
-- case_no: unc-570
+- case_no: uncf-570
   sheet: B
   feature: ファイルアップロード
   description: |-
@@ -845,17 +840,17 @@ cases:
     ④保存してレコード詳細画面でアップロードした画像が表示されることを確認する
   expected: zip形式での画像アップロードが正常にできること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '453'
-- case_no: unc-580
+- case_no: uncf-580
   sheet: B
   feature: 文字列
   description: ①フィルタの日付検索で、〜より大きい などがその日しか検索されなくなっていたので修正
   expected: ・フィルタの日付検索で「より大きい」条件が複数日を対象に動作すること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '459'
-- case_no: unc-590
+- case_no: uncf-590
   sheet: B
   feature: 関連レコード一覧
   description: |-
@@ -870,12 +865,12 @@ cases:
       - ルックアップ = 各種フィールド
   expected: 関連テーブルの表示条件で各種フィールドタイプの組み合わせが正しく機能すること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '460'
-- case_no: unc-600
+- case_no: uncf-600
   sheet: B
   feature: ワークフロー
-  description: |-
+  description: |
     ①ワークフローが設定されたテーブルでレコードを新規作成する
     ②作成時に「下書き保存」を選択する
     ③下書き保存したレコードの編集画面を開く
@@ -884,9 +879,9 @@ cases:
   expected: |
     ワークフローの下書き保存後、編集画面から申請ボタンで申請が行えること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '465'
-- case_no: unc-610
+- case_no: uncf-610
   sheet: B
   feature: WF承認スキップ・組織/項目対応
   description: |-
@@ -898,9 +893,9 @@ cases:
   expected: ワークフローの承認済みスキップが、組織や項目条件にも対応していること
   movie: UC05
   target_spec: workflow
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '466'
-- case_no: unc-620
+- case_no: uncf-620
   sheet: B
   feature: ワークフロー
   description: |-
@@ -912,9 +907,9 @@ cases:
     ⑥下書き保存後の編集画面から申請を行い、申請フローが正しく読み込まれることを確認する
   expected: ワークフロー否認/取り下げ後にデータ編集しても、条件に合ったワークフローに正しく切り替わること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '474'
-- case_no: unc-630
+- case_no: uncf-630
   sheet: B
   feature: レコードコピー
   description: |-
@@ -924,12 +919,12 @@ cases:
     ④OKを押してコピーが実行されることを確認する
   expected: レコードのコピーボタン押下時に確認ダイアログが表示され、OKでコピーが実行されること
   movie: UC05
-  detailed_flow: UC05テストフロー参照（unc-520 のdetailed_flowと同一）
+  detailed_flow: UC05テストフロー参照（uncf-520 のdetailed_flowと同一）
   old_case_no: '475'
-- case_no: unc-640
+- case_no: uncf-640
   sheet: B
   feature: CSV
-  description: |-
+  description: |
     ①「CSVダウンロード/アップロードに子テーブルも含める」設定をOFFにする
     ②親テーブルからCSVダウンロードを実行する
     ③ダウンロードしたCSVに子テーブルのデータが含まれていないことを確認する
@@ -940,31 +935,30 @@ cases:
   movie: UC06
   detailed_flow: |-
     【UC06 テストフロー】この動画で確認するテスト番号:
-      unc-640        (旧: 482)     CSV
-      unc-650        (旧: 487)     レコード遷移ボタン
-      unc-660        (旧: 489)     文字列
-      unc-670        (旧: 501)     レコード操作
-      unc-680        (旧: 503)     グループ表示
-      unc-690        (旧: 504)     テーブル設定
-      unc-700        (旧: 508)     ルックアップ・関連レコード表示条件
-      unc-710        (旧: 509)     文字列
-      unc-720        (旧: 519)     テーブル設定
-      unc-730        (旧: 520)     ワークフロー設定
-      unc-740        (旧: 521)     ワークフロー
-      unc-750        (旧: 522)     WF並行承認・同一承認者スキップ
+      uncf-640       (旧: 482)     CSV
+      uncf-650       (旧: 487)     レコード遷移ボタン
+      uncf-660       (旧: 489)     文字列
+      uncf-670       (旧: 501)     レコード操作
+      uncf-680       (旧: 503)     グループ表示
+      uncf-690       (旧: 504)     テーブル設定
+      uncf-700       (旧: 508)     ルックアップ・関連レコード表示条件
+      uncf-710       (旧: 509)     文字列
+      uncf-720       (旧: 519)     テーブル設定
+      uncf-730       (旧: 520)     ワークフロー設定
+      uncf-740       (旧: 521)     ワークフロー
+      uncf-750       (旧: 522)     WF並行承認・同一承認者スキップ
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. 「CSVダウンロード/アップロードに子テーブルも含める」設定をOFFにする
-    4. 親テーブルからCSVダウンロードを実行する
-    5. ダウンロードしたCSVに子テーブルのデータが含まれていないことを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. 同設定をONにしてCSVダウンロードを実行する
-    7. 子テーブルのデータが含まれていることを確認する: `await expect(page.locator("body")).toContainText("期待するテキスト")` で確認
-    8. 最終確認: `子テーブル含める設定OFF時は親テーブルのみ、ON時は子テーブルも含めたCSVがダウンロードされること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. 「CSVダウンロード/アップロードに子テーブルも含める」設定をOFFにする
+    3. 親テーブルからCSVダウンロードを実行する
+    4. ダウンロードしたCSVに子テーブルのデータが含まれていないことを確認する
+    5. 同設定をONにしてCSVダウンロードを実行する
+    6. 子テーブルのデータが含まれていることを確認する
+    7. 最終確認: 子テーブル含める設定OFF時は親テーブルのみ、ON時は子テーブルも含めたCSVがダウンロードされること - expect()で検証する
   old_case_no: '482'
-- case_no: unc-650
+- case_no: uncf-650
   sheet: B
   feature: レコード遷移ボタン
   description: |-
@@ -975,9 +969,9 @@ cases:
   expected: レコード詳細画面にボタン式のレコード遷移機能が実装され、正常に前後移動できること
   movie: UC06
   target_spec: records
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '487'
-- case_no: unc-660
+- case_no: uncf-660
   sheet: B
   feature: 文字列
   description: |-
@@ -986,9 +980,9 @@ cases:
     ③日時項目の現在時刻を条件にした色付けについても確認
   expected: ・ビューの行色設定が正しく保存・反映されること
   movie: UC06
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '489'
-- case_no: unc-670
+- case_no: uncf-670
   sheet: B
   feature: レコード操作
   description: |-
@@ -998,9 +992,9 @@ cases:
     ④関連する項目の値が意図通りに更新されていることを確認する
   expected: レコードの編集・保存が正しく動作すること
   movie: UC06
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '501'
-- case_no: unc-680
+- case_no: uncf-680
   sheet: B
   feature: グループ表示
   description: |-
@@ -1009,12 +1003,12 @@ cases:
     ③グループ内のテーブル名が省略されず読める状態で表示されることを確認する
   expected: グループに所属するテーブル名がサイドメニューで正しく（見切れなく）表示されること
   movie: UC06
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '503'
-- case_no: unc-690
+- case_no: uncf-690
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面を開く
     ②各種フィールドの設定変更を行い保存する
     ③保存後にエラーが発生しないことを確認する
@@ -1022,9 +1016,9 @@ cases:
   expected: |
     テーブル設定の変更を保存後、レコード一覧画面がエラーなく正常に表示されること
   movie: UC06
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '504'
-- case_no: unc-700
+- case_no: uncf-700
   sheet: B
   feature: ルックアップ・関連レコード表示条件
   description: |-
@@ -1035,9 +1029,9 @@ cases:
   expected: ルックアップが他テーブル参照の場合でも、関連レコード一覧の表示条件が正常に動作すること
   movie: UC06
   target_spec: fields
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '508'
-- case_no: unc-710
+- case_no: uncf-710
   sheet: B
   feature: 文字列
   description: |-
@@ -1047,9 +1041,9 @@ cases:
     ④数値が100000000000000以上のとき桁区切りで出ませんでした。
   expected: ・数値が100000000000000以上のとき桁区切りが正しく表示されること
   movie: UC06
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '509'
-- case_no: unc-720
+- case_no: uncf-720
   sheet: B
   feature: テーブル設定
   description: |-
@@ -1059,9 +1053,9 @@ cases:
     ④テーブル操作に設定が反映されていることを確認する
   expected: テーブル設定の変更が正しく保存・反映されること
   movie: UC06
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '519'
-- case_no: unc-730
+- case_no: uncf-730
   sheet: B
   feature: ワークフロー設定
   description: |-
@@ -1072,12 +1066,12 @@ cases:
     ⑤再度設定画面を開き、2人目以降の役職が正しく保存・表示されていることを確認する
   expected: ワークフローのAND/OR並行承認で2人目以降の役職選択が正しく保存・表示されること
   movie: UC06
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '520'
-- case_no: unc-740
+- case_no: uncf-740
   sheet: B
   feature: ワークフロー
-  description: |-
+  description: |
     ①ワークフローが設定されたテーブルで申請画面を開く
     ②「自身の組織」を選択した状態で、画面上部の「組織」を未選択のまま申請する
     ③バリデーションエラーが表示されることを確認する
@@ -1086,9 +1080,9 @@ cases:
   expected: |
     組織未選択時にバリデーションエラーが表示され、正しく選択後に再申請してもエラーが発生しないこと
   movie: UC06
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '521'
-- case_no: unc-750
+- case_no: uncf-750
   sheet: B
   feature: WF並行承認・同一承認者スキップ
   description: |-
@@ -1100,9 +1094,9 @@ cases:
   expected: 並行承認AND/ORで同一承認者スキップ有効時にテーブル一覧がエラーなく表示されること
   movie: UC06
   target_spec: workflow
-  detailed_flow: UC06テストフロー参照（unc-640 のdetailed_flowと同一）
+  detailed_flow: UC06テストフロー参照（uncf-640 のdetailed_flowと同一）
   old_case_no: '522'
-- case_no: unc-760
+- case_no: uncf-760
   sheet: B
   feature: フィールド設定
   description: |-
@@ -1114,30 +1108,29 @@ cases:
   movie: UC07
   detailed_flow: |-
     【UC07 テストフロー】この動画で確認するテスト番号:
-      unc-760        (旧: 525)     フィールド設定
-      unc-770        (旧: 526)     レコード全選択
-      unc-780        (旧: 527)     テーブル設定
-      unc-790        (旧: 528)     親子テーブル削除権限
-      unc-800        (旧: 532)     レコード操作
-      unc-810        (旧: 533)     公開フォーム
-      unc-820        (旧: 534)     他テーブル参照
-      unc-830        (旧: 537)     WFステータス変更・カスタム通知
-      unc-840        (旧: 541)     フィールド設定
-      unc-850        (旧: 542)     テーブルアイコン
-      unc-860        (旧: 543)     テーブル設定
-      unc-870        (旧: 544)     フィルタ後の一括編集
+      uncf-760       (旧: 525)     フィールド設定
+      uncf-770       (旧: 526)     レコード全選択
+      uncf-780       (旧: 527)     テーブル設定
+      uncf-790       (旧: 528)     親子テーブル削除権限
+      uncf-800       (旧: 532)     レコード操作
+      uncf-810       (旧: 533)     公開フォーム
+      uncf-820       (旧: 534)     他テーブル参照
+      uncf-830       (旧: 537)     WFステータス変更・カスタム通知
+      uncf-840       (旧: 541)     フィールド設定
+      uncf-850       (旧: 542)     テーブルアイコン
+      uncf-860       (旧: 543)     テーブル設定
+      uncf-870       (旧: 544)     フィルタ後の一括編集
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId + "/setting")` → フィールドタブをクリック: `await page.locator('a:has-text("フィールド設定"), .setting-tab').click()`
-    4. 各フィールドの追加オプション設定を確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    5. 設定変更が正しく保存されることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. 一覧画面・詳細画面で設定が反映されていることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 最終確認: `フィールドの追加オプション設定が正しく動作すること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId}/field にナビゲートする
+    3. 各フィールドの追加オプション設定を確認する
+    4. 設定変更が正しく保存されることを確認する
+    5. 一覧画面・詳細画面で設定が反映されていることを確認する
+    6. 最終確認: フィールドの追加オプション設定が正しく動作すること - expect()で検証する
   old_case_no: '525'
-- case_no: unc-770
+- case_no: uncf-770
   sheet: B
   feature: レコード全選択
   description: |-
@@ -1148,12 +1141,12 @@ cases:
     ⑤一括編集ボタンを押し、IDが10個まで表示され「...など○○件のデータが一括更新されます」と表示されることを確認する
   expected: 全選択時に全ページのデータが対象となり、一括削除・一括編集モーダルに件数が正しく表示されること
   movie: UC07
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '526'
-- case_no: unc-780
+- case_no: uncf-780
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面を開く
     ②フィールドの設定変更を行う
     ③保存後にテーブル一覧画面が正常に表示されることを確認する
@@ -1161,9 +1154,9 @@ cases:
   expected: |
     テーブル設定変更後、一覧画面とフィールドヘッダーがエラーなく正常に表示されること
   movie: UC07
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '527'
-- case_no: unc-790
+- case_no: uncf-790
   sheet: B
   feature: 親子テーブル削除権限
   description: |-
@@ -1175,9 +1168,9 @@ cases:
   expected: 親テーブル削除権限あり・子テーブル削除権限なしの場合に、子テーブルのレコード削除が禁止されること
   movie: UC07
   target_spec: users-permissions
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '528'
-- case_no: unc-800
+- case_no: uncf-800
   sheet: B
   feature: レコード操作
   description: |-
@@ -1187,9 +1180,9 @@ cases:
     ④操作結果が一覧画面に反映されていることを確認する
   expected: レコード操作が正しく動作すること
   movie: UC07
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '532'
-- case_no: unc-810
+- case_no: uncf-810
   sheet: B
   feature: 公開フォーム
   description: |-
@@ -1199,12 +1192,12 @@ cases:
     ④テーブルに添付ファイルが正しく反映されていることを確認する
   expected: 未ログイン状態の公開フォームからファイル添付して送信した場合、テーブルに添付ファイルが反映されること
   movie: UC07
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '533'
-- case_no: unc-820
+- case_no: uncf-820
   sheet: B
   feature: 他テーブル参照
-  description: |-
+  description: |
     ①大分類→中分類→小分類のように連鎖する他テーブル参照項目を設定する
     ②レコード編集画面で大分類を選択する
     ③大分類に応じて中分類の選択肢が絞り込まれることを確認する
@@ -1213,9 +1206,9 @@ cases:
   expected: |
     連鎖する他テーブル参照で親カテゴリの選択に応じて子カテゴリの選択肢が正しく絞り込まれること
   movie: UC07
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '534'
-- case_no: unc-830
+- case_no: uncf-830
   sheet: B
   feature: WFステータス変更・カスタム通知
   description: |-
@@ -1227,9 +1220,9 @@ cases:
   expected: ワークフローステータス変更アクション時にカスタム通知内容が正しく送信されること
   movie: UC07
   target_spec: workflow
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '537'
-- case_no: unc-840
+- case_no: uncf-840
   sheet: B
   feature: フィールド設定
   description: |-
@@ -1239,9 +1232,9 @@ cases:
     ④レコードの値が正しく表示されることを確認する
   expected: フィールド設定の変更が正しく反映されること
   movie: UC07
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '541'
-- case_no: unc-850
+- case_no: uncf-850
   sheet: B
   feature: テーブルアイコン
   description: |-
@@ -1250,12 +1243,12 @@ cases:
     ③アイコンの位置が正しく（ずれなく）表示されることを確認する
   expected: テーブルにアイコンを設定した場合、アイコンの位置が正しく表示されること
   movie: UC07
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '542'
-- case_no: unc-860
+- case_no: uncf-860
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面を開く
     ②各種設定を変更して保存する
     ③保存後にレコード一覧画面が正常に表示されることを確認する
@@ -1263,9 +1256,9 @@ cases:
   expected: |
     テーブル設定の変更保存後、レコード一覧画面がエラーなく表示されること
   movie: UC07
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '543'
-- case_no: unc-870
+- case_no: uncf-870
   sheet: B
   feature: フィルタ後の一括編集
   description: |-
@@ -1276,9 +1269,9 @@ cases:
   expected: 一覧画面でフィルタ後に一括編集した場合、フィルタ対象のレコードのみが更新されること
   movie: UC07
   target_spec: records
-  detailed_flow: UC07テストフロー参照（unc-760 のdetailed_flowと同一）
+  detailed_flow: UC07テストフロー参照（uncf-760 のdetailed_flowと同一）
   old_case_no: '544'
-- case_no: unc-880
+- case_no: uncf-880
   sheet: B
   feature: テーブル設定
   description: |-
@@ -1290,30 +1283,29 @@ cases:
   movie: UC08
   detailed_flow: |-
     【UC08 テストフロー】この動画で確認するテスト番号:
-      unc-880        (旧: 548)     テーブル設定
-      unc-890        (旧: 549)     WF通知
-      unc-900        (旧: 550)     他テーブル参照
-      unc-910        (旧: 551)     絞り込み後の一括削除件数表示
-      unc-920        (旧: 553)     フィールド設定
-      unc-930        (旧: 554)     OR条件フィルタ
-      unc-940        (旧: 560)     フィールド設定
-      unc-950        (旧: 561)     集計・日付型の最大最小
-      unc-960        (旧: 563)     フィールド設定
-      unc-970        (旧: 564)     ファイルフィールド
-      unc-980        (旧: 565)     フィールド設定
-      unc-990        (旧: 566)     数値フィールド・入力時桁区切り非表示
+      uncf-880       (旧: 548)     テーブル設定
+      uncf-890       (旧: 549)     WF通知
+      uncf-900       (旧: 550)     他テーブル参照
+      uncf-910       (旧: 551)     絞り込み後の一括削除件数表示
+      uncf-920       (旧: 553)     フィールド設定
+      uncf-930       (旧: 554)     OR条件フィルタ
+      uncf-940       (旧: 560)     フィールド設定
+      uncf-950       (旧: 561)     集計・日付型の最大最小
+      uncf-960       (旧: 563)     フィールド設定
+      uncf-970       (旧: 564)     ファイルフィールド
+      uncf-980       (旧: 565)     フィールド設定
+      uncf-990       (旧: 566)     数値フィールド・入力時桁区切り非表示
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId + "/setting")` → waitForAngular(page)
-    4. 追加オプション等の設定を変更して保存する: `await page.locator('button:has-text("保存"), button:has-text("更新")').first().click()` → 保存完了を待機
-    5. 設定が反映されていることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. テーブル操作が正常に動作することを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 最終確認: `テーブル設定の変更が正しく反映されること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId}/setting にナビゲートする
+    3. 追加オプション等の設定を変更して保存する
+    4. 設定が反映されていることを確認する
+    5. テーブル操作が正常に動作することを確認する
+    6. 最終確認: テーブル設定の変更が正しく反映されること - expect()で検証する
   old_case_no: '548'
-- case_no: unc-890
+- case_no: uncf-890
   sheet: B
   feature: WF通知
   description: |-
@@ -1323,12 +1315,12 @@ cases:
     ④通知メールの本文が設定した内容で送信されることを確認する（デフォルト本文にならないこと）
   expected: WFステータス変更の通知で「申請時」トリガーは申請タイミングのみ発火し、通知本文も設定内容が反映されること
   movie: UC08
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '549'
-- case_no: unc-900
+- case_no: uncf-900
   sheet: B
   feature: 他テーブル参照
-  description: |-
+  description: |
     ①他テーブル参照項目があるレコードの編集画面を開く
     ②他テーブル参照フィールドの検索ボタン（虫眼鏡アイコン）をクリックする
     ③モーダルが表示され、参照先テーブルのレコード一覧が表示されることを確認する
@@ -1337,9 +1329,9 @@ cases:
   expected: |
     他テーブル参照の検索モーダルが正常に表示され、キーワード検索でレコードを絞り込み・選択できること
   movie: UC08
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '550'
-- case_no: unc-910
+- case_no: uncf-910
   sheet: B
   feature: 絞り込み後の一括削除件数表示
   description: |-
@@ -1350,9 +1342,9 @@ cases:
   expected: フィルター・検索で絞り込み後の一括削除確認メッセージに正しい件数が表示されること
   movie: UC08
   target_spec: records
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '551'
-- case_no: unc-920
+- case_no: uncf-920
   sheet: B
   feature: フィールド設定
   description: |-
@@ -1362,9 +1354,9 @@ cases:
     ④レコードの表示・操作に反映されていることを確認する
   expected: フィールド設定が正しく保存・反映されること
   movie: UC08
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '553'
-- case_no: unc-930
+- case_no: uncf-930
   sheet: B
   feature: OR条件フィルタ
   description: |-
@@ -1374,21 +1366,21 @@ cases:
     ④いずれかの条件がtrueのレコードが正しく絞り込まれることを確認する
   expected: フィルタの「いずれかの項目」（OR条件）で複数条件を設定した場合に正しく絞り込みが行われること
   movie: UC08
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '554'
-- case_no: unc-940
+- case_no: uncf-940
   sheet: B
   feature: フィールド設定
-  description: |-
+  description: |
     ①テーブル設定画面でフィールドの各種設定を変更する
     ②保存後にレコード一覧のフィールドヘッダーが正常に表示されることを確認する
     ③レコード編集画面で各フィールドが正常に動作することを確認する
   expected: |
     フィールド設定変更後、一覧画面・編集画面でフィールドがエラーなく正常に動作すること
   movie: UC08
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '560'
-- case_no: unc-950
+- case_no: uncf-950
   sheet: B
   feature: 集計・日付型の最大最小
   description: |-
@@ -1399,9 +1391,9 @@ cases:
   expected: 集計の最大・最小の対象項目に日付・日時・時間フィールドが選択でき、正しく集計されること
   movie: UC08
   target_spec: chart-calendar
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '561'
-- case_no: unc-960
+- case_no: uncf-960
   sheet: B
   feature: フィールド設定
   description: |-
@@ -1411,9 +1403,9 @@ cases:
     ④一覧画面でレコードが正しく表示されることを確認する
   expected: フィールド設定変更が正しく保存・反映されること
   movie: UC08
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '563'
-- case_no: unc-970
+- case_no: uncf-970
   sheet: B
   feature: ファイルフィールド
   description: |-
@@ -1424,21 +1416,21 @@ cases:
     ⑤複数件連続してファイル添付・保存を繰り返し、エラーが再発しないことを確認する
   expected: 必須設定のファイルフィールドにファイルを添付して保存した際、「添付されていない」エラーが発生しないこと
   movie: UC08
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '564'
-- case_no: unc-980
+- case_no: uncf-980
   sheet: B
   feature: フィールド設定
-  description: |-
+  description: |
     ①テーブル設定画面でフィールド設定を変更する
     ②保存後にテーブル一覧画面が正常に表示されることを確認する
     ③各フィールドのヘッダーが正常に表示されていることを確認する
   expected: |
     フィールド設定変更後、テーブル一覧とフィールドヘッダーがエラーなく表示されること
   movie: UC08
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '565'
-- case_no: unc-990
+- case_no: uncf-990
   sheet: B
   feature: 数値フィールド・入力時桁区切り非表示
   description: |-
@@ -1449,9 +1441,9 @@ cases:
   expected: 数値フィールドの入力中は桁区切りが非表示になり、フォーカスアウト後に桁区切りが適用されること
   movie: UC08
   target_spec: fields
-  detailed_flow: UC08テストフロー参照（unc-880 のdetailed_flowと同一）
+  detailed_flow: UC08テストフロー参照（uncf-880 のdetailed_flowと同一）
   old_case_no: '566'
-- case_no: unc-1000
+- case_no: uncf-1000
   sheet: B
   feature: レコード操作
   description: |-
@@ -1463,30 +1455,29 @@ cases:
   movie: UC09
   detailed_flow: |-
     【UC09 テストフロー】この動画で確認するテスト番号:
-      unc-1000       (旧: 569)     レコード操作
-      unc-1010       (旧: 570)     コメントメンション
-      unc-1020       (旧: 571)     フィールド設定
-      unc-1030       (旧: 572)     パスワードポリシー・7桁以上ハイフン許可
-      unc-1040       (旧: 576)     レコード操作
-      unc-1050       (旧: 577)     WF閲覧権限
-      unc-1060       (旧: 578)     帳票
-      unc-1070       (旧: 581)     ダッシュボード正常表示
-      unc-1080       (旧: 586)     レコード操作
-      unc-1090       (旧: 588)     WF無効ユーザー
-      unc-1100       (旧: 589)     リッチテキスト
-      unc-1110       (旧: 591)     帳票一括ダウンロード
+      uncf-1000      (旧: 569)     レコード操作
+      uncf-1010      (旧: 570)     コメントメンション
+      uncf-1020      (旧: 571)     フィールド設定
+      uncf-1030      (旧: 572)     パスワードポリシー・7桁以上ハイフン許可
+      uncf-1040      (旧: 576)     レコード操作
+      uncf-1050      (旧: 577)     WF閲覧権限
+      uncf-1060      (旧: 578)     帳票
+      uncf-1070      (旧: 581)     ダッシュボード正常表示
+      uncf-1080      (旧: 586)     レコード操作
+      uncf-1090      (旧: 588)     WF無効ユーザー
+      uncf-1100      (旧: 589)     リッチテキスト
+      uncf-1110      (旧: 591)     帳票一括ダウンロード
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId)` → waitForAngular(page)
-    4. レコードの編集操作を行う
-    5. 保存後にデータが正しく保持されていることを確認する: ページをリロードまたは再遷移して `await expect(page.locator("...")).toHaveValue("期待値")` で確認
-    6. 関連テーブルのデータも正しく表示されることを確認する: `await expect(page.locator("...")).toBeVisible()` で「関連テーブルのデータも正しくを」の表示を確認
-    7. 最終確認: `レコード編集操作が正しく動作すること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId} にナビゲートし、waitForAngular(page)で待機する
+    3. レコードの編集操作を行う
+    4. 保存後にデータが正しく保持されていることを確認する
+    5. 関連テーブルのデータも正しく表示されることを確認する: 対象要素が page.locator(...).isVisible() で確認する
+    6. 最終確認: レコード編集操作が正しく動作すること - expect()で検証する
   old_case_no: '569'
-- case_no: unc-1010
+- case_no: uncf-1010
   sheet: B
   feature: コメントメンション
   description: |-
@@ -1495,21 +1486,21 @@ cases:
     ③ユーザーAに届く通知が1件であることを確認する（複数役職があっても重複しないこと）
   expected: 組織メンション時に複数役職を兼任するユーザーへの通知が重複しないこと（1件のみ届くこと）
   movie: UC09
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '570'
-- case_no: unc-1020
+- case_no: uncf-1020
   sheet: B
   feature: フィールド設定
-  description: |-
+  description: |
     ①テーブル設定画面でフィールドの各種設定を確認・変更する
     ②保存後にレコード一覧が正常に表示されることを確認する
     ③レコード詳細画面で各フィールドの値が正しく表示されることを確認する
   expected: |
     フィールド設定変更後、一覧・詳細画面でフィールドがエラーなく正常に表示されること
   movie: UC09
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '571'
-- case_no: unc-1030
+- case_no: uncf-1030
   sheet: B
   feature: パスワードポリシー・7桁以上ハイフン許可
   description: |-
@@ -1521,9 +1512,9 @@ cases:
   expected: パスワードが7桁以上で設定可能であり、ハイフンも使用できること
   movie: UC09
   target_spec: users-permissions
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '572'
-- case_no: unc-1040
+- case_no: uncf-1040
   sheet: B
   feature: レコード操作
   description: |-
@@ -1534,9 +1525,9 @@ cases:
     ⑤関連レコード一覧からレコード詳細への遷移が正しく動作することを確認する
   expected: 関連レコード一覧の表示・操作が正常に動作すること
   movie: UC09
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '576'
-- case_no: unc-1050
+- case_no: uncf-1050
   sheet: B
   feature: WF閲覧権限
   description: |-
@@ -1546,21 +1537,21 @@ cases:
     ④後付けユーザーでログインし、該当レコードが閲覧できることを確認する
   expected: WF閲覧権限で「承認者=ログインユーザー」設定時、組織・役職を後付けしたユーザーでも該当レコードを閲覧できること
   movie: UC09
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '577'
-- case_no: unc-1060
+- case_no: uncf-1060
   sheet: B
   feature: 帳票
-  description: |-
+  description: |
     ①帳票テンプレート（Excel）に「${テーブル名.項目名}」の変数式を150行以上設定する
     ②帳票をダウンロードする
     ③ダウンロードしたExcelで157行目以降（300行目まで）の変数式が正しく反映されていることを確認する
   expected: |
     Excelテンプレートの300行目までの変数式が正しく反映されてダウンロードされること
   movie: UC09
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '578'
-- case_no: unc-1070
+- case_no: uncf-1070
   sheet: B
   feature: ダッシュボード正常表示
   description: |-
@@ -1570,9 +1561,9 @@ cases:
   expected: ダッシュボードがエラーなく正常に表示されること
   movie: UC09
   target_spec: dashboard
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '581'
-- case_no: unc-1080
+- case_no: uncf-1080
   sheet: B
   feature: レコード操作
   description: |-
@@ -1582,9 +1573,9 @@ cases:
     ④一覧画面に反映されていることを確認する
   expected: レコード操作が正しく動作すること
   movie: UC09
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '586'
-- case_no: unc-1090
+- case_no: uncf-1090
   sheet: B
   feature: WF無効ユーザー
   description: |-
@@ -1594,12 +1585,12 @@ cases:
     ④進行中のWFで承認者が無効化された場合、自動で取り下げになることを確認する
   expected: WF承認者が無効/削除済みの場合、申請時にエラー表示で取り下げになること。進行中に承認者が無効化された場合も自動取り下げになること
   movie: UC09
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '588'
-- case_no: unc-1100
+- case_no: uncf-1100
   sheet: B
   feature: リッチテキスト
-  description: |-
+  description: |
     ①リッチテキスト項目があるレコードの編集画面をモバイルブラウザで開く
     ②リッチテキストの拡大ボタンをタップする
     ③拡大表示でテキストを編集する
@@ -1608,9 +1599,9 @@ cases:
   expected: |
     モバイルでリッチテキストの拡大編集後、前の画面に正常に戻れ、編集内容が保存されること
   movie: UC09
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '589'
-- case_no: unc-1110
+- case_no: uncf-1110
   sheet: B
   feature: 帳票一括ダウンロード
   description: |-
@@ -1621,9 +1612,9 @@ cases:
   expected: 帳票の一括ダウンロード（ZIP）が正常に動作し、選択したレコードの帳票がまとめてダウンロードできること
   movie: UC09
   target_spec: reports
-  detailed_flow: UC09テストフロー参照（unc-1000 のdetailed_flowと同一）
+  detailed_flow: UC09テストフロー参照（uncf-1000 のdetailed_flowと同一）
   old_case_no: '591'
-- case_no: unc-1120
+- case_no: uncf-1120
   sheet: B
   feature: ワークフロー
   description: |-
@@ -1636,31 +1627,30 @@ cases:
   movie: UC10
   detailed_flow: |-
     【UC10 テストフロー】この動画で確認するテスト番号:
-      unc-1120       (旧: 593)     ワークフロー
-      unc-1130       (旧: 594)     WF履歴
-      unc-1140       (旧: 595)     計算項目
-      unc-1150       (旧: 598)     一覧カラム幅の最小値制限
-      unc-1160       (旧: 602)     CSV操作
-      unc-1170       (旧: 603)     コネクト
-      unc-1180       (旧: 604)     テーブル設定
-      unc-1190       (旧: 606)     子テーブル・最終更新者表示
-      unc-1200       (旧: 608)     CSV操作
-      unc-1210       (旧: 609)     FTP連携
-      unc-1220       (旧: 610)     他テーブル参照
-      unc-1230       (旧: 612)     ビュー権限デフォルト変更
+      uncf-1120      (旧: 593)     ワークフロー
+      uncf-1130      (旧: 594)     WF履歴
+      uncf-1140      (旧: 595)     計算項目
+      uncf-1150      (旧: 598)     一覧カラム幅の最小値制限
+      uncf-1160      (旧: 602)     CSV操作
+      uncf-1170      (旧: 603)     コネクト
+      uncf-1180      (旧: 604)     テーブル設定
+      uncf-1190      (旧: 606)     子テーブル・最終更新者表示
+      uncf-1200      (旧: 608)     CSV操作
+      uncf-1210      (旧: 609)     FTP連携
+      uncf-1220      (旧: 610)     他テーブル参照
+      uncf-1230      (旧: 612)     ビュー権限デフォルト変更
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. ワークフローが設定されたテーブルでレコードを申請する
-    4. 申請中のレコードを削除する（編集可能設定の場合、取り下げずに削除可能）
-    5. 左メニューのワークフローバッジ数を確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. 削除したレコードの分のバッジが残っていないことを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 別のレコードで申請→承認の正常フローを実行し、バッジが正しく増減することを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 最終確認: `申請中レコードを削除した場合、ワークフローバッジが正しく更新されること（残り続けないこと）` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. ワークフローが設定されたテーブルでレコードを申請する
+    3. 申請中のレコードを削除する（編集可能設定の場合、取り下げずに削除可能）
+    4. 左メニューのワークフローバッジ数を確認する
+    5. 削除したレコードの分のバッジが残っていないことを確認する
+    6. 別のレコードで申請→承認の正常フローを実行し、バッジが正しく増減することを確認する
+    7. 最終確認: 申請中レコードを削除した場合、ワークフローバッジが正しく更新されること（残り続けないこと） - expect()で検証する
   old_case_no: '593'
-- case_no: unc-1130
+- case_no: uncf-1130
   sheet: B
   feature: WF履歴
   description: |-
@@ -1670,12 +1660,12 @@ cases:
     ④WF履歴が非表示になっていることを確認する
   expected: WFを無効化したテーブルのレコード詳細画面にWF履歴が表示されないこと
   movie: UC10
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '594'
-- case_no: unc-1140
+- case_no: uncf-1140
   sheet: B
   feature: 計算項目
-  description: |-
+  description: |
     ①関連レコード一覧を持つテーブルを用意する
     ②親テーブルに計算項目を追加し、SUM({関連レコード一覧名::数値項目名})の計算式を設定する
     ③計算値の自動更新をONにする
@@ -1684,9 +1674,9 @@ cases:
   expected: |
     関連レコード一覧内の項目をSUMで計算した結果が、親レコードの計算項目に正しく表示されること
   movie: UC10
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '595'
-- case_no: unc-1150
+- case_no: uncf-1150
   sheet: B
   feature: 一覧カラム幅の最小値制限
   description: |-
@@ -1696,9 +1686,9 @@ cases:
   expected: 一覧画面のカラム幅を最小にしても項目名1文字分の幅が確保され、長文は省略表示されること
   movie: UC10
   target_spec: layout-ui
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '598'
-- case_no: unc-1160
+- case_no: uncf-1160
   sheet: B
   feature: CSV操作
   description: |-
@@ -1708,9 +1698,9 @@ cases:
     ④ダウンロードしたCSVファイルを開き、先頭ゼロが消えず「0621」として出力されていることを確認する
   expected: 計算フィールドの先頭ゼロ付き数値がCSVダウンロードで消えないこと
   movie: UC10
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '602'
-- case_no: unc-1170
+- case_no: uncf-1170
   sheet: B
   feature: コネクト
   description: |-
@@ -1720,21 +1710,21 @@ cases:
     ④画面がローディングのまま固まらないことを確認する
   expected: コネクトのWF完了トリガーでコピー先の重複禁止エラー時に適切なエラーメッセージが表示され、画面が固まらないこと
   movie: UC10
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '603'
-- case_no: unc-1180
+- case_no: uncf-1180
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面でフィールドの設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③各フィールドのデータが正しく表示されていることを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面でフィールドがエラーなく正常に表示されること
   movie: UC10
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '604'
-- case_no: unc-1190
+- case_no: uncf-1190
   sheet: B
   feature: 子テーブル・最終更新者表示
   description: |-
@@ -1745,9 +1735,9 @@ cases:
   expected: 子テーブルのレコード作成直後から最終更新者が表示されること（更新操作なしでも作成者が表示）
   movie: UC10
   target_spec: records
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '606'
-- case_no: unc-1200
+- case_no: uncf-1200
   sheet: B
   feature: CSV操作
   description: |-
@@ -1757,9 +1747,9 @@ cases:
     ④ダウンロードしたCSVで、参照先テーブルのIDではなく実際の表示値が出力されていることを確認する
   expected: 複数許可の他テーブル参照フィールドをCSVダウンロードした際、IDではなく表示値が出力されること
   movie: UC10
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '608'
-- case_no: unc-1210
+- case_no: uncf-1210
   sheet: B
   feature: FTP連携
   description: |-
@@ -1768,12 +1758,12 @@ cases:
     ③どのテーブルで発生したエラーかが通知に含まれていることを確認する
   expected: FTP処理の失敗・一部成功時にどのテーブルのエラーかが通知に含まれること
   movie: UC10
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '609'
-- case_no: unc-1220
+- case_no: uncf-1220
   sheet: B
   feature: 他テーブル参照
-  description: |-
+  description: |
     ①他テーブル参照項目の「表示項目」が空欄の状態でテーブルを更新する
     ②バリデーションエラーが表示され、更新できないことを確認する
     ③表示項目を正しく設定して保存する
@@ -1781,9 +1771,9 @@ cases:
   expected: |
     他テーブル参照の表示項目が空欄の場合はバリデーションエラーで更新不可となり、正しく設定後はレコードが表示されること
   movie: UC10
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '610'
-- case_no: unc-1230
+- case_no: uncf-1230
   sheet: B
   feature: ビュー権限デフォルト変更
   description: |-
@@ -1794,9 +1784,9 @@ cases:
   expected: ビュー設定タブの権限デフォルトが「自分のみ表示」に変更されていること
   movie: UC10
   target_spec: layout-ui
-  detailed_flow: UC10テストフロー参照（unc-1120 のdetailed_flowと同一）
+  detailed_flow: UC10テストフロー参照（uncf-1120 のdetailed_flowと同一）
   old_case_no: '612'
-- case_no: unc-1240
+- case_no: uncf-1240
   sheet: B
   feature: チャート
   description: |-
@@ -1810,32 +1800,31 @@ cases:
   movie: UC11
   detailed_flow: |-
     【UC11 テストフロー】この動画で確認するテスト番号:
-      unc-1240       (旧: 615)     チャート
-      unc-1250       (旧: 617)     レコード一括操作
-      unc-1260       (旧: 619)     CSV
-      unc-1270       (旧: 622)     他テーブル参照・値絞り込みのユーザー権限対応
-      unc-1280       (旧: 625)     フィールド設定
-      unc-1290       (旧: 626)     CSV DL
-      unc-1300       (旧: 632)     テーブル設定
-      unc-1310       (旧: 633)     フィールド名スペース登録時の表示
-      unc-1320       (旧: 637)     計算フィールド
-      unc-1330       (旧: 638)     ワークフロー承認
-      unc-1340       (旧: 639)     UI
-      unc-1350       (旧: 641)     システムログ・APIログチャート
+      uncf-1240      (旧: 615)     チャート
+      uncf-1250      (旧: 617)     レコード一括操作
+      uncf-1260      (旧: 619)     CSV
+      uncf-1270      (旧: 622)     他テーブル参照・値絞り込みのユーザー権限対応
+      uncf-1280      (旧: 625)     フィールド設定
+      uncf-1290      (旧: 626)     CSV DL
+      uncf-1300      (旧: 632)     テーブル設定
+      uncf-1310      (旧: 633)     フィールド名スペース登録時の表示
+      uncf-1320      (旧: 637)     計算フィールド
+      uncf-1330      (旧: 638)     ワークフロー承認
+      uncf-1340      (旧: 639)     UI
+      uncf-1350      (旧: 641)     システムログ・APIログチャート
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId)` → チャートビューに切り替える
-    4. データ項目1に6個以上の種類がある項目を設定する
-    5. チャートを表示し凡例が表示されることを確認する: `await expect(page.locator("...")).toBeVisible()` で「チャートを表示し凡例がを」の表示を確認
-    6. チャート設定で「6個以上の場合は凡例を表示しない」オプションを有効にする: 対象チェックボックスを `await page.locator('input[type="checkbox"]').check()` で有効にする
-    7. 凡例が非表示になることを確認する: `await expect(page.locator("...")).toHaveCount(0)` または `.not.toBeVisible()` で確認
-    8. オプションを無効に戻し凡例が再表示されることを確認する: `await expect(page.locator("...")).toBeVisible()` で「オプションを無効に戻し凡例が再を」の表示を確認
-    9. 最終確認: `チャートの凡例が6個以上ある場合に凡例非表示の設定が可能であること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId} にナビゲートし、チャートビューに切り替える
+    3. データ項目1に6個以上の種類がある項目を設定する
+    4. チャートを表示し凡例が表示されることを確認する: 対象要素が page.locator(...).isVisible() で確認する
+    5. チャート設定で「6個以上の場合は凡例を表示しない」オプションを有効にする
+    6. 凡例が非表示になることを確認する: 対象要素が非表示 page.locator(...).count() === 0 であることを確認する
+    7. オプションを無効に戻し凡例が再表示されることを確認する: 対象要素が page.locator(...).isVisible() で確認する
+    8. 最終確認: チャートの凡例が6個以上ある場合に凡例非表示の設定が可能であること - expect()で検証する
   old_case_no: '615'
-- case_no: unc-1250
+- case_no: uncf-1250
   sheet: B
   feature: レコード一括操作
   description: |-
@@ -1846,12 +1835,12 @@ cases:
     ⑤一括編集ボタンでも同様の注意書きが表示されることを確認する
   expected: 全データ選択時の一括削除・一括編集ポップアップに赤文字で全データ削除の注意書きが表示されること
   movie: UC11
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '617'
-- case_no: unc-1260
+- case_no: uncf-1260
   sheet: B
   feature: CSV
-  description: |-
+  description: |
     ①子テーブルのテーブル設定で「CSVにテーブル名を含める」を有効にする
     ②子テーブルからCSVダウンロードを実行する
     ③ダウンロードしたCSVの「テーブル名」列にテーブル名が正しく表示されていることを確認する
@@ -1859,9 +1848,9 @@ cases:
   expected: |
     子テーブルCSVダウンロード時、「テーブル名」列と「親テーブルのID」列の値が逆にならず正しく出力されること
   movie: UC11
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '619'
-- case_no: unc-1270
+- case_no: uncf-1270
   sheet: B
   feature: 他テーブル参照・値絞り込みのユーザー権限対応
   description: |-
@@ -1872,9 +1861,9 @@ cases:
   expected: 他テーブル参照の値の絞り込み設定が、全ユーザーで正常に動作すること
   movie: UC11
   target_spec: fields
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '622'
-- case_no: unc-1280
+- case_no: uncf-1280
   sheet: B
   feature: フィールド設定
   description: |-
@@ -1885,9 +1874,9 @@ cases:
     ⑤テーブル設定を再度開き、デフォルト値「0.5」が保持されていることを確認する
   expected: 数値フィールドの小数デフォルト値が正しく表示・保存されること。テーブル設定を再度開いてもデフォルト値が保持されること
   movie: UC11
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '625'
-- case_no: unc-1290
+- case_no: uncf-1290
   sheet: B
   feature: CSV DL
   description: |-
@@ -1897,12 +1886,12 @@ cases:
     ④レコードID1001以上のユーザーの組織欄が空欄にならず、正しく出力されていることを確認する
   expected: ユーザーテーブルのCSVダウンロードでレコードID1001以上のユーザーの組織が正しく出力されること
   movie: UC11
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '626'
-- case_no: unc-1300
+- case_no: uncf-1300
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面を開く
     ②各種フィールドの設定を変更・保存する
     ③保存後にレコード一覧画面が正常に表示されることを確認する
@@ -1910,9 +1899,9 @@ cases:
   expected: |
     テーブル設定変更後、レコード一覧画面がエラーなく正常に表示されること
   movie: UC11
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '632'
-- case_no: unc-1310
+- case_no: uncf-1310
   sheet: B
   feature: フィールド名スペース登録時の表示
   description: |-
@@ -1922,9 +1911,9 @@ cases:
   expected: 項目名にスペースのみを登録してもテーブル設定画面で項目が正常に表示されること（非表示にならないこと）
   movie: UC11
   target_spec: fields
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '633'
-- case_no: unc-1320
+- case_no: uncf-1320
   sheet: B
   feature: 計算フィールド
   description: |-
@@ -1936,9 +1925,9 @@ cases:
     ⑥7以上の数字のみの項目名で計算が正常に動作することを確認する
   expected: 項目名が数字のみ（7以上）の場合でも計算フィールドで正しく参照・計算できること
   movie: UC11
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '637'
-- case_no: unc-1330
+- case_no: uncf-1330
   sheet: B
   feature: ワークフロー承認
   description: |-
@@ -1947,12 +1936,12 @@ cases:
     ③申請フローNo.が変わった際にステップ番号も正しく切り替わることを確認する
   expected: ワークフローで申請フローNo.が変わった際にステップ番号が正しく切り替わること
   movie: UC11
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '638'
-- case_no: unc-1340
+- case_no: uncf-1340
   sheet: B
   feature: UI
-  description: |-
+  description: |
     ①テーブルのレコード一覧画面を開く
     ②ブラウザタブのタイトルが「{テーブル名} - PigeonCloud」形式であることを確認する
     ③レコード詳細画面を開く
@@ -1960,9 +1949,9 @@ cases:
   expected: |
     一覧画面では「テーブル名 - PigeonCloud」、詳細画面では「テーブル名-ID:番号 - PigeonCloud」がブラウザタブに表示されること
   movie: UC11
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '639'
-- case_no: unc-1350
+- case_no: uncf-1350
   sheet: B
   feature: システムログ・APIログチャート
   description: |-
@@ -1973,9 +1962,9 @@ cases:
   expected: システムログページにAPIログの月別棒グラフチャートが表示されること
   movie: UC11
   target_spec: system-settings
-  detailed_flow: UC11テストフロー参照（unc-1240 のdetailed_flowと同一）
+  detailed_flow: UC11テストフロー参照（uncf-1240 のdetailed_flowと同一）
   old_case_no: '641'
-- case_no: unc-1360
+- case_no: uncf-1360
   sheet: B
   feature: テーブル設定
   description: |-
@@ -1988,31 +1977,30 @@ cases:
   movie: UC12
   detailed_flow: |-
     【UC12 テストフロー】この動画で確認するテスト番号:
-      unc-1360       (旧: 643)     テーブル設定
-      unc-1370       (旧: 644)     テーブルコピー
-      unc-1380       (旧: 647)     フィルタ
-      unc-1390       (旧: 648)     パスワードリセットメール・テキスト形式対応
-      unc-1400       (旧: 650)     通知設定
-      unc-1410       (旧: 651)     SMTP設定
-      unc-1420       (旧: 652)     計算項目
-      unc-1430       (旧: 655)     帳票出力・計算項目の日付フォーマット
-      unc-1440       (旧: 657)     計算フィールド
-      unc-1450       (旧: 658)     通知設定
-      unc-1460       (旧: 659)     フィルタ
-      unc-1470       (旧: 661)     チャートプレビュー・期間切り替え
+      uncf-1360      (旧: 643)     テーブル設定
+      uncf-1370      (旧: 644)     テーブルコピー
+      uncf-1380      (旧: 647)     フィルタ
+      uncf-1390      (旧: 648)     パスワードリセットメール・テキスト形式対応
+      uncf-1400      (旧: 650)     通知設定
+      uncf-1410      (旧: 651)     SMTP設定
+      uncf-1420      (旧: 652)     計算項目
+      uncf-1430      (旧: 655)     帳票出力・計算項目の日付フォーマット
+      uncf-1440      (旧: 657)     計算フィールド
+      uncf-1450      (旧: 658)     通知設定
+      uncf-1460      (旧: 659)     フィルタ
+      uncf-1470      (旧: 661)     チャートプレビュー・期間切り替え
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId + "/setting")` → waitForAngular(page)
-    4. 主キー設定で5項目以上（最大10項目）を設定できることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    5. 5項目を主キーとして設定して保存する: `await page.locator('button:has-text("保存"), button:has-text("更新")').first().click()` → 保存完了を待機
-    6. テーブル設定を再度開き、主キー設定が保持されていることを確認する: ページをリロードまたは再遷移して `await expect(page.locator("...")).toHaveValue("期待値")` で確認
-    7. 主キーの重複チェックが正しく動作することを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 最終確認: `主キー設定で5項目以上を設定でき、正しく保存・動作すること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId}/setting にナビゲートする
+    3. 主キー設定で5項目以上（最大10項目）を設定できることを確認する
+    4. 5項目を主キーとして設定して保存する
+    5. テーブル設定を再度開き、主キー設定が保持されていることを確認する
+    6. 主キーの重複チェックが正しく動作することを確認する
+    7. 最終確認: 主キー設定で5項目以上を設定でき、正しく保存・動作すること - expect()で検証する
   old_case_no: '643'
-- case_no: unc-1370
+- case_no: uncf-1370
   sheet: B
   feature: テーブルコピー
   description: |-
@@ -2021,12 +2009,12 @@ cases:
     ③行の設定が正しくコピー/インポートされていることを確認する
   expected: テーブルコピーやJSONインポートで行の設定（行色等）が正しくコピーされること
   movie: UC12
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '644'
-- case_no: unc-1380
+- case_no: uncf-1380
   sheet: B
   feature: フィルタ
-  description: |-
+  description: |
     ①日時項目があるテーブルでフィルタを作成する
     ②絞り込み条件に「日時項目」「が次と一致」「相対値：今月」を設定する
     ③月末日（31日）にフィルタを適用する
@@ -2035,9 +2023,9 @@ cases:
   expected: |
     月末日でも相対値「今月」フィルタが正しく動作し、当月のデータのみが表示されること
   movie: UC12
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '647'
-- case_no: unc-1390
+- case_no: uncf-1390
   sheet: B
   feature: パスワードリセットメール・テキスト形式対応
   description: |-
@@ -2048,9 +2036,9 @@ cases:
   expected: パスワードリセットメールにリンクとURL文字列の両方が含まれ、テキスト形式でもURLが確認できること
   movie: UC12
   target_spec: notifications
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '648'
-- case_no: unc-1400
+- case_no: uncf-1400
   sheet: B
   feature: 通知設定
   description: |-
@@ -2062,9 +2050,9 @@ cases:
     ⑥CSVアップロード後も通知が送信されることを確認する
   expected: 特定項目更新時の通知が、手動編集・CSVアップロードの両方で正しく送信されること
   movie: UC12
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '650'
-- case_no: unc-1410
+- case_no: uncf-1410
   sheet: B
   feature: SMTP設定
   description: |-
@@ -2075,12 +2063,12 @@ cases:
     ⑤ダッシュボードに戻りエラーが発生しないことを確認する
   expected: SMTP設定が正常に動作し、テストメール送信が成功すること
   movie: UC12
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '651'
-- case_no: unc-1420
+- case_no: uncf-1420
   sheet: B
   feature: 計算項目
-  description: |-
+  description: |
     ①関連レコード一覧を持つテーブルで、親テーブルにSUM計算項目を設定する
     ②関連レコード一覧の表示条件に他テーブル参照の条件を設定する
     ③関連レコードにデータを追加する
@@ -2089,9 +2077,9 @@ cases:
   expected: |
     関連レコードの表示条件が他テーブル参照の場合でも、SUM計算項目の結果が正しく表示されること
   movie: UC12
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '652'
-- case_no: unc-1430
+- case_no: uncf-1430
   sheet: B
   feature: 帳票出力・計算項目の日付フォーマット
   description: |-
@@ -2102,9 +2090,9 @@ cases:
   expected: 計算値の種類が日付/日時の計算項目を帳票出力したとき、表示フォーマット通りに出力されること
   movie: UC12
   target_spec: reports
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '655'
-- case_no: unc-1440
+- case_no: uncf-1440
   sheet: B
   feature: 計算フィールド
   description: |-
@@ -2114,9 +2102,9 @@ cases:
     ④計算値が正しく表示されることを確認する（空やエラーにならないこと）
   expected: 親テーブルの階層を重ねた他テーブル参照を子テーブルの計算フィールドで参照した場合、値が正しく表示されること
   movie: UC12
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '657'
-- case_no: unc-1450
+- case_no: uncf-1450
   sheet: B
   feature: 通知設定
   description: |-
@@ -2126,12 +2114,12 @@ cases:
     ④選択して保存し、通知が正しく送信されることを確認する
   expected: 通知設定の通知先メールアドレスに「ログインユーザーのメールアドレス」が選択可能で、通知が正しく送信されること
   movie: UC12
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '658'
-- case_no: unc-1460
+- case_no: uncf-1460
   sheet: B
   feature: フィルタ
-  description: |-
+  description: |
     ①年度開始月が4月のテーブルで集計フィルタを作成する
     ②絞り込み条件に「日時項目」「が次と一致」「相対値：来年度」を設定する
     ③集計結果を確認する
@@ -2140,9 +2128,9 @@ cases:
   expected: |
     相対値「来年度」のフィルタが年度開始月に基づいて正しく絞り込まれ、年度範囲外のデータが含まれないこと
   movie: UC12
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '659'
-- case_no: unc-1470
+- case_no: uncf-1470
   sheet: B
   feature: チャートプレビュー・期間切り替え
   description: |-
@@ -2155,9 +2143,9 @@ cases:
   expected: チャートプレビュー画面の前後切り替えボタン（≪≫）で期間テキスト表示が正しく更新されること
   movie: UC12
   target_spec: chart-calendar
-  detailed_flow: UC12テストフロー参照（unc-1360 のdetailed_flowと同一）
+  detailed_flow: UC12テストフロー参照（uncf-1360 のdetailed_flowと同一）
   old_case_no: '661'
-- case_no: unc-1480
+- case_no: uncf-1480
   sheet: B
   feature: テーブル設定
   description: |-
@@ -2170,31 +2158,30 @@ cases:
   movie: UC13
   detailed_flow: |-
     【UC13 テストフロー】この動画で確認するテスト番号:
-      unc-1480       (旧: 663)     テーブル設定
-      unc-1490       (旧: 664)     ルックアップ
-      unc-1500       (旧: 665)     CSV
-      unc-1510       (旧: 666)     CSV・子テーブル他テーブル参照
-      unc-1520       (旧: 668)     フィールド設定
-      unc-1530       (旧: 669)     画像フィールド
-      unc-1540       (旧: 670)     通知・メール
-      unc-1550       (旧: 671)     CSVダウンロード・大量レコード重複防止
-      unc-1560       (旧: 673)     ワークフロー
-      unc-1570       (旧: 674)     CSV DL
-      unc-1580       (旧: 675)     レコード操作
-      unc-1590       (旧: 678)     チャートプレビュー・期間切り替えエラーなし
+      uncf-1480      (旧: 663)     テーブル設定
+      uncf-1490      (旧: 664)     ルックアップ
+      uncf-1500      (旧: 665)     CSV
+      uncf-1510      (旧: 666)     CSV・子テーブル他テーブル参照
+      uncf-1520      (旧: 668)     フィールド設定
+      uncf-1530      (旧: 669)     画像フィールド
+      uncf-1540      (旧: 670)     通知・メール
+      uncf-1550      (旧: 671)     CSVダウンロード・大量レコード重複防止
+      uncf-1560      (旧: 673)     ワークフロー
+      uncf-1570      (旧: 674)     CSV DL
+      uncf-1580      (旧: 675)     レコード操作
+      uncf-1590      (旧: 678)     チャートプレビュー・期間切り替えエラーなし
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__" + tableId + "/setting")` → waitForAngular(page)
-    4. 追加オプションで「一括否認ボタンを非表示にする」設定を有効にする: 対象チェックボックスを `await page.locator('input[type="checkbox"]').check()` で有効にする
-    5. 「一括削除ボタンを非表示にする」設定を有効にして保存する: `await page.locator('button:has-text("保存"), button:has-text("更新")').first().click()` → 保存完了を待機
-    6. テーブル一覧画面でレコードを選択し、一括否認・一括削除ボタンが非表示であることを確認する: 対象のセレクト/プルダウンを特定し `selectOption()` または `.click()` で選択する
-    7. 設定を無効に戻し、ボタンが再表示されることを確認する: `await expect(page.locator("...")).toBeVisible()` で「設定を無効に戻し、ボタンが再を」の表示を確認
-    8. 最終確認: `テーブル設定で一括否認・一括削除ボタンの非表示設定ができ、正しく反映されること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId}/setting にナビゲートする
+    3. 追加オプションで「一括否認ボタンを非表示にする」設定を有効にする
+    4. 「一括削除ボタンを非表示にする」設定を有効にして保存する
+    5. テーブル一覧画面でレコードを選択し、一括否認・一括削除ボタンが非表示であることを確認する: 対象要素が非表示 page.locator(...).count() === 0 であることを確認する
+    6. 設定を無効に戻し、ボタンが再表示されることを確認する
+    7. 最終確認: テーブル設定で一括否認・一括削除ボタンの非表示設定ができ、正しく反映されること - expect()で検証する
   old_case_no: '663'
-- case_no: unc-1490
+- case_no: uncf-1490
   sheet: B
   feature: ルックアップ
   description: |-
@@ -2204,12 +2191,12 @@ cases:
     ④ルックアップ先のフォーマットに合わせて表示されることを確認する（yyyy-mm-dd固定にならないこと）
   expected: ルックアップで表示した日付項目がルックアップ先のフォーマット設定に従って表示されること
   movie: UC13
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '664'
-- case_no: unc-1500
+- case_no: uncf-1500
   sheet: B
   feature: CSV
-  description: |-
+  description: |
     ①他テーブル参照で日時項目を参照しているテーブルを用意する
     ②参照先の日時項目に一桁の月（例：6月）を含むデータを登録する
     ③CSVダウンロードを実行する
@@ -2218,9 +2205,9 @@ cases:
   expected: |
     他テーブル参照の日時項目で一桁の月日が含まれる場合でもCSVアップロードがエラーなく完了すること
   movie: UC13
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '665'
-- case_no: unc-1510
+- case_no: uncf-1510
   sheet: B
   feature: CSV・子テーブル他テーブル参照
   description: |-
@@ -2231,9 +2218,9 @@ cases:
   expected: 子テーブルを含むCSVアップロードで、他テーブル参照の値が正しく各行に反映されること
   movie: UC13
   target_spec: csv-export
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '666'
-- case_no: unc-1520
+- case_no: uncf-1520
   sheet: B
   feature: フィールド設定
   description: |-
@@ -2244,9 +2231,9 @@ cases:
     ⑤一覧画面で絞り込みが正しく動作することを確認する
   expected: 「他の項目で値の絞り込みを行う」で他テーブル参照タイプの表示項目を選択できること
   movie: UC13
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '668'
-- case_no: unc-1530
+- case_no: uncf-1530
   sheet: B
   feature: 画像フィールド
   description: |-
@@ -2256,12 +2243,12 @@ cases:
     ④表示される画素数が実際の画像サイズと一致していることを確認する
   expected: 画像フィールドでファイルサイズと正しい画素数（幅x高さ）が表示されること
   movie: UC13
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '669'
-- case_no: unc-1540
+- case_no: uncf-1540
   sheet: B
   feature: 通知・メール
-  description: |-
+  description: |
     ①システム設定でメール受信取込機能を有効にする
     ②メール受信取込設定画面が正常に表示されることを確認する
     ③取込先テーブルとマッピング設定が行えることを確認する
@@ -2269,9 +2256,9 @@ cases:
   expected: |
     メール受信取込機能の設定画面が正常に表示され、設定の保存がエラーなく完了すること
   movie: UC13
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '670'
-- case_no: unc-1550
+- case_no: uncf-1550
   sheet: B
   feature: CSVダウンロード・大量レコード重複防止
   description: |-
@@ -2282,9 +2269,9 @@ cases:
   expected: デフォルト表示順の同一値レコードが大量にある場合でも、CSVダウンロードで重複が発生しないこと
   movie: UC13
   target_spec: csv-export
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '671'
-- case_no: unc-1560
+- case_no: uncf-1560
   sheet: B
   feature: ワークフロー
   description: |-
@@ -2294,9 +2281,9 @@ cases:
     ④組織・項目ベースのスキップ条件でも正しく動作することを確認する
   expected: ワークフローの承認済みスキップ機能が組織・項目条件でも正しく動作すること
   movie: UC13
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '673'
-- case_no: unc-1570
+- case_no: uncf-1570
   sheet: B
   feature: CSV DL
   description: |-
@@ -2306,12 +2293,12 @@ cases:
     ④ラベルが空白の場合でも値が正しくダウンロードされることを確認する
   expected: Yes/Noフィールドのラベルが空白でもCSVダウンロード時にフィルタ反映の値が正しく出力されること
   movie: UC13
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '674'
-- case_no: unc-1580
+- case_no: uncf-1580
   sheet: B
   feature: レコード操作
-  description: |-
+  description: |
     ①関連レコード一覧が表示されたレコード詳細画面を開く
     ②関連レコードの削除ボタンをクリックする
     ③「本当に削除してもよろしいですか？」ダイアログが表示されることを確認する
@@ -2321,9 +2308,9 @@ cases:
   expected: |
     関連レコード削除時、確認ダイアログで「削除する」を押すとダイアログが閉じ、削除後の画面が正常に表示されること
   movie: UC13
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '675'
-- case_no: unc-1590
+- case_no: uncf-1590
   sheet: B
   feature: チャートプレビュー・期間切り替えエラーなし
   description: |-
@@ -2335,9 +2322,9 @@ cases:
   expected: チャートプレビュー画面のページ移動ボタン（≪≫）を押してもエラーが発生しないこと
   movie: UC13
   target_spec: chart-calendar
-  detailed_flow: UC13テストフロー参照（unc-1480 のdetailed_flowと同一）
+  detailed_flow: UC13テストフロー参照（uncf-1480 のdetailed_flowと同一）
   old_case_no: '678'
-- case_no: unc-1600
+- case_no: uncf-1600
   sheet: B
   feature: ワークフロー
   description: |-
@@ -2350,31 +2337,30 @@ cases:
   movie: UC14
   detailed_flow: |-
     【UC14 テストフロー】この動画で確認するテスト番号:
-      unc-1600       (旧: 680)     ワークフロー
-      unc-1610       (旧: 681)     関連レコード一覧
-      unc-1620       (旧: 682)     CSV
-      unc-1630       (旧: 683)     他テーブル参照・並び替え順序
-      unc-1640       (旧: 685)     権限設定
-      unc-1650       (旧: 686)     行色設定
-      unc-1660       (旧: 687)     CSV
-      unc-1670       (旧: 688)     CSVアップロード・空欄削除/{NOCHANGE}保持
-      unc-1680       (旧: 691)     通知設定
-      unc-1690       (旧: 692)     権限設定
-      unc-1700       (旧: 694)     テーブル設定
-      unc-1710       (旧: 695)     関連レコード・計算項目テキスト条件
+      uncf-1600      (旧: 680)     ワークフロー
+      uncf-1610      (旧: 681)     関連レコード一覧
+      uncf-1620      (旧: 682)     CSV
+      uncf-1630      (旧: 683)     他テーブル参照・並び替え順序
+      uncf-1640      (旧: 685)     権限設定
+      uncf-1650      (旧: 686)     行色設定
+      uncf-1660      (旧: 687)     CSV
+      uncf-1670      (旧: 688)     CSVアップロード・空欄削除/{NOCHANGE}保持
+      uncf-1680      (旧: 691)     通知設定
+      uncf-1690      (旧: 692)     権限設定
+      uncf-1700      (旧: 694)     テーブル設定
+      uncf-1710      (旧: 695)     関連レコード・計算項目テキスト条件
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. ワークフローでスキップ承認者を含むフローを設定する
-    4. レコードを申請し、途中の承認者がスキップされて承認が進むことを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    5. 「フローを一つ戻す」機能を実行する
-    6. 一つ前の直前に承認を行ったユーザーに正しく戻ることを確認する（スキップされた承認者に戻らないこと）: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 戻った承認者で再度承認を実行できることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 最終確認: `フローを一つ戻す際、スキップされた承認者ではなく直前の実際の承認者に正しく戻ること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. ワークフローでスキップ承認者を含むフローを設定する
+    3. レコードを申請し、途中の承認者がスキップされて承認が進むことを確認する
+    4. 「フローを一つ戻す」機能を実行する
+    5. 一つ前の直前に承認を行ったユーザーに正しく戻ることを確認する（スキップされた承認者に戻らないこと）
+    6. 戻った承認者で再度承認を実行できることを確認する
+    7. 最終確認: フローを一つ戻す際、スキップされた承認者ではなく直前の実際の承認者に正しく戻ること - expect()で検証する
   old_case_no: '680'
-- case_no: unc-1610
+- case_no: uncf-1610
   sheet: B
   feature: 関連レコード一覧
   description: |-
@@ -2384,12 +2370,12 @@ cases:
     ④表示条件の比較対象が正しい値で評価されていることを確認する
   expected: 関連レコード一覧の表示条件で「他テーブル参照の他テーブル参照」を設定した場合に条件が正しく反映されること
   movie: UC14
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '681'
-- case_no: unc-1620
+- case_no: uncf-1620
   sheet: B
   feature: CSV
-  description: |-
+  description: |
     ①親子テーブルで「CSVダウンロード/アップロードに子テーブルも含める」を有効にする
     ②子テーブルの必須項目を空欄にしたCSVをアップロードする
     ③エラーメッセージが表示されることを確認する（空欄で更新されずエラーも出ない状態ではないこと）
@@ -2398,9 +2384,9 @@ cases:
   expected: |
     子テーブルCSVアップロードで必須項目空欄時・ID誤入力時にエラーが表示され、新規作成時に正しい件数がポップアップに表示されること
   movie: UC14
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '682'
-- case_no: unc-1630
+- case_no: uncf-1630
   sheet: B
   feature: 他テーブル参照・並び替え順序
   description: |-
@@ -2411,9 +2397,9 @@ cases:
   expected: 他テーブル参照フィールドの並び替えが数値順で正しく動作すること
   movie: UC14
   target_spec: fields
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '683'
-- case_no: unc-1640
+- case_no: uncf-1640
   sheet: B
   feature: 権限設定
   description: |-
@@ -2424,9 +2410,9 @@ cases:
     ⑤文字列として{division.id}を入れた場合、ログインユーザーの組織名で一致することを確認する
   expected: ルックアップ先の他テーブル参照フィールドに対してもテーブル権限の組織条件が正しく動作すること
   movie: UC14
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '685'
-- case_no: unc-1650
+- case_no: uncf-1650
   sheet: B
   feature: 行色設定
   description: |-
@@ -2436,12 +2422,12 @@ cases:
     ④日付Aと日付Bが同じ値の場合、行に色が付かないことを確認する
   expected: ビューの「行に色を付ける」条件で「日付A < 日付B」の場合、両方の値が同じときは色が付かないこと
   movie: UC14
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '686'
-- case_no: unc-1660
+- case_no: uncf-1660
   sheet: B
   feature: CSV
-  description: |-
+  description: |
     ①テーブル設定で「IDを表示」を無効にする
     ②「CSVアップロードの主キー設定」をID以外の項目に変更する
     ③CSVダウンロードしてID列を削除した状態でアップロードする
@@ -2449,9 +2435,9 @@ cases:
   expected: |
     主キー設定をID以外に変更してCSVアップロードした際、同じ主キーの既存レコードが更新され、重複エラーが発生しないこと
   movie: UC14
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '687'
-- case_no: unc-1670
+- case_no: uncf-1670
   sheet: B
   feature: CSVアップロード・空欄削除/{NOCHANGE}保持
   description: |-
@@ -2462,9 +2448,9 @@ cases:
   expected: CSVアップロードで空欄は値削除、{NOCHANGE}は値保持として動作すること
   movie: UC14
   target_spec: csv-export
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '688'
-- case_no: unc-1680
+- case_no: uncf-1680
   sheet: B
   feature: 通知設定
   description: |-
@@ -2474,9 +2460,9 @@ cases:
     ④sales@のメールアドレスが含まれていないことを確認する
   expected: メール通知制限の警告文言が正しく表示され、sales@が含まれていないこと
   movie: UC14
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '691'
-- case_no: unc-1690
+- case_no: uncf-1690
   sheet: B
   feature: 権限設定
   description: |-
@@ -2486,21 +2472,21 @@ cases:
     ④該当ユーザーでログインし、ログページにアクセスできることを確認する
   expected: ユーザー権限でもログ・リクエストログ・通知ログの閲覧権限を設定でき、権限付与されたユーザーがログを確認できること
   movie: UC14
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '692'
-- case_no: unc-1700
+- case_no: uncf-1700
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①関連レコード一覧項目の「表示する条件」に設定された項目を削除する
     ②表示する条件が空欄の状態でテーブルを更新する
     ③不明なエラーではなく「○○の表示する条件が空欄になっています」というエラーメッセージが表示されることを確認する
   expected: |
     関連レコード一覧の表示条件が空欄の場合、具体的なエラーメッセージが表示されること
   movie: UC14
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '694'
-- case_no: unc-1710
+- case_no: uncf-1710
   sheet: B
   feature: 関連レコード・計算項目テキスト条件
   description: |-
@@ -2511,9 +2497,9 @@ cases:
   expected: 関連レコード一覧の表示条件で、計算項目（テキスト）と文字列(一行)の紐づけが正常に動作すること
   movie: UC14
   target_spec: fields
-  detailed_flow: UC14テストフロー参照（unc-1600 のdetailed_flowと同一）
+  detailed_flow: UC14テストフロー参照（uncf-1600 のdetailed_flowと同一）
   old_case_no: '695'
-- case_no: unc-1720
+- case_no: uncf-1720
   sheet: B
   feature: 通知設定
   description: |-
@@ -2526,31 +2512,30 @@ cases:
   movie: UC15
   detailed_flow: |-
     【UC15 テストフロー】この動画で確認するテスト番号:
-      unc-1720       (旧: 698)     通知設定
-      unc-1730       (旧: 699)     テーブル設定
-      unc-1740       (旧: 700)     計算項目
-      unc-1750       (旧: 701)     CSVアップロード・複数値の空欄削除
-      unc-1760       (旧: 703)     RPA
-      unc-1770       (旧: 704)     フィルタ一括削除
-      unc-1780       (旧: 705)     レイアウト
-      unc-1790       (旧: 706)     テーブル上部メモ・ファイルダウンロード名
-      unc-1800       (旧: 708)     レコード操作
-      unc-1810       (旧: 709)     帳票ダウンロード
-      unc-1820       (旧: 710)     テーブル設定
-      unc-1830       (旧: 711)     他テーブル参照・複数選択
+      uncf-1720      (旧: 698)     通知設定
+      uncf-1730      (旧: 699)     テーブル設定
+      uncf-1740      (旧: 700)     計算項目
+      uncf-1750      (旧: 701)     CSVアップロード・複数値の空欄削除
+      uncf-1760      (旧: 703)     RPA
+      uncf-1770      (旧: 704)     フィルタ一括削除
+      uncf-1780      (旧: 705)     レイアウト
+      uncf-1790      (旧: 706)     テーブル上部メモ・ファイルダウンロード名
+      uncf-1800      (旧: 708)     レコード操作
+      uncf-1810      (旧: 709)     帳票ダウンロード
+      uncf-1820      (旧: 710)     テーブル設定
+      uncf-1830      (旧: 711)     他テーブル参照・複数選択
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. 通知設定でレコード作成時の通知を設定する
-    4. リマインダ通知（作成後N日経過で条件を満たす場合に通知）を設定する
-    5. レコードを作成し、作成時通知が正しく送信されることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. 通知ログで通知が記録されていることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 通知が停止していないこと（連続して複数レコード作成しても通知が届くこと）を確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 最終確認: `通知設定（レコード作成時・リマインダ）が停止せず継続的に動作すること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. 通知設定でレコード作成時の通知を設定する
+    3. リマインダ通知（作成後N日経過で条件を満たす場合に通知）を設定する
+    4. レコードを作成し、作成時通知が正しく送信されることを確認する
+    5. 通知ログで通知が記録されていることを確認する
+    6. 通知が停止していないこと（連続して複数レコード作成しても通知が届くこと）を確認する
+    7. 最終確認: 通知設定（レコード作成時・リマインダ）が停止せず継続的に動作すること - expect()で検証する
   old_case_no: '698'
-- case_no: unc-1730
+- case_no: uncf-1730
   sheet: B
   feature: テーブル設定
   description: |-
@@ -2560,12 +2545,12 @@ cases:
     ④テーブル更新ボタンを押す前にエラーが検出されていることを確認する
   expected: 他の設定（通知・計算項目等）で使用中の項目を削除しようとした際、即座にエラーが表示され削除自体ができないこと
   movie: UC15
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '699'
-- case_no: unc-1740
+- case_no: uncf-1740
   sheet: B
   feature: 計算項目
-  description: |-
+  description: |
     ①計算値の自動更新がOFFの計算項目があるテーブルを用意する
     ②レコードを編集して計算項目の値が変わる操作を行う
     ③「計算値の自動更新がOFFの項目の値を上書きしますか？」ポップアップが表示されることを確認する
@@ -2574,9 +2559,9 @@ cases:
   expected: |
     自動更新OFF計算項目の値変更時にポップアップが表示され、「はい」で上書き・「いいえ」で元の値保持が正しく動作すること
   movie: UC15
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '700'
-- case_no: unc-1750
+- case_no: uncf-1750
   sheet: B
   feature: CSVアップロード・複数値の空欄削除
   description: |-
@@ -2587,9 +2572,9 @@ cases:
   expected: CSVで複数値フィールドを空欄でアップロードした場合、値が削除されること
   movie: UC15
   target_spec: csv-export
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '701'
-- case_no: unc-1760
+- case_no: uncf-1760
   sheet: B
   feature: RPA
   description: |-
@@ -2599,9 +2584,9 @@ cases:
     ④エラーなく処理が完了していることを確認する
   expected: RPA機能が正常に動作すること
   movie: UC15
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '703'
-- case_no: unc-1770
+- case_no: uncf-1770
   sheet: B
   feature: フィルタ一括削除
   description: |-
@@ -2612,12 +2597,12 @@ cases:
     ⑤削除処理が「処理待ち」で停止せず正常に完了することを確認する
   expected: フィルタ適用中の全選択一括削除でフィルタ対象のレコードのみが正常に削除されること
   movie: UC15
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '704'
-- case_no: unc-1780
+- case_no: uncf-1780
   sheet: B
   feature: レイアウト
-  description: |-
+  description: |
     ①関連レコード一覧の表示方向を「縦」に設定する
     ②レコード詳細画面を開く
     ③縦表示の関連レコード一覧に「詳細」「編集」「削除」ボタンが表示されていることを確認する
@@ -2625,9 +2610,9 @@ cases:
   expected: |
     関連レコード一覧を縦表示にした場合でも、詳細・編集・削除ボタンが正常に表示・動作すること
   movie: UC15
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '705'
-- case_no: unc-1790
+- case_no: uncf-1790
   sheet: B
   feature: テーブル上部メモ・ファイルダウンロード名
   description: |-
@@ -2637,9 +2622,9 @@ cases:
   expected: テーブル上部メモに添付したファイルをダウンロード時、元のファイル名が保持されていること
   movie: UC15
   target_spec: layout-ui
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '706'
-- case_no: unc-1800
+- case_no: uncf-1800
   sheet: B
   feature: レコード操作
   description: |-
@@ -2650,9 +2635,9 @@ cases:
     ⑤ページネーションの総件数表示が正しいことを確認する
   expected: 関連レコード一覧が10件ずつのページネーションで表示され、ページ遷移が正しく動作すること
   movie: UC15
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '708'
-- case_no: unc-1810
+- case_no: uncf-1810
   sheet: B
   feature: 帳票ダウンロード
   description: |-
@@ -2662,21 +2647,21 @@ cases:
     ④別タブで真っ白の画面が開かず、直接ファイルがダウンロードされることを確認する
   expected: 帳票ダウンロード時に別タブで空白ページが開かず、直接ファイルがダウンロードされること
   movie: UC15
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '709'
-- case_no: unc-1820
+- case_no: uncf-1820
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面で各種フィールド設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③エラーが発生しないことを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面がエラーなく表示されること
   movie: UC15
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '710'
-- case_no: unc-1830
+- case_no: uncf-1830
   sheet: B
   feature: 他テーブル参照・複数選択
   description: |-
@@ -2688,9 +2673,9 @@ cases:
   expected: 他テーブル参照フィールドの複数選択が正常に動作し、保存・表示されること
   movie: UC15
   target_spec: fields
-  detailed_flow: UC15テストフロー参照（unc-1720 のdetailed_flowと同一）
+  detailed_flow: UC15テストフロー参照（uncf-1720 のdetailed_flowと同一）
   old_case_no: '711'
-- case_no: unc-1840
+- case_no: uncf-1840
   sheet: B
   feature: 権限設定
   description: |-
@@ -2702,30 +2687,29 @@ cases:
   movie: UC16
   detailed_flow: |-
     【UC16 テストフロー】この動画で確認するテスト番号:
-      unc-1840       (旧: 713)     権限設定
-      unc-1850       (旧: 715)     カードブランド表示
-      unc-1860       (旧: 716)     テーブル設定
-      unc-1870       (旧: 717)     コメントメンション通知・内容/テーブル名表示
-      unc-1880       (旧: 719)     ビュー設定
-      unc-1890       (旧: 720)     計算項目
-      unc-1900       (旧: 721)     他テーブル参照
-      unc-1910       (旧: 722)     関連レコード・親情報コピー新規作成
-      unc-1920       (旧: 724)     フィールド設定
-      unc-1930       (旧: 725)     カレンダー
-      unc-1940       (旧: 726)     地図
-      unc-1950       (旧: 727)     複数選択ng-select・動作改善
+      uncf-1840      (旧: 713)     権限設定
+      uncf-1850      (旧: 715)     カードブランド表示
+      uncf-1860      (旧: 716)     テーブル設定
+      uncf-1870      (旧: 717)     コメントメンション通知・内容/テーブル名表示
+      uncf-1880      (旧: 719)     ビュー設定
+      uncf-1890      (旧: 720)     計算項目
+      uncf-1900      (旧: 721)     他テーブル参照
+      uncf-1910      (旧: 722)     関連レコード・親情報コピー新規作成
+      uncf-1920      (旧: 724)     フィールド設定
+      uncf-1930      (旧: 725)     カレンダー
+      uncf-1940      (旧: 726)     地図
+      uncf-1950      (旧: 727)     複数選択ng-select・動作改善
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. テーブル権限設定で組織に対して「CSVダウンロード不可」「CSVアップロード不可」を設定する
-    4. 同組織内の特定ユーザーにCSVダウンロード・アップロード権限を付与する
-    5. 組織権限で不可のユーザーでログインし、CSVダウンロード・アップロードができないことを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. 個別に権限を付与したユーザーでログインし、CSVダウンロード・アップロードができることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 最終確認: `組織レベルでCSV操作を不可にしても、特定ユーザーに個別でCSV権限を付与できること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. テーブル権限設定で組織に対して「CSVダウンロード不可」「CSVアップロード不可」を設定する
+    3. 同組織内の特定ユーザーにCSVダウンロード・アップロード権限を付与する
+    4. 組織権限で不可のユーザーでログインし、CSVダウンロード・アップロードができないことを確認する
+    5. 個別に権限を付与したユーザーでログインし、CSVダウンロード・アップロードができることを確認する
+    6. 最終確認: 組織レベルでCSV操作を不可にしても、特定ユーザーに個別でCSV権限を付与できること - expect()で検証する
   old_case_no: '713'
-- case_no: unc-1850
+- case_no: uncf-1850
   sheet: B
   feature: カードブランド表示
   description: |-
@@ -2735,21 +2719,21 @@ cases:
     ④ブランド表示がカード情報更新ボタンの上に正しく配置されていることを確認する
   expected: 支払いページでクレジットカードのブランド（アイコン+名前）が正しく表示されること
   movie: UC16
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '715'
-- case_no: unc-1860
+- case_no: uncf-1860
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面でフィールドの各種設定を変更する
     ②保存後にレコード一覧のフィールドヘッダーが正常に表示されることを確認する
     ③レコードデータが正常に表示されることを確認する
   expected: |
     テーブル設定変更後、一覧画面のフィールドヘッダーとデータがエラーなく表示されること
   movie: UC16
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '716'
-- case_no: unc-1870
+- case_no: uncf-1870
   sheet: B
   feature: コメントメンション通知・内容/テーブル名表示
   description: |-
@@ -2760,9 +2744,9 @@ cases:
   expected: コメントメンション通知メールにコメント内容とテーブル名が記載されること
   movie: UC16
   target_spec: notifications
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '717'
-- case_no: unc-1880
+- case_no: uncf-1880
   sheet: B
   feature: ビュー設定
   description: |-
@@ -2773,9 +2757,9 @@ cases:
     ⑤一覧画面で変更した優先順位に従って行の色が適用されることを確認する
   expected: 「行に色を付ける」条件の順序を自由に変更でき、変更後の優先順位が正しく反映されること
   movie: UC16
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '719'
-- case_no: unc-1890
+- case_no: uncf-1890
   sheet: B
   feature: 計算項目
   description: |-
@@ -2785,12 +2769,12 @@ cases:
     ④計算値の自動更新をONにした場合も正しく計算されることを確認する
   expected: 関連レコード一覧内の計算項目をSUM集計で計算した値が正しく表示されること
   movie: UC16
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '720'
-- case_no: unc-1900
+- case_no: uncf-1900
   sheet: B
   feature: 他テーブル参照
-  description: |-
+  description: |
     ①他テーブル参照項目があるレコードの編集画面を開く
     ②プルダウンから「＋新規追加」をクリックする
     ③新規データを入力して保存する
@@ -2799,9 +2783,9 @@ cases:
   expected: |
     他テーブル参照のプルダウンで「＋新規追加」後、ブラウザリロードなしで即座に選択肢に反映されること
   movie: UC16
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '721'
-- case_no: unc-1910
+- case_no: uncf-1910
   sheet: B
   feature: 関連レコード・親情報コピー新規作成
   description: |-
@@ -2813,9 +2797,9 @@ cases:
   expected: 関連レコード一覧の+ボタンから新規作成時、親レコードの情報が一部コピーされること
   movie: UC16
   target_spec: records
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '722'
-- case_no: unc-1920
+- case_no: uncf-1920
   sheet: B
   feature: フィールド設定
   description: |-
@@ -2825,9 +2809,9 @@ cases:
     ④親テーブルからレコードを作成し、子テーブルで他テーブル参照を選択する際に親テーブルの項目が表示されることを確認する
   expected: 他テーブル参照の選択用表示項目に親テーブルの項目を設定できること
   movie: UC16
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '724'
-- case_no: unc-1930
+- case_no: uncf-1930
   sheet: B
   feature: カレンダー
   description: |-
@@ -2837,12 +2821,12 @@ cases:
     ④登録後にカレンダー画面に戻った際、登録した月のままであること（当月に戻らないこと）を確認する
   expected: カレンダーで先の月にレコード登録後、カレンダー画面が登録した月のまま維持されること（当月に戻らないこと）
   movie: UC16
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '725'
-- case_no: unc-1940
+- case_no: uncf-1940
   sheet: B
   feature: 地図
-  description: |-
+  description: |
     ①テーブル設定で地図機能を有効にする
     ②住所項目を地図表示のフィールドに設定する
     ③レコード一覧画面で地図ビューに切り替える
@@ -2851,9 +2835,9 @@ cases:
   expected: |
     地図機能を有効にしたテーブルで、地図ビューにレコードのピンが表示され、クリックで情報が確認できること
   movie: UC16
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '726'
-- case_no: unc-1950
+- case_no: uncf-1950
   sheet: B
   feature: 複数選択ng-select・動作改善
   description: |-
@@ -2865,9 +2849,9 @@ cases:
   expected: 複数選択のng-selectで値選択後にドロップダウンが閉じ、値が正しく保存されること
   movie: UC16
   target_spec: fields
-  detailed_flow: UC16テストフロー参照（unc-1840 のdetailed_flowと同一）
+  detailed_flow: UC16テストフロー参照（uncf-1840 のdetailed_flowと同一）
   old_case_no: '727'
-- case_no: unc-1960
+- case_no: uncf-1960
   sheet: B
   feature: 通知設定
   description: |-
@@ -2880,31 +2864,30 @@ cases:
   movie: UC17
   detailed_flow: |-
     【UC17 テストフロー】この動画で確認するテスト番号:
-      unc-1960       (旧: 730)     通知設定
-      unc-1970       (旧: 731)     CSV UL
-      unc-1980       (旧: 732)     ワークフロー
-      unc-1990       (旧: 733)     権限設定・削除権限の条件付き対応
-      unc-2000       (旧: 735)     フィールド設定
-      unc-2010       (旧: 736)     CSV主キー
-      unc-2020       (旧: 737)     集計
-      unc-2030       (旧: 738)     帳票・ワークフロー変数反映
-      unc-2040       (旧: 740)     テーブル管理
-      unc-2050       (旧: 741)     通知権限更新
-      unc-2060       (旧: 742)     コネクト（RPA）
-      unc-2070       (旧: 743)     住所フィールド・Google Map連携
+      uncf-1960      (旧: 730)     通知設定
+      uncf-1970      (旧: 731)     CSV UL
+      uncf-1980      (旧: 732)     ワークフロー
+      uncf-1990      (旧: 733)     権限設定・削除権限の条件付き対応
+      uncf-2000      (旧: 735)     フィールド設定
+      uncf-2010      (旧: 736)     CSV主キー
+      uncf-2020      (旧: 737)     集計
+      uncf-2030      (旧: 738)     帳票・ワークフロー変数反映
+      uncf-2040      (旧: 740)     テーブル管理
+      uncf-2050      (旧: 741)     通知権限更新
+      uncf-2060      (旧: 742)     コネクト（RPA）
+      uncf-2070      (旧: 743)     住所フィールド・Google Map連携
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/notification")` → waitForAngular(page)
-    4. 通知先ユーザーで「マスターユーザー」を絞り込み検索する
-    5. 検索結果に該当の通知が表示されることを確認する（「データはありません」にならないこと）: `await expect(page.locator("...")).toBeVisible()` で「検索結果に該当の通知がを（「データはありません」にならないこと）」の表示を確認
-    6. 項目名横の虫眼鏡からの検索でも正しく検索できることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 簡易検索・フィルタでも同様に絞り込めることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 最終確認: `通知設定で通知先ユーザーによる絞り込み検索が正しく動作すること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/notification にナビゲートする
+    3. 通知先ユーザーで「マスターユーザー」を絞り込み検索する
+    4. 検索結果に該当の通知が表示されることを確認する（「データはありません」にならないこと）: 対象要素が page.locator(...).isVisible() で確認する
+    5. 項目名横の虫眼鏡からの検索でも正しく検索できることを確認する
+    6. 簡易検索・フィルタでも同様に絞り込めることを確認する
+    7. 最終確認: 通知設定で通知先ユーザーによる絞り込み検索が正しく動作すること - expect()で検証する
   old_case_no: '730'
-- case_no: unc-1970
+- case_no: uncf-1970
   sheet: B
   feature: CSV UL
   description: |-
@@ -2914,12 +2897,12 @@ cases:
     ④アップロード完了後に結果が正しく反映されていることを確認する
   expected: CSVアップロード時に進捗状況がプログレスバー等で表示されること
   movie: UC17
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '731'
-- case_no: unc-1980
+- case_no: uncf-1980
   sheet: B
   feature: ワークフロー
-  description: |-
+  description: |
     ①ワークフロー設定で「一度承認されたデータも再申請可能」を有効にする
     ②「申請者以外でも再申請可能」オプションが表示されることを確認する
     ③「申請者以外でも再申請可能」を有効にする
@@ -2928,9 +2911,9 @@ cases:
   expected: |
     「申請者以外でも再申請可能」を有効にすると、他ユーザーからも承認済みデータの再申請が行えること
   movie: UC17
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '732'
-- case_no: unc-1990
+- case_no: uncf-1990
   sheet: B
   feature: 権限設定・削除権限の条件付き対応
   description: |-
@@ -2941,9 +2924,9 @@ cases:
   expected: 削除権限にも条件付き設定ができ、既存の編集権限条件が正しくコピーされていること
   movie: UC17
   target_spec: users-permissions
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '733'
-- case_no: unc-2000
+- case_no: uncf-2000
   sheet: B
   feature: フィールド設定
   description: |-
@@ -2955,9 +2938,9 @@ cases:
     ⑥制限値以下の画像がアップロードできることを確認する
   expected: 画像フィールドにサイズ制限を設定でき、制限を超える画像のアップロードが拒否されること
   movie: UC17
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '735'
-- case_no: unc-2010
+- case_no: uncf-2010
   sheet: B
   feature: CSV主キー
   description: |-
@@ -2966,12 +2949,12 @@ cases:
     ③「計算項目は設定できません」の注意書きが表示されていることを確認する
   expected: CSVアップロードの主キー設定画面に「計算項目は設定できません」の注意書きが表示されていること
   movie: UC17
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '736'
-- case_no: unc-2020
+- case_no: uncf-2020
   sheet: B
   feature: 集計
-  description: |-
+  description: |
     ①数値項目に「桁区切りを表示しない」をOFFに設定する
     ②集計機能で該当項目の合計を表示する
     ③合計値に桁区切り（カンマ）が表示されていることを確認する
@@ -2980,9 +2963,9 @@ cases:
   expected: |
     集計の合計表示で、フィールドの桁区切り設定に連動して桁区切りの表示・非表示が切り替わること
   movie: UC17
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '737'
-- case_no: unc-2030
+- case_no: uncf-2030
   sheet: B
   feature: 帳票・ワークフロー変数反映
   description: |-
@@ -2994,9 +2977,9 @@ cases:
   expected: ワークフロー申請状態の帳票出力で、ワークフロー変数と他の項目値が両方正しく反映されること
   movie: UC17
   target_spec: reports
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '738'
-- case_no: unc-2040
+- case_no: uncf-2040
   sheet: B
   feature: テーブル管理
   description: |-
@@ -3006,9 +2989,9 @@ cases:
     ④全てのテーブルのドラッグ＆ドロップによる並び替えが可能であることを確認する
   expected: メニュー並び替え画面でフォルダ内の全テーブルが表示され、並び替えが可能であること
   movie: UC17
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '740'
-- case_no: unc-2050
+- case_no: uncf-2050
   sheet: B
   feature: 通知権限更新
   description: |-
@@ -3019,12 +3002,12 @@ cases:
     ⑤通知権限が正しく更新されていることを確認する
   expected: admin/組織情報変更時に通知権限設定がバックグラウンドジョブで正しく更新されること
   movie: UC17
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '741'
-- case_no: unc-2060
+- case_no: uncf-2060
   sheet: B
   feature: コネクト（RPA）
-  description: |-
+  description: |
     ①コネクト設定画面を開く
     ②データ更新ブロックの設定を変更して保存する
     ③コネクト一覧に戻り、再度設定を開く
@@ -3033,9 +3016,9 @@ cases:
   expected: |
     コネクトのデータ更新ブロック設定が正しく保存され、再表示時に設定内容が保持されていること
   movie: UC17
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '742'
-- case_no: unc-2070
+- case_no: uncf-2070
   sheet: B
   feature: 住所フィールド・Google Map連携
   description: |-
@@ -3047,9 +3030,9 @@ cases:
   expected: 詳細画面・編集画面の住所フィールド横にGoogle Mapリンクがあり、地図表示ができること
   movie: UC17
   target_spec: fields
-  detailed_flow: UC17テストフロー参照（unc-1960 のdetailed_flowと同一）
+  detailed_flow: UC17テストフロー参照（uncf-1960 のdetailed_flowと同一）
   old_case_no: '743'
-- case_no: unc-2080
+- case_no: uncf-2080
   sheet: B
   feature: フィールド設定
   description: |-
@@ -3062,31 +3045,30 @@ cases:
   movie: UC18
   detailed_flow: |-
     【UC18 テストフロー】この動画で確認するテスト番号:
-      unc-2080       (旧: 745)     フィールド設定
-      unc-2090       (旧: 746)     他テーブル参照
-      unc-2100       (旧: 747)     テーブル設定
-      unc-2110       (旧: 748)     権限設定・CSVアップロード非表示
-      unc-2120       (旧: 750)     レコード操作
-      unc-2130       (旧: 752)     CSV UL
-      unc-2140       (旧: 753)     レコード一覧
-      unc-2150       (旧: 754)     リマインド通知・複合条件
-      unc-2160       (旧: 756)     ワークフロー
-      unc-2170       (旧: 757)     関連レコード一覧
-      unc-2180       (旧: 758)     テーブル設定
-      unc-2190       (旧: 759)     帳票ダウンロード正常動作
+      uncf-2080      (旧: 745)     フィールド設定
+      uncf-2090      (旧: 746)     他テーブル参照
+      uncf-2100      (旧: 747)     テーブル設定
+      uncf-2110      (旧: 748)     権限設定・CSVアップロード非表示
+      uncf-2120      (旧: 750)     レコード操作
+      uncf-2130      (旧: 752)     CSV UL
+      uncf-2140      (旧: 753)     レコード一覧
+      uncf-2150      (旧: 754)     リマインド通知・複合条件
+      uncf-2160      (旧: 756)     ワークフロー
+      uncf-2170      (旧: 757)     関連レコード一覧
+      uncf-2180      (旧: 758)     テーブル設定
+      uncf-2190      (旧: 759)     帳票ダウンロード正常動作
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. `await page.goto(BASE_URL + "/admin/dataset__{tableId}/setting")` → waitForAngular(page)
-    4. 「デフォルト値」の設定項目が表示されることを確認する: `await expect(page.locator("...")).toBeVisible()` で「「デフォルト値」の設定項目がを」の表示を確認
-    5. デフォルト値を「true（はい）」に設定して保存する: `await page.locator('button:has-text("保存"), button:has-text("更新")').first().click()` → 保存完了を待機
-    6. 新規レコード作成画面でYes/Noフィールドがデフォルトで「はい」になっていることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. デフォルト値を「false（いいえ）」に変更して同様に確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 最終確認: `Yes/Noフィールドにデフォルト値（true/false）を設定でき、レコード作成時に反映されること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. TEST_BASE_URL/admin/dataset__{tableId}/field にナビゲートし、waitForAngular(page)で待機する
+    3. 「デフォルト値」の設定項目が表示されることを確認する
+    4. デフォルト値を「true（はい）」に設定して保存する
+    5. 新規レコード作成画面でYes/Noフィールドがデフォルトで「はい」になっていることを確認する
+    6. デフォルト値を「false（いいえ）」に変更して同様に確認する
+    7. 最終確認: Yes/Noフィールドにデフォルト値（true/false）を設定でき、レコード作成時に反映されること - expect()で検証する
   old_case_no: '745'
-- case_no: unc-2090
+- case_no: uncf-2090
   sheet: B
   feature: 他テーブル参照
   description: |-
@@ -3096,12 +3078,12 @@ cases:
     ④ユーザー管理テーブルを対象にした場合も、「組織」などの子テーブルが選択できないことを確認する
   expected: 他テーブル参照の表示項目に対象テーブルの子テーブルが選択肢として表示されないこと
   movie: UC18
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '746'
-- case_no: unc-2100
+- case_no: uncf-2100
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面を開く
     ②各種設定を変更して保存する
     ③保存後にレコード一覧画面が正常に表示されることを確認する
@@ -3109,9 +3091,9 @@ cases:
   expected: |
     テーブル設定変更後、レコード一覧画面がエラーなく正常に表示されること
   movie: UC18
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '747'
-- case_no: unc-2110
+- case_no: uncf-2110
   sheet: B
   feature: 権限設定・CSVアップロード非表示
   description: |-
@@ -3122,9 +3104,9 @@ cases:
   expected: テーブル権限設定の項目一覧からCSVアップロードが除外されていること
   movie: UC18
   target_spec: users-permissions
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '748'
-- case_no: unc-2120
+- case_no: uncf-2120
   sheet: B
   feature: レコード操作
   description: |-
@@ -3134,9 +3116,9 @@ cases:
     ④ページネーションの各ページで表示条件が正しく適用されていることを確認する
   expected: 関連レコードのページネーションがある場合でも帳票出力・表示条件が正しく動作すること
   movie: UC18
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '750'
-- case_no: unc-2130
+- case_no: uncf-2130
   sheet: B
   feature: CSV UL
   description: |-
@@ -3147,12 +3129,12 @@ cases:
     ⑤日時項目の項目編集画面に規定フォーマットの注意書きが表示されていることを確認する
   expected: 日時項目のCSVアップロードで規定フォーマット以外はアラート表示され、項目編集画面に規定フォーマットの注意書きがあること
   movie: UC18
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '752'
-- case_no: unc-2140
+- case_no: uncf-2140
   sheet: B
   feature: レコード一覧
-  description: |-
+  description: |
     ①単数の他テーブル参照項目があるテーブルのレコード一覧を開く
     ②他テーブル参照項目の項目名（ヘッダー）をクリックする
     ③昇順に並び替えられることを確認する
@@ -3160,9 +3142,9 @@ cases:
   expected: |
     単数の他テーブル参照項目でヘッダークリックによる並び替えが正常に動作すること
   movie: UC18
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '753'
-- case_no: unc-2150
+- case_no: uncf-2150
   sheet: B
   feature: リマインド通知・複合条件
   description: |-
@@ -3173,9 +3155,9 @@ cases:
   expected: 複合条件のリマインド通知設定で、条件を満たした場合に通知が正常に送信されること
   movie: UC18
   target_spec: notifications
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '754'
-- case_no: unc-2160
+- case_no: uncf-2160
   sheet: B
   feature: ワークフロー
   description: |-
@@ -3185,9 +3167,9 @@ cases:
     ④フロー設定の変更（AND/ORの追加・削除）が正しく反映されることを確認する
   expected: ワークフローのAND/OR条件が正しく動作し、フロー設定変更が反映されること
   movie: UC18
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '756'
-- case_no: unc-2170
+- case_no: uncf-2170
   sheet: B
   feature: 関連レコード一覧
   description: |-
@@ -3197,21 +3179,21 @@ cases:
     ④表示条件に合致しないレコードが含まれていないことを確認する
   expected: 関連レコード一覧のページネーションで2ページ目以降でも表示条件が正しく適用されること
   movie: UC18
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '757'
-- case_no: unc-2180
+- case_no: uncf-2180
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面でフィールドの各種設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③フィールドヘッダーが正しく表示されていることを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面とフィールドヘッダーがエラーなく表示されること
   movie: UC18
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '758'
-- case_no: unc-2190
+- case_no: uncf-2190
   sheet: B
   feature: 帳票ダウンロード正常動作
   description: |-
@@ -3222,9 +3204,9 @@ cases:
   expected: 帳票のダウンロードがエラーなく正常に実行できること
   movie: UC18
   target_spec: reports
-  detailed_flow: UC18テストフロー参照（unc-2080 のdetailed_flowと同一）
+  detailed_flow: UC18テストフロー参照（uncf-2080 のdetailed_flowと同一）
   old_case_no: '759'
-- case_no: unc-2200
+- case_no: uncf-2200
   sheet: B
   feature: カレンダー
   description: |-
@@ -3237,31 +3219,30 @@ cases:
   movie: UC19
   detailed_flow: |-
     【UC19 テストフロー】この動画で確認するテスト番号:
-      unc-2200       (旧: 762)     カレンダー
-      unc-2210       (旧: 763)     関連レコード一覧
-      unc-2220       (旧: 764)     テーブル設定
-      unc-2230       (旧: 765)     集計・条件設定の有効/無効保持
-      unc-2240       (旧: 767)     フィールド設定
-      unc-2250       (旧: 768)     ユーザー管理
-      unc-2260       (旧: 769)     テーブル設定
-      unc-2270       (旧: 772)     一覧画面・ボタン重なり修正
-      unc-2280       (旧: 774)     テーブル設定
-      unc-2290       (旧: 775)     カレンダー
-      unc-2300       (旧: 776)     通知・メール
-      unc-2310       (旧: 777)     時刻フィールド・コロン自動補完
+      uncf-2200      (旧: 762)     カレンダー
+      uncf-2210      (旧: 763)     関連レコード一覧
+      uncf-2220      (旧: 764)     テーブル設定
+      uncf-2230      (旧: 765)     集計・条件設定の有効/無効保持
+      uncf-2240      (旧: 767)     フィールド設定
+      uncf-2250      (旧: 768)     ユーザー管理
+      uncf-2260      (旧: 769)     テーブル設定
+      uncf-2270      (旧: 772)     一覧画面・ボタン重なり修正
+      uncf-2280      (旧: 774)     テーブル設定
+      uncf-2290      (旧: 775)     カレンダー
+      uncf-2300      (旧: 776)     通知・メール
+      uncf-2310      (旧: 777)     時刻フィールド・コロン自動補完
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. カレンダー表示に切り替える
-    4. イベント（レコード）をドラッグ＆ドロップで別の日に移動する: `await page.locator("対象要素").dragTo(page.locator("ターゲット"))` でドラッグ&ドロップを実行する
-    5. 移動先の日付にレコードが正しく反映されることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. 元の日付からレコードが移動していることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. レコード詳細を開き、日付が移動先に更新されていることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 最終確認: `カレンダー表示でドラッグ＆ドロップによるレコード移動が正常に動作すること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. カレンダー表示に切り替える
+    3. イベント（レコード）をドラッグ＆ドロップで別の日に移動する
+    4. 移動先の日付にレコードが正しく反映されることを確認する
+    5. 元の日付からレコードが移動していることを確認する
+    6. レコード詳細を開き、日付が移動先に更新されていることを確認する
+    7. 最終確認: カレンダー表示でドラッグ＆ドロップによるレコード移動が正常に動作すること - expect()で検証する
   old_case_no: '762'
-- case_no: unc-2210
+- case_no: uncf-2210
   sheet: B
   feature: 関連レコード一覧
   description: |-
@@ -3271,21 +3252,21 @@ cases:
     ④入れ替え後の順番が正しく保存されることを確認する
   expected: 関連レコード一覧の表示条件の順番をドラッグ＆ドロップで入れ替えできること
   movie: UC19
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '763'
-- case_no: unc-2220
+- case_no: uncf-2220
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面で各種設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③エラーが発生しないことを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面がエラーなく表示されること
   movie: UC19
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '764'
-- case_no: unc-2230
+- case_no: uncf-2230
   sheet: B
   feature: 集計・条件設定の有効/無効保持
   description: |-
@@ -3296,9 +3277,9 @@ cases:
   expected: 集計項目の「他の項目を条件で利用する」が無効時に勝手に有効にならないこと
   movie: UC19
   target_spec: chart-calendar
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '765'
-- case_no: unc-2240
+- case_no: uncf-2240
   sheet: B
   feature: フィールド設定
   description: |-
@@ -3308,9 +3289,9 @@ cases:
     ④レコードの作成・編集が問題なくできることを確認する
   expected: 複数の他テーブル参照フィールドが正しく動作すること
   movie: UC19
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '767'
-- case_no: unc-2250
+- case_no: uncf-2250
   sheet: B
   feature: ユーザー管理
   description: |-
@@ -3320,21 +3301,21 @@ cases:
     ④パスワード欄を空のまま保存した場合、パスワードが変更されない（元のまま維持される）ことを確認する
   expected: ユーザー編集画面でパスワード欄が空欄表示され、空のまま更新してもパスワードが変更されないこと
   movie: UC19
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '768'
-- case_no: unc-2260
+- case_no: uncf-2260
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面で各種フィールド設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③レコードデータが正しく表示されていることを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面でデータがエラーなく正常に表示されること
   movie: UC19
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '769'
-- case_no: unc-2270
+- case_no: uncf-2270
   sheet: B
   feature: 一覧画面・ボタン重なり修正
   description: |-
@@ -3344,9 +3325,9 @@ cases:
   expected: レコードが多い場合でもボタンが重ならず正常に表示されること
   movie: UC19
   target_spec: layout-ui
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '772'
-- case_no: unc-2280
+- case_no: uncf-2280
   sheet: B
   feature: テーブル設定
   description: |-
@@ -3356,9 +3337,9 @@ cases:
     ④レコード操作（作成・編集・削除）が正常に動作することを確認する
   expected: テーブル設定の変更が正しく反映され、レコード操作が正常に動作すること
   movie: UC19
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '774'
-- case_no: unc-2290
+- case_no: uncf-2290
   sheet: B
   feature: カレンダー
   description: |-
@@ -3368,21 +3349,21 @@ cases:
     ④予定を削除した後も操作していた月のまま表示されていることを確認する
   expected: カレンダーで予定の登録キャンセル・削除後も操作していた月のまま表示されること（当月に戻らないこと）
   movie: UC19
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '775'
-- case_no: unc-2300
+- case_no: uncf-2300
   sheet: B
   feature: 通知・メール
-  description: |-
+  description: |
     ①通知設定でメール本文にHTMLタグ（改行、太字等）を含むテンプレートを設定する
     ②通知メールを送信する
     ③受信したメールでHTMLタグがそのまま表示されず、書式（改行・太字等）として正しく反映されていることを確認する
   expected: |
     通知メールでHTMLタグがテキストとして表示されず、改行・太字等の書式が正しく反映されること
   movie: UC19
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '776'
-- case_no: unc-2310
+- case_no: uncf-2310
   sheet: B
   feature: 時刻フィールド・コロン自動補完
   description: |-
@@ -3394,9 +3375,9 @@ cases:
   expected: 時刻のみの日時フィールドで数字入力時にコロンが自動補完されること
   movie: UC19
   target_spec: fields
-  detailed_flow: UC19テストフロー参照（unc-2200 のdetailed_flowと同一）
+  detailed_flow: UC19テストフロー参照（uncf-2200 のdetailed_flowと同一）
   old_case_no: '777'
-- case_no: unc-2320
+- case_no: uncf-2320
   sheet: B
   feature: テーブル設定
   description: |-
@@ -3408,30 +3389,29 @@ cases:
   movie: UC20
   detailed_flow: |-
     【UC20 テストフロー】この動画で確認するテスト番号:
-      unc-2320       (旧: 779)     テーブル設定
-      unc-2330       (旧: 780)     レコード編集
-      unc-2340       (旧: 781)     カレンダー
-      unc-2350       (旧: 782)     画像複数値・サイズ表示
-      unc-2360       (旧: 785)     ワークフロー・通知
-      unc-2370       (旧: 786)     数値項目
-      unc-2380       (旧: 787)     リッチテキスト
-      unc-2390       (旧: 788)     CSVダウンロード・非表示ファイル項目対応
-      unc-2400       (旧: 790)     レコード操作
-      unc-2410       (旧: 791)     数値項目
-      unc-2420       (旧: 792)     テーブル設定
-      unc-2430       (旧: 793)     ロック自動解除時間
+      uncf-2320      (旧: 779)     テーブル設定
+      uncf-2330      (旧: 780)     レコード編集
+      uncf-2340      (旧: 781)     カレンダー
+      uncf-2350      (旧: 782)     画像複数値・サイズ表示
+      uncf-2360      (旧: 785)     ワークフロー・通知
+      uncf-2370      (旧: 786)     数値項目
+      uncf-2380      (旧: 787)     リッチテキスト
+      uncf-2390      (旧: 788)     CSVダウンロード・非表示ファイル項目対応
+      uncf-2400      (旧: 790)     レコード操作
+      uncf-2410      (旧: 791)     数値項目
+      uncf-2420      (旧: 792)     テーブル設定
+      uncf-2430      (旧: 793)     ロック自動解除時間
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. 親テーブルのテーブル設定で子テーブルの配置位置を変更する
-    4. 編集画面を開き、子テーブルが指定した位置に表示されることを確認する: `await expect(page.locator("...")).toBeVisible()` で「編集画面を開き、子テーブルが指定した位置にを」の表示を確認
-    5. 詳細画面でも子テーブルが指定した位置に表示されることを確認する（最下部固定ではないこと）: `await expect(page.locator("...")).toBeVisible()` で「詳細画面でも子テーブルが指定した位置にを（最下部固定ではないこと）」の表示を確認
-    6. 子テーブルの位置を別の場所に変更し、再度反映されることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 最終確認: `子テーブルの配置位置を変更でき、編集画面・詳細画面の両方で反映されること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. 親テーブルのテーブル設定で子テーブルの配置位置を変更する
+    3. 編集画面を開き、子テーブルが指定した位置に表示されることを確認する: 対象要素が page.locator(...).isVisible() で確認する
+    4. 詳細画面でも子テーブルが指定した位置に表示されることを確認する（最下部固定ではないこと）: 対象要素が page.locator(...).isVisible() で確認する
+    5. 子テーブルの位置を別の場所に変更し、再度反映されることを確認する
+    6. 最終確認: 子テーブルの配置位置を変更でき、編集画面・詳細画面の両方で反映されること - expect()で検証する
   old_case_no: '779'
-- case_no: unc-2330
+- case_no: uncf-2330
   sheet: B
   feature: レコード編集
   description: |-
@@ -3441,12 +3421,12 @@ cases:
     ④複数値フィールドのデータが消えていないことを確認する
   expected: 編集モードでレコードを保存した際に複数値フィールド（複数選択・複数ファイル等）のデータが消えないこと
   movie: UC20
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '780'
-- case_no: unc-2340
+- case_no: uncf-2340
   sheet: B
   feature: カレンダー
-  description: |-
+  description: |
     ①テーブル設定→カレンダー設定を開く
     ②「カレンダーで表示したいフィールド」の選択肢を確認する
     ③固定テキスト項目が「fixd_html_XXXXXXX」ではなく、設定した項目名で表示されることを確認する
@@ -3454,9 +3434,9 @@ cases:
   expected: |
     カレンダー設定のフィールド選択で固定テキスト項目がコード名ではなく項目名で表示されること
   movie: UC20
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '781'
-- case_no: unc-2350
+- case_no: uncf-2350
   sheet: B
   feature: 画像複数値・サイズ表示
   description: |-
@@ -3467,9 +3447,9 @@ cases:
   expected: 複数画像を一度にアップした場合でも、各画像のサイズ表示が正しいこと
   movie: UC20
   target_spec: fields
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '782'
-- case_no: unc-2360
+- case_no: uncf-2360
   sheet: B
   feature: ワークフロー・通知
   description: |-
@@ -3480,9 +3460,9 @@ cases:
     ⑤コメント通知が送信されることを確認する
   expected: ワークフロー承認時にコメント欄が空の場合はコメント通知が送信されず、コメント入力時のみ通知されること
   movie: UC20
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '785'
-- case_no: unc-2370
+- case_no: uncf-2370
   sheet: B
   feature: 数値項目
   description: |-
@@ -3492,12 +3472,12 @@ cases:
     ④計算項目でも編集画面で常に桁区切りが表示されることを確認する
   expected: 数値項目・計算項目で桁区切り表示が有効な場合、入力時（フォーカス中）にも桁区切りが表示されること
   movie: UC20
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '786'
-- case_no: unc-2380
+- case_no: uncf-2380
   sheet: B
   feature: リッチテキスト
-  description: |-
+  description: |
     ①リッチテキスト（文章複数行）項目があるレコードの編集画面を開く
     ②「リンクの挿入」でURLを入力し、「新しいタブで開く」チェックを外して保存する
     ③レコード詳細画面でリンクをクリックする
@@ -3506,9 +3486,9 @@ cases:
   expected: |
     リッチテキストのリンクで「新しいタブで開く」OFF時は同一タブ、ON時は新しいタブでリンク先が開かれること
   movie: UC20
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '787'
-- case_no: unc-2390
+- case_no: uncf-2390
   sheet: B
   feature: CSVダウンロード・非表示ファイル項目対応
   description: |-
@@ -3519,9 +3499,9 @@ cases:
   expected: 子テーブル含むCSVダウンロードで、非表示の複数値ファイル項目がある場合もエラーなくダウンロードできること
   movie: UC20
   target_spec: csv-export
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '788'
-- case_no: unc-2400
+- case_no: uncf-2400
   sheet: B
   feature: レコード操作
   description: |-
@@ -3531,9 +3511,9 @@ cases:
     ④操作前後でレコード件数が正しいことを確認する
   expected: レコードの一括操作が正しく動作すること
   movie: UC20
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '790'
-- case_no: unc-2410
+- case_no: uncf-2410
   sheet: B
   feature: 数値項目
   description: |-
@@ -3543,21 +3523,21 @@ cases:
     ④レコード編集画面で数値フィールドが自由入力可能な状態に戻っていることを確認する
   expected: 数値項目の固定値を設定後に正常に解除（削除）できること
   movie: UC20
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '791'
-- case_no: unc-2420
+- case_no: uncf-2420
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面でフィールド設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③エラーが発生しないことを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面がエラーなく正常に表示されること
   movie: UC20
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '792'
-- case_no: unc-2430
+- case_no: uncf-2430
   sheet: B
   feature: ロック自動解除時間
   description: |-
@@ -3568,9 +3548,9 @@ cases:
   expected: ロック自動解除時間の設定通りにレコードロックが自動解除されること
   movie: UC20
   target_spec: system-settings
-  detailed_flow: UC20テストフロー参照（unc-2320 のdetailed_flowと同一）
+  detailed_flow: UC20テストフロー参照（uncf-2320 のdetailed_flowと同一）
   old_case_no: '793'
-- case_no: unc-2440
+- case_no: uncf-2440
   sheet: B
   feature: フィルタ・集計
   description: |-
@@ -3583,31 +3563,30 @@ cases:
   movie: UC21
   detailed_flow: |-
     【UC21 テストフロー】この動画で確認するテスト番号:
-      unc-2440       (旧: 795)     フィルタ・集計
-      unc-2450       (旧: 796)     子テーブル表示
-      unc-2460       (旧: 797)     テーブル設定
-      unc-2470       (旧: 798)     ファイル項目・MOVブラウザ表示
-      unc-2480       (旧: 800)     レイアウト・UI
-      unc-2490       (旧: 801)     テーブル設定
-      unc-2500       (旧: 802)     ワークフロー
-      unc-2510       (旧: 803)     テーブルコピー・子テーブル除外
-      unc-2520       (旧: 805)     テーブル設定
-      unc-2530       (旧: 806)     ダッシュボード集計
-      unc-2540       (旧: 807)     テーブル設定
-      unc-2550       (旧: 809)     権限設定・親組織条件変数
+      uncf-2440      (旧: 795)     フィルタ・集計
+      uncf-2450      (旧: 796)     子テーブル表示
+      uncf-2460      (旧: 797)     テーブル設定
+      uncf-2470      (旧: 798)     ファイル項目・MOVブラウザ表示
+      uncf-2480      (旧: 800)     レイアウト・UI
+      uncf-2490      (旧: 801)     テーブル設定
+      uncf-2500      (旧: 802)     ワークフロー
+      uncf-2510      (旧: 803)     テーブルコピー・子テーブル除外
+      uncf-2520      (旧: 805)     テーブル設定
+      uncf-2530      (旧: 806)     ダッシュボード集計
+      uncf-2540      (旧: 807)     テーブル設定
+      uncf-2550      (旧: 809)     権限設定・親組織条件変数
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. フィルタ/集計の「行に色を付ける」設定で、日付フィールドの比較条件を設定する（例：「返却日」が「貸出日」より小さい）
-    4. 条件設定した項目の片方が未入力（空）のレコードを作成する
-    5. 一覧画面でそのレコードが表示されることを確認する（消えないこと）: `await expect(page.locator("...")).toBeVisible()` で「一覧画面でそのレコードがを（消えないこと）」の表示を確認
-    6. 未入力の場合は条件不一致として色が付かないことを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    7. 両方に値が入力されているレコードでは正しく色が付くことを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 最終確認: `「行に色を付ける」条件でフィールドが未入力の場合、レコードが非表示にならず正しく表示されること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. フィルタ/集計の「行に色を付ける」設定で、日付フィールドの比較条件を設定する（例：「返却日」が「貸出日」より小さい）
+    3. 条件設定した項目の片方が未入力（空）のレコードを作成する
+    4. 一覧画面でそのレコードが表示されることを確認する（消えないこと）: 対象要素が page.locator(...).isVisible() で確認する
+    5. 未入力の場合は条件不一致として色が付かないことを確認する
+    6. 両方に値が入力されているレコードでは正しく色が付くことを確認する
+    7. 最終確認: 「行に色を付ける」条件でフィールドが未入力の場合、レコードが非表示にならず正しく表示されること - expect()で検証する
   old_case_no: '795'
-- case_no: unc-2450
+- case_no: uncf-2450
   sheet: B
   feature: 子テーブル表示
   description: |-
@@ -3616,21 +3595,21 @@ cases:
     ③子テーブルの行追加・編集が正常に動作することを確認する
   expected: 子テーブルがテーブル表示形式で正しく表示・操作できること
   movie: UC21
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '796'
-- case_no: unc-2460
+- case_no: uncf-2460
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面で各種設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③フィールドヘッダーとデータが正しく表示されていることを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面でフィールドヘッダーとデータがエラーなく表示されること
   movie: UC21
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '797'
-- case_no: unc-2470
+- case_no: uncf-2470
   sheet: B
   feature: ファイル項目・MOVブラウザ表示
   description: |-
@@ -3641,9 +3620,9 @@ cases:
   expected: .MOVファイルをファイル項目に添付した場合でも「ブラウザで表示」が正常に動作すること
   movie: UC21
   target_spec: fields
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '798'
-- case_no: unc-2480
+- case_no: uncf-2480
   sheet: B
   feature: レイアウト・UI
   description: |-
@@ -3654,9 +3633,9 @@ cases:
     ⑤ドラッグ伸縮した幅がリセットされ設定値に戻っていることを確認する
   expected: 一覧の表示幅(px)を再設定した場合、ログアウトなしで即座に反映されること
   movie: UC21
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '800'
-- case_no: unc-2490
+- case_no: uncf-2490
   sheet: B
   feature: テーブル設定
   description: |-
@@ -3665,12 +3644,12 @@ cases:
     ③エラーメッセージに正しい項目名が表示されていることを確認する（%sなどの変数が表示されないこと）
   expected: 使用中の項目を削除した際のエラーメッセージに正しい項目名が表示されること（%sのような変数が表示されないこと）
   movie: UC21
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '801'
-- case_no: unc-2500
+- case_no: uncf-2500
   sheet: B
   feature: ワークフロー
-  description: |-
+  description: |
     ①ワークフローテンプレートの条件設定画面を開く
     ②条件にログインユーザーの「役職」が設定項目として表示されることを確認する
     ③役職を条件に設定して保存する（組織の指定なし、役職のみ）
@@ -3678,9 +3657,9 @@ cases:
   expected: |
     ワークフローテンプレートの条件でログインユーザーの役職のみを設定でき、正しく条件判定されること
   movie: UC21
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '802'
-- case_no: unc-2510
+- case_no: uncf-2510
   sheet: B
   feature: テーブルコピー・子テーブル除外
   description: |-
@@ -3691,9 +3670,9 @@ cases:
   expected: 親テーブルのコピー時に子テーブル指定の他テーブル参照がコピーされないこと
   movie: UC21
   target_spec: table-definition
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '803'
-- case_no: unc-2520
+- case_no: uncf-2520
   sheet: B
   feature: テーブル設定
   description: |-
@@ -3703,9 +3682,9 @@ cases:
     ④テーブル操作が正常に動作することを確認する
   expected: テーブル設定の変更が正しく保存・反映されること
   movie: UC21
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '805'
-- case_no: unc-2530
+- case_no: uncf-2530
   sheet: B
   feature: ダッシュボード集計
   description: |-
@@ -3715,21 +3694,21 @@ cases:
     ④集計結果が正しく並び替えられることを確認する
   expected: ダッシュボードに配置した集計結果の並び替えが正常に動作すること
   movie: UC21
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '806'
-- case_no: unc-2540
+- case_no: uncf-2540
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面で各種設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③エラーが発生しないことを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面がエラーなく正常に表示されること
   movie: UC21
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '807'
-- case_no: unc-2550
+- case_no: uncf-2550
   sheet: B
   feature: 権限設定・親組織条件変数
   description: |-
@@ -3739,9 +3718,9 @@ cases:
   expected: テーブル権限設定の条件で{{parent_division.id}}（親組織名）が使用できること
   movie: UC21
   target_spec: users-permissions
-  detailed_flow: UC21テストフロー参照（unc-2440 のdetailed_flowと同一）
+  detailed_flow: UC21テストフロー参照（uncf-2440 のdetailed_flowと同一）
   old_case_no: '809'
-- case_no: unc-2560
+- case_no: uncf-2560
   sheet: B
   feature: ワークフロー
   description: |-
@@ -3755,33 +3734,32 @@ cases:
   movie: UC22
   detailed_flow: |-
     【UC22 テストフロー】この動画で確認するテスト番号:
-      unc-2560       (旧: 811)     ワークフロー
-      unc-2570       (旧: 812)     公開フォーム
-      unc-2580       (旧: 813)     カレンダー
-      unc-2590       (旧: 814)     関連レコード一覧・項目幅保持
-      unc-2600       (旧: 816)     通知設定
-      unc-2610       (旧: 817)     帳票削除
-      unc-2620       (旧: 818)     文字列
-      unc-2630       (旧: 819)     テーブル設定
-      unc-2640       (旧: 820)     通知設定・ファイル項目のファイル名表示
-      unc-2650       (旧: 822)     チャート
-      unc-2660       (旧: 823)     フィルタUI
-      unc-2670       (旧: 824)     フィルタ
-      unc-2680       (旧: 825)     リクエストログ・マスターユーザー閲覧
+      uncf-2560      (旧: 811)     ワークフロー
+      uncf-2570      (旧: 812)     公開フォーム
+      uncf-2580      (旧: 813)     カレンダー
+      uncf-2590      (旧: 814)     関連レコード一覧・項目幅保持
+      uncf-2600      (旧: 816)     通知設定
+      uncf-2610      (旧: 817)     帳票削除
+      uncf-2620      (旧: 818)     文字列
+      uncf-2630      (旧: 819)     テーブル設定
+      uncf-2640      (旧: 820)     通知設定・ファイル項目のファイル名表示
+      uncf-2650      (旧: 822)     チャート
+      uncf-2660      (旧: 823)     フィルタUI
+      uncf-2670      (旧: 824)     フィルタ
+      uncf-2680      (旧: 825)     リクエストログ・マスターユーザー閲覧
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. 親テーブルにワークフローを設定する
-    4. 子テーブルを持つレコードで申請を行う
-    5. 親テーブル側から編集しようとし、編集できないことを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. 子テーブル側から子レコードを編集しようとする
-    7. 子テーブル側からも編集できないことを確認する（親テーブルのワークフロー申請中は子テーブルも編集不可）: 対象要素を `expect(page.locator("..."))` で検証する
-    8. 承認後は子テーブルも編集可能に戻ることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    9. 最終確認: `親テーブルのワークフロー申請中は子テーブル側からも編集できないこと` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. 親テーブルにワークフローを設定する
+    3. 子テーブルを持つレコードで申請を行う
+    4. 親テーブル側から編集しようとし、編集できないことを確認する
+    5. 子テーブル側から子レコードを編集しようとする
+    6. 子テーブル側からも編集できないことを確認する（親テーブルのワークフロー申請中は子テーブルも編集不可）
+    7. 承認後は子テーブルも編集可能に戻ることを確認する
+    8. 最終確認: 親テーブルのワークフロー申請中は子テーブル側からも編集できないこと - expect()で検証する
   old_case_no: '811'
-- case_no: unc-2570
+- case_no: uncf-2570
   sheet: B
   feature: 公開フォーム
   description: |-
@@ -3792,12 +3770,12 @@ cases:
     ⑤複数選択の場合はカンマ区切り（項目名=AAA,BBB,CCC）で複数値が設定されることを確認する
   expected: 公開フォームURLにパラメータを付与して開くと、対応するフィールドに値が初期設定されること
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '812'
-- case_no: unc-2580
+- case_no: uncf-2580
   sheet: B
   feature: カレンダー
-  description: |-
+  description: |
     ①テーブル設定→カレンダー設定を開く
     ②「カレンダーで表示したいフィールド」の選択肢を確認する
     ③固定テキスト項目が「fixd_html_XXXXXXX」ではなく、設定した項目名で表示されることを確認する
@@ -3805,9 +3783,9 @@ cases:
   expected: |
     カレンダー設定のフィールド選択で固定テキスト項目がコード名ではなく項目名で表示されること
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '813'
-- case_no: unc-2590
+- case_no: uncf-2590
   sheet: B
   feature: 関連レコード一覧・項目幅保持
   description: |-
@@ -3818,9 +3796,9 @@ cases:
   expected: 関連レコード一覧の項目幅変更がログアウト後も保持されること
   movie: UC22
   target_spec: layout-ui
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '814'
-- case_no: unc-2600
+- case_no: uncf-2600
   sheet: B
   feature: 通知設定
   description: |-
@@ -3831,9 +3809,9 @@ cases:
     ⑤リマインダ設定の「追加の通知先対象項目」でも同様に確認する
   expected: 通知設定・リマインダ設定の「追加の通知先対象項目」が一般ユーザーでも正しく保存されること
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '816'
-- case_no: unc-2610
+- case_no: uncf-2610
   sheet: B
   feature: 帳票削除
   description: |-
@@ -3845,9 +3823,9 @@ cases:
     ⑥テーブル一覧ページが正常に表示されることを確認する
   expected: エラーなく帳票が削除でき、その後テーブル一覧ページが正常に表示されること
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '817'
-- case_no: unc-2620
+- case_no: uncf-2620
   sheet: B
   feature: 文字列
   description: |-
@@ -3855,21 +3833,21 @@ cases:
     ②※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する。
   expected: ※シート「APIテスト(邊見)」を実施しエラーが発生しないこと
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '818'
-- case_no: unc-2630
+- case_no: uncf-2630
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面で各種設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③フィールドヘッダーとデータが正しく表示されていることを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面でフィールドヘッダーとデータがエラーなく表示されること
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '819'
-- case_no: unc-2640
+- case_no: uncf-2640
   sheet: B
   feature: 通知設定・ファイル項目のファイル名表示
   description: |-
@@ -3879,9 +3857,9 @@ cases:
   expected: 通知設定でファイル項目を含めた場合、通知内容にファイル名が正しく表示されること
   movie: UC22
   target_spec: notifications
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '820'
-- case_no: unc-2650
+- case_no: uncf-2650
   sheet: B
   feature: チャート
   description: |-
@@ -3892,9 +3870,9 @@ cases:
     ⑤前期表示とデータ項目追加の両方が同時に動作することを確認する
   expected: チャートの「前期も表示」にチェックを入れてもデータ項目の「追加+」ボタンが表示されること
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '822'
-- case_no: unc-2660
+- case_no: uncf-2660
   sheet: B
   feature: フィルタUI
   description: |-
@@ -3904,12 +3882,12 @@ cases:
     ④見切れていたフィルタが選択可能であることを確認する
   expected: フィルタ選択ドロップダウンでフィルタ数が多い場合もスクロールバーが正しく機能し、全フィルタが選択可能なこと
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '823'
-- case_no: unc-2670
+- case_no: uncf-2670
   sheet: B
   feature: フィルタ
-  description: |-
+  description: |
     ①年度開始月が4月のテーブルで集計フィルタを作成する
     ②絞り込み条件に「日時項目」「が次と一致」「相対値：昨年度」を設定する
     ③集計結果を確認する
@@ -3918,9 +3896,9 @@ cases:
   expected: |
     相対値「昨年度」の絞り込みが年度開始月に基づいて正しく動作し、年度範囲外のデータが含まれないこと
   movie: UC22
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '824'
-- case_no: unc-2680
+- case_no: uncf-2680
   sheet: B
   feature: リクエストログ・マスターユーザー閲覧
   description: |-
@@ -3932,9 +3910,9 @@ cases:
   expected: マスターユーザーから他ユーザーのリクエストログが閲覧でき、ユーザー列が表示されること
   movie: UC22
   target_spec: system-settings
-  detailed_flow: UC22テストフロー参照（unc-2560 のdetailed_flowと同一）
+  detailed_flow: UC22テストフロー参照（uncf-2560 のdetailed_flowと同一）
   old_case_no: '825'
-- case_no: unc-2690
+- case_no: uncf-2690
   sheet: B
   feature: 帳票
   description: |-
@@ -3946,28 +3924,27 @@ cases:
   movie: UC23
   detailed_flow: |-
     【UC23 テストフロー】この動画で確認するテスト番号:
-      unc-2690       (旧: 827)     帳票
-      unc-2700       (旧: 828)     ルックアップ
-      unc-2710       (旧: 829)     テーブル設定
-      unc-2720       (旧: 830)     フィルタ・高度な機能の変数対応
-      unc-2730       (旧: 832)     一括操作
-      unc-2740       (旧: 833)     カレンダーフィルタ
-      unc-2750       (旧: 834)     フィールド設定
-      unc-2760       (旧: 835)     フィールド・必須マーク表示
-      unc-2770       (旧: 837)     CSV操作
-      unc-2780       (旧: 838)     公開フォーム
+      uncf-2690      (旧: 827)     帳票
+      uncf-2700      (旧: 828)     ルックアップ
+      uncf-2710      (旧: 829)     テーブル設定
+      uncf-2720      (旧: 830)     フィルタ・高度な機能の変数対応
+      uncf-2730      (旧: 832)     一括操作
+      uncf-2740      (旧: 833)     カレンダーフィルタ
+      uncf-2750      (旧: 834)     フィールド設定
+      uncf-2760      (旧: 835)     フィールド・必須マーク表示
+      uncf-2770      (旧: 837)     CSV操作
+      uncf-2780      (旧: 838)     公開フォーム
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. beforeAll: `getAllTypeTableId(page)` でALLテストテーブルID取得 → tableIdを取得する
-    2. `await page.goto(BASE_URL + "/admin/login")` でログイン画面に遷移し、admin/パスワードでログインする
-    3. 帳票テンプレートで画像出力用のセルを設定する
-    4. レコードに画像を添付し、帳票を出力する
-    5. 出力された帳票でセル幅がテンプレートのセル幅のまま維持されていることを確認する: 対象要素を `expect(page.locator("..."))` で検証する
-    6. 画像がセルに合わせてリサイズ表示されていることを確認する（セル幅が画像に合わせて変わらないこと）: `await expect(page.locator("...")).toBeVisible()` で「画像がセルに合わせてリサイズを（セル幅が画像に合わせて変わらないこと）」の表示を確認
-    7. 最終確認: `帳票の画像出力時にテンプレートのセル幅が維持され、画像がセルに合わせてリサイズされること` → `expect()` アサーションで検証する
+    1. ログイン: TEST_BASE_URL/admin/login にアクセスし、adminでログインする
+    2. 帳票テンプレートで画像出力用のセルを設定する
+    3. レコードに画像を添付し、帳票を出力する
+    4. 出力された帳票でセル幅がテンプレートのセル幅のまま維持されていることを確認する
+    5. 画像がセルに合わせてリサイズ表示されていることを確認する（セル幅が画像に合わせて変わらないこと）: 対象要素が page.locator(...).isVisible() で確認する
+    6. 最終確認: 帳票の画像出力時にテンプレートのセル幅が維持され、画像がセルに合わせてリサイズされること - expect()で検証する
   old_case_no: '827'
-- case_no: unc-2700
+- case_no: uncf-2700
   sheet: B
   feature: ルックアップ
   description: |-
@@ -3976,21 +3953,21 @@ cases:
     ③計算項目がルックアップに影響していないことを確認する
   expected: ルックアップフィールドの値がすべて正しく表示されること（計算項目との組み合わせで表示が消えないこと）
   movie: UC23
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '828'
-- case_no: unc-2710
+- case_no: uncf-2710
   sheet: B
   feature: テーブル設定
-  description: |-
+  description: |
     ①テーブル設定画面で各種設定を変更する
     ②保存後にレコード一覧画面が正常に表示されることを確認する
     ③エラーが発生しないことを確認する
   expected: |
     テーブル設定変更後、レコード一覧画面がエラーなく正常に表示されること
   movie: UC23
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '829'
-- case_no: unc-2720
+- case_no: uncf-2720
   sheet: B
   feature: フィルタ・高度な機能の変数対応
   description: |-
@@ -4001,9 +3978,9 @@ cases:
   expected: フィルタの高度な機能で変数を設定した場合、フィルタが正常に適用されデータが表示されること
   movie: UC23
   target_spec: filters
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '830'
-- case_no: unc-2730
+- case_no: uncf-2730
   sheet: B
   feature: 一括操作
   description: |-
@@ -4013,9 +3990,9 @@ cases:
     ④操作後の件数が正しいことを確認する
   expected: 一括操作が正しく動作すること
   movie: UC23
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '832'
-- case_no: unc-2740
+- case_no: uncf-2740
   sheet: B
   feature: カレンダーフィルタ
   description: |-
@@ -4025,12 +4002,12 @@ cases:
     ④月移動なしで即座に別フィルタの内容が反映されることを確認する
   expected: カレンダービューでデフォルトフィルタから別フィルタに切り替えた際、月移動なしで即座にフィルタが反映されること
   movie: UC23
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '833'
-- case_no: unc-2750
+- case_no: uncf-2750
   sheet: B
   feature: フィールド設定
-  description: |-
+  description: |
     ①日時項目で「複数の値の登録を許可する」を有効にする
     ②種類を「日付のみ」に設定し、表示フォーマットを「Y-m-d」に設定する
     ③レコードに日時データを登録する
@@ -4038,9 +4015,9 @@ cases:
   expected: |
     複数値許可の日時項目で設定した表示フォーマット（Y-m-d等）が正しく反映されること
   movie: UC23
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '834'
-- case_no: unc-2760
+- case_no: uncf-2760
   sheet: B
   feature: フィールド・必須マーク表示
   description: |-
@@ -4051,9 +4028,9 @@ cases:
   expected: 必須設定していないフィールドに必須マークが表示されないこと
   movie: UC23
   target_spec: fields
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '835'
-- case_no: unc-2770
+- case_no: uncf-2770
   sheet: B
   feature: CSV操作
   description: |-
@@ -4064,9 +4041,9 @@ cases:
     ⑤先頭ゼロが正しく保持されていることを確認する
   expected: CSVダウンロード時に先頭ゼロ付き値に不要な="..."が付与されないこと
   movie: UC23
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '837'
-- case_no: unc-2780
+- case_no: uncf-2780
   sheet: B
   feature: 公開フォーム
   description: |-
@@ -4076,7 +4053,7 @@ cases:
     ④「活動名」「申請受付対象月」「活動内容」等のフィールドが見切れていないことを確認する
   expected: 公開フォームで各フィールドの表示が左寄りにならず、正しいレイアウトで表示されること
   movie: UC23
-  detailed_flow: UC23テストフロー参照（unc-2690 のdetailed_flowと同一）
+  detailed_flow: UC23テストフロー参照（uncf-2690 のdetailed_flowと同一）
   old_case_no: '838'
 actual_steps:
 - case_no: 145-01

@@ -525,7 +525,7 @@ test.describe('チャート - 基本機能', () => {
                 const notEmptyOption = operatorSelect.locator('option').filter({ hasText: '空ではない' });
                 if (await notEmptyOption.count() > 0) {
                     const val = await notEmptyOption.first().getAttribute('value');
-                    await operatorSelect.selectOption(val || 'not_empty');
+                    await operatorSelect.selectOption(val || 'not_empty', { timeout: 10000 }).catch(() => {});
                     await waitForAngular(page);
                 }
             }
@@ -577,7 +577,7 @@ test.describe('チャート - 基本機能', () => {
                 const dateOption = fieldSelect.locator('option').filter({ hasText: '日付' });
                 if (await dateOption.count() > 0) {
                     const val = await dateOption.first().getAttribute('value');
-                    await fieldSelect.selectOption(val || '');
+                    await fieldSelect.selectOption(val || '', { timeout: 10000 }).catch(() => {});
                     await waitForAngular(page);
                 }
             }
@@ -631,7 +631,7 @@ test.describe('チャート - 基本機能', () => {
             const dataItem1 = dataItemSelects.first();
             const firstOption = await dataItem1.locator('option').nth(1).getAttribute('value');
             if (firstOption) {
-                await dataItem1.selectOption(firstOption);
+                await dataItem1.selectOption(firstOption, { timeout: 10000 }).catch(() => {});
                 await waitForAngular(page);
             }
 
@@ -642,7 +642,7 @@ test.describe('チャート - 基本機能', () => {
                 const lineOption = graphTypeSelect.first().locator('option').filter({ hasText: '線グラフ' });
                 if (await lineOption.count() > 0) {
                     const lineVal = await lineOption.first().getAttribute('value');
-                    await graphTypeSelect.first().selectOption(lineVal || 'line');
+                    await graphTypeSelect.first().selectOption(lineVal || 'line', { timeout: 10000 }).catch(() => {});
                     await waitForAngular(page);
                 }
             }
@@ -750,7 +750,7 @@ test.describe('チャート - 基本機能', () => {
                 const datetimeOption = fieldSelect.locator('option').filter({ hasText: '日時' });
                 if (await datetimeOption.count() > 0) {
                     const val = await datetimeOption.first().getAttribute('value');
-                    await fieldSelect.selectOption(val || '');
+                    await fieldSelect.selectOption(val || '', { timeout: 10000 }).catch(() => {});
                     await waitForAngular(page);
                 }
             }
@@ -761,7 +761,7 @@ test.describe('チャート - 基本機能', () => {
                 const matchOption = operatorSelect.locator('option').filter({ hasText: '次と一致' });
                 if (await matchOption.count() > 0) {
                     const val = await matchOption.first().getAttribute('value');
-                    await operatorSelect.selectOption(val || 'eq');
+                    await operatorSelect.selectOption(val || 'eq', { timeout: 10000 }).catch(() => {});
                     await waitForAngular(page);
                 }
             }

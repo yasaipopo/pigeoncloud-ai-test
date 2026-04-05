@@ -2,13 +2,30 @@ group: フィールド Part5（表示条件）
 spec_file: tests/fields-5.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 850-1
+- case_no: fld5-010
   feature: フィールド追加オプション
   description: ①文字列(一行)フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     文字列(一行)フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
+  detailed_flow: |-
+    【F501 テストフロー】この動画で確認するテスト番号:
+      fld5-010       (旧: 850-1)   フィールド追加オプション
+      fld5-020       (旧: 850-2)   フィールド追加オプション
+      fld5-030       (旧: 850-3)   フィールド追加オプション
+      fld5-040       (旧: 850-4)   フィールド追加オプション
+      fld5-050       (旧: 850-5)   フィールド追加オプション
+      fld5-060       (旧: 850-6)   フィールド追加オプション
+      fld5-070       (旧: 850-7)   フィールド追加オプション
+      fld5-080       (旧: 850-8)   フィールド追加オプション
+      fld5-090       (旧: 850-9)   フィールド追加オプション
+      fld5-100       (旧: 850-10)  フィールド追加オプション
+      fld5-110       (旧: 850-11)  フィールド追加オプション
+      fld5-120       (旧: 850-12)  フィールド追加オプション
+      fld5-130       (旧: 850-13)  フィールド追加オプション
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
     【URL】/admin/dataset/edit/{tableId}
     【フィールドタイプ】文字列(一行) = type: 'text'
@@ -34,341 +51,100 @@ cases:
     - expect(page.locator('.modal.show button:has-text("追加オプション設定")')).toBeVisible()
     - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
     - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-2
+  old_case_no: 850-1
+- case_no: fld5-020
   feature: フィールド追加オプション
   description: ①文章(複数行)フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     文章(複数行)フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】文章(複数行) = type: 'textarea'
-    【settingTypes label】'文章(複数行)'
-    【ALLテストフィールドlabelキーワード】'テキストエリア'
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['テキストエリア']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「文章(複数行)」が表示されていることを確認する
-       - セレクター: .modal.show h5（getSettingTypeObj().label = '文章(複数行)'）
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-    7. 「条件追加」ボタンが存在することを確認する
-       - セレクター: .modal.show button:has-text("条件追加")
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('文章(複数行)')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-3
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-2
+- case_no: fld5-030
   feature: フィールド追加オプション
   description: ①数値フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     数値フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】数値 = type: 'number'
-    【settingTypes label】'数値'（edit.component.ts L197）
-    【ALLテストフィールドlabelキーワード】'数値_整数'
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['数値_整数']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「数値」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('数値')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-4
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-3
+- case_no: fld5-040
   feature: フィールド追加オプション
   description: ①Yes / Noフィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     Yes / Noフィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】Yes / No = type: 'boolean'
-    【settingTypes label】'Yes / No'（edit.component.ts L198）
-    【ALLテストフィールドlabelキーワード】'ブール'
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['ブール']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「Yes / No」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-       - 注意: boolean型は必須設定が除外されるが表示条件は有効
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('Yes / No')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-5
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-4
+- case_no: fld5-050
   feature: フィールド追加オプション
   description: ①選択肢(単一選択)フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     選択肢(単一選択)フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】選択肢(単一選択) = type: 'radio' または 'select'
-    【settingTypes label】'選択肢(単一選択)'（edit.component.ts L199-200）
-    【ALLテストフィールドlabelキーワード】'セレクト'
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['セレクト']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「選択肢(単一選択)」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('選択肢(単一選択)')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-6
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-5
+- case_no: fld5-060
   feature: フィールド追加オプション
   description: ①選択肢(複数選択)フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     選択肢(複数選択)フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】選択肢(複数選択) = type: 'checkbox'
-    【settingTypes label】'選択肢(複数選択)'（edit.component.ts L201）
-    【ALLテストフィールドlabelキーワード】'チェックボックス'
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['チェックボックス']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「選択肢(複数選択)」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-       - 注意: checkbox型は表示条件が有効（type != 'relation_table' のみ除外）
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('選択肢(複数選択)')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-7
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-6
+- case_no: fld5-070
   feature: フィールド追加オプション
   description: ①日時フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     日時フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】日時 = type: 'datetime'
-    【settingTypes label】'日時'（edit.component.ts L202）
-    【ALLテストフィールドlabelキーワード】'日時'
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['日時']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「日時」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('日時')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-8
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-7
+- case_no: fld5-080
   feature: フィールド追加オプション
   description: ①画像フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     画像フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】画像 = type: 'image'
-    【settingTypes label】'画像'（edit.component.ts L203）
-    【ALLテストフィールドlabelキーワード】'画像'
-    【注意】画像型は conditions-form の ignore_type_a に 'image' が含まれるが、
-           表示条件設定自体は有効（L1263の条件: type != 'relation_table'）
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['画像']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「画像」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('画像')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-9
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-8
+- case_no: fld5-090
   feature: フィールド追加オプション
   description: ①ファイルフィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     ファイルフィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】ファイル = type: 'file'
-    【settingTypes label】'ファイル'（edit.component.ts L204）
-    【ALLテストフィールドlabelキーワード】'ファイル'
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['ファイル']) でインデックス取得
-       - 注意: 「ファイル」と「ファイル_複数」がある場合は完全一致優先で「ファイル」を選択
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「ファイル」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('ファイル')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-10
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-9
+- case_no: fld5-100
   feature: フィールド追加オプション
   description: ①他テーブル参照フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     他テーブル参照フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】他テーブル参照 = type: 'select_other_table'
-    【settingTypes label】'他テーブル参照'（edit.component.ts L205）
-    【ALLテストフィールドlabelキーワード】'参照_admin'
-    【注意】他テーブル参照型は表示条件設定の条件（type != 'relation_table'）を満たすため表示される
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['参照_admin']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「他テーブル参照」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('他テーブル参照')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-11
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-10
+- case_no: fld5-110
   feature: フィールド追加オプション
   description: ①計算フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     計算フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】計算 = type: 'calc'
-    【settingTypes label】'計算'（edit.component.ts L206）
-    【ALLテストフィールドlabelキーワード】'計算_加算'
-    【注意】計算型は必須設定が除外される（L1130: ['calc','relation_table'].indexOf(type)===-1）
-           ただし表示条件設定は有効（L1263: type != 'relation_table'）
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['計算_加算']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「計算」が表示されていることを確認する
-    5. 「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    6. 「表示条件設定」ラベルが表示されていることを確認する
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-    7. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('計算')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-12
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-11
+- case_no: fld5-120
   feature: フィールド追加オプション
   description: ①固定テキストフィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     固定テキストフィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】固定テキスト = type: 'fixed_html'
-    【settingTypes label】'固定テキスト'（edit.component.ts L208）
-    【ALLテストフィールドlabelキーワード】null（固定テキストはラベル要素なし）
-    【注意】固定テキスト型は「追加オプション設定」ボタンが表示されない
-           （dataset-field-one.component.html L1120: *ngIf="type!='fixed_html'"）
-           代わりに edit.component.html L1821-1830 の専用「表示条件設定」ブロックが直接表示される
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. findFixedTextField() 関数を使用してフィールドを探す:
-       - ラベル（label要素）が存在しない .overSetting を全件取得
-       - 各インデックスをクリックして .modal.show h5 が「固定テキスト」を含むか確認
-       - 見つかったら true を返す
-    3. モーダル（.modal.show）の h5 タグに「固定テキスト」が表示されていることを確認する
-    4. モーダル内に「表示条件設定」ラベルが直接表示されていることを確認する
-       （「追加オプション設定」ボタンのクリックは不要）
-       - セレクター: .modal.show .locator('text=表示条件設定').first()
-       - HTMLソース: edit.component.html L1821-1830（fixed_html 専用ブロック）
-    5. 「条件追加」ボタンが存在することを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('固定テキスト')
-    - expect(page.locator('.modal.show').locator('text=表示条件設定').first()).toBeVisible()
-    - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 850-13
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-12
+- case_no: fld5-130
   feature: フィールド追加オプション
   description: ①自動採番フィールドの追加オプション（表示条件）UIが確認できること
   expected: |
     自動採番フィールドの追加オプション（表示条件）UIが確認できること
   movie: F501
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【フィールドタイプ】自動採番 = type: 'auto-id'
-    【settingTypes label】'自動採番'（edit.component.ts L190）
-    【ALLテストフィールドlabelキーワード】'自動採番'
-    【注意】自動採番型（hasDisplayCondition: false）の場合:
-           - fields-5.spec.js では表示条件セクションの確認ではなく、モーダルが開けることのみを確認
-           - 必須設定は除外される（L1130: type != 'auto-id'）
-           - 「追加オプション設定」ボタンは表示される（type != 'fixed_html' のみ除外）
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. getFieldLabelMap() → findIndexByLabel(labelMap, ['自動採番']) でインデックス取得
-    3. openFieldDialogByIndex() でクリック → モーダル（.modal.show）が表示される
-    4. モーダルの h5 タグに「自動採番」が表示されていることを確認する
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5').first()).toContainText('自動採番')
-    - expect(await page.locator('.modal.show h5:has-text("自動採番")').count()).toBeGreaterThan(0)（モーダルが開いていること）
-    - body に 'Internal Server Error' が含まれないこと
+  detailed_flow: F501テストフロー参照（fld5-010 のdetailed_flowと同一）
+  old_case_no: 850-13

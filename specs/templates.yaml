@@ -2,13 +2,23 @@ group: テンプレート
 spec_file: tests/templates.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: TMPL-01
+- case_no: tpl-010
   feature: テンプレート
   description: ①テンプレート一覧モーダルが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: TM01
-  detailed_flow: |
+  detailed_flow: |-
+    【TM01 テストフロー】この動画で確認するテスト番号:
+      tpl-010        (旧: TMPL-01)  テンプレート
+      tpl-020        (旧: TMPL-02)  テンプレート
+      tpl-030        (旧: TMPL-03)  テンプレート
+      tpl-040        (旧: TMPL-04)  テンプレート
+      tpl-050        (旧: TMPL-05)  テンプレート
+      tpl-060        (旧: TMPL-06)  テンプレート
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. ダッシュボード(/admin/dashboard)を開く
     2. Angular初期化完了を待つ(body[data-ng-ready="true"])
     3. チュートリアルモーダルが既に表示されている場合はスキップ処理
@@ -26,119 +36,44 @@ cases:
        - `expect(await page.locator('.template_icon').count()).toBeGreaterThan(0)`
     9. 「スキップ」ボタン(button.btn-secondary:has-text("スキップ"))が表示されることを確認
     確認元: dashboard.component.html L336-L385, dashboard.component.ts L184-L193
-
-- case_no: TMPL-02
+  old_case_no: TMPL-01
+- case_no: tpl-020
   feature: テンプレート
   description: ①テンプレートの詳細を確認できること
   expected: |
     テンプレートの詳細を確認できること
   movie: TM01
-  detailed_flow: |
-    1. TMPL-01と同様の手順でテンプレート一覧モーダルを開く
-    2. テンプレート一覧から最初のテンプレートアイコン(.template_icon)をクリック
-       → selected_template に値がセット
-       → STEP2（詳細画面）に切り替わる
-    3. 詳細画面が表示されることを確認:
-       - `.modal.in .modal-body h4` のテキストが空でないことを確認
-       - `expect(page.locator('.modal.in .modal-body h4')).toBeVisible({ timeout: 5000 })`
-    4. テンプレートの説明文(explain_body)が表示されることを確認:
-       - `expect(page.locator('.modal.in .modal-body p')).toBeVisible({ timeout: 5000 })`
-    5. 「テンプレートをインストール」ボタンが表示されることを確認:
-       - `expect(page.locator('.modal.in button:has-text("テンプレートをインストール")')).toBeVisible({ timeout: 5000 })`
-    6. 「戻る」ボタンが表示されることを確認:
-       - `expect(page.locator('.modal.in button:has-text("戻る")')).toBeVisible({ timeout: 5000 })`
-    確認元: dashboard.component.html L388-L428, dashboard.component.ts L48
-
-- case_no: TMPL-03
+  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  old_case_no: TMPL-02
+- case_no: tpl-030
   feature: テンプレート
   description: ①テンプレートインストールモーダルの「戻る」で一覧に戻れること
   expected: |
     テンプレートインストールモーダルの「戻る」で一覧に戻れること
   movie: TM01
-  detailed_flow: |
-    1. TMPL-01と同様の手順でテンプレート一覧モーダルを開く
-    2. テンプレートアイコン(.template_icon)をクリックして詳細画面に遷移
-    3. 詳細画面が表示されたことを確認（「戻る」ボタンが見える）
-       - `expect(page.locator('.modal.in button:has-text("戻る")')).toBeVisible({ timeout: 5000 })`
-    4. 「戻る」ボタンをクリック
-       → selected_template = null になる
-       → STEP1（テンプレート一覧）に戻る
-    5. テンプレート一覧に戻ったことを確認:
-       - `expect(page.locator('#templates')).toBeVisible({ timeout: 5000 })`
-       - `expect(page.locator('.template_icon').first()).toBeVisible({ timeout: 5000 })`
-    6. 「戻る」ボタンが非表示になり「スキップ」ボタンが表示されることを確認:
-       - `expect(page.locator('.modal.in button:has-text("スキップ")')).toBeVisible({ timeout: 3000 })`
-    確認元: dashboard.component.html L417, dashboard.component.ts L48
-
-- case_no: TMPL-04
+  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  old_case_no: TMPL-03
+- case_no: tpl-040
   feature: テンプレート
   description: ①テンプレートをインストールできること
   expected: |
     テンプレートをインストールできること
   movie: TM01
-  detailed_flow: |
-    1. TMPL-01と同様の手順でテンプレート一覧モーダルを開く
-    2. テンプレートアイコン(.template_icon)をクリックして詳細画面に遷移
-    3. 「テンプレートをインストール」ボタン(button.btn-warning:has-text("テンプレートをインストール"))をクリック
-       → installTemplate()が呼ばれ、POST /api/admin/install_template が実行される
-       → template_install_status = 'installing' になりプログレスバーが表示される
-    4. インストール中プログレスバーが表示されることを確認:
-       - `expect(page.locator('.modal.in progressbar')).toBeVisible({ timeout: 5000 })`
-       - または「インストール中...」ボタンが表示されること
-       - `expect(page.locator('.modal.in button:has-text("インストール中...")')).toBeVisible({ timeout: 5000 })`
-    5. インストール完了を待つ(最大30秒):
-       - `expect(page.locator('.modal.in')).not.toContainText('インストール中...', { timeout: 30000 })`
-    6. 完了メッセージが表示されることを確認:
-       - `expect(page.locator('.modal.in')).toContainText('インストールが完了しました', { timeout: 30000 })`
-    7. 「閉じる」ボタン(button:has-text("閉じる"))が表示されることを確認
-    8. 「閉じる」をクリックしてモーダルが閉じることを確認:
-       - `await page.locator('.modal.in button:has-text("閉じる")').click()`
-       - `await expect(page.locator('.modal.in')).not.toBeVisible({ timeout: 5000 })`
-    9. サイドバーのメニューにテンプレートのテーブルが追加されていることを確認:
-       - `expect(await page.locator('nav .nav-item').count()).toBeGreaterThan(0)`
-    注意: このテストはインストール後にDBにテーブルが作成されるため、後続テストに影響する可能性がある。
-    確認元: dashboard.component.ts L111-L133, dashboard.component.html L401-L425
-
-- case_no: TMPL-05
+  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  old_case_no: TMPL-04
+- case_no: tpl-050
   feature: テンプレート
   description: ①テンプレートモーダルを閉じられること
   expected: |
     テンプレートモーダルを閉じられること
   movie: TM01
-  detailed_flow: |
-    1. TMPL-01と同様の手順でテンプレート一覧モーダルを開く
-    2. モーダルが表示されていることを確認:
-       - `expect(page.locator('.modal.in, .modal.show').filter({hasText:'テンプレートからインストール'})).toBeVisible({ timeout: 10000 })`
-    3. モーダル右上の「×」(閉じる)ボタンをクリック:
-       - `await page.locator('.modal.in .modal-header button.close').click()`
-       - または `(click)="tutorialModal.hide()"` が紐づくボタン
-    4. モーダルが閉じることを確認:
-       - `await expect(page.locator('.modal.in').filter({hasText:'テンプレートからインストール'})).not.toBeVisible({ timeout: 5000 })`
-    5. ダッシュボードが正常に表示されていることを確認:
-       - `expect(page.locator('.navbar')).toBeVisible({ timeout: 5000 })`
-    補足: 「スキップ」ボタン(footer内)でも同様に閉じられる。
-       - `await page.locator('.modal.in button:has-text("スキップ")').click()` → tutorialModalHide()
-    確認元: dashboard.component.html L345-L347, dashboard.component.ts L377-L380
-
-- case_no: TMPL-06
+  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  old_case_no: TMPL-05
+- case_no: tpl-060
   feature: テンプレート
   description: ①テンプレート一覧のテンプレート名が表示されていること
   expected: |
     テンプレート一覧のテンプレート名が表示されていること
   movie: TM01
-  detailed_flow: |
-    1. TMPL-01と同様の手順でテンプレート一覧モーダルを開く
-    2. テンプレート一覧(#templates)が表示されていることを確認
-    3. テンプレートアイコン(.template_icon)が複数表示されていることを確認:
-       - `expect(await page.locator('.template_icon').count()).toBeGreaterThan(1)`
-    4. 各テンプレートアイコン内のテキスト(.template_icon .text)が表示されていることを確認:
-       - `expect(page.locator('.template_icon .text').first()).toBeVisible({ timeout: 5000 })`
-       - `const text = await page.locator('.template_icon .text').first().textContent()`
-       - `expect(text?.trim()).not.toBe('')`
-    5. 既知のテンプレート名が少なくとも1つ含まれることを確認:
-       - APIで取得できるテンプレート: 採用管理, 在庫管理, タスク管理, ファイル管理, 日報管理 など
-       - `const names = await page.locator('.template_icon .text').allTextContents()`
-       - `expect(names.some(n => n.trim().length > 0)).toBe(true)`
-    6. テンプレートアイコンの画像(fa-iconクラス)も表示されていることを確認:
-       - `expect(page.locator('.template_icon .fa').first()).toBeVisible({ timeout: 3000 })`
-    確認元: dashboard.component.html L359-L377, /api/admin/templates (12件のテンプレートが返る)
+  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  old_case_no: TMPL-06

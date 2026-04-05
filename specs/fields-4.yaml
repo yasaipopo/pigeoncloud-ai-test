@@ -2,13 +2,23 @@ group: フィールド Part4
 spec_file: tests/fields-4.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 261-1
+- case_no: fld4-010
   feature: フィールド設定
   description: ①選択肢フィールドのインライン編集パネルで「表示条件」セクションが確認できること
   expected: |
     選択肢フィールドのインライン編集パネルで「表示条件」セクションが確認できること
   movie: F401
-  detailed_flow: |
+  detailed_flow: |-
+    【F401 テストフロー】この動画で確認するテスト番号:
+      fld4-010       (旧: 261-1)   フィールド設定
+      fld4-020       (旧: 261-2)   フィールド設定
+      fld4-030       (旧: 261-3)   フィールド設定
+      fld4-040       (旧: 265-1)   フィールド設定
+      fld4-050       (旧: 265-2)   フィールド設定
+      fld4-060       (旧: 267-1)   フィールド設定
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
     【URL】/admin/dataset/edit/{tableId}
     【手順】
@@ -29,151 +39,44 @@ cases:
     - expect(page.locator('.modal.show h5')).toContainText(['選択肢(単一選択)', '選択肢(複数選択)']) のいずれか
     - expect(page.locator('.modal.show').locator('text=表示条件設定')).toBeVisible()
     - expect(await page.locator('.modal.show button:has-text("条件追加")').count()).toBeGreaterThan(0)
-
-- case_no: 261-2
+  old_case_no: 261-1
+- case_no: fld4-020
   feature: フィールド設定
   description: ①Yes/Noフィールドのインライン編集パネルが開けること
   expected: |
     Yes/Noフィールドのインライン編集パネルが開けること
   movie: F401
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. .overSetting ボタンを全件取得し、ラベルに「ブール」「Yes」「No」を含むフィールド行を探してクリックする
-       - セレクター: .overSetting
-       - クリック後: モーダル（.modal.show）が表示される
-    3. モーダルの h5 タグに「Yes / No」が表示されていることを確認する
-       - セレクター: .modal.show h5
-       - 期待テキスト: 「Yes / No」（settingTypes の label）
-    4. Escキーまたは × ボタンでモーダルを閉じる
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5')).toContainText('Yes / No')
-    - expect(page.locator('.modal.show')).toBeVisible()（パネルが開いていること）
-    - body に 'Internal Server Error' が含まれないこと
-
-- case_no: 261-3
+  detailed_flow: F401テストフロー参照（fld4-010 のdetailed_flowと同一）
+  old_case_no: 261-2
+- case_no: fld4-030
   feature: フィールド設定
   description: ①チェックボックスフィールドのインライン編集パネルが開けること
   expected: |
     チェックボックスフィールドのインライン編集パネルが開けること
   movie: F401
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. .overSetting ボタンを全件取得し、ラベルに「チェックボックス」を含むフィールド行を探してクリックする
-       - セレクター: .overSetting
-       - ALLテストテーブルのチェックボックスフィールド名: 「チェックボックス」（labelKeywords: ['チェックボックス']）
-       - クリック後: モーダル（.modal.show）が表示される
-    3. モーダルの h5 タグに「選択肢(複数選択)」が表示されていることを確認する
-       - セレクター: .modal.show h5
-       - 期待テキスト: 「選択肢(複数選択)」（checkbox型のラベル）
-    4. Escキーまたは × ボタンでモーダルを閉じる
-    【期待値アサーション】
-    - expect(page.locator('.modal.show h5')).toContainText('選択肢(複数選択)')
-    - expect(page.locator('.modal.show')).toBeVisible()（パネルが開いていること）
-    - body に 'Internal Server Error' が含まれないこと
-
-- case_no: 265-1
+  detailed_flow: F401テストフロー参照（fld4-010 のdetailed_flowと同一）
+  old_case_no: 261-3
+- case_no: fld4-040
   feature: フィールド設定
   description: ①テキストフィールドに必須設定後、空保存でエラーメッセージが表示されること
   expected: |
     テキストフィールドに必須設定後、空保存でエラーメッセージが表示されること
   movie: F401
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL1】/admin/dataset/edit/{tableId}（フィールド設定）
-    【URL2】/admin/dataset__{tableId}（レコード一覧）
-    【URL3】/admin/dataset__{tableId}/add（新規作成フォーム）
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. .overSetting ボタンを全件取得し、ラベルに「テキスト」を含むフィールドを探してクリックする
-       - セレクター: .overSetting
-       - ALLテストテーブルのテキストフィールド名: 「テキスト」
-    3. モーダル（.modal.show）が表示されたら「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    4. 「必須設定」セクションの「必須項目にする」チェックボックスをONにする
-       - セレクター: .modal.show input[type="checkbox"][ng-reflect-model], または label:has-text("必須項目にする") input
-       - HTMLテンプレート: input[(ngModel)]="this.data.raw_data['option']['required']" value="true"
-    5. 「保存」または「更新」ボタンをクリックして設定を保存する
-       - セレクター: .modal.show button[data-testid="field-save-btn"], または .modal.show button:has-text("保存")
-    6. レコード一覧ページ（/admin/dataset__{tableId}）または新規作成フォーム（/admin/dataset__{tableId}/add）に遷移する
-    7. テキストフィールドを空のまま「保存」ボタンをクリックする
-       - 保存ボタンセレクター: button:has-text("保存"), または .modal.show .btn-primary
-    8. エラーメッセージが表示されることを確認する
-    9. クリーンアップ: フィールド設定ページに戻り、必須設定をOFFに戻して保存する
-    【期待値アサーション】
-    - expect(bodyText).toMatch(/入力してください|必須|エラー/)（空保存時にエラーメッセージが表示されること）
-    - body に 'Internal Server Error' が含まれないこと
-    【注意事項】
-    - テスト後は必ず必須設定をOFF（必須: false）に戻すこと（他テストへの影響を防ぐため）
-
-- case_no: 265-2
+  detailed_flow: F401テストフロー参照（fld4-010 のdetailed_flowと同一）
+  old_case_no: 265-1
+- case_no: fld4-050
   feature: フィールド設定
   description: ①テキスト/数値フィールドで重複チェック設定のUIが表示されること
   expected: |
     テキスト/数値フィールドで重複チェック設定のUIが表示されること
   movie: F401
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL】/admin/dataset/edit/{tableId}
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. .overSetting ボタンを全件取得し、ラベルに「テキスト」を含むフィールドを探してクリックする
-       - セレクター: .overSetting
-       - ALLテストテーブルのテキストフィールド名: 「テキスト」
-    3. モーダル（.modal.show）が表示されたら「値の重複」ラベルと「値の重複を禁止する」チェックボックスが表示されていることを確認する
-       - ソース: dataset-field-one.component.html
-       - 条件: type=='text' の場合に表示（ng-container *ngIf="(type=='text' && data.raw_data['type'] !== 'url') || type == 'select_other_table' || type=='auto-id'"）
-       - ラベルセレクター: .modal.show:has-text("値の重複")
-       - チェックボックスセレクター: .modal.show input[type="checkbox"]（input[checked] が is_unique=='true' に連動）
-    4. Escキーでモーダルを閉じる
-    5. 次に .overSetting で数値フィールドを探してクリックする
-       - ALLテストテーブルの数値フィールド名: 「数値_整数」等
-    6. 数値フィールドのモーダルでも「値の重複」ラベルが表示されていることを確認する
-       - ソース: dataset-field-one.component.html L317-L330（number型の場合も同様にis_unique設定あり）
-    【期待値アサーション】
-    - expect(page.locator('.modal.show').locator('text=値の重複')).toBeVisible()（テキストフィールドの場合）
-    - expect(page.locator('.modal.show input[value="true"]').first()).toBeVisible()（チェックボックスが存在すること）
-    - body に 'Internal Server Error' が含まれないこと
-
-- case_no: 267-1
+  detailed_flow: F401テストフロー参照（fld4-010 のdetailed_flowと同一）
+  old_case_no: 265-2
+- case_no: fld4-060
   feature: フィールド設定
   description: ①テキストフィールドに初期値を設定すると新規レコード作成時に自動入力されること
   expected: |
     テキストフィールドに初期値を設定すると新規レコード作成時に自動入力されること
   movie: F401
-  detailed_flow: |
-    【前提】ALLテストテーブルが作成済みであること（getAllTypeTableId で取得）
-    【URL1】/admin/dataset/edit/{tableId}（フィールド設定）
-    【URL2】/admin/dataset__{tableId}/add（新規作成フォーム）
-    【テスト用初期値】'__テスト初期値__'（一意の文字列）
-    【手順】
-    1. フィールド設定ページ（/admin/dataset/edit/{tableId}）に遷移する
-    2. .overSetting ボタンを全件取得し、ラベルに「テキスト」を含むフィールドを探してクリックする
-       - セレクター: .overSetting
-       - ALLテストテーブルのテキストフィールド名: 「テキスト」
-    3. モーダル（.modal.show）が表示されたら「追加オプション設定」ボタンをクリックして展開する
-       - セレクター: .modal.show button:has-text("追加オプション設定")
-    4. 「デフォルト値」入力欄にテスト値を入力する
-       - ソース: dataset-field-one.component.html L1480-1493
-       - 条件: !is_multi_value_mode && !use_current_as_default のときに表示
-       - ラベル: 「デフォルト値」（label.col-md-4:has-text("デフォルト値")）
-       - 入力フィールドは admin-forms-field コンポーネント内に存在
-       - セレクター候補: label:has-text("デフォルト値") ~ div input[type="text"]
-       - 入力値: '__テスト初期値__'
-    5. 「保存」ボタンをクリックして設定を保存する
-       - セレクター: .modal.show button[data-testid="field-save-btn"], または .modal.show button:has-text("保存")
-    6. 新規作成フォーム（/admin/dataset__{tableId}/add）に遷移する
-    7. テキストフィールドに '__テスト初期値__' が自動入力されていることを確認する
-       - page.innerText('body') に '__テスト初期値__' が含まれることを確認
-    8. クリーンアップ: フィールド設定ページに戻り、デフォルト値を空にして保存する
-    【期待値アサーション】
-    - expect(await page.inputValue('input containing default value')).toBe('__テスト初期値__')
-       または expect(await page.innerText('body')).toContain('__テスト初期値__')
-    - body に 'Internal Server Error' が含まれないこと
-    【注意事項】
-    - テスト後は必ずデフォルト値を空に戻すこと（他テストへの影響を防ぐため）
+  detailed_flow: F401テストフロー参照（fld4-010 のdetailed_flowと同一）
+  old_case_no: 267-1

@@ -2,13 +2,23 @@ group: RPA（コネクト）
 spec_file: tests/rpa.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: RPA-01
+- case_no: rpa-010
   feature: RPA
   description: ①コネクト管理画面が正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: RA01
-  detailed_flow: |
+  detailed_flow: |-
+    【RA01 テストフロー】この動画で確認するテスト番号:
+      rpa-010        (旧: RPA-01)  RPA
+      rpa-020        (旧: RPA-02)  RPA
+      rpa-030        (旧: RPA-03)  RPA
+      rpa-040        (旧: RPA-04)  RPA
+      rpa-050        (旧: RPA-05)  RPA
+      rpa-060        (旧: RPA-06)  RPA
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. ログイン済み状態でサイドメニュー「コネクト」グループの「コネクト」リンク（href="/admin/rpa"）をクリック
     2. URL が /admin/rpa になり、ページタイトルが「コネクト一覧」になることを確認
     3. ページ上部に「コネクト」という見出しが表示されることを確認
@@ -19,107 +29,48 @@ cases:
     - page.title() が「コネクト一覧」を含む
     - ヘッダーに「コネクト」テキストが表示されている
     - 500エラーが表示されていない
-
-- case_no: RPA-02
+  old_case_no: RPA-01
+- case_no: rpa-020
   feature: RPA
   description: ①新しいコネクト（RPA）を作成できること
   expected: |
     新しいコネクト（RPA）を作成できること
   movie: RA01
-  detailed_flow: |
-    1. /admin/rpa へ遷移（コネクト一覧）
-    2. ツールバーの「+」（追加）ボタンをクリックしてドロップダウンを表示
-    3. ドロップダウンに「テーブル追加画面へ」「エクセルから追加」「テンプレートから追加」「JSONから追加」が表示されることを確認
-    4. 「テーブル追加画面へ」をクリックして /admin/rpa/add へ遷移
-    5. コネクト名入力フィールドにテスト用名前（例: "E2Eテストコネクト"）を入力
-    6. トリガーとなるテーブルを選択（ALLテストテーブルを選択）
-    7. トリガーを設定（例: レコード追加時）
-    8. 保存ボタンをクリック
-    9. 一覧ページにリダイレクトされ、作成したコネクト名が一覧に表示されることを確認
-    【expect】
-    - 追加ドロップダウンに「テーブル追加画面へ」が表示されている
-    - 作成後、/admin/rpa 一覧に新しいコネクトが表示される
-    - 作成したコネクト名がテーブル内に表示されている
-
-- case_no: RPA-03
+  detailed_flow: RA01テストフロー参照（rpa-010 のdetailed_flowと同一）
+  old_case_no: RPA-02
+- case_no: rpa-030
   feature: RPA
   description: ①コネクト（RPA）フロー編集画面が表示されること
   expected: |
     コネクト（RPA）フロー編集画面が表示されること
   movie: RA01
-  detailed_flow: |
-    1. コネクトが少なくとも1件存在する状態を前提とする（beforeAllでコネクト作成）
-    2. /admin/rpa へ遷移
-    3. 一覧の最初のコネクト行にある「詳細（虫眼鏡）」または「コネクト名リンク」をクリック
-    4. もしくは /admin/rpa/flow/{id} へ直接遷移
-    5. フロー編集画面が表示されることを確認
-    6. フロー編集UI（ステップ追加ボタン、フロー図等）が表示されることを確認
-    7. 500エラーが表示されないことを確認
-    【expect】
-    - URL が /admin/rpa/flow/{id} または /admin/rpa/edit/{id} を含む
-    - フロー編集画面が表示されている（フロー関連のUI要素が存在する）
-    - Internal Server Error が表示されない
-
-- case_no: RPA-04
+  detailed_flow: RA01テストフロー参照（rpa-010 のdetailed_flowと同一）
+  old_case_no: RPA-03
+- case_no: rpa-040
   feature: RPA
   description: ①コネクト一覧のテーブルヘッダーが正しいこと
   expected: |
     コネクト一覧のテーブルヘッダーが正しいこと
   movie: RA01
-  detailed_flow: |
-    1. /admin/rpa へ遷移（コネクト一覧）
-    2. ページが完全に読み込まれるまで待つ（waitForSelector でテーブルヘッダーを待機）
-    3. テーブルのカラムヘッダーを取得する
-    4. 以下のヘッダーが存在することを確認:
-       - 「ID」
-       - 「テーブル」
-       - 「コネクト名」
-       - 「ステータス」
-    【expect】
-    - table の columnheader に「ID」が含まれる
-    - table の columnheader に「テーブル」が含まれる
-    - table の columnheader に「コネクト名」が含まれる
-    - table の columnheader に「ステータス」が含まれる
-
-- case_no: RPA-05
+  detailed_flow: RA01テストフロー参照（rpa-010 のdetailed_flowと同一）
+  old_case_no: RPA-04
+- case_no: rpa-050
   feature: RPA
   description: ①コネクト一覧の今月使用量が表示されること
   expected: |
     コネクト一覧の今月使用量が表示されること
   movie: RA01
-  detailed_flow: |
-    1. /admin/rpa へ遷移（コネクト一覧）
-    2. ページが完全に読み込まれるまで待つ
-    3. ページ上部の使用量表示エリアを確認
-    4. 「今月使用量:」というラベルが表示されることを確認
-    5. 「X STEP / 100 STEP」形式で使用量が表示されることを確認
-    6. 数値部分が数字とSTEP単位で表示されていることを確認
-    【expect】
-    - 「今月使用量」テキストが表示されている
-    - 「STEP」テキストが表示されている
-    - 使用量の数値が表示されている（正規表現: /\d+ STEP \/ \d+ STEP/）
-
-- case_no: RPA-06
+  detailed_flow: RA01テストフロー参照（rpa-010 のdetailed_flowと同一）
+  old_case_no: RPA-05
+- case_no: rpa-060
   feature: RPA
   description: ①コネクト実行ログページへ遷移できること
   expected: |
     コネクト実行ログページへ遷移できること
   movie: RA01
-  detailed_flow: |
-    1. /admin/rpa へ遷移（コネクト一覧）
-    2. サイドメニューの「コネクト実行ログ」リンク（href="/admin/rpa_executes"）をクリック
-    3. URL が /admin/rpa_executes になることを確認
-    4. ページタイトルが「コネクト実行ログ一覧」になることを確認
-    5. 「コネクト実行ログ」見出しが表示されることを確認
-    6. テーブルヘッダーに「ID」「コネクト」「ステータス」「実行ステップ数」「開始日時」「終了日時」が表示されることを確認
-    7. 今月使用量（「X STEP / 100 STEP」）が表示されることを確認
-    【expect】
-    - URL が /admin/rpa_executes を含む
-    - ページタイトルが「コネクト実行ログ」を含む
-    - テーブルヘッダーに「ID」「コネクト」「ステータス」「実行ステップ数」「開始日時」「終了日時」が表示されている
-    - 500エラーが表示されない
-
-- case_no: '603'
+  detailed_flow: RA01テストフロー参照（rpa-010 のdetailed_flowと同一）
+  old_case_no: RPA-06
+- case_no: rpa-070
   sheet: B
   feature: コネクト
   description: |-
@@ -129,7 +80,13 @@ cases:
     ④画面がローディングのまま固まらないことを確認する
   expected: コネクトのWF完了トリガーでコピー先の重複禁止エラー時に適切なエラーメッセージが表示され、画面が固まらないこと
   movie: UC10
-  detailed_flow: |
+  detailed_flow: |-
+    【UC10 テストフロー】この動画で確認するテスト番号:
+      rpa-070        (旧: 603)     コネクト
+      rpa-080        (旧: 609)     FTP連携
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. コピー元テーブルと「重複禁止」フィールドを持つコピー先テーブルを事前に作成する
     2. コピー元テーブルにワークフロー（WF）を設定する
     3. /admin/rpa へ遷移し、新規コネクトを作成
@@ -146,8 +103,8 @@ cases:
     - エラーメッセージに「[object object]」が含まれない（適切な日本語メッセージが表示される）
     - コネクト実行ログページが正常にロードされる（ローディングスピナーが消えている）
     - 重複禁止エラーを示す適切なメッセージ（例: 「重複しています」「すでに登録されています」等）が表示される
-
-- case_no: '609'
+  old_case_no: '603'
+- case_no: rpa-080
   sheet: B
   feature: FTP連携
   description: |-
@@ -156,20 +113,9 @@ cases:
     ③どのテーブルで発生したエラーかが通知に含まれていることを確認する
   expected: FTP処理の失敗・一部成功時にどのテーブルのエラーかが通知に含まれること
   movie: UC10
-  detailed_flow: |
-    1. システム設定 > FTP連携設定 (/admin/ftp または /admin/setting/ftp) へ遷移
-    2. 接続先FTPサーバー情報を入力して保存（テスト用のFTP設定）
-    3. テスト対象テーブルにFTP連携アクション（ファイル出力など）を設定
-    4. 意図的に失敗するFTP設定（存在しないサーバー等）でFTP連携を実行
-    5. コネクト実行ログ (/admin/rpa_executes) または通知ログ (/admin/notification_log) でエラー通知を確認
-    6. エラー通知にテーブル名（どのテーブルでエラーが発生したか）が含まれることを確認
-    7. 「一部成功」ケース（複数テーブルのうち一部のみ失敗）でも同様にテーブル名が通知に含まれることを確認
-    【expect】
-    - エラー通知/ログにテーブル名が含まれている
-    - 通知メッセージが「テーブル名: XXX でエラーが発生しました」等の形式になっている
-    - 「[object object]」や「undefined」等の非ユーザーフレンドリーなメッセージが含まれない
-
-- case_no: '672'
+  detailed_flow: UC10テストフロー参照（rpa-070 のdetailed_flowと同一）
+  old_case_no: '609'
+- case_no: rpa-090
   sheet: B
   feature: RPA実行履歴
   description: |-
@@ -178,7 +124,12 @@ cases:
     ③RPA実行履歴画面（/admin/rpa_executes）で実行結果が正しく表示されることを確認する
   expected: RPA実行後、実行履歴画面に実行結果が正しく記録・表示されること
   movie: UC13
-  detailed_flow: |
+  detailed_flow: |-
+    【UC13 テストフロー】この動画で確認するテスト番号:
+      rpa-090        (旧: 672)     RPA実行履歴
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll でコネクト（RPA）を1件作成しておく（テーブル追加画面でシンプルなコネクトを作成）
     2. /admin/rpa へ遷移し、作成済みのコネクトを手動実行する（「実行」ボタンをクリック）
        ※ 手動実行ボタンが存在する場合。もしくはトリガーイベントを発火させてコネクトを動かす
@@ -197,8 +148,8 @@ cases:
     - 各カラム（ID/コネクト/ステータス/実行ステップ数/開始日時/終了日時）に値が入っている
     - ステータスが「完了」または「失敗」等の適切な値になっている
     - 開始日時・終了日時が正しい日時フォーマット（YYYY-MM-DD HH:mm:ss）で表示されている
-
-- case_no: '789'
+  old_case_no: '672'
+- case_no: rpa-100
   sheet: B
   feature: RPAビュー・編集
   description: |-
@@ -209,7 +160,12 @@ cases:
     ⑤変更内容が正しく反映されていることを確認する
   expected: RPAのビュー表示と編集・保存が正常に動作すること
   movie: UC20
-  detailed_flow: |
+  detailed_flow: |-
+    【UC20 テストフロー】この動画で確認するテスト番号:
+      rpa-100        (旧: 789)     RPAビュー・編集
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     1. beforeAll でコネクトを1件作成しておき、そのIDを取得する（例: rpaId）
     2. /admin/rpa/view/{rpaId} へ遷移（ビュー画面）
     3. ビュー画面でコネクトの設定情報（コネクト名、テーブル名、トリガー、ステータス等）が表示されることを確認
@@ -226,3 +182,4 @@ cases:
     - /admin/rpa/edit/{rpaId} が正常に表示される（500エラーなし）
     - 編集保存後、変更したコネクト名が反映されている
     - 保存完了メッセージまたは一覧へのリダイレクトが発生する
+  old_case_no: '789'

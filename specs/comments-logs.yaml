@@ -2,14 +2,21 @@ group: コメント・ログ管理
 spec_file: tests/comments-logs.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 13-1
+- case_no: cl-010
   sheet: A
   feature: ログ管理
   category: '-'
   description: ①左ペインより「ログ」⇒「ログ」を選択する。
   expected: 各ユーザー毎の操作ログの確認ができること。
   movie: CL01
-  detailed_flow: |
+  detailed_flow: |-
+    【CL01 テストフロー】この動画で確認するテスト番号:
+      cl-010         (旧: 13-1)    ログ管理
+      cl-020         (旧: 13-2)    ログ管理
+      cl-070         (旧: 196)     ログ
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 操作手順
     1. ログイン済み状態でダッシュボードを開く（BASE_URL + '/admin/dashboard'）
     2. 左サイドバーの「ログ」カテゴリ配下の「ログ」リンク（href="/admin/logs"）をクリック
@@ -29,34 +36,17 @@ cases:
     - ログページリンク: a[href="/admin/logs"]
     - テーブル: table（ヘッダーセル th を持つ）
     - ヘッダーセル: th
-- case_no: 13-2
+  old_case_no: 13-1
+- case_no: cl-020
   sheet: A
   feature: ログ管理
   category: '-'
   description: ①左ペインより「ログ」⇒「CSV UP/DL履歴」を選択する。
   expected: CSVのダウンロード／アップロード履歴の確認ができること。
   movie: CL01
-  detailed_flow: |
-    # 操作手順
-    1. ログイン済み状態でダッシュボードを開く（BASE_URL + '/admin/dashboard'）
-    2. 左サイドバーの「ログ」カテゴリ配下の「CSV UP/DL履歴」リンク（href="/admin/csv"）をクリック
-    3. URL が /admin/csv に遷移したことを確認
-    4. ページロード完了を待つ
-
-    # 確認項目（expect）
-    - URL が /admin/csv を含むこと
-    - ページタイトルが「CSV UP/DL履歴」を含むこと
-    - テーブルが表示されていること
-    - テーブルのヘッダーに「作成者」「タイプ」「ファイル名」「処理」「処理依頼日時」「処理結果」が含まれること
-    - テーブルの行データが表示されていること（CSVダウンロード/アップロード履歴）
-    - 「タイプ」列に「ダウンロード」または「アップロード」が表示されること
-    - 「処理」列に「完了」「失敗」などのステータスが表示されること
-
-    # セレクタ情報
-    - CSV UP/DL履歴リンク: a[href="/admin/csv"]
-    - テーブル: table
-    - ヘッダーセル: th
-- case_no: 69-1
+  detailed_flow: CL01テストフロー参照（cl-010 のdetailed_flowと同一）
+  old_case_no: 13-2
+- case_no: cl-030
   sheet: A
   feature: コメントメンション
   category: 1ユーザーへのメンション
@@ -65,7 +55,16 @@ cases:
     ②@ユーザー名で1ユーザー指定をして、コメントし保存。
   expected: メンション指定されたユーザーに対し、コメント通知が届いていること。
   movie: CL02
-  detailed_flow: |
+  detailed_flow: |-
+    【CL02 テストフロー】この動画で確認するテスト番号:
+      cl-030         (旧: 69-1)    コメントメンション
+      cl-040         (旧: 69-2)    コメントメンション
+      cl-050         (旧: 69-3)    コメントメンション
+      cl-060         (旧: 69-4)    コメントメンション
+      cl-080         (旧: 242)     コメント
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 事前準備
     1. ALLテストテーブルが存在することを確認（getAllTypeTableId で取得）
     2. テスト用ユーザー2を作成（POST /api/admin/debug/create-user → id, email を取得）
@@ -95,7 +94,8 @@ cases:
     - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
     - コメント履歴エリア: aside
     - 通知ベル: #bell-notify-icon-link
-- case_no: 69-2
+  old_case_no: 69-1
+- case_no: cl-040
   sheet: A
   feature: コメントメンション
   category: 複数ユーザーへのメンション
@@ -104,32 +104,9 @@ cases:
     ②@ユーザー名で複数のユーザー指定をして、コメントし保存。
   expected: メンション指定されたユーザーに対し、コメント通知が届いていること。
   movie: CL02
-  detailed_flow: |
-    # 事前準備
-    1. ALLテストテーブルが存在することを確認（getAllTypeTableId で取得）
-    2. テスト用ユーザー2を作成（POST /api/admin/debug/create-user → email: ishikawa+2@loftal.jp）
-    3. テスト用ユーザー3を作成（POST /api/admin/debug/create-user → email: ishikawa+3@loftal.jp）
-
-    # 操作手順
-    1. レコード詳細ページに遷移（/admin/dataset__{tableId}/view/{recordId}）
-    2. aside-menuを表示：document.querySelector('.app').classList.remove('aside-menu-hidden')
-    3. #comment をクリックしてフォーカス
-    4. 「複数メンションテスト @マスターユーザー @ishikawa+2@loftal.jp」をキーボード入力
-       （オートコンプリートが表示された場合は各ユーザーをEnterで選択してから次の@を入力）
-    5. 「送信」ボタン（button.ladda-button.btn-primary）をクリック
-    6. 3秒待機後、asideのコメント履歴を確認
-
-    # 確認項目（expect）
-    - aside 内に送信したコメントテキストが表示されていること
-    - aside 内にコメント送信者の名前が表示されていること
-    - コメント送信後にエラーが表示されないこと
-    - 通知ログ（/admin/notification_log）に、メンションした複数ユーザー分の通知エントリが作成されること
-
-    # セレクタ情報
-    - コメント入力: #comment（contenteditable DIV）
-    - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
-    - コメント履歴: aside
-- case_no: 69-3
+  detailed_flow: CL02テストフロー参照（cl-030 のdetailed_flowと同一）
+  old_case_no: 69-2
+- case_no: cl-050
   sheet: A
   feature: コメントメンション
   category: 存在しないユーザーでメンション
@@ -138,28 +115,9 @@ cases:
     ②@ユーザー名で実在しないユーザー指定をして、コメントし保存。
   expected: 誰にもメンションされず、コメント保存されること。
   movie: CL02
-  detailed_flow: |
-    # 操作手順
-    1. レコード詳細ページに遷移（/admin/dataset__{tableId}/view/{recordId}）
-    2. aside-menuを表示：document.querySelector('.app').classList.remove('aside-menu-hidden')
-    3. #comment をクリックしてフォーカス
-    4. 「存在しないユーザーテスト @存在しないユーザーXYZ99999」をキーボード入力
-       （オートコンプリートが表示されないことを確認してからそのまま入力を続ける）
-    5. 「送信」ボタン（button.ladda-button.btn-primary）をクリック
-    6. 3秒待機後、asideのコメント履歴を確認
-
-    # 確認項目（expect）
-    - aside 内に送信したコメントテキスト「存在しないユーザーテスト」が表示されていること
-    - コメントが保存されること（エラーが発生しないこと）
-    - 通知ログ（/admin/notification_log）に新規エントリが作成されないこと
-      （存在しないユーザーへの通知は発生しない）
-    - @存在しないユーザーXYZ99999 がリンクや特殊な表示にならず、プレーンテキストとして保存されること
-
-    # セレクタ情報
-    - コメント入力: #comment（contenteditable DIV）
-    - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
-    - コメント履歴: aside
-- case_no: 69-4
+  detailed_flow: CL02テストフロー参照（cl-030 のdetailed_flowと同一）
+  old_case_no: 69-3
+- case_no: cl-060
   sheet: A
   feature: コメントメンション
   category: 組織へのメンション
@@ -168,34 +126,9 @@ cases:
     ②@組織名を指定して、コメントし保存。
   expected: メンション指定された組織内のメンバーに対し、コメント通知が届いていること。
   movie: CL02
-  detailed_flow: |
-    # 事前準備
-    1. ALLテストテーブルに組織「組織1」が存在することを確認（debug/statusまたはUIで確認）
-    2. 「組織1」に少なくとも1名のユーザーが所属していることを確認
-    3. テスト用ユーザーを作成して組織1に所属させる（必要に応じて）
-
-    # 操作手順
-    1. レコード詳細ページに遷移（/admin/dataset__{tableId}/view/{recordId}）
-    2. aside-menuを表示：document.querySelector('.app').classList.remove('aside-menu-hidden')
-    3. #comment をクリックしてフォーカス
-    4. 「組織メンションテスト @組織1」をキーボード入力
-       （オートコンプリートが表示された場合は「組織1」をEnterで選択）
-    5. 「送信」ボタン（button.ladda-button.btn-primary）をクリック
-    6. 3秒待機後、asideのコメント履歴を確認
-    7. 通知ログ（/admin/notification_log）に遷移して確認
-
-    # 確認項目（expect）
-    - aside 内に送信したコメントテキスト「組織メンションテスト」が表示されていること
-    - コメントが正常に保存されること
-    - 通知ログ（/admin/notification_log）に組織1のメンバー宛の通知エントリが作成されること
-      （「送信先」列に組織1のメンバーのメールアドレスが表示される）
-
-    # セレクタ情報
-    - コメント入力: #comment（contenteditable DIV）
-    - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
-    - コメント履歴: aside
-    - 通知ログページ: a[href="/admin/notification_log"]
-- case_no: '196'
+  detailed_flow: CL02テストフロー参照（cl-030 のdetailed_flowと同一）
+  old_case_no: 69-4
+- case_no: cl-070
   sheet: B
   feature: ログ
   category: リクエストログ
@@ -206,72 +139,18 @@ cases:
     ④帳票出力など。
   expected: 処理ステータスが、正常終了していれば「成功」となること。
   movie: CL01
-  detailed_flow: |
-    # 事前準備
-    1. ALLテストテーブルが存在し、レコードが3件以上あることを確認
-
-    # 操作手順（リクエストログを発生させる処理を実行してからログ確認）
-    1. CSVダウンロードを実行してリクエストを発生させる
-       - ALLテストテーブル一覧（/admin/dataset__{tableId}）に遷移
-       - 「帳票」ボタンまたはCSVダウンロードボタンをクリック
-       - ダウンロード処理が開始されることを確認
-    2. 複数レコードを選択して削除操作を実行
-       - チェックボックスで複数行を選択
-       - 「削除」ボタンをクリックして削除実行
-    3. 左サイドバーの「ログ」→「リクエストログ」（a[href="/admin/job_logs"]）をクリック
-    4. リクエストログページ（/admin/job_logs）のロード完了を待つ
-
-    # 確認項目（expect）
-    - URL が /admin/job_logs を含むこと
-    - テーブルが表示されていること
-    - テーブルのヘッダーに「ID」「リクエスト」「テーブル」「ステータス」「処理結果」「IPアドレス」が含まれること
-    - 実行したCSV処理のログが「成功」ステータスで表示されていること
-    - 「ステータス」列に「成功」が表示されているエントリが存在すること
-    - 「失敗」のエントリは「処理結果」列にエラーメッセージが表示されていること
-
-    # セレクタ情報
-    - リクエストログリンク: a[href="/admin/job_logs"]
-    - テーブル: table
-    - ヘッダーセル: th
-- case_no: '242'
+  detailed_flow: CL01テストフロー参照（cl-010 のdetailed_flowと同一）
+  old_case_no: '196'
+- case_no: cl-080
   sheet: B
   feature: コメント
   category: ''
   description: ①「ログとコメントをまとめて表示する」が有効の時にメンションがでること
   expected: ・他テーブル参照の必須条件設定が機能すること
   movie: CL02
-  detailed_flow: |
-    # 事前準備
-    1. ALLテストテーブルが存在することを確認
-
-    # 操作手順
-    1. テーブル設定ページ（/admin/dataset/edit/{tableId}）に遷移
-    2. 「詳細・編集画面」タブをクリック
-    3. 「ログとコメントをまとめて表示する」スイッチを ON にする
-       - スイッチのセレクタ: label:has-text("ログとコメントをまとめて表示する") + div input[type="checkbox"]
-       - またはDOMから直接操作: JavaScriptで対象inputを checked=true に設定してchangeイベント発火
-    4. 「更新」ボタン（button.btn.btn-primary.btn-ladda）をクリックして保存
-    5. レコード詳細ページに遷移（/admin/dataset__{tableId}/view/{recordId}）
-    6. aside-menuを表示：document.querySelector('.app').classList.remove('aside-menu-hidden')
-    7. #comment をクリックしてフォーカス
-    8. 「@マスターユーザー」をキーボード入力
-    9. 「送信」ボタンをクリック
-    10. 2秒待機
-
-    # 確認項目（expect）
-    - aside 内のタイムラインに「ログ」と「コメント」が混在して時系列表示されること
-      （更新履歴エントリとコメントが同一ビューに表示される）
-    - コメントと共にメンション（@マスターユーザー）が正しく保存・表示されること
-    - aside 内のコメントに「マスターユーザー」が表示されること
-
-    # セレクタ情報
-    - テーブル設定ページ: /admin/dataset/edit/{tableId}
-    - 詳細・編集画面タブ: tab:has-text("詳細・編集画面")
-    - ログとコメントをまとめて表示スイッチ: .form-group:has-text("ログとコメントをまとめて表示する") input[type="checkbox"]
-    - 更新ボタン: button.btn.btn-primary（テキスト「更新」）
-    - コメント入力: #comment
-    - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
-- case_no: '297'
+  detailed_flow: CL02テストフロー参照（cl-030 のdetailed_flowと同一）
+  old_case_no: '242'
+- case_no: cl-090
   sheet: B
   feature: 文字列
   description: |-
@@ -288,7 +167,18 @@ cases:
     ④各担当者の業務量把握が主目的でもありますので、どのように設定すべきかご教。
   expected: エラーなく正常に動作すること。(値が複数あると絞り込みができないです。何か方法はありますでしょうか？   以下、先方コメント ・担当者として複数人が選択されている場合、抽出機能が働きません。OR選択で選ぶことが出来ますか？   ・上)
   movie: CL03
-  detailed_flow: |
+  detailed_flow: |-
+    【CL03 テストフロー】この動画で確認するテスト番号:
+      cl-090         (旧: 297)     文字列
+      cl-100         (旧: 356)     文字列
+      cl-110         (旧: 426)     文字列
+      cl-120         (旧: 472)     文字列
+      cl-130         (旧: 597)     追加実装
+      cl-140         (旧: 629)     追加実装
+      cl-150         (旧: 653)     追加実装
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # 依頼内容
     チェックボックス・複数選択フィールドで複数値が設定されているレコードに対して
     フィルタ（絞り込み）でOR条件選択が機能することを確認
@@ -316,7 +206,8 @@ cases:
     - テーブル一覧: /admin/dataset__{tableId}
     - フィルタボタン: button:has-text("絞り込み") または .filter-btn
     - フィルタ条件追加: フィルタモーダル内の条件追加UI
-- case_no: '356'
+  old_case_no: '297'
+- case_no: cl-100
   sheet: B
   feature: 文字列
   description: |-
@@ -326,38 +217,9 @@ cases:
     ④これを、通知をクリックしたらコメントが来たレコードに遷移させるように修正希望です。
   expected: 機能改善が正しく反映されていること。(レコードのコメントが入力されると通知が行くよう設定した場合（添付画像3枚目）、 右上のベルマーク（通知マーク）から通知をクリックすると（添付画像2枚目）、 添付画像1枚目のような画像になるのが現状の�し)
   movie: CL03
-  detailed_flow: |
-    # 機能改善内容
-    コメント通知のベルアイコンをクリックした際に、該当レコードの詳細ページに直接遷移する機能
-
-    # 事前準備
-    1. ALLテストテーブルが存在することを確認
-    2. 別ユーザー（テスト用ユーザー2）を作成（POST /api/admin/debug/create-user）
-    3. テスト用ユーザー2でレコードにコメントを投稿する
-
-    # 操作手順
-    1. マスターユーザーでログイン
-    2. レコード詳細ページ（/admin/dataset__{tableId}/view/{recordId}）に遷移
-    3. aside-menuを表示してコメントを入力・送信
-       - #comment に「通知テストコメント @マスターユーザー」を入力
-       - 送信ボタン（button.ladda-button.btn-primary）をクリック
-    4. 2秒待機
-    5. ヘッダーの通知ベルアイコン（#bell-notify-icon-link）をクリック
-    6. 通知ドロップダウンが表示されることを確認
-    7. ドロップダウン内のコメント通知項目をクリック
-
-    # 確認項目（expect）
-    - 通知ベルアイコンにバッジ（未読通知数）が表示されること
-    - 通知ドロップダウンが表示されること
-    - 通知をクリックすると、コメントが投稿されたレコードの詳細ページ（/view/{id}）に遷移すること
-      （以前の仕様では一覧ページや別のページに遷移していたが、改善後は詳細ページに直接遷移する）
-    - 遷移先URLに /view/{recordId} が含まれること
-
-    # セレクタ情報
-    - 通知ベル: #bell-notify-icon-link
-    - 通知ドロップダウン: #bell-notify-icon-link + .dropdown-menu
-    - 通知項目: .dropdown-menu .dropdown-item または .notification-item
-- case_no: '426'
+  detailed_flow: CL03テストフロー参照（cl-090 のdetailed_flowと同一）
+  old_case_no: '356'
+- case_no: cl-110
   sheet: B
   feature: 文字列
   description: |-
@@ -371,67 +233,17 @@ cases:
     ③表示結果は年度の分が出ていますので問題ありませんが、修正希望です。
   expected: バグが修正され、正常に動作すること。(年度開始日を設定することで、年度の絞り込みが可能になりましたが、 検索結果表示画面のコメントが、  「今年度」で検索すると、「発注日が次と一緒「今年」」と出ます。（スクショ）  「昨年度」で検索すると)
   movie: CL03
-  detailed_flow: |
-    # バグ内容
-    日付フィールドのフィルタで「今年度」「昨年度」を選択した場合に、
-    検索結果表示画面のコメント（フィルタ説明文）が「今年度」→「今年」、「昨年度」→「去年」と誤表示される
-
-    # 事前準備
-    1. ALLテストテーブルに日付フィールドが存在することを確認（「日付」フィールド）
-    2. 複数の年度にまたがるレコードが存在することを確認
-
-    # 操作手順
-    1. ALLテストテーブル一覧（/admin/dataset__{tableId}）に遷移
-    2. フィルタ条件を追加するUIを開く
-    3. 「日付」フィールドを選択
-    4. 条件タイプで「今年度」を選択して適用
-    5. 検索結果表示画面に表示されるフィルタ説明文を確認
-    6. フィルタをクリアして「昨年度」に変更して再度確認
-
-    # 確認項目（expect）
-    - 「今年度」でフィルタした場合、画面上の説明文に「今年度」と表示されること
-      （「今年」という誤表示がないこと）
-    - 「昨年度」でフィルタした場合、画面上の説明文に「昨年度」と表示されること
-      （「去年」という誤表示がないこと）
-    - フィルタ結果のデータ件数が正しく絞り込まれていること
-
-    # セレクタ情報
-    - テーブル一覧: /admin/dataset__{tableId}
-    - フィルタUI: .filter-btn または「絞り込み」ボタン
-    - 適用中フィルタの表示: .active-filters または .filter-tags エリア
-- case_no: '472'
+  detailed_flow: CL03テストフロー参照（cl-090 のdetailed_flowと同一）
+  old_case_no: '426'
+- case_no: cl-120
   sheet: B
   feature: 文字列
   description: ①【機能改善確認】レコードのコメント機能でコメントを入力する際、改行が反映されないのですが、こちら改行も反映できるようにしていただけますでしょうか。
   expected: 機能改善が正しく反映されていること。(レコードのコメント機能でコメントを入力する際、改行が反映されないのですが、こちら改行も反映できるようにしていただけますでしょうか。)
   movie: CL03
-  detailed_flow: |
-    # 機能改善内容
-    レコードのコメント欄（#comment contenteditable DIV）で改行（Shift+Enter または Enter）が
-    正しく反映されて保存・表示されること
-
-    # 操作手順
-    1. レコード詳細ページに遷移（/admin/dataset__{tableId}/view/{recordId}）
-    2. aside-menuを表示：document.querySelector('.app').classList.remove('aside-menu-hidden')
-    3. #comment をクリックしてフォーカス
-    4. 「1行目のテキスト」を入力
-    5. Shift+Enter または Enter を押して改行を入力
-    6. 「2行目のテキスト」を入力
-    7. 「送信」ボタン（button.ladda-button.btn-primary）をクリック
-    8. 2秒待機後、asideのコメント履歴を確認
-
-    # 確認項目（expect）
-    - aside 内のコメント履歴に「1行目のテキスト」と「2行目のテキスト」が別行として表示されること
-    - コメントの改行が <br> タグや CSS で正しくレンダリングされていること
-    - コメントが1行に結合されず、改行が保持されていること
-    - page.locator('aside').innerText() に「1行目のテキスト\n2行目のテキスト」のパターンが含まれること
-
-    # セレクタ情報
-    - コメント入力: #comment（contenteditable DIV）
-    - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
-    - コメント履歴エリア: aside
-    - 改行を含むコメントの確認: aside .comment-text または aside [class*="content"]
-- case_no: '597'
+  detailed_flow: CL03テストフロー参照（cl-090 のdetailed_flowと同一）
+  old_case_no: '472'
+- case_no: cl-130
   sheet: B
   feature: 追加実装
   description: |-
@@ -442,35 +254,9 @@ cases:
     ⑤・pが承認者に設定されている場合、ワークフローの承認者（組織）欄から名前が消える（添付画像二枚目）※無効になった場合はFB990。
   expected: バグが修正され、正常に動作すること。(ユーザーを無効にしたとき、及び削除した時、以下のように履歴から名前が消えてしまうため、 消えないようにしていただけますでしょうか。 （例として、無効化、および削除ユーザーを「p」という名前にしています)
   movie: CL03
-  detailed_flow: |
-    # バグ内容
-    ユーザーを無効化または削除した後に、そのユーザーが書いたコメントから名前が消えてしまう
-
-    # 事前準備
-    1. テスト用ユーザーを作成（POST /api/admin/debug/create-user → id, name を取得）
-       - 作成されるユーザー名: 「テストユーザー{n}」または「ishikawa+n」
-    2. テスト用ユーザーのIDを記録
-
-    # 操作手順
-    1. テスト用ユーザーでログイン（ishikawa+n@loftal.jp / admin）
-    2. レコード詳細ページ（/admin/dataset__{tableId}/view/{recordId}）に遷移
-    3. aside-menuを表示してコメントを投稿（「テストユーザーのコメント」）
-    4. マスターユーザーに切り替えてログイン
-    5. ユーザー管理ページ（/admin/users）に遷移
-    6. テスト用ユーザーを無効化（ステータスを「無効」に変更して保存）
-    7. レコード詳細ページに戻り、先ほどのコメントを確認
-
-    # 確認項目（expect）
-    - 無効化後もコメントに投稿者の名前が表示されること
-      （名前が空欄や削除済みにならないこと）
-    - コメントの投稿者名フィールドに元のユーザー名が保持されていること
-    - ユーザーを削除した場合も同様に名前が保持されること
-
-    # セレクタ情報
-    - ユーザー管理: /admin/users
-    - コメント履歴: aside
-    - コメント内の投稿者名: aside [class*="user-name"] または aside strong
-- case_no: '629'
+  detailed_flow: CL03テストフロー参照（cl-090 のdetailed_flowと同一）
+  old_case_no: '597'
+- case_no: cl-140
   sheet: B
   feature: 追加実装
   description: |-
@@ -483,38 +269,9 @@ cases:
     ③https://loftal.slack.com/archives/C05CK6Z7YDQ/p1。
   expected: バグが修正され、正常に動作すること。(コメント追加時にメール通知がされるよう通知設定をしているとき、 コメントの中に改行を使用すると、 改行部分が{line_break}となってしまうため、 単純に改行になるよう修正いただけますでしょうか)
   movie: CL03
-  detailed_flow: |
-    # バグ内容
-    コメントに改行を含む場合にメール通知本文で改行部分が「{line_break}」という文字列になってしまう
-
-    # 事前準備
-    1. ALLテストテーブルにコメント通知設定（メール通知）を有効にする
-       - テーブル設定ページ（/admin/dataset/edit/{tableId}）の通知設定タブを開く
-       - 「コメント追加時」の通知を有効化
-       - 通知先メールアドレスに IMAP_USER（テスト受信用メール）を設定
-    2. SMTPの設定: setupSmtp(page) を呼ぶ
-
-    # 操作手順
-    1. レコード詳細ページに遷移（/admin/dataset__{tableId}/view/{recordId}）
-    2. aside-menuを表示してコメントを入力
-    3. 「1行目のコメント」を入力
-    4. Shift+Enter を押して改行
-    5. 「2行目のコメント」を入力
-    6. 「送信」ボタンをクリック
-    7. メール受信を待機（waitForEmail()）
-    8. 受信したメールの本文を確認
-
-    # 確認項目（expect）
-    - メール通知が届くこと
-    - 受信メールの本文に「{line_break}」という文字列が含まれないこと
-    - 受信メールの本文に実際の改行（または<br>タグ）が含まれること
-    - メール本文に「1行目のコメント」と「2行目のコメント」が別行として表示されること
-
-    # セレクタ情報
-    - コメント入力: #comment（contenteditable DIV）
-    - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
-    - メール受信確認: tests/helpers/mail-checker.js の waitForEmail() を使用
-- case_no: '653'
+  detailed_flow: CL03テストフロー参照（cl-090 のdetailed_flowと同一）
+  old_case_no: '629'
+- case_no: cl-150
   sheet: B
   feature: 追加実装
   description: |-
@@ -525,36 +282,9 @@ cases:
     ③<a href="https://loftal.slack.com/archives/C04J1D90QJY/p17185199。
   expected: 機能改善が正しく反映されていること。(コメント入力の際、組織へメンションする際に以下メッセージが出るようなっていますが このメッセージが出た後、キャンセルボタンを押してbynameのメンションに変更した場合も ずっとこのメッセージが出続け)
   movie: CL03
-  detailed_flow: |
-    # バグ内容
-    組織へのメンション（@組織名）を選択後に確認メッセージが表示され、
-    「キャンセル」を押してbynameメンション（個人宛）に変更した場合でも
-    そのメッセージが表示され続ける
-
-    # 操作手順
-    1. レコード詳細ページに遷移（/admin/dataset__{tableId}/view/{recordId}）
-    2. aside-menuを表示：document.querySelector('.app').classList.remove('aside-menu-hidden')
-    3. #comment をクリックしてフォーカス
-    4. 「@組織1」をキーボード入力してオートコンプリートから「組織1」を選択
-    5. 組織メンション確認メッセージ（「組織1のメンバー全員に通知します」等）が表示されることを確認
-    6. 「キャンセル」ボタンをクリック
-    7. #comment の内容を「@マスターユーザー」に変更（組織指定をクリア）
-    8. 確認メッセージが消えることを確認
-    9. 「@マスターユーザー」を入力して送信ボタンをクリック
-    10. 確認メッセージが再度表示されないことを確認
-
-    # 確認項目（expect）
-    - 組織メンション選択時に確認メッセージが表示されること
-    - 「キャンセル」クリック後に確認メッセージが消えること
-    - bynameメンション（個人宛）に変更した後に確認メッセージが表示されないこと
-    - コメントが正常に送信できること
-
-    # セレクタ情報
-    - コメント入力: #comment（contenteditable DIV）
-    - 確認メッセージ: aside [class*="confirm"] または aside .alert または aside .mention-confirm
-    - キャンセルボタン: aside button:has-text("キャンセル")
-    - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
-- case_no: '570'
+  detailed_flow: CL03テストフロー参照（cl-090 のdetailed_flowと同一）
+  old_case_no: '653'
+- case_no: cl-160
   sheet: B
   feature: コメントメンション
   description: |-
@@ -563,7 +293,12 @@ cases:
     ③ユーザーAに届く通知が1件であることを確認する（複数役職があっても重複しないこと）
   expected: 組織メンション時に複数役職を兼任するユーザーへの通知が重複しないこと（1件のみ届くこと）
   movie: UC09
-  detailed_flow: |
+  detailed_flow: |-
+    【UC09 テストフロー】この動画で確認するテスト番号:
+      cl-160         (旧: 570)     コメントメンション
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     # バグ内容
     組織に所属するユーザーが複数の役職（組織内の役割）を持つ場合、
     @組織メンションで通知が役職の数だけ重複して届いてしまう
@@ -596,6 +331,7 @@ cases:
     - 送信ボタン: button.btn.btn-sm.btn-primary.ladda-button
     - 通知ログ: /admin/notification_log
     - 通知ログのテーブル: table（ヘッダー: ID, テーブル, channel, 送信先, 件名, ステータス, エラー内容, 作成日時）
+  old_case_no: '570'
 actual_steps:
 - case_no: 13-1
   status: passed
