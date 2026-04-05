@@ -602,7 +602,7 @@ test.describe('チャート - 基本機能', () => {
             expect(condCount).toBeGreaterThanOrEqual(0); // 条件行の存在はUI依存
 
             // モーダルが正常に表示されたままであることを確認（壊れていない）
-            await expect(page.locator('.modal.show, .navbar')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('.modal.show, .navbar').first()).toBeVisible({ timeout: 10000 });
 
         });
         await test.step('123-01: チャートで棒グラフと線グラフを同時設定して想定通りに表示されること', async () => {
@@ -658,7 +658,7 @@ test.describe('チャート - 基本機能', () => {
             }
 
             // モーダルが正常に開いたままであることを確認
-            await expect(page.locator('.modal.show, .navbar')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('.modal.show, .navbar').first()).toBeVisible({ timeout: 10000 });
 
         });
         await test.step('123-02: ダッシュボードからチャート作成で棒+線グラフが保存され他ユーザーにも表示されること', async () => {
@@ -779,7 +779,7 @@ test.describe('チャート - 基本機能', () => {
             expect(pageText).not.toContain('エラーが発生しました');
 
             // モーダルが正常に表示されたままであることを確認
-            await expect(page.locator('.modal.show, .navbar')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('.modal.show, .navbar').first()).toBeVisible({ timeout: 10000 });
 
         });
         await test.step('261: チャートのデフォルト設定「全てのユーザーのデフォルトにする」が正常に動作すること', async () => {
@@ -828,7 +828,7 @@ test.describe('チャート - 基本機能', () => {
             } else {
                 // デフォルト設定タブはフィルタ/ビューの場合のみ表示される（チャートでは非表示の可能性）
                 // チャートモーダルが正常に開いていることだけ確認
-                await expect(page.locator('.modal.show, .navbar')).toBeVisible({ timeout: 10000 });
+                await expect(page.locator('.modal.show, .navbar').first()).toBeVisible({ timeout: 10000 });
 
                 // ISEが出ていないことを確認
                 const pageText = await page.innerText('body');
@@ -877,7 +877,7 @@ test.describe('チャート - 基本機能', () => {
             } else {
                 // 「行に色を付ける」タブはビューの場合のみ表示。チャートモーダルの場合は非表示。
                 // 代わりにモーダルが正常表示されていることを確認
-                await expect(page.locator('.modal.show, .navbar')).toBeVisible({ timeout: 10000 });
+                await expect(page.locator('.modal.show, .navbar').first()).toBeVisible({ timeout: 10000 });
                 const pageText = await page.innerText('body');
                 expect(pageText).not.toContain('Internal Server Error');
             }
@@ -925,7 +925,7 @@ test.describe('チャート - 基本機能', () => {
                 expect(pageText).not.toContain('Internal Server Error');
             } else {
                 // 「行に色を付ける」タブはビューの場合のみ表示
-                await expect(page.locator('.modal.show, .navbar')).toBeVisible({ timeout: 10000 });
+                await expect(page.locator('.modal.show, .navbar').first()).toBeVisible({ timeout: 10000 });
                 const pageText = await page.innerText('body');
                 expect(pageText).not.toContain('Internal Server Error');
             }
