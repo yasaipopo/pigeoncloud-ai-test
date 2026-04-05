@@ -1189,10 +1189,14 @@ async function playVideo(spec, movie) {
     const data = await resp.json();
     if (data.downloadUrl || data.url) {
       document.getElementById('videoPlayer').src = data.downloadUrl || data.url;
-      document.getElementById('videoModalTitle').textContent = `${SPEC_LABELS[spec] || spec} / ${movie}`;
 
-      // 同じmovieのテスト内容一覧を右カラムに表示
+      // 撮影日時: allItemsのstagingRunIdからUTC→JST変換
       const movieTests = allItems.filter(i => i.spec === spec && i.movie === movie);
+      const runIdSample = (movieTests.find(i => i.stagingRunId) || {}).stagingRunId || '';
+      const tsJST = parseRunTimestamp(runIdSample);
+      const titleEl = document.getElementById('videoModalTitle');
+      titleEl.innerHTML = `${escHtml(SPEC_LABELS[spec] || spec)} / ${escHtml(movie)}`
+        + (tsJST ? ` <small class="text-muted fw-normal ms-2" style="font-size:0.72em">📅 撮影: ${tsJST} JST</small>` : '');
       const listEl = document.getElementById('videoTestList');
 
       // 動画タイムスタンプ（stepの開始秒数）
