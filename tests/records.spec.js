@@ -1567,13 +1567,16 @@ test.describe('レコード保存・値の永続化', () => {
         await waitForAngular(page);
         // 編集フォームが表示されるまで待機
         await page.waitForSelector('[id^="field__"]', { timeout: 15000 });
-        // ALLテストテーブルは102フィールドあり、各フィールドがgetSelectOptions()等のAPIを呼ぶ。
-        // networkidleでAPI呼び出しが全て完了（Angular Reactive Form初期化完了）してからfillする。
+        // ALLテストテーブルは102フィールドあり、getSelectOptions()等のAPIを呼ぶ。
+        // networkidleで全API完了を待ち、さらにAngularがフォームに初期値をバインドするまで待機。
         // これにより、fill後にAngularが値をリセットする問題を防ぐ。
-        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
-            // networkidleが取れなくても最低3秒は待つ
-        });
-        await page.waitForTimeout(1000);
+        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+        // テキストフィールドに初期値がバインドされるまで待機（Angular form初期化完了の指標）
+        await page.waitForFunction(() => {
+            const input = document.querySelector('input[type="text"][placeholder="例：山田太郎"]');
+            return input && input.value !== '';
+        }, { timeout: 10000 }).catch(() => {});
+        await page.waitForTimeout(500);
     }
 
     /**
