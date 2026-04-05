@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const fs = require('fs');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const { createTestEnv } = require('./helpers/create-test-env');
@@ -72,11 +73,14 @@ async function logout(page) {
         console.log('logout: ドロップダウン経由のログアウト失敗。クッキー削除でログアウト。');
     }
     // クッキーをクリアしてセッションを強制終了（リダイレクト待ち不要）
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
     await page.context().clearCookies();
-        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
     await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
-    await page.waitForSelector('#id', { timeout: 5000 });
+    await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+    if (!page.url().includes('/login')) {
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+    }
+    await page.waitForSelector('#id', { timeout: 5000 }).catch(() => {});
 }
 
 /**
