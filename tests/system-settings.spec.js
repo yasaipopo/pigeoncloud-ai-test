@@ -351,6 +351,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
+        await waitForAngular(page);
         await closeTemplateModal(page);
     });
 
@@ -505,6 +506,7 @@ test.describe('共通設定・システム設定', () => {
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
+        await waitForAngular(page);
         await closeTemplateModal(page);
     });
 

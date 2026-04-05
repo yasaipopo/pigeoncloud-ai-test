@@ -234,6 +234,7 @@ test.describe('フィールド - 日時（101）', () => {
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
+        await waitForAngular(page);
         await closeTemplateModal(page);
     });
 

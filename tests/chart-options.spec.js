@@ -2219,6 +2219,7 @@ test.describe('チャート - フィルタ・表示設定', () => {
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
+        await waitForAngular(page);
         await closeTemplateModal(page);
     });
 
@@ -2729,6 +2730,7 @@ test.describe('集計 - 詳細権限設定', () => {
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
+        await waitForAngular(page);
         await closeTemplateModal(page);
     });
 
@@ -2944,6 +2946,7 @@ test.describe('チャート - 詳細権限設定', () => {
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
+        await waitForAngular(page);
         await closeTemplateModal(page);
     });
 

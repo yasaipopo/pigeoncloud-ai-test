@@ -106,6 +106,7 @@ test.describe('フィールド機能テスト（261/265/267系）', () => {
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
+        await waitForAngular(page);
         await closeTemplateModal(page);
     });
 

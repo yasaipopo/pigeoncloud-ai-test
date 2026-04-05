@@ -208,6 +208,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
+        await waitForAngular(page);
         await closeTemplateModal(page);
     });
 
