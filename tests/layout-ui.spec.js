@@ -4,6 +4,7 @@ const fs = require('fs');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const { createTestEnv } = require('./helpers/create-test-env');
+const { getAllTypeTableId } = require('./helpers/table-setup');
 
 let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
