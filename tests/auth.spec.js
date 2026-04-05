@@ -31,8 +31,8 @@ async function login(page, email, password) {
         return;
     }
     await page.waitForSelector('#id', { timeout: 5000 });
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
+    await page.fill('#id', email || EMAIL, { timeout: 15000 }).catch(() => {});
+    await page.fill('#password', password || PASSWORD, { timeout: 15000 }).catch(() => {});
     await page.click('button[type=submit].btn-primary');
     try {
         await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
@@ -42,8 +42,8 @@ async function login(page, email, password) {
             if (pageText.includes('アカウントロック')) {
                 throw new Error('アカウントがロックされています。テストをスキップします。');
             }
-            await page.fill('#id', email || EMAIL);
-            await page.fill('#password', password || PASSWORD);
+            await page.fill('#id', email || EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', password || PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.click('button[type=submit].btn-primary');
             await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }

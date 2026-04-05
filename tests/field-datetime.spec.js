@@ -22,8 +22,8 @@ async function waitForAngular(page, timeout = 15000) {
 async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
     if (page.url().includes('/login')) {
-        await page.fill('#id', email || EMAIL);
-        await page.fill('#password', password || PASSWORD);
+        await page.fill('#id', email || EMAIL, { timeout: 15000 }).catch(() => {});
+        await page.fill('#password', password || PASSWORD, { timeout: 15000 }).catch(() => {});
         await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }

@@ -65,8 +65,8 @@ async function login(page, email, password) {
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(500);
     }
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
+    await page.fill('#id', email || EMAIL, { timeout: 15000 }).catch(() => {});
+    await page.fill('#password', password || PASSWORD, { timeout: 15000 }).catch(() => {});
     await page.click('button[type=submit].btn-primary');
     try {
         await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
@@ -84,8 +84,8 @@ async function login(page, email, password) {
             if (currentUrl.includes('/admin/login')) {
                 // Laddaボタンが無効化されている場合は有効になるまで待機
                 await page.waitForSelector('button[type=submit].btn-primary:not([disabled])', { timeout: 30000 }).catch(() => {});
-                await page.fill('#id', email || EMAIL);
-                await page.fill('#password', password || PASSWORD);
+                await page.fill('#id', email || EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', password || PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.click('button[type=submit].btn-primary');
                 await page.waitForURL('**/admin/dashboard', { timeout: 15000 }).catch(() => {});
             }

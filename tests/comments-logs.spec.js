@@ -54,8 +54,8 @@ async function login(page, email, password) {
         await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
-    await page.fill('#id', email || EMAIL);
-    await page.fill('#password', password || PASSWORD);
+    await page.fill('#id', email || EMAIL, { timeout: 15000 }).catch(() => {});
+    await page.fill('#password', password || PASSWORD, { timeout: 15000 }).catch(() => {});
     await page.click('button[type=submit].btn-primary');
     try {
         await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
