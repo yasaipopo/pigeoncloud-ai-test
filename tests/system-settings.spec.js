@@ -25,15 +25,32 @@ async function gotoAdminSetting(page) {
     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     await waitForAngular(page);
     await page.waitForTimeout(1000);
-    // リダイレクト先がview/N の場合はedit/N に変換
     const url = page.url();
+    console.log('[gotoAdminSetting] redirected to:', url);
+
     if (url.includes('/view/')) {
+        // view/N → edit/N に変換
         const editUrl = url.replace('/view/', '/edit/');
         await page.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
+    } else if (url.includes('/dashboard') || !url.includes('/admin_setting')) {
+        // dashboardにリダイレクトされた場合: edit/1 を直接試みる
+        console.log('[gotoAdminSetting] dashboard redirect detected, trying edit/1 directly');
+        await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await waitForAngular(page);
+        const url2 = page.url();
+        console.log('[gotoAdminSetting] edit/1 URL:', url2);
+        if (url2.includes('テーブル') || !url2.includes('/admin_setting')) {
+            // フォールバック: /admin/setting/edit/1 を試す
+            await page.goto(BASE_URL + '/admin/setting/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+        }
     }
     await page.waitForTimeout(2000);
+    console.log('[gotoAdminSetting] final URL:', page.url());
 }
 
 
