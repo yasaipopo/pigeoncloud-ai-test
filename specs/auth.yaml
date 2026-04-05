@@ -2,7 +2,8 @@ group: 認証（ログイン・ログアウト・パスワード変更）
 spec_file: tests/auth.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 144-01
+- case_no: auth-010
+  old_case_no: "144-01"
   sheet: A
   feature: 推奨ブラウザ
   category: 警告出力
@@ -51,7 +52,8 @@ cases:
     6. ダッシュボードに遷移することを確認（変更成功）
     ✅ 期待: パスワード変更機能が正常に動作すること
 
-- case_no: 1-1
+- case_no: auth-020
+  old_case_no: "1-1"
   sheet: A
   feature: ログイン／ログアウト
   category: '-'
@@ -83,7 +85,8 @@ cases:
     ▼ [0:41] 38-1 — 誤ったパスワードでのログインエラー
     ▼ [0:57] 295 — パスワード変更機能
 
-- case_no: 1-2
+- case_no: auth-030
+  old_case_no: "1-2"
   sheet: A
   feature: ログイン／ログアウト
   category: '-'
@@ -107,7 +110,8 @@ cases:
     ▼ [0:41] 38-1 — 誤ったパスワードでのログインエラー
     ▼ [0:57] 295 — パスワード変更機能
 
-- case_no: 38-1
+- case_no: auth-040
+  old_case_no: "38-1"
   sheet: A
   feature: ログイン
   category: パスワード入力(異常系)
@@ -131,7 +135,8 @@ cases:
 
     ▼ [0:57] 295 — パスワード変更機能
 
-- case_no: 295
+- case_no: auth-050
+  old_case_no: "295"
   sheet: A
   feature: パスワード変更
   category: パスワード変更
@@ -157,7 +162,8 @@ cases:
     6. ダッシュボードに遷移することを確認（変更成功）
     ✅ 期待: パスワード変更機能が正常に動作すること
 
-- case_no: '176'
+- case_no: auth-060
+  old_case_no: "176"
   sheet: B
   feature: ログイン
   category: google　login
@@ -180,7 +186,8 @@ cases:
     ▼ [0:77] 212-3 — 自動ログアウト設定
     ▼ [0:84] 212-4 — 全端末ログアウト
 
-- case_no: 212-1
+- case_no: auth-070
+  old_case_no: "212-1"
   sheet: B
   feature: 同時ログインプラン
   category: 同時ログイン制御
@@ -203,7 +210,8 @@ cases:
     ▼ [0:77] 212-3 — 自動ログアウト設定
     ▼ [0:84] 212-4 — 全端末ログアウト
 
-- case_no: 212-2
+- case_no: auth-080
+  old_case_no: "212-2"
   sheet: B
   feature: 同時ログインプラン
   category: 強制ログアウト
@@ -226,7 +234,8 @@ cases:
     ▼ [0:77] 212-3 — 自動ログアウト設定
     ▼ [0:84] 212-4 — 全端末ログアウト
 
-- case_no: 212-3
+- case_no: auth-090
+  old_case_no: "212-3"
   sheet: B
   feature: 同時ログインプラン
   category: 自動ログアウト
@@ -246,7 +255,8 @@ cases:
 
     ▼ [0:84] 212-4 — 全端末ログアウト
 
-- case_no: 212-4
+- case_no: auth-100
+  old_case_no: "212-4"
   sheet: B
   feature: 同時ログインプラン
   category: 全端末ログアウト
@@ -263,7 +273,8 @@ cases:
     4. 2つ目のコンテキストでリロード → ログインページにリダイレクト確認
     ✅ 期待: 全端末ログアウトすること
 
-- case_no: 267
+- case_no: auth-110
+  old_case_no: "267"
   sheet: B
   feature: 2段階認証
   category: メールアドレス形式チェック

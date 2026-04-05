@@ -889,6 +889,7 @@ def pipeline_init(event):
             item = {
                 'spec': spec_name,
                 'caseNo': case_no,
+                'oldCaseNo': case.get('oldCaseNo', ''),
                 'movie': case.get('movie', ''),
                 'feature': case.get('feature', ''),
                 'description': case.get('description', ''),

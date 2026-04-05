@@ -674,7 +674,10 @@ function renderRow(tbody, item) {
 
   row.innerHTML = `
     <td style="white-space:nowrap;font-size:.75rem">${item.movie ? `<a href="#" onclick="playVideo('${escAttr(item.spec)}','${escAttr(item.movie)}');return false" style="color:#0d6efd;text-decoration:none" title="動画再生">${escHtml(item.movie)} 🎬</a>` : ''}</td>
-    <td class="case-no">${escHtml(item.caseNo)}</td>
+    <td class="case-no">
+      ${escHtml(item.caseNo)}
+      ${item.oldCaseNo ? `<br><span style="font-size:.65em;color:#adb5bd;font-weight:normal" title="旧番号: ${escHtml(item.oldCaseNo)}">${escHtml(item.oldCaseNo)}</span>` : ''}
+    </td>
     <td class="feature-col" title="${escHtml(item.feature || '')}">${escHtml(item.feature || '')}</td>
     <td class="desc-col" onclick="openDetailModal('${escHtml(item.spec)}','${escHtml(item.caseNo)}','${escAttr(item.description || '')}','${escAttr(item.expected || '')}','${escAttr(item.feature || '')}')" title="${escHtml(item.description || '')}">${escHtml(item.description || '')}</td>
     <td class="desc-col" onclick="openDetailModal('${escHtml(item.spec)}','${escHtml(item.caseNo)}','${escAttr(item.description || '')}','${escAttr(item.expected || '')}','${escAttr(item.feature || '')}')" title="${escHtml(item.expected || '')}">${escHtml(item.expected || '')}</td>
@@ -982,10 +985,12 @@ async function initFromYaml() {
       spec: s.name.replace('.spec.js', '').replace('tests/', ''),
       cases: (s.cases || []).map(c => ({
         caseNo: c.caseNo || c.case_no || '',
+        oldCaseNo: c.oldCaseNo || c.old_case_no || '',
         feature: c.feature || '',
         description: c.description || '',
         expected: c.expected || '',
         detailedFlow: c.detailedFlow || '',
+        movie: c.movie || '',
       }))
     }));
 
