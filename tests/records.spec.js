@@ -1547,16 +1547,33 @@ test.describe('レコード保存・値の永続化', () => {
      */
     async function goToEditPage(page) {
         expect(tableId).not.toBeNull();
-        expect(recordId).not.toBeNull();
+        // テスト実行時点でテーブルから有効なrecordIdを動的に取得
+        // （beforeAllで取得したrecordIdは他テストの削除操作で無効になる場合があるため）
+        const currentUrl = page.url();
+        let useRecordId = recordId;
+        if (!useRecordId || !currentUrl.includes(BASE_URL)) {
+            // テーブル一覧から最初の有効なレコードIDを取得
+            const firstRow = page.locator('tr[mat-row]').first();
+            const dynamicId = await firstRow.getAttribute('data-record-id', { timeout: 5000 }).catch(() => null);
+            if (dynamicId) {
+                useRecordId = dynamicId;
+                recordId = dynamicId; // グループ内でキャッシュ
+                console.log(`[goToEditPage] 動的にrecordId取得: ${useRecordId}`);
+            }
+        }
+        expect(useRecordId, 'recordIdが取得できていること').not.toBeNull();
         // beforeEachでnavigateToTable済みなので、ここでは直接edit URLに遷移
-        // （二重navigateToTableはAngular初期化の二重起動を招くため除去）
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${useRecordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
-        // 編集フォームが表示されるまで待機（テキストフィールドのinputが表示される）
+        // 編集フォームが表示されるまで待機
         await page.waitForSelector('[id^="field__"]', { timeout: 15000 });
-        // ALLテストテーブルは102フィールドあるため、Angular Reactive Form初期化完了まで追加待機
-        // （初期化中にfillするとgetSelectOptionsのsubscribe完了時に値がリセットされる）
-        await page.waitForTimeout(3000);
+        // ALLテストテーブルは102フィールドあり、各フィールドがgetSelectOptions()等のAPIを呼ぶ。
+        // networkidleでAPI呼び出しが全て完了（Angular Reactive Form初期化完了）してからfillする。
+        // これにより、fill後にAngularが値をリセットする問題を防ぐ。
+        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+            // networkidleが取れなくても最低3秒は待つ
+        });
+        await page.waitForTimeout(1000);
     }
 
     /**
