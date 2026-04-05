@@ -154,7 +154,7 @@ async function setupSmtp(page) {
         return;
     }
     try {
-        await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+        await page.goto(BASE_URL + '/admin/admin_setting', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
 
         // 「通知の送信メールアドレスをSMTPで指定」トグルをONにする（まだOFFの場合）
@@ -1615,7 +1615,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // 管理設定ページへ（SMTP設定はここで行う）
-            await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin_setting', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             expect(page.url()).toContain('/admin/admin_setting');
@@ -1665,7 +1665,7 @@ test.describe('通知設定', () => {
             const STEP_TIME = Date.now();
 
             // 管理設定ページへ
-            await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin_setting', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             expect(page.url()).toContain('/admin/admin_setting');
@@ -2419,7 +2419,7 @@ test.describe('通知設定', () => {
             test.setTimeout(150000);
 
             // システム設定 or 通知設定ページでテキストメール配信オプションを確認
-            await page.goto(BASE_URL + '/admin/admin_setting/edit/1', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin_setting', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             let bodyText = await page.innerText('body');
