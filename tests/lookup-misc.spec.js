@@ -623,7 +623,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -637,7 +637,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -842,7 +842,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -875,7 +875,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -935,7 +935,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1298,7 +1298,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1410,13 +1410,13 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             // description: 伝えたか忘れましたが、今のdevelopから、決済が即時反映され、すぐに登録ユーザー数が変わるので、そちらもテストいただきたいです。 （現在のユーザー以下にした場合にエラーになるか、増やした場合、即時反映になるかなど）
             // expected: 想定通りの結果となること。
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // ユーザー一覧ページが表示されること
             await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
-            expect(page.url()).toContain('/admin/user');
+            expect(page.url()).toContain('/admin/admin');
             // ユーザーリストが表示されること（テーブル読み込みを待機）
             await page.locator('[role="row"], table, .user-list').first().waitFor({ timeout: 5000 }).catch(() => {});
             const userRows = page.locator('[role="row"]');
@@ -1628,13 +1628,13 @@ test.describe('追加実装テスト（314-579系）', () => {
             // description: https://loftal.pigeon-cloud.com/admin/dataset__90/view/928 テストお願いします！ 2段階認証ONのとき、自分のユーザー編集から設定できます
             // expected: 想定通りの結果となること。
             // ユーザー一覧ページで2段階認証設定が確認できること
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // ユーザー一覧が表示されること
             await page.locator('main, [role="main"]').waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
-            expect(page.url()).toContain('/admin/user');
+            expect(page.url()).toContain('/admin/admin');
             // adminユーザーの編集ページへ
             await page.goto(BASE_URL + '/admin/mypage', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
@@ -1666,7 +1666,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1683,7 +1683,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1914,7 +1914,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -2185,7 +2185,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -2313,7 +2313,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -2361,7 +2361,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -2439,7 +2439,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 

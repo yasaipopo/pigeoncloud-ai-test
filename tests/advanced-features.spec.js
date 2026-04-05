@@ -553,7 +553,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1123,7 +1123,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1559,7 +1559,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1568,7 +1568,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1669,7 +1669,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             // description: APIテストの実施 ※実行ユーザーのIP制限有り／無しでAPI実行の可・不可についても確認する
             // expected: ※シート「APIテスト(邊見)」を実施しエラーが発生しないこと
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1735,7 +1735,7 @@ test.describe('追加実装テスト（314-579系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 

@@ -1446,7 +1446,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // ユーザー管理ページへアクセスしてエラーがないことを確認
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const userPageText = await page.innerText('body');
             expect(userPageText).not.toContain('Internal Server Error');
@@ -2720,7 +2720,7 @@ test.describe('通知設定', () => {
 
 
             // ユーザー管理ページ
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             let bodyText = await page.innerText('body');

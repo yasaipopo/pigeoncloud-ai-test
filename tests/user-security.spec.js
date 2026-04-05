@@ -249,7 +249,7 @@ test.describe('ユーザー管理（251系）', () => {
     // -------------------------------------------------------------------------
     test('251: ユーザー管理テーブルの「ログイン状態」列でソートできること', async ({ page }) => {
         // ユーザー管理ページへ
-        await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+        await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         await waitForAngular(page);
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');

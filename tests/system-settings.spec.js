@@ -765,10 +765,10 @@ test.describe('共通設定・システム設定', () => {
             expect(userBody.result).toBe('success');
 
             // ユーザー管理ページへ
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
-            await expect(page).toHaveURL(/\/admin\/user/);
+            await expect(page).toHaveURL(/\/admin\/admin/);
             // ユーザー管理ページにテーブルまたはユーザー一覧が表示されていること
             await expect(page.locator('.pc-list-view, table.table-striped').first()).toBeVisible();
 

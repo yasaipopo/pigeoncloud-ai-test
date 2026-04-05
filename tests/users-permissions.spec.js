@@ -3589,7 +3589,7 @@ test.describe('バグ修正・機能改善確認（UP08）', () => {
             expect(sidebarText).toContain('ユーザー');
 
             // ユーザー管理ページが正常に表示されること
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3762,7 +3762,7 @@ test.describe('バグ修正・機能改善確認（UP08）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理テーブルの設定ページ
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -3944,7 +3944,7 @@ test.describe('バグ修正・機能改善確認（UP09）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // ユーザー一覧で他テーブル参照項目の値が表示されていることを確認
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
@@ -3977,7 +3977,7 @@ test.describe('バグ修正・機能改善確認（UP09）', () => {
         await test.step('410: マスターユーザーがユーザー一覧からアカウントロック解除できること', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -4313,7 +4313,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
         await test.step('590: ユーザーテーブルの他テーブル参照ルックアップが正常動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -4329,7 +4329,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
             const STEP_TIME = Date.now();
 
             // マスターユーザーでユーザー管理画面に遷移
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -4350,7 +4350,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
         await test.step('251: ユーザー管理テーブルでログイン状態のソートが正常に動作すること', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -4417,7 +4417,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
 
     test('290-2: パスワード変更フォームで新しいパスワードを設定できること', async ({ page }) => {
             // パスワード変更関連のUIが存在することを確認
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');

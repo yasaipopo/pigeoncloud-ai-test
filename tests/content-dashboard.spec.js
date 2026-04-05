@@ -816,10 +816,10 @@ test.describe('未実装テスト（todo）', () => {
             }
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
             if (page.url().includes('/admin/login')) {
                 await login(page);
-                await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+                await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
             }
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
             await page.waitForSelector('table', { timeout: 5000 }).catch(() => {});
@@ -941,7 +941,7 @@ test.describe('未実装テスト（todo）', () => {
 
     test('263: 複数の計算項目が正常に動作すること（#issue365）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1012,14 +1012,14 @@ test.describe('未実装テスト（todo）', () => {
 
     test('272: テーブル作成権限ユーザーがExcel・JSONからテーブル作成できること（#issue384）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
 
     test('277: 閲覧権限がない一般ユーザーがユーザー情報を閲覧できないこと（#issue389）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1034,7 +1034,7 @@ test.describe('未実装テスト（todo）', () => {
 
     test('280: 権限設定内の登録ユーザー並び替えが正しく反映されること（#issue381）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1177,7 +1177,7 @@ test.describe('未実装テスト（todo）', () => {
 
     test('311: ユーザー管理ページが正常に表示されること（#issue438）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });

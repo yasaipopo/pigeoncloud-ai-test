@@ -1079,7 +1079,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             // description: ユーザー、マスターユーザのアカウントに状態を無効にしたのに、利用可となってます。リロードしても同じです。ログアウトして、またログインしたら、利用不可です。 そのissues修正完了致しました。テストお願い致します。
             // expected: 想定通りの結果となること。
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
@@ -1526,14 +1526,14 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('331: 新規テーブル登録時にユーザーテーブルへの他テーブル参照が正常に動作すること（#issue336）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
 
     test('332: 2つのフィルタ条件を組み合わせた絞り込みが正常に動作すること（#issue337）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1590,7 +1590,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('338: ユーザー管理ページが正常に表示されること（#issue483）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1605,7 +1605,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('340: マスターユーザーのテーブル項目設定・管理者権限が正常に動作すること（#issue496）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1675,14 +1675,14 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('348: ユーザー管理テーブルの権限設定で非表示デフォルト項目が正しく機能すること（#issue461）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
 
     test('351: ログアウト後にユーザー管理画面のログイン状態表示が正しく更新されること（#issue478）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1751,7 +1751,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('364: ユーザー管理テーブルで他テーブル参照項目を作成できること（#issue521）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1781,7 +1781,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('369: ユーザー管理ページが正常に表示されること（#issue535）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1986,7 +1986,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('392: ユーザーテーブルからの他テーブル参照でルックアップが機能していないようですので（#issue571）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2119,7 +2119,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('410: マスターユーザーは、ユーザー一覧からロック解除出来るようにしてもらっても良いでし（#issue555）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2196,14 +2196,14 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('416: ユーザータイプ：ユーザーでも、請求情報にアクセスできる権限設定を実装希望です。（#issue565）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
 
     test('417: カスタマイズ設定が全体に正しく適用されること（#issue607）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2309,7 +2309,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('432: スマートフォンからPigeonCloudにログインできること（#issue612）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2359,7 +2359,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('437: ユーザー管理ページが正常に表示されること（#issue655）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2377,7 +2377,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('439: ユーザー管理ページが正常に表示されること（#issue643）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2440,7 +2440,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('449: 他テーブル参照の一覧用表示項目が正常に機能すること（#issue669）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2641,7 +2641,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
     test('477: ユーザー管理テーブルが正常に表示されること（#issue671）', async ({ page }) => {
             // ユーザー管理ページが正常に表示されること
-            await checkPage(page, '/admin/user');
+            await checkPage(page, '/admin/admin');
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });

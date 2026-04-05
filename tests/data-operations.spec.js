@@ -3245,7 +3245,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             // ユーザー管理テーブルを開く
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');

@@ -6569,7 +6569,7 @@ test.describe('テーブル定義追加テスト', () => {
             }
 
             // ③ 作成したテストユーザーを削除しようとする
-            await page.goto(BASE_URL + '/admin/user', { waitUntil: 'domcontentloaded', timeout: 90000 }).catch(() => {});
+            await page.goto(BASE_URL + '/admin/admin', { waitUntil: 'domcontentloaded', timeout: 90000 }).catch(() => {});
             await page.waitForTimeout(2000);
 
             // テストユーザーの行を探して削除ボタンをクリック
