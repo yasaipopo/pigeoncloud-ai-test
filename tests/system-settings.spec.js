@@ -352,6 +352,8 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
         await waitForAngular(page);
+        // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
         await closeTemplateModal(page);
     });
 
@@ -507,6 +509,8 @@ test.describe('共通設定・システム設定', () => {
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
         await waitForAngular(page);
+        // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
         await closeTemplateModal(page);
     });
 

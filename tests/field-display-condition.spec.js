@@ -188,6 +188,8 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
         await waitForAngular(page);
+        // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
         await closeTemplateModal(page);
     });
 

@@ -2220,6 +2220,8 @@ test.describe('チャート - フィルタ・表示設定', () => {
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
         await waitForAngular(page);
+        // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
         await closeTemplateModal(page);
     });
 
@@ -2731,6 +2733,8 @@ test.describe('集計 - 詳細権限設定', () => {
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
         await waitForAngular(page);
+        // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
         await closeTemplateModal(page);
     });
 
@@ -2947,6 +2951,8 @@ test.describe('チャート - 詳細権限設定', () => {
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
         await waitForAngular(page);
+        // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
         await closeTemplateModal(page);
     });
 
