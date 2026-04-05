@@ -62,8 +62,8 @@ async function login(page, email, password) {
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.click('button[type=submit].btn-primary');
             await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }

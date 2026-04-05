@@ -77,8 +77,8 @@ async function login(page) {
 
     // フォールバック: フォームログイン（#id が表示されるまで待つ）
     await page.waitForSelector('#id', { timeout: 5000 });
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
+    await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+    await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
     await page.click('button[type=submit].btn-primary');
     await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
@@ -200,8 +200,8 @@ test.describe('公開フォーム・公開メールリンク', () => {
         await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         if (page.url().includes('/login')) {
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }

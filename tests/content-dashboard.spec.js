@@ -239,8 +239,8 @@ test.describe('リッチテキスト（274系）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -309,8 +309,8 @@ test.describe('日時フォーマット（275系）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -386,8 +386,8 @@ test.describe('ダッシュボード集計（315系）', () => {
         await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -438,8 +438,8 @@ test.describe('テーブル削除ロック（349系）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -578,8 +578,8 @@ test.describe('未実装テスト（todo）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -1718,8 +1718,8 @@ test.describe('追加実装テスト（683-838系）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }

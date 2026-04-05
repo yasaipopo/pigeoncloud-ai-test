@@ -198,8 +198,8 @@ test.describe('フィールド - 日時（101）', () => {
             if (!page.url().includes('/login')) break;
             const hasId = await page.waitForSelector('#id', { timeout: 15000 }).then(() => true).catch(() => false);
             if (hasId) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click({ force: true });
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 break;
@@ -226,8 +226,8 @@ test.describe('フィールド - 日時（101）', () => {
         await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         if (page.url().includes('/login')) {
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }

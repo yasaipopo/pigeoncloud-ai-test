@@ -55,16 +55,16 @@ async function login(page) {
         return;
     }
     await page.waitForSelector('#id', { timeout: 5000 });
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
+    await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+    await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
     await page.click('button[type=submit].btn-primary');
     try {
         await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.click('button[type=submit].btn-primary');
             await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
         }

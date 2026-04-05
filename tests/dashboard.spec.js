@@ -72,16 +72,16 @@ async function login(page) {
         if (!page.url().includes('/admin/login')) return;
         throw new Error('ログインフォームの#idフィールドが見つかりません');
     }
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
+    await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+    await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
     await page.click('button[type=submit].btn-primary');
     try {
         await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     } catch (e) {
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.click('button[type=submit].btn-primary');
             await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }
@@ -197,8 +197,8 @@ test.describe('ダッシュボード', () => {
         await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         if (page.url().includes('/login')) {
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }

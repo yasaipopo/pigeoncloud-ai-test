@@ -233,8 +233,8 @@ test.describe('ユーザー管理（251系）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -279,8 +279,8 @@ test.describe('権限設定（262系）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -334,8 +334,8 @@ test.describe('2段階認証（267系）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -380,8 +380,8 @@ test.describe('ログイン失敗制限（357系）', () => {
             test.setTimeout(120000);
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }

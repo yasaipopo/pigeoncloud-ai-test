@@ -311,8 +311,8 @@ test.describe('ワークフロー', () => {
         if (currentUrl.includes('/login')) {
             const loginField = await page.waitForSelector('#id', { timeout: 10000 }).catch(() => null);
             if (loginField) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }

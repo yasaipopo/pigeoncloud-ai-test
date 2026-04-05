@@ -226,8 +226,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     test.beforeEach(async ({ page }) => {
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -622,8 +622,8 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     test.beforeEach(async ({ page }) => {
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }

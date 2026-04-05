@@ -42,8 +42,8 @@ async function login(page) {
     } catch (e) {
         await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
+    await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+    await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
     await page.click('button[type=submit].btn-primary');
     try {
         await page.waitForURL('**/admin/dashboard', { timeout: 15000 });

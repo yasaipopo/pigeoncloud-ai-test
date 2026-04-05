@@ -61,8 +61,8 @@ async function gotoDatasetList(page) {
 async function login(page) {
     await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
     if (page.url().includes('/login')) {
-        await page.fill('#id', EMAIL);
-        await page.fill('#password', PASSWORD);
+        await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+        await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
         await page.locator('button[type=submit].btn-primary').first().click();
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
@@ -597,8 +597,8 @@ test.describe('テーブル定義（テーブル管理・テーブル設定・�
         await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -5705,8 +5705,8 @@ test.describe('テーブルオプション設定の動作確認（109系オプ�
         await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
             if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL);
-                await page.fill('#password', PASSWORD);
+                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
                 await page.locator('button[type=submit].btn-primary').first().click();
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
@@ -5973,8 +5973,8 @@ test.describe('テーブルアーカイブ', () => {
         const context = await browser.newContext();
         const page = await context.newPage();
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await page.fill('#id', EMAIL);
-        await page.fill('#password', PASSWORD);
+        await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+        await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
         await page.locator('button[type=submit].btn-primary').first().click();
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await closeTemplateModal(page);

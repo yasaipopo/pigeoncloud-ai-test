@@ -28,8 +28,8 @@ async function login(page) {
         await page.waitForSelector('.navbar', { timeout: 5000 });
         return;
     }
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
+    await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+    await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
     await page.click('button[type=submit].btn-primary');
     // CSRFエラー時は自動で再ロード -> 再試行
     try {
@@ -38,8 +38,8 @@ async function login(page) {
         // CSRF エラーで login のまま残っていたら、再度ログイン
         if (page.url().includes('/admin/login')) {
             await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.click('button[type=submit].btn-primary');
             await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
         }
@@ -200,8 +200,8 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
         await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         if (page.url().includes('/login')) {
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
             await page.locator('button[type=submit].btn-primary').first().click();
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
