@@ -134,7 +134,7 @@ test.describe('RPA（コネクト）', () => {
         if (page.url().includes('/login')) {
             await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
             await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
     });

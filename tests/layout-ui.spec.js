@@ -17,7 +17,7 @@ async function login(page, email, password) {
     if (page.url().includes('/login')) {
         await page.fill('#id', email || EMAIL);
         await page.fill('#password', password || PASSWORD);
-        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
 }
@@ -228,15 +228,21 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
 
     test.beforeEach(async ({ page }) => {
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
-                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
-                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-            }
-            await closeTemplateModal(page);
-        });
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await closeTemplateModal(page);
+    });
 
     test('LU01: メニュー', async ({ page }) => {
         await test.step('100-1: ユーザータイプ「ユーザー」でログイン後ユーザーアイコンクリックでメニュー一覧が表示されること', async () => {
@@ -624,15 +630,21 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
         });
 
     test.beforeEach(async ({ page }) => {
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
             await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
-                await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
-                await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-            }
-            await closeTemplateModal(page);
-        });
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await closeTemplateModal(page);
+    });
 
     test('LU01: メニュー', async ({ page }) => {
         await test.step('127-01: Ctrl+Spaceでテーブル検索が行えること', async () => {

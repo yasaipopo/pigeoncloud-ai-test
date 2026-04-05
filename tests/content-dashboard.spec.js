@@ -33,7 +33,7 @@ async function login(page, email, password) {
     if (page.url().includes('/login')) {
         await page.fill('#id', email || EMAIL);
         await page.fill('#password', password || PASSWORD);
-        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
 }
@@ -244,7 +244,7 @@ test.describe('リッチテキスト（274系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -313,7 +313,7 @@ test.describe('日時フォーマット（275系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -389,7 +389,7 @@ test.describe('ダッシュボード集計（315系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -440,7 +440,7 @@ test.describe('テーブル削除ロック（349系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -579,7 +579,7 @@ test.describe('未実装テスト（todo）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -1718,7 +1718,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);

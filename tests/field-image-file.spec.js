@@ -25,7 +25,7 @@ async function login(page, email, password) {
     if (page.url().includes('/login')) {
         await page.fill('#id', email || EMAIL);
         await page.fill('#password', password || PASSWORD);
-        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
 }

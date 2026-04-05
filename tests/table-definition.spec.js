@@ -63,7 +63,7 @@ async function login(page) {
     if (page.url().includes('/login')) {
         await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
         await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
 }
@@ -5710,7 +5710,7 @@ test.describe('テーブルオプション設定の動作確認（109系オプ�
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -5978,7 +5978,7 @@ test.describe('テーブルアーカイブ', () => {
         await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
         await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
         await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         await closeTemplateModal(page);
 

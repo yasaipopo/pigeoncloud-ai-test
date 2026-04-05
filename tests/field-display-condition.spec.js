@@ -21,7 +21,7 @@ async function login(page) {
     if (page.url().includes('/login')) {
         await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
         await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
 }
@@ -184,7 +184,7 @@ test.describe('フィールド追加オプション（表示条件）- 850系', 
         if (page.url().includes('/login')) {
             await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
             await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
             await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
         await waitForAngular(page);

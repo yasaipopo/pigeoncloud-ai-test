@@ -33,7 +33,7 @@ async function login(page, email, password) {
     if (page.url().includes('/login')) {
         await page.fill('#id', email || EMAIL);
         await page.fill('#password', password || PASSWORD);
-        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
 }
@@ -251,7 +251,7 @@ test.describe('大量データ（211系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -304,7 +304,7 @@ test.describe('検索機能（270系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -358,7 +358,7 @@ test.describe('自動採番（273系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -443,7 +443,7 @@ test.describe('循環参照エラー（291系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -522,7 +522,7 @@ test.describe('一括編集（312系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -577,7 +577,7 @@ test.describe('CSVキャンセル（367系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -638,7 +638,7 @@ test.describe('子テーブル（325, 341系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -728,7 +728,7 @@ test.describe('一覧編集モード（324系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -1190,7 +1190,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);

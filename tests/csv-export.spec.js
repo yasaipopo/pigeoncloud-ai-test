@@ -21,7 +21,7 @@ async function login(page, email, password) {
     if (page.url().includes('/login')) {
         await page.fill('#id', email || EMAIL);
         await page.fill('#password', password || PASSWORD);
-        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
         await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
     }
 }
@@ -360,7 +360,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -413,7 +413,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -537,7 +537,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -650,7 +650,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -748,7 +748,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -838,7 +838,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -881,7 +881,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -943,7 +943,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -981,7 +981,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -1031,7 +1031,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -1080,7 +1080,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -1128,7 +1128,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -1172,7 +1172,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -1264,7 +1264,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -1313,7 +1313,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -1334,7 +1334,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -1580,7 +1580,7 @@ test.describe('JSONエクスポート・インポート', () => {
             if (page.url().includes('/login')) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click();
+                await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
             await closeTemplateModal(page);
@@ -1872,7 +1872,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -2480,7 +2480,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -2531,7 +2531,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -2594,7 +2594,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
@@ -2655,7 +2655,7 @@ test.describe('JSONエクスポート・インポート', () => {
                 if (page.url().includes('/login')) {
                     await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                     await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                    await page.locator('button[type=submit].btn-primary').first().click();
+                    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                     await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 }
             }
