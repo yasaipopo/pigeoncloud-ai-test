@@ -201,8 +201,9 @@
 
     <!-- 動画 -->
     <div class="card mb-4 d-none" id="video-section">
-      <div class="card-header fw-bold">
-        <i class="bi bi-camera-video me-2"></i>テスト動画
+      <div class="card-header fw-bold d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-camera-video me-2"></i>テスト動画</span>
+        <small class="text-muted fw-normal" id="video-timestamp" style="font-size:0.8em"></small>
       </div>
       <div class="card-body">
         <div class="text-center py-3 d-none" id="video-loading">
@@ -411,6 +412,19 @@ function renderCase(c) {
   if (c.videoKey) {
     document.getElementById('video-section').classList.remove('d-none');
     document.getElementById('video-loading').classList.remove('d-none');
+    // 動画の撮影日時（run_idのUTCタイムスタンプ→JST変換）
+    const tsEl = document.getElementById('video-timestamp');
+    if (tsEl) {
+      const m = c.videoKey.match(/runs\/(\d{8})_(\d{6})_/);
+      if (m) {
+        const [, date, time] = m;
+        const y=date.slice(0,4),mo=date.slice(4,6),d=date.slice(6,8);
+        const h=time.slice(0,2),mi=time.slice(2,4),s=time.slice(4,6);
+        const utc = new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}Z`);
+        const jst = utc.toLocaleString('ja-JP', {timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        tsEl.textContent = `📅 撮影: ${jst} JST`;
+      }
+    }
   }
   if (c.screenshotKeys && c.screenshotKeys.length > 0) {
     document.getElementById('screenshot-section').classList.remove('d-none');
