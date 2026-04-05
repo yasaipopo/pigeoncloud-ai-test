@@ -1548,13 +1548,15 @@ test.describe('レコード保存・値の永続化', () => {
     async function goToEditPage(page) {
         expect(tableId).not.toBeNull();
         expect(recordId).not.toBeNull();
-        // まずnavigateToTableでSPA nav経由でテーブル一覧に到達（route guard対策）
-        await navigateToTable(page, BASE_URL, tableId, { maxRetries: 3, retryWait: 5000 });
-        // テーブル一覧から直接編集URLに遷移（一度テーブルSPA navを通過済みなので安定）
+        // beforeEachでnavigateToTable済みなので、ここでは直接edit URLに遷移
+        // （二重navigateToTableはAngular初期化の二重起動を招くため除去）
         await page.goto(BASE_URL + `/admin/dataset__${tableId}/edit/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await waitForAngular(page);
         // 編集フォームが表示されるまで待機（テキストフィールドのinputが表示される）
         await page.waitForSelector('[id^="field__"]', { timeout: 15000 });
+        // ALLテストテーブルは102フィールドあるため、Angular Reactive Form初期化完了まで追加待機
+        // （初期化中にfillするとgetSelectOptionsのsubscribe完了時に値がリセットされる）
+        await page.waitForTimeout(3000);
     }
 
     /**
@@ -1632,17 +1634,10 @@ test.describe('レコード保存・値の永続化', () => {
         await expect(targetInput, 'テキストフィールドの入力欄が表示されること').toBeVisible();
 
         // Step3: 値をクリアして新しい値を入力（Angular Reactive Formsに対応）
+        // fill + Tab でAngularのchange detection確実にトリガー（native events より安定）
         await targetInput.click();
-        await targetInput.fill('');
         await targetInput.fill(newValue);
-        // Angularのchange検知を確実にするためblurイベントを発火
-        await targetInput.evaluate((el, val) => {
-            const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-            nativeSet.call(el, val);
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-            el.dispatchEvent(new Event('blur', { bubbles: true }));
-        }, newValue);
+        await targetInput.press('Tab');  // blur → Angular change detection
         await page.waitForTimeout(500);
 
         // Step4: 更新ボタンをクリック
@@ -1691,15 +1686,10 @@ test.describe('レコード保存・値の永続化', () => {
         }
         await expect(targetTextarea, 'テキストエリアが表示されること').toBeVisible();
 
-        // Step3: 値を入力
+        // Step3: 値を入力（fill + Tab でAngular change detection確実にトリガー）
         await targetTextarea.click();
-        await targetTextarea.fill('');
         await targetTextarea.fill(newValue);
-        await targetTextarea.evaluate((el, val) => {
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-            el.dispatchEvent(new Event('blur', { bubbles: true }));
-        }, newValue);
+        await targetTextarea.press('Tab');
         await page.waitForTimeout(500);
 
         // Step4: 更新ボタンをクリック
@@ -1725,17 +1715,10 @@ test.describe('レコード保存・値の永続化', () => {
         const numInput = page.locator('input.input-number[id^="field__"]').first();
         await expect(numInput, '数値フィールドの入力欄が表示されること').toBeVisible();
 
-        // Step3: 値を入力
+        // Step3: 値を入力（fill + Tab でAngular change detection確実にトリガー）
         await numInput.click();
-        await numInput.fill('');
         await numInput.fill(newValue);
-        await numInput.evaluate((el, val) => {
-            const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-            nativeSet.call(el, val);
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-            el.dispatchEvent(new Event('blur', { bubbles: true }));
-        }, newValue);
+        await numInput.press('Tab');
         await page.waitForTimeout(500);
 
         // Step4: 更新ボタンをクリック
@@ -1762,31 +1745,19 @@ test.describe('レコード保存・値の永続化', () => {
         // Step1: 編集画面に遷移
         await goToEditPage(page);
 
-        // Step2: テキストフィールド
+        // Step2: テキストフィールド（fill + Tab でAngular change detection確実にトリガー）
         const textInput = page.locator('input[type="text"][placeholder="例：山田太郎"]').first();
         const textInputFallback = page.locator('[id^="field__"]:not(ng-select)').first();
         const targetText = await textInput.isVisible({ timeout: 3000 }).catch(() => false) ? textInput : textInputFallback;
         await targetText.click();
-        await targetText.fill('');
         await targetText.fill(textValue);
-        await targetText.evaluate((el, val) => {
-            const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-            nativeSet.call(el, val);
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        }, textValue);
+        await targetText.press('Tab');
 
-        // Step3: 数値フィールド
+        // Step3: 数値フィールド（fill + Tab でAngular change detection確実にトリガー）
         const numInput = page.locator('input.input-number[id^="field__"]').first();
         await numInput.click();
-        await numInput.fill('');
         await numInput.fill(numValue);
-        await numInput.evaluate((el, val) => {
-            const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-            nativeSet.call(el, val);
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        }, numValue);
+        await numInput.press('Tab');
 
         // Step4: メールフィールド
         const emailInput = page.locator('input[type="text"][id^="field__"]').filter({ has: page.locator(':scope') });
@@ -1810,14 +1781,8 @@ test.describe('レコード保存・値の永続化', () => {
         if (emailField) {
             const mailInput = page.locator(`#${emailField}`);
             await mailInput.click();
-            await mailInput.fill('');
             await mailInput.fill(emailValue);
-            await mailInput.evaluate((el, val) => {
-                const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-                nativeSet.call(el, val);
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-            }, emailValue);
+            await mailInput.press('Tab');
         }
 
         await page.waitForTimeout(500);
