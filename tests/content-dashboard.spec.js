@@ -171,7 +171,7 @@ async function navigateToFieldEditPage(page, tableId) {
     }
     await waitForAngular(page);
     // フィールドリストがロードされるまで待機（60秒に延長）
-    await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list, .toggle-drag-field-list', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list, .toggle-drag-field-list', { timeout: 15000 }).catch(() => {});
     const bodyText = await page.innerText('body');
     expect(bodyText).not.toContain('Internal Server Error');
     return bodyText;
@@ -247,6 +247,9 @@ test.describe('リッチテキスト（274系）', () => {
                 await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
+            await waitForAngular(page);
+            // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+            await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
             await closeTemplateModal(page);
         });
 
@@ -316,6 +319,9 @@ test.describe('日時フォーマット（275系）', () => {
                 await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
+            await waitForAngular(page);
+            // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+            await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
             await closeTemplateModal(page);
         });
 
@@ -392,6 +398,9 @@ test.describe('ダッシュボード集計（315系）', () => {
                 await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
+            await waitForAngular(page);
+            // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+            await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
             await closeTemplateModal(page);
         });
 
@@ -443,6 +452,9 @@ test.describe('テーブル削除ロック（349系）', () => {
                 await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
+            await waitForAngular(page);
+            // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+            await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
             await closeTemplateModal(page);
         });
 
@@ -582,6 +594,9 @@ test.describe('未実装テスト（todo）', () => {
                 await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
+            await waitForAngular(page);
+            // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+            await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
             await closeTemplateModal(page);
         });
 
@@ -1721,6 +1736,9 @@ test.describe('追加実装テスト（683-838系）', () => {
                 await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
             }
+            await waitForAngular(page);
+            // サイドバーが完全ロードされるまで待機（スケルトン UI 対策）
+            await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
             await closeTemplateModal(page);
         });
 
