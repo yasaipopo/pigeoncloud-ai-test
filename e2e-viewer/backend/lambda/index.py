@@ -411,10 +411,15 @@ def create_cases(run_id, event):
     now_iso = datetime.now(timezone.utc).isoformat()
     ttl = get_ttl()
 
-    # DynamoDBへバッチ書き込み（25件ずつ）
+    # DynamoDBへバッチ書き込み（重複caseId除去）
+    seen_ids = set()
     with cases_table.batch_writer() as batch:
         for case in cases:
             case_id = case.get('caseId') or str(uuid.uuid4())
+            dedup_key = f'{run_id}#{case_id}'
+            if dedup_key in seen_ids:
+                continue
+            seen_ids.add(dedup_key)
             item = {
                 'runId': run_id,
                 'caseId': case_id,

@@ -1182,21 +1182,68 @@ async function saveDetailedFlow() {
 }
 
 async function playVideo(spec, movie) {
-  // S3署名付きURLを取得
   const token = localStorage.getItem('e2e_auth_token');
-  const key = `videos/${spec}/${movie}/video.webm`;
-  try {
-    const resp = await fetch(CONFIG.apiUrl + '/assets/download-url', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key })
-    });
-    const data = await resp.json();
-    if (data.downloadUrl || data.url) {
-      document.getElementById('videoPlayer').src = data.downloadUrl || data.url;
 
-      // 撮影日時: allItemsのstagingRunIdからUTC→JST変換
-      const movieTests = allItems.filter(i => i.spec === spec && i.movie === movie);
+  // 動画キーを決定: まず pipeline の videoKey を探す。なければ旧パス videos/ を試す
+  const movieTests = allItems.filter(i => i.spec === spec && i.movie === movie);
+  const withVideoKey = movieTests.find(i => i.videoKey);
+  const withRunId = movieTests.find(i => i.stagingRunId);
+
+  let videoUrl = null;
+
+  // 方法1: runs/{runId}/{caseId}/video/ から videoKey を取得（最新の結果）
+  if (withRunId && withRunId.stagingRunId) {
+    try {
+      const casesResp = await fetch(`${CONFIG.apiUrl}/runs/${withRunId.stagingRunId}/cases?limit=50`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (casesResp.ok) {
+        const casesData = await casesResp.json();
+        const cases = casesData.items || casesData.cases || [];
+        const withVideo = cases.find(c => c.videoKey);
+        if (withVideo?.videoKey) {
+          const vResp = await fetch(CONFIG.apiUrl + '/assets/download-url', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: withVideo.videoKey })
+          });
+          const vData = await vResp.json();
+          videoUrl = vData.downloadUrl || vData.url;
+        }
+      }
+    } catch (e) { console.log('runs videoKey lookup failed:', e.message); }
+  }
+
+  // 方法2: pipeline の videoKey
+  if (!videoUrl && withVideoKey?.videoKey) {
+    try {
+      const resp2 = await fetch(CONFIG.apiUrl + '/assets/download-url', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: withVideoKey.videoKey })
+      });
+      const data2 = await resp2.json();
+      videoUrl = data2.downloadUrl || data2.url;
+    } catch (e) {}
+  }
+
+  // 方法3: 旧パス videos/{spec}/{movie}/video.webm
+  if (!videoUrl) {
+    try {
+      const key = `videos/${spec}/${movie}/video.webm`;
+      const resp3 = await fetch(CONFIG.apiUrl + '/assets/download-url', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key })
+      });
+      const data3 = await resp3.json();
+      videoUrl = data3.downloadUrl || data3.url;
+    } catch (e) {}
+  }
+
+  try {
+    if (videoUrl) {
+      document.getElementById('videoPlayer').src = videoUrl;
       const runIdSample = (movieTests.find(i => i.stagingRunId) || {}).stagingRunId || '';
       const tsJST = parseRunTimestamp(runIdSample);
       const titleEl = document.getElementById('videoModalTitle');
@@ -1244,7 +1291,7 @@ async function playVideo(spec, movie) {
 
       new bootstrap.Modal(document.getElementById('videoModal')).show();
     } else {
-      alert('動画が見つかりません: ' + key);
+      alert(`動画が見つかりません: ${spec}/${movie}\n\n動画が未アップロードの可能性があります。テストを再実行してください。`);
     }
   } catch (e) {
     alert('動画取得エラー: ' + e.message);
