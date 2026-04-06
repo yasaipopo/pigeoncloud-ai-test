@@ -121,6 +121,8 @@ cat .claude/knowledge-e2e-failure-triage.md
 | `.claude/knowledge-e2e-performance.md` | waitForTimeout, auto-waiting, 高速化施策 |
 | `.claude/knowledge-e2e-angular.md` | beforeAll/storageState, Reactive Forms, ダッシュボードUI, パスワード変更フロー等 |
 | `.claude/knowledge-e2e-failure-triage.md` | **フェイル種別の切り分け基準** (A:FLAKY / B:SPEC_BUG / C:PRODUCT_BUG / D:INFRA_BUG) |
+| `.claude/knowledge-step-screenshot-rule.md` | **ステップスクショ撮影ルール** + detailedFlowマーク規約（✅/🔴/📷） |
+| `.claude/knowledge-e2e-roadmap.md` | テスターチェック完了までのロードマップ |
 | `.claude/knowledge-page-table-settings.md` | テーブル設定ページ、テーブル作成フロー、.pc-field-block、設定モーダル |
 | `.claude/knowledge-page-record-list.md` | レコード一覧、新規作成、アクションメニュー、チャートモーダル |
 | `.claude/knowledge-page-workflow.md` | ワークフロー設定、ビジュアルフローエディタ、申請・承認フロー |
