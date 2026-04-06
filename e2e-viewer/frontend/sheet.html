@@ -1261,30 +1261,35 @@ async function playVideo(spec, movie) {
       const fmtTime = (sec) => { const m = Math.floor(sec/60); const s = sec%60; return `${m}:${String(s).padStart(2,'0')}`; };
 
       if (movieTests.length > 0) {
-        // タイムスタンプ順にソート（動画の実行順と一致させる）
         movieTests.sort((a, b) => (timeMap[a.caseNo] ?? 999) - (timeMap[b.caseNo] ?? 999));
-        listEl.innerHTML = movieTests.map((t, idx) => {
-          const sec = timeMap[t.caseNo];
-          const timeLabel = sec !== undefined ? `<a href="#" onclick="document.getElementById('videoPlayer').currentTime=${sec};return false" style="color:#fff;background:#0d6efd;padding:1px 6px;border-radius:4px;font-size:.75rem;text-decoration:none;margin-left:6px" title="動画をこの位置にジャンプ">▶ ${fmtTime(sec)}</a>` : '';
-          return `
-          <div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #dee2e6">
-            <div style="font-weight:700;color:#0d6efd;margin-bottom:4px">
-              ${idx+1}. ${escHtml(t.caseNo)} — ${escHtml(t.feature || '')} ${timeLabel}
-            </div>
-            <div style="margin-bottom:6px">
-              <span style="font-size:.72rem;color:#6c757d;font-weight:600">テスト内容:</span>
-              <div style="white-space:pre-wrap;line-height:1.5">${escHtml(t.description || '')}</div>
-            </div>
-            <div>
-              <span style="font-size:.72rem;color:#6c757d;font-weight:600">期待結果:</span>
-              <div style="white-space:pre-wrap;color:#198754;line-height:1.5">${escHtml(t.expected || '')}</div>
-            </div>
-            ${t.detailedFlow ? `<div style="margin-top:6px;background:#fff3cd;padding:6px 8px;border-radius:4px;font-size:.8rem">
-              <span style="font-weight:600;color:#856404">📋 詳細テストフロー:</span>
-              <div style="white-space:pre-wrap">${escHtml(t.detailedFlow || '')}</div>
-            </div>` : ''}
-          </div>
-        `;}).join('');
+
+        // 先頭ケースの detailedFlow を取得（movie全体のフローが書いてある）
+        const firstWithFlow = movieTests.find(t => t.detailedFlow && !t.detailedFlow.includes('参照'));
+        const movieFlow = firstWithFlow?.detailedFlow || '';
+
+        // メイン表示: detailedFlow（1回だけ、大きく表示）
+        let html = '';
+        if (movieFlow) {
+          html += `<div style="background:#fff3cd;padding:10px 12px;border-radius:6px;font-size:.85rem;margin-bottom:16px">
+            <div style="font-weight:700;color:#856404;margin-bottom:6px">📋 テストフロー（この動画で確認する内容）</div>
+            <div style="white-space:pre-wrap;line-height:1.6">${escHtml(movieFlow)}</div>
+          </div>`;
+        } else {
+          // detailedFlow がない場合は従来通り個別表示
+          html += movieTests.map((t, idx) => {
+            const sec = timeMap[t.caseNo];
+            const timeLabel = sec !== undefined ? `<a href="#" onclick="document.getElementById('videoPlayer').currentTime=${sec};return false" style="color:#fff;background:#0d6efd;padding:1px 6px;border-radius:4px;font-size:.75rem;text-decoration:none;margin-left:6px">▶ ${fmtTime(sec)}</a>` : '';
+            return `
+            <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #dee2e6">
+              <div style="font-weight:700;color:#0d6efd;margin-bottom:4px">
+                ${idx+1}. ${escHtml(t.caseNo)} — ${escHtml(t.feature || '')} ${timeLabel}
+              </div>
+              <div style="font-size:.85rem">${escHtml(t.description || '')}</div>
+            </div>`;
+          }).join('');
+        }
+
+        listEl.innerHTML = html;
       } else {
         listEl.innerHTML = '<p class="text-muted">テスト内容が見つかりません</p>';
       }
