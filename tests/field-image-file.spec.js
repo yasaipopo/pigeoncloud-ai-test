@@ -312,7 +312,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             const modal = page.locator('.settingModal .modal-content');
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -339,7 +339,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             const modal = page.locator('.settingModal .modal-content');
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // 画像フィールド固有: 推奨サイズ表示やオプションが設定可能であること
             // モーダルヘッダーに「画像」が含まれること
             await expect(modal.locator('h5')).toContainText('画像');
@@ -384,11 +384,22 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-        // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-            await login(page);
-            await closeTemplateModal(page);
-        });
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
+        await closeTemplateModal(page);
+    });
 
     test('F201: フィールド設定', async ({ page }) => {
         await test.step('44-1: Yes/Noフィールド設定ページが正常に表示されること', async () => {
@@ -397,7 +408,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             await navigateToFieldPage(page, tableId);
             await assertFieldPageLoaded(page, tableId);
             // フィールド一覧に Yes/No タイプのフィールドが存在すること
-            const boolField = page.locator('.pc-field-block').filter({ hasText: /Yes\s*[\/／]\s*No/ });
+            const boolField = page.locator('.pc-field-block').filter({ hasText: /ブール/ });
             await expect(boolField.first()).toBeVisible();
             // 歯車アイコンをクリックして設定モーダルを開く
             await boolField.first().hover();
@@ -407,7 +418,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             const modal = page.locator('.settingModal .modal-content');
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // Yes/No固有: ラベル入力欄が存在すること（boolean-text）
             await expect(modal.locator('input[type="text"]').nth(1)).toBeVisible();
             // モーダルを閉じる
@@ -426,7 +437,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             await navigateToFieldPage(page, tableId);
             await assertFieldPageLoaded(page, tableId);
             // フィールド一覧に Yes/No タイプのフィールドが存在すること
-            const boolField = page.locator('.pc-field-block').filter({ hasText: /Yes\s*[\/／]\s*No/ });
+            const boolField = page.locator('.pc-field-block').filter({ hasText: /ブール/ });
             await expect(boolField.first()).toBeVisible();
             // 歯車アイコンをクリックして設定モーダルを開く
             await boolField.first().hover();
@@ -438,7 +449,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             // モーダルヘッダーに「Yes / No」が含まれること
             await expect(modal.locator('h5')).toContainText('Yes');
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -500,7 +511,7 @@ test.describe('自動採番フィールド（216系）', () => {
             const modal = page.locator('.settingModal .modal-content');
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // 自動採番固有: フォーマット入力欄が存在すること（placeholder: ID-{YYYY}-...）
             const formatInput = modal.locator('input[placeholder*="ID-"]');
             await expect(formatInput).toBeVisible();
@@ -543,11 +554,22 @@ test.describe('固定テキストフィールド（230系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-        // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-            await login(page);
-            await closeTemplateModal(page);
-        });
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
+        await closeTemplateModal(page);
+    });
 
     test('F201: フィールド設定', async ({ page }) => {
         await test.step('230: 固定テキストフィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -621,11 +643,22 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-        // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-            await login(page);
-            await closeTemplateModal(page);
-        });
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
+        await closeTemplateModal(page);
+    });
 
     test('F202: フィールド設定', async ({ page }) => {
         await test.step('121-01: ファイルフィールドのアップロード設定ページが表示されること', async () => {
@@ -644,7 +677,7 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
             const modal = page.locator('.settingModal .modal-content');
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // ファイルフィールドであること（モーダルヘッダーにファイルが含まれる）
             await expect(modal.locator('h5')).toContainText('ファイル');
             // モーダルを閉じる
@@ -704,11 +737,22 @@ test.describe('列設定（122系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-        // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-            await login(page);
-            await closeTemplateModal(page);
-        });
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
+        await closeTemplateModal(page);
+    });
 
     test('F202: フィールド設定', async ({ page }) => {
         await test.step('122-01: 列の表示/非表示設定ページが正常に表示されること', async () => {
@@ -782,11 +826,22 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
         });
 
     test.beforeEach(async ({ page }) => {
-        // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-            await login(page);
-            await closeTemplateModal(page);
-        });
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
+        await closeTemplateModal(page);
+    });
 
     test('F203: フィールド設定', async ({ page }) => {
         await test.step('218: 文章複数行（通常テキスト）フィールドの設定ページが正常に表示されること', async () => {
@@ -849,7 +904,7 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             await richRadio.click();
             await waitForAngular(page);
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる（キャンセル）
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -887,11 +942,22 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-        // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-            await login(page);
-            await closeTemplateModal(page);
-        });
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
+        await closeTemplateModal(page);
+    });
 
     test('F203: フィールド設定', async ({ page }) => {
         await test.step('217: 文字列一行フィールドの設定ページが正常に表示されること', async () => {
@@ -914,7 +980,7 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
             await expect(modal.locator('label:has-text("メールアドレス")')).toBeVisible();
             await expect(modal.locator('label:has-text("URL")')).toBeVisible();
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // 「値の重複を禁止する」チェックボックスが存在すること
             await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible();
             // モーダルを閉じる（キャンセル）
@@ -1061,11 +1127,22 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
         });
 
     test.beforeEach(async ({ page }) => {
-        // 古い環境のcookieをクリアして新環境にログイン
         await page.context().clearCookies();
-            await login(page);
-            await closeTemplateModal(page);
-        });
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        }
+        await waitForAngular(page);
+        await page.waitForSelector('.sidebar-nav a, .nav-link', { timeout: 10000 }).catch(() => {});
+        await closeTemplateModal(page);
+    });
 
     test('F203: フィールド設定', async ({ page }) => {
         await test.step('14-1: テキスト種別フィールドのフィールド設定ページが正常に表示されること', async () => {
@@ -1086,7 +1163,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await expect(textRadio).toBeVisible();
             await expect(textRadio).toBeChecked();
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -1116,7 +1193,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await emailRadio.click();
             await waitForAngular(page);
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -1146,7 +1223,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await urlRadio.click();
             await waitForAngular(page);
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -1177,7 +1254,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await waitForAngular(page);
             // URL選択時は「値の重複を禁止する」が非表示になること（URLは重複禁止対象外）
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -1202,7 +1279,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await modal.locator('button:has-text("数値")').click();
             await waitForAngular(page);
             // 項目名入力欄が表示されていること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // 数値固有: 整数/小数の選択ラジオが存在すること
             await expect(modal.locator('label:has-text("整数")')).toBeVisible();
             await expect(modal.locator('label:has-text("小数")')).toBeVisible();
@@ -1349,7 +1426,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 選択肢入力欄が存在すること
             await expect(modal.locator('label:has-text("選択肢")')).toBeVisible();
             // 項目名入力欄が存在すること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -1381,7 +1458,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 選択肢入力欄が存在すること
             await expect(modal.locator('label:has-text("選択肢")')).toBeVisible();
             // 項目名入力欄が存在すること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -1411,7 +1488,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await yearMonthRadio.click();
             await waitForAngular(page);
             // 項目名入力欄が存在すること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -1436,7 +1513,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await modal.locator('button:has-text("ファイル")').click();
             await waitForAngular(page);
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // ファイルフィールドの設定モーダルであること
             await expect(modal.locator('h5')).toContainText('ファイル');
             // モーダルを閉じる
@@ -1469,7 +1546,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 計算値の自動更新チェックボックスが存在すること
             await expect(modal.locator('label:has-text("計算値の自動更新")')).toBeVisible();
             // 項目名入力欄が表示されること
-            await expect(modal.locator('input[type="text"][name="label"]')).toBeVisible();
+            await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
