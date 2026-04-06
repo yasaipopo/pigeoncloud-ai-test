@@ -1181,6 +1181,37 @@ async function saveDetailedFlow() {
   }
 }
 
+// ステップスクリーンショット表示（グローバル関数）
+async function showStepScreenshot(specName, movieName, stepId) {
+  const token = localStorage.getItem('e2e_auth_token');
+  const key = `steps/${specName}/${movieName}/${stepId}.jpg`;
+  try {
+    const r = await fetch(CONFIG.apiUrl + '/assets/download-url', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    const data = await r.json();
+    if (data.downloadUrl) {
+      const container = document.getElementById('videoPlayer').parentElement;
+      let overlay = document.getElementById('stepScreenshotOverlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'stepScreenshotOverlay';
+        overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10';
+        overlay.onclick = () => overlay.remove();
+        container.style.position = 'relative';
+        container.appendChild(overlay);
+      }
+      overlay.innerHTML = `<div style="text-align:center"><img src="${data.downloadUrl}" style="max-width:100%;max-height:70vh;border-radius:4px"><div style="color:#fff;margin-top:8px;font-size:.8rem">${stepId} — クリックで閉じる</div></div>`;
+    } else {
+      alert(`スクリーンショットが見つかりません: ${key}\n\nテストを再実行してスクリーンショットをアップロードしてください。`);
+    }
+  } catch (e) {
+    alert('スクリーンショット取得エラー: ' + e.message);
+  }
+}
+
 async function playVideo(spec, movie) {
   const token = localStorage.getItem('e2e_auth_token');
 
@@ -1281,7 +1312,7 @@ async function playVideo(spec, movie) {
                 + `title="動画の ${min}:${sec} にジャンプ">▶ ${min}:${sec}</a>`;
             }
           );
-          // ステップID (auth-010 等) の横に 📷 スクショボタン
+          // ステップID (auth-010 等) の横に 📷 スクショボタン（メインスクショ）
           result = result.replace(
             /(\w+-\d{3})\s+──/g,
             (match, stepId) => {
@@ -1289,39 +1320,17 @@ async function playVideo(spec, movie) {
                 + `style="text-decoration:none;font-size:.85rem" title="この時点のスクリーンショット">📷</a> ──`;
             }
           );
-          return result;
-        }
-
-        // ステップスクリーンショット表示
-        async function showStepScreenshot(specName, movieName, stepId) {
-          const token = localStorage.getItem('e2e_auth_token');
-          const key = `steps/${specName}/${movieName}/${stepId}.jpg`;
-          try {
-            const r = await fetch(CONFIG.apiUrl + '/assets/download-url', {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ key })
-            });
-            const data = await r.json();
-            if (data.downloadUrl) {
-              // 動画の上にオーバーレイ表示
-              const container = document.getElementById('videoPlayer').parentElement;
-              let overlay = document.getElementById('stepScreenshotOverlay');
-              if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'stepScreenshotOverlay';
-                overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10';
-                overlay.onclick = () => overlay.remove();
-                container.style.position = 'relative';
-                container.appendChild(overlay);
-              }
-              overlay.innerHTML = `<div style="text-align:center"><img src="${data.downloadUrl}" style="max-width:100%;max-height:70vh;border-radius:4px"><div style="color:#fff;margin-top:8px;font-size:.8rem">${stepId} — クリックで閉じる</div></div>`;
-            } else {
-              alert(`スクリーンショットが見つかりません: ${key}\n\nテストを再実行してスクリーンショットをアップロードしてください。`);
+          // ✅ マークの横にサブステップスクショボタン（auth-010-s4 等）
+          // "3. ✅ div.warning が表示されること" → ✅ の横に📷(s3)
+          let stepCounter = {};
+          result = result.replace(
+            /((\w+-\d{3})[\s\S]*?)(\d+)\.\s*(✅)/g,
+            (match, prefix, stepId, num, check) => {
+              const subId = `${stepId}-s${num}`;
+              return `${prefix}${num}. ${check} <a href="#" onclick="showStepScreenshot('${specName}','${movie}','${subId}');return false" style="text-decoration:none;font-size:.75rem;opacity:0.7" title="ステップ${num}のスクリーンショット">📷</a>`;
             }
-          } catch (e) {
-            alert('スクリーンショット取得エラー: ' + e.message);
-          }
+          );
+          return result;
         }
 
         let html = '';
