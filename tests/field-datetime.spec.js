@@ -170,17 +170,17 @@ async function navigateToNewRecord(page, tableId) {
 // 後続describeが必要な場合はそのdescribeのbeforeAllで作成する
 let _sharedTableId = null;
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(120000);
-    const env = await createTestEnv(browser, { withAllTypeTable: false });
+    test.setTimeout(300000);
+    const env = await createTestEnv(browser, { withAllTypeTable: true });
     BASE_URL = env.baseUrl;
     EMAIL = env.email;
     PASSWORD = env.password;
+    _sharedTableId = env.tableId;
     process.env.TEST_BASE_URL = env.baseUrl;
     process.env.TEST_EMAIL = env.email;
     process.env.TEST_PASSWORD = env.password;
     await env.context.close();
-    // テナント作成直後はAPIが不安定なため少し待機
-    await new Promise(r => setTimeout(r, 3000));
+    console.log(`[field-datetime] 自己完結環境: ${BASE_URL}, sharedTableId: ${_sharedTableId}`);
 });
 
 test.describe('フィールド - 日時（101）', () => {
