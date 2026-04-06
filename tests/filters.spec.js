@@ -700,7 +700,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             if (!tableId) throw new Error('テーブルIDが取得できていません');
 
             // テーブル設定の権限設定タブに遷移
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 権限設定タブをクリック

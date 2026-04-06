@@ -857,7 +857,7 @@ test.describe('未実装テスト（todo）', () => {
             console.log('362: 権限テキスト含む:', hasPermissionContent);
             if (!hasPermissionContent) {
                 // 権限設定ページへ直接遷移して確認
-                await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+                await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
                 await waitForAngular(page);
                 const settingPageText = await page.innerText('body').catch(() => '');
                 const hasPermInSetting = settingPageText.includes('権限') || settingPageText.includes('permission');
@@ -928,7 +928,7 @@ test.describe('未実装テスト（todo）', () => {
     test('249: メール配信テーブルの通知設定ページが正常に表示されること（#issue266）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -960,7 +960,7 @@ test.describe('未実装テスト（todo）', () => {
     test('265: テーブル設定ページが正常に表示されること（#issue372）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1027,7 +1027,7 @@ test.describe('未実装テスト（todo）', () => {
     test('278: ワークフロー設定ページが正常に表示されること（#issue369）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1093,7 +1093,7 @@ test.describe('未実装テスト（todo）', () => {
     test('300: 個数制限設定後に子テーブル機能を有効にしてもエラーが発生しないこと（#issue415）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1122,7 +1122,7 @@ test.describe('未実装テスト（todo）', () => {
     test('304: 権限設定で編集不可項目が帳票出力時に正常に表示されること（#issue427）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 帳票設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1138,7 +1138,7 @@ test.describe('未実装テスト（todo）', () => {
     test('306: 他テーブル参照先が壊れている場合にテーブル設定ページが正常に表示されること（#issue423）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1170,7 +1170,7 @@ test.describe('未実装テスト（todo）', () => {
     test('310: 帳票出力時にHTMLタグが文字列として表示されないこと（#issue420）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 帳票設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1810,7 +1810,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -1839,7 +1839,7 @@ test.describe('追加実装テスト（683-838系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // ビュー設定画面へ
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -1865,7 +1865,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -1958,7 +1958,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -1976,7 +1976,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2021,7 +2021,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2043,7 +2043,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2146,7 +2146,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2197,7 +2197,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2215,7 +2215,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             let bodyText = await page.innerText('body');
@@ -2264,7 +2264,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2355,7 +2355,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2381,7 +2381,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2443,7 +2443,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2483,7 +2483,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2559,7 +2559,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2585,7 +2585,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -2609,7 +2609,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2635,7 +2635,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -2659,7 +2659,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2677,7 +2677,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2795,7 +2795,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2831,7 +2831,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -2878,7 +2878,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -2939,7 +2939,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3005,7 +3005,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3042,7 +3042,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3076,7 +3076,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3170,7 +3170,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             let bodyText = await page.innerText('body');
@@ -3248,7 +3248,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3296,7 +3296,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3335,7 +3335,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3402,7 +3402,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3445,7 +3445,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3504,7 +3504,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3574,7 +3574,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3590,7 +3590,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             let bodyText = await page.innerText('body');
@@ -3613,7 +3613,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3629,7 +3629,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3667,7 +3667,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3718,7 +3718,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3744,7 +3744,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3767,7 +3767,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3790,7 +3790,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3845,7 +3845,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3913,7 +3913,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3994,7 +3994,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -4103,7 +4103,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -4161,7 +4161,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -4179,7 +4179,7 @@ test.describe('追加実装テスト（683-838系）', () => {
 
     test('145-01-B: 文字列に一覧表示文字数と全文字表示を同時設定した場合にツールチップで全文表示されること', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');

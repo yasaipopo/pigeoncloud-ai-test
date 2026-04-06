@@ -1259,7 +1259,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定 > 権限設定を開く
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -1296,7 +1296,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定 > ワークフロー設定を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -1435,7 +1435,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定画面を開く
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors1 = await page.locator('.alert-danger').count();
             expect(errors1).toBe(0);
 
@@ -1455,7 +1455,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定を開き、フィールド一覧でルックアップが存在するか確認
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             // フィールド設定タブを開く
             const fieldTab = page.locator('a, button, [role=tab]').filter({ hasText: /フィールド|項目/ });
@@ -1522,7 +1522,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
@@ -1544,7 +1544,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -1624,7 +1624,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             // フィールド設定タブを開く
             const fieldTab = page.locator('a, button, [role=tab]').filter({ hasText: /フィールド|項目/ });
@@ -1687,7 +1687,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors1 = await page.locator('.alert-danger').count();
             expect(errors1).toBe(0);
 
@@ -1713,7 +1713,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定 > 権限設定を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -1774,7 +1774,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定で公開フォームURLを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -1806,7 +1806,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定を確認（他テーブル参照フィールドの有無）
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             // フィールド設定タブを開く
             const fieldTab = page.locator('a, button, [role=tab]').filter({ hasText: /フィールド|項目/ });
@@ -1860,7 +1860,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             // フィールド設定タブを開く
             const fieldTab = page.locator('a, button, [role=tab]').filter({ hasText: /フィールド|項目/ });
@@ -1895,7 +1895,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定でアイコン設定を確認
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             // アイコン設定UIが存在するか確認
             const iconSelect = page.locator('select, input').filter({ hasText: /アイコン/ });
@@ -1928,7 +1928,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors1 = await page.locator('.alert-danger').count();
             expect(errors1).toBe(0);
 
@@ -1990,7 +1990,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             // 追加オプションタブを開く
             const optionTab = page.locator('a, button, [role=tab]').filter({ hasText: /追加オプション|オプション/ });
@@ -2108,7 +2108,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             // フィールド設定タブ
             const fieldTab = page.locator('a, button, [role=tab]').filter({ hasText: /フィールド|項目/ });
@@ -2207,7 +2207,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定 > 集計設定を確認
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             // 集計タブを探す
             const aggregateTab = page.locator('a, button, [role=tab]').filter({ hasText: /集計/ });
@@ -2234,7 +2234,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
 
             const fieldTab = page.locator('a, button, [role=tab]').filter({ hasText: /フィールド|項目/ });
             if (await fieldTab.count() > 0) {
@@ -2300,7 +2300,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors1 = await page.locator('.alert-danger').count();
             expect(errors1).toBe(0);
 
@@ -2540,7 +2540,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定のワークフロー設定を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -2567,7 +2567,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定 > 帳票設定を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -2655,7 +2655,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブル設定 > ワークフロー設定を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 
@@ -3076,7 +3076,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // テーブルのビュー設定ページを開く
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3360,7 +3360,7 @@ test.describe('追加実装テスト（282-593系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
             // ワークフロー設定ページを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3901,7 +3901,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');
@@ -3998,7 +3998,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             const STEP_TIME = Date.now();
 
             expect(tableId, 'テーブルIDが取得できること').toBeTruthy();
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
             const bodyText = await page.innerText('body');

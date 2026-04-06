@@ -3551,7 +3551,7 @@ test.describe('バグ修正・機能改善確認（UP08）', () => {
             const STEP_TIME = Date.now();
 
             // テーブル設定で計算項目を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
@@ -3599,7 +3599,7 @@ test.describe('バグ修正・機能改善確認（UP08）', () => {
             const STEP_TIME = Date.now();
 
             // テーブルの権限設定ページを確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 「権限設定」タブをクリック
@@ -3651,7 +3651,7 @@ test.describe('バグ修正・機能改善確認（UP08）', () => {
             const STEP_TIME = Date.now();
 
             // テーブル設定の権限設定を開く
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 権限設定タブ
@@ -3699,7 +3699,7 @@ test.describe('バグ修正・機能改善確認（UP08）', () => {
             const STEP_TIME = Date.now();
 
             // テーブル設定
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 項目設定タブに移動
@@ -3723,7 +3723,7 @@ test.describe('バグ修正・機能改善確認（UP08）', () => {
             const STEP_TIME = Date.now();
 
             // テーブル設定画面の項目設定で他テーブル参照項目を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -3738,7 +3738,7 @@ test.describe('バグ修正・機能改善確認（UP08）', () => {
         await test.step('340: 複数権限グループのテーブル項目設定・管理者設定が競合しないこと', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 権限設定タブ
@@ -4011,7 +4011,7 @@ test.describe('バグ修正・機能改善確認（UP09）', () => {
             const STEP_TIME = Date.now();
 
             // テーブル設定の詳細画面設定
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -4066,7 +4066,7 @@ test.describe('バグ修正・機能改善確認（UP09）', () => {
             const STEP_TIME = Date.now();
 
             // テーブル設定の項目設定
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 項目設定タブ
@@ -4122,7 +4122,7 @@ test.describe('バグ修正・機能改善確認（UP09）', () => {
             const STEP_TIME = Date.now();
 
             // テーブル一覧で公開フォーム設定があるか確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const bodyText = await page.innerText('body');
@@ -4156,7 +4156,7 @@ test.describe('バグ修正・機能改善確認（UP09）', () => {
             const STEP_TIME = Date.now();
 
             // テーブルの権限設定を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 権限設定タブ
@@ -4273,7 +4273,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
         await test.step('536: ルックアップに他テーブル参照の複数項目を設定してもエラーが出ないこと', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 項目設定タブ
@@ -4291,7 +4291,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
         await test.step('559: 権限グループのユーザー追加が送信ボタンだけで即反映されないこと', async () => {
             const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             // 権限設定タブ

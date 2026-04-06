@@ -1494,7 +1494,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('327: 関連レコード一覧の表示順がテーブル設定画面と詳細画面で一致すること（#issue442）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1541,7 +1541,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('333: ワークフロー承認者のユーザー選択が正常に動作すること（#issue396）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1613,7 +1613,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('343: 文字列（一行）で、複数のスペース（空白）を伴う文字列を入力した場合に（#issue501）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1638,7 +1638,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('345: 関連レコードをテーブル設定で任意の位置に配置できること（#issue487）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1720,7 +1720,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('356: レコードコメント入力時の通知設定が正常に動作すること（#issue503）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1744,7 +1744,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('363: ワークフロー設定ページが正常に表示されること（#issue524）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1810,7 +1810,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('375: 現状ユーザータイプは、テーブルの権限設定で「テーブル項目設定」「テーブル管理者」（#issue534）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1826,7 +1826,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('377: メール通知で、htmlメールをテキストメールで配信できるようオプションの追加を希（#issue477）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -1913,7 +1913,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('384: リマインド設定の通知をクリックすると、通知の画面へ遷移されてしまうため、（#issue549）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2005,7 +2005,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('394: 対象テーブル：「申請」（dataset__31）（#issue578）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2023,7 +2023,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('397: 子テーブルごとに表示条件設定を独立させるよう修正希望です。（#issue540）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2052,7 +2052,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('404: １、通知ログの「作成日時」で、「相対値」にチェックを入れると（#issue587）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2095,7 +2095,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('408: 左側メニューにテーブルやグループがないとき（#issue573）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2211,7 +2211,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('418: ワークフロー設定ページが正常に表示されること（#issue513）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2246,7 +2246,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('425: HTMLメールで、配信リストから送信すると（#issue615）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2302,7 +2302,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('431: ワークフロー設定ページが正常に表示されること（#issue512）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2327,7 +2327,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('434: ワークフロー設定ページが正常に表示されること（#issue633）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2335,7 +2335,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('435: ワークフロー設定内の「承認後も編集可能」にチェック後、ユーザーを選択する画面に（#issue650）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2416,7 +2416,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('446: ワークフロー設定ページが正常に表示されること（#issue632）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2502,7 +2502,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('457: ワークフロー設定ページが正常に表示されること（#issue645）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2550,7 +2550,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('464: ワークフロー設定ページが正常に表示されること（#issue635）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2568,7 +2568,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('469: ワークフロー設定ページが正常に表示されること（#issue647）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2662,7 +2662,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('479: 通知設定の期限内通知が正常に送信されること（#issue641）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2670,7 +2670,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('480: ワークフロー設定ページが正常に表示されること（#issue750）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2699,7 +2699,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('484: ワークフロー設定ページが正常に表示されること（#issue623）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2783,7 +2783,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('494: テーブル設定ページが正常に表示されること（#issue805）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2819,7 +2819,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('497: テーブル設定ページが正常に表示されること（#issue804）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });
@@ -2865,7 +2865,7 @@ test.describe('追加実装テスト（314-579系）', () => {
     test('502: 親テーブルの編集画面で子テーブル登録済みレコードが正常に表示されること（#issue772）', async ({ page }) => {
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
         });

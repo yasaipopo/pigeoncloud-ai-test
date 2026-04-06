@@ -497,7 +497,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -544,7 +544,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -626,7 +626,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -709,7 +709,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -719,7 +719,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -859,7 +859,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -869,7 +869,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -890,7 +890,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 帳票設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -964,7 +964,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -974,7 +974,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 帳票設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -984,7 +984,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1007,7 +1007,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1080,7 +1080,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1090,7 +1090,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 帳票設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1160,7 +1160,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 帳票設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1170,7 +1170,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1205,7 +1205,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1283,7 +1283,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1293,7 +1293,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1303,7 +1303,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1338,7 +1338,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // テーブル設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1398,7 +1398,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1455,7 +1455,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 帳票設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1465,7 +1465,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1493,7 +1493,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1503,7 +1503,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1578,7 +1578,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1637,7 +1637,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1684,7 +1684,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1716,7 +1716,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // ワークフロー設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1745,7 +1745,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 通知設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/notification`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -1755,7 +1755,7 @@ test.describe('追加実装テスト（314-579系）', () => {
 
             expect(tableId, 'テーブルIDが取得できること（beforeAllで作成済み）').toBeTruthy();
             // 帳票設定ページが正常に表示されること
-            await checkPage(page, `/admin/dataset__${tableId}/setting/report`);
+            await checkPage(page, `/admin/dataset/edit/${tableId}`);
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 

@@ -2577,7 +2577,7 @@ test.describe('通知設定', () => {
             console.log('436: テーブル行数:', await rows.count());
 
             // テーブル設定ページで他テーブル参照項目の設定を確認
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}/setting`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
             const settingText = await page.innerText('body');
