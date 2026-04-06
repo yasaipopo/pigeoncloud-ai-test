@@ -1299,9 +1299,12 @@ async function playVideo(spec, movie) {
         const movieFlow = firstWithFlow?.detailedFlow || '';
 
         // メイン表示: detailedFlow（1回だけ、大きく表示）
-        // [M:SS] → 動画ジャンプボタン、ステップID → 📷 スクショボタン
+        // [M:SS] → 動画ジャンプ、🔴 → 赤文字（未実施ステップ）、✅📷 → スクショ
         function flowWithTimestampLinks(text, specName) {
           let result = escHtml(text);
+          // 🔴 を含む行を赤文字に（テストすべきだが未実施のステップ）
+          result = result.replace(/^(.*🔴.*)$/gm,
+            '<span style="color:#dc3545;font-weight:600">$1</span>');
           // [M:SS] → 動画ジャンプボタン
           result = result.replace(
             /\[(\d+):(\d{2})\]/g,

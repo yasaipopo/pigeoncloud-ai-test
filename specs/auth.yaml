@@ -119,8 +119,9 @@ cases:
     1. Googleログインが有効な環境（demo-popo7.pigeon-demo.com）にアクセス
     2. ✅ ログインページにGoogleログインボタンが表示されること
     3. Googleログインボタンをクリック
-    4. ✅ Google認証画面（accounts.google.com）にリダイレクトされること
-       ※実際のGoogleアカウント認証はE2Eテストではスキップ
+    4. ✅ SSOエンドポイント（/api/saml/sso）へのリンクが存在すること
+    5. 🔴 Google認証画面でログインできること（SAML設定依存のため未テスト）
+    6. 🔴 ログイン後ダッシュボードが表示されること（上記に依存）
 
     [0:07] auth-070 ── 同時ログイン制御
     1. debug/settings で login_max_devices=2 に設定
