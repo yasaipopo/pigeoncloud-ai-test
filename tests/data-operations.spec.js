@@ -772,6 +772,9 @@ test.describe('追加実装テスト（282-593系）', () => {
 
     let tableId = null;
 
+    test.beforeAll(async () => {
+        tableId = _sharedTableId;
+    });
 
     // -------------------------------------------------------------------------
     // 282: レコード編集 — 値を入力して保存、詳細画面で値が正しく表示されること
@@ -1210,9 +1213,10 @@ test.describe('追加実装テスト（282-593系）', () => {
             await navigateToDatasetPage(page, tableId);
 
             // 新規レコード作成ボタンをクリック
-            const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
-            if (await addBtn.count() > 0) {
-                await addBtn.first().click();
+            // レコード一覧の+ボタン（fa-plusアイコンのみ、テキストなし）
+            const addBtn = page.locator('button:has(.fa-plus)').first();
+            if (await addBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await addBtn.click();
                 await waitForAngular(page);
                 await page.waitForTimeout(1500);
 
@@ -1484,9 +1488,10 @@ test.describe('追加実装テスト（282-593系）', () => {
             await navigateToDatasetPage(page, tableId);
 
             // レコード編集画面を開いて数値フィールドに大きな値を入力
-            const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
-            if (await addBtn.count() > 0) {
-                await addBtn.first().click();
+            // レコード一覧の+ボタン（fa-plusアイコンのみ、テキストなし）
+            const addBtn = page.locator('button:has(.fa-plus)').first();
+            if (await addBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await addBtn.click();
                 await waitForAngular(page);
                 await page.waitForTimeout(1500);
 
@@ -1739,9 +1744,10 @@ test.describe('追加実装テスト（282-593系）', () => {
             await navigateToDatasetPage(page, tableId);
 
             // 新規作成ボタンが存在すること
-            const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
-            if (await addBtn.count() > 0) {
-                await addBtn.first().click();
+            // レコード一覧の+ボタン（fa-plusアイコンのみ、テキストなし）
+            const addBtn = page.locator('button:has(.fa-plus)').first();
+            if (await addBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await addBtn.click();
                 await waitForAngular(page);
                 await page.waitForTimeout(1500);
 
@@ -2174,9 +2180,10 @@ test.describe('追加実装テスト（282-593系）', () => {
             await expect(headers.first()).toBeVisible();
 
             // 編集画面（新規作成画面）でフィールドが表示されること
-            const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
-            if (await addBtn.count() > 0) {
-                await addBtn.first().click();
+            // レコード一覧の+ボタン（fa-plusアイコンのみ、テキストなし）
+            const addBtn = page.locator('button:has(.fa-plus)').first();
+            if (await addBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await addBtn.click();
                 await waitForAngular(page);
                 await page.waitForTimeout(1500);
 
@@ -2622,9 +2629,10 @@ test.describe('追加実装テスト（282-593系）', () => {
             await navigateToDatasetPage(page, tableId);
 
             // 新規作成ボタン
-            const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|作成/ });
-            if (await addBtn.count() > 0) {
-                await addBtn.first().click();
+            // レコード一覧の+ボタン（fa-plusアイコンのみ、テキストなし）
+            const addBtn = page.locator('button:has(.fa-plus)').first();
+            if (await addBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await addBtn.click();
                 await waitForAngular(page);
                 await page.waitForTimeout(1500);
 
