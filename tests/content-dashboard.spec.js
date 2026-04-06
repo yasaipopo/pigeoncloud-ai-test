@@ -170,8 +170,10 @@ async function navigateToFieldEditPage(page, tableId) {
         await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
     }
     await waitForAngular(page);
-    // フィールドリストがロードされるまで待機（60秒に延長）
+    // フィールドリストがロードされるまで待機（networkidle + 明示待機）
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await page.waitForSelector('.cdk-drag, .field-drag, .cdk-drop-list, .toggle-drag-field-list', { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1000);
     const bodyText = await page.innerText('body');
     expect(bodyText).not.toContain('Internal Server Error');
     return bodyText;
