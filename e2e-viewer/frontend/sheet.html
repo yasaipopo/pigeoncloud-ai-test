@@ -1320,23 +1320,22 @@ async function playVideo(spec, movie) {
                 + `style="text-decoration:none;font-size:.85rem" title="この時点のスクリーンショット">📷</a> ──`;
             }
           );
-          // ✅ マークの横に📷ボタン（auth-010-s4 等）
-          // detailedFlowの各行で N. ✅ → 📷(sN) を追加
-          // 現在のステップIDを追跡
+          // ✅ がある行に📷ボタン追加（auth-010-s4 等）
+          // 行番号 N と現在のステップIDからサブスクショIDを生成
           let currentStepId = '';
           result = result.replace(/^(.*)$/gm, (line) => {
             // ステップIDの検出（auth-010 等）
             const idMatch = line.match(/(\w+-\d{3})\s/);
             if (idMatch) currentStepId = idMatch[1];
-            // ✅ の行に📷追加
+            // ✅ を含む行に📷追加（行頭の番号を取得）
             if (currentStepId && line.includes('✅')) {
-              const numMatch = line.match(/(\d+)\.\s*✅/);
+              const numMatch = line.match(/^(\d+)\./);
               if (numMatch) {
                 const num = numMatch[1];
                 const subId = `${currentStepId}-s${num}`;
                 return line.replace(
-                  /(\d+)\.\s*✅/,
-                  `$1. ✅ <a href="#" onclick="showStepScreenshot('${specName}','${movie}','${subId}');return false" style="text-decoration:none;font-size:.75rem;opacity:0.7" title="ステップ$1のスクショ">📷</a>`
+                  '✅',
+                  `✅ <a href="#" onclick="showStepScreenshot('${specName}','${movie}','${subId}');return false" style="text-decoration:none;font-size:.75rem;opacity:0.7" title="ステップ${num}のスクショ">📷</a>`
                 );
               }
             }
