@@ -1073,19 +1073,23 @@ def pipeline_sync_results(event):
         spec_name = spec_file.replace('tests/', '').replace('.spec.js', '').replace('.spec.ts', '')
 
         # caseNoの推測:
-        # testTitleに "1-1:" のようなパターンがある場合はそれを使う
-        # caseIdが "1-1__description" 形式ならハイフン含む先頭部分
+        # testTitleから "AT01:", "RC01:", "1-1:", "F201:", "UC01:" 等のパターンを抽出
         case_no = ''
 
-        # testTitleから "数字-数字" パターンを抽出
-        title_match = re.match(r'^(\d+-\d+)', test_title)
+        # パターン1: "数字-数字" (旧形式: 1-1, 144-01)
+        title_match = re.match(r'^(\d+-\d+(?:-\d+)?)', test_title)
         if title_match:
             case_no = title_match.group(1)
         else:
-            # caseIdから試行（"1-1__..." or "1-1-..."）
-            case_id_match = re.match(r'^(\d+-\d+)', case_id)
-            if case_id_match:
-                case_no = case_id_match.group(1)
+            # パターン2: "英字+数字:" (movie形式: AT01, RC01, UC01, F201, etc.)
+            movie_match = re.match(r'^([A-Z]+\d+)', test_title)
+            if movie_match:
+                case_no = movie_match.group(1)
+            else:
+                # パターン3: caseIdから試行
+                case_id_match = re.match(r'^(\d+-\d+|[A-Z]+\d+)', case_id)
+                if case_id_match:
+                    case_no = case_id_match.group(1)
 
         if not spec_name or not case_no:
             skipped_count += 1
@@ -1126,54 +1130,72 @@ def pipeline_sync_results(event):
                     pass
 
         # 3. パイプラインテーブルを更新
-        try:
-            update_parts = [
-                f'#rf = :rv',
-                f'#ri = :rid',
-                'updatedAt = :t',
-                'updatedBy = :u',
-            ]
-            attr_names = {
-                '#rf': result_field,
-                '#ri': run_id_field,
-            }
-            attr_values = {
-                ':rv': mapped_status,
-                ':rid': run_id,
-                ':t': now_iso,
-                ':u': f'sync:{run_id}',
-            }
+        # movie形式(AT01等)の場合: pipeline tableの movie フィールドでマッチ → 全caseNoを更新
+        is_movie_match = bool(re.match(r'^[A-Z]+\d+$', case_no))
+        target_case_nos = [case_no]  # デフォルトは直接マッチ
 
-            # エラーメッセージがあればnoteに記録
-            error_msg = case.get('errorMessage', '')
-            if error_msg:
-                update_parts.append(f'#nf = :nv')
-                attr_names['#nf'] = note_field
-                attr_values[':nv'] = error_msg[:500]  # 500文字に制限
+        if is_movie_match:
+            try:
+                movie_result = pipeline_table.query(
+                    KeyConditionExpression=Key('spec').eq(spec_name),
+                    FilterExpression='movie = :m',
+                    ExpressionAttributeValues={':m': case_no}
+                )
+                movie_items = movie_result.get('Items', [])
+                if movie_items:
+                    target_case_nos = [mi['caseNo'] for mi in movie_items if mi.get('caseNo')]
+            except Exception:
+                pass  # マッチしなければ直接case_noで試行
 
-            # S3キーを直接保存（URLは表示時に生成する方が安全）
-            if screenshot_keys and len(screenshot_keys) > 0:
-                update_parts.append('screenshotKey = :sk')
-                attr_values[':sk'] = screenshot_keys[0]
-            if video_key:
-                update_parts.append('videoKey = :vk')
-                attr_values[':vk'] = video_key
+        for target_no in target_case_nos:
+            try:
+                update_parts = [
+                    f'#rf = :rv',
+                    f'#ri = :rid',
+                    'updatedAt = :t',
+                    'updatedBy = :u',
+                ]
+                attr_names = {
+                    '#rf': result_field,
+                    '#ri': run_id_field,
+                }
+                attr_values = {
+                    ':rv': mapped_status,
+                    ':rid': run_id,
+                    ':t': now_iso,
+                    ':u': f'sync:{run_id}',
+                }
 
-            pipeline_table.update_item(
-                Key={'spec': spec_name, 'caseNo': case_no},
-                UpdateExpression='SET ' + ', '.join(update_parts),
-                ExpressionAttributeNames=attr_names,
-                ExpressionAttributeValues=attr_values,
-                ConditionExpression='attribute_exists(spec)',  # 存在するアイテムのみ更新
-            )
-            updated_count += 1
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-                skipped_count += 1  # パイプラインに未登録のケース
-            else:
-                errors.append(f'{spec_name}/{case_no}: {str(e)}')
-        except Exception as e:
-            errors.append(f'{spec_name}/{case_no}: {str(e)}')
+                # エラーメッセージがあればnoteに記録
+                error_msg = case.get('errorMessage', '')
+                if error_msg:
+                    update_parts.append(f'#nf = :nv')
+                    attr_names['#nf'] = note_field
+                    attr_values[':nv'] = error_msg[:500]
+
+                # S3キーを直接保存
+                if screenshot_keys and len(screenshot_keys) > 0:
+                    update_parts.append('screenshotKey = :sk')
+                    attr_values[':sk'] = screenshot_keys[0]
+                if video_key:
+                    update_parts.append('videoKey = :vk')
+                    attr_values[':vk'] = video_key
+
+                pipeline_table.update_item(
+                    Key={'spec': spec_name, 'caseNo': target_no},
+                    UpdateExpression='SET ' + ', '.join(update_parts),
+                    ExpressionAttributeNames=attr_names,
+                    ExpressionAttributeValues=attr_values,
+                    ConditionExpression='attribute_exists(spec)',
+                )
+                updated_count += 1
+            except ClientError as e:
+                if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                    skipped_count += 1
+                else:
+                    errors.append(f'{spec_name}/{target_no}: {str(e)}')
+            except Exception as e:
+                errors.append(f'{spec_name}/{target_no}: {str(e)}')
 
     result_msg = f'{updated_count}件同期完了（{skipped_count}件スキップ）'
     if errors:
