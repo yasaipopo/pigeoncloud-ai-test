@@ -193,7 +193,7 @@ test.describe('ダッシュボード', () => {
 
             // 4. ✅ URLが /admin/dashboard を含むこと
             expect(page.url()).toContain('/admin/dashboard');
-            await autoScreenshot(page, 'DB01', 'dash-010', 0, _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-010', _testStart);
         });
 
         // ----- step: dash-020 タブ作成 -----
@@ -269,7 +269,7 @@ test.describe('ダッシュボード', () => {
             const allTabTexts = await dashTablist.locator('[role=tab]').allTextContents().catch(() => []);
             console.log('dash-020: 全タブ:', allTabTexts, '検索名:', db02Name);
             await expect(newTab).toBeVisible();
-            await autoScreenshot(page, 'DB01', 'dash-020', 0, _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-020', _testStart);
 
             _createdDashboardName = db02Name;
         });
@@ -345,6 +345,9 @@ test.describe('ダッシュボード', () => {
             const saveBtnCount = await saveBtn.count();
             if (saveBtnCount > 0) {
                 await saveBtn.click();
+                // モーダル/ダイアログが閉じるまで待機（ダッシュボードに戻る）
+                await page.locator('dialog, .modal.show').filter({ hasText: 'ビュー' })
+                    .waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
                 await waitForAngular(page);
             }
 
@@ -352,7 +355,9 @@ test.describe('ダッシュボード', () => {
             const errorAlert = page.locator('.alert-danger');
             const errorCount = await errorAlert.count();
             expect(errorCount).toBe(0);
-            await autoScreenshot(page, 'DB01', 'dash-030', 0, _testStart);
+            // ダッシュボードに戻った画面でスクショ（モーダルが閉じた後）
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+            await autoScreenshot(page, 'DB01', 'dash-030', _testStart);
         });
 
         // ----- step: dash-040 掲示板コンテンツ追加 -----
@@ -392,7 +397,7 @@ test.describe('ダッシュボード', () => {
             const errorCount = await errorAlert.count();
             expect(errorCount).toBe(0);
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await autoScreenshot(page, 'DB01', 'dash-040', 0, _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-040', _testStart);
         });
 
         // ----- step: dash-050 タブ削除 -----
@@ -437,7 +442,7 @@ test.describe('ダッシュボード', () => {
             // 18. ✅ HOMEタブが表示されていること
             const homeTabAfterDelete = dashTablistDB05.locator('[role=tab]').filter({ hasText: 'HOME' });
             await expect(homeTabAfterDelete).toBeVisible();
-            await autoScreenshot(page, 'DB01', 'dash-050', 0, _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-050', _testStart);
 
             const errorAlert = page.locator('.alert-danger');
             expect(await errorAlert.count()).toBe(0);
@@ -466,7 +471,6 @@ test.describe('ダッシュボード', () => {
             // 21. ✅ HOMEタブパネルに「掲示板」が表示されていること
             const homeTabpanel = page.locator('[role=tabpanel]').filter({ hasText: '掲示板' });
             await expect(homeTabpanel).toBeVisible();
-            await autoScreenshot(page, 'DB01', 'dash-060', 0, _testStart);
 
             // 22. HOMEタブの▼メニューを開く
             const homeTabEl = homeTab.first();
@@ -479,7 +483,7 @@ test.describe('ダッシュボード', () => {
                 const deleteItem = menuEl.locator('[role=menuitem]').filter({ hasText: '削除' });
                 await expect(deleteItem).toHaveCount(0);
             }
-            await autoScreenshot(page, 'DB01', 'dash-060', 1, _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-060', _testStart);
         });
     });
 
@@ -513,7 +517,6 @@ test.describe('ダッシュボード', () => {
 
             // 5. ✅ ダッシュボードが正常に表示されていること
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await autoScreenshot(page, 'UC21', 'dash-070', 0, _testStart);
 
             // 6. ✅ 並び替えボタンの確認
             const sortBtns = page.locator('button:has(.fa-sort), button:has-text("並び替え"), .sort-btn, [class*="sort"]');
@@ -521,17 +524,16 @@ test.describe('ダッシュボード', () => {
             console.log('dash-070: 並び替えボタン数:', sortCount);
 
             if (sortCount > 0) {
-                await autoScreenshot(page, 'UC21', 'dash-070', 1, _testStart);
-
                 // 7. 並び替えボタンをクリック
                 await sortBtns.first().click();
                 await page.waitForTimeout(1000);
-
-                // 8. ✅ エラーなく並び替えが動作すること
-                const bodyText = await page.innerText('body');
-                expect(bodyText).not.toContain('Internal Server Error');
-                await autoScreenshot(page, 'UC21', 'dash-070', 2, _testStart);
             }
+
+            // 8. ✅ エラーなく並び替えが動作すること（ページが正常であること）
+            const bodyText = await page.innerText('body');
+            expect(bodyText).not.toContain('Internal Server Error');
+            // 最終状態でスクショ（5/6/8の全✅をカバー）
+            await autoScreenshot(page, 'UC21', 'dash-070', _testStart);
         });
     });
 });

@@ -633,6 +633,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 注: 実際のワークフロー操作による通知発火は手動テストで確認
 
+            await autoScreenshot(page, 'NT01', 'ntf-010', STEP_TIME);
         });
         await test.step('102-2: 通知設定でワークフロー「各承認者の承認時」チェック時に承認のたびに通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -645,6 +646,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 注: 実際のワークフロー承認操作による通知発火は手動テストで確認
 
+            await autoScreenshot(page, 'NT01', 'ntf-020', STEP_TIME);
         });
         await test.step('102-3: 通知設定でワークフロー「否認時」チェック時に否認時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -657,6 +659,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 注: 実際のワークフロー否認操作による通知発火は手動テストで確認
 
+            await autoScreenshot(page, 'NT01', 'ntf-030', STEP_TIME);
         });
         await test.step('102-4: 通知設定でワークフロー「最終承認時」チェック時に最終承認時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -669,6 +672,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 注: 実際のワークフロー最終承認操作による通知発火は手動テストで確認
 
+            await autoScreenshot(page, 'NT01', 'ntf-040', STEP_TIME);
         });
         await test.step('102-5: 通知設定でワークフロー「取り下げ時」チェック時に取り下げ時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -681,6 +685,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             // 注: 実際のワークフロー取り下げ操作による通知発火は手動テストで確認
 
+            await autoScreenshot(page, 'NT01', 'ntf-050', STEP_TIME);
         });
         await test.step('102-6: 通知設定でワークフロー「全てチェック」時に各ステータス変更時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -695,6 +700,7 @@ test.describe('通知設定', () => {
             console.log('102-6: ワークフロー関連要素数:', await workflowRelated.count());
             // 注: 実際の全ステータス変更操作による通知発火は手動テストで確認
 
+            await autoScreenshot(page, 'NT01', 'ntf-060', STEP_TIME);
         });
     });
 
@@ -740,6 +746,7 @@ test.describe('通知設定', () => {
                 await resetWebhook(key);
             }
 
+            await autoScreenshot(page, 'NT02', 'ntf-070', STEP_TIME);
         });
         await test.step('105-02: Webhook設定を複数設定すると全Webhookへ通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -788,6 +795,7 @@ test.describe('通知設定', () => {
                 await resetWebhook(key2);
             }
 
+            await autoScreenshot(page, 'NT02', 'ntf-080', STEP_TIME);
         });
         await test.step('105-03: Slack Webhook設定を1つ設定すると申請処理時にSlackへ通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -825,6 +833,7 @@ test.describe('通知設定', () => {
             }
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT02', 'ntf-090', STEP_TIME);
         });
     });
 
@@ -876,6 +885,7 @@ test.describe('通知設定', () => {
             }
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT03', 'ntf-100', STEP_TIME);
         });
         await test.step('112: 通知設定のコピーがエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
@@ -896,6 +906,7 @@ test.describe('通知設定', () => {
             const addLink = page.locator('a[href*="notification/edit"], button:has-text("追加"), .fa-plus');
             console.log('112: 通知設定追加リンク数:', await addLink.count());
 
+            await autoScreenshot(page, 'NT03', 'ntf-110', STEP_TIME);
         });
         await test.step('133-01: 通知設定で有効ONに設定すると該当の通知設定が有効になること', async () => {
             const STEP_TIME = Date.now();
@@ -925,6 +936,7 @@ test.describe('通知設定', () => {
             console.log('133-01: 有効トグル数:', await enableToggle.count());
             // 注: 実際の有効ON時の通知発火確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT03', 'ntf-120', STEP_TIME);
         });
         await test.step('133-02: 通知設定で有効OFFに設定すると該当の通知設定が無効になること（リマインダも停止すること）', async () => {
             const STEP_TIME = Date.now();
@@ -947,6 +959,7 @@ test.describe('通知設定', () => {
             console.log('133-02: リマインダ設定ボタン数:', await reminderBtn.count());
             // 注: 実際の有効OFF時の通知停止確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT03', 'ntf-130', STEP_TIME);
         });
     });
 
@@ -979,6 +992,7 @@ test.describe('通知設定', () => {
 
             console.log('168: リマインダ設定UI（日後設定）の確認完了（実際の発火確認は翌日8時に手動確認が必要）');
 
+            await autoScreenshot(page, 'NT04', 'ntf-140', STEP_TIME);
         });
         await test.step('172: コメント追加時に通知する機能の確認', async () => {
             const STEP_TIME = Date.now();
@@ -1025,6 +1039,7 @@ test.describe('通知設定', () => {
                 expect(page.url()).toContain('/admin/');
             }
 
+            await autoScreenshot(page, 'NT04', 'ntf-150', STEP_TIME);
         });
         await test.step('178: 公開メールリンクURLよりアクセスしてデータ登録が可能なこと（メール受信確認が必要）', async () => {
             const STEP_TIME = Date.now();
@@ -1067,6 +1082,7 @@ test.describe('通知設定', () => {
             expect(page.url()).toContain('/admin/');
             console.log('178: 公開メールリンク機能のUI確認完了（実際のメール受信→リンクアクセスは手動確認が必要）');
 
+            await autoScreenshot(page, 'NT04', 'ntf-160', STEP_TIME);
         });
         await test.step('184: 通知設定でコメント追加時にチェックを入れるとコメント時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -1100,12 +1116,14 @@ test.describe('通知設定', () => {
             console.log('184: コメント通知チェックボックス数:', await commentCheckbox.count());
             // 注: 実際のコメント追加による通知発火はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT04', 'ntf-170', STEP_TIME);
         });
         await test.step('188-1: メール取り込み設定を行うと毎時00分に自動でメール取り込みが行われること（外部メールサーバー接続が必要）', async () => {
             const STEP_TIME = Date.now();
 
             test.skip(true, '外部メールサーバー(IMAP)接続と毎時00分という時間依存のため自動テスト不可（手動確認が必要）');
 
+            await autoScreenshot(page, 'NT04', 'ntf-180', STEP_TIME);
         });
         await test.step('188-2: 臨時のメール取り込みがエラーなくリアルタイムで行えること（外部メールサーバー接続が必要）', async () => {
             const STEP_TIME = Date.now();
@@ -1157,6 +1175,7 @@ test.describe('通知設定', () => {
             expect(finalText).not.toContain('Internal Server Error');
             console.log('188-2: メール取り込み設定ページの確認完了');
 
+            await autoScreenshot(page, 'NT04', 'ntf-190', STEP_TIME);
         });
         await test.step('188-3: 画面最上段のメール取り込み設定「状態(enabled)」のチェックを外すと無効になること', async () => {
             const STEP_TIME = Date.now();
@@ -1215,6 +1234,7 @@ test.describe('通知設定', () => {
                 console.log('188-3: メール取り込み設定ページURL:', page.url());
             }
 
+            await autoScreenshot(page, 'NT04', 'ntf-200', STEP_TIME);
         });
         await test.step('188-4: メニュー内のメール取り込み設定「状態(enabled)」のチェックを外すと無効になること', async () => {
             const STEP_TIME = Date.now();
@@ -1275,6 +1295,7 @@ test.describe('通知設定', () => {
             const statusText = pageText.includes('有効') || pageText.includes('無効') || pageText.includes('enabled');
             console.log('188-4: 状態表示あり:', statusText);
 
+            await autoScreenshot(page, 'NT04', 'ntf-210', STEP_TIME);
         });
         await test.step('190: 通知設定の追加の通知先対象項目に設定値を指定すると通知内容に含まれること', async () => {
             const STEP_TIME = Date.now();
@@ -1293,6 +1314,7 @@ test.describe('通知設定', () => {
             console.log('190: 通知先関連フィールド数:', await recipientFields.count());
             // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT04', 'ntf-220', STEP_TIME);
         });
         await test.step('209: 通知設定でフッターをオフにするとメール通知の内容にフッター情報が含まれないこと', async () => {
             const STEP_TIME = Date.now();
@@ -1318,6 +1340,7 @@ test.describe('通知設定', () => {
             console.log('209: フッター設定要素数:', footerCount);
             // 注: フッターのOFF/ONはdisplay_keysフィールドで制御され、メール内容の確認はSMTP動作環境が必要
 
+            await autoScreenshot(page, 'NT04', 'ntf-230', STEP_TIME);
         });
         await test.step('210: 通知設定でフッターをオンにするとメール通知の内容にフッター情報が含まれること', async () => {
             const STEP_TIME = Date.now();
@@ -1336,6 +1359,7 @@ test.describe('通知設定', () => {
             const footerRelated = page.locator('label:has-text("フッター"), label:has-text("PigeonCloud"), input[value*="footer"]').first();
             console.log('210: フッター設定要素数:', await footerRelated.count());
 
+            await autoScreenshot(page, 'NT04', 'ntf-240', STEP_TIME);
         });
     });
 
@@ -1371,6 +1395,7 @@ test.describe('通知設定', () => {
                 expect(page.url()).toContain('/admin/notification');
             }
 
+            await autoScreenshot(page, 'NT05', 'ntf-320', STEP_TIME);
         });
         await test.step('54-2: 通知設定のリマインダ設定でリマインドテキスト未入力のまま登録するとエラーが発生すること', async () => {
             const STEP_TIME = Date.now();
@@ -1399,6 +1424,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             expect(page.url()).toContain('/admin/notification');
 
+            await autoScreenshot(page, 'NT05', 'ntf-330', STEP_TIME);
         });
         await test.step('54-3: 通知設定のリマインダ設定でタイミング未入力のまま登録するとエラーが発生すること', async () => {
             const STEP_TIME = Date.now();
@@ -1422,6 +1448,7 @@ test.describe('通知設定', () => {
                 expect(page.url()).toContain('/admin/notification');
             }
 
+            await autoScreenshot(page, 'NT05', 'ntf-340', STEP_TIME);
         });
         await test.step('32-1: 通知先ユーザーを削除しても他機能に影響なくエラーが発生しないこと', async () => {
             const STEP_TIME = Date.now();
@@ -1459,6 +1486,7 @@ test.describe('通知設定', () => {
             expect(page.url()).toContain('/admin/');
 
 
+            await autoScreenshot(page, 'NT05', 'ntf-300', STEP_TIME);
         });
         await test.step('32-2: 通知先組織を削除しても他機能に影響なくエラーが発生しないこと', async () => {
             const STEP_TIME = Date.now();
@@ -1479,6 +1507,7 @@ test.describe('通知設定', () => {
             expect(orgPageText).not.toContain('Internal Server Error');
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT05', 'ntf-310', STEP_TIME);
         });
         await test.step('57-1: 複数データを一括更新した際に更新内容が1本に纏まって通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -1527,6 +1556,7 @@ test.describe('通知設定', () => {
                 expect(page.url()).toContain('/admin/');
             }
 
+            await autoScreenshot(page, 'NT05', 'ntf-350', STEP_TIME);
         });
         await test.step('57-2: 複数データを新規登録した際に更新内容が1本に纏まって通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -1550,6 +1580,7 @@ test.describe('通知設定', () => {
                 expect(page.url()).toContain('/admin/');
             }
 
+            await autoScreenshot(page, 'NT05', 'ntf-360', STEP_TIME);
         });
         await test.step('57-3: 複数データを削除した際に更新内容が1本に纏まって通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -1596,6 +1627,7 @@ test.describe('通知設定', () => {
             // ページが正常に表示されていることを確認
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT05', 'ntf-370', STEP_TIME);
         });
         await test.step('57-4: データ新規登録/更新の際に更新内容が1本に纏まって通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -1616,6 +1648,7 @@ test.describe('通知設定', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
+            await autoScreenshot(page, 'NT05', 'ntf-380', STEP_TIME);
         });
         await test.step('217-1: SMTP設定のFROM名を設定すると受信メールのFROM名が設定通りになること', async () => {
             const STEP_TIME = Date.now();
@@ -1666,6 +1699,7 @@ test.describe('通知設定', () => {
             }
             // 注: 実際のメール受信確認はSMTPが正常動作する環境で手動テストが必要
 
+            await autoScreenshot(page, 'NT05', 'ntf-250', STEP_TIME);
         });
         await test.step('217-2: SMTP設定のFROM名をブランクにすると受信メールのFROM名がFROMアドレスになること', async () => {
             const STEP_TIME = Date.now();
@@ -1705,6 +1739,7 @@ test.describe('通知設定', () => {
             }
             // 注: FROM名ブランク時はFROMアドレスが使用されることの確認はメール受信環境が必要
 
+            await autoScreenshot(page, 'NT05', 'ntf-260', STEP_TIME);
         });
         await test.step('221: 通知設定を無効にすると通知後リマインダ通知も停止すること', async () => {
             const STEP_TIME = Date.now();
@@ -1736,6 +1771,7 @@ test.describe('通知設定', () => {
             }
             // 注: 実際の無効化後の通知停止確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT05', 'ntf-270', STEP_TIME);
         });
         await test.step('235: 通知設定で特定項目の更新時に通知設定を行い全種別の項目で通知が行えること', async () => {
             const STEP_TIME = Date.now();
@@ -1775,6 +1811,7 @@ test.describe('通知設定', () => {
             expect(page.url()).toContain('/admin/notification');
             // 注: 全種別の項目での通知確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT05', 'ntf-280', STEP_TIME);
         });
         await test.step('298: コメント時の通知が想定通りに動作すること（専用テスト環境・メール受信確認が必要）', async () => {
             const STEP_TIME = Date.now();
@@ -1823,6 +1860,7 @@ test.describe('通知設定', () => {
                 expect(page.url()).toContain('/admin/');
             }
 
+            await autoScreenshot(page, 'NT05', 'ntf-290', STEP_TIME);
         });
     });
 
@@ -1891,6 +1929,7 @@ test.describe('通知設定', () => {
                 expect(page.url()).toContain('/admin/');
             }
 
+            await autoScreenshot(page, 'NT06', 'ntf-430', STEP_TIME);
         });
         await test.step('6-2: 通知設定でアクション「更新」を設定してレコード更新時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -1921,6 +1960,7 @@ test.describe('通知設定', () => {
             }
             // 注: 実際のレコード更新による通知発火はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-440', STEP_TIME);
         });
         await test.step('6-3: 通知設定でアクション「削除」を設定してレコード削除時に通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -1947,6 +1987,7 @@ test.describe('通知設定', () => {
             }
             // 注: 実際のレコード削除による通知発火はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-450', STEP_TIME);
         });
         await test.step('6-4: 通知設定でアクション「ワークフローステータス変更時」を設定して通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -1976,6 +2017,7 @@ test.describe('通知設定', () => {
             }
             // 注: 実際のワークフロー操作による通知発火は手動テストで確認
 
+            await autoScreenshot(page, 'NT06', 'ntf-460', STEP_TIME);
         });
         await test.step('6-5: 通知先組織に対して通知設定を行い通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -1995,6 +2037,7 @@ test.describe('通知設定', () => {
             console.log('6-5: 組織関連UI数:', await orgRelated.count());
             // 注: 実際の通知発火はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-470', STEP_TIME);
         });
         await test.step('62-1: 通知設定で通知先メールアドレスを追加すると設定されたアドレスに通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -2023,6 +2066,7 @@ test.describe('通知設定', () => {
             }
             // 注: 実際のメール通知確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-390', STEP_TIME);
         });
         await test.step('62-2: 通知設定で通知先メールアドレスを更新すると変更後のアドレスに通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -2047,6 +2091,7 @@ test.describe('通知設定', () => {
             }
             // 注: 実際のメール通知確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-400', STEP_TIME);
         });
         await test.step('62-3: 通知設定で通知先メールアドレスを削除しても他通知設定に問題がないこと', async () => {
             const STEP_TIME = Date.now();
@@ -2064,6 +2109,7 @@ test.describe('通知設定', () => {
             console.log('62-3: 通知設定リンク・追加ボタン数:', await addLink.count());
             // 注: 実際のメール削除後の通知確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-410', STEP_TIME);
         });
         await test.step('62-4: ワークフロー承認時に通知先メールアドレスに通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -2087,6 +2133,7 @@ test.describe('通知設定', () => {
             }
             // 注: ワークフロー承認時のメール通知確認は手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-420', STEP_TIME);
         });
         await test.step('80-1: リマインダ設定の分後トリガーが設定通りに動作すること（時間経過確認が必要）', async () => {
             const STEP_TIME = Date.now();
@@ -2120,6 +2167,7 @@ test.describe('通知設定', () => {
 
             console.log('80-1: リマインダ設定UIの確認完了（実際の発火確認は設定後〇分経過後に手動確認が必要）');
 
+            await autoScreenshot(page, 'NT06', 'ntf-480', STEP_TIME);
         });
         await test.step('80-2: ワークフロー申請中の条件でリマインダが設定通りに動作すること（時間経過確認が必要）', async () => {
             const STEP_TIME = Date.now();
@@ -2149,6 +2197,7 @@ test.describe('通知設定', () => {
 
             console.log('80-2: リマインダ設定UI（ワークフロー条件）の確認完了（実際の発火確認は時間経過後に手動確認が必要）');
 
+            await autoScreenshot(page, 'NT06', 'ntf-490', STEP_TIME);
         });
         await test.step('81-1: 通知設定の表示項目で「テーブル名」のみチェックすると設定通りの通知内容で通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -2167,6 +2216,7 @@ test.describe('通知設定', () => {
             console.log('81-1: テーブル名チェックボックス数:', await tableNameCheckbox.count());
             // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-500', STEP_TIME);
         });
         await test.step('81-2: 通知設定の表示項目で「URL」のみチェックすると設定通りの通知内容で通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -2185,6 +2235,7 @@ test.describe('通知設定', () => {
             console.log('81-2: URL表示チェックボックス数:', await urlCheckbox.count());
             // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-510', STEP_TIME);
         });
         await test.step('81-3: 通知設定の表示項目で「作成(更新)データ」のみチェックすると設定通りの通知内容で通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -2203,6 +2254,7 @@ test.describe('通知設定', () => {
             console.log('81-3: 作成(更新)データチェックボックス数:', await dataCheckbox.count());
             // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-520', STEP_TIME);
         });
         await test.step('81-4: 通知設定の表示項目で「更新者」のみチェックすると設定通りの通知内容で通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -2221,6 +2273,7 @@ test.describe('通知設定', () => {
             console.log('81-4: 更新者チェックボックス数:', await updaterCheckbox.count());
             // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT06', 'ntf-530', STEP_TIME);
         });
     });
 
@@ -2242,6 +2295,7 @@ test.describe('通知設定', () => {
             console.log('81-5: フッターチェックボックス数:', await footerCheckbox.count());
             // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT07', 'ntf-540', STEP_TIME);
         });
         await test.step('81-6: 通知設定の表示項目で設定なしの場合も設定通りの通知内容で通知されること', async () => {
             const STEP_TIME = Date.now();
@@ -2260,6 +2314,7 @@ test.describe('通知設定', () => {
             console.log('81-6: 表示項目チェックボックス数:', await displayCheckboxes.count());
             // 注: 実際の通知内容確認はSMTP動作環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT07', 'ntf-550', STEP_TIME);
         });
         await test.step('84-1: 通知設定でワークフロー条件「申請中(要確認)」を設定すると設定通りの通知が行われること', async () => {
             const STEP_TIME = Date.now();
@@ -2284,6 +2339,7 @@ test.describe('通知設定', () => {
             console.log('84-1: ワークフロー条件関連要素数:', await wfRelated.count());
             // 注: 実際の通知発火確認は手動テストが必要
 
+            await autoScreenshot(page, 'NT07', 'ntf-560', STEP_TIME);
         });
         await test.step('95-1: 通知内容を長文に設定するとアプリ内通知で省略して表示されること', async () => {
             const STEP_TIME = Date.now();
@@ -2316,6 +2372,7 @@ test.describe('通知設定', () => {
             console.log('95-1: 通知ログページ確認完了');
             // 注: 実際の長文省略表示確認はアプリ内通知が届く環境での手動テストが必要
 
+            await autoScreenshot(page, 'NT07', 'ntf-570', STEP_TIME);
         });
     });
 
@@ -2342,6 +2399,7 @@ test.describe('通知設定', () => {
             // ページが正常にロードされていること（500エラーなし）
             expect(bodyText).not.toContain('500');
 
+            await autoScreenshot(page, 'NT08', 'ntf-580', STEP_TIME);
         });
         await test.step('252: ユーザーを無効にした後も一覧画面・詳細画面で正常に表示されること', async () => {
             const STEP_TIME = Date.now();
@@ -2372,6 +2430,7 @@ test.describe('通知設定', () => {
                 expect(detailText).not.toContain('Internal Server Error');
             }
 
+            await autoScreenshot(page, 'NT08', 'ntf-590', STEP_TIME);
         });
         await test.step('350: テーブル管理権限がある場合のみ通知の追加・編集が有効であること', async () => {
             const STEP_TIME = Date.now();
@@ -2393,6 +2452,7 @@ test.describe('通知設定', () => {
 
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT08', 'ntf-600', STEP_TIME);
         });
         await test.step('375: テーブル項目設定・テーブル管理者権限を持つユーザーが通知設定を追加できること', async () => {
             const STEP_TIME = Date.now();
@@ -2415,6 +2475,7 @@ test.describe('通知設定', () => {
             const addBtn = page.locator('a:has-text("追加"), a[href*="new"], .fa-plus');
             console.log('375: 追加ボタン数:', await addBtn.count());
 
+            await autoScreenshot(page, 'NT08', 'ntf-610', STEP_TIME);
         });
     });
 
@@ -2441,6 +2502,7 @@ test.describe('通知設定', () => {
             expect(bodyText).not.toContain('Internal Server Error');
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT09', 'ntf-620', STEP_TIME);
         });
         await test.step('384: リマインド設定の通知をクリックするとレコードに遷移されること', async () => {
             const STEP_TIME = Date.now();
@@ -2476,6 +2538,7 @@ test.describe('通知設定', () => {
 
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT09', 'ntf-630', STEP_TIME);
         });
         await test.step('400: HTMLメールがHTMLコードとして表示されず正しくレンダリングされること', async () => {
             const STEP_TIME = Date.now();
@@ -2515,6 +2578,7 @@ test.describe('通知設定', () => {
 
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT09', 'ntf-640', STEP_TIME);
         });
         await test.step('404: 通知ログの作成日時フィルタで相対値を正しく使用できること', async () => {
             const STEP_TIME = Date.now();
@@ -2543,6 +2607,7 @@ test.describe('通知設定', () => {
 
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT09', 'ntf-650', STEP_TIME);
         });
         await test.step('425: HTMLメールを配信リストから送信しても画像やリンクが正しく表示されること', async () => {
             const STEP_TIME = Date.now();
@@ -2563,6 +2628,7 @@ test.describe('通知設定', () => {
             const testMailBtn = page.locator('button:has-text("テストメール"), a:has-text("テストメール")');
             console.log('425: テストメール送信ボタン数:', await testMailBtn.count());
 
+            await autoScreenshot(page, 'NT09', 'ntf-660', STEP_TIME);
         });
         await test.step('436: ルックアップ設定されたメールアドレス項目が正しく自動反映されること', async () => {
             const STEP_TIME = Date.now();
@@ -2590,6 +2656,7 @@ test.describe('通知設定', () => {
             expect(settingText).not.toContain('Internal Server Error');
             expect(page.url()).toContain('/admin/');
 
+            await autoScreenshot(page, 'NT09', 'ntf-670', STEP_TIME);
         });
         await test.step('479: 通知ログの日時フィルタで秒数を含めなくても検索結果が返ること', async () => {
             const STEP_TIME = Date.now();
@@ -2619,6 +2686,7 @@ test.describe('通知設定', () => {
             const afterFilterText = await page.innerText('body');
             expect(afterFilterText).not.toContain('Internal Server Error');
 
+            await autoScreenshot(page, 'NT09', 'ntf-680', STEP_TIME);
         });
         await test.step('751: リマインダ設定の追加の通知先対象項目が保存後も保持されること', async () => {
             const STEP_TIME = Date.now();
@@ -2641,6 +2709,7 @@ test.describe('通知設定', () => {
             const additionalUI = page.locator('text=追加の通知先対象項目, text=追加の通知先');
             console.log('751: 追加の通知先UI数:', await additionalUI.count());
 
+            await autoScreenshot(page, 'NT09', 'ntf-690', STEP_TIME);
         });
     });
 
@@ -2671,6 +2740,7 @@ test.describe('通知設定', () => {
             const applyTrigger = page.locator('text=申請時, text=申請, label:has-text("申請")');
             console.log('549: 申請時トリガーUI数:', await applyTrigger.count());
 
+            await autoScreenshot(page, 'UC08', 'ntf-700', STEP_TIME);
         });
     });
 
@@ -2695,6 +2765,7 @@ test.describe('通知設定', () => {
             const testMailCount = await testMailBtn.count();
             console.log('651: テストメール送信ボタン数:', testMailCount);
 
+            await autoScreenshot(page, 'UC12', 'ntf-710', STEP_TIME);
         });
         await test.step('658: 通知設定で通知先に「ログインユーザーのメールアドレス」が選択できること', async () => {
             const STEP_TIME = Date.now();
@@ -2717,6 +2788,7 @@ test.describe('通知設定', () => {
             const loginOptionCount = await loginUserOption.count();
             console.log('658: ログインユーザーオプション有無:', loginOptionCount > 0);
 
+            await autoScreenshot(page, 'UC12', 'ntf-720', STEP_TIME);
         });
     });
 
@@ -2744,6 +2816,7 @@ test.describe('通知設定', () => {
             const notifVisible = await notifTable.isVisible({ timeout: 10000 }).catch(() => false);
             console.log('741: 通知設定テーブル表示:', notifVisible);
 
+            await autoScreenshot(page, 'UC17', 'ntf-730', STEP_TIME);
         });
     });
 
@@ -2770,6 +2843,7 @@ test.describe('通知設定', () => {
                 console.log('684: 組織選択肢数:', options.length);
             }
 
+            await autoScreenshot(page, 'UC14', 'ntf-740', STEP_TIME);
         });
     });
 
@@ -2792,6 +2866,7 @@ test.describe('通知設定', () => {
             // 不明なエラーが発生しないこと
             expect(bodyText).not.toContain('不明なエラー');
 
+            await autoScreenshot(page, 'UC16', 'ntf-750', STEP_TIME);
         });
     });
 
@@ -2816,6 +2891,7 @@ test.describe('通知設定', () => {
             const selectCount = await selectElements.count();
             console.log('826: select要素数:', selectCount);
 
+            await autoScreenshot(page, 'UC23', 'ntf-760', STEP_TIME);
         });
     });
 

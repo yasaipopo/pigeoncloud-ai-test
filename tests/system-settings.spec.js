@@ -439,7 +439,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             } else {
                 await expect(page.locator('header.app-header')).toBeVisible();
             }
-            await autoScreenshot(page, 'SS03', 'sys-010', 0, _testStart);
+            await autoScreenshot(page, 'SS03', 'sys-010', _testStart);
         });
 
         await test.step('sys-020: テーブル詳細情報の表示がエラーなく行えること', async () => {
@@ -467,7 +467,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             const tableList = page.locator('table tbody tr, .dataset-list-item, [class*="table-row"], tr[ng-reflect], li[class*="list-group-item"]');
             const count = await tableList.count();
             console.log('テーブル一覧件数: ' + count);
-            await autoScreenshot(page, 'SS03', 'sys-020', 0, _testStart);
+            await autoScreenshot(page, 'SS03', 'sys-020', _testStart);
         });
 
     });
@@ -566,7 +566,7 @@ test.describe('共通設定・システム設定', () => {
 
             // テーブルのヘッダー行が表示されていること（IDカラムが存在すること）
             await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
-            await autoScreenshot(page, 'SS03', 'sys-030', 0, _testStart);
+            await autoScreenshot(page, 'SS03', 'sys-030', _testStart);
         });
 
         await test.step('sys-040: テーブルの削除がエラーなく行えること', async () => {
@@ -718,6 +718,7 @@ test.describe('共通設定・システム設定', () => {
                     }
                 }
             }
+            await autoScreenshot(page, 'SS03', 'sys-040', STEP_TIME);
         });
 
     });
@@ -755,6 +756,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
             // リロード後もフォームが表示されていること
             await expect(page.locator('form').first()).toBeVisible();
+            await autoScreenshot(page, 'SS04', 'sys-090', STEP_TIME);
         });
 
         await test.step('7-2: ユーザーを減らすとシステム利用状況のユーザー数表示が減ること', async () => {
@@ -791,6 +793,7 @@ test.describe('共通設定・システム設定', () => {
             // 設定フォームが表示されていること
             await expect(page.locator('form').first()).toBeVisible();
             await expect(page.locator('body')).toContainText('二段階認証を有効にする');
+            await autoScreenshot(page, 'SS04', 'sys-100', STEP_TIME);
         });
 
         await test.step('7-3: テーブルを増やすとシステム利用状況のテーブル数表示が増えること', async () => {
@@ -812,6 +815,7 @@ test.describe('共通設定・システム設定', () => {
 
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
             await expect(page.locator('form').first()).toBeVisible();
+            await autoScreenshot(page, 'SS04', 'sys-110', STEP_TIME);
         });
 
         await test.step('7-4: テーブルを減らすとシステム利用状況のテーブル数表示が減ること', async () => {
@@ -917,6 +921,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
             await expect(page.locator('form').first()).toBeVisible();
             await expect(page.locator('body')).toContainText('ロック自動解除時間');
+            await autoScreenshot(page, 'SS04', 'sys-120', STEP_TIME);
         });
 
         await test.step('7-5: メール通知を実施するとシステム利用状況のメール通知数表示が増えること', async () => {
@@ -992,6 +997,7 @@ test.describe('共通設定・システム設定', () => {
 
             // SMTP設定を元に戻す
             await updateAdminSetting(page, { use_smtp: 'false' });
+            await autoScreenshot(page, 'SS04', 'sys-130', STEP_TIME);
         });
 
     });
@@ -1030,6 +1036,7 @@ test.describe('共通設定・システム設定', () => {
             // その他設定ページが表示されていることを確認（設定フォームの固有要素）
             await expect(page.locator('form').first()).toBeVisible();
             await expect(page.locator('body')).toContainText('二段階認証を有効にする');
+            await autoScreenshot(page, 'SS01', 'sys-140', STEP_TIME);
         });
 
         await test.step('8-2: 二段階認証を無効化すると設定が解除されること', async () => {
@@ -1059,6 +1066,7 @@ test.describe('共通設定・システム設定', () => {
             // その他設定ページが表示されていることを確認（設定フォームの固有要素）
             await expect(page.locator('form').first()).toBeVisible();
             await expect(page.locator('body')).toContainText('二段階認証を有効にする');
+            await autoScreenshot(page, 'SS01', 'sys-150', STEP_TIME);
         });
 
         await test.step('24-1: 新規ユーザーのログイン時のパスワードリセットをOFFにすると初回ログイン時パスワード変更画面が表示されないこと', async () => {
@@ -1090,6 +1098,7 @@ test.describe('共通設定・システム設定', () => {
             // 設定ページが正常に表示されていること（固有ラベルが見えること）
             await expect(page.locator('form').first()).toBeVisible();
             await expect(page.locator('body')).toContainText('新規ユーザーのログイン時のパスワードリセットをOFFにする');
+            await autoScreenshot(page, 'SS01', 'sys-050', STEP_TIME);
         });
 
         await test.step('24-2: 新規ユーザーのログイン時のパスワードリセットをONにすると初回ログイン時パスワード変更画面が表示されること', async () => {
@@ -1120,6 +1129,7 @@ test.describe('共通設定・システム設定', () => {
             // パスワードリセットONになっていること（チェックなし = ONがデフォルト）
             const isCheckedReset = await page.locator('#ignore_new_pw_input_1').isChecked();
             expect(isCheckedReset).toBe(false);
+            await autoScreenshot(page, 'SS01', 'sys-060', STEP_TIME);
         });
 
         await test.step('58-1: 初回ログイン時に利用規約を表示する設定を有効にするとログイン時に利用規約が表示されること', async () => {
@@ -1151,6 +1161,7 @@ test.describe('共通設定・システム設定', () => {
             // その他設定ページが表示されていること（固有ラベルが見えること）
             await expect(page.locator('form').first()).toBeVisible();
             await expect(page.locator('body')).toContainText('初回ログイン時に利用規約を表示する');
+            await autoScreenshot(page, 'SS01', 'sys-070', STEP_TIME);
         });
 
         await test.step('58-2: 初回ログイン時に利用規約を表示する設定を無効にするとログイン時に利用規約が表示されなくなること', async () => {
@@ -1201,6 +1212,7 @@ test.describe('共通設定・システム設定', () => {
             // 設定ページが表示されること（固有ラベルが見えること）
             await expect(page.locator('form').first()).toBeVisible();
             await expect(page.locator('body')).toContainText('初回ログイン時に利用規約を表示する');
+            await autoScreenshot(page, 'SS01', 'sys-080', STEP_TIME);
         });
 
         await test.step('89-1: パスワード強制変更画面表示の間隔日数を設定すると設定通りの処理となり他設定項目に影響しないこと', async () => {
@@ -1275,6 +1287,7 @@ test.describe('共通設定・システム設定', () => {
             // ※ days=9999のため強制変更画面は表示されないはず
             await expect(page.locator('form').first()).toBeVisible();
             await expect(page.locator('body')).toContainText('パスワード強制変更画面表示の間隔日数');
+            await autoScreenshot(page, 'SS01', 'sys-280', STEP_TIME);
         });
 
     });
@@ -1336,6 +1349,7 @@ test.describe('共通設定・システム設定', () => {
             // 追加ボタンを確認（存在確認のみ）
             const addBtn = page.locator('button:has-text("追加"), a:has-text("追加"), button.btn-add, [data-action="add"]');
             console.log('追加ボタン数: ' + (await addBtn.count()));
+            await autoScreenshot(page, 'SS02', 'sys-190', STEP_TIME);
         });
 
         await test.step('9-4: 全てのデータ削除がエラーなく行えること', async () => {
@@ -1351,6 +1365,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
             // テーブルのIDカラムが表示されていること（削除後もページは壊れていないこと）
             await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
+            await autoScreenshot(page, 'SS02', 'sys-200', STEP_TIME);
         });
 
         await test.step('9-5: 集計を選択してデータ集計がエラーなく行えること', async () => {
@@ -1368,6 +1383,7 @@ test.describe('共通設定・システム設定', () => {
             // 集計ボタンの確認（存在確認）
             const aggregateBtn = page.locator('button:has-text("集計"), a:has-text("集計")');
             console.log('集計ボタン数: ' + (await aggregateBtn.count()));
+            await autoScreenshot(page, 'SS02', 'sys-210', STEP_TIME);
         });
 
         await test.step('9-6: チャート追加がエラーなく行えること', async () => {
@@ -1382,6 +1398,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
             await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
             await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
+            await autoScreenshot(page, 'SS02', 'sys-220', STEP_TIME);
         });
 
         await test.step('9-7: 帳票登録がエラーなく行えること', async () => {
@@ -1396,6 +1413,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
             // 帳票ボタンがツールバーに表示されていること
             await expect(page.locator('button:has-text("帳票")')).toBeVisible();
+            await autoScreenshot(page, 'SS02', 'sys-310', STEP_TIME);
         });
 
         await test.step('9-8: データ検索がエラーなく行えること', async () => {
@@ -1415,6 +1433,7 @@ test.describe('共通設定・システム設定', () => {
             // 検索フィールドが存在することを確認
             const searchInput = page.locator('input[type="search"], input[placeholder*="検索"], .search-input, #search-input');
             console.log('検索フィールド数: ' + (await searchInput.count()));
+            await autoScreenshot(page, 'SS02', 'sys-230', STEP_TIME);
         });
 
         await test.step('9-9: データ編集がエラーなく行えること', async () => {
@@ -1430,6 +1449,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
             // 「編集モード」ボタンがツールバーに表示されていること
             await expect(page.locator('button:has-text("編集モード")')).toBeVisible();
+            await autoScreenshot(page, 'SS02', 'sys-240', STEP_TIME);
         });
 
         await test.step('9-10: レコードの詳細情報表示がエラーなく行えること', async () => {
@@ -1449,6 +1469,7 @@ test.describe('共通設定・システム設定', () => {
             const headerCount = await headers.count();
             console.log('カラム数: ' + headerCount);
             expect(headerCount).toBeGreaterThan(1);
+            await autoScreenshot(page, 'SS02', 'sys-160', STEP_TIME);
         });
 
         await test.step('9-11: レコードの編集がエラーなく行えること', async () => {
@@ -1464,6 +1485,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
             // 「編集モード」ボタンがツールバーに表示されていること
             await expect(page.locator('button:has-text("編集モード")')).toBeVisible();
+            await autoScreenshot(page, 'SS02', 'sys-170', STEP_TIME);
         });
 
         await test.step('9-12: レコードの削除がエラーなく行えること', async () => {
@@ -1478,6 +1500,7 @@ test.describe('共通設定・システム設定', () => {
             await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
             await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
             await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
+            await autoScreenshot(page, 'SS02', 'sys-180', STEP_TIME);
         });
 
         await test.step('9-2: CSVダウンロードがエラーなく行えること', async () => {
@@ -1495,6 +1518,7 @@ test.describe('共通設定・システム設定', () => {
             // CSVダウンロードボタンの確認
             const csvBtn = page.locator('button:has-text("CSV"), a:has-text("CSV"), a:has-text("ダウンロード")');
             console.log('CSVボタン数: ' + (await csvBtn.count()));
+            await autoScreenshot(page, 'SS02', 'sys-290', STEP_TIME);
         });
 
         await test.step('9-3: CSVアップロードがエラーなく行えること', async () => {
@@ -1540,6 +1564,7 @@ test.describe('共通設定・システム設定', () => {
             // ページが正常に表示されることを確認
             await expect(page.locator('h5').filter({ hasText: 'ALLテストテーブル' }).first()).toBeVisible();
             await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+            await autoScreenshot(page, 'SS02', 'sys-300', STEP_TIME);
         });
 
     });
@@ -1554,6 +1579,7 @@ test.describe('共通設定・システム設定', () => {
             const STEP_TIME = Date.now();
             // PayPal連携機能は廃止済みのためスキップ（外部PayPalサービス連携・機能変更に伴い不要）
             test.skip(true, 'PayPalサブスクリプション機能は廃止済み。外部サービス連携のため自動テスト不可かつ手動確認も不要（機能削除済み）。');
+            await autoScreenshot(page, 'SS05', 'sys-250', STEP_TIME);
         });
 
         await test.step('131-02: デビットカード/クレジットカード支払いが完了すること', async () => {
@@ -1561,11 +1587,13 @@ test.describe('共通設定・システム設定', () => {
             // 機能変更に伴い不要。外部決済サービス連携のため自動テスト不可。
             // Stripeによる新決済フローは284-1でカバー（手動確認が必要）。
             test.skip(true, 'クレジットカード支払い機能は機能変更に伴い不要（外部決済サービス連携・手動確認が必要）。Stripeは284-1参照。');
+            await autoScreenshot(page, 'SS05', 'sys-260', STEP_TIME);
         });
 
         await test.step('284-1: Stripe経由でクレジットカード支払いが完了すること（外部サービス連携）', async () => {
             const STEP_TIME = Date.now();
             test.skip(true, 'Stripe外部サービス連携のため自動テスト不可（手動確認が必要）');
+            await autoScreenshot(page, 'SS05', 'sys-270', STEP_TIME);
         });
 
     });
@@ -1921,6 +1949,7 @@ test.describe('共通設定・システム設定', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await autoScreenshot(page, 'UC04', 'sys-320', STEP_TIME);
         });
 
     });
