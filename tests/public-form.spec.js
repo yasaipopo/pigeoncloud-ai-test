@@ -9,6 +9,20 @@ let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
 let PASSWORD = process.env.TEST_PASSWORD;
 
+/**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -222,8 +236,8 @@ test.describe('公開フォーム・公開メールリンク', () => {
         await closeTemplateModal(page);
 
         // ----- step: 135 公開フォーム設定画面が表示され、メール配信設定ができること -----
-        await test.step('135: 公開フォーム設定画面が表示され、メール配信設定ができること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 135`);
+        await test.step('pf-010: 公開フォーム設定画面が表示され、メール配信設定ができること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-010`);
 
             // Step 1: テーブル設定の「その他」タブを開く
             await openOtherTab(page, tableId);
@@ -314,11 +328,12 @@ test.describe('公開フォーム・公開メールリンク', () => {
                     console.log('公開フォームメニューは現在のビュー設定では表示されていません');
                 }
             }
+            await stepScreenshot(page, 'public-form', 'PF01', 'pf-010-s3', _testStart);
         });
 
         // ----- step: 170 公開フォームURLのアドレス長が適切であること -----
-        await test.step('170: 公開フォームURLのアドレス長が適切であること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 170`);
+        await test.step('pf-020: 公開フォームURLのアドレス長が適切であること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-020`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -384,11 +399,12 @@ test.describe('公開フォーム・公開メールリンク', () => {
                     await expect(pubFormLabelFallback, '「公開フォームをONにする」ラベルが存在すること').toBeVisible();
                 }
             }
+            await stepScreenshot(page, 'public-form', 'PF01', 'pf-020-s3', _testStart);
         });
 
         // ----- step: 358 公開フォームで子テーブルのルックアップコピーが動作すること -----
-        await test.step('358: 公開フォームで子テーブル内のルックアップコピーが正常に動作すること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 358`);
+        await test.step('pf-030: 公開フォームで子テーブル内のルックアップコピーが正常に動作すること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-030`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -442,11 +458,12 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 const pubFormLabel = page.locator('label:has-text("公開フォームをONにする")').first();
                 await expect(pubFormLabel).toBeVisible();
             }
+            await stepScreenshot(page, 'public-form', 'PF01', 'pf-030-s3', _testStart);
         });
 
         // ----- step: 359 公開フォームで複数列レイアウトでも項目が正しく収まること -----
-        await test.step('359: 公開フォームで複数列レイアウトでも項目が正しく収まること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 359`);
+        await test.step('pf-040: 公開フォームで複数列レイアウトでも項目が正しく収まること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-040`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -512,11 +529,12 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 await openOtherTab(page, tableId);
                 await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible();
             }
+            await stepScreenshot(page, 'public-form', 'PF01', 'pf-040-s3', _testStart);
         });
 
         // ----- step: 499 ビューで非表示の子テーブルが公開フォームに表示されないこと -----
-        await test.step('499: ビューで非表示の子テーブルが公開フォームに表示されないこと', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 499`);
+        await test.step('pf-050: ビューで非表示の子テーブルが公開フォームに表示されないこと', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-050`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -567,11 +585,12 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 await openOtherTab(page, tableId);
                 await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible();
             }
+            await stepScreenshot(page, 'public-form', 'PF01', 'pf-050-s3', _testStart);
         });
 
         // ----- step: 547 埋め込みフォームの送信ボタン下の空白が適切であること -----
-        await test.step('547: 埋め込みフォームの送信ボタン下の空白が適切であること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 547`);
+        await test.step('pf-060: 埋め込みフォームの送信ボタン下の空白が適切であること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-060`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -634,11 +653,12 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 await openOtherTab(page, tableId);
                 await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible();
             }
+            await stepScreenshot(page, 'public-form', 'PF01', 'pf-060-s3', _testStart);
         });
 
         // ----- step: 660 公開フォームがスマホサイズでも正しいレイアウトで表示されること -----
-        await test.step('660: 公開フォームがスマホサイズでも正しいレイアウトで表示されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 660`);
+        await test.step('pf-070: 公開フォームがスマホサイズでも正しいレイアウトで表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-070`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -699,6 +719,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 await openOtherTab(page, tableId);
                 await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible();
             }
+            await stepScreenshot(page, 'public-form', 'PF01', 'pf-070-s3', _testStart);
         });
     });
 
@@ -712,8 +733,8 @@ test.describe('公開フォーム・公開メールリンク', () => {
         await login(page);
         await closeTemplateModal(page);
 
-        await test.step('533: 未ログイン状態の公開フォームからファイル添付して送信できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 533`);
+        await test.step('pf-080: 未ログイン状態の公開フォームからファイル添付して送信できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-080`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -786,6 +807,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 await openOtherTab(page, tableId);
                 await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible();
             }
+            await stepScreenshot(page, 'public-form', 'UC07', 'pf-080-s3', _testStart);
         });
     });
 
@@ -799,8 +821,8 @@ test.describe('公開フォーム・公開メールリンク', () => {
         await login(page);
         await closeTemplateModal(page);
 
-        await test.step('812: 公開フォームURLにパラメータを付与して初期値が設定されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 812`);
+        await test.step('pf-090: 公開フォームURLにパラメータを付与して初期値が設定されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-090`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -868,6 +890,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 await openOtherTab(page, tableId);
                 await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible();
             }
+            await stepScreenshot(page, 'public-form', 'UC22', 'pf-090-s3', _testStart);
         });
     });
 
@@ -881,8 +904,8 @@ test.describe('公開フォーム・公開メールリンク', () => {
         await login(page);
         await closeTemplateModal(page);
 
-        await test.step('838: 公開フォームで各フィールドが正しいレイアウトで表示されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 838`);
+        await test.step('pf-100: 公開フォームで各フィールドが正しいレイアウトで表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-100`);
 
             const enabled = await enablePublicForm(page, tableId);
             expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
@@ -960,6 +983,7 @@ test.describe('公開フォーム・公開メールリンク', () => {
                 await openOtherTab(page, tableId);
                 await expect(page.locator('label:has-text("公開フォームをONにする")').first()).toBeVisible();
             }
+            await stepScreenshot(page, 'public-form', 'UC23', 'pf-100-s3', _testStart);
         });
     });
 

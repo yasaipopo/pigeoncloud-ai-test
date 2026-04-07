@@ -2,40 +2,54 @@ group: テンプレート
 spec_file: tests/templates.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
+
+# ──────────────────────────────────────────────
+# movie: TM01 (tpl-010〜tpl-060 を1動画で確認)
+# ──────────────────────────────────────────────
 - case_no: tpl-010
   feature: テンプレート
   description: ①テンプレート一覧モーダルが正常に表示されること
   expected: |
     エラーなくページが正常に表示されること
   movie: TM01
-  detailed_flow: |-
+  detailed_flow: |
     【TM01 テストフロー】この動画で確認するテスト番号:
-      tpl-010        (旧: TMPL-01)  テンプレート
-      tpl-020        (旧: TMPL-02)  テンプレート
-      tpl-030        (旧: TMPL-03)  テンプレート
-      tpl-040        (旧: TMPL-04)  テンプレート
-      tpl-050        (旧: TMPL-05)  テンプレート
-      tpl-060        (旧: TMPL-06)  テンプレート
+      tpl-010        (旧: TMPL-01)  テンプレート一覧表示
+      tpl-020        (旧: TMPL-02)  テンプレート詳細確認
+      tpl-030        (旧: TMPL-03)  「戻る」で一覧に戻る
+      tpl-040        (旧: TMPL-04)  テンプレートインストール
+      tpl-050        (旧: TMPL-05)  モーダルを閉じる
+      tpl-060        (旧: TMPL-06)  テンプレート名表示
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    1. ダッシュボード(/admin/dashboard)を開く
-    2. Angular初期化完了を待つ(body[data-ng-ready="true"])
-    3. チュートリアルモーダルが既に表示されている場合はスキップ処理
-       - `.modal.show` または `.modal.in` が存在し、「テンプレートからインストール」テキストが含まれるか確認
-    4. サイドバーの「+」アイコン(.nav-item.nav-link.button_center .fa-plus)をクリック
-       → テーブル追加メニューモーダル(addMenuModal)が表示される
-    5. 「テンプレートから追加」リンク(text="テンプレートから追加")をクリック
-       → add_template()が呼ばれ、dashboard({type:'add_template'})にルーティング
-       → /api/admin/templatesが呼ばれ、tutorialModalが表示される
-    6. モーダルが表示されることを確認:
-       - `expect(page.locator('.modal.in, .modal.show').filter({hasText:'テンプレートからインストール'})).toBeVisible({ timeout: 10000 })`
-    7. テンプレート一覧(#templates)が表示されることを確認:
-       - `expect(page.locator('#templates')).toBeVisible({ timeout: 10000 })`
-    8. テンプレートアイコン(.template_icon)が1件以上表示されることを確認:
-       - `expect(await page.locator('.template_icon').count()).toBeGreaterThan(0)`
-    9. 「スキップ」ボタン(button.btn-secondary:has-text("スキップ"))が表示されることを確認
-    確認元: dashboard.component.html L336-L385, dashboard.component.ts L184-L193
+    [0:00] tpl-010 ── テンプレート一覧モーダルが表示されること
+    1. ダッシュボードを開き、サイドバーの「+」→「テンプレートから追加」をクリック
+    2. ✅ テンプレートモーダルが表示されること
+    3. ✅ テンプレート一覧（#templates）が表示され、アイコンが1件以上あること
+    4. ✅ 「スキップ」ボタンが表示されること
+
+    tpl-020 ── テンプレートの詳細を確認できること
+    5. テンプレートアイコンをクリック
+    6. ✅ テンプレート詳細（説明テキストまたはプレビュー）が表示されること
+
+    tpl-030 ── 「戻る」で一覧に戻れること
+    7. 詳細画面で「戻る」ボタンをクリック
+    8. ✅ テンプレート一覧（#templates）が再び表示されること
+
+    tpl-040 ── テンプレートをインストールできること
+    9. テンプレートアイコンをクリック→「インストール」ボタンをクリック
+    10. ✅ エラーなくインストール処理が完了すること
+    11. ✅ サイドバーに新しいテーブルリンクが追加されること
+
+    tpl-050 ── テンプレートモーダルを閉じられること
+    12. テンプレートモーダルを再度開く
+    13. 「スキップ」ボタンをクリック
+    14. ✅ モーダルが閉じられること
+
+    tpl-060 ── テンプレート一覧にテンプレート名が表示されること
+    15. テンプレートモーダルを開く
+    16. ✅ 各テンプレートアイコンにテンプレート名テキストが含まれること
   old_case_no: TMPL-01
 - case_no: tpl-020
   feature: テンプレート
@@ -43,7 +57,7 @@ cases:
   expected: |
     テンプレートの詳細を確認できること
   movie: TM01
-  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  detailed_flow: 'TM01テストフロー参照（tpl-010のdetailed_flowと同一）'
   old_case_no: TMPL-02
 - case_no: tpl-030
   feature: テンプレート
@@ -51,7 +65,7 @@ cases:
   expected: |
     テンプレートインストールモーダルの「戻る」で一覧に戻れること
   movie: TM01
-  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  detailed_flow: 'TM01テストフロー参照（tpl-010のdetailed_flowと同一）'
   old_case_no: TMPL-03
 - case_no: tpl-040
   feature: テンプレート
@@ -59,7 +73,7 @@ cases:
   expected: |
     テンプレートをインストールできること
   movie: TM01
-  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  detailed_flow: 'TM01テストフロー参照（tpl-010のdetailed_flowと同一）'
   old_case_no: TMPL-04
 - case_no: tpl-050
   feature: テンプレート
@@ -67,7 +81,7 @@ cases:
   expected: |
     テンプレートモーダルを閉じられること
   movie: TM01
-  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  detailed_flow: 'TM01テストフロー参照（tpl-010のdetailed_flowと同一）'
   old_case_no: TMPL-05
 - case_no: tpl-060
   feature: テンプレート
@@ -75,5 +89,5 @@ cases:
   expected: |
     テンプレート一覧のテンプレート名が表示されていること
   movie: TM01
-  detailed_flow: TM01テストフロー参照（tpl-010 のdetailed_flowと同一）
+  detailed_flow: 'TM01テストフロー参照（tpl-010のdetailed_flowと同一）'
   old_case_no: TMPL-06

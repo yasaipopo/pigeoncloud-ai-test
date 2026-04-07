@@ -19,31 +19,30 @@ cases:
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    # PAY-01: 支払いページが表示されること
+    [0:00] pay-010 ── 支払いページが表示されること
+    1. /admin/payment に遷移
+    2. ✅ 支払いページ（.plan-header）が表示されること
+    3. ✅ Internal Server Error が表示されないこと
 
-    ## 前提
-    - ログイン済み（admin権限）
-    - テスト環境はトライアル状態（isTrial() == true）
+    pay-020 ── プラン変更フォームと料金情報が表示されること
+    4. 支払いページでプラン情報を確認
+    5. ✅ プラン変更フォームが表示されること
 
-    ## 操作手順
-    1. `page.goto(BASE_URL + '/admin/payment')` でアクセス
-    2. Angular が読み込まれるまで待機: `page.waitForSelector('.plan-header', { timeout: 15000 })`
-       - もしリダイレクトされた場合は router navigate で `/admin/dataset/payment/pay` にアクセス
+    pay-030 ── Stripe checkoutの関連iframeが存在すること
+    6. Stripe iframe要素を確認
+    7. ✅ iframeが存在すること
 
-    ## 確認事項（expect）
-    - `.plan-header` または `h1:has-text("利用料金のお支払い")` が表示されていること
-      ```javascript
-      await expect(page.locator('h1.plan-header, .plan-header').first()).toBeVisible({ timeout: 15000 });
-      ```
-    - ページタイトルが "PigeonCloud" であること（Internal Server Error が出ていないこと）
-      ```javascript
-      const bodyText = await page.innerText('body');
-      expect(bodyText).not.toContain('Internal Server Error');
-      ```
+    pay-040 ── テストカードでStripe支払いフォームに入力できること
+    8. Stripe checkout モーダルを開く
+    9. ✅ 支払いフォームが表示されること
 
-    ## 注意
-    - `/admin/payment` は Angular SPA のルート。PHP には届かないため `/admin/dataset/payment/pay` が正確なパス
-    - トライアル環境ではページが表示されるが「有料プラン契約」のフォームが表示される（is_update=false）
+    pay-050 ── ユーザー数の範囲外入力でバリデーションエラーが表示されること
+    10. ユーザー数に範囲外の値を入力
+    11. ✅ バリデーションエラーが表示されること
+
+    pay-060 ── 支払い履歴APIエンドポイントが存在すること
+    12. 支払い履歴APIにリクエスト
+    13. ✅ エンドポイントが正常に応答すること
   old_case_no: PAY-01
 - case_no: pay-020
   feature: 支払い

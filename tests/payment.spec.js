@@ -5,6 +5,20 @@ const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
 const PASSWORD = process.env.TEST_PASSWORD;
 
+/**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -83,9 +97,10 @@ test.describe('支払い・プラン管理', () => {
 
     test('PM01: 支払いページ基本機能確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('PAY-01: 支払いページが表示されること', async () => {
+        await test.step('pay-010: 支払いページが表示されること', async () => {
             stepStart = Date.now();
             await gotoPaymentPage(page);
 
@@ -103,10 +118,11 @@ test.describe('支払い・プラン管理', () => {
 
             // 「有料プラン契約」の見出しが存在すること
             await expect(page.locator('h2.plan-header, h2')).toContainText('有料プラン契約');
-            console.log(`STEP_TIME PAY-01: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'PM01', 'pay-010-s3', _testStart);
+            console.log(`STEP_TIME pay-010: ${Date.now() - stepStart}ms`);
         });
 
-        await test.step('PAY-02: プラン変更フォームと料金情報が表示されること', async () => {
+        await test.step('pay-020: プラン変更フォームと料金情報が表示されること', async () => {
             stepStart = Date.now();
             // テスト環境ではStripe設定がないためスキップ
             test.skip(true, 'テスト環境ではStripe設定がないためスキップ');
@@ -141,10 +157,11 @@ test.describe('支払い・プラン管理', () => {
 
             // 「お支払い金額（税込）」の見出しが表示されること
             await expect(page.locator('h4').filter({ hasText: 'お支払い金額' })).toBeVisible();
-            console.log(`STEP_TIME PAY-02: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'PM01', 'pay-020-s3', _testStart);
+            console.log(`STEP_TIME pay-020: ${Date.now() - stepStart}ms`);
         });
 
-        await test.step('PAY-03: Stripe checkoutの関連iframeが存在すること', async () => {
+        await test.step('pay-030: Stripe checkoutの関連iframeが存在すること', async () => {
             stepStart = Date.now();
             // テスト環境ではStripe設定がないためスキップ
             test.skip(true, 'テスト環境ではStripe設定がないためスキップ');
@@ -164,10 +181,11 @@ test.describe('支払い・プラン管理', () => {
             const ctaButton = page.locator('.stripe-subscription button.btn-success.cta-button');
             await expect(ctaButton).toBeVisible();
             await expect(ctaButton).toContainText('クレジットカード支払いに進む');
-            console.log(`STEP_TIME PAY-03: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'PM01', 'pay-030-s3', _testStart);
+            console.log(`STEP_TIME pay-030: ${Date.now() - stepStart}ms`);
         });
 
-        await test.step('PAY-04: テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）', async () => {
+        await test.step('pay-040: テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）', async () => {
             stepStart = Date.now();
             // テスト環境ではStripe設定がないためスキップ
             test.skip(true, 'テスト環境ではStripe設定がないためスキップ');
@@ -216,18 +234,19 @@ test.describe('支払い・プラン管理', () => {
                 const errorMsg = frame.locator('.StripeElement--invalid, [class*="error"], [role="alert"]');
                 const errorCount = await errorMsg.count();
                 // テストカードなのでエラーは出ないはず（または出ても "invalid" ではない）
-                console.log('[PAY-04] カード入力フォームへの入力完了');
+                console.log('[pay-040] カード入力フォームへの入力完了');
             } else {
                 // Stripe Checkoutモーダルが別ウィンドウで開く場合
                 // またはiframe内のDOMが非同期でロードされる場合のフォールバック
-                console.log('[PAY-04] Stripe Checkout iframeが確認できました（iframe内DOM非同期）');
+                console.log('[pay-040] Stripe Checkout iframeが確認できました（iframe内DOM非同期）');
                 // iframeが存在することの確認のみ
                 await expect(checkoutIframe).toBeAttached();
             }
-            console.log(`STEP_TIME PAY-04: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'PM01', 'pay-040-s3', _testStart);
+            console.log(`STEP_TIME pay-040: ${Date.now() - stepStart}ms`);
         });
 
-        await test.step('PAY-05: ユーザー数の範囲外入力でバリデーションエラーが表示されること', async () => {
+        await test.step('pay-050: ユーザー数の範囲外入力でバリデーションエラーが表示されること', async () => {
             stepStart = Date.now();
             // テスト環境ではStripe設定がないためスキップ
             test.skip(true, 'テスト環境ではStripe設定がないためスキップ');
@@ -250,13 +269,13 @@ test.describe('支払い・プラン管理', () => {
             if (errorCount > 0) {
                 // エラーメッセージが1件以上表示されていること
                 expect(errorCount).toBeGreaterThan(0);
-                console.log('[PAY-05] バリデーションエラー表示確認');
+                console.log('[pay-050] バリデーションエラー表示確認');
             } else {
                 // 「クレジットカード支払いに進む」ボタンが無効化またはエラー表示
                 // ページ内の警告テキストを確認
                 const warningText = await page.locator('main').textContent().catch(() => '');
                 const hasRangeWarning = warningText.includes('5') && (warningText.includes('範囲') || warningText.includes('以上') || warningText.includes('3000'));
-                console.log('[PAY-05] 範囲警告テキスト確認:', hasRangeWarning);
+                console.log('[pay-050] 範囲警告テキスト確認:', hasRangeWarning);
             }
 
             // 範囲外の値（最大値3000超）を入力
@@ -267,10 +286,11 @@ test.describe('支払い・プラン管理', () => {
             // 範囲超過でもエラーまたは警告が表示されること
             const pageContent = await page.locator('main').textContent().catch(() => '');
             expect(pageContent).toContain('3000');
-            console.log(`STEP_TIME PAY-05: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'PM01', 'pay-050-s3', _testStart);
+            console.log(`STEP_TIME pay-050: ${Date.now() - stepStart}ms`);
         });
 
-        await test.step('PAY-06: 支払い履歴APIエンドポイントが存在すること', async () => {
+        await test.step('pay-060: 支払い履歴APIエンドポイントが存在すること', async () => {
             stepStart = Date.now();
 
             // Stripe Invoice ダウンロードAPIが存在することを確認（404でないこと）
@@ -288,7 +308,7 @@ test.describe('支払い・プラン管理', () => {
 
             // APIが正常に応答すること
             expect(nextPlanData).toHaveProperty('result', 'success');
-            console.log('[PAY-06] next-plan API応答:', JSON.stringify(nextPlanData));
+            console.log('[pay-060] next-plan API応答:', JSON.stringify(nextPlanData));
 
             // 支払いページに遷移して現在のプラン状態を確認
             await gotoPaymentPage(page);
@@ -303,21 +323,23 @@ test.describe('支払い・プラン管理', () => {
                 // 契約済みの場合：現在のプランテーブルが表示されること
                 const currentPlanTable = page.locator('.current-plan-table');
                 await expect(currentPlanTable).toBeVisible();
-                console.log('[PAY-06] 現在のプランテーブルが表示されています');
+                console.log('[pay-060] 現在のプランテーブルが表示されています');
             } else {
                 // 未契約の場合：プラン変更フォームが表示されること
                 await expect(page.locator('h3').filter({ hasText: 'プラン変更' })).toBeVisible();
-                console.log('[PAY-06] 未契約環境 - プラン変更フォームが表示されています');
+                console.log('[pay-060] 未契約環境 - プラン変更フォームが表示されています');
             }
-            console.log(`STEP_TIME PAY-06: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'PM01', 'pay-060-s3', _testStart);
+            console.log(`STEP_TIME pay-060: ${Date.now() - stepStart}ms`);
         });
     });
 
     test('UC16: 支払いページでクレジットカードブランド表示確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('715: 支払いページでクレジットカードのブランドが正しく表示されること', async () => {
+        await test.step('pay-070: 支払いページでクレジットカードのブランドが正しく表示されること', async () => {
             stepStart = Date.now();
 
             // 支払い設定ページに遷移
@@ -327,30 +349,32 @@ test.describe('支払い・プラン管理', () => {
             // カード情報表示エリアを確認
             const cardInfo = page.locator('.card-info, .credit-card, [class*="card-brand"], :has-text("Visa"), :has-text("MasterCard"), :has-text("カード")');
             const cardInfoCount = await cardInfo.count();
-            console.log('715: カード情報要素数:', cardInfoCount);
+            console.log('pay-070: カード情報要素数:', cardInfoCount);
 
             // カードブランドアイコンを確認
             const brandIcons = page.locator('img[src*="card"], img[src*="visa"], img[src*="master"], .card-brand-icon, [class*="brand"]');
             const brandIconCount = await brandIcons.count();
-            console.log('715: カードブランドアイコン数:', brandIconCount);
+            console.log('pay-070: カードブランドアイコン数:', brandIconCount);
 
             // カード情報更新ボタンを確認
             const updateBtn = page.locator('button:has-text("カード"), button:has-text("更新"), button:has-text("変更")');
             const updateCount = await updateBtn.count();
-            console.log('715: カード更新ボタン数:', updateCount);
+            console.log('pay-070: カード更新ボタン数:', updateCount);
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            console.log(`STEP_TIME 715: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'UC16', 'pay-070-s3', _testStart);
+            console.log(`STEP_TIME pay-070: ${Date.now() - stepStart}ms`);
         });
     });
 
     test('UC03: 請求情報メニュー・領収書ダウンロード確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('355: 契約済み環境で請求情報メニューが表示され領収書がダウンロードできること', async () => {
+        await test.step('pay-080: 契約済み環境で請求情報メニューが表示され領収書がダウンロードできること', async () => {
             stepStart = Date.now();
 
             // サイドメニューから請求情報を確認
@@ -367,7 +391,7 @@ test.describe('支払い・プラン管理', () => {
             // 「請求情報」メニューを確認
             const billingMenu = page.locator('a:has-text("請求"), a:has-text("billing"), .nav-link:has-text("請求")');
             const billingVisible = await billingMenu.first().isVisible({ timeout: 5000 }).catch(() => false);
-            console.log('355: 請求情報メニュー表示:', billingVisible);
+            console.log('pay-080: 請求情報メニュー表示:', billingVisible);
 
             if (billingVisible) {
                 await billingMenu.first().click();
@@ -380,22 +404,24 @@ test.describe('支払い・プラン管理', () => {
                 // 領収書ダウンロードボタンを確認
                 const receiptBtn = page.locator('button:has-text("領収書"), a:has-text("領収書"), button:has-text("ダウンロード")');
                 const receiptCount = await receiptBtn.count();
-                console.log('355: 領収書ダウンロードボタン数:', receiptCount);
+                console.log('pay-080: 領収書ダウンロードボタン数:', receiptCount);
             } else {
                 // 請求情報メニューがない場合（demo環境等）
-                console.log('355: 請求情報メニューが表示されない（未契約またはdemo環境の可能性）');
+                console.log('pay-080: 請求情報メニューが表示されない（未契約またはdemo環境の可能性）');
             }
 
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            console.log(`STEP_TIME 355: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'UC03', 'pay-080-s3', _testStart);
+            console.log(`STEP_TIME pay-080: ${Date.now() - stepStart}ms`);
         });
     });
 
     test('UC09: 決済後のユーザー数変更確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('573: 決済後のユーザー数変更が即時反映されること', async () => {
+        await test.step('pay-090: 決済後のユーザー数変更が即時反映されること', async () => {
             stepStart = Date.now();
 
             // 決済設定ページに遷移
@@ -405,17 +431,18 @@ test.describe('支払い・プラン管理', () => {
             // ユーザー数設定欄を確認
             const userCountInput = page.locator('input[name*="user"], input[type="number"]:near(:text("ユーザー")), :has-text("ユーザー数")');
             const userCountVisible = await userCountInput.first().isVisible({ timeout: 5000 }).catch(() => false);
-            console.log('573: ユーザー数設定欄表示:', userCountVisible);
+            console.log('pay-090: ユーザー数設定欄表示:', userCountVisible);
 
             // 現在の登録可能ユーザー数を確認
             const currentUserInfo = page.locator(':has-text("登録可能"), :has-text("ユーザー数"), :has-text("上限")');
             const userInfoCount = await currentUserInfo.count();
-            console.log('573: ユーザー数情報要素数:', userInfoCount);
+            console.log('pay-090: ユーザー数情報要素数:', userInfoCount);
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            console.log(`STEP_TIME 573: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'payment', 'UC09', 'pay-090-s3', _testStart);
+            console.log(`STEP_TIME pay-090: ${Date.now() - stepStart}ms`);
         });
     });
 

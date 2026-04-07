@@ -130,6 +130,20 @@ async function gotoNotificationEditNew(page, expectedText = '通知設定') {
 }
 
 /**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
+/**
  * SMTP設定を管理画面から自動設定するヘルパー
  * IMAP_USER/IMAP_PASS が設定されている場合のみ実行（同じ sakura.ne.jp アカウントを SMTP にも使用）
  * 設定ページ: /admin/admin_setting/edit/1

@@ -20,6 +20,20 @@ let tableId = null;
 // ヘルパー関数
 // ============================================================
 
+/**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
 /** Angular SPAの描画待機 */
 async function waitForAngular(page, timeout = 10000) {
     try {
@@ -327,15 +341,18 @@ test.describe('ワークフロー', () => {
 
     test('WF03: 11-1: ワークフロー有効化と保存', async ({ page }) => {
         test.setTimeout(90000);
+        const _testStart = Date.now();
         await navigateToWorkflowTab(page, tableId);
         const toggleExists = await page.evaluate(() => !!document.querySelector('#wf-toggle-workflow-input'));
         expect(toggleExists).toBeTruthy();
         await setWorkflowToggle(page, true);
         expect(await isWorkflowEnabled(page)).toBeTruthy();
         await expect(page.locator('dataset-workflow-options .child-container')).toBeVisible({ timeout: 5000 });
+        await stepScreenshot(page, 'workflow', 'WF03', 'wf-320-s1', _testStart);
         await saveTableSettings(page, tableId);
         await navigateToWorkflowTab(page, tableId);
         expect(await isWorkflowEnabled(page)).toBeTruthy();
+        await stepScreenshot(page, 'workflow', 'WF03', 'wf-320-s2', _testStart);
     });
 
     test('WF03: 21-1: 承認者はデータ編集可能設定の保存', async ({ page }) => {

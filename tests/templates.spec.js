@@ -8,6 +8,20 @@ let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
 let PASSWORD = process.env.TEST_PASSWORD;
 
+/**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -126,9 +140,10 @@ test.describe('テンプレート', () => {
 
     test('TM01: テンプレート機能の基本確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('TMPL-01: テンプレート一覧モーダルが正常に表示されること', async () => {
+        await test.step('tpl-010: テンプレート一覧モーダルが正常に表示されること', async () => {
             stepStart = Date.now();
 
             const opened = await openTemplateModal(page);
@@ -145,10 +160,10 @@ test.describe('テンプレート', () => {
             // エラーなし
             const errorMsg = await page.locator('.modal.show .alert-danger').count();
             expect(errorMsg).toBe(0);
-            console.log(`STEP_TIME TMPL-01: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'templates', 'TM01', 'tpl-010-s3', _testStart);
         });
 
-        await test.step('TMPL-02: テンプレートの詳細を確認できること', async () => {
+        await test.step('tpl-020: テンプレートの詳細を確認できること', async () => {
             stepStart = Date.now();
 
             const opened = await openTemplateModal(page);
@@ -178,10 +193,10 @@ test.describe('テンプレート', () => {
             // 「戻る」ボタンが存在すること
             const backBtn = await page.locator('.modal.show button').filter({ hasText: '戻る' }).count();
             expect(backBtn).toBeGreaterThan(0);
-            console.log(`STEP_TIME TMPL-02: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'templates', 'TM01', 'tpl-020-s3', _testStart);
         });
 
-        await test.step('TMPL-03: テンプレートインストールモーダルの「戻る」で一覧に戻れること', async () => {
+        await test.step('tpl-030: テンプレートインストールモーダルの「戻る」で一覧に戻れること', async () => {
             stepStart = Date.now();
 
             const opened = await openTemplateModal(page);
@@ -204,10 +219,10 @@ test.describe('テンプレート', () => {
             // テンプレート一覧に戻ること
             const templateIconsAfter = await page.locator('.modal.show .template_icon').count();
             expect(templateIconsAfter).toBeGreaterThan(0);
-            console.log(`STEP_TIME TMPL-03: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'templates', 'TM01', 'tpl-030-s3', _testStart);
         });
 
-        await test.step('TMPL-04: テンプレートをインストールできること', async () => {
+        await test.step('tpl-040: テンプレートをインストールできること', async () => {
             stepStart = Date.now();
 
             const opened = await openTemplateModal(page);
@@ -249,10 +264,10 @@ test.describe('テンプレート', () => {
             // （モーダルが閉じている or まだ表示中でもエラーなし）
             const currentUrl = page.url();
             expect(currentUrl).toContain('/admin/');
-            console.log(`STEP_TIME TMPL-04: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'templates', 'TM01', 'tpl-040-s3', _testStart);
         });
 
-        await test.step('TMPL-05: テンプレートモーダルを閉じられること', async () => {
+        await test.step('tpl-050: テンプレートモーダルを閉じられること', async () => {
             stepStart = Date.now();
 
             const opened = await openTemplateModal(page);
@@ -277,10 +292,10 @@ test.describe('テンプレート', () => {
                 const modalAfter = await page.locator('.modal.show').count();
                 expect(modalAfter).toBe(0);
             }
-            console.log(`STEP_TIME TMPL-05: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'templates', 'TM01', 'tpl-050-s3', _testStart);
         });
 
-        await test.step('TMPL-06: テンプレート一覧のテンプレート名が表示されていること', async () => {
+        await test.step('tpl-060: テンプレート一覧のテンプレート名が表示されていること', async () => {
             stepStart = Date.now();
 
             const opened = await openTemplateModal(page);
@@ -298,7 +313,7 @@ test.describe('テンプレート', () => {
             const knownTemplates = ['採用管理', '在庫管理', 'タスク管理', 'ファイル管理', '顧客管理'];
             const hasKnownTemplate = templateNames.some(name => knownTemplates.includes(name));
             expect(hasKnownTemplate).toBeTruthy();
-            console.log(`STEP_TIME TMPL-06: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'templates', 'TM01', 'tpl-060-s3', _testStart);
         });
     });
 });

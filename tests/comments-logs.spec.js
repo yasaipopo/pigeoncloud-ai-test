@@ -11,6 +11,20 @@ let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
 let PASSWORD = process.env.TEST_PASSWORD;
 
+/**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -386,8 +400,8 @@ test.describe('ログ管理', () => {
         await closeTemplateModal(page);
 
         // ----- step: 13-1 各ユーザーの操作ログが確認できること -----
-        await test.step('13-1: 各ユーザーの操作ログが確認できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 13-1`);
+        await test.step('cl-010: 各ユーザーの操作ログが確認できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-010`);
 
             await page.goto(BASE_URL + '/admin/logs', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
@@ -403,11 +417,12 @@ test.describe('ログ管理', () => {
             expect(pageText).toContain('アクション');
             expect(pageText).toContain('テーブル');
             expect(pageText).toContain('日時');
+            await stepScreenshot(page, 'comments-logs', 'CL01', 'cl-010-s4', _testStart);
         });
 
         // ----- step: 13-2 CSV UP/DL履歴が確認できること -----
-        await test.step('13-2: CSV UP/DL履歴が確認できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 13-2`);
+        await test.step('cl-020: CSV UP/DL履歴が確認できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-020`);
 
             await page.goto(BASE_URL + '/admin/csv', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
@@ -422,11 +437,12 @@ test.describe('ログ管理', () => {
             expect(pageText).toContain('ファイル名');
             expect(pageText).toContain('タイプ');
             expect(pageText).toContain('処理');
+            await stepScreenshot(page, 'comments-logs', 'CL01', 'cl-020-s4', _testStart);
         });
 
         // ----- step: 196 リクエストログで処理ステータスが確認できること -----
-        await test.step('196: リクエストログで処理ステータスが確認できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 196`);
+        await test.step('cl-070: リクエストログで処理ステータスが確認できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-070`);
 
             await page.goto(BASE_URL + '/admin/job_logs', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
@@ -443,6 +459,7 @@ test.describe('ログ管理', () => {
             expect(pageText).toContain('リクエスト');
             expect(pageText).toContain('ステータス');
             expect(pageText).toContain('処理結果');
+            await stepScreenshot(page, 'comments-logs', 'CL01', 'cl-070-s4', _testStart);
         });
     });
 
@@ -458,8 +475,8 @@ test.describe('ログ管理', () => {
         await closeTemplateModal(page);
 
         // ----- step: 69-1 1ユーザーへのメンション付きコメントが送信できること -----
-        await test.step('69-1: 1ユーザーへのメンション付きコメントが送信できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-1`);
+        await test.step('cl-030: 1ユーザーへのメンション付きコメントが送信できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-030`);
 
             await tryCreateTestUser(page);
 
@@ -496,11 +513,12 @@ test.describe('ログ管理', () => {
             const commentBody = page.locator('.comment-body').last();
             await expect(commentBody).toBeVisible();
             await expect(commentBody).toContainText('テストコメント');
+            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-030-s4', _testStart);
         });
 
         // ----- step: 69-2 複数ユーザーへのメンション付きコメントが送信できること -----
-        await test.step('69-2: 複数ユーザーへのメンション付きコメントが送信できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-2`);
+        await test.step('cl-040: 複数ユーザーへのメンション付きコメントが送信できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-040`);
 
             await page.goto(BASE_URL + recordViewUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
@@ -530,11 +548,12 @@ test.describe('ログ管理', () => {
             expect(asideContent).toContain('複数メンションテスト');
             const commentBody = page.locator('.comment-body').filter({ hasText: '複数メンションテスト' }).first();
             await expect(commentBody).toBeVisible();
+            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-040-s3', _testStart);
         });
 
         // ----- step: 69-3 存在しないユーザーでメンションしてもコメントが保存されること -----
-        await test.step('69-3: 存在しないユーザーでメンションしてもコメントが保存されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-3`);
+        await test.step('cl-050: 存在しないユーザーでメンションしてもコメントが保存されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-050`);
 
             await page.goto(BASE_URL + recordViewUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
@@ -563,11 +582,12 @@ test.describe('ログ管理', () => {
 
             const commentBody = page.locator('.comment-body').filter({ hasText: '存在しないユーザーテスト' }).first();
             await expect(commentBody).toBeVisible();
+            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-050-s3', _testStart);
         });
 
         // ----- step: 69-4 組織へのメンション付きコメントが送信できること -----
-        await test.step('69-4: 組織へのメンション付きコメントが送信できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 69-4`);
+        await test.step('cl-060: 組織へのメンション付きコメントが送信できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-060`);
 
             await page.goto(BASE_URL + recordViewUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await page.waitForLoadState('domcontentloaded');
@@ -608,11 +628,12 @@ test.describe('ログ管理', () => {
             expect(asideContent).toContain('組織メンションテスト');
             const commentBody = page.locator('.comment-body').filter({ hasText: '組織メンションテスト' }).first();
             await expect(commentBody).toBeVisible();
+            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-060-s3', _testStart);
         });
 
         // ----- step: 242 ログとコメントをまとめて表示が有効の時にメンション機能が動作すること -----
-        await test.step('242: ログとコメントをまとめて表示が有効の時にメンション機能が動作すること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 242`);
+        await test.step('cl-080: ログとコメントをまとめて表示が有効の時にメンション機能が動作すること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-080`);
 
             const match = tableUrl.match(/dataset__(\d+)/);
             const tableId = match ? match[1] : '7';
@@ -690,6 +711,7 @@ test.describe('ログ管理', () => {
 
             const commentBody = page.locator('.comment-body').last();
             await expect(commentBody).toBeVisible();
+            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-080-s4', _testStart);
         });
     });
 
@@ -708,8 +730,8 @@ test.describe('ログ管理', () => {
         const _tableUrl = tableUrl;
 
         // ----- step: 297 複数値を持つ項目で絞り込み（OR選択）が正常に動作すること -----
-        await test.step('297: 複数値を持つ項目で絞り込み（OR選択）が正常に動作すること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 297`);
+        await test.step('cl-090: 複数値を持つ項目で絞り込み（OR選択）が正常に動作すること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-090`);
 
             await page.goto(BASE_URL + _tableUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
@@ -730,11 +752,12 @@ test.describe('ログ管理', () => {
 
             const afterText = await page.innerText('body');
             expect(afterText).not.toContain('Internal Server Error');
+            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-090-s3', _testStart);
         });
 
         // ----- step: 356 通知をクリックした際にコメントが来たレコード詳細画面に遷移すること -----
-        await test.step('356: 通知をクリックした際にコメントが来たレコード詳細画面に遷移すること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 356`);
+        await test.step('cl-100: 通知をクリックした際にコメントが来たレコード詳細画面に遷移すること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-100`);
 
             await page.goto(BASE_URL + '/admin/notifications', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
@@ -760,11 +783,12 @@ test.describe('ログ管理', () => {
                 const afterText = await page.innerText('body');
                 expect(afterText).not.toContain('Internal Server Error');
             }
+            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-100-s3', _testStart);
         });
 
         // ----- step: 426 年度絞り込みの検索結果コメントが正しく表示されること -----
-        await test.step('426: 年度絞り込みの検索結果コメントが「今年度」「昨年度」と正しく表示されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 426`);
+        await test.step('cl-110: 年度絞り込みの検索結果コメントが「今年度」「昨年度」と正しく表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-110`);
 
             const tableId = await getAllTypeTableId(page);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -786,11 +810,12 @@ test.describe('ログ管理', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-110-s3', _testStart);
         });
 
         // ----- step: 472 コメント入力欄で改行が正しく反映されること -----
-        await test.step('472: コメント入力欄で改行が正しく反映されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 472`);
+        await test.step('cl-120: コメント入力欄で改行が正しく反映されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-120`);
 
             const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
             await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -826,11 +851,12 @@ test.describe('ログ管理', () => {
                     console.log('472: コメント表示の改行確認:', hasLineBreak);
                 }
             }
+            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-120-s3', _testStart);
         });
 
         // ----- step: 597 ユーザーを無効化してもコメント履歴にユーザー名が消えないこと -----
-        await test.step('597: ユーザーを無効化してもコメント履歴にユーザー名が消えないこと', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 597`);
+        await test.step('cl-130: ユーザーを無効化してもコメント履歴にユーザー名が消えないこと', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-130`);
 
             const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
             await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -854,11 +880,12 @@ test.describe('ログ管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
+            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-130-s3', _testStart);
         });
 
         // ----- step: 570 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと -----
-        await test.step('570: 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 570`);
+        await test.step('cl-160: 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-160`);
 
             const recordUrl = await getFirstRecordViewUrl(page, _tableUrl);
             await page.goto(BASE_URL + recordUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -892,11 +919,12 @@ test.describe('ログ管理', () => {
 
             const asideText = await page.locator('aside').innerText().catch(() => '');
             expect(asideText).toContain('組織メンションテスト570');
+            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-160-s3', _testStart);
         });
 
         // ----- step: 629 コメントの改行がメール通知で{line_break}にならず正常に改行されること -----
-        await test.step('629: コメントの改行がメール通知で{line_break}にならず正常に改行されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 629`);
+        await test.step('cl-140: コメントの改行がメール通知で{line_break}にならず正常に改行されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-140`);
 
             const tableId = await getAllTypeTableId(page);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -931,11 +959,12 @@ test.describe('ログ管理', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-140-s3', _testStart);
         });
 
         // ----- step: 653 組織メンションのキャンセル後にメッセージが出続けないこと -----
-        await test.step('653: 組織メンションのキャンセル後にメッセージが出続けないこと', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 653`);
+        await test.step('cl-150: 組織メンションのキャンセル後にメッセージが出続けないこと', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s cl-150`);
 
             const tableId = await getAllTypeTableId(page);
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
@@ -976,6 +1005,7 @@ test.describe('ログ管理', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-150-s3', _testStart);
         });
     });
 

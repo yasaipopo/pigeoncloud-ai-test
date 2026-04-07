@@ -19,21 +19,26 @@ cases:
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    # 前提: ALLテストテーブル（tableId）のレコードに事前にコメントを1件投稿しておく
-    # 1. beforeAll: create-all-type-table API → create-all-type-data API (count:3, pattern:'fixed')
-    # 2. コメント投稿: POST /api/admin/dataset__${tableId}/record/${recordId}/comment
-    #    body: { comment: "テスト用コメント" }
-    # 3. /admin/dataset__${tableId} に遷移
-    # 4. waitForSelector('table.pc-list-view', { timeout: 30000 })
-    # 5. waitForSelector('tr[mat-row]', { timeout: 30000 })
-    # 確認:
-    #   - page.locator('[class*="comment"], .comment-count, .fa-comment, [title*="コメント"]').first() が visible であること
-    # 6. コメントアイコンにマウスオーバー: commentIcon.hover()
-    # 7. waitForTimeout(800)  ← tooltip表示アニメーション待ち
-    # 確認:
-    #   - tooltip/popover に件数（例: "1件"）と最新投稿時間が表示されること
-    #   - page.locator('[class*="tooltip"], [class*="popover"], [class*="balloon"]').first() が visible かつ
-    #     textContent に数字と時刻文字列（例: "2026-03"等）が含まれること
+    [0:00] rec-010 ── レコード一覧にコメントアイコンが表示されること
+    1. ALLテストテーブル一覧に遷移
+    2. ✅ テーブルにレコード行が表示されること
+    3. ✅ コメントアイコンが表示されること
+
+    rec-020 ── チェックボックスクリックで一括削除ボタンが表示されること
+    4. レコード行のチェックボックスをクリック
+    5. ✅ 一括削除ボタンが表示されること
+
+    rec-070 ── スクロールバーが操作できること
+    6. レコード一覧でスクロールバーを確認
+    7. ✅ スクロール操作がエラーなく動作すること
+
+    rec-110 ── 文章(複数行)フィールドの編集でフリーズしないこと
+    8. レコード詳細画面で文章フィールドを編集
+    9. ✅ エラーなく編集できること
+
+    rec-120 ── 数値(小数)の入力値が正しく表示されること
+    10. レコード詳細画面で数値フィールドを確認
+    11. ✅ 値が正しく表示されること
   old_case_no: 143-01
 - case_no: rec-020
   sheet: A
@@ -69,15 +74,32 @@ cases:
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    # 1. /admin/dataset__${tableId} に遷移
-    # 2. waitForSelector('tr[mat-row]', { timeout: 30000 })
-    # 3. ハンバーガーメニューを開く: page.locator('button:has(.fa-bars)').first().click()
-    # 4. waitForSelector('.dropdown-menu.show', { timeout: 10000 })
-    # 確認:
-    #   - page.locator('.dropdown-menu.show .dropdown-item:has-text("一括編集")').first() が visible
-    # 5. 「一括編集」をクリック: page.locator('.dropdown-menu.show .dropdown-item:has-text("一括編集")').first().click()
-    # 6. waitForSelector('.modal.show', { timeout: 15000 })
-    # 確認:
+    [0:00] rec-030 ── 一括編集メニューが表示され実行できること
+    1. ALLテストテーブル一覧に遷移
+    2. ハンバーガーメニューから「一括編集」をクリック
+    3. ✅ 一括編集モーダルが表示されること
+
+    rec-040 ── 権限がないデータの一括編集制限
+    4. 権限なしデータを含む状態で一括編集を試行
+    5. ✅ エラーなく処理されること
+
+    rec-050 ── ロック中データの扱い説明が表示されること
+    6. 一括編集モーダルを確認
+    7. ✅ ロック関連の説明が表示されること
+
+    rec-060 ── フィルタ適用中に一括編集がかかること
+    8. フィルタを適用して一括編集を実行
+    9. ✅ フィルタ対象のみ更新されること
+
+    rec-130 ── 子テーブルの複製ボタンが存在すること
+    10. レコード詳細画面の子テーブルを確認
+    11. ✅ 複製ボタンが存在すること
+
+    rec-140 ── 子テーブル一覧で項目値が表示されること
+    12. 子テーブル一覧を確認
+    13. ✅ 項目値が表示されること
+
+    # 旧コメント（セレクタ情報）:
     #   - expect(page.locator('.modal.show .modal-title')).toContainText('一括編集')
     #   - 編集フィールド（select/input）が表示されること
     # 7. 編集するフィールドを選択（例: テキストフィールド）
@@ -144,22 +166,17 @@ cases:
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    # 前提: ALLテスト_選択肢マスタ（simpleTableId）は ALLテストテーブルのルックアップ参照先
-    # 1. /admin/dataset__${simpleTableId} に遷移（参照先テーブル）
-    # 2. waitForSelector('.navbar', { timeout: 30000 })
-    # 3. テーブル設定ボタンをクリック: page.locator('#table-setting-btn').click()
-    # 4. waitForSelector('.dropdown-menu.show', { timeout: 10000 })
-    # 5. 「テーブルを削除」メニューをクリック:
-    #    page.locator('.dropdown-menu.show a:has-text("テーブルを削除"), .dropdown-menu.show button:has-text("テーブルを削除")').click()
-    # 6. 確認ダイアログが表示されること:
-    #    - window.confirm ダイアログ or モーダルダイアログを待機
-    #    - page.on('dialog', dialog => dialog.accept()) でダイアログを承認
-    # 確認:
-    #   - エラーメッセージ「参照されているため削除できません」または類似テキストが表示されること:
-    #     expect(page.locator('.alert, .toast, [class*="error"], [class*="danger"]').filter({
-    #       hasText: '参照'
-    #     })).toBeVisible({ timeout: 15000 })
-    #   - テーブル一覧ページに遷移していないこと（削除が失敗していること）
+    [0:00] rec-080 ── 参照中テーブルの削除でエラーが表示されること
+    1. 参照先テーブルの設定から「テーブルを削除」を試行
+    2. ✅ 「参照されているため削除できません」エラーが表示されること
+
+    rec-090 ── 関連レコード一覧の項目名未入力でエラーが発生すること
+    3. 「関連レコード一覧」フィールドを追加、項目名を空で保存試行
+    4. ✅ 必須項目未入力のエラーが表示されること
+
+    rec-100 ── 関連レコード一覧の対象テーブル未入力でエラーが発生すること
+    5. 対象テーブルを空で保存試行
+    6. ✅ エラーが表示されること
   old_case_no: 35-1
 - case_no: rec-090
   sheet: B
@@ -242,23 +259,14 @@ cases:
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    # 1. /admin/dataset__${tableId} に遷移（テスト用レコード数件あること）
-    # 2. waitForSelector('tr[mat-row]', { timeout: 30000 })
-    # 3. ヘッダーの全選択チェックボックスをクリック:
-    #    page.locator('tr[mat-header-row] input[type="checkbox"]').click()
-    # 確認:
-    #   - 全行のチェックボックスが checked になること:
-    #     expect(page.locator('tr[mat-row] input[type="checkbox"]').first()).toBeChecked()
-    # 4. 「一括削除」ボタンをクリック: page.locator('button.btn-danger:has-text("一括削除")').click()
-    # 5. 確認モーダルが表示されること: waitForSelector('.modal.show', { timeout: 10000 })
-    # 6. 削除実行ボタンをクリック: page.locator('.modal.show button.btn-danger, .modal.show button.btn-primary').click()
-    # 7. 処理完了を待機: waitForSelector('.modal.show', { state: 'hidden', timeout: 30000 })
-    # 確認 (削除後):
-    #   - ヘッダーの全選択チェックボックスが unchecked になること:
-    #     expect(page.locator('tr[mat-header-row] input[type="checkbox"]')).not.toBeChecked()
-    # 8. 同様に一括編集: ハンバーガーメニュー → 「一括編集」 → 実行 → 処理後
-    # 確認 (更新後):
-    #   - ヘッダーの全選択チェックボックスが unchecked になること
+    [0:00] rec-150 ── 一括削除後に全選択チェックが外れること
+    1. テーブル一覧で全選択チェックをクリック
+    2. 一括削除を実行
+    3. ✅ 処理後に全選択チェックが外れること
+
+    rec-160 ── レコードコピーボタンで確認ダイアログが表示されること
+    4. レコードのコピーボタンを押す
+    5. ✅ 確認ダイアログが表示されること
   old_case_no: '442'
 - case_no: rec-160
   sheet: B
@@ -289,24 +297,12 @@ cases:
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    # 1. /admin/dataset__${tableId} に遷移（複数ページのレコードがあることが望ましい）
-    # 2. waitForSelector('tr[mat-row]', { timeout: 30000 })
-    # 3. ヘッダーの全選択チェックボックスをクリック:
-    #    page.locator('tr[mat-header-row] input[type="checkbox"]').click()
-    # 確認:
-    #   - 全ページ選択のメッセージが表示されること（例: "全データを選択"リンクまたはバナー）
-    # 4. 「一括削除」ボタンをクリック: page.locator('button.btn-danger:has-text("一括削除")').click()
-    # 5. waitForSelector('.modal.show', { timeout: 10000 })
-    # 確認 (削除モーダル):
-    #   - モーダル内に件数が表示されること（数字が含まれること）:
-    #     const modalText = await page.locator('.modal.show .modal-body').textContent()
-    #     expect(modalText).toMatch(/\d+/)
-    # 6. モーダルを閉じる: page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').click()
-    # 7. ハンバーガーメニュー → 「一括編集」をクリック
-    # 8. waitForSelector('.modal.show', { timeout: 10000 })
-    # 確認 (一括編集モーダル):
-    #   - モーダル内にIDリスト（最大10件）と「など○○件」の文言が表示されること:
-    #     expect(page.locator('.modal.show .modal-body').filter({ hasText: '件' })).toBeVisible()
+    [0:00] rec-170 ── 全選択時に全ページのデータが選択対象になること
+    1. テーブル一覧で全選択チェックをクリック
+    2. 一括削除ボタンをクリック
+    3. ✅ モーダルに件数が表示されること
+    4. 一括編集ボタンをクリック
+    5. ✅ モーダルにIDリストと件数が表示されること
   old_case_no: '526'
 - case_no: rec-180
   sheet: B
@@ -338,9 +334,9 @@ cases:
     # 6. モーダルを閉じる
     # 7. ハンバーガーメニュー → 「一括編集」をクリック
     # 8. waitForSelector('.modal.show', { timeout: 10000 })
-    # 確認 (一括編集モーダル):
-    #   - 赤文字の警告テキストが表示されること:
-    #     expect(page.locator('.modal.show .text-danger, .modal.show .alert-danger').first()).toBeVisible()
+    [0:00] rec-180 ── 全データ選択時に赤文字注意書きが表示されること
+    1. 全選択チェックをクリックし一括削除ボタンを押す
+    2. ✅ モーダルに赤文字で「全データ」警告が表示されること
   old_case_no: '617'
 - case_no: rec-190
   sheet: B
@@ -359,23 +355,11 @@ cases:
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    # 1. テスト用レコードを複数件作成（create-all-type-data, count:5, pattern:'fixed'）
-    # 2. /admin/dataset__${tableId} に遷移
-    # 3. waitForSelector('tr[mat-row]', { timeout: 30000 })
-    # 4. フィルタを適用（カラム検索でテキストフィールドを絞り込む）:
-    #    - ヘッダーの検索アイコンをクリック（.fa-search）
-    #    - 検索値を入力して検索実行
-    # 5. フィルタ後の件数を記録: const filteredCount = await page.locator('tr[mat-row]').count()
-    # 6. ヘッダーの全選択チェックボックスをクリック
-    # 7. 「一括削除」ボタンをクリック: page.locator('button.btn-danger:has-text("一括削除")').click()
-    # 8. waitForSelector('.modal.show', { timeout: 10000 })
-    # 9. 削除実行ボタンをクリック: page.locator('.modal.show button.btn-danger').click()
-    # 10. 処理完了まで待機（「処理待ち」状態が解消されるまで）:
-    #     waitForSelector('.modal.show', { state: 'hidden', timeout: 60000 })
-    # 確認:
-    #   - 処理が「処理待ち」で停止しないこと（タイムアウト内に完了）
-    #   - フィルタ未適用状態に戻したとき、削除されたのはフィルタ対象のレコードのみであること
-    #   - フィルタ外のレコードが残っていること
+    [0:00] rec-190 ── フィルタ適用中の全選択一括削除
+    1. テーブル一覧でフィルタを適用
+    2. 全選択→一括削除を実行
+    3. ✅ 処理が正常に完了すること
+    4. ✅ フィルタ対象のみ削除されること
   old_case_no: '704'
 - case_no: rec-200
   sheet: B

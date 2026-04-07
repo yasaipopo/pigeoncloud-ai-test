@@ -8,6 +8,20 @@ let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
 let PASSWORD = process.env.TEST_PASSWORD;
 
+/**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -379,8 +393,9 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
     // SS03: 共通設定（テーブル定義一覧）
     // =========================================================================
     test('SS03: 共通設定（テーブル定義一覧）', async ({ page }) => {
+        const _testStart = Date.now();
 
-        await test.step('10-1: テーブルの順番入れ替えがエラーなく行えること', async () => {
+        await test.step('sys-010: テーブルの順番入れ替えがエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
             // テーブル管理 (/admin/dataset) でドラッグアンドドロップによる順番変更
             await page.goto(BASE_URL + '/admin/dataset', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
@@ -432,9 +447,10 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             } else {
                 await expect(page.locator('header.app-header')).toBeVisible();
             }
+            await stepScreenshot(page, 'system-settings', 'SS03', 'sys-010-s1', _testStart);
         });
 
-        await test.step('10-2: テーブル詳細情報の表示がエラーなく行えること', async () => {
+        await test.step('sys-020: テーブル詳細情報の表示がエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
 
             // テーブル管理ページへ
@@ -459,6 +475,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             const tableList = page.locator('table tbody tr, .dataset-list-item, [class*="table-row"], tr[ng-reflect], li[class*="list-group-item"]');
             const count = await tableList.count();
             console.log('テーブル一覧件数: ' + count);
+            await stepScreenshot(page, 'system-settings', 'SS03', 'sys-020-s1', _testStart);
         });
 
     });
@@ -536,8 +553,9 @@ test.describe('共通設定・システム設定', () => {
     // SS03: 共通設定（テーブル定義変更・削除）
     // =========================================================================
     test('SS03: 共通設定（テーブル定義変更・削除）', async ({ page }) => {
+        const _testStart = Date.now();
 
-        await test.step('10-3: テーブル定義の変更がエラーなく行えること', async () => {
+        await test.step('sys-030: テーブル定義の変更がエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
 
             // テーブル設定ページへ（セッション切れ対策：loginリダイレクト時は再ログイン）
@@ -556,9 +574,10 @@ test.describe('共通設定・システム設定', () => {
 
             // テーブルのヘッダー行が表示されていること（IDカラムが存在すること）
             await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
+            await stepScreenshot(page, 'system-settings', 'SS03', 'sys-030-s1', _testStart);
         });
 
-        await test.step('10-4: テーブルの削除がエラーなく行えること', async () => {
+        await test.step('sys-040: テーブルの削除がエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
 
             // 削除用の一時テーブルを作成する

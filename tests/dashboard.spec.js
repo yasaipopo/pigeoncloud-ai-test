@@ -7,6 +7,25 @@ let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
 let PASSWORD = process.env.TEST_PASSWORD;
 
+/**
+ * ステップスクリーンショット撮影
+ * @param {import('@playwright/test').Page} page
+ * @param {string} spec - spec名（例: 'dashboard'）
+ * @param {string} movie - movie ID（例: 'DB01'）
+ * @param {string} stepId - ステップID（例: 'dash-010-s2'）
+ * @param {number} testStartTime - テスト開始時刻（Date.now()）
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -101,70 +120,6 @@ async function closeTutorialModal(page) {
 }
 
 /**
- * ダッシュボードタブを作成する共通関数
- * @returns {Promise<string>} 作成したダッシュボード名
- */
-async function createDashboardTab(page, name) {
-    const dashTablist = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
-    const tabsBefore = await dashTablist.locator('[role=tab]').count();
-    await dashTablist.locator('button.dashboard-tab-add-btn').click({ force: true }).catch(async () => {
-        await dashTablist.locator('button').first().click({ force: true }).catch(() => {});
-    });
-
-    // ダッシュボード作成モーダルが開くまでポーリング
-    await page.waitForFunction(() => {
-        const inputs = document.querySelectorAll('input#name');
-        for (const inp of inputs) {
-            const r = inp.getBoundingClientRect();
-            if (r.width > 0 && r.height > 0) return true;
-        }
-        return false;
-    }, null, { timeout: 10000 });
-
-    // ダッシュボード名をAngularモデルに書き込む（Native Input Value Setter）
-    await page.evaluate((n) => {
-        const inputs = document.querySelectorAll('input#name');
-        for (const input of inputs) {
-            const r = input.getBoundingClientRect();
-            if (r.width > 0 && r.height > 0) {
-                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-                nativeInputValueSetter.call(input, n);
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-                return;
-            }
-        }
-    }, name);
-    await page.waitForTimeout(300);
-
-    // 送信ボタンをクリック（表示中のbtn-primary ladda-buttonのみ対象）
-    await page.evaluate(() => {
-        const btns = document.querySelectorAll('button.btn-primary.ladda-button, button.btn-primary.btn-ladda');
-        for (const btn of btns) {
-            const r = btn.getBoundingClientRect();
-            if (r.width > 0 && r.height > 0 && btn.textContent.trim().includes('送信')) {
-                btn.click();
-                return;
-            }
-        }
-    });
-
-    // タブが増えるのを待つ
-    await page.waitForFunction(
-        (beforeCount) => {
-            const tablist = document.querySelector('[role=tablist]');
-            if (!tablist) return false;
-            return tablist.querySelectorAll('[role=tab]').length > beforeCount;
-        },
-        tabsBefore,
-        { timeout: 5000 }
-    ).catch(() => {});
-    await page.waitForTimeout(1500);
-
-    return name;
-}
-
-/**
  * ダッシュボードタブの▼メニューを開く
  */
 async function openTabMenu(page, tabLocator) {
@@ -208,10 +163,10 @@ test.describe('ダッシュボード', () => {
     });
 
     // =========================================================================
-    // DB01: ダッシュボード基本操作（DB-01〜DB-06）→ 1動画
+    // DB01: ダッシュボード基本操作（dash-010〜dash-060）→ 1動画
     // =========================================================================
     test('DB01: ダッシュボード基本操作', async ({ page }) => {
-        test.setTimeout(120000); // 10分
+        test.setTimeout(120000);
         const _testStart = Date.now();
         page.setDefaultTimeout(60000);
 
@@ -228,31 +183,30 @@ test.describe('ダッシュボード', () => {
             console.log('[DB01] ALLテストテーブルが見つかりません（DB-03で個別にスキップされます）');
         }
 
-        // ----- step: DB-01 ダッシュボード画面表示 -----
-        await test.step('DB-01: ダッシュボード画面が正常に表示されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-01`);
+        // ----- step: dash-010 ダッシュボード画面表示 -----
+        await test.step('dash-010: ダッシュボード画面が正常に表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s dash-010`);
 
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
-            // ナビゲーションバーが表示されること
+            // 2. ✅ .navbar が表示されていること
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
-            // ダッシュボードタブリストが存在すること
+            // 3. ✅ HOMEタブが表示されていること
             const tablist = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
             await expect(tablist).toBeVisible();
-
-            // HOMEタブが存在すること（ダッシュボードtablist内のみ）
             const homeTab = tablist.locator('[role=tab]').filter({ hasText: 'HOME' });
             await expect(homeTab).toBeVisible();
 
-            // URLが /admin/dashboard であること
+            // 4. ✅ URLが /admin/dashboard を含むこと
             expect(page.url()).toContain('/admin/dashboard');
+            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-010-s4', _testStart);
         });
 
-        // ----- step: DB-02 タブ作成 -----
-        await test.step('DB-02: 新しいダッシュボードタブを作成できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-02`);
+        // ----- step: dash-020 タブ作成 -----
+        await test.step('dash-020: 新しいダッシュボードタブを作成できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s dash-020`);
 
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
@@ -260,7 +214,7 @@ test.describe('ダッシュボード', () => {
             // チュートリアルモーダルを閉じる
             await closeTutorialModal(page);
 
-            // 「+」ボタン（dashboard-tab-add-btn）をクリック
+            // 5. 「+」ボタンをクリック
             const dashTablistDB02 = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
             const tabsBeforeDB02 = await dashTablistDB02.locator('[role=tab]').count();
             await dashTablistDB02.locator('button.dashboard-tab-add-btn').click({ force: true }).catch(async () => {
@@ -268,7 +222,7 @@ test.describe('ダッシュボード', () => {
             });
             await waitForAngular(page);
 
-            // ダッシュボード作成モーダルが開くまで待機（input#nameが表示されるまでポーリング）
+            // 6. ダッシュボード作成モーダルで名前を入力して送信
             await page.waitForFunction(() => {
                 const inputs = document.querySelectorAll('input#name');
                 for (const inp of inputs) {
@@ -278,7 +232,6 @@ test.describe('ダッシュボード', () => {
                 return false;
             }, null, { timeout: 8000 });
 
-            // ダッシュボード名をAngularモデルに直接書き込む
             const db02Name = `テストDB02_${Date.now()}`;
             await page.evaluate((name) => {
                 const inputs = document.querySelectorAll('input#name');
@@ -295,7 +248,6 @@ test.describe('ダッシュボード', () => {
             }, db02Name);
             await page.waitForTimeout(300);
 
-            // 送信ボタンをクリック（表示中のbtn-primary ladda-buttonのみ対象）
             await page.evaluate(() => {
                 const btns = document.querySelectorAll('button.btn-primary.ladda-button');
                 for (const btn of btns) {
@@ -307,7 +259,7 @@ test.describe('ダッシュボード', () => {
                 }
             });
 
-            // タブが増えるのを待つ（ダッシュボードtablist内のタブ数で判定）
+            // タブが増えるのを待つ
             await page.waitForFunction(
                 (beforeCount) => {
                     const tablist = document.querySelector('[role=tablist].nav.nav-tabs');
@@ -319,37 +271,34 @@ test.describe('ダッシュボード', () => {
             ).catch(() => {});
             await page.waitForTimeout(1500);
 
-            // 新しいタブが追加されることを確認
+            // 7. ✅ 新しいタブがタブリストに表示されること
             const dashTablist = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
             const newTab = dashTablist.locator('[role=tab]').filter({ hasText: db02Name });
             const allTabTexts = await dashTablist.locator('[role=tab]').allTextContents().catch(() => []);
-            console.log('DB-02: 全タブ:', allTabTexts, '検索名:', db02Name);
+            console.log('dash-020: 全タブ:', allTabTexts, '検索名:', db02Name);
             await expect(newTab).toBeVisible();
+            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-020-s7', _testStart);
 
-            // DB-03〜DB-05で使うためにタブ名を保存
             _createdDashboardName = db02Name;
         });
 
-        // ----- step: DB-03 ビューコンテンツ追加 -----
-        await test.step('DB-03: ダッシュボードにビューコンテンツを追加できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-03`);
+        // ----- step: dash-030 ビューコンテンツ追加 -----
+        await test.step('dash-030: ダッシュボードにビューコンテンツを追加できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s dash-030`);
 
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
-            // DB-02で作成したダッシュボードタブを選択
-            expect(_createdDashboardName, 'DB-02でダッシュボードが作成されていること').toBeTruthy();
+            expect(_createdDashboardName, 'dash-020でダッシュボードが作成されていること').toBeTruthy();
 
-            // ダッシュボードtablist内のタブのみを対象にする
+            // 8. 作成したタブを選択
             const dashTablistDB03 = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
             const targetTab = dashTablistDB03.locator('[role=tab]').filter({ hasText: _createdDashboardName });
             await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible();
-
-            // タブのテキスト部分をクリックして選択
             await targetTab.first().click();
             await waitForAngular(page);
 
-            // タブパネル内の「ウィジェットを追加」ボタンをクリック
+            // 9. 「ウィジェットを追加」ボタンをクリック
             const targetTabEl = dashTablistDB03.locator('[role=tab]').filter({ hasText: _createdDashboardName }).first();
             const tabpanelId = await targetTabEl.getAttribute('aria-controls').catch(() => null);
 
@@ -362,7 +311,7 @@ test.describe('ダッシュボード', () => {
             await expect(addWidgetBtn).toBeVisible();
             await addWidgetBtn.click();
 
-            // ビューダイアログが開くのを待つ
+            // 10. ビューダイアログでALLテストテーブルを選択
             await page.waitForTimeout(1000);
             const dialogVisible = await page.waitForFunction(() => {
                 const dialogs = document.querySelectorAll('dialog');
@@ -379,12 +328,10 @@ test.describe('ダッシュボード', () => {
             }, null, { timeout: 8000 }).then(() => true).catch(() => false);
 
             if (!dialogVisible) {
-                throw new Error('DB-03: ビューダイアログが開きませんでした。UIを確認してください。');
+                throw new Error('dash-030: ビューダイアログが開きませんでした。UIを確認してください。');
             }
 
-            // dialog要素またはBootstrapモーダル内のcomboboxでALLテストテーブルを選択
             const modalContainer = page.locator('dialog, .modal.show').filter({ hasText: 'ビュー' }).first();
-
             const tableCombobox = modalContainer.locator('[role=combobox]').first();
             await tableCombobox.click();
             await page.waitForTimeout(500);
@@ -397,13 +344,11 @@ test.describe('ダッシュボード', () => {
                 await waitForAngular(page);
             }
 
-            // 「詳細設定」ボタンをクリック
             const detailBtn = modalContainer.locator('button').filter({ hasText: '詳細設定' });
             await expect(detailBtn).toBeVisible();
             await detailBtn.click();
             await waitForAngular(page);
 
-            // 詳細設定ページで保存ボタンをクリック
             const saveBtn = page.locator('button').filter({ hasText: '保存' }).first();
             const saveBtnCount = await saveBtn.count();
             if (saveBtnCount > 0) {
@@ -411,38 +356,37 @@ test.describe('ダッシュボード', () => {
                 await waitForAngular(page);
             }
 
-            // エラー（.alert-danger）がないことを確認
+            // 11. ✅ エラー（.alert-danger）が表示されないこと
             const errorAlert = page.locator('.alert-danger');
             const errorCount = await errorAlert.count();
             expect(errorCount).toBe(0);
+            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-030-s11', _testStart);
         });
 
-        // ----- step: DB-04 掲示板コンテンツ追加 -----
-        await test.step('DB-04: ダッシュボードに掲示板コンテンツを追加できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-04`);
+        // ----- step: dash-040 掲示板コンテンツ追加 -----
+        await test.step('dash-040: ダッシュボードに掲示板コンテンツを追加できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s dash-040`);
 
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
-            // DB-02で作成したダッシュボードタブを選択
-            expect(_createdDashboardName, 'DB-02でダッシュボードが作成されていること').toBeTruthy();
+            expect(_createdDashboardName, 'dash-020でダッシュボードが作成されていること').toBeTruthy();
 
+            // 12. 作成したタブの▼メニューを開く
             const dashTablistDB04 = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
             const targetTab = dashTablistDB04.locator('[role=tab]').filter({ hasText: _createdDashboardName });
             await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible();
             await targetTab.first().click();
             await waitForAngular(page);
 
-            // タブ内の▼アイコンをクリックしてメニューを開く
             const tabEl = dashTablistDB04.locator('[role=tab]').filter({ hasText: _createdDashboardName }).first();
             await openTabMenu(page, tabEl);
 
-            // ドロップダウンメニューが表示されていることを確認
+            // 13. 「掲示板を追加」をクリック
             const menu = page.locator('[role=menu]');
             const menuVisible = await menu.isVisible().catch(() => false);
 
             if (menuVisible) {
-                // 「掲示板を追加」をクリック
                 const bulletinItem = menu.locator('[role=menuitem]').filter({ hasText: '掲示板を追加' });
                 const bulletinCount = await bulletinItem.count();
                 if (bulletinCount > 0) {
@@ -451,38 +395,35 @@ test.describe('ダッシュボード', () => {
                 }
             }
 
-            // エラーがないことを確認
+            // 14. ✅ エラーが表示されず、.navbar が表示されたままであること
             const errorAlert = page.locator('.alert-danger');
             const errorCount = await errorAlert.count();
             expect(errorCount).toBe(0);
-
-            // ダッシュボードが表示されたままであること
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-040-s14', _testStart);
         });
 
-        // ----- step: DB-05 タブ削除 -----
-        await test.step('DB-05: ダッシュボードタブを削除できること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-05`);
+        // ----- step: dash-050 タブ削除 -----
+        await test.step('dash-050: ダッシュボードタブを削除できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s dash-050`);
 
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
-            // DB-02で作成したダッシュボードタブを削除
-            expect(_createdDashboardName, 'DB-02でダッシュボードが作成されていること').toBeTruthy();
+            expect(_createdDashboardName, 'dash-020でダッシュボードが作成されていること').toBeTruthy();
 
+            // 15. 作成したタブの▼メニューから「削除」をクリック
             const dashTablistDB05 = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
             const targetTab = dashTablistDB05.locator('[role=tab]').filter({ hasText: _createdDashboardName });
             await expect(targetTab.first(), `ダッシュボードタブ "${_createdDashboardName}" が存在すること`).toBeVisible();
 
-            // タブ内の▼アイコンをクリックしてメニューを開く
             const tabEl = targetTab.first();
             await openTabMenu(page, tabEl);
 
-            // ドロップダウンメニューから「削除」をクリック
             const menu = page.locator('[role=menu]');
             const menuVisible = await menu.isVisible().catch(() => false);
             if (!menuVisible) {
-                throw new Error('DB-05: ダッシュボードタブの▼メニューが開きませんでした。UIを確認してください（[role=menu]が表示されません）。');
+                throw new Error('dash-050: ダッシュボードタブの▼メニューが開きませんでした。');
             }
 
             const deleteItem = menu.locator('[role=menuitem]').filter({ hasText: '削除' });
@@ -491,67 +432,67 @@ test.describe('ダッシュボード', () => {
             await deleteItem.click();
             await waitForAngular(page);
 
-            // 削除確認モーダルが開くことを確認
+            // 16. 確認モーダルで「はい」をクリック
             const confirmModal = page.locator('.modal.show');
             await expect(confirmModal).toBeVisible();
-
-            // 「はい」ボタンをクリック
             await confirmModal.locator('button').filter({ hasText: 'はい' }).click();
             await waitForAngular(page);
 
-            // 削除後にダッシュボードtablist内のタブが消えることを確認
+            // 17. ✅ 作成したタブが消えていること
             const deletedTab = dashTablistDB05.locator('[role=tab]').filter({ hasText: _createdDashboardName });
             await expect(deletedTab).toHaveCount(0, { timeout: 5000 });
 
-            // エラーがないことを確認
-            const errorAlert = page.locator('.alert-danger');
-            expect(await errorAlert.count()).toBe(0);
-
-            // HOMEタブに戻っていること（削除後はHOMEに戻る）
+            // 18. ✅ HOMEタブが表示されていること
             const homeTabAfterDelete = dashTablistDB05.locator('[role=tab]').filter({ hasText: 'HOME' });
             await expect(homeTabAfterDelete).toBeVisible();
+            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-050-s18', _testStart);
+
+            const errorAlert = page.locator('.alert-danger');
+            expect(await errorAlert.count()).toBe(0);
 
             _createdDashboardName = null;
         });
 
-        // ----- step: DB-06 デフォルトダッシュボード -----
-        await test.step('DB-06: デフォルトダッシュボード（HOMEタブ）が表示されること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s DB-06`);
+        // ----- step: dash-060 デフォルトダッシュボード -----
+        await test.step('dash-060: デフォルトダッシュボード（HOMEタブ）が表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s dash-060`);
 
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
 
-            // HOMEタブが存在すること（ダッシュボードtablist内のみを対象）
+            // 20. ✅ HOMEタブが表示・選択されていること
             const dashTablistDB06 = page.locator('[role=tablist]').filter({ hasText: 'HOME' });
             const homeTab = dashTablistDB06.locator('[role=tab]').filter({ hasText: 'HOME' });
             await expect(homeTab).toBeVisible();
 
-            // HOMEタブが選択されていること（または選択可能であること）
             const isSelected = await homeTab.first().getAttribute('aria-selected');
             if (isSelected !== 'true') {
                 await homeTab.first().click();
                 await waitForAngular(page);
             }
 
-            // HOMEタブパネルが表示されること
+            // 21. ✅ HOMEタブパネルに「掲示板」が表示されていること
             const homeTabpanel = page.locator('[role=tabpanel]').filter({ hasText: '掲示板' });
             await expect(homeTabpanel).toBeVisible();
+            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-060-s21', _testStart);
 
-            // HOMEタブの▼メニューに「削除」がないことを確認（ID=1は削除不可）
+            // 22. HOMEタブの▼メニューを開く
             const homeTabEl = homeTab.first();
             await openTabMenu(page, homeTabEl);
 
-            const menu = page.locator('[role=menu]');
-            const menuVisible = await menu.isVisible().catch(() => false);
-            if (menuVisible) {
-                const deleteItem = menu.locator('[role=menuitem]').filter({ hasText: '削除' });
+            // 23. ✅ 「削除」メニューが存在しないこと（HOMEは削除不可）
+            const menuEl = page.locator('[role=menu]');
+            const menuVis = await menuEl.isVisible().catch(() => false);
+            if (menuVis) {
+                const deleteItem = menuEl.locator('[role=menuitem]').filter({ hasText: '削除' });
                 await expect(deleteItem).toHaveCount(0);
             }
+            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-060-s23', _testStart);
         });
     });
 
     // =========================================================================
-    // UC21: ウィジェット並び替え（806）→ 1動画
+    // UC21: ウィジェット並び替え（dash-070）→ 1動画
     // =========================================================================
     test('UC21: ウィジェット並び替え', async ({ page }) => {
         const _testStart = Date.now();
@@ -559,10 +500,10 @@ test.describe('ダッシュボード', () => {
 
         await login(page);
 
-        await test.step('806: ダッシュボードの集計ウィジェットで並び替えが正常に動作すること', async () => {
-            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s 806`);
+        await test.step('dash-070: ダッシュボードの集計ウィジェットで並び替えが正常に動作すること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s dash-070`);
 
-            // ダッシュボードに遷移
+            // 1. ダッシュボードに遷移
             await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
@@ -573,27 +514,32 @@ test.describe('ダッシュボード', () => {
                 await page.waitForTimeout(1000);
             }
 
-            // 集計ウィジェットを探す
+            // 2-4. 集計ウィジェットを追加
             const summaryWidgets = page.locator('.widget, .dashboard-widget, [class*="widget"]').filter({ hasText: '集計' });
             const widgetCount = await summaryWidgets.count();
-            console.log('806: 集計ウィジェット数:', widgetCount);
+            console.log('dash-070: 集計ウィジェット数:', widgetCount);
 
-            // 並び替えボタンを探す
+            // 5. ✅ ダッシュボードが正常に表示されていること
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await stepScreenshot(page, 'dashboard', 'UC21', 'dash-070-s5', _testStart);
+
+            // 6. ✅ 並び替えボタンの確認
             const sortBtns = page.locator('button:has(.fa-sort), button:has-text("並び替え"), .sort-btn, [class*="sort"]');
             const sortCount = await sortBtns.count();
-            console.log('806: 並び替えボタン数:', sortCount);
+            console.log('dash-070: 並び替えボタン数:', sortCount);
 
             if (sortCount > 0) {
-                // 並び替えボタンをクリック
+                await stepScreenshot(page, 'dashboard', 'UC21', 'dash-070-s6', _testStart);
+
+                // 7. 並び替えボタンをクリック
                 await sortBtns.first().click();
                 await page.waitForTimeout(1000);
 
-                // 並び替え後もページが正常であること
+                // 8. ✅ エラーなく並び替えが動作すること
                 const bodyText = await page.innerText('body');
                 expect(bodyText).not.toContain('Internal Server Error');
+                await stepScreenshot(page, 'dashboard', 'UC21', 'dash-070-s8', _testStart);
             }
-
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
         });
     });
 });

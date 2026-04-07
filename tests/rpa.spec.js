@@ -8,6 +8,20 @@ let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
 let PASSWORD = process.env.TEST_PASSWORD;
 
+/**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -141,9 +155,10 @@ test.describe('RPA（コネクト）', () => {
 
     test('RA01: コネクト管理画面の基本機能確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('RPA-01: コネクト管理画面が正常に表示されること', async () => {
+        await test.step('rpa-010: コネクト管理画面が正常に表示されること', async () => {
             stepStart = Date.now();
             await navigateToRpa(page);
 
@@ -164,10 +179,11 @@ test.describe('RPA（コネクト）', () => {
             // .card-blockは複数ある場合があるので first() で取得
             const usageText = await page.locator('.card-block').first().textContent();
             expect(usageText).toMatch(/今月使用量/);
-            console.log(`STEP_TIME RPA-01: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-010-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-010`);
         });
 
-        await test.step('RPA-02: 新しいコネクト（RPA）を作成できること', async () => {
+        await test.step('rpa-020: 新しいコネクト（RPA）を作成できること', async () => {
             stepStart = Date.now();
             await navigateToRpa(page);
 
@@ -226,10 +242,11 @@ test.describe('RPA（コネクト）', () => {
             expect(finalUrl).not.toContain('/admin/rpa/edit/new');
             const errorCount = await page.locator('.alert-danger').count();
             expect(errorCount, 'エラーが表示されていないこと').toBe(0);
-            console.log(`STEP_TIME RPA-02: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-020-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-020`);
         });
 
-        await test.step('RPA-03: コネクト（RPA）フロー編集画面が表示されること', async () => {
+        await test.step('rpa-030: コネクト（RPA）フロー編集画面が表示されること', async () => {
             stepStart = Date.now();
             await navigateToRpa(page);
 
@@ -264,10 +281,11 @@ test.describe('RPA（コネクト）', () => {
             // エラーなし
             const errorText = await page.locator('.alert-danger').count();
             expect(errorText, 'エラーが表示されていないこと').toBe(0);
-            console.log(`STEP_TIME RPA-03: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-030-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-030`);
         });
 
-        await test.step('RPA-04: コネクト一覧のテーブルヘッダーが正しいこと', async () => {
+        await test.step('rpa-040: コネクト一覧のテーブルヘッダーが正しいこと', async () => {
             stepStart = Date.now();
             await navigateToRpa(page);
 
@@ -293,10 +311,11 @@ test.describe('RPA（コネクト）', () => {
             expect(hasTable, `テーブルカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
             expect(hasName, `コネクト名カラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
             expect(hasStatus, `ステータスカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
-            console.log(`STEP_TIME RPA-04: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-040-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-040`);
         });
 
-        await test.step('RPA-05: コネクト一覧の今月使用量が表示されること', async () => {
+        await test.step('rpa-050: コネクト一覧の今月使用量が表示されること', async () => {
             stepStart = Date.now();
             await navigateToRpa(page);
 
@@ -309,10 +328,11 @@ test.describe('RPA（コネクト）', () => {
             // 使用量テキストが "N STEP / N STEP" 形式で表示されること
             const usageText = await usageCard.first().textContent();
             expect(usageText).toMatch(/STEP/);
-            console.log(`STEP_TIME RPA-05: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-050-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-050`);
         });
 
-        await test.step('RPA-06: コネクト実行ログページへ遷移できること', async () => {
+        await test.step('rpa-060: コネクト実行ログページへ遷移できること', async () => {
             stepStart = Date.now();
 
             // コネクト実行ログへ遷移
@@ -325,15 +345,17 @@ test.describe('RPA（コネクト）', () => {
 
             const title = await page.title();
             expect(title).not.toMatch(/エラー|Error|404|500/i);
-            console.log(`STEP_TIME RPA-06: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-060-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-060`);
         });
     });
 
     test('UC10: コネクトのWF完了トリガー・FTP処理確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('603: コネクトのWF完了トリガーで重複禁止エラー時に適切なメッセージが表示されること', async () => {
+        await test.step('rpa-070: コネクトのWF完了トリガーで重複禁止エラー時に適切なメッセージが表示されること', async () => {
             stepStart = Date.now();
 
             // コネクト設定画面に遷移
@@ -355,10 +377,11 @@ test.describe('RPA（コネクト）', () => {
             console.log('603: トリガー設定関連要素数:', triggerCount);
 
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            console.log(`STEP_TIME 603: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'UC10', 'rpa-070-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-070`);
         });
 
-        await test.step('609: FTP処理の失敗時にどのテーブルのエラーかが通知に含まれること', async () => {
+        await test.step('rpa-080: FTP処理の失敗時にどのテーブルのエラーかが通知に含まれること', async () => {
             stepStart = Date.now();
 
             // FTP連携設定画面に遷移
@@ -374,15 +397,17 @@ test.describe('RPA（コネクト）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            console.log(`STEP_TIME 609: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'UC10', 'rpa-080-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-080`);
         });
     });
 
     test('UC13: RPA実行履歴画面確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('672: RPA実行履歴画面に実行結果が正しく表示されること', async () => {
+        await test.step('rpa-090: RPA実行履歴画面に実行結果が正しく表示されること', async () => {
             stepStart = Date.now();
 
             // RPA実行履歴画面に遷移
@@ -406,15 +431,17 @@ test.describe('RPA（コネクト）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            console.log(`STEP_TIME 672: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'UC13', 'rpa-090-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-090`);
         });
     });
 
     test('UC20: RPAビュー表示・編集・保存確認', async ({ page }) => {
         await login(page);
+        const _testStart = Date.now();
         let stepStart;
 
-        await test.step('789: RPAのビュー表示と編集・保存が正常に動作すること', async () => {
+        await test.step('rpa-100: RPAのビュー表示と編集・保存が正常に動作すること', async () => {
             stepStart = Date.now();
 
             // RPA一覧に遷移
@@ -458,7 +485,8 @@ test.describe('RPA（コネクト）', () => {
             }
 
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            console.log(`STEP_TIME 789: ${Date.now() - stepStart}ms`);
+            await stepScreenshot(page, 'rpa', 'UC20', 'rpa-100-s3', _testStart);
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-100`);
         });
     });
 });

@@ -27,6 +27,20 @@ async function login(page, email, password) {
 }
 
 /**
+ * ステップスクリーンショット撮影
+ */
+async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
+    const sec = Math.round((Date.now() - testStartTime) / 1000);
+    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
+    const dir = `${reportsDir}/steps/${spec}/${movie}`;
+    require('fs').mkdirSync(dir, { recursive: true });
+    const filePath = `${dir}/${stepId}.jpg`;
+    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
+    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
+    return sec;
+}
+
+/**
  * storageStateを使ったブラウザコンテキストを作成する
  */
 async function waitForAngular(page, timeout = 15000) {
@@ -348,7 +362,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
         });
 
     test('CE01: CSVダウンロード', async ({ page }) => {
-        await test.step('255: CSVダウンロードモーダルが開き、ダウンロードボタンが表示されること', async () => {
+        await test.step('csv-140: CSVダウンロードモーダルが開き、ダウンロードボタンが表示されること', async () => {
             const STEP_TIME = Date.now();
 
             // 新環境に明示的ログイン
@@ -403,9 +417,10 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 console.log('255: ダウンロードイベント未取得（処理は継続）');
             }
             await page.waitForTimeout(2000);
+            await stepScreenshot(page, 'csv-export', 'CE01', 'csv-140-s1', STEP_TIME);
 
         });
-        await test.step('161: ソート後にCSVダウンロードを実行するとモーダルが表示されること', async () => {
+        await test.step('csv-040: ソート後にCSVダウンロードを実行するとモーダルが表示されること', async () => {
             const STEP_TIME = Date.now();
 
             // 新環境に明示的ログイン
@@ -461,9 +476,10 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             // モーダルを閉じる
             await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
             await waitForAngular(page);
+            await stepScreenshot(page, 'csv-export', 'CE01', 'csv-040-s1', STEP_TIME);
 
         });
-        await test.step('231: CSVダウンロードモーダルにCSVフィルタ反映オプションが表示されること（数値カンマ設定確認）', async () => {
+        await test.step('csv-120: CSVダウンロードモーダルにCSVフィルタ反映オプションが表示されること（数値カンマ設定確認）', async () => {
             const STEP_TIME = Date.now();
 
             await ensureLoggedIn(page, EMAIL, PASSWORD);
@@ -524,12 +540,13 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 await page.keyboard.press('Escape');
             }
             console.log('231: CSVダウンロード確認完了（数値フィールド含むテーブル）');
+            await stepScreenshot(page, 'csv-export', 'CE01', 'csv-120-s1', STEP_TIME);
 
         });
     });
 
     test('CE02: CSVアップロード', async ({ page }) => {
-        await test.step('55-1: ヘッダー行なしのCSVをアップロードするとインポートエラーが発生すること', async () => {
+        await test.step('csv-150: ヘッダー行なしのCSVをアップロードするとインポートエラーが発生すること', async () => {
             const STEP_TIME = Date.now();
 
             // 新環境に明示的ログイン
@@ -638,9 +655,10 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             expect(found).toBeTruthy();
             // ページが正常に表示されていることを確認（クラッシュしていない）
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await stepScreenshot(page, 'csv-export', 'CE02', 'csv-150-s1', STEP_TIME);
 
         });
-        await test.step('55-2: CSV以外のファイル(.txt)をアップロードするとインポートエラーが発生すること', async () => {
+        await test.step('csv-160: CSV以外のファイル(.txt)をアップロードするとインポートエラーが発生すること', async () => {
             const STEP_TIME = Date.now();
 
             test.setTimeout(300000); // CSV非同期処理の完了待ちに対応
@@ -737,9 +755,10 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
                 console.log('55-2: CSVアップロードモーダルが開けなかった — ドロップダウンメニュー構成を確認');
                 await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             }
+            await stepScreenshot(page, 'csv-export', 'CE02', 'csv-160-s1', STEP_TIME);
 
         });
-        await test.step('193-1: テーブル設定で必須項目空を許可(ON)にすると、必須項目が空のCSVをアップロードできること', async () => {
+        await test.step('csv-070: テーブル設定で必須項目空を許可(ON)にすると、必須項目が空のCSVをアップロードできること', async () => {
             const STEP_TIME = Date.now();
 
             // 明示的ログイン（セッション切れ対策）
@@ -827,9 +846,10 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             // モーダルを閉じる
             await page.locator('.modal.show button:has-text("キャンセル"), .modal.show .close').first().click();
             await waitForAngular(page);
+            await stepScreenshot(page, 'csv-export', 'CE02', 'csv-070-s1', STEP_TIME);
 
         });
-        await test.step('193-2: テーブル設定で必須項目空を許可(OFF)にすると、必須項目が空のCSVはエラーになること', async () => {
+        await test.step('csv-080: テーブル設定で必須項目空を許可(OFF)にすると、必須項目が空のCSVはエラーになること', async () => {
             const STEP_TIME = Date.now();
 
             // 明示的ログイン（セッション切れ対策）
@@ -870,6 +890,7 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             const alertDanger = await page.locator('.alert-danger').count();
             expect(alertDanger).toBe(0);
             console.log('193-2: テーブル設定保存完了（必須項目空不許可）');
+            await stepScreenshot(page, 'csv-export', 'CE02', 'csv-080-s1', STEP_TIME);
 
         });
         await test.step('194-1: 選択肢がない場合自動追加(ON)の設定をテーブル編集で確認できること', async () => {
