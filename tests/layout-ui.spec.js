@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const fs = require('fs');
 const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
@@ -30,17 +31,6 @@ async function login(page, email, password) {
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -205,6 +195,8 @@ test.beforeAll(async ({ browser }) => {
 // レイアウト・メニュー・UI・ダッシュボード（テーブル不要）テスト
 // =============================================================================
 
+const autoScreenshot = createAutoScreenshot('layout-ui');
+
 test.describe('レイアウト・メニュー・UI・ダッシュボード（テーブル不要）', () => {
 
 
@@ -304,7 +296,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             expect(
                 dropdownText.includes('ログアウト') || dropdownText.includes('プロフィール') || dropdownText.includes('ユーザー情報')
             ).toBeTruthy();
-            await stepScreenshot(page, 'layout-ui', 'LU01', 'lui-010-s1', _testStart);
+            await autoScreenshot(page, 'LU01', 'lui-010', 0, _testStart);
 
         });
     });
@@ -327,7 +319,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             // サイドバーナビゲーションが表示されていることを確認
             await expect(page.locator('nav.sidebar-nav')).toBeVisible();
-            await stepScreenshot(page, 'layout-ui', 'LU04', 'lui-070-s1', _testStart);
+            await autoScreenshot(page, 'LU04', 'lui-070', 0, _testStart);
 
         });
         await test.step('lui-180: カスタムCSSを適用するとCSSの定義通りにUIが変更されること', async () => {
@@ -372,7 +364,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                 // テスト用ファイルを削除
                 try { fs.unlinkSync(cssFilePath); } catch (e) {}
             }
-            await stepScreenshot(page, 'layout-ui', 'LU04', 'lui-180-s1', _testStart);
+            await autoScreenshot(page, 'LU04', 'lui-180', 0, _testStart);
 
         });
         await test.step('lui-190: カスタムCSSを削除するとUIがデフォルトに戻ること', async () => {
@@ -414,7 +406,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             // ページが正常に表示されることを確認
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
-            await stepScreenshot(page, 'layout-ui', 'LU04', 'lui-190-s1', _testStart);
+            await autoScreenshot(page, 'LU04', 'lui-190', 0, _testStart);
 
         });
         await test.step('lui-200: デジエからの移行会社向けUIバージョン変更が想定通りに動作すること（専用テスト環境が必要）', async () => {
@@ -470,7 +462,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
 
             // ダッシュボードが正常に表示されていることを確認（再確認）
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'layout-ui', 'LU03', 'lui-080-s1', _testStart);
+            await autoScreenshot(page, 'LU03', 'lui-080', 0, _testStart);
 
         });
         await test.step('lui-160: マスターユーザーでダッシュボードからチャート追加が行えること', async () => {
@@ -497,7 +489,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             // タブ追加ボタン（＋）が表示されていることを確認（マスターユーザー権限チェック）
             const addTabBtn = page.locator('button[class*="add"], button.btn-tab-add, .tab-add-btn, button[title*="追加"]');
             console.log('タブ追加ボタン数:', await addTabBtn.count());
-            await stepScreenshot(page, 'layout-ui', 'LU03', 'lui-160-s1', _testStart);
+            await autoScreenshot(page, 'LU03', 'lui-160', 0, _testStart);
 
         });
         await test.step('lui-170: マスターユーザーでダッシュボードから帳票登録が行えること', async () => {
@@ -517,7 +509,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await expect(page.locator('.navbar-brand').first()).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
-            await stepScreenshot(page, 'layout-ui', 'LU03', 'lui-170-s1', _testStart);
+            await autoScreenshot(page, 'LU03', 'lui-170', 0, _testStart);
 
         });
     });
@@ -539,7 +531,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             await expect(page.locator('.navbar-brand').first()).toBeVisible();
             // mainコンテンツエリアが表示されていることを確認
             await expect(page.locator('main')).toBeVisible();
-            await stepScreenshot(page, 'layout-ui', 'LU02', 'lui-210-s1', _testStart);
+            await autoScreenshot(page, 'LU02', 'lui-210', 0, _testStart);
 
         });
     });

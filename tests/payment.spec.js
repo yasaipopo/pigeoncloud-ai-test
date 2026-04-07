@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 
 const BASE_URL = process.env.TEST_BASE_URL;
 const EMAIL = process.env.TEST_EMAIL;
@@ -8,17 +9,6 @@ const PASSWORD = process.env.TEST_PASSWORD;
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -93,6 +83,8 @@ async function gotoPaymentPage(page) {
     }
 }
 
+const autoScreenshot = createAutoScreenshot('payment');
+
 test.describe('支払い・プラン管理', () => {
 
     test('PM01: 支払いページ基本機能確認', async ({ page }) => {
@@ -118,7 +110,7 @@ test.describe('支払い・プラン管理', () => {
 
             // 「有料プラン契約」の見出しが存在すること
             await expect(page.locator('h2.plan-header, h2')).toContainText('有料プラン契約');
-            await stepScreenshot(page, 'payment', 'PM01', 'pay-010-s3', _testStart);
+            await autoScreenshot(page, 'PM01', 'pay-010', 0, _testStart);
             console.log(`STEP_TIME pay-010: ${Date.now() - stepStart}ms`);
         });
 
@@ -157,7 +149,7 @@ test.describe('支払い・プラン管理', () => {
 
             // 「お支払い金額（税込）」の見出しが表示されること
             await expect(page.locator('h4').filter({ hasText: 'お支払い金額' })).toBeVisible();
-            await stepScreenshot(page, 'payment', 'PM01', 'pay-020-s3', _testStart);
+            await autoScreenshot(page, 'PM01', 'pay-020', 0, _testStart);
             console.log(`STEP_TIME pay-020: ${Date.now() - stepStart}ms`);
         });
 
@@ -181,7 +173,7 @@ test.describe('支払い・プラン管理', () => {
             const ctaButton = page.locator('.stripe-subscription button.btn-success.cta-button');
             await expect(ctaButton).toBeVisible();
             await expect(ctaButton).toContainText('クレジットカード支払いに進む');
-            await stepScreenshot(page, 'payment', 'PM01', 'pay-030-s3', _testStart);
+            await autoScreenshot(page, 'PM01', 'pay-030', 0, _testStart);
             console.log(`STEP_TIME pay-030: ${Date.now() - stepStart}ms`);
         });
 
@@ -242,7 +234,7 @@ test.describe('支払い・プラン管理', () => {
                 // iframeが存在することの確認のみ
                 await expect(checkoutIframe).toBeAttached();
             }
-            await stepScreenshot(page, 'payment', 'PM01', 'pay-040-s3', _testStart);
+            await autoScreenshot(page, 'PM01', 'pay-040', 0, _testStart);
             console.log(`STEP_TIME pay-040: ${Date.now() - stepStart}ms`);
         });
 
@@ -286,7 +278,7 @@ test.describe('支払い・プラン管理', () => {
             // 範囲超過でもエラーまたは警告が表示されること
             const pageContent = await page.locator('main').textContent().catch(() => '');
             expect(pageContent).toContain('3000');
-            await stepScreenshot(page, 'payment', 'PM01', 'pay-050-s3', _testStart);
+            await autoScreenshot(page, 'PM01', 'pay-050', 0, _testStart);
             console.log(`STEP_TIME pay-050: ${Date.now() - stepStart}ms`);
         });
 
@@ -329,7 +321,7 @@ test.describe('支払い・プラン管理', () => {
                 await expect(page.locator('h3').filter({ hasText: 'プラン変更' })).toBeVisible();
                 console.log('[pay-060] 未契約環境 - プラン変更フォームが表示されています');
             }
-            await stepScreenshot(page, 'payment', 'PM01', 'pay-060-s3', _testStart);
+            await autoScreenshot(page, 'PM01', 'pay-060', 0, _testStart);
             console.log(`STEP_TIME pay-060: ${Date.now() - stepStart}ms`);
         });
     });
@@ -364,7 +356,7 @@ test.describe('支払い・プラン管理', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'payment', 'UC16', 'pay-070-s3', _testStart);
+            await autoScreenshot(page, 'UC16', 'pay-070', 0, _testStart);
             console.log(`STEP_TIME pay-070: ${Date.now() - stepStart}ms`);
         });
     });
@@ -411,7 +403,7 @@ test.describe('支払い・プラン管理', () => {
             }
 
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'payment', 'UC03', 'pay-080-s3', _testStart);
+            await autoScreenshot(page, 'UC03', 'pay-080', 0, _testStart);
             console.log(`STEP_TIME pay-080: ${Date.now() - stepStart}ms`);
         });
     });
@@ -441,7 +433,7 @@ test.describe('支払い・プラン管理', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'payment', 'UC09', 'pay-090-s3', _testStart);
+            await autoScreenshot(page, 'UC09', 'pay-090', 0, _testStart);
             console.log(`STEP_TIME pay-090: ${Date.now() - stepStart}ms`);
         });
     });

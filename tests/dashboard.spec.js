@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createTestEnv } = require('./helpers/create-test-env');
 
@@ -15,17 +16,6 @@ let PASSWORD = process.env.TEST_PASSWORD;
  * @param {string} stepId - ステップID（例: 'dash-010-s2'）
  * @param {number} testStartTime - テスト開始時刻（Date.now()）
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -132,6 +122,8 @@ async function openTabMenu(page, tabLocator) {
     await page.waitForTimeout(800);
 }
 
+const autoScreenshot = createAutoScreenshot('dashboard');
+
 test.describe('ダッシュボード', () => {
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(300000);
@@ -201,7 +193,7 @@ test.describe('ダッシュボード', () => {
 
             // 4. ✅ URLが /admin/dashboard を含むこと
             expect(page.url()).toContain('/admin/dashboard');
-            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-010-s4', _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-010', 0, _testStart);
         });
 
         // ----- step: dash-020 タブ作成 -----
@@ -277,7 +269,7 @@ test.describe('ダッシュボード', () => {
             const allTabTexts = await dashTablist.locator('[role=tab]').allTextContents().catch(() => []);
             console.log('dash-020: 全タブ:', allTabTexts, '検索名:', db02Name);
             await expect(newTab).toBeVisible();
-            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-020-s7', _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-020', 0, _testStart);
 
             _createdDashboardName = db02Name;
         });
@@ -360,7 +352,7 @@ test.describe('ダッシュボード', () => {
             const errorAlert = page.locator('.alert-danger');
             const errorCount = await errorAlert.count();
             expect(errorCount).toBe(0);
-            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-030-s11', _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-030', 0, _testStart);
         });
 
         // ----- step: dash-040 掲示板コンテンツ追加 -----
@@ -400,7 +392,7 @@ test.describe('ダッシュボード', () => {
             const errorCount = await errorAlert.count();
             expect(errorCount).toBe(0);
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-040-s14', _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-040', 0, _testStart);
         });
 
         // ----- step: dash-050 タブ削除 -----
@@ -445,7 +437,7 @@ test.describe('ダッシュボード', () => {
             // 18. ✅ HOMEタブが表示されていること
             const homeTabAfterDelete = dashTablistDB05.locator('[role=tab]').filter({ hasText: 'HOME' });
             await expect(homeTabAfterDelete).toBeVisible();
-            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-050-s18', _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-050', 0, _testStart);
 
             const errorAlert = page.locator('.alert-danger');
             expect(await errorAlert.count()).toBe(0);
@@ -474,7 +466,7 @@ test.describe('ダッシュボード', () => {
             // 21. ✅ HOMEタブパネルに「掲示板」が表示されていること
             const homeTabpanel = page.locator('[role=tabpanel]').filter({ hasText: '掲示板' });
             await expect(homeTabpanel).toBeVisible();
-            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-060-s21', _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-060', 0, _testStart);
 
             // 22. HOMEタブの▼メニューを開く
             const homeTabEl = homeTab.first();
@@ -487,7 +479,7 @@ test.describe('ダッシュボード', () => {
                 const deleteItem = menuEl.locator('[role=menuitem]').filter({ hasText: '削除' });
                 await expect(deleteItem).toHaveCount(0);
             }
-            await stepScreenshot(page, 'dashboard', 'DB01', 'dash-060-s23', _testStart);
+            await autoScreenshot(page, 'DB01', 'dash-060', 1, _testStart);
         });
     });
 
@@ -521,7 +513,7 @@ test.describe('ダッシュボード', () => {
 
             // 5. ✅ ダッシュボードが正常に表示されていること
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'dashboard', 'UC21', 'dash-070-s5', _testStart);
+            await autoScreenshot(page, 'UC21', 'dash-070', 0, _testStart);
 
             // 6. ✅ 並び替えボタンの確認
             const sortBtns = page.locator('button:has(.fa-sort), button:has-text("並び替え"), .sort-btn, [class*="sort"]');
@@ -529,7 +521,7 @@ test.describe('ダッシュボード', () => {
             console.log('dash-070: 並び替えボタン数:', sortCount);
 
             if (sortCount > 0) {
-                await stepScreenshot(page, 'dashboard', 'UC21', 'dash-070-s6', _testStart);
+                await autoScreenshot(page, 'UC21', 'dash-070', 1, _testStart);
 
                 // 7. 並び替えボタンをクリック
                 await sortBtns.first().click();
@@ -538,7 +530,7 @@ test.describe('ダッシュボード', () => {
                 // 8. ✅ エラーなく並び替えが動作すること
                 const bodyText = await page.innerText('body');
                 expect(bodyText).not.toContain('Internal Server Error');
-                await stepScreenshot(page, 'dashboard', 'UC21', 'dash-070-s8', _testStart);
+                await autoScreenshot(page, 'UC21', 'dash-070', 2, _testStart);
             }
         });
     });

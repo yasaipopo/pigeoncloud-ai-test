@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createAuthContext } = require('./helpers/auth-context');
 const { createTestEnv } = require('./helpers/create-test-env');
@@ -11,17 +12,6 @@ let PASSWORD = process.env.TEST_PASSWORD;
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -117,6 +107,8 @@ async function navigateToRpa(page) {
     await page.waitForSelector('b:text("今月使用量")', { timeout: 20000 });
 }
 
+const autoScreenshot = createAutoScreenshot('rpa');
+
 test.describe('RPA（コネクト）', () => {
     /** @type {import('@playwright/test').Browser} */
     let browser;
@@ -179,7 +171,7 @@ test.describe('RPA（コネクト）', () => {
             // .card-blockは複数ある場合があるので first() で取得
             const usageText = await page.locator('.card-block').first().textContent();
             expect(usageText).toMatch(/今月使用量/);
-            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-010-s3', _testStart);
+            await autoScreenshot(page, 'RA01', 'rpa-010', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-010`);
         });
 
@@ -242,7 +234,7 @@ test.describe('RPA（コネクト）', () => {
             expect(finalUrl).not.toContain('/admin/rpa/edit/new');
             const errorCount = await page.locator('.alert-danger').count();
             expect(errorCount, 'エラーが表示されていないこと').toBe(0);
-            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-020-s3', _testStart);
+            await autoScreenshot(page, 'RA01', 'rpa-020', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-020`);
         });
 
@@ -281,7 +273,7 @@ test.describe('RPA（コネクト）', () => {
             // エラーなし
             const errorText = await page.locator('.alert-danger').count();
             expect(errorText, 'エラーが表示されていないこと').toBe(0);
-            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-030-s3', _testStart);
+            await autoScreenshot(page, 'RA01', 'rpa-030', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-030`);
         });
 
@@ -311,7 +303,7 @@ test.describe('RPA（コネクト）', () => {
             expect(hasTable, `テーブルカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
             expect(hasName, `コネクト名カラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
             expect(hasStatus, `ステータスカラムが存在すること（実際のヘッダー: [${headers.join(', ')}]）`).toBeTruthy();
-            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-040-s3', _testStart);
+            await autoScreenshot(page, 'RA01', 'rpa-040', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-040`);
         });
 
@@ -328,7 +320,7 @@ test.describe('RPA（コネクト）', () => {
             // 使用量テキストが "N STEP / N STEP" 形式で表示されること
             const usageText = await usageCard.first().textContent();
             expect(usageText).toMatch(/STEP/);
-            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-050-s3', _testStart);
+            await autoScreenshot(page, 'RA01', 'rpa-050', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-050`);
         });
 
@@ -345,7 +337,7 @@ test.describe('RPA（コネクト）', () => {
 
             const title = await page.title();
             expect(title).not.toMatch(/エラー|Error|404|500/i);
-            await stepScreenshot(page, 'rpa', 'RA01', 'rpa-060-s3', _testStart);
+            await autoScreenshot(page, 'RA01', 'rpa-060', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-060`);
         });
     });
@@ -377,7 +369,7 @@ test.describe('RPA（コネクト）', () => {
             console.log('603: トリガー設定関連要素数:', triggerCount);
 
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'rpa', 'UC10', 'rpa-070-s3', _testStart);
+            await autoScreenshot(page, 'UC10', 'rpa-070', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-070`);
         });
 
@@ -397,7 +389,7 @@ test.describe('RPA（コネクト）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'rpa', 'UC10', 'rpa-080-s3', _testStart);
+            await autoScreenshot(page, 'UC10', 'rpa-080', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-080`);
         });
     });
@@ -431,7 +423,7 @@ test.describe('RPA（コネクト）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'rpa', 'UC13', 'rpa-090-s3', _testStart);
+            await autoScreenshot(page, 'UC13', 'rpa-090', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-090`);
         });
     });
@@ -485,7 +477,7 @@ test.describe('RPA（コネクト）', () => {
             }
 
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'rpa', 'UC20', 'rpa-100-s3', _testStart);
+            await autoScreenshot(page, 'UC20', 'rpa-100', 0, _testStart);
             console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s rpa-100`);
         });
     });

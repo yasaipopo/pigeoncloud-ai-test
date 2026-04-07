@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const { getAllTypeTableId, createAllTypeData } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
@@ -14,17 +15,6 @@ let PASSWORD = process.env.TEST_PASSWORD;
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -334,6 +324,8 @@ async function getFirstRecordViewUrl(page, tableUrl) {
 // ログ管理テスト
 // =============================================================================
 
+const autoScreenshot = createAutoScreenshot('comments-logs');
+
 test.describe('ログ管理', () => {
 
     /** テーブルURL（beforeAll で設定） */
@@ -417,7 +409,7 @@ test.describe('ログ管理', () => {
             expect(pageText).toContain('アクション');
             expect(pageText).toContain('テーブル');
             expect(pageText).toContain('日時');
-            await stepScreenshot(page, 'comments-logs', 'CL01', 'cl-010-s4', _testStart);
+            await autoScreenshot(page, 'CL01', 'cl-010', 0, _testStart);
         });
 
         // ----- step: 13-2 CSV UP/DL履歴が確認できること -----
@@ -437,7 +429,7 @@ test.describe('ログ管理', () => {
             expect(pageText).toContain('ファイル名');
             expect(pageText).toContain('タイプ');
             expect(pageText).toContain('処理');
-            await stepScreenshot(page, 'comments-logs', 'CL01', 'cl-020-s4', _testStart);
+            await autoScreenshot(page, 'CL01', 'cl-020', 0, _testStart);
         });
 
         // ----- step: 196 リクエストログで処理ステータスが確認できること -----
@@ -459,7 +451,7 @@ test.describe('ログ管理', () => {
             expect(pageText).toContain('リクエスト');
             expect(pageText).toContain('ステータス');
             expect(pageText).toContain('処理結果');
-            await stepScreenshot(page, 'comments-logs', 'CL01', 'cl-070-s4', _testStart);
+            await autoScreenshot(page, 'CL01', 'cl-070', 0, _testStart);
         });
     });
 
@@ -513,7 +505,7 @@ test.describe('ログ管理', () => {
             const commentBody = page.locator('.comment-body').last();
             await expect(commentBody).toBeVisible();
             await expect(commentBody).toContainText('テストコメント');
-            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-030-s4', _testStart);
+            await autoScreenshot(page, 'CL02', 'cl-030', 0, _testStart);
         });
 
         // ----- step: 69-2 複数ユーザーへのメンション付きコメントが送信できること -----
@@ -548,7 +540,7 @@ test.describe('ログ管理', () => {
             expect(asideContent).toContain('複数メンションテスト');
             const commentBody = page.locator('.comment-body').filter({ hasText: '複数メンションテスト' }).first();
             await expect(commentBody).toBeVisible();
-            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-040-s3', _testStart);
+            await autoScreenshot(page, 'CL02', 'cl-040', 0, _testStart);
         });
 
         // ----- step: 69-3 存在しないユーザーでメンションしてもコメントが保存されること -----
@@ -582,7 +574,7 @@ test.describe('ログ管理', () => {
 
             const commentBody = page.locator('.comment-body').filter({ hasText: '存在しないユーザーテスト' }).first();
             await expect(commentBody).toBeVisible();
-            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-050-s3', _testStart);
+            await autoScreenshot(page, 'CL02', 'cl-050', 0, _testStart);
         });
 
         // ----- step: 69-4 組織へのメンション付きコメントが送信できること -----
@@ -628,7 +620,7 @@ test.describe('ログ管理', () => {
             expect(asideContent).toContain('組織メンションテスト');
             const commentBody = page.locator('.comment-body').filter({ hasText: '組織メンションテスト' }).first();
             await expect(commentBody).toBeVisible();
-            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-060-s3', _testStart);
+            await autoScreenshot(page, 'CL02', 'cl-060', 0, _testStart);
         });
 
         // ----- step: 242 ログとコメントをまとめて表示が有効の時にメンション機能が動作すること -----
@@ -711,7 +703,7 @@ test.describe('ログ管理', () => {
 
             const commentBody = page.locator('.comment-body').last();
             await expect(commentBody).toBeVisible();
-            await stepScreenshot(page, 'comments-logs', 'CL02', 'cl-080-s4', _testStart);
+            await autoScreenshot(page, 'CL02', 'cl-080', 0, _testStart);
         });
     });
 
@@ -752,7 +744,7 @@ test.describe('ログ管理', () => {
 
             const afterText = await page.innerText('body');
             expect(afterText).not.toContain('Internal Server Error');
-            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-090-s3', _testStart);
+            await autoScreenshot(page, 'CL03', 'cl-090', 0, _testStart);
         });
 
         // ----- step: 356 通知をクリックした際にコメントが来たレコード詳細画面に遷移すること -----
@@ -783,7 +775,7 @@ test.describe('ログ管理', () => {
                 const afterText = await page.innerText('body');
                 expect(afterText).not.toContain('Internal Server Error');
             }
-            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-100-s3', _testStart);
+            await autoScreenshot(page, 'CL03', 'cl-100', 0, _testStart);
         });
 
         // ----- step: 426 年度絞り込みの検索結果コメントが正しく表示されること -----
@@ -810,7 +802,7 @@ test.describe('ログ管理', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-110-s3', _testStart);
+            await autoScreenshot(page, 'CL03', 'cl-110', 0, _testStart);
         });
 
         // ----- step: 472 コメント入力欄で改行が正しく反映されること -----
@@ -851,7 +843,7 @@ test.describe('ログ管理', () => {
                     console.log('472: コメント表示の改行確認:', hasLineBreak);
                 }
             }
-            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-120-s3', _testStart);
+            await autoScreenshot(page, 'CL03', 'cl-120', 0, _testStart);
         });
 
         // ----- step: 597 ユーザーを無効化してもコメント履歴にユーザー名が消えないこと -----
@@ -880,7 +872,7 @@ test.describe('ログ管理', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-130-s3', _testStart);
+            await autoScreenshot(page, 'CL03', 'cl-130', 0, _testStart);
         });
 
         // ----- step: 570 組織メンション時に複数役職兼任ユーザーへの通知が重複しないこと -----
@@ -919,7 +911,7 @@ test.describe('ログ管理', () => {
 
             const asideText = await page.locator('aside').innerText().catch(() => '');
             expect(asideText).toContain('組織メンションテスト570');
-            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-160-s3', _testStart);
+            await autoScreenshot(page, 'CL03', 'cl-160', 0, _testStart);
         });
 
         // ----- step: 629 コメントの改行がメール通知で{line_break}にならず正常に改行されること -----
@@ -959,7 +951,7 @@ test.describe('ログ管理', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-140-s3', _testStart);
+            await autoScreenshot(page, 'CL03', 'cl-140', 0, _testStart);
         });
 
         // ----- step: 653 組織メンションのキャンセル後にメッセージが出続けないこと -----
@@ -1005,7 +997,7 @@ test.describe('ログ管理', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'comments-logs', 'CL03', 'cl-150-s3', _testStart);
+            await autoScreenshot(page, 'CL03', 'cl-150', 0, _testStart);
         });
     });
 

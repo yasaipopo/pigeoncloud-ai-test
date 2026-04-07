@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const path = require('path');
@@ -51,17 +52,6 @@ async function login(page) {
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 /**
  * storageStateを使ったブラウザコンテキストを作成する
  */
@@ -184,6 +174,8 @@ async function navigateToReportSetting(page, tableId) {
 // 帳票テスト
 // =============================================================================
 
+const autoScreenshot = createAutoScreenshot('reports');
+
 test.describe('帳票（登録・出力・ダウンロード）', () => {
     // describeブロック全体のデフォルトタイムアウトを240秒に設定
     // （beforeEachのログイン処理が遅い場合に120秒で失敗することを防ぐ）
@@ -260,7 +252,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/144-01-report-related-table.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-010-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-010', 0, _testStart);
         });
 
         await test.step('rpt-020: 帳票設定ページが表示され、Excel/PDF生成の設定項目があること', async () => {
@@ -284,7 +276,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/198-report-file-generate.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-020-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-020', 0, _testStart);
         });
 
         await test.step('rpt-030: 帳票のExcel出力ができること', async () => {
@@ -438,7 +430,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/205-report-excel.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-030-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-030', 0, _testStart);
         });
 
         await test.step('rpt-040: 帳票のPDF出力ができること', async () => {
@@ -540,7 +532,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/206-report-pdf.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-040-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-040', 0, _testStart);
         });
 
         await test.step('rpt-050: 帳票のファイル名フォーマット設定ができること（Excel）', async () => {
@@ -610,7 +602,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/207-report-excel-filename.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-050-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-050', 0, _testStart);
         });
 
         await test.step('rpt-060: 帳票のファイル名フォーマット設定ができること（PDF）', async () => {
@@ -672,7 +664,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/208-report-pdf-filename.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-060-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-060', 0, _testStart);
         });
 
         await test.step('rpt-070: 帳票メニューに歯車アイコンが表示されること', async () => {
@@ -717,7 +709,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/216-report-gear-icon.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-070-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-070', 0, _testStart);
         });
 
         await test.step('rpt-080: ユーザーテーブルの帳票設定ページが表示されること', async () => {
@@ -743,7 +735,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/230-user-table-report.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-080-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-080', 0, _testStart);
         });
 
         await test.step('rpt-090: 帳票設定でAA列以降の列指定ができること', async () => {
@@ -804,7 +796,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/236-report-column-aa.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-090-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-090', 0, _testStart);
         });
 
         await test.step('rpt-100: 帳票ダウンロードでファイル項目・画像項目が出力されること（手動確認推奨）', async () => {
@@ -1001,7 +993,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/253-report-file-image.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-100-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-100', 0, _testStart);
 
             // NOTE: 実際の帳票ダウンロードでファイル・画像が出力されるかの確認は
             // 帳票テンプレート（Excel）の設定が必要なため、手動確認が推奨される。
@@ -1087,7 +1079,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // スクリーンショット保存
             const reportsDir = process.env.REPORTS_DIR || 'reports/agent-1';
             await page.screenshot({ path: `${reportsDir}/screenshots/56-1-report-invalid-file.png`, fullPage: true });
-            await stepScreenshot(page, 'reports', 'RP01', 'rpt-110-s3', _testStart);
+            await autoScreenshot(page, 'RP01', 'rpt-110', 0, _testStart);
         });
 
     });
@@ -1120,7 +1112,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-120-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-120', 0, _testStart);
         });
 
         await test.step('rpt-130: テーブル管理画面でExcel/JSONからの作成メニューが存在すること', async () => {
@@ -1139,7 +1131,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             console.log(`272: JSONから追加メニュー数: ${jsonCount}`);
 
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-130-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-130', 0, _testStart);
         });
 
         await test.step('rpt-140: 帳票設定でリッチテキスト項目の帳票出力設定ができること', async () => {
@@ -1157,7 +1149,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-140-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-140', 0, _testStart);
         });
 
         await test.step('rpt-150: テーブル管理者の一般ユーザーが帳票設定にアクセスできること', async () => {
@@ -1172,7 +1164,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-150-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-150', 0, _testStart);
         });
 
         await test.step('rpt-160: 帳票設定で画像型フィールドが指定可能であること', async () => {
@@ -1188,7 +1180,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // 帳票ボタンが表示されていること（画像型フィールドの帳票出力設定にアクセス可能）
             const reportBtn = page.locator('button:has-text("帳票")').first();
             await expect(reportBtn).toBeVisible();
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-160-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-160', 0, _testStart);
         });
 
         await test.step('rpt-170: 帳票設定ページが正常に表示されること（関連レコードINDEX対応確認）', async () => {
@@ -1204,7 +1196,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // 帳票ボタンが表示されていること
             const reportBtn = page.locator('button:has-text("帳票")').first();
             await expect(reportBtn).toBeVisible();
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-170-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-170', 0, _testStart);
         });
 
         await test.step('rpt-180: 帳票出力設定で数値フォーマットの設定が確認できること', async () => {
@@ -1223,7 +1215,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-180-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-180', 0, _testStart);
         });
 
         await test.step('rpt-190: 帳票の元Excelにタブが2つ以上あってもダウンロードできること', async () => {
@@ -1273,7 +1265,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const body = await page.innerText('body');
             expect(body).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-190-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-190', 0, _testStart);
         });
 
         await test.step('rpt-200: 帳票の2枚目以降のシートでも$から始まる式が反映されること', async () => {
@@ -1299,7 +1291,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const body = await page.innerText('body');
             expect(body).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-200-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-200', 0, _testStart);
         });
 
         await test.step('rpt-210: 子テーブルが空のレコードで帳票出力時に$START/$ENDが表示されないこと', async () => {
@@ -1339,7 +1331,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             expect(body).not.toContain('$START');
             expect(body).not.toContain('$END');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'RP02', 'rpt-210-s3', _testStart);
+            await autoScreenshot(page, 'RP02', 'rpt-210', 0, _testStart);
         });
 
     });
@@ -1370,7 +1362,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'UC15', 'rpt-220-s3', _testStart);
+            await autoScreenshot(page, 'UC15', 'rpt-220', 0, _testStart);
         });
 
     });
@@ -1487,7 +1479,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-            await stepScreenshot(page, 'reports', 'UC22', 'rpt-230-s3', _testStart);
+            await autoScreenshot(page, 'UC22', 'rpt-230', 0, _testStart);
         });
 
     });
@@ -1529,7 +1521,7 @@ test.describe('帳票（登録・出力・ダウンロード）', () => {
             // ドロップダウンを閉じる
             await page.keyboard.press('Escape');
             await waitForAngular(page);
-            await stepScreenshot(page, 'reports', 'UC08', 'rpt-240-s3', _testStart);
+            await autoScreenshot(page, 'UC08', 'rpt-240', 0, _testStart);
         });
 
     });

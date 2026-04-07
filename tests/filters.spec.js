@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const fs = require('fs');
@@ -14,17 +15,6 @@ let PASSWORD = process.env.TEST_PASSWORD;
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -172,6 +162,8 @@ async function openFilterPanel(page) {
 // フィルタテスト
 // =============================================================================
 
+const autoScreenshot = createAutoScreenshot('filters');
+
 test.describe('フィルタ（フィルタタイプ・高度な検索）', () => {
 
     let tableId = null;
@@ -286,7 +278,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
             await expect(page.locator('button:has-text("キャンセル")').filter({ visible: true }).first()).toBeVisible();
 
             // スクリーンショット保存
-            await stepScreenshot(page, 'filters', 'FL01', 'fil-010-s1', _testStart);
+            await autoScreenshot(page, 'FL01', 'fil-010', 0, _testStart);
 
         });
         await test.step('fil-020: 高度な検索（フィルタの複合条件）が設定できること', async () => {
@@ -352,7 +344,7 @@ test.describe('フィルタ（フィルタタイプ・高度な検索）', () =>
             await expect(page.locator('text=集計を使用する')).toBeVisible();
 
             // スクリーンショット保存
-            await stepScreenshot(page, 'filters', 'FL01', 'fil-020-s1', _testStart);
+            await autoScreenshot(page, 'FL01', 'fil-020', 0, _testStart);
 
         });
     });
@@ -544,7 +536,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             expect(bodyAfter).not.toContain('Internal Server Error');
             expect(bodyAfter.includes('フィルタ') || bodyAfter.includes('条件')).toBe(true);
 
-            await stepScreenshot(page, 'filters', 'FL01', 'fil-030-s1', _testStart);
+            await autoScreenshot(page, 'FL01', 'fil-030', 0, _testStart);
         });
         await test.step('fil-040: フィルタ保存UIが存在すること', async () => {
             const STEP_TIME = Date.now();
@@ -572,7 +564,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             // 「保存して表示」ボタンが存在すること
             await expect(page.locator('button:has-text("保存して表示")')).toBeVisible();
 
-            await stepScreenshot(page, 'filters', 'FL01', 'fil-040-s1', _testStart);
+            await autoScreenshot(page, 'FL01', 'fil-040', 0, _testStart);
         });
         await test.step('fil-050: フィルタ一覧・管理UIが存在すること', async () => {
             const STEP_TIME = Date.now();
@@ -598,7 +590,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             // 「絞り込み」タブが存在すること
             await expect(page.locator('[role="tab"]:has-text("絞り込み")')).toBeVisible();
 
-            await stepScreenshot(page, 'filters', 'FL01', 'fil-050-s1', _testStart);
+            await autoScreenshot(page, 'FL01', 'fil-050', 0, _testStart);
         });
         await test.step('fil-060: 高度な検索UIが表示され、複合条件を設定できること', async () => {
             const STEP_TIME = Date.now();
@@ -640,7 +632,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             expect(bodyAfter).not.toContain('Internal Server Error');
             expect(bodyAfter.includes('AND') || bodyAfter.includes('OR') || bodyAfter.includes('条件')).toBe(true);
 
-            await stepScreenshot(page, 'filters', 'FL01', 'fil-060-s1', _testStart);
+            await autoScreenshot(page, 'FL01', 'fil-060', 0, _testStart);
         });
     });
 
@@ -667,7 +659,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
-            await stepScreenshot(page, 'filters', 'FL02', 'fil-070-s1', _testStart);
+            await autoScreenshot(page, 'FL02', 'fil-070', 0, _testStart);
         });
         await test.step('fil-110: フィルタの「全てのユーザーのデフォルトにする」チェックが排他的であること', async () => {
             const STEP_TIME = Date.now();
@@ -694,7 +686,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
-            await stepScreenshot(page, 'filters', 'FL02', 'fil-110-s1', _testStart);
+            await autoScreenshot(page, 'FL02', 'fil-110', 0, _testStart);
         });
         await test.step('fil-120: テーブルを開いたときにデフォルトフィルタが適用されること', async () => {
             const STEP_TIME = Date.now();
@@ -713,7 +705,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
-            await stepScreenshot(page, 'filters', 'FL02', 'fil-120-s1', _testStart);
+            await autoScreenshot(page, 'FL02', 'fil-120', 0, _testStart);
         });
         await test.step('fil-080: 権限設定内の登録ユーザー並び替えが正しく反映されること', async () => {
             const STEP_TIME = Date.now();
@@ -744,7 +736,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             const userCount = await userItems.count();
             console.log('280: 権限グループ内ユーザー数:', userCount);
 
-            await stepScreenshot(page, 'filters', 'FL02', 'fil-080-s1', _testStart);
+            await autoScreenshot(page, 'FL02', 'fil-080', 0, _testStart);
         });
         await test.step('fil-130: ビュー編集後に表示ボタンを押してもフィルタモードに切り替わらないこと', async () => {
             const STEP_TIME = Date.now();
@@ -771,7 +763,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
-            await stepScreenshot(page, 'filters', 'FL02', 'fil-130-s1', _testStart);
+            await autoScreenshot(page, 'FL02', 'fil-130', 0, _testStart);
         });
     });
 
@@ -806,7 +798,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
             }
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
 
-            await stepScreenshot(page, 'filters', 'FL03', 'fil-090-s1', _testStart);
+            await autoScreenshot(page, 'FL03', 'fil-090', 0, _testStart);
         });
         await test.step('fil-140: ユーザー管理テーブルの項目クリックで並び替えができること', async () => {
             const STEP_TIME = Date.now();
@@ -832,7 +824,7 @@ test.describe('フィルタ作成・適用・削除（245-248系）', () => {
                 expect(bodyAfter).not.toContain('Internal Server Error');
             }
 
-            await stepScreenshot(page, 'filters', 'FL03', 'fil-140-s1', _testStart);
+            await autoScreenshot(page, 'FL03', 'fil-140', 0, _testStart);
         });
         await test.step('fil-200: 項目横の検索後にフィルタボタンが正常に反応すること', async () => {
             const STEP_TIME = Date.now();

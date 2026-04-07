@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const { createTestEnv } = require('./helpers/create-test-env');
 const { createAuthContext } = require('./helpers/auth-context');
 const { getAllTypeTableId } = require('./helpers/table-setup');
@@ -12,17 +13,6 @@ let PASSWORD = process.env.TEST_PASSWORD;
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -220,6 +210,8 @@ test.beforeAll(async ({ browser }) => {
 // =============================================================================
 // ユーザー管理・権限設定テスト
 // =============================================================================
+
+const autoScreenshot = createAutoScreenshot('users-permissions');
 
 test.describe('ユーザー管理（作成・編集・削除・有効/無効）', () => {
 

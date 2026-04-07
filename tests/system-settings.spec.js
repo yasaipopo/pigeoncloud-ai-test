@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const { createAuthContext } = require('./helpers/auth-context');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { createTestEnv } = require('./helpers/create-test-env');
@@ -11,17 +12,6 @@ let PASSWORD = process.env.TEST_PASSWORD;
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -356,6 +346,8 @@ async function getAdminSetting(page) {
 // =============================================================================
 // テーブル定義一覧テスト（ALLテストテーブル不要 — 10-1, 10-2）
 // =============================================================================
+const autoScreenshot = createAutoScreenshot('system-settings');
+
 test.describe('テーブル定義一覧（ALLテストテーブル不要）', () => {
 
     test.beforeAll(async ({ browser }) => {
@@ -447,7 +439,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             } else {
                 await expect(page.locator('header.app-header')).toBeVisible();
             }
-            await stepScreenshot(page, 'system-settings', 'SS03', 'sys-010-s1', _testStart);
+            await autoScreenshot(page, 'SS03', 'sys-010', 0, _testStart);
         });
 
         await test.step('sys-020: テーブル詳細情報の表示がエラーなく行えること', async () => {
@@ -475,7 +467,7 @@ test.describe('テーブル定義一覧（ALLテストテーブル不要）', ()
             const tableList = page.locator('table tbody tr, .dataset-list-item, [class*="table-row"], tr[ng-reflect], li[class*="list-group-item"]');
             const count = await tableList.count();
             console.log('テーブル一覧件数: ' + count);
-            await stepScreenshot(page, 'system-settings', 'SS03', 'sys-020-s1', _testStart);
+            await autoScreenshot(page, 'SS03', 'sys-020', 0, _testStart);
         });
 
     });
@@ -574,7 +566,7 @@ test.describe('共通設定・システム設定', () => {
 
             // テーブルのヘッダー行が表示されていること（IDカラムが存在すること）
             await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();
-            await stepScreenshot(page, 'system-settings', 'SS03', 'sys-030-s1', _testStart);
+            await autoScreenshot(page, 'SS03', 'sys-030', 0, _testStart);
         });
 
         await test.step('sys-040: テーブルの削除がエラーなく行えること', async () => {

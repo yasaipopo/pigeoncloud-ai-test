@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const { createTestEnv } = require('./helpers/create-test-env');
 
@@ -11,17 +12,6 @@ let PASSWORD = process.env.TEST_PASSWORD;
 /**
  * ステップスクリーンショット撮影
  */
-async function stepScreenshot(page, spec, movie, stepId, testStartTime) {
-    const sec = Math.round((Date.now() - testStartTime) / 1000);
-    const reportsDir = process.env.REPORTS_DIR || `reports/agent-${process.env.AGENT_NUM || '1'}`;
-    const dir = `${reportsDir}/steps/${spec}/${movie}`;
-    require('fs').mkdirSync(dir, { recursive: true });
-    const filePath = `${dir}/${stepId}.jpg`;
-    await page.screenshot({ path: filePath, type: 'jpeg', quality: 30, fullPage: false }).catch(() => {});
-    console.log(`[STEP_TIME] ${sec}s ${stepId} screenshot:${filePath}`);
-    return sec;
-}
-
 async function waitForAngular(page, timeout = 15000) {
     try {
         await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
@@ -122,6 +112,8 @@ async function openTemplateModal(page) {
     return modalCount > 0;
 }
 
+const autoScreenshot = createAutoScreenshot('templates');
+
 test.describe('テンプレート', () => {
     // 自己完結: specごとに専用テスト環境を作成
     test.beforeAll(async ({ browser }) => {
@@ -160,7 +152,7 @@ test.describe('テンプレート', () => {
             // エラーなし
             const errorMsg = await page.locator('.modal.show .alert-danger').count();
             expect(errorMsg).toBe(0);
-            await stepScreenshot(page, 'templates', 'TM01', 'tpl-010-s3', _testStart);
+            await autoScreenshot(page, 'TM01', 'tpl-010', 0, _testStart);
         });
 
         await test.step('tpl-020: テンプレートの詳細を確認できること', async () => {
@@ -193,7 +185,7 @@ test.describe('テンプレート', () => {
             // 「戻る」ボタンが存在すること
             const backBtn = await page.locator('.modal.show button').filter({ hasText: '戻る' }).count();
             expect(backBtn).toBeGreaterThan(0);
-            await stepScreenshot(page, 'templates', 'TM01', 'tpl-020-s3', _testStart);
+            await autoScreenshot(page, 'TM01', 'tpl-020', 0, _testStart);
         });
 
         await test.step('tpl-030: テンプレートインストールモーダルの「戻る」で一覧に戻れること', async () => {
@@ -219,7 +211,7 @@ test.describe('テンプレート', () => {
             // テンプレート一覧に戻ること
             const templateIconsAfter = await page.locator('.modal.show .template_icon').count();
             expect(templateIconsAfter).toBeGreaterThan(0);
-            await stepScreenshot(page, 'templates', 'TM01', 'tpl-030-s3', _testStart);
+            await autoScreenshot(page, 'TM01', 'tpl-030', 0, _testStart);
         });
 
         await test.step('tpl-040: テンプレートをインストールできること', async () => {
@@ -264,7 +256,7 @@ test.describe('テンプレート', () => {
             // （モーダルが閉じている or まだ表示中でもエラーなし）
             const currentUrl = page.url();
             expect(currentUrl).toContain('/admin/');
-            await stepScreenshot(page, 'templates', 'TM01', 'tpl-040-s3', _testStart);
+            await autoScreenshot(page, 'TM01', 'tpl-040', 0, _testStart);
         });
 
         await test.step('tpl-050: テンプレートモーダルを閉じられること', async () => {
@@ -292,7 +284,7 @@ test.describe('テンプレート', () => {
                 const modalAfter = await page.locator('.modal.show').count();
                 expect(modalAfter).toBe(0);
             }
-            await stepScreenshot(page, 'templates', 'TM01', 'tpl-050-s3', _testStart);
+            await autoScreenshot(page, 'TM01', 'tpl-050', 0, _testStart);
         });
 
         await test.step('tpl-060: テンプレート一覧のテンプレート名が表示されていること', async () => {
@@ -313,7 +305,7 @@ test.describe('テンプレート', () => {
             const knownTemplates = ['採用管理', '在庫管理', 'タスク管理', 'ファイル管理', '顧客管理'];
             const hasKnownTemplate = templateNames.some(name => knownTemplates.includes(name));
             expect(hasKnownTemplate).toBeTruthy();
-            await stepScreenshot(page, 'templates', 'TM01', 'tpl-060-s3', _testStart);
+            await autoScreenshot(page, 'TM01', 'tpl-060', 0, _testStart);
         });
     });
 });
