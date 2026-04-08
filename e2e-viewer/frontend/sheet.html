@@ -1310,7 +1310,7 @@ async function playVideo(spec, movie) {
             /\[(\d+):(\d{2})\]/g,
             (match, min, sec) => {
               const totalSec = parseInt(min) * 60 + parseInt(sec);
-              return `<a href="#" onclick="document.getElementById('videoPlayer').currentTime=${totalSec};document.getElementById('videoPlayer').play();return false" `
+              return `<a href="#" onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${totalSec};document.getElementById('videoPlayer').play();return false" `
                 + `style="display:inline-block;background:#0d6efd;color:#fff;padding:1px 8px;border-radius:4px;text-decoration:none;font-weight:700;font-size:.8rem" `
                 + `title="動画の ${min}:${sec} にジャンプ">▶ ${min}:${sec}</a>`;
             }
@@ -1357,7 +1357,7 @@ async function playVideo(spec, movie) {
           // detailedFlow がない場合は従来通り個別表示
           html += movieTests.map((t, idx) => {
             const sec = timeMap[t.caseNo];
-            const timeLabel = sec !== undefined ? `<a href="#" onclick="document.getElementById('videoPlayer').currentTime=${sec};return false" style="color:#fff;background:#0d6efd;padding:1px 6px;border-radius:4px;font-size:.75rem;text-decoration:none;margin-left:6px">▶ ${fmtTime(sec)}</a>` : '';
+            const timeLabel = sec !== undefined ? `<a href="#" onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${sec};document.getElementById('videoPlayer').play();return false" style="color:#fff;background:#0d6efd;padding:1px 6px;border-radius:4px;font-size:.75rem;text-decoration:none;margin-left:6px">▶ ${fmtTime(sec)}</a>` : '';
             return `
             <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #dee2e6">
               <div style="font-weight:700;color:#0d6efd;margin-bottom:4px">
