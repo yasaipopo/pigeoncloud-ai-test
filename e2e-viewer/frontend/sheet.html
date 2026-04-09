@@ -1301,62 +1301,78 @@ async function playVideo(spec, movie) {
         // メイン表示: detailedFlow（1回だけ、大きく表示）
         // [M:SS] → 動画ジャンプ、🔴 → 赤文字（未実施ステップ）、✅📷 → スクショ
         function flowWithTimestampLinks(text, specName) {
-          let result = escHtml(text);
-          // 🔴 を含む行を赤文字に（テストすべきだが未実施のステップ）
-          result = result.replace(/^(.*🔴.*)$/gm,
-            '<span style="color:#dc3545;font-weight:600">$1</span>');
+          // 行単位で処理
+          const rawLines = escHtml(text).split('\n');
 
-          // タイムスタンプを収集してステップブロックに分割
-          const timestamps = [];
-          result.replace(/\[(\d+):(\d{2})\]/g, (m, min, sec) => {
-            timestamps.push(parseInt(min) * 60 + parseInt(sec));
+          // 1. タイムスタンプを収集: [{sec, lineIdx}]
+          const tsEntries = [];
+          rawLines.forEach((line, i) => {
+            const m = line.match(/\[(\d+):(\d{2})\]/);
+            if (m) tsEntries.push({ sec: parseInt(m[1]) * 60 + parseInt(m[2]), lineIdx: i });
           });
 
-          // [M:SS] → 動画ジャンプボタン（data-step-idx属性付き）
-          let stepIdx = 0;
-          result = result.replace(
-            /\[(\d+):(\d{2})\]/g,
-            (match, min, sec) => {
-              const totalSec = parseInt(min) * 60 + parseInt(sec);
-              const idx = stepIdx++;
-              return `</div><div class="flow-step" data-step-idx="${idx}" data-start="${totalSec}" style="padding:4px 0;margin:0 -4px;padding-left:4px;border-left:3px solid transparent;transition:all 0.2s">`
-                + `<a href="#" onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${totalSec};document.getElementById('videoPlayer').play();return false" `
-                + `style="display:inline-block;background:#0d6efd;color:#fff;padding:1px 8px;border-radius:4px;text-decoration:none;font-weight:700;font-size:.8rem" `
-                + `title="動画の ${min}:${sec} にジャンプ">▶ ${min}:${sec}</a>`;
-            }
-          );
-          // 先頭の空divタグを除去、最後のdivを閉じる
-          if (timestamps.length > 0) {
-            result = result.replace(/^<\/div>/, '') + '</div>';
-          }
-
-          // ステップID (auth-010 等) の横に 📷 スクショボタン（メインスクショ）
-          result = result.replace(
-            /(\w+-\d{3})\s+──/g,
-            (match, stepId) => {
-              return `${stepId} <a href="#" onclick="showStepScreenshot('${specName}','${movie}','${stepId}');return false" `
-                + `style="text-decoration:none;font-size:.85rem" title="この時点のスクリーンショット">📷</a> ──`;
-            }
-          );
-          // ✅ がある行に📷ボタン追加（auth-010-s4 等）
+          // 2. 各行にブロック番号＋ブロック内の行番号を割り当て
+          //    ブロック = タイムスタンプ行〜次のタイムスタンプ行の前まで
+          //    番号付き行（N. で始まる行）のみカウントして均等割
           let currentStepId = '';
-          result = result.replace(/^(.*)$/gm, (line) => {
+          const outLines = rawLines.map((line, i) => {
+            // 🔴 行を赤文字に
+            if (line.includes('🔴')) {
+              line = `<span style="color:#dc3545;font-weight:600">${line}</span>`;
+            }
+
+            // タイムスタンプ行 → ▶ ジャンプボタンに置換
+            line = line.replace(
+              /\[(\d+):(\d{2})\]/g,
+              (match, min, sec) => {
+                const totalSec = parseInt(min) * 60 + parseInt(sec);
+                return `<a href="#" onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${totalSec};document.getElementById('videoPlayer').play();return false" `
+                  + `style="display:inline-block;background:#0d6efd;color:#fff;padding:1px 8px;border-radius:4px;text-decoration:none;font-weight:700;font-size:.8rem" `
+                  + `title="動画の ${min}:${sec} にジャンプ">▶ ${min}:${sec}</a>`;
+              }
+            );
+
+            // ステップID の 📷 ボタン
+            line = line.replace(
+              /(\w+-\d{3})\s+──/g,
+              (match, stepId) => {
+                return `${stepId} <a href="#" onclick="showStepScreenshot('${specName}','${movie}','${stepId}');return false" `
+                  + `style="text-decoration:none;font-size:.85rem" title="この時点のスクリーンショット">📷</a> ──`;
+              }
+            );
+
+            // ステップID追跡 + ✅行の📷ボタン
             const idMatch = line.match(/(\w+-\d{3})\s/);
             if (idMatch) currentStepId = idMatch[1];
             if (currentStepId && line.includes('✅')) {
-              const numMatch = line.match(/^(\d+)\./);
+              const numMatch = line.match(/^(\s*)(\d+)\./);
               if (numMatch) {
-                const num = numMatch[1];
+                const num = numMatch[2];
                 const subId = `${currentStepId}-s${num}`;
-                return line.replace(
+                line = line.replace(
                   '✅',
                   `✅ <a href="#" onclick="showStepScreenshot('${specName}','${movie}','${subId}');return false" style="text-decoration:none;font-size:.75rem;opacity:0.7" title="ステップ${num}のスクショ">📷</a>`
                 );
               }
             }
+
+            // 番号付き行かどうか判定
+            const isNumbered = /^\s*\d+\./.test(rawLines[i]);
+
+            // どのブロックに属するか
+            let blockIdx = -1;
+            for (let b = tsEntries.length - 1; b >= 0; b--) {
+              if (i >= tsEntries[b].lineIdx) { blockIdx = b; break; }
+            }
+
+            // data属性付きdivで囲む（番号付き行のみハイライト対象）
+            if (blockIdx >= 0 && isNumbered) {
+              return `<div class="flow-line" data-block="${blockIdx}" data-src-line="${i}" style="padding:1px 4px;margin:0 -4px;border-left:3px solid transparent;transition:background 0.15s,border-color 0.15s">${line}</div>`;
+            }
             return line;
           });
-          return result;
+
+          return outLines.join('\n');
         }
 
         let html = '';
@@ -1387,30 +1403,64 @@ async function playVideo(spec, movie) {
 
       new bootstrap.Modal(document.getElementById('videoModal')).show();
 
-      // 動画再生に合わせてフローのステップをハイライト
+      // 動画再生に合わせて行単位でハイライト
       const videoEl = document.getElementById('videoPlayer');
-      const flowSteps = listEl.querySelectorAll('.flow-step');
-      if (flowSteps.length > 0) {
-        let lastHighlighted = -1;
-        videoEl.addEventListener('timeupdate', function onTimeUpdate() {
-          const t = videoEl.currentTime;
-          let activeIdx = -1;
-          for (let i = flowSteps.length - 1; i >= 0; i--) {
-            if (t >= parseFloat(flowSteps[i].dataset.start)) { activeIdx = i; break; }
-          }
-          if (activeIdx === lastHighlighted) return;
-          lastHighlighted = activeIdx;
-          flowSteps.forEach((el, i) => {
-            if (i === activeIdx) {
-              el.style.borderLeftColor = '#0d6efd';
-              el.style.background = 'rgba(13,110,253,0.08)';
-              el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            } else {
-              el.style.borderLeftColor = 'transparent';
-              el.style.background = 'transparent';
-            }
-          });
+      const flowLines = listEl.querySelectorAll('.flow-line');
+      if (flowLines.length > 0) {
+        // ブロックごとに行を整理: { blockIdx: [line elements], startSec, endSec }
+        const blocks = {};
+        flowLines.forEach(el => {
+          const b = el.dataset.block;
+          if (!blocks[b]) blocks[b] = { lines: [], startSec: 0, endSec: 0 };
+          blocks[b].lines.push(el);
         });
+        // タイムスタンプ情報（flowWithTimestampLinksのtsEntriesと同じ順序）
+        const tsButtons = listEl.querySelectorAll('a[title^="動画の"]');
+        const tsSecs = [];
+        tsButtons.forEach(btn => {
+          const m = btn.textContent.match(/(\d+):(\d{2})/);
+          if (m) tsSecs.push(parseInt(m[1]) * 60 + parseInt(m[2]));
+        });
+        // 各ブロックの開始秒・終了秒
+        Object.keys(blocks).forEach(b => {
+          const idx = parseInt(b);
+          blocks[b].startSec = tsSecs[idx] || 0;
+          blocks[b].endSec = (idx + 1 < tsSecs.length) ? tsSecs[idx + 1] : videoEl.duration || (tsSecs[idx] + 30);
+        });
+
+        let lastLine = null;
+        function onTimeUpdate() {
+          const t = videoEl.currentTime;
+          // 現在のブロックを特定
+          let activeBlock = null;
+          for (let i = tsSecs.length - 1; i >= 0; i--) {
+            if (t >= tsSecs[i]) { activeBlock = blocks[i]; break; }
+          }
+          if (!activeBlock) return;
+
+          // ブロック内の行を均等割して現在行を特定
+          const elapsed = t - activeBlock.startSec;
+          const duration = activeBlock.endSec - activeBlock.startSec;
+          const ratio = Math.min(elapsed / Math.max(duration, 1), 0.999);
+          const lineIdx = Math.floor(ratio * activeBlock.lines.length);
+          const activeLine = activeBlock.lines[lineIdx];
+
+          if (activeLine === lastLine) return;
+          lastLine = activeLine;
+
+          flowLines.forEach(el => {
+            el.style.borderLeftColor = 'transparent';
+            el.style.background = 'transparent';
+            el.style.fontWeight = '';
+          });
+          if (activeLine) {
+            activeLine.style.borderLeftColor = '#0d6efd';
+            activeLine.style.background = 'rgba(13,110,253,0.1)';
+            activeLine.style.fontWeight = '600';
+            activeLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+        videoEl.addEventListener('timeupdate', onTimeUpdate);
         // モーダルが閉じたらリスナーを解除
         document.getElementById('videoModal').addEventListener('hidden.bs.modal', () => {
           videoEl.removeEventListener('timeupdate', onTimeUpdate);
