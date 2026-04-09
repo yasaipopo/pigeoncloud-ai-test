@@ -1365,9 +1365,21 @@ async function playVideo(spec, movie) {
               if (i >= tsEntries[b].lineIdx) { blockIdx = b; break; }
             }
 
-            // data属性付きdivで囲む（番号付き行のみハイライト対象）
+            // data属性付きdivで囲む（番号付き行のみハイライト対象＋クリックで動画ジャンプ）
             if (blockIdx >= 0 && isNumbered) {
-              return `<div class="flow-line" data-block="${blockIdx}" data-src-line="${i}" style="padding:1px 4px;margin:0 -4px;border-left:3px solid transparent;transition:background 0.15s,border-color 0.15s">${line}</div>`;
+              // このブロック内で何番目の行か
+              const blockStart = tsEntries[blockIdx].lineIdx;
+              const blockEnd = (blockIdx + 1 < tsEntries.length) ? tsEntries[blockIdx + 1].lineIdx : rawLines.length;
+              const numberedInBlock = rawLines.slice(blockStart, blockEnd).filter(l => /^\s*\d+(?:-\d+)?\./.test(l));
+              const posInBlock = numberedInBlock.findIndex(l => rawLines.indexOf(l, blockStart) === i);
+              const blockStartSec = tsEntries[blockIdx].sec;
+              const blockEndSec = (blockIdx + 1 < tsEntries.length) ? tsEntries[blockIdx + 1].sec : blockStartSec + 15;
+              const stepSec = Math.round(blockStartSec + (posInBlock / Math.max(numberedInBlock.length, 1)) * (blockEndSec - blockStartSec));
+
+              return `<div class="flow-line" data-block="${blockIdx}" data-src-line="${i}" data-sec="${stepSec}" `
+                + `onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${stepSec};document.getElementById('videoPlayer').play()" `
+                + `style="padding:1px 4px;margin:0 -4px;border-left:3px solid transparent;transition:background 0.15s,border-color 0.15s;cursor:pointer" `
+                + `title="動画の ${Math.floor(stepSec/60)}:${String(stepSec%60).padStart(2,'0')} にジャンプ">${line}</div>`;
             }
             return line;
           });
@@ -1403,48 +1415,18 @@ async function playVideo(spec, movie) {
 
       new bootstrap.Modal(document.getElementById('videoModal')).show();
 
-      // 動画再生に合わせて行単位でハイライト
+      // 動画再生に合わせて行単位でハイライト（各行のdata-secを使用）
       const videoEl = document.getElementById('videoPlayer');
-      const flowLines = listEl.querySelectorAll('.flow-line');
+      const flowLines = [...listEl.querySelectorAll('.flow-line')];
       if (flowLines.length > 0) {
-        // ブロックごとに行を整理: { blockIdx: [line elements], startSec, endSec }
-        const blocks = {};
-        flowLines.forEach(el => {
-          const b = el.dataset.block;
-          if (!blocks[b]) blocks[b] = { lines: [], startSec: 0, endSec: 0 };
-          blocks[b].lines.push(el);
-        });
-        // タイムスタンプ情報（flowWithTimestampLinksのtsEntriesと同じ順序）
-        const tsButtons = listEl.querySelectorAll('a[title^="動画の"]');
-        const tsSecs = [];
-        tsButtons.forEach(btn => {
-          const m = btn.textContent.match(/(\d+):(\d{2})/);
-          if (m) tsSecs.push(parseInt(m[1]) * 60 + parseInt(m[2]));
-        });
-        // 各ブロックの開始秒・終了秒
-        Object.keys(blocks).forEach(b => {
-          const idx = parseInt(b);
-          blocks[b].startSec = tsSecs[idx] || 0;
-          blocks[b].endSec = (idx + 1 < tsSecs.length) ? tsSecs[idx + 1] : videoEl.duration || (tsSecs[idx] + 30);
-        });
-
         let lastLine = null;
         function onTimeUpdate() {
           const t = videoEl.currentTime;
-          // 現在のブロックを特定
-          let activeBlock = null;
-          for (let i = tsSecs.length - 1; i >= 0; i--) {
-            if (t >= tsSecs[i]) { activeBlock = blocks[i]; break; }
+          // 現在の行を特定: data-sec が現在時刻以下で最大のもの
+          let activeLine = null;
+          for (let i = flowLines.length - 1; i >= 0; i--) {
+            if (t >= parseFloat(flowLines[i].dataset.sec)) { activeLine = flowLines[i]; break; }
           }
-          if (!activeBlock) return;
-
-          // ブロック内の行を均等割して現在行を特定
-          const elapsed = t - activeBlock.startSec;
-          const duration = activeBlock.endSec - activeBlock.startSec;
-          const ratio = Math.min(elapsed / Math.max(duration, 1), 0.999);
-          const lineIdx = Math.floor(ratio * activeBlock.lines.length);
-          const activeLine = activeBlock.lines[lineIdx];
-
           if (activeLine === lastLine) return;
           lastLine = activeLine;
 
