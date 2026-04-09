@@ -1305,16 +1305,31 @@ async function playVideo(spec, movie) {
           // 🔴 を含む行を赤文字に（テストすべきだが未実施のステップ）
           result = result.replace(/^(.*🔴.*)$/gm,
             '<span style="color:#dc3545;font-weight:600">$1</span>');
-          // [M:SS] → 動画ジャンプボタン
+
+          // タイムスタンプを収集してステップブロックに分割
+          const timestamps = [];
+          result.replace(/\[(\d+):(\d{2})\]/g, (m, min, sec) => {
+            timestamps.push(parseInt(min) * 60 + parseInt(sec));
+          });
+
+          // [M:SS] → 動画ジャンプボタン（data-step-idx属性付き）
+          let stepIdx = 0;
           result = result.replace(
             /\[(\d+):(\d{2})\]/g,
             (match, min, sec) => {
               const totalSec = parseInt(min) * 60 + parseInt(sec);
-              return `<a href="#" onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${totalSec};document.getElementById('videoPlayer').play();return false" `
+              const idx = stepIdx++;
+              return `</div><div class="flow-step" data-step-idx="${idx}" data-start="${totalSec}" style="padding:4px 0;margin:0 -4px;padding-left:4px;border-left:3px solid transparent;transition:all 0.2s">`
+                + `<a href="#" onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${totalSec};document.getElementById('videoPlayer').play();return false" `
                 + `style="display:inline-block;background:#0d6efd;color:#fff;padding:1px 8px;border-radius:4px;text-decoration:none;font-weight:700;font-size:.8rem" `
                 + `title="動画の ${min}:${sec} にジャンプ">▶ ${min}:${sec}</a>`;
             }
           );
+          // 先頭の空divタグを除去、最後のdivを閉じる
+          if (timestamps.length > 0) {
+            result = result.replace(/^<\/div>/, '') + '</div>';
+          }
+
           // ステップID (auth-010 等) の横に 📷 スクショボタン（メインスクショ）
           result = result.replace(
             /(\w+-\d{3})\s+──/g,
@@ -1324,13 +1339,10 @@ async function playVideo(spec, movie) {
             }
           );
           // ✅ がある行に📷ボタン追加（auth-010-s4 等）
-          // 行番号 N と現在のステップIDからサブスクショIDを生成
           let currentStepId = '';
           result = result.replace(/^(.*)$/gm, (line) => {
-            // ステップIDの検出（auth-010 等）
             const idMatch = line.match(/(\w+-\d{3})\s/);
             if (idMatch) currentStepId = idMatch[1];
-            // ✅ を含む行に📷追加（行頭の番号を取得）
             if (currentStepId && line.includes('✅')) {
               const numMatch = line.match(/^(\d+)\./);
               if (numMatch) {
@@ -1374,6 +1386,38 @@ async function playVideo(spec, movie) {
       }
 
       new bootstrap.Modal(document.getElementById('videoModal')).show();
+
+      // 動画再生に合わせてフローのステップをハイライト
+      const videoEl = document.getElementById('videoPlayer');
+      const flowSteps = listEl.querySelectorAll('.flow-step');
+      if (flowSteps.length > 0) {
+        let lastHighlighted = -1;
+        videoEl.addEventListener('timeupdate', function onTimeUpdate() {
+          const t = videoEl.currentTime;
+          let activeIdx = -1;
+          for (let i = flowSteps.length - 1; i >= 0; i--) {
+            if (t >= parseFloat(flowSteps[i].dataset.start)) { activeIdx = i; break; }
+          }
+          if (activeIdx === lastHighlighted) return;
+          lastHighlighted = activeIdx;
+          flowSteps.forEach((el, i) => {
+            if (i === activeIdx) {
+              el.style.borderLeftColor = '#0d6efd';
+              el.style.background = 'rgba(13,110,253,0.08)';
+              el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+              el.style.borderLeftColor = 'transparent';
+              el.style.background = 'transparent';
+            }
+          });
+        });
+        // モーダルが閉じたらリスナーを解除
+        document.getElementById('videoModal').addEventListener('hidden.bs.modal', () => {
+          videoEl.removeEventListener('timeupdate', onTimeUpdate);
+          videoEl.pause();
+        }, { once: true });
+      }
+
     } else {
       alert(`動画が見つかりません: ${spec}/${movie}\n\n動画が未アップロードの可能性があります。テストを再実行してください。`);
     }
