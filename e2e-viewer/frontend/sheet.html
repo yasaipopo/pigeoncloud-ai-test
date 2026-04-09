@@ -1345,7 +1345,7 @@ async function playVideo(spec, movie) {
             const idMatch = line.match(/(\w+-\d{3})\s/);
             if (idMatch) currentStepId = idMatch[1];
             if (currentStepId && line.includes('✅')) {
-              const numMatch = line.match(/^(\s*)(\d+)\./);
+              const numMatch = line.match(/^(\s*)(\d+(?:-\d+)?)\./);
               if (numMatch) {
                 const num = numMatch[2];
                 const subId = `${currentStepId}-s${num}`;
@@ -1357,7 +1357,7 @@ async function playVideo(spec, movie) {
             }
 
             // 番号付き行かどうか判定
-            const isNumbered = /^\s*\d+\./.test(rawLines[i]);
+            const isNumbered = /^\s*\d+(?:-\d+)?\./.test(rawLines[i]);
 
             // どのブロックに属するか
             let blockIdx = -1;

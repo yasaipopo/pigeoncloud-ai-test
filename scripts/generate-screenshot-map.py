@@ -57,10 +57,10 @@ def parse_detailed_flow(flow_text):
                 case_checks[current_case] = []
             continue
 
-        # 番号付きステップの✅検出: N. ✅ ...
-        step_match = re.match(r'^(\d+)\.\s*✅', trimmed)
+        # 番号付きステップの✅検出: N. ✅ ... または N-N. ✅ ...
+        step_match = re.match(r'^(\d+(?:-\d+)?)\.\s*✅', trimmed)
         if step_match and current_case:
-            line_num = int(step_match.group(1))
+            line_num = step_match.group(1)  # "10-2" or "30-4" 等
             case_checks[current_case].append(line_num)
 
     return case_checks
