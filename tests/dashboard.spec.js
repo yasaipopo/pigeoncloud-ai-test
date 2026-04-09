@@ -351,12 +351,21 @@ test.describe('ダッシュボード', () => {
                 await waitForAngular(page);
             }
 
-            // 11. ✅ エラー（.alert-danger）が表示されないこと
+            // 30-4. ✅ エラーメッセージが表示されないこと
             const errorAlert = page.locator('.alert-danger');
             const errorCount = await errorAlert.count();
             expect(errorCount).toBe(0);
-            // ダッシュボードに戻った画面でスクショ（モーダルが閉じた後）
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+            // 30-5. ✅ ダッシュボードにビューウィジェットが追加されていること
+            const tabpanelId030 = await dashTablistDB03.locator('[role=tab]').filter({ hasText: _createdDashboardName }).first()
+                .getAttribute('aria-controls').catch(() => null);
+            if (tabpanelId030) {
+                const widgetInPanel = page.locator(`#${tabpanelId030}`).locator('[class*="widget"], [class*="view"], iframe, table, .card');
+                const widgetCount = await widgetInPanel.count();
+                console.log('dash-030: ウィジェット数:', widgetCount);
+                expect(widgetCount, 'ビューウィジェットがダッシュボードに追加されていること').toBeGreaterThan(0);
+            }
             await autoScreenshot(page, 'DB01', 'dash-030', _testStart);
         });
 
@@ -392,11 +401,21 @@ test.describe('ダッシュボード', () => {
                 }
             }
 
-            // 14. ✅ エラーが表示されず、.navbar が表示されたままであること
-            const errorAlert = page.locator('.alert-danger');
-            const errorCount = await errorAlert.count();
-            expect(errorCount).toBe(0);
+            // 40-3. ✅ エラーメッセージが表示されないこと
+            const errorAlert040 = page.locator('.alert-danger');
+            expect(await errorAlert040.count()).toBe(0);
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+
+            // 40-4. ✅ ダッシュボードに掲示板コンテンツが追加されていること
+            const tabpanelId040 = await dashTablistDB04.locator('[role=tab]').filter({ hasText: _createdDashboardName }).first()
+                .getAttribute('aria-controls').catch(() => null);
+            if (tabpanelId040) {
+                const bulletinInPanel = page.locator(`#${tabpanelId040}`).locator('[class*="bulletin"], [class*="board"], [class*="掲示板"], .card');
+                const bulletinCount040 = await bulletinInPanel.count();
+                console.log('dash-040: 掲示板要素数:', bulletinCount040);
+                // 掲示板が追加されたことを確認（要素が増えていること）
+                expect(bulletinCount040, '掲示板コンテンツがダッシュボードに追加されていること').toBeGreaterThan(0);
+            }
             await autoScreenshot(page, 'DB01', 'dash-040', _testStart);
         });
 
