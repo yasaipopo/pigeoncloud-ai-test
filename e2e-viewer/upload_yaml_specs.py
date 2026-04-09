@@ -90,7 +90,7 @@ def main():
     parser = argparse.ArgumentParser(description='specs/*.yaml を pipeline テーブルに同期')
     parser.add_argument('--dry-run', action='store_true', help='APIに送信せず内容を表示')
     parser.add_argument('--spec', default='', help='対象specを絞り込む（例: auth）')
-    parser.add_argument('--overwrite', action='store_true', default=True,
+    parser.add_argument('--overwrite', action='store_true', default=False,
                         help='既存データも上書き（デフォルト: True）')
     args = parser.parse_args()
 

@@ -879,46 +879,76 @@ def pipeline_init(event):
             if not spec_name or not case_no:
                 continue
 
-            if not overwrite:
-                # 既存チェック
-                try:
-                    existing = pipeline_table.get_item(
-                        Key={'spec': spec_name, 'caseNo': case_no}
-                    )
-                    if 'Item' in existing:
-                        skip_count += 1
-                        continue
-                except Exception:
-                    pass
+            # 既存チェック
+            existing_item = None
+            try:
+                existing = pipeline_table.get_item(
+                    Key={'spec': spec_name, 'caseNo': case_no}
+                )
+                existing_item = existing.get('Item')
+            except Exception:
+                pass
 
-            item = {
-                'spec': spec_name,
-                'caseNo': case_no,
-                'oldCaseNo': case.get('oldCaseNo', ''),
-                'movie': case.get('movie', ''),
-                'feature': case.get('feature', ''),
-                'description': case.get('description', ''),
-                'expected': case.get('expected', ''),
-                'detailedFlow': case.get('detailedFlow', ''),
-                'yamlCheck': case.get('yamlCheck') or None,
-                'yamlCheckNote': case.get('yamlCheckNote', ''),
-                'specCheck': case.get('specCheck') or None,
-                'specCheckNote': case.get('specCheckNote', ''),
-                'runCheck': case.get('runCheck') or None,
-                'runCheckNote': case.get('runCheckNote', ''),
-                'testerCheck': case.get('testerCheck') or None,
-                'testerCheckNote': case.get('testerCheckNote', ''),
-                'testerCheckBy': case.get('testerCheckBy', ''),
-                'testerCheckAt': case.get('testerCheckAt', ''),
-                'updatedAt': now_iso,
-                'updatedBy': 'pipeline_init',
-            }
+            if existing_item and not overwrite:
+                skip_count += 1
+                continue
 
-            # Noneの値を除去（DynamoDBはNoneを保存できない）
-            item = {k: v for k, v in item.items() if v is not None}
+            if existing_item:
+                # 既存アイテムがある場合: yaml由来フィールドのみ更新（テスト結果フィールドを保持）
+                yaml_fields = {
+                    'oldCaseNo': case.get('oldCaseNo', ''),
+                    'movie': case.get('movie', ''),
+                    'feature': case.get('feature', ''),
+                    'description': case.get('description', ''),
+                    'expected': case.get('expected', ''),
+                    'detailedFlow': case.get('detailedFlow', ''),
+                }
+                update_parts = []
+                attr_names = {}
+                attr_values = {':t': now_iso, ':u': 'pipeline_init'}
+                for idx, (k, v) in enumerate(yaml_fields.items()):
+                    if v is not None:
+                        placeholder = f':v{idx}'
+                        attr_names[f'#f{idx}'] = k
+                        attr_values[placeholder] = v
+                        update_parts.append(f'#f{idx} = {placeholder}')
+                update_parts.append('updatedAt = :t')
+                update_parts.append('updatedBy = :u')
 
-            pipeline_table.put_item(Item=item)
-            total_count += 1
+                pipeline_table.update_item(
+                    Key={'spec': spec_name, 'caseNo': case_no},
+                    UpdateExpression='SET ' + ', '.join(update_parts),
+                    ExpressionAttributeNames=attr_names,
+                    ExpressionAttributeValues=attr_values,
+                )
+                total_count += 1
+            else:
+                # 新規アイテム: 全フィールドで作成
+                item = {
+                    'spec': spec_name,
+                    'caseNo': case_no,
+                    'oldCaseNo': case.get('oldCaseNo', ''),
+                    'movie': case.get('movie', ''),
+                    'feature': case.get('feature', ''),
+                    'description': case.get('description', ''),
+                    'expected': case.get('expected', ''),
+                    'detailedFlow': case.get('detailedFlow', ''),
+                    'yamlCheck': case.get('yamlCheck') or None,
+                    'yamlCheckNote': case.get('yamlCheckNote', ''),
+                    'specCheck': case.get('specCheck') or None,
+                    'specCheckNote': case.get('specCheckNote', ''),
+                    'runCheck': case.get('runCheck') or None,
+                    'runCheckNote': case.get('runCheckNote', ''),
+                    'testerCheck': case.get('testerCheck') or None,
+                    'testerCheckNote': case.get('testerCheckNote', ''),
+                    'testerCheckBy': case.get('testerCheckBy', ''),
+                    'testerCheckAt': case.get('testerCheckAt', ''),
+                    'updatedAt': now_iso,
+                    'updatedBy': 'pipeline_init',
+                }
+                item = {k: v for k, v in item.items() if v is not None}
+                pipeline_table.put_item(Item=item)
+                total_count += 1
 
     return response(200, {
         'message': f'{total_count}件登録完了（{skip_count}件スキップ）',
