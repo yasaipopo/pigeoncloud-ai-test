@@ -8,13 +8,14 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 
 const ADMIN_BASE_URL = process.env.ADMIN_BASE_URL || 'https://ai-test.pigeon-demo.com';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.TEST_PASSWORD || '';
 
 async function createTestEnv(browser, options = {}) {
-    const { withAllTypeTable = true } = options;
+    const { withAllTypeTable = true, enableOptions = null } = options;
 
     // 1. 管理画面にログイン
     const adminContext = await browser.newContext();
@@ -34,7 +35,10 @@ async function createTestEnv(browser, options = {}) {
             break;
         } catch (e) {
             console.log(`[createTestEnv] ログイン attempt ${loginAttempt}/3 失敗: ${e.message.substring(0, 50)}`);
-            if (loginAttempt < 3) await adminPage.waitForTimeout(3000 + Math.random() * 2000);
+            if (loginAttempt < 3) {
+                // net::ERR_ABORTEDなどでpageが無効になる場合があるためtry/catch
+                try { await adminPage.waitForTimeout(3000 + Math.random() * 2000); } catch {}
+            }
         }
     }
     if (!loginOk) {
@@ -73,13 +77,46 @@ async function createTestEnv(browser, options = {}) {
         if (attempt < 3) await adminPage.waitForTimeout(5000);
     }
 
-    await adminContext.close();
-
     if (!baseUrl || !password) {
+        await adminContext.close();
         throw new Error('create-trial が3回とも失敗');
     }
 
     console.log(`[createTestEnv] 環境作成完了: ${baseUrl}${tableId ? ', tableId: ' + tableId : ', テーブル作成中...'}`);
+
+    // 2.5. テナントオプションを有効化（step_mail_option等）
+    if (enableOptions && typeof enableOptions === 'object') {
+        // baseUrl: https://tmp-xxx.pigeon-demo.com → clientName: tmp-xxx
+        const clientName = (() => {
+            try {
+                const host = new URL(baseUrl).hostname;
+                return host.split('.')[0];
+            } catch { return null; }
+        })();
+        if (clientName) {
+            const updateResult = await adminPage.evaluate(async ({ name, opts }) => {
+                try {
+                    const r = await fetch(`/api/admin/update-client-setting/${name}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ setting: opts }),
+                        credentials: 'include',
+                    });
+                    if (!r.ok) return { error: true, status: r.status };
+                    return { ok: true };
+                } catch (e) {
+                    return { error: true, message: e.message };
+                }
+            }, { name: clientName, opts: enableOptions });
+            if (updateResult.ok) {
+                console.log(`[createTestEnv] オプション有効化OK: ${JSON.stringify(enableOptions)}`);
+            } else {
+                console.warn(`[createTestEnv] オプション有効化失敗:`, JSON.stringify(updateResult));
+            }
+        }
+    }
+
+    await adminContext.close();
 
     // 3. 新環境にログイン
     const email = 'admin';
@@ -93,16 +130,17 @@ async function createTestEnv(browser, options = {}) {
     await page.locator('button[type=submit].btn-primary').first().click();
     await page.waitForSelector('.navbar', { timeout: 30000 });
 
-    // storageState更新
+    // storageState更新（蓄積防止のため上書き前にファイルを削除）
     const agentNum = process.env.AGENT_NUM || '1';
     const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
+    try { if (fs.existsSync(storageStatePath)) fs.unlinkSync(storageStatePath); } catch {}
     await context.storageState({ path: storageStatePath });
 
     // 4. テーブルIDが未取得の場合、テスト側でポーリング（最大120秒）
     // PHP側はバックグラウンドでテーブル作成中 → ALBタイムアウトに依存しない
     if (withAllTypeTable && !tableId) {
         console.log('[createTestEnv] テーブル作成完了をポーリング中...');
-        for (let i = 0; i < 48; i++) {
+        for (let i = 0; i < 24; i++) {
             await page.waitForTimeout(5000);
             const status = await page.evaluate(async () => {
                 try {
@@ -122,7 +160,7 @@ async function createTestEnv(browser, options = {}) {
             }
         }
         if (!tableId) {
-            console.warn('[createTestEnv] テーブル作成が240秒以内に完了しませんでした');
+            console.warn('[createTestEnv] テーブル作成が120秒以内に完了しませんでした');
         }
     }
 

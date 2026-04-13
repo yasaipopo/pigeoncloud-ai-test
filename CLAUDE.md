@@ -128,6 +128,8 @@ cat .claude/knowledge-e2e-failure-triage.md
 | `.claude/knowledge-page-record-list.md` | レコード一覧、新規作成、アクションメニュー、チャートモーダル |
 | `.claude/knowledge-page-workflow.md` | ワークフロー設定、ビジュアルフローエディタ、申請・承認フロー |
 | `.claude/knowledge-page-admin-settings.md` | 管理設定、debug API、ログインフロー |
+| `.claude/knowledge-e2e-notifications.md` | **メール系テーブル名（mail_templates/mail_reserve/mail_delivery_list）**、step_mail_option 有効化API、ステップメール/メールテンプレート/メール配信編集ページのセレクター |
+| `.claude/knowledge-e2e-table-definition.md` | **テーブル名マッピング（organization→division）**、`/admin/dataset__N/add` 直接 goto 禁止、ALLテストテーブルの自動採番フィールド特定、サイドバータブクリック方法、gotoRecordAdd helper |
 
 テスト用テーブルスキーマ定義:
 
