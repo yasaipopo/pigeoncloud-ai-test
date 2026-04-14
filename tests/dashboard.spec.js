@@ -197,20 +197,37 @@ async function addWidget(page, tabPanelId, displayType = 'データ') {
     await waitForAngular(page);
 
     // [flow] 表示タイプをラジオボタンで選択（デフォルトは「データ」）
+    // input[type=radio][name=filter_type] の value: データ→table, チャート→chart, 集計→sum
+    // label には for 属性がないため click で関連付けできない。force checkで直接チェック。
     if (displayType !== 'データ') {
-        // getByRoleでラジオボタンを選択（accessible nameでマッチ）
-        const radioBtn = page.getByRole('radio', { name: displayType });
-        if (await radioBtn.count() > 0) {
-            await radioBtn.first().click();
-            await waitForAngular(page);
-        } else {
-            // フォールバック: effectiveModal内のテキストマッチ
-            const radioContainer = effectiveModal.locator('div').filter({ hasText: displayType });
-            if (await radioContainer.count() > 0) {
-                await radioContainer.last().click();
-                await waitForAngular(page);
+        const typeValueMap = { 'データ': 'table', 'チャート': 'chart', '集計': 'sum' };
+        const targetValue = typeValueMap[displayType];
+        if (!targetValue) throw new Error(`addWidget: 未対応のdisplayType: ${displayType}`);
+        // DOM全体で検索（モーダル外の可能性に備えて）+ 可視性デバッグ
+        const allRadios = await page.locator(`input[type=radio][name="filter_type"][value="${targetValue}"]`).count();
+        console.log(`[addWidget] filter_type=${targetValue} ラジオ数: ${allRadios}`);
+        if (allRadios === 0) throw new Error(`addWidget: filter_type=${targetValue} のラジオが見つからない`);
+
+        // すべてのfilter_typeラジオを直接操作（可視状態を無視して値をセット）
+        const checked = await page.evaluate((value) => {
+            const radios = Array.from(document.querySelectorAll(`input[type=radio][name="filter_type"]`));
+            console.log('total filter_type radios:', radios.length);
+            let target = null;
+            for (const r of radios) {
+                // 他のラジオをアンチェック
+                r.checked = false;
+                if (r.getAttribute('value') === value) target = r;
             }
-        }
+            if (!target) return false;
+            target.checked = true;
+            target.click();
+            target.dispatchEvent(new Event('change', { bubbles: true }));
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+            return target.checked;
+        }, targetValue);
+        await waitForAngular(page);
+        console.log(`[addWidget] 表示タイプ選択 ${displayType}: checked=${checked}`);
+        expect(checked, `表示タイプラジオ「${displayType}」が選択されていること`).toBe(true);
     }
 
     // [flow] 「詳細設定」ボタンをクリック（必須 — 「保存」はここから遷移した先にある）
@@ -525,18 +542,15 @@ test.describe('ダッシュボード', () => {
             // [check] 60-2. ✅ エラーメッセージが表示されないこと
             expect(await page.locator('.alert-danger').count()).toBe(0);
 
-            // [check] 60-3. ✅ 集計ウィジェットが追加されていること
+            // [check] 60-3. ✅ 集計ウィジェットが追加されてデータ+集計の2件のウィジェットが存在すること
             const activePanelId60 = await page.locator('[role=tablist] [role=tab][aria-selected=true]')
                 .first().getAttribute('aria-controls').catch(() => null);
             const widgetContainer = activePanelId60
                 ? page.locator(`#${activePanelId60}`)
                 : page.locator('[role=tabpanel]').last();
-            // ウィジェットが2つ以上存在することを確認（データ+集計）
-            const widgets = widgetContainer.locator('[class*="dashboard"], .card, [class*="widget"]');
-            await expect(async () => {
-                const count = await widgets.count();
-                expect(count).toBeGreaterThanOrEqual(1);
-            }).toPass({ timeout: 10000 });
+            // dashboard-chart（データ/集計/チャート共通コンポーネント）の数
+            const dcCharts = widgetContainer.locator('dashboard-chart');
+            await expect(dcCharts).toHaveCount(2, { timeout: 15000 });
 
             // [check] 60-4. ✅ ローディングが完了していること
             await page.waitForFunction(
@@ -559,30 +573,20 @@ test.describe('ダッシュボード', () => {
             // [check] 70-2. ✅ エラーメッセージが表示されないこと
             expect(await page.locator('.alert-danger').count()).toBe(0);
 
-            // [check] 70-3. ✅ チャートウィジェットが追加されていること
+            // [check] 70-3. ✅ チャートウィジェットが追加されてデータ+集計+チャートの3件のウィジェットが存在すること
             const activePanelId70 = await page.locator('[role=tablist] [role=tab][aria-selected=true]')
                 .first().getAttribute('aria-controls').catch(() => null);
             const widgetContainer70 = activePanelId70
                 ? page.locator(`#${activePanelId70}`)
                 : page.locator('[role=tabpanel]').last();
-            // ウィジェットが存在することを確認
-            const widgets70 = widgetContainer70.locator('[class*="dashboard"], .card, [class*="widget"]');
-            await expect(async () => {
-                const count = await widgets70.count();
-                expect(count).toBeGreaterThanOrEqual(1);
-            }).toPass({ timeout: 10000 });
+            const dcCharts70 = widgetContainer70.locator('dashboard-chart');
+            await expect(dcCharts70).toHaveCount(3, { timeout: 15000 });
 
-            // [check] 70-4. ✅ グラフ描画領域が表示されていること
+            // [check] 70-4. ✅ ローディング完了（スケルトン消去）
             await page.waitForFunction(
                 () => !document.querySelector('.lazy-load-placeholder, .skeleton-row, .loader'),
                 { timeout: 15000 }
             ).catch(() => {});
-            // canvas または chart コンポーネントが存在するか確認
-            const chartElem = widgetContainer70.locator('canvas, [class*="chart"], dashboard-chart').first();
-            const chartCount = await chartElem.count();
-            console.log(`[dash-070] チャート要素数: ${chartCount}`);
-            // グラフ要素またはウィジェットが存在すること
-            expect(chartCount + await widgets70.count()).toBeGreaterThan(0);
 
             await autoScreenshot(page, 'DB02', 'dash-070', _testStart);
         });
