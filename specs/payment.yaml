@@ -1,0 +1,323 @@
+group: 支払い・プラン管理
+spec_file: tests/payment.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: pay-010
+  feature: 支払い
+  description: ①支払いページが表示されること
+  expected: |
+    支払いページが表示されること
+  movie: PM01
+  detailed_flow: |-
+    【PM01 テストフロー】この動画で確認するテスト番号:
+      pay-010        (旧: PAY-01)  支払い
+      pay-020        (旧: PAY-02)  支払い
+      pay-030        (旧: PAY-03)  支払い
+      pay-040        (旧: PAY-04)  支払い
+      pay-050        (旧: PAY-05)  支払い
+      pay-060        (旧: PAY-06)  支払い
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] pay-010 ── 支払いページが表示されること
+    1. /admin/payment に遷移
+    2. ✅ 支払いページ（.plan-header）が表示されること
+    3. ✅ Internal Server Error が表示されないこと
+
+    pay-020 ── プラン変更フォームと料金情報が表示されること
+    4. 支払いページでプラン情報を確認
+    5. ✅ プラン変更フォームが表示されること
+
+    pay-030 ── Stripe checkoutの関連iframeが存在すること
+    6. Stripe iframe要素を確認
+    7. ✅ iframeが存在すること
+
+    pay-040 ── テストカードでStripe支払いフォームに入力できること
+    8. Stripe checkout モーダルを開く
+    9. ✅ 支払いフォームが表示されること
+
+    pay-050 ── ユーザー数の範囲外入力でバリデーションエラーが表示されること
+    10. ユーザー数に範囲外の値を入力
+    11. ✅ バリデーションエラーが表示されること
+
+    pay-060 ── 支払い履歴APIエンドポイントが存在すること
+    12. 支払い履歴APIにリクエスト
+    13. ✅ エンドポイントが正常に応答すること
+  old_case_no: PAY-01
+- case_no: pay-020
+  feature: 支払い
+  description: ①プラン変更フォームと料金情報が表示されること
+  expected: |
+    プラン変更フォームと料金情報が表示されること
+  movie: PM01
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-02
+- case_no: pay-030
+  feature: 支払い
+  description: ①Stripe checkoutの関連iframeが存在すること
+  expected: |
+    Stripe checkoutの関連iframeが存在すること
+  movie: PM01
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-03
+- case_no: pay-040
+  feature: 支払い
+  description: ①テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
+  expected: |
+    テストカードでStripe支払いフォームに入力できること（Checkoutモーダル）
+  movie: PM01
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-04
+- case_no: pay-050
+  feature: 支払い
+  description: ①ユーザー数の範囲外入力でバリデーションエラーが表示されること
+  expected: |
+    ユーザー数の範囲外入力でバリデーションエラーが表示されること
+  movie: PM01
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-05
+- case_no: pay-060
+  feature: 支払い
+  description: ①支払い履歴APIエンドポイントが存在すること
+  expected: |
+    支払い履歴APIエンドポイントが存在すること
+  movie: PM01
+  detailed_flow: PM01テストフロー参照（pay-010 のdetailed_flowと同一）
+  old_case_no: PAY-06
+- case_no: pay-070
+  sheet: B
+  feature: カードブランド表示
+  description: |-
+    ①支払い設定ページを開く
+    ②クレジットカード情報表示エリアを確認する
+    ③カードブランド（Visa、MasterCard等）のアイコンと名前が表示されていることを確認する
+    ④ブランド表示がカード情報更新ボタンの上に正しく配置されていることを確認する
+  expected: 支払いページでクレジットカードのブランド（アイコン+名前）が正しく表示されること
+  movie: UC16
+  detailed_flow: |-
+    【UC16 テストフロー】この動画で確認するテスト番号:
+      pay-070        (旧: 715)     カードブランド表示
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # 715: カードブランド表示
+
+    ## 前提
+    - クレジットカード登録済みの契約環境（is_update=true かつ stripe_credit_card['last4'] が存在する）
+    - テスト環境ではトライアルのため、APIモックまたはカード登録済み環境が必要
+
+    ## 操作手順
+    1. `page.goto(BASE_URL + '/admin/dataset/payment/pay')` でアクセス
+    2. `page.waitForSelector('.plan-card', { timeout: 15000 })` 待機
+    3. カード情報エリアが表示されているか確認
+
+    ## テスト環境での検証方法（カード未登録環境）
+    1. `/api/admin/stripe-card-check` APIのレスポンスを確認
+       ```javascript
+       const cardData = await page.evaluate(async () => {
+         const res = await fetch('/api/admin/stripe-card-check', {
+           credentials: 'include',
+           headers: { 'X-Requested-With': 'XMLHttpRequest' }
+         });
+         return res.json();
+       });
+       ```
+    2. カードが登録されている場合（`card.last4` が存在する）
+       - 支払いページに「登録カード」エリアが表示される
+       - カード番号末尾4桁が表示されること: `.td:has-text("xxxx")` または `td:has-text("xxxx")`
+       - 有効期限が表示されること
+
+    ## 確認事項（expect）
+    - カード情報が存在する場合、「登録カード」テーブルが表示されること
+      ```javascript
+      // カード情報が存在する場合
+      if (cardData.card && cardData.card.last4) {
+        await expect(page.locator('h5:has-text("登録カード")')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('td').filter({ hasText: /xxxx/ })).toBeVisible();
+        // ブランド情報（brand フィールド）が表示されること
+        const brandText = cardData.card.brand;
+        if (brandText) {
+          // HTMLテンプレートにbrand表示がある場合（UC16機能追加後）
+          await expect(page.locator(`td:has-text("${brandText}")`)).toBeVisible();
+        }
+      } else {
+        // カード未登録の場合は「登録カード」エリアが非表示
+        await expect(page.locator('h5:has-text("登録カード")')).not.toBeVisible();
+      }
+      ```
+
+    ## 注意
+    - `stripe_credit_card['brand']` は Stripe API の card オブジェクトから取得（visa, mastercard, amex 等）
+    - 現在の payment-page.component.html には `brand` フィールドの直接表示はない可能性がある
+    - ケース715の要件（カードブランドアイコン+名前表示）が未実装の場合は product-bugs.md に記録
+  old_case_no: '715'
+- case_no: pay-080
+  sheet: B
+  feature: 領収書ダウンロード
+  description: |-
+    ①契約済みのdemo環境にログインする
+    ②「請求情報」メニューが表示されることを確認する
+    ③請求情報画面から領収書ダウンロードを実行する
+    ④ダウンロードされたPDFに全項目が正しく印字されていることを確認する
+  expected: 契約済み環境で請求情報メニューが表示され、領収書がダウンロードでき、全項目が印字されていること
+  movie: UC03
+  detailed_flow: |-
+    【UC03 テストフロー】この動画で確認するテスト番号:
+      [0:00] pay-080        (旧: 355)     領収書ダウンロード
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # 355: 領収書ダウンロード
+
+    ## 前提
+    - 契約済み環境（isTrial() == false、payment_method == 'credit'）が必要
+    - テスト環境はトライアルのため、本番環境 (ai-test.pigeon-cloud.com) またはクレジット契約済みのステージング環境が対象
+
+    ## 操作手順
+
+    ### ① 請求情報メニューの確認
+    1. ログイン後、ヘッダーのユーザーメニューをクリック
+       ```javascript
+       await page.click('button.dropdown-toggle, [data-toggle="dropdown"]');
+       // または直接メニューボタンを探す
+       await page.click('li.nav-item.dropdown button');
+       ```
+    2. 「請求情報」メニュー項目が表示されることを確認
+       ```javascript
+       await expect(page.locator('a:has-text("請求情報")')).toBeVisible({ timeout: 5000 });
+       ```
+    3. 「請求情報」をクリックして請求情報ページに移動
+       ```javascript
+       await page.click('a:has-text("請求情報")');
+       await page.waitForURL(/admin_invoices/, { timeout: 15000 });
+       ```
+
+    ### ② 請求情報画面の確認
+    4. `page.goto(BASE_URL + '/admin/dataset/admin_invoices')` で直接アクセスも可能
+    5. テーブルに請求レコードが一覧表示されていること
+       ```javascript
+       await page.waitForSelector('table', { timeout: 15000 });
+       await expect(page.locator('table tbody tr').first()).toBeVisible();
+       ```
+    6. レコードをクリックして詳細画面を開く
+       ```javascript
+       await page.click('table tbody tr:first-child a, table tbody tr:first-child td:first-child');
+       ```
+
+    ### ③ 領収書ダウンロードボタンの確認
+    7. 詳細画面（view）で「領収書ダウンロード」ボタンが表示されること
+       ```javascript
+       await expect(page.locator('button:has-text("領収書ダウンロード")')).toBeVisible({ timeout: 10000 });
+       ```
+    8. ステータスが 'paid' のレコードのみボタンが表示される（`*ngIf="data.raw_data.status =='paid'"` 条件）
+
+    ## 確認事項（expect）
+    - 契約済み環境では「請求情報」メニューが表示されること
+      - 表示条件: `_share.isMasterUser() || _share.common_grant.invoice` かつ `!_share.isTrial()` かつ `payment_method=='credit'`
+    - 「領収書ダウンロード」ボタンが status='paid' のレコードで表示されること
+    - 「請求書ダウンロード」ボタンが全レコードで表示されること
+    - ダウンロード API `GET /api/admin/download-stripe-invoice/{id}?type=receipt` が 200 を返すこと
+      ```javascript
+      const dlCheck = await page.evaluate(async (invoiceId) => {
+        const res = await fetch(`/api/admin/download-stripe-invoice/${invoiceId}`, {
+          credentials: 'include',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        return { status: res.status, result: data.status };
+      }, recordId);
+      expect(dlCheck.status).toBe(200);
+      expect(dlCheck.result).toBe('success');
+      ```
+
+    ## 注意
+    - テスト環境（トライアル）では「請求情報」メニューが表示されない。本番または契約済み環境でテスト
+    - 実際のPDFダウンロード内容の確認（印字項目）は自動テストでは困難。ボタン表示とAPIレスポンスの確認を中心とする
+  old_case_no: '355'
+- case_no: pay-090
+  sheet: B
+  feature: 決済の即時反映（ユーザー数変更）
+  description: |-
+    ①決済設定でユーザー数を増やす
+    ②決済完了後、即時に登録可能ユーザー数が反映されることを確認する
+    ③現在のユーザー数以下に変更した場合にエラーが表示されることを確認する
+    ④増やした場合は即時反映され、追加ユーザーが作成可能なことを確認する
+  expected: 決済後のユーザー数変更が即時反映され、制限以下への変更時にはエラーが表示されること
+  movie: UC09
+  detailed_flow: |-
+    【UC09 テストフロー】この動画で確認するテスト番号:
+      pay-090        (旧: 573)     決済の即時反映（ユーザー数変更）
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # 573: 決済の即時反映（ユーザー数変更）
+
+    ## 前提
+    - 契約済み環境（Stripe クレジット払い、is_update=true）が必要
+    - 現在のユーザー数（max_user）が既知（例: 5ユーザー契約中）
+
+    ## 操作手順
+
+    ### ③ バリデーション確認（現在のユーザー数以下に変更）
+    1. `page.goto(BASE_URL + '/admin/dataset/payment/pay')` でアクセス
+    2. `page.waitForSelector('#user_input', { timeout: 15000 })` 待機
+    3. 現在の max_user より小さい値（例: 3）を入力
+       ```javascript
+       await page.fill('#user_input', '3');
+       await page.dispatchEvent('#user_input', 'input');
+       ```
+    4. バリデーションエラーが表示されること（5未満は無効）
+       ```javascript
+       await expect(page.locator('.text-danger:has-text("ユーザー数は5~3000の範囲で選択して下さい")')).toBeVisible({ timeout: 5000 });
+       ```
+    5. 「契約更新を行う」ボタンが表示されないこと（is_valid_num=false）
+       ```javascript
+       await expect(page.locator('button:has-text("契約更新を行う")')).not.toBeVisible();
+       ```
+
+    ### ① ユーザー数を増やした場合の料金反映確認
+    6. ユーザー数に現在より多い値（例: 10）を入力
+       ```javascript
+       await page.fill('#user_input', '10');
+       await page.dispatchEvent('#user_input', 'input');
+       ```
+    7. お支払い金額が更新されること（#price_calc の値が変わる）
+       ```javascript
+       const priceText = await page.locator('#price_calc').textContent();
+       expect(parseInt(priceText.replace(/,/g, ''))).toBeGreaterThan(0);
+       ```
+    8. 「契約更新を行う」ボタンが表示されること（is_valid_num=true）
+       ```javascript
+       await expect(page.locator('button:has-text("契約更新を行う")')).toBeVisible({ timeout: 5000 });
+       ```
+
+    ### ② 即時反映の確認（Stripe更新API呼び出し）
+    9. 「契約更新を行う」ボタンをクリック → 確認モーダルが表示される
+       ```javascript
+       await page.click('button:has-text("契約更新を行う")');
+       // confirm-modal の表示を待機
+       await expect(page.locator('.modal.show, .modal-dialog')).toBeVisible({ timeout: 5000 });
+       ```
+    10. 確認モーダルの「契約更新を行う」ボタンをクリック
+        ```javascript
+        await page.click('.modal.show button:has-text("契約更新を行う"), .modal button[class*="btn-success"]');
+        ```
+    11. 成功メッセージが表示されること
+        ```javascript
+        await expect(page.locator('.toast-success, [class*="toastr"]:has-text("契約更新依頼を送信しました")')).toBeVisible({ timeout: 15000 });
+        // または updated_status='update_success' によるメッセージ
+        await expect(page.locator('text=プランの変更リクエストが完了しました')).toBeVisible({ timeout: 15000 });
+        ```
+
+    ## 確認事項（expect）
+    - バリデーション: 5未満は `.text-danger` エラー表示
+    - 有効なユーザー数の場合: `#price_calc` に料金が表示される
+    - 更新API `/api/admin/stripe-payment-update` が呼ばれ成功すること
+      - レスポンス: `{ result: 'success' }` または `updated_status: 'update_success'`
+
+    ## 注意
+    - 実際の Stripe 課金テストは sandbox 環境でのみ実施
+    - 本番環境では即時反映されるため、テスト後に元の値に戻すこと
+    - `stripePaymentUpdateRequest` コントローラーが `stripe-payment-update` API を処理する
+    - 「即時適用」は PHP 側で `stripePaymentUpdateRequest` が Stripe API を直接更新（翌月ではなく即時）
+  old_case_no: '573'

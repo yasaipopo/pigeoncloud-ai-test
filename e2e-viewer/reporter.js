@@ -243,14 +243,19 @@ class E2EViewerReporter {
     }
     if (!this.runId) return;
 
-    // ステータス変換
+    // ステータス変換（タイムアウトを区別）
     let caseStatus;
+    const isTimeout = result.status === 'timedOut' ||
+      (result.errors?.length > 0 && (result.errors[0].message || '').includes('timeout'));
     if (result.status === 'skipped') {
       caseStatus = 'skipped';
       this.skipCount++;
     } else if (result.status === 'passed' && test.ok()) {
       caseStatus = 'passed';
       this.passCount++;
+    } else if (isTimeout) {
+      caseStatus = 'timeout';  // タイムアウトはfailedと区別してリトライ候補として記録
+      this.failCount++;
     } else {
       caseStatus = 'failed';
       this.failCount++;
@@ -291,7 +296,7 @@ class E2EViewerReporter {
       // 無視
     }
 
-    // ② S3アップロード: onEndで await するためPromiseをキューに積む
+    // ② S3アップロード: アップロード完了次第リアルタイムでDynamoDBをPATCH
     const uploadPromises = (result.attachments || [])
       .filter(att => att.path && existsSync(att.path))
       .map(att => {
@@ -308,6 +313,19 @@ class E2EViewerReporter {
             caseData.traceKey = s3Key;
           } else {
             (caseData.screenshotKeys ??= []).push(s3Key);
+          }
+          // アップロード完了後すぐにDynamoDBをPATCH（リアルタイム反映）
+          const patch = {};
+          if (caseData.videoKey) patch.videoKey = caseData.videoKey;
+          if (caseData.screenshotKeys?.length) patch.screenshotKeys = caseData.screenshotKeys;
+          if (caseData.traceKey) patch.traceKey = caseData.traceKey;
+          if (Object.keys(patch).length > 0) {
+            return this._patch(
+              `/runs/${this.runId}/cases/${encodeURIComponent(caseData.caseId)}`,
+              patch
+            ).catch(e => {
+              process.stdout.write(`[E2EViewer] realtime patch失敗 (${att.name}): ${e.message}\n`);
+            });
           }
         }).catch(e => {
           process.stdout.write(`[E2EViewer] upload failed (${att.name}): ${e.message}\n`);

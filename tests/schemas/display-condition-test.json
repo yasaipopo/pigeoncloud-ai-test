@@ -1,0 +1,9 @@
+{
+  "name": "表示条件テスト",
+  "fields": [
+    { "type": "radio", "label": "ラジオ", "options": ["ラジオA", "ラジオB", "ラジオC"] },
+    { "type": "text", "label": "ラジオ_表示条件テキスト", "display_condition": { "field": "ラジオ", "value": "ラジオA" } },
+    { "type": "select", "label": "セレクト", "options": ["選択A", "選択B"] },
+    { "type": "text", "label": "セレクト_条件テキスト", "display_condition": { "field": "セレクト", "value": "選択A" } }
+  ]
+}

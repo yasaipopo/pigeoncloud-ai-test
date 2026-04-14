@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>パイプラインチェックシート - PigeonCloud E2E</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+
+    /* サマリーカード */
+    .summary-card {
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-align: center;
+      min-width: 100px;
+    }
+    .summary-card .num { font-size: 1.8rem; font-weight: bold; line-height: 1.1; }
+    .summary-card .lbl { font-size: .72rem; color: #6c757d; }
+
+    /* 振り分け済みケースのハイライト */
+    tr.sorted-case { background: #fff8e1; }
+    tr.sorted-case td:first-child::before { content: '🔀 '; }
+
+    /* パイプラインテーブル */
+    .pipeline-table th { white-space: nowrap; font-size: .82rem; }
+    .pipeline-table td { vertical-align: middle; font-size: .85rem; }
+    .pipeline-table .case-no { white-space: nowrap; font-weight: 600; }
+    .pipeline-table .feature-col { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pipeline-table .desc-col { max-width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+    .pipeline-table .desc-col:hover { background: #e9ecef; }
+    /* フィルタ時はテスト内容を全文表示 */
+    .pipeline-table.filtered .desc-col { max-width: none; white-space: pre-wrap; word-break: break-word; }
+    /* テーブル幅を広げる */
+    .container-fluid { max-width: 100%; padding: 0 20px; }
+
+    /* ステータスバッジ */
+    .check-cell { text-align: center; cursor: pointer; min-width: 48px; }
+    .check-cell:hover { background: #e9ecef; }
+    .badge-ok { background: #198754; color: #fff; }
+    .badge-ng { background: #dc3545; color: #fff; }
+    .badge-pass { background: #198754; color: #fff; }
+    .badge-fail-spec { background: #fd7e14; color: #fff; }
+    .badge-fail-product { background: #dc3545; color: #fff; }
+    .badge-fail-env { background: #6f42c1; color: #fff; }
+    .badge-unchecked { background: #dee2e6; color: #6c757d; }
+
+    /* spec タブ */
+    .spec-tab { cursor: pointer; padding: 6px 14px; border-radius: 20px; font-size: .82rem; white-space: nowrap; }
+    .spec-tab:hover { background: #e9ecef; }
+    .spec-tab.active { background: #0d6efd; color: #fff; }
+    .spec-tab .spec-count { font-size: .7rem; opacity: .7; }
+
+    /* 進捗バー */
+    .progress-thin { height: 6px; border-radius: 3px; }
+
+    /* ノート編集モーダル */
+    .note-indicator { cursor: pointer; opacity: .5; font-size: .7rem; }
+    .note-indicator:hover { opacity: 1; }
+    .note-indicator.has-note { opacity: 1; color: #0d6efd; }
+
+    /* フィルタバー */
+    .filter-bar { background: #fff; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; }
+
+    /* テスト結果バッジ */
+    .result-pass { background: #198754; color: #fff; }
+    .result-fail { background: #dc3545; color: #fff; }
+    .result-skip { background: #6c757d; color: #fff; }
+    .result-empty { background: #f8f9fa; color: #adb5bd; border: 1px dashed #dee2e6; }
+    .result-cell { text-align: center; min-width: 56px; }
+
+    /* メディアアイコン */
+    .media-cell { text-align: center; min-width: 40px; }
+    .media-icon { cursor: pointer; font-size: 1.1rem; opacity: .5; }
+    .media-icon:hover { opacity: 1; }
+    .media-icon.has-media { opacity: 1; color: #0d6efd; }
+
+    /* メディアモーダル */
+    #mediaModal .modal-dialog { max-width: 90vw; }
+    #mediaModal .modal-body { text-align: center; background: #000; padding: 0; }
+    #mediaModal .modal-body img { max-width: 100%; max-height: 80vh; object-fit: contain; }
+    #mediaModal .modal-body video { max-width: 100%; max-height: 80vh; }
+
+    /* 同期ボタン */
+    .sync-btn { font-size: .75rem; }
+
+    /* movieグループヘッダー */
+    .movie-header { background: #e3f2fd !important; cursor: pointer; }
+    .movie-header:hover { background: #bbdefb !important; }
+    .movie-header td { padding: 8px 12px !important; font-weight: 700; font-size: .85rem; }
+    .movie-group-row td:first-child { padding-left: 24px !important; }
+    .movie-no-group td:first-child { padding-left: 12px !important; }
+  </style>
+</head>
+<body>
+
+<!-- ナビゲーション -->
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container">
+    <a href="index.html" class="navbar-brand text-decoration-none">
+      <i class="bi bi-arrow-left me-2"></i>PigeonCloud E2E ビューアー
+    </a>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-success sync-btn" onclick="openSyncModal()" title="E2E実行結果をシートに同期">
+        <i class="bi bi-arrow-repeat me-1"></i>結果同期
+      </button>
+      <button class="btn btn-sm btn-outline-info" onclick="initFromYaml()" title="yamlから初期データ投入">
+        <i class="bi bi-cloud-upload me-1"></i>初期化
+      </button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="doLogout()">
+        <i class="bi bi-box-arrow-right me-1"></i>ログアウト
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid py-4">
+
+  <!-- サマリーバー -->
+  <div class="card mb-3" id="summary-card">
+    <div class="card-body">
+      <h6 class="mb-3"><i class="bi bi-kanban me-1"></i>パイプライン進捗</h6>
+      <div class="row g-3 mb-3">
+        <!-- yaml -->
+        <div class="col-md-4 col-lg">
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small">1. YAML品質チェック</strong>
+              <span class="text-muted small" id="yaml-ratio">-</span>
+            </div>
+            <div class="progress progress-thin mb-2">
+              <div class="progress-bar bg-success" id="yaml-bar-ok" style="width:0%"></div>
+              <div class="progress-bar bg-danger" id="yaml-bar-ng" style="width:0%"></div>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="badge badge-ok" id="yaml-ok">0</span>
+              <span class="badge badge-ng" id="yaml-ng">0</span>
+              <span class="badge badge-unchecked" id="yaml-unc">0</span>
+            </div>
+          </div>
+        </div>
+        <!-- spec -->
+        <div class="col-md-4 col-lg">
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small">2. Spec実装</strong>
+              <span class="text-muted small" id="spec-ratio">-</span>
+            </div>
+            <div class="progress progress-thin mb-2">
+              <div class="progress-bar bg-success" id="spec-bar-ok" style="width:0%"></div>
+              <div class="progress-bar bg-danger" id="spec-bar-ng" style="width:0%"></div>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="badge badge-ok" id="spec-ok">0</span>
+              <span class="badge badge-ng" id="spec-ng">0</span>
+              <span class="badge badge-unchecked" id="spec-unc">0</span>
+            </div>
+          </div>
+        </div>
+        <!-- run -->
+        <div class="col-md-4 col-lg">
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small">3. 実行確認</strong>
+              <span class="text-muted small" id="run-ratio">-</span>
+            </div>
+            <div class="progress progress-thin mb-2">
+              <div class="progress-bar bg-success" id="run-bar-pass" style="width:0%"></div>
+              <div class="progress-bar bg-warning" id="run-bar-fspec" style="width:0%"></div>
+              <div class="progress-bar bg-danger" id="run-bar-fprod" style="width:0%"></div>
+              <div class="progress-bar bg-purple" id="run-bar-fenv" style="width:0%"></div>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="badge badge-pass" id="run-pass">0</span>
+              <span class="badge badge-fail-spec" id="run-fspec">0</span>
+              <span class="badge badge-fail-product" id="run-fprod">0</span>
+              <span class="badge badge-fail-env" id="run-fenv">0</span>
+              <span class="badge badge-unchecked" id="run-unc">0</span>
+            </div>
+          </div>
+        </div>
+        <!-- staging -->
+        <div class="col-md-6 col-lg">
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small">Staging結果</strong>
+              <span class="text-muted small" id="staging-ratio">-</span>
+            </div>
+            <div class="progress progress-thin mb-2">
+              <div class="progress-bar bg-success" id="staging-bar-pass" style="width:0%"></div>
+              <div class="progress-bar bg-danger" id="staging-bar-fail" style="width:0%"></div>
+              <div class="progress-bar bg-secondary" id="staging-bar-skip" style="width:0%"></div>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="badge result-pass" id="staging-pass">0</span>
+              <span class="badge result-fail" id="staging-fail">0</span>
+              <span class="badge result-skip" id="staging-skip">0</span>
+              <span class="badge badge-unchecked" id="staging-unc">0</span>
+            </div>
+          </div>
+        </div>
+        <!-- main -->
+        <div class="col-md-6 col-lg">
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small">Main結果</strong>
+              <span class="text-muted small" id="main-ratio">-</span>
+            </div>
+            <div class="progress progress-thin mb-2">
+              <div class="progress-bar bg-success" id="main-bar-pass" style="width:0%"></div>
+              <div class="progress-bar bg-danger" id="main-bar-fail" style="width:0%"></div>
+              <div class="progress-bar bg-secondary" id="main-bar-skip" style="width:0%"></div>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="badge result-pass" id="main-pass">0</span>
+              <span class="badge result-fail" id="main-fail">0</span>
+              <span class="badge result-skip" id="main-skip">0</span>
+              <span class="badge badge-unchecked" id="main-unc">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Specタブ -->
+  <div class="d-flex flex-wrap gap-2 mb-3" id="spec-tabs">
+    <div class="spec-tab active" data-spec="all" onclick="selectSpec('all', this)">
+      全て <span class="spec-count" id="tab-count-all"></span>
+    </div>
+  </div>
+
+  <!-- フィルタバー -->
+  <div class="filter-bar d-flex gap-3 align-items-center flex-wrap">
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-secondary active" data-status-filter="all" onclick="setStatusFilter('all', this)">すべて</button>
+      <button class="btn btn-sm btn-outline-warning" data-status-filter="unchecked" onclick="setStatusFilter('unchecked', this)">未チェック</button>
+      <button class="btn btn-sm btn-outline-info" data-status-filter="sorted" onclick="setStatusFilter('sorted', this)">🔀振り分け済み</button>
+      <button class="btn btn-sm btn-outline-success" data-status-filter="ok" onclick="setStatusFilter('ok', this)">OK/PASSのみ</button>
+      <button class="btn btn-sm btn-outline-danger" data-status-filter="ng" onclick="setStatusFilter('ng', this)">NG/FAILのみ</button>
+    </div>
+    <input class="form-control form-control-sm ms-auto" style="max-width:220px"
+           id="search-box" placeholder="ケースNo/機能名で絞り込み..." oninput="applyFilters()">
+    <span class="text-muted small" id="display-count"></span>
+  </div>
+
+  <!-- ローディング -->
+  <div class="text-center py-5" id="loading">
+    <div class="spinner-border text-secondary"></div>
+  </div>
+
+  <!-- メインテーブル -->
+  <div class="card d-none" id="main-table-container">
+    <div class="card-body p-0" style="overflow-x:auto">
+      <table class="table table-hover table-sm pipeline-table mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th style="width:60px">動画</th>
+            <th style="width:80px">No</th>
+            <th style="width:120px">機能</th>
+            <th>テスト内容</th>
+            <th>期待結果</th>
+            <th style="width:64px" class="text-center">1.YAML</th>
+            <th style="width:64px" class="text-center">2.Spec</th>
+            <th style="width:64px" class="text-center">3.Run</th>
+            <th style="width:64px" class="text-center">✅テスター</th>
+            <th style="width:64px" class="text-center">Staging</th>
+            <th style="width:64px" class="text-center">Main</th>
+            <th style="width:40px" class="text-center" title="スクリーンショット">📸</th>
+            <th style="width:40px" class="text-center" title="動画">🎬</th>
+            <th style="width:140px">更新</th>
+          </tr>
+        </thead>
+        <tbody id="pipeline-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ノート編集モーダル -->
+<div class="modal fade" id="noteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="noteModalTitle">ステータス編集</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">ステータス</label>
+          <div id="noteModalStatusButtons"></div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">備考</label>
+          <textarea class="form-control" id="noteModalText" rows="3" placeholder="備考を入力..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">更新者</label>
+          <input class="form-control form-control-sm" id="noteModalBy" value="manual" placeholder="更新者名">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">キャンセル</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="saveNote()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const CONFIG = { apiUrl: '__API_URL__' };
+
+// =========================================
+// 認証
+// =========================================
+const _token = localStorage.getItem('e2e_auth_token');
+if (!_token) location.href = 'login.html';
+
+function authHeaders() {
+  return {
+    'Authorization': `Bearer ${localStorage.getItem('e2e_auth_token')}`,
+    'Content-Type': 'application/json'
+  };
+}
+function doLogout() {
+  localStorage.removeItem('e2e_auth_token');
+  location.href = 'login.html';
+}
+
+// =========================================
+// 状態管理
+// =========================================
+let allItems = [];
+let currentSpec = 'all';
+
+// spec名 → 日本語ラベル
+const SPEC_LABELS = {
+  'auth': '認証',
+  'chart-calendar': 'チャート・カレンダー',
+  'chart-calendar-2': 'チャート・カレンダー2',
+  'comments-logs': 'コメント・ログ',
+  'csv-export': 'CSV・エクスポート',
+  'dashboard': 'ダッシュボード',
+  'fields': '項目設定',
+  'fields-2': '項目設定2',
+  'fields-3': '項目設定3',
+  'fields-4': '項目設定4',
+  'fields-5': '項目設定5',
+  'filters': 'フィルタ',
+  'layout-ui': 'レイアウト・UI',
+  'notifications': '通知設定',
+  'notifications-2': '通知設定2',
+  'payment': '決済',
+  'public-form': '公開フォーム',
+  'records': 'レコード操作',
+  'reports': '帳票',
+  'rpa': 'コネクト(RPA)',
+  'system-settings': 'システム設定',
+  'table-definition': 'テーブル定義',
+  'templates': 'テンプレート',
+  'uncategorized': '総合テスト',
+  'uncategorized-2': '総合テスト2',
+  'uncategorized-3': '総合テスト3',
+  'users-permissions': 'ユーザー・権限',
+  'workflow': 'ワークフロー',
+};
+let currentStatusFilter = 'all';
+let specList = [];
+
+// 編集中モーダル用
+let editingSpec = '';
+let editingCaseNo = '';
+let editingField = '';
+let editingValue = null;
+
+// =========================================
+// 初期化
+// =========================================
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await Promise.all([loadPipeline(), loadSummary()]);
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      `<div class="alert alert-danger">読み込みエラー: ${escHtml(e.message)}</div>`;
+  }
+});
+
+// =========================================
+// データ読み込み
+// =========================================
+async function loadPipeline() {
+  const r = await fetch(`${CONFIG.apiUrl}/pipeline`, { headers: authHeaders() });
+  if (r.status === 401) { doLogout(); return; }
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const data = await r.json();
+  allItems = data.items || [];
+
+  // spec一覧を抽出
+  const specSet = new Set();
+  allItems.forEach(i => specSet.add(i.spec));
+  specList = [...specSet].sort();
+
+  buildSpecTabs();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main-table-container').classList.remove('d-none');
+  applyFilters();
+}
+
+async function loadSummary() {
+  const r = await fetch(`${CONFIG.apiUrl}/pipeline/summary`, { headers: authHeaders() });
+  if (!r.ok) return;
+  const s = await r.json();
+  updateSummaryUI(s);
+}
+
+// =========================================
+// サマリーUI更新
+// =========================================
+function updateSummaryUI(s) {
+  const total = s.total || 1;
+
+  // YAML
+  const yamlOk = s.yaml?.ok || 0;
+  const yamlNg = s.yaml?.ng || 0;
+  const yamlUnc = s.yaml?.unchecked || 0;
+  document.getElementById('yaml-ok').textContent = `OK ${yamlOk}`;
+  document.getElementById('yaml-ng').textContent = `NG ${yamlNg}`;
+  document.getElementById('yaml-unc').textContent = `- ${yamlUnc}`;
+  document.getElementById('yaml-ratio').textContent = `${yamlOk}/${total}`;
+  document.getElementById('yaml-bar-ok').style.width = `${(yamlOk/total*100).toFixed(1)}%`;
+  document.getElementById('yaml-bar-ng').style.width = `${(yamlNg/total*100).toFixed(1)}%`;
+
+  // Spec
+  const specOk = s.spec?.ok || 0;
+  const specNg = s.spec?.ng || 0;
+  const specUnc = s.spec?.unchecked || 0;
+  document.getElementById('spec-ok').textContent = `OK ${specOk}`;
+  document.getElementById('spec-ng').textContent = `NG ${specNg}`;
+  document.getElementById('spec-unc').textContent = `- ${specUnc}`;
+  document.getElementById('spec-ratio').textContent = `${specOk}/${total}`;
+  document.getElementById('spec-bar-ok').style.width = `${(specOk/total*100).toFixed(1)}%`;
+  document.getElementById('spec-bar-ng').style.width = `${(specNg/total*100).toFixed(1)}%`;
+
+  // Run
+  const runPass = s.run?.pass || 0;
+  const runFspec = s.run?.fail_spec || 0;
+  const runFprod = s.run?.fail_product || 0;
+  const runFenv = s.run?.fail_env || 0;
+  const runUnc = s.run?.unchecked || 0;
+  document.getElementById('run-pass').textContent = `PASS ${runPass}`;
+  document.getElementById('run-fspec').textContent = `F:Spec ${runFspec}`;
+  document.getElementById('run-fprod').textContent = `F:Prod ${runFprod}`;
+  document.getElementById('run-fenv').textContent = `F:Env ${runFenv}`;
+  document.getElementById('run-unc').textContent = `- ${runUnc}`;
+  document.getElementById('run-ratio').textContent = `${runPass}/${total}`;
+  document.getElementById('run-bar-pass').style.width = `${(runPass/total*100).toFixed(1)}%`;
+  document.getElementById('run-bar-fspec').style.width = `${(runFspec/total*100).toFixed(1)}%`;
+  document.getElementById('run-bar-fprod').style.width = `${(runFprod/total*100).toFixed(1)}%`;
+  document.getElementById('run-bar-fenv').style.width = `${(runFenv/total*100).toFixed(1)}%`;
+
+  // Staging
+  const stgPass = s.staging?.pass || 0;
+  const stgFail = s.staging?.fail || 0;
+  const stgSkip = s.staging?.skip || 0;
+  const stgUnc = s.staging?.unchecked || 0;
+  document.getElementById('staging-pass').textContent = `PASS ${stgPass}`;
+  document.getElementById('staging-fail').textContent = `FAIL ${stgFail}`;
+  document.getElementById('staging-skip').textContent = `SKIP ${stgSkip}`;
+  document.getElementById('staging-unc').textContent = `- ${stgUnc}`;
+  document.getElementById('staging-ratio').textContent = `${stgPass}/${total}`;
+  document.getElementById('staging-bar-pass').style.width = `${(stgPass/total*100).toFixed(1)}%`;
+  document.getElementById('staging-bar-fail').style.width = `${(stgFail/total*100).toFixed(1)}%`;
+  document.getElementById('staging-bar-skip').style.width = `${(stgSkip/total*100).toFixed(1)}%`;
+
+  // Main
+  const mainPass = s.main?.pass || 0;
+  const mainFail = s.main?.fail || 0;
+  const mainSkip = s.main?.skip || 0;
+  const mainUnc = s.main?.unchecked || 0;
+  document.getElementById('main-pass').textContent = `PASS ${mainPass}`;
+  document.getElementById('main-fail').textContent = `FAIL ${mainFail}`;
+  document.getElementById('main-skip').textContent = `SKIP ${mainSkip}`;
+  document.getElementById('main-unc').textContent = `- ${mainUnc}`;
+  document.getElementById('main-ratio').textContent = `${mainPass}/${total}`;
+  document.getElementById('main-bar-pass').style.width = `${(mainPass/total*100).toFixed(1)}%`;
+  document.getElementById('main-bar-fail').style.width = `${(mainFail/total*100).toFixed(1)}%`;
+  document.getElementById('main-bar-skip').style.width = `${(mainSkip/total*100).toFixed(1)}%`;
+}
+
+// =========================================
+// Specタブ構築
+// =========================================
+function buildSpecTabs() {
+  const container = document.getElementById('spec-tabs');
+  container.innerHTML = '';
+
+  // 全てタブ
+  const allTab = document.createElement('div');
+  allTab.className = 'spec-tab active';
+  allTab.dataset.spec = 'all';
+  allTab.onclick = () => selectSpec('all', allTab);
+  allTab.innerHTML = `全て <span class="spec-count">(${allItems.length})</span>`;
+  container.appendChild(allTab);
+
+  specList.forEach(spec => {
+    const count = allItems.filter(i => i.spec === spec).length;
+    const tab = document.createElement('div');
+    tab.className = 'spec-tab';
+    tab.dataset.spec = spec;
+    tab.onclick = () => selectSpec(spec, tab);
+    tab.innerHTML = `${escHtml(SPEC_LABELS[spec] || spec)} <span class="spec-count">(${count})</span>`;
+    container.appendChild(tab);
+  });
+}
+
+function selectSpec(spec, el) {
+  currentSpec = spec;
+  document.querySelectorAll('.spec-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function setStatusFilter(status, btn) {
+  currentStatusFilter = status;
+  document.querySelectorAll('[data-status-filter]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+// =========================================
+// フィルタ適用 & テーブル描画
+// =========================================
+function applyFilters() {
+  const query = (document.getElementById('search-box').value || '').toLowerCase();
+  let filtered = allItems;
+
+  // specフィルタ
+  if (currentSpec !== 'all') {
+    filtered = filtered.filter(i => i.spec === currentSpec);
+  }
+
+  // ステータスフィルタ
+  if (currentStatusFilter === 'unchecked') {
+    filtered = filtered.filter(i => !i.yamlCheck || !i.specCheck || !i.runCheck);
+  } else if (currentStatusFilter === 'ok') {
+    filtered = filtered.filter(i =>
+      (i.yamlCheck === 'ok' || i.specCheck === 'ok' || i.runCheck === 'pass')
+    );
+  } else if (currentStatusFilter === 'sorted') {
+    filtered = filtered.filter(i => {
+      const d = i.description || '';
+      return d.includes('【バグ修正確認】') || d.includes('【機能改善確認】') || d.includes('【実装確認】');
+    });
+  } else if (currentStatusFilter === 'ng') {
+    filtered = filtered.filter(i =>
+      i.yamlCheck === 'ng' || i.specCheck === 'ng' ||
+      (i.runCheck && i.runCheck.startsWith('fail'))
+    );
+  }
+
+  // テキスト検索
+  if (query) {
+    filtered = filtered.filter(i =>
+      (i.caseNo || '').toLowerCase().includes(query) ||
+      (i.feature || '').toLowerCase().includes(query) ||
+      (i.description || '').toLowerCase().includes(query)
+    );
+  }
+
+  renderTable(filtered);
+  document.getElementById('display-count').textContent = `${filtered.length}件表示`;
+}
+
+function renderTable(items) {
+  const tbody = document.getElementById('pipeline-tbody');
+  tbody.innerHTML = '';
+  // フィルタ時（spec選択 or 検索中）はテスト内容を全文表示
+  const table = tbody.closest('table');
+  if (currentSpec !== 'all' || document.getElementById('search-box').value) {
+    table.classList.add('filtered');
+  } else {
+    table.classList.remove('filtered');
+  }
+
+  // spec でグループ化（currentSpec === 'all' のとき）
+  if (currentSpec === 'all') {
+    const groups = {};
+    items.forEach(i => {
+      if (!groups[i.spec]) groups[i.spec] = [];
+      groups[i.spec].push(i);
+    });
+    // specList順で表示
+    const orderedSpecs = specList.filter(s => groups[s]);
+    orderedSpecs.forEach(spec => {
+      // グループヘッダー
+      const headerRow = tbody.insertRow();
+      headerRow.innerHTML = `<td colspan="14" class="p-0 border-0">
+        <div style="background:#e9ecef;font-size:.82rem;font-weight:600;padding:4px 12px;border-radius:4px;margin:8px 0 4px;color:#495057;">
+          ${escHtml(spec)} <span style="font-weight:normal;color:#6c757d">(${groups[spec].length}件)</span>
+        </div>
+      </td>`;
+      groups[spec].forEach(item => renderRow(tbody, item));
+    });
+  } else {
+    // specフィルタ時: movie単位でグループ化
+    const movieGroups = {};  // movie名 -> items[]
+    const noMovieItems = []; // movie未設定
+    items.forEach(i => {
+      if (i.movie) {
+        if (!movieGroups[i.movie]) movieGroups[i.movie] = [];
+        movieGroups[i.movie].push(i);
+      } else {
+        noMovieItems.push(i);
+      }
+    });
+
+    // movieグループを表示（movie名のアルファベット順）
+    const movieNames = Object.keys(movieGroups).sort();
+    movieNames.forEach(movie => {
+      const groupItems = movieGroups[movie];
+      const headerRow = tbody.insertRow();
+      headerRow.className = 'movie-header';
+      headerRow.setAttribute('data-movie-group', movie);
+      headerRow.onclick = function() { toggleMovieGroup(this); };
+      headerRow.innerHTML = `<td colspan="14">
+        <span class="movie-toggle-icon">&#9660;</span> ${escHtml(movie)} &#127916;
+        <span style="font-size:.8rem;color:#666;font-weight:normal">(${groupItems.length}ケース)</span>
+        <a href="#" onclick="playVideo('${escAttr(currentSpec)}','${escAttr(movie)}');event.stopPropagation();return false"
+           style="margin-left:10px;font-size:.8rem;font-weight:normal">動画再生</a>
+      </td>`;
+      groupItems.forEach(item => {
+        const row = renderRow(tbody, item);
+        if (row) row.classList.add('movie-group-row');
+        row.setAttribute('data-movie-parent', movie);
+      });
+    });
+
+    // movie未設定のアイテム
+    noMovieItems.forEach(item => {
+      const row = renderRow(tbody, item);
+      if (row) row.classList.add('movie-no-group');
+    });
+  }
+}
+
+function renderRow(tbody, item) {
+  const row = tbody.insertRow();
+  row.dataset.spec = item.spec;
+  row.dataset.caseNo = item.caseNo;
+  // 振り分け済みケース（【バグ修正確認】【機能改善確認】【実装確認】）をハイライト
+  const desc = item.description || '';
+  if (desc.includes('【バグ修正確認】') || desc.includes('【機能改善確認】') || desc.includes('【実装確認】')) {
+    row.classList.add('sorted-case');
+  }
+
+  const yamlBadge = checkBadge(item.yamlCheck, 'yaml');
+  const specBadge = checkBadge(item.specCheck, 'spec');
+  const runBadge = runCheckBadge(item.runCheck);
+  const stagingBadge = resultBadge(item.stagingResult, item.stagingRunId);
+  const mainBadge = resultBadge(item.mainResult, item.mainRunId);
+  const screenshotIcon = mediaIcon(item.screenshotKey, 'screenshot', item.spec, item.caseNo);
+  const videoIcon = mediaIcon(item.videoKey, 'video', item.spec, item.caseNo);
+
+  const updatedInfo = item.updatedAt
+    ? `<span class="text-muted" style="font-size:.72rem">${new Date(item.updatedAt).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+       <br><span style="font-size:.68rem;color:#999">${escHtml(item.updatedBy || '')}</span>`
+    : '<span class="text-muted" style="font-size:.72rem">-</span>';
+
+  const yamlNote = item.yamlCheckNote ? `<i class="bi bi-chat-dots note-indicator has-note" title="${escHtml(item.yamlCheckNote)}"></i>` : '';
+  const specNote = item.specCheckNote ? `<i class="bi bi-chat-dots note-indicator has-note" title="${escHtml(item.specCheckNote)}"></i>` : '';
+  const runNote = item.runCheckNote ? `<i class="bi bi-chat-dots note-indicator has-note" title="${escHtml(item.runCheckNote)}"></i>` : '';
+
+  row.innerHTML = `
+    <td style="white-space:nowrap;font-size:.75rem">${item.movie ? `<a href="#" onclick="playVideo('${escAttr(item.spec)}','${escAttr(item.movie)}');return false" style="color:#0d6efd;text-decoration:none" title="動画再生">${escHtml(item.movie)} 🎬</a>` : ''}</td>
+    <td class="case-no">
+      ${escHtml(item.caseNo)}
+      ${item.oldCaseNo ? `<br><span style="font-size:.65em;color:#adb5bd;font-weight:normal" title="旧番号: ${escHtml(item.oldCaseNo)}">${escHtml(item.oldCaseNo)}</span>` : ''}
+    </td>
+    <td class="feature-col" title="${escHtml(item.feature || '')}">${escHtml(item.feature || '')}</td>
+    <td class="desc-col" onclick="openDetailModal('${escHtml(item.spec)}','${escHtml(item.caseNo)}','${escAttr(item.description || '')}','${escAttr(item.expected || '')}','${escAttr(item.feature || '')}')" title="${escHtml(item.description || '')}">${escHtml(item.description || '')}</td>
+    <td class="desc-col" onclick="openDetailModal('${escHtml(item.spec)}','${escHtml(item.caseNo)}','${escAttr(item.description || '')}','${escAttr(item.expected || '')}','${escAttr(item.feature || '')}')" title="${escHtml(item.expected || '')}">${escHtml(item.expected || '')}</td>
+    <td class="check-cell" onclick="openEdit('${escAttr(item.spec)}','${escAttr(item.caseNo)}','yamlCheck','${escAttr(item.yamlCheck||'')}','${escAttr(item.yamlCheckNote||'')}')">
+      ${yamlBadge} ${yamlNote}
+    </td>
+    <td class="check-cell" onclick="openEdit('${escAttr(item.spec)}','${escAttr(item.caseNo)}','specCheck','${escAttr(item.specCheck||'')}','${escAttr(item.specCheckNote||'')}')">
+      ${specBadge} ${specNote}
+    </td>
+    <td class="check-cell" onclick="openEdit('${escAttr(item.spec)}','${escAttr(item.caseNo)}','runCheck','${escAttr(item.runCheck||'')}','${escAttr(item.runCheckNote||'')}')">
+      ${runBadge} ${runNote}
+    </td>
+    <td class="check-cell" onclick="toggleTesterCheck('${escAttr(item.spec)}','${escAttr(item.caseNo)}')">
+      ${item.testerCheck === 'ok'
+        ? '<span class="badge badge-ok" title="' + escHtml((item.testerCheckBy||'') + ' ' + (item.testerCheckAt||'')) + '">✅</span>'
+        : '<span class="badge badge-unchecked">☐</span>'}
+    </td>
+    <td class="result-cell">${stagingBadge}</td>
+    <td class="result-cell">${mainBadge}</td>
+    <td class="media-cell">${screenshotIcon}</td>
+    <td class="media-cell">${videoIcon}</td>
+    <td>${updatedInfo}</td>
+  `;
+  return row;
+}
+
+// =========================================
+// バッジ生成
+// =========================================
+function checkBadge(val, type) {
+  if (val === 'ok') return '<span class="badge badge-ok">OK</span>';
+  if (val === 'ng') return '<span class="badge badge-ng">NG</span>';
+  return '<span class="badge badge-unchecked">-</span>';
+}
+
+function runCheckBadge(val) {
+  if (val === 'pass') return '<span class="badge badge-pass">PASS</span>';
+  if (val === 'fail_spec') return '<span class="badge badge-fail-spec">F:Spec</span>';
+  if (val === 'fail_product') return '<span class="badge badge-fail-product">F:Prod</span>';
+  if (val === 'fail_env') return '<span class="badge badge-fail-env">F:Env</span>';
+  if (val === 'timeout') return '<span class="badge" style="background:#ff9800;color:#fff">⏱RETRY</span>';
+  return '<span class="badge badge-unchecked">-</span>';
+}
+
+function resultBadge(val, runId) {
+  if (!val) return '<span class="badge result-empty">-</span>';
+  const title = runId ? `title="runId: ${escHtml(runId)}"` : '';
+  if (val === 'pass') return `<span class="badge result-pass" ${title}>PASS</span>`;
+  if (val === 'fail') return `<span class="badge result-fail" ${title}>FAIL</span>`;
+  if (val === 'skip') return `<span class="badge result-skip" ${title}>SKIP</span>`;
+  return `<span class="badge result-empty">${escHtml(val)}</span>`;
+}
+
+function mediaIcon(key, type, spec, caseNo) {
+  if (!key) return '<span class="text-muted" style="font-size:.7rem">-</span>';
+  const icon = type === 'screenshot' ? 'bi-camera' : 'bi-play-circle';
+  return `<i class="bi ${icon} media-icon has-media" onclick="openMedia('${escAttr(key)}','${type}','${escAttr(spec)}','${escAttr(caseNo)}')"></i>`;
+}
+
+function parseRunTimestamp(key) {
+  // key形式: runs/YYYYMMDD_HHmmss_hash_agentN/caseId/video/file.webm
+  // run_idのタイムスタンプ（UTC）をJSTに変換して返す
+  const m = key.match(/runs\/(\d{8})_(\d{6})_/);
+  if (!m) return null;
+  const [, date, time] = m;
+  const y = date.slice(0,4), mo = date.slice(4,6), d = date.slice(6,8);
+  const h = time.slice(0,2), mi = time.slice(2,4), s = time.slice(4,6);
+  const utc = new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}Z`);
+  return utc.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+async function openMedia(key, type, spec, caseNo) {
+  const modal = new bootstrap.Modal(document.getElementById('mediaModal'));
+  const body = document.getElementById('mediaModalBody');
+  const title = document.getElementById('mediaModalTitle');
+  const tsJST = parseRunTimestamp(key);
+  const tsLabel = tsJST ? ` <small class="text-muted fw-normal ms-2" style="font-size:0.75em">📅 撮影: ${tsJST} JST</small>` : '';
+  title.innerHTML = `${escHtml(spec)} / ${escHtml(caseNo)} - ${type === 'screenshot' ? 'スクリーンショット' : '動画'}${tsLabel}`;
+  body.innerHTML = '<div class="text-white p-5"><div class="spinner-border"></div></div>';
+  modal.show();
+
+  try {
+    // S3署名付きURLを取得
+    const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ key: key })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    const url = data.downloadUrl;
+
+    if (type === 'screenshot') {
+      body.innerHTML = `<img src="${url}" alt="screenshot" style="max-width:100%;max-height:80vh">`;
+    } else {
+      body.innerHTML = `<video src="${url}" controls autoplay style="max-width:100%;max-height:80vh"></video>`;
+    }
+  } catch (e) {
+    body.innerHTML = `<div class="text-white p-3">読み込みエラー: ${escHtml(e.message)}</div>`;
+  }
+}
+
+// =========================================
+// 結果同期
+// =========================================
+function openSyncModal() {
+  document.getElementById('syncRunId').value = '';
+  document.getElementById('syncEnv').value = 'staging';
+  document.getElementById('syncResult').innerHTML = '';
+  new bootstrap.Modal(document.getElementById('syncModal')).show();
+}
+
+async function executeSyncResults() {
+  const runId = document.getElementById('syncRunId').value.trim();
+  const env = document.getElementById('syncEnv').value;
+  const resultEl = document.getElementById('syncResult');
+
+  if (!runId) {
+    resultEl.innerHTML = '<div class="alert alert-warning py-1">Run IDを入力してください</div>';
+    return;
+  }
+
+  resultEl.innerHTML = '<div class="text-center py-2"><div class="spinner-border spinner-border-sm"></div> 同期中...</div>';
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/pipeline/sync-results`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ runId: runId, env: env })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    resultEl.innerHTML = `<div class="alert alert-success py-1">${escHtml(data.message)}</div>`;
+
+    // データリロード
+    setTimeout(() => {
+      bootstrap.Modal.getInstance(document.getElementById('syncModal')).hide();
+      loadPipeline();
+      loadSummary();
+    }, 1500);
+  } catch (e) {
+    resultEl.innerHTML = `<div class="alert alert-danger py-1">エラー: ${escHtml(e.message)}</div>`;
+  }
+}
+
+// =========================================
+// 編集モーダル
+// =========================================
+function openEdit(spec, caseNo, field, currentVal, currentNote) {
+  editingSpec = spec;
+  editingCaseNo = caseNo;
+  editingField = field;
+  editingValue = currentVal || null;
+
+  const titleMap = {
+    yamlCheck: '1. YAML品質チェック',
+    specCheck: '2. Spec実装',
+    runCheck: '3. 実行確認',
+  };
+  document.getElementById('noteModalTitle').textContent =
+    `${titleMap[field]} - ${spec} / ${caseNo}`;
+  document.getElementById('noteModalText').value = currentNote || '';
+
+  // ステータスボタンを生成
+  const btnContainer = document.getElementById('noteModalStatusButtons');
+  btnContainer.innerHTML = '';
+
+  const options = field === 'runCheck'
+    ? [
+        { val: null, label: '未チェック', cls: 'btn-outline-secondary' },
+        { val: 'pass', label: 'PASS', cls: 'btn-success' },
+        { val: 'fail_spec', label: 'FAIL(Spec)', cls: 'btn-warning' },
+        { val: 'fail_product', label: 'FAIL(Product)', cls: 'btn-danger' },
+        { val: 'fail_env', label: 'FAIL(Env)', cls: 'btn-outline-purple' },
+      ]
+    : field === 'testerCheck'
+    ? [
+        { val: null, label: '未チェック', cls: 'btn-outline-secondary' },
+        { val: 'ok', label: '確認済み', cls: 'btn-success' },
+      ]
+    : [
+        { val: null, label: '未チェック', cls: 'btn-outline-secondary' },
+        { val: 'ok', label: 'OK', cls: 'btn-success' },
+        { val: 'ng', label: 'NG', cls: 'btn-danger' },
+      ];
+
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    const isActive = (editingValue === opt.val) || (!editingValue && opt.val === null);
+    btn.className = `btn btn-sm ${isActive ? opt.cls : 'btn-outline-secondary'} me-1 mb-1`;
+    btn.textContent = opt.label;
+    btn.onclick = () => {
+      editingValue = opt.val;
+      // ボタンのアクティブ状態更新
+      btnContainer.querySelectorAll('button').forEach(b => b.className = `btn btn-sm btn-outline-secondary me-1 mb-1`);
+      btn.className = `btn btn-sm ${opt.cls} me-1 mb-1`;
+    };
+    btnContainer.appendChild(btn);
+  });
+
+  new bootstrap.Modal(document.getElementById('noteModal')).show();
+}
+
+async function saveNote() {
+  const note = document.getElementById('noteModalText').value;
+  const updatedBy = document.getElementById('noteModalBy').value || 'manual';
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/pipeline`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        spec: editingSpec,
+        caseNo: editingCaseNo,
+        field: editingField,
+        value: editingValue,
+        note: note,
+        updatedBy: updatedBy,
+      })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    // ローカルデータ更新
+    const item = allItems.find(i => i.spec === editingSpec && i.caseNo === editingCaseNo);
+    if (item) {
+      item[editingField] = editingValue;
+      item[editingField + 'Note'] = note;
+      item.updatedAt = new Date().toISOString();
+      item.updatedBy = updatedBy;
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('noteModal')).hide();
+    applyFilters();
+    loadSummary(); // サマリー再取得
+  } catch (e) {
+    alert('保存に失敗しました: ' + e.message);
+  }
+}
+
+// =========================================
+// テスターチェック トグル
+// =========================================
+async function toggleTesterCheck(spec, caseNo) {
+  const item = allItems.find(i => i.spec === spec && i.caseNo === caseNo);
+  if (!item) return;
+
+  const newVal = item.testerCheck === 'ok' ? null : 'ok';
+  const checkerName = prompt('チェック者名を入力してください:', localStorage.getItem('testerName') || '');
+  if (checkerName === null) return; // キャンセル
+  localStorage.setItem('testerName', checkerName);
+
+  const now = new Date().toISOString();
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/pipeline`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        spec: spec,
+        caseNo: caseNo,
+        field: 'testerCheck',
+        value: newVal,
+        note: '',
+        updatedBy: checkerName || 'tester',
+        testerCheckBy: checkerName || 'tester',
+        testerCheckAt: newVal ? now : '',
+      })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    // ローカルデータ更新
+    item.testerCheck = newVal;
+    item.testerCheckBy = checkerName || 'tester';
+    item.testerCheckAt = newVal ? now : '';
+    item.updatedAt = now;
+    item.updatedBy = checkerName || 'tester';
+
+    applyFilters();
+  } catch (e) {
+    alert('テスターチェック更新に失敗: ' + e.message);
+  }
+}
+
+// =========================================
+// yamlから初期化
+// =========================================
+async function initFromYaml() {
+  if (!confirm('specs/ のYAMLからパイプラインチェックシートを初期化します。\n既存データはスキップされます（上書きしません）。\n\n続行しますか？')) return;
+
+  // まず /specs からspec一覧を取得
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/specs`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(`specs取得失敗: HTTP ${r.status}`);
+    const specsData = await r.json();
+    const specsList = specsData.specs || [];
+
+    if (specsList.length === 0) {
+      alert('spec一覧が空です。upload_specs.py を先に実行してください。');
+      return;
+    }
+
+    // /pipeline/init に投げるデータを構築
+    const payload = specsList.map(s => ({
+      spec: s.name.replace('.spec.js', '').replace('tests/', ''),
+      cases: (s.cases || []).map(c => ({
+        caseNo: c.caseNo || c.case_no || '',
+        oldCaseNo: c.oldCaseNo || c.old_case_no || '',
+        feature: c.feature || '',
+        description: c.description || '',
+        expected: c.expected || '',
+        detailedFlow: c.detailedFlow || '',
+        movie: c.movie || '',
+      }))
+    }));
+
+    const r2 = await fetch(`${CONFIG.apiUrl}/pipeline/init`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ specs: payload, overwrite: false })
+    });
+    if (!r2.ok) throw new Error(`初期化失敗: HTTP ${r2.status}`);
+    const result = await r2.json();
+    alert(`初期化完了: ${result.registered}件登録、${result.skipped}件スキップ`);
+
+    // リロード
+    location.reload();
+  } catch (e) {
+    alert('初期化エラー: ' + e.message);
+  }
+}
+
+// =========================================
+// ユーティリティ
+// =========================================
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function escAttr(str) {
+  return String(str || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '');
+}
+
+// movieグループの折りたたみ/展開
+function toggleMovieGroup(headerRow) {
+  const movie = headerRow.getAttribute('data-movie-group');
+  const childRows = document.querySelectorAll(`tr[data-movie-parent="${movie}"]`);
+  const icon = headerRow.querySelector('.movie-toggle-icon');
+  const isCollapsed = headerRow.classList.toggle('collapsed');
+  childRows.forEach(row => {
+    row.style.display = isCollapsed ? 'none' : '';
+  });
+  if (icon) {
+    icon.innerHTML = isCollapsed ? '&#9654;' : '&#9660;'; // ▶ or ▼
+  }
+}
+</script>
+<!-- メディア表示モーダル -->
+<div class="modal fade" id="mediaModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h6 class="modal-title" id="mediaModalTitle">メディア</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0" id="mediaModalBody" style="background:#000;text-align:center;min-height:200px">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 結果同期モーダル -->
+<div class="modal fade" id="syncModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title"><i class="bi bi-arrow-repeat me-1"></i>E2E実行結果の同期</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted">E2Eビューアーの実行結果をこのチェックシートに反映します。</p>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Run ID</label>
+          <input class="form-control form-control-sm" id="syncRunId" placeholder="例: agent30">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">環境</label>
+          <select class="form-select form-select-sm" id="syncEnv">
+            <option value="staging">Staging</option>
+            <option value="main">Main（本番）</option>
+          </select>
+        </div>
+        <div id="syncResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">キャンセル</button>
+        <button type="button" class="btn btn-success btn-sm" onclick="executeSyncResults()">
+          <i class="bi bi-arrow-repeat me-1"></i>同期実行
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- テスト内容詳細モーダル -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailModalTitle">テスト内容詳細</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <tr><th style="width:120px">Spec</th><td id="detailSpec"></td></tr>
+          <tr><th>Case No</th><td id="detailCaseNo"></td></tr>
+          <tr><th>機能名</th><td id="detailFeature"></td></tr>
+          <tr><th>テスト内容</th><td id="detailDescription" style="white-space:pre-wrap"></td></tr>
+          <tr><th>期待結果</th><td id="detailExpected" style="white-space:pre-wrap"></td></tr>
+          <tr>
+            <th>詳細テストフロー</th>
+            <td>
+              <textarea class="form-control" id="detailDetailedFlow" rows="6" placeholder="詳細なテストフロー・操作手順を記入..."></textarea>
+            </td>
+          </tr>
+        </table>
+        <div class="text-end">
+          <button type="button" class="btn btn-primary btn-sm" onclick="saveDetailedFlow()">
+            <i class="bi bi-save me-1"></i>詳細フローを保存
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 詳細モーダル用の現在の spec/caseNo
+let detailEditingSpec = '';
+let detailEditingCaseNo = '';
+
+function openDetailModal(spec, caseNo, description, expected, feature) {
+  detailEditingSpec = spec;
+  detailEditingCaseNo = caseNo;
+  document.getElementById('detailModalTitle').textContent = `${spec} / ${caseNo}`;
+  document.getElementById('detailSpec').textContent = spec;
+  document.getElementById('detailCaseNo').textContent = caseNo;
+  document.getElementById('detailFeature').textContent = feature.replace(/\\n/g, "\n");
+  document.getElementById('detailDescription').textContent = description.replace(/\\n/g, "\n");
+  document.getElementById('detailExpected').textContent = expected.replace(/\\n/g, "\n");
+
+  // 詳細フローを取得してセット
+  const item = allItems.find(i => i.spec === spec && i.caseNo === caseNo);
+  document.getElementById('detailDetailedFlow').value = (item && item.detailedFlow) ? item.detailedFlow : '';
+
+  new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+
+async function saveDetailedFlow() {
+  const flowText = document.getElementById('detailDetailedFlow').value;
+  const spec = detailEditingSpec;
+  const caseNo = detailEditingCaseNo;
+
+  if (!spec || !caseNo) return;
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/pipeline`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        spec: spec,
+        caseNo: caseNo,
+        field: 'detailedFlow',
+        value: flowText,
+        note: '',
+        updatedBy: 'manual',
+      })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    // ローカルデータ更新
+    const item = allItems.find(i => i.spec === spec && i.caseNo === caseNo);
+    if (item) {
+      item.detailedFlow = flowText;
+      item.updatedAt = new Date().toISOString();
+      item.updatedBy = 'manual';
+    }
+
+    alert('詳細フローを保存しました');
+  } catch (e) {
+    alert('保存に失敗しました: ' + e.message);
+  }
+}
+
+// ステップスクリーンショット表示（グローバル関数）
+async function showStepScreenshot(specName, movieName, stepId) {
+  const token = localStorage.getItem('e2e_auth_token');
+  const key = `steps/${specName}/${movieName}/${stepId}.jpg`;
+  try {
+    const r = await fetch(CONFIG.apiUrl + '/assets/download-url', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    const data = await r.json();
+    if (data.downloadUrl) {
+      const container = document.getElementById('videoPlayer').parentElement;
+      let overlay = document.getElementById('stepScreenshotOverlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'stepScreenshotOverlay';
+        overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10';
+        overlay.onclick = () => overlay.remove();
+        container.style.position = 'relative';
+        container.appendChild(overlay);
+      }
+      overlay.innerHTML = `<div style="text-align:center"><img src="${data.downloadUrl}" style="max-width:100%;max-height:70vh;border-radius:4px"><div style="color:#fff;margin-top:8px;font-size:.8rem">${stepId} — クリックで閉じる</div></div>`;
+    } else {
+      alert(`スクリーンショットが見つかりません: ${key}\n\nテストを再実行してスクリーンショットをアップロードしてください。`);
+    }
+  } catch (e) {
+    alert('スクリーンショット取得エラー: ' + e.message);
+  }
+}
+
+async function playVideo(spec, movie) {
+  const token = localStorage.getItem('e2e_auth_token');
+
+  // 動画キーを決定: まず pipeline の videoKey を探す。なければ旧パス videos/ を試す
+  const movieTests = allItems.filter(i => i.spec === spec && i.movie === movie);
+  const withVideoKey = movieTests.find(i => i.videoKey);
+  const withRunId = movieTests.find(i => i.stagingRunId);
+
+  let videoUrl = null;
+
+  // 方法1: runs/{runId}/{caseId}/video/ から videoKey を取得（最新の結果）
+  if (withRunId && withRunId.stagingRunId) {
+    try {
+      const casesResp = await fetch(`${CONFIG.apiUrl}/runs/${withRunId.stagingRunId}/cases?limit=50`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (casesResp.ok) {
+        const casesData = await casesResp.json();
+        const cases = casesData.items || casesData.cases || [];
+        const withVideo = cases.find(c => c.videoKey);
+        if (withVideo?.videoKey) {
+          const vResp = await fetch(CONFIG.apiUrl + '/assets/download-url', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: withVideo.videoKey })
+          });
+          const vData = await vResp.json();
+          videoUrl = vData.downloadUrl || vData.url;
+        }
+      }
+    } catch (e) { console.log('runs videoKey lookup failed:', e.message); }
+  }
+
+  // 方法2: pipeline の videoKey
+  if (!videoUrl && withVideoKey?.videoKey) {
+    try {
+      const resp2 = await fetch(CONFIG.apiUrl + '/assets/download-url', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: withVideoKey.videoKey })
+      });
+      const data2 = await resp2.json();
+      videoUrl = data2.downloadUrl || data2.url;
+    } catch (e) {}
+  }
+
+  // 方法3: 旧パス videos/{spec}/{movie}/video.webm
+  if (!videoUrl) {
+    try {
+      const key = `videos/${spec}/${movie}/video.webm`;
+      const resp3 = await fetch(CONFIG.apiUrl + '/assets/download-url', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key })
+      });
+      const data3 = await resp3.json();
+      videoUrl = data3.downloadUrl || data3.url;
+    } catch (e) {}
+  }
+
+  try {
+    if (videoUrl) {
+      document.getElementById('videoPlayer').src = videoUrl;
+      const runIdSample = (movieTests.find(i => i.stagingRunId) || {}).stagingRunId || '';
+      const tsJST = parseRunTimestamp(runIdSample);
+      const titleEl = document.getElementById('videoModalTitle');
+      titleEl.innerHTML = `${escHtml(SPEC_LABELS[spec] || spec)} / ${escHtml(movie)}`
+        + (tsJST ? ` <small class="text-muted fw-normal ms-2" style="font-size:0.72em">📅 撮影: ${tsJST} JST</small>` : '');
+      const listEl = document.getElementById('videoTestList');
+
+      // 動画タイムスタンプ（stepの開始秒数）
+      const STEP_TIMES = {
+        'auth#AT01': {'144-01': 0, '1-1': 6, '1-2': 19, '38-1': 41, '295': 57},
+        'auth#AT02': {'176': 0, '212-1': 13, '212-2': 66, '212-3': 77, '212-4': 84},
+        'auth#UC01': {'267': 0},
+      };
+      const timeMap = STEP_TIMES[`${spec}#${movie}`] || {};
+      const fmtTime = (sec) => { const m = Math.floor(sec/60); const s = sec%60; return `${m}:${String(s).padStart(2,'0')}`; };
+
+      if (movieTests.length > 0) {
+        movieTests.sort((a, b) => (timeMap[a.caseNo] ?? 999) - (timeMap[b.caseNo] ?? 999));
+
+        // 先頭ケースの detailedFlow を取得（movie全体のフローが書いてある）
+        const firstWithFlow = movieTests.find(t => t.detailedFlow && !t.detailedFlow.includes('参照'));
+        const movieFlow = firstWithFlow?.detailedFlow || '';
+
+        // メイン表示: detailedFlow（1回だけ、大きく表示）
+        // [M:SS] → 動画ジャンプ、🔴 → 赤文字（未実施ステップ）、✅📷 → スクショ
+        function flowWithTimestampLinks(text, specName) {
+          // 行単位で処理
+          const rawLines = escHtml(text).split('\n');
+
+          // 1. タイムスタンプを収集: [{sec, lineIdx}]
+          const tsEntries = [];
+          rawLines.forEach((line, i) => {
+            const m = line.match(/\[(\d+):(\d{2})\]/);
+            if (m) tsEntries.push({ sec: parseInt(m[1]) * 60 + parseInt(m[2]), lineIdx: i });
+          });
+
+          // 2. 各行にブロック番号＋ブロック内の行番号を割り当て
+          //    ブロック = タイムスタンプ行〜次のタイムスタンプ行の前まで
+          //    番号付き行（N. で始まる行）のみカウントして均等割
+          let currentStepId = '';
+          const outLines = rawLines.map((line, i) => {
+            // 🔴 行を赤文字に
+            if (line.includes('🔴')) {
+              line = `<span style="color:#dc3545;font-weight:600">${line}</span>`;
+            }
+
+            // タイムスタンプ行 → ▶ ジャンプボタンに置換
+            line = line.replace(
+              /\[(\d+):(\d{2})\]/g,
+              (match, min, sec) => {
+                const totalSec = parseInt(min) * 60 + parseInt(sec);
+                return `<a href="#" onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${totalSec};document.getElementById('videoPlayer').play();return false" `
+                  + `style="display:inline-block;background:#0d6efd;color:#fff;padding:1px 8px;border-radius:4px;text-decoration:none;font-weight:700;font-size:.8rem" `
+                  + `title="動画の ${min}:${sec} にジャンプ">▶ ${min}:${sec}</a>`;
+              }
+            );
+
+            // ステップID の 📷 ボタン
+            line = line.replace(
+              /(\w+-\d{3})\s+──/g,
+              (match, stepId) => {
+                return `${stepId} <a href="#" onclick="showStepScreenshot('${specName}','${movie}','${stepId}');return false" `
+                  + `style="text-decoration:none;font-size:.85rem" title="この時点のスクリーンショット">📷</a> ──`;
+              }
+            );
+
+            // ステップID追跡 + ✅行の📷ボタン
+            const idMatch = line.match(/(\w+-\d{3})\s/);
+            if (idMatch) currentStepId = idMatch[1];
+            if (currentStepId && line.includes('✅')) {
+              const numMatch = line.match(/^(\s*)(\d+(?:-\d+)?)\./);
+              if (numMatch) {
+                const num = numMatch[2];
+                const subId = `${currentStepId}-s${num}`;
+                line = line.replace(
+                  '✅',
+                  `✅ <a href="#" onclick="showStepScreenshot('${specName}','${movie}','${subId}');return false" style="text-decoration:none;font-size:.75rem;opacity:0.7" title="ステップ${num}のスクショ">📷</a>`
+                );
+              }
+            }
+
+            // 番号付き行かどうか判定
+            const isNumbered = /^\s*\d+(?:-\d+)?\./.test(rawLines[i]);
+
+            // どのブロックに属するか
+            let blockIdx = -1;
+            for (let b = tsEntries.length - 1; b >= 0; b--) {
+              if (i >= tsEntries[b].lineIdx) { blockIdx = b; break; }
+            }
+
+            // data属性付きdivで囲む（番号付き行のみハイライト対象＋クリックで動画ジャンプ）
+            if (blockIdx >= 0 && isNumbered) {
+              // このブロック内で何番目の行か
+              const blockStart = tsEntries[blockIdx].lineIdx;
+              const blockEnd = (blockIdx + 1 < tsEntries.length) ? tsEntries[blockIdx + 1].lineIdx : rawLines.length;
+              const numberedInBlock = rawLines.slice(blockStart, blockEnd).filter(l => /^\s*\d+(?:-\d+)?\./.test(l));
+              const posInBlock = numberedInBlock.findIndex(l => rawLines.indexOf(l, blockStart) === i);
+              const blockStartSec = tsEntries[blockIdx].sec;
+              const blockEndSec = (blockIdx + 1 < tsEntries.length) ? tsEntries[blockIdx + 1].sec : blockStartSec + 15;
+              const stepSec = Math.round(blockStartSec + (posInBlock / Math.max(numberedInBlock.length, 1)) * (blockEndSec - blockStartSec));
+
+              return `<div class="flow-line" data-block="${blockIdx}" data-src-line="${i}" data-sec="${stepSec}" `
+                + `onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${stepSec};document.getElementById('videoPlayer').play()" `
+                + `style="padding:1px 4px;margin:0 -4px;border-left:3px solid transparent;transition:background 0.15s,border-color 0.15s;cursor:pointer" `
+                + `title="動画の ${Math.floor(stepSec/60)}:${String(stepSec%60).padStart(2,'0')} にジャンプ">${line}</div>`;
+            }
+            return line;
+          });
+
+          return outLines.join('\n');
+        }
+
+        let html = '';
+        if (movieFlow) {
+          html += `<div style="background:#fff3cd;padding:10px 12px;border-radius:6px;font-size:.85rem;margin-bottom:16px">
+            <div style="font-weight:700;color:#856404;margin-bottom:6px">📋 テストフロー（この動画で確認する内容）</div>
+            <div style="white-space:pre-wrap;line-height:1.8">${flowWithTimestampLinks(movieFlow, spec)}</div>
+          </div>`;
+        } else {
+          // detailedFlow がない場合は従来通り個別表示
+          html += movieTests.map((t, idx) => {
+            const sec = timeMap[t.caseNo];
+            const timeLabel = sec !== undefined ? `<a href="#" onclick="var o=document.getElementById('stepScreenshotOverlay');if(o)o.remove();document.getElementById('videoPlayer').currentTime=${sec};document.getElementById('videoPlayer').play();return false" style="color:#fff;background:#0d6efd;padding:1px 6px;border-radius:4px;font-size:.75rem;text-decoration:none;margin-left:6px">▶ ${fmtTime(sec)}</a>` : '';
+            return `
+            <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #dee2e6">
+              <div style="font-weight:700;color:#0d6efd;margin-bottom:4px">
+                ${idx+1}. ${escHtml(t.caseNo)} — ${escHtml(t.feature || '')} ${timeLabel}
+              </div>
+              <div style="font-size:.85rem">${escHtml(t.description || '')}</div>
+            </div>`;
+          }).join('');
+        }
+
+        listEl.innerHTML = html;
+      } else {
+        listEl.innerHTML = '<p class="text-muted">テスト内容が見つかりません</p>';
+      }
+
+      new bootstrap.Modal(document.getElementById('videoModal')).show();
+
+      // 動画再生に合わせて行単位でハイライト（各行のdata-secを使用）
+      const videoEl = document.getElementById('videoPlayer');
+      const flowLines = [...listEl.querySelectorAll('.flow-line')];
+      if (flowLines.length > 0) {
+        let lastLine = null;
+        function onTimeUpdate() {
+          const t = videoEl.currentTime;
+          // 現在の行を特定: data-sec が現在時刻以下で最大のもの
+          let activeLine = null;
+          for (let i = flowLines.length - 1; i >= 0; i--) {
+            if (t >= parseFloat(flowLines[i].dataset.sec)) { activeLine = flowLines[i]; break; }
+          }
+          if (activeLine === lastLine) return;
+          lastLine = activeLine;
+
+          flowLines.forEach(el => {
+            el.style.borderLeftColor = 'transparent';
+            el.style.background = 'transparent';
+            el.style.fontWeight = '';
+          });
+          if (activeLine) {
+            activeLine.style.borderLeftColor = '#0d6efd';
+            activeLine.style.background = 'rgba(13,110,253,0.1)';
+            activeLine.style.fontWeight = '600';
+            activeLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+        videoEl.addEventListener('timeupdate', onTimeUpdate);
+        // モーダルが閉じたらリスナーを解除
+        document.getElementById('videoModal').addEventListener('hidden.bs.modal', () => {
+          videoEl.removeEventListener('timeupdate', onTimeUpdate);
+          videoEl.pause();
+        }, { once: true });
+      }
+
+    } else {
+      alert(`動画が見つかりません: ${spec}/${movie}\n\n動画が未アップロードの可能性があります。テストを再実行してください。`);
+    }
+  } catch (e) {
+    alert('動画取得エラー: ' + e.message);
+  }
+}
+</script>
+
+<!-- 動画再生モーダル（動画+テスト内容の2カラム） -->
+<div class="modal fade" id="videoModal" tabindex="-1">
+  <div class="modal-dialog" style="max-width:95vw">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h5 class="modal-title" id="videoModalTitle">動画再生</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="document.getElementById('videoPlayer').pause()"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="d-flex" style="height:75vh">
+          <!-- 左: 動画 -->
+          <div style="flex:3;min-width:0;background:#000;display:flex;align-items:center">
+            <video id="videoPlayer" controls style="width:100%;max-height:75vh" autoplay></video>
+          </div>
+          <!-- 右: テスト内容一覧 -->
+          <div id="videoTestList" style="flex:2;overflow-y:auto;border-left:1px solid #dee2e6;padding:12px;font-size:.85rem;background:#f8f9fa">
+            <p class="text-muted">テスト内容を読み込み中...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

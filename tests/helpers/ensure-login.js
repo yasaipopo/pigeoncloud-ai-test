@@ -21,6 +21,7 @@ const PASSWORD = process.env.TEST_PASSWORD || '';
  * @param {string} [password] - 省略時はTEST_PASSWORDを使用
  */
 async function ensureLoggedIn(page, email, password) {
+    const t0 = Date.now();
     const baseUrl = process.env.TEST_BASE_URL || BASE_URL;
     const _email = email || EMAIL;
     const _password = password || PASSWORD;
@@ -28,17 +29,21 @@ async function ensureLoggedIn(page, email, password) {
     // ダッシュボードへアクセスしてセッション確認
     const currentUrl = page.url();
     if (!currentUrl || currentUrl === 'about:blank') {
-        await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        console.log(`[ensureLoggedIn] goto dashboard: ${Date.now() - t0}ms, url=${page.url()}`);
     }
 
-    // navbarが表示されていれば既にログイン済み
-    const navbar = await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => null);
+    // navbarが表示されていれば既にログイン済み（storageState有効時は1-5秒で表示）
+    const navbar = await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => null);
+    console.log(`[ensureLoggedIn] navbar check: ${Date.now() - t0}ms, found=${!!navbar}, url=${page.url()}`);
     if (navbar && !page.url().includes('/admin/login')) {
         return; // セッション有効
     }
 
     // セッション切れ → フルログインを実行
+    console.log(`[ensureLoggedIn] session expired, doing fullLogin: ${Date.now() - t0}ms`);
     await fullLogin(page, _email, _password);
+    console.log(`[ensureLoggedIn] fullLogin done: ${Date.now() - t0}ms`);
 }
 
 /**
@@ -53,7 +58,7 @@ async function fullLogin(page, email, password) {
     const _email = email || EMAIL;
     const _password = password || PASSWORD;
 
-    await page.goto(baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.goto(baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 });
 
     // すでにダッシュボードにいる場合はOK
     if (!page.url().includes('/admin/login')) {
@@ -61,28 +66,27 @@ async function fullLogin(page, email, password) {
         return;
     }
 
-    await page.waitForSelector('#id', { timeout: 30000 });
+    await page.waitForSelector('#id', { timeout: 5000 });
     await page.fill('#id', _email);
     await page.fill('#password', _password);
-    // ログインページのボタンは最初の1つだけクリック（複数マッチ対策）
-    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 30000 });
+    await page.locator('button[type=submit].btn-primary').first().click({ timeout: 10000 });
 
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 180000, waitUntil: 'domcontentloaded' });
+        await page.waitForURL('**/admin/dashboard', { timeout: 15000, waitUntil: 'domcontentloaded' });
     } catch (e) {
         const currentUrl = page.url();
         if (!currentUrl.includes('/admin/login')) {
             await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
             return;
         }
-        // Laddaボタンが無効化されている場合は有効になるまで待機してリトライ
-        await page.waitForSelector('button[type=submit].btn-primary:not([disabled])', { timeout: 30000 }).catch(() => {});
+        // リトライ
+        await page.waitForSelector('button[type=submit].btn-primary:not([disabled])', { timeout: 10000 }).catch(() => {});
         await page.fill('#id', _email);
         await page.fill('#password', _password);
-        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 30000 });
-        await page.waitForURL('**/admin/dashboard', { timeout: 180000, waitUntil: 'domcontentloaded' }).catch(() => {});
+        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 10000 });
+        await page.waitForURL('**/admin/dashboard', { timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => {});
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
 }
 
 module.exports = { ensureLoggedIn, fullLogin };

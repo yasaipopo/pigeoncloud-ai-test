@@ -5,6 +5,341 @@
 
 ---
 
+## 【最初に必ず確認】Playwright環境 & 知見ファイル
+
+### Playwrightバージョン確認（テスト実行前に必ず実施）
+
+テスト実行前に、Playwrightのバージョンとブラウザバイナリの整合性を確認すること。
+バージョン不一致は `browserType.launch: Executable doesn't exist` エラーの原因になる。
+
+```bash
+# 1. Playwrightバージョン確認
+npx playwright --version
+
+# 2. インストール済みブラウザ確認
+ls ~/Library/Caches/ms-playwright/ | grep chromium
+
+# 3. 不一致がある場合はブラウザを再インストール
+npx playwright install
+```
+
+**よくある問題**:
+- `package.json` の `@playwright/test` を更新したがブラウザを再インストールしていない
+- 古いテスト結果ファイルを参照して「failしている」と誤判断（実際は古いバージョンでの結果）
+- **対策**: テスト結果を分析する前に、まず1つのspecを実際に実行して現在のPlaywright環境で動くか確認する
+
+### waitForTimeout最適化ルール
+
+`waitForTimeout` は固定sleepであり、テスト実行時間を無駄に伸ばす。以下のルールで最適化すること：
+
+| パターン | 置き換え方法 |
+|---|---|
+| ログインリトライ前の `waitForTimeout(1000)` | `waitForLoadState('domcontentloaded')` |
+| toast/モーダル表示待ち `waitForTimeout(2000)` | `expect(locator).toBeVisible({ timeout: N })` で自動待機 |
+| Angular描画待ち `waitForTimeout(500)` | `waitForAngular(page)` で十分 |
+| ページリロード後 `waitForTimeout(N)` | `waitForLoadState` or `waitForAngular` で代替 |
+| 外部リクエスト検知 `waitForTimeout(5000)` | 2秒で十分（リクエストイベント発火目的） |
+
+**削除してはいけないケース**（knowledge-e2e-performance.md参照）:
+- `count()` / `textContent()` / `getAttribute()` 直前（auto-waitしない）
+- Angularタブ切り替え後（タブコンテンツ未ロード）
+- `waitForSelector` 後のAngularルーティング完了待ち
+
+### test.setTimeout の自動計算ルール
+
+テスト関数の`test.setTimeout`は**step数に応じて自動計算**する:
+
+```
+timeout = Math.max(60000, stepCount * 15000 + 30000)
+```
+
+| step数 | タイムアウト | 例 |
+|---|---|---|
+| 0-2 | 60秒（config default） | `test.setTimeout`不要 |
+| 3-6 | 75〜120秒 | 短いテスト |
+| 7-11 | 135〜195秒 | 中程度のテスト |
+| 12-17 | 210〜285秒 | 長いテスト |
+| 18+ | 300秒〜 | 非常に長いテスト |
+
+- **step数が0-2のテストには`test.setTimeout`を書かない**（config defaultの60秒で十分）
+- テストを新規作成・step追加時は、上記計算式でタイムアウトを設定する
+
+### 次にやること（2026-04-01時点の残タスク）
+
+**全spec実行済み（login統一後）: 約330 pass / 85 fail (80%) ← 前回 121/92 (56%)**
+
+0. **全specを自己完結型に移行中** — 各specのbeforeAllで`createTestEnv(browser)`を呼び、専用テナントを作成する設計
+   - `tests/helpers/create-test-env.js` を使う
+   - storageStateファイルも新環境用に上書きされる
+   - templates.spec.jsで動作確認済み
+   - **移行手順（各specに適用）**:
+     1. `const { createTestEnv } = require('./helpers/create-test-env');` を追加
+     2. `let BASE_URL = ...` を `let` に変更（constだとbeforeAllで上書きできない）
+     3. `test.beforeAll(async ({ browser }) => { ... })` で `createTestEnv` を呼び、BASE_URL/EMAIL/PASSWORDを上書き
+     4. `process.env.TEST_BASE_URL` 等も更新（ensureLoggedInが参照するため）
+   - **ALLテストテーブルが不要なspec**: `createTestEnv(browser, { withAllTypeTable: false })`
+   - **並列テスト実行時は異なるAGENT_NUMを使う**（storageState競合防止）
+   - **並列テスト実行にはSonnet 1Mモデルのsubagentを使う**（コスト効率）
+   - **Playwrightテスト実行時に `| pipe` を使うとJSONレポーターが出力しない** — パイプなしで実行すること
+1. **独自login関数の統一**（fields-2等）: ensureLoggedInに置き換え
+2. **UIセレクター修正（fail数順）**:
+   - chart-calendar (29 fail): 詳細権限セレクター全面修正
+   - fields (21 fail): .pc-field-block等のクラス名変更対応
+   - table-definition (14 fail): セレクター修正
+   - system-settings (11 fail): beforeAll/afterAll構造修正
+   - users-permissions (9 fail), fields-2 (9 fail): 個別セレクター
+   - workflow (5 fail): テキスト不一致
+3. **全spec再テスト → DB同期（TEST_NUMBER更新）**
+4. **sheet.htmlにアップロード**
+
+### テスト実行・修正の進め方
+
+- **直列で1specずつ実行** → 結果確認 → 修正 → アップロードのサイクル
+- **subagent（Sonnet）に委任できるもの**: セレクター修正、waitForTimeout最適化、単純なbeforeAll修正など、パターンが明確な作業
+- **subagentへの依頼は細かく書く**: 対象ファイル、修正箇所（行番号）、修正内容、期待する結果を明記。曖昧な「直して」は禁止
+- **テスト実行後は必ずアップロード**: `python3 e2e-viewer/upload_results.py --reports-dir reports/agent-1 --api-url "$E2E_API_URL" --agent-num 1`
+- **結果はsheet.htmlで確認**: https://dezmzppc07xat.cloudfront.net/sheet.html
+- **failが出たら途中でも止めて確認** — 最後まで待たず、エラーパターンを見て修正→再実行のサイクル
+- **独自login関数は使わない** — `ensureLoggedIn`（helpers/ensure-login.js）に統一。独自実装は`button[type=submit]`の複数マッチ等で壊れやすい
+- **`count() > 0` でclick/fillしない** — `isVisible()` または `:visible` セレクターを使う（知見6参照）
+- **sedでの一括置換は禁止** — コードを壊すリスクが高い。nodeスクリプトで安全に置換する
+- **ALLテストテーブルのレコード追加/編集画面は102フィールドのため描画に時間がかかる** — `/add`, `/new`, `/view/N` 遷移後は `waitForSelector('.navbar', { timeout: 15000 })` を入れる。`waitForAngular`の5秒だけでは足りない
+- **Angularモーダルは×ボタンやEscapeで閉じない場合がある** — 「追加オプション設定」等の入れ子モーダルではEscapeが効かず、×ボタンのDOMも複数存在する。確実に閉じるには**ページリロード**を使う（`page.reload()` → `waitForSelector('.overSetting')`）。JS DOM操作（`classList.remove('show')`等）はAngularの状態を壊すので禁止
+
+### 知見ファイル
+
+E2Eテストの修正・作成を始める前に、以下の知見ファイルを**必ず全て読むこと**:
+
+```bash
+cat .claude/knowledge-e2e-performance.md
+cat .claude/knowledge-e2e-angular.md
+cat .claude/knowledge-e2e-failure-triage.md
+```
+
+| ファイル | 内容 |
+|---|---|
+| `.claude/knowledge-e2e-performance.md` | waitForTimeout, auto-waiting, 高速化施策 |
+| `.claude/knowledge-e2e-angular.md` | beforeAll/storageState, Reactive Forms, ダッシュボードUI, パスワード変更フロー等 |
+| `.claude/knowledge-e2e-failure-triage.md` | **フェイル種別の切り分け基準** (A:FLAKY / B:SPEC_BUG / C:PRODUCT_BUG / D:INFRA_BUG) |
+| `.claude/knowledge-step-screenshot-rule.md` | **ステップスクショ撮影ルール** + detailedFlowマーク規約（✅/🔴/📷） |
+| `.claude/knowledge-sheet-html-system.md` | **sheet.html仕組み全体** — 動画/スクショのS3パス・sync-results必須手順・autoScreenshot使い方 |
+| `.claude/knowledge-e2e-roadmap.md` | テスターチェック完了までのロードマップ |
+| `.claude/knowledge-page-table-settings.md` | テーブル設定ページ、テーブル作成フロー、.pc-field-block、設定モーダル |
+| `.claude/knowledge-page-record-list.md` | レコード一覧、新規作成、アクションメニュー、チャートモーダル |
+| `.claude/knowledge-page-workflow.md` | ワークフロー設定、ビジュアルフローエディタ、申請・承認フロー |
+| `.claude/knowledge-page-admin-settings.md` | 管理設定、debug API、ログインフロー |
+| `.claude/knowledge-e2e-notifications.md` | **メール系テーブル名（mail_templates/mail_reserve/mail_delivery_list）**、step_mail_option 有効化API、ステップメール/メールテンプレート/メール配信編集ページのセレクター |
+| `.claude/knowledge-e2e-table-definition.md` | **テーブル名マッピング（organization→division）**、`/admin/dataset__N/add` 直接 goto 禁止、ALLテストテーブルの自動採番フィールド特定、サイドバータブクリック方法、gotoRecordAdd helper |
+
+テスト用テーブルスキーマ定義:
+
+| ファイル | 用途 |
+|---|---|
+| `tests/schemas/datetime-test.json` | 日時系フィールドテスト |
+| `tests/schemas/field-options-test.json` | フィールドオプション全種テスト |
+| `tests/schemas/display-condition-test.json` | 表示条件テスト |
+| `tests/schemas/csv-test.json` | CSV操作テスト（レコード付き） |
+| `tests/schemas/workflow-test.json` | ワークフロー設定付きテスト |
+
+テーブル作成API: `POST /api/admin/debug/create-light-table` にスキーマJSONを渡す。
+APIスキーマ定義: `pigeon_cloud/assets/json_schema/create-light-table-schema.json`
+ワークフロースキーマ: `pigeon_cloud/assets/json_schema/workflow-schema.json`
+テスト側: `createTableFromSchema(page, 'datetime-test')` または `createLightTable(page, '名前', [...fields])`
+
+調査で新しい知見が得られたら、作業終了前に必ず該当ファイルに追記すること。
+
+## 【パイプラインフロー】
+
+```
+① テスト内容チェック (/check-yaml): yaml品質・網羅性（pigeon repo + Playwright MCP参照）
+  → ② テスト修正くん (/spec-create): yaml通りにspec.js実装・修正
+    → ③ チェックくん (/check-run): Playwright実行 + 問題あれば差し戻し
+```
+
+**前工程変更 → 後工程全リセット:**
+- yaml変更 → ②③ リセット
+- spec.js変更 → ③ リセット
+
+**管理DB**: チェックDB（DynamoDB + API）— **唯一の正（SSoT）**。DB未構築時は `.claude/pipeline-status.md` をフォールバック。
+**詳細**: `.claude/e2e-pipeline-sheet.md`
+
+| エージェント | スキル | 役割 |
+|---|---|---|
+| テスト内容チェック | `/check-yaml` | yaml品質・網羅性チェック（pigeon repo + Playwright MCP参照） |
+| テスト修正くん | `/spec-create` | yaml通りにspec.jsを実装・修正（MCP Playwright必須） |
+| チェックくん | `/check-run` | Playwright実行 + failed振り分け + 差し戻し（環境依存の遅さは切り分け） |
+| 不具合調査くん | — | 障害・PRからyaml追加→DB更新→知見md |
+| 詳細調査くん | — | インフラ根本原因調査（CloudWatch/ECS/RDS） |
+
+---
+
+## 【URLベースのテストケース】
+
+yaml の description がURL（pigeon-cloud.com/pigeon-demo.com）のみのケースは**そのままPASSにしない**。
+URLは不具合修正依頼や機能追加依頼のページ。raw_query.js で依頼内容を取得してテストフローに書き直す。
+
+```bash
+# 例: https://loftal.pigeon-cloud.com/admin/dataset__90/view/583
+node /Users/yasaipopo/PhpStormProjects/PopoframeworkSlim/manage/raw_query.js \
+  popo "SELECT * FROM dataset__90 WHERE id = 583" --env=prod
+```
+
+詳細は `.claude/knowledge-e2e-angular.md` の「URLベースのテストケースの扱い」参照。
+
+---
+
+## 【テスト品質チェック（必須・厳格に実施）】
+
+### 「テストOK」の定義
+
+テストが **passed** であっても、以下のチェックリストを全て満たさない限り **本当のOKではない**。
+spec.jsを生成・修正した際、またはテスト結果をシートに書き込む前に、必ず各テストを以下の観点で評価すること。
+
+### テスト品質チェックリスト
+
+各テストケースについて、以下を全てクリアしているか確認する：
+
+| # | チェック項目 | NGの例 |
+|---|------------|--------|
+| 1 | **タイトルとテスト内容が合致している（十分である）** | タイトルが「フィルタ適用中にのみ一括編集がかかること」なのに、`.navbar` が表示されているだけを確認している |
+| 2 | **テスト内容が正しく最後まで完遂している** | 途中で `return` / `console.log('...スキップ')` して実質何もテストしていない |
+| 3 | **スキップされていない** | `test.skip(...)` / 早期 `return` / graceful skip で終わっている |
+| 4 | **navbar/ISEチェックだけで終わっていない** | `.navbar` の toBeVisible + Internal Server Error の非含有チェックだけで、テスト名に書いてある操作を一切していない |
+| 5 | **具体的なassertionが最低1つある** | expect文が0個、またはcheckPage()だけ |
+
+### NGパターン（絶対に許可しない）
+
+```javascript
+// ❌ NG: navbarチェックだけ — 何もテストしていない
+test('フィルタ適用中にのみ一括編集がかかること', async ({ page }) => {
+    await login(page);
+    await page.goto(BASE_URL + '/admin/dataset__7');
+    await waitForAngular(page);
+    await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+    const bodyText = await page.innerText('body');
+    expect(bodyText).not.toContain('Internal Server Error');
+    // ← ここで終わり。フィルタも一括編集も何もしていない
+});
+
+// ❌ NG: checkPageだけ
+test('ワークフロー設定ページが正常表示されること', async ({ page }) => {
+    await checkPage(page, `/admin/dataset__${tableId}/setting/workflow`);
+    // ← checkPage = 500エラーが出ないことだけ確認
+});
+```
+
+### テスト修正くんへの指示ルール
+
+1. **数ではなく質を優先**: 「50件実装して」ではなく「10件を確実に動くように実装して」
+2. **MCP Playwright で実UI確認必須**: テスト対象ページを開いてセレクター・ボタン・テキストを確認
+3. **yaml の description の操作手順を全て実行する**: ①②③の手順を全てPlaywrightコードに落とす
+4. **yaml の expected の期待結果を全て検証する**: expect文で結果を確認
+5. **navbar/ISEだけのテストは禁止**: 具体的な操作 + 具体的なassertion が必須
+
+---
+
+## 【テスト修正フロー — 失敗から学んだルール】
+
+### 知見1: 大量一括修正は禁止
+R44(89%)→R50(55%)に悪化した原因: 5並列エージェントが27ファイル3100行を一括修正→コンフリクト→リグレッション。
+**1ファイルずつ修正→テスト確認→コミットのサイクルを厳守。**
+
+### 知見2: retries:2はプロセス蓄積の原因
+retries:2で各テスト最大3回実行→Chromiumプロセスが蓄積→CPU/メモリ圧迫→全体が遅くなる。
+**retries:1が安全。flakyテストはretryではなくテスト修正で対応。**
+
+### 知見3: beforeAllの独自実装は不安定化の元
+各specが独自の`createAllTypeTable`/`createLoginContext`を持つと、セッション切れ/fetch失敗時の挙動がバラバラ。
+**共通ヘルパー（`getAllTypeTableId`, `createAuthContext`）を使う。独自実装は禁止。**
+
+### 知見4: テスト環境パフォーマンスは時間帯で変動
+同じコードでも実行タイミングで結果が変わる（RDS負荷、ネットワーク、他テナントのアクセス）。
+**1回のfailで「コードが悪い」と判断しない。2回連続failなら調査。**
+
+### 知見5: 品質改善（assertion追加）は安定した基盤の上で行う
+パス率89%の安定状態を確認してから品質改善を開始すること。
+**パス率が80%未満に落ちたら品質改善を止めて安定化を優先。**
+
+### 知見6: globalTeardownでChromiumプロセスをクリーンアップ
+テスト完了後に`pkill -f "test-agent=${AGENT_NUM}"`でChromiumプロセスを確実に終了。
+`tests/global-teardown.js` に実装済み。
+
+---
+
+## 【最重要】spec.jsが唯一の正（Single Source of Truth）
+
+### 原則
+**spec.jsが全ての正**。yamlのdetailedFlowはspec.jsから自動生成する。手書きしない。
+
+- spec.jsの構造化コメント（`[flow]`/`[check]`タグ）→ パーサーがyaml detailedFlowを生成 → pipeline DB → sheet.html
+- yamlを手で編集する場合はcase_no, feature, description, expected, movieのみ。detailedFlowは触らない
+- spec.jsを修正したら `generate-detailed-flow.py` を実行してyamlを再生成
+
+### spec.jsのコメント記法（必須）
+
+```javascript
+await test.step('dash-030: ダッシュボードにビューコンテンツを追加できること', async () => {
+    // [flow] 30-1. 作成したタブを選択
+    await targetTab.first().click();
+
+    // [flow] 30-2. 「ウィジェットを追加」ボタンをクリック
+    await addWidgetBtn.click();
+
+    // [flow] 30-3. ビュー追加ダイアログでALLテストテーブルを選択し「詳細設定」→「保存」
+    await detailBtn.click();
+    await saveBtn.click();
+
+    // [check] 30-4. ✅ エラーメッセージが表示されないこと
+    expect(errorCount).toBe(0);
+
+    // [check] 30-5. ✅ ダッシュボードにビューウィジェットが追加されていること
+    expect(widgetCount).toBeGreaterThan(0);
+
+    await autoScreenshot(page, 'DB01', 'dash-030', _testStart);
+});
+```
+
+**ルール:**
+- `// [flow] XX-N. 操作内容` — 操作手順（テスター向け日本語、CSSセレクター禁止）
+- `// [check] XX-N. ✅ 確認内容` — 検証ポイント（スクショ＋📷対象）
+- `// [check] XX-N. 🔴 確認内容（理由）` — 未実施の検証ポイント
+- 番号はケース内番号（30-1, 30-2...）。通し番号禁止
+- CSSセレクター・技術用語禁止（`.navbar`→「ナビゲーションメニュー」）
+- 詳細は `.claude/knowledge-detailed-flow-writing-rule.md` 参照
+
+### 品質チェックリスト
+spec修正時は `.claude/knowledge-spec-quality-checklist.md` の全項目をクリアすること。
+
+---
+
+## 【絶対守るルール】テスト設計
+
+1. **テスト環境は `createTestEnv(browser)` で作成する（必須・最重要）**。
+   - 各specのbeforeAllで `createTestEnv(browser, { withAllTypeTable: true })` を呼ぶ。
+   - 内部で `create-trial` API（`with_all_type_table: true`）を呼び、環境+ALLテストテーブル+VIEWを**1回のAPI呼び出しで同時作成**する。
+   - `debug/create-all-type-table` APIを**直接呼ばない**。ポーリング（60秒）も**使わない**。全て `create-trial` に統一。
+   - domain は省略（PHP側で短いランダム名を自動生成。504リスク低減のため）。
+   - レスポンスの `table_id` を使う。`debug/status` でIDを取得する必要もない。
+   - テスト実行時は `SKIP_GLOBAL_SETUP=1` を設定し、global-setupのai-testログインを回避する（セッション競合防止）。
+2. **テスト途中で `deleteAllTypeTables` を呼ばない**。テーブル削除テストは専用の一時テーブルで。
+3. **テスト間のデータ状態に依存しない**。各テストが必要なデータは自身のsetupで作成。使い捨て環境なのでafterAllのリセット処理も不要。
+4. **フィールド設定テストではALLテストテーブル（102フィールド）を使わない**。テスト対象のフィールドだけを持つ軽量テーブルを新規作成する（`withAllTypeTable: false`）。
+   - 例: 日時+テキスト+数値のテストなら3フィールドだけのテーブルを作成
+   - **同じページにいる間にできる操作はまとめて行う**。フィールドを1個作成→確認→1個作成→確認 ではなく、**必要なフィールドをまとめて作成→まとめて確認**。ページ遷移を最小化してテスト時間を短縮する。テスト観点はlossしない。
+5. **テスト修正時はまず元のテスト観点を確認する**。specs/*.yaml の description/expected を読み、「何を確認すべきか」を理解してからフローを設計する。
+6. **Laddaボタン**: `setInputFiles` 後に `dispatchEvent(new Event('change'))` を手動発火。
+7. **CSVアップロードは非同期**。結果は `/admin/csv` 履歴ページで確認。
+8. **ALLテストテーブルの制約（新規作成時）**:
+   - 「テキスト_デフォルト値」にはデフォルト値が未設定。デフォルト値テストは「日付」「日時」の現在日時自動入力で代替。
+   - 表示条件（ラジオ→テキスト表示/非表示）は未設定。新規テーブルではフィールドの存在と操作可能性の確認に留める。
+9. **navigateToAllTypeTable等のヘルパーでAPIフェッチしてtableIdを取得しない**。createTestEnvが返す `tableId` をファイルレベル変数に保存し直接使う。fixture pageのcookieは新環境と一致しないため、API呼び出しが認証エラーになる。
+10. **beforeEachでは明示的ログインする（ensureLoggedIn不使用）**。Playwright fixtureの `{ page }` はconfig読み込み時のstorageState（古い環境のcookie）を使い続けるため、createTestEnvで作った新環境にはログインできない。beforeEachでは `page.goto(BASE_URL + '/admin/login')` → `fill('#id', EMAIL)` → `fill('#password', PASSWORD)` → `click` → `.navbar` 待機の明示的ログインを行う。
+11. **テスト実行は1specずつ直列で行う**。複数specを同時実行すると、createTestEnvがai-test管理画面に同時ログイン→セッション競合でcreate-trial失敗。`npx playwright test tests/xxx.spec.js` で1つずつ実行し、完了後に次のspecを実行する。
+12. **staging RDSストレージに注意**。大量のcreate-trialでテスト環境DBが蓄積し、ストレージ100GBを使い切る事故が発生（2026-04-04）。テスト後に不要な環境DBの削除が必要。現在350GBに拡張済み。
+13. **workflow.spec.js は全面書き直しが必要**（2026-04-03時点）。ワークフローの設定・申請UIがビジュアルエディタに一新されたため、既存のセレクター・フローが全て無効。現状のテストは実行しても意味がないので、新UIに合わせて再実装する。
+
+---
+
 ## あなたの役割
 
 ### モードA: spec.js生成モード（メイン作業）
@@ -545,6 +880,149 @@ steps:
 | `login` | ログインショートカット | `email`/`password`（省略時は環境変数使用） |
 | `api_post` | APIのPOST呼び出し | `path`: APIパス、`body`: リクエストボディ |
 | `api_get` | APIのGET呼び出し | `path`: APIパス |
+
+---
+
+## テスト品質チェック（必須・厳格に実施）
+
+### 「テストOK」の定義
+
+テストが **passed** であっても、以下のチェックリストを全て満たさない限り **本当のOKではない**。
+spec.jsを生成・修正した際、またはテスト結果をシートに書き込む前に、必ず各テストを以下の観点で評価すること。
+
+### テスト品質チェックリスト
+
+各テストケースについて、以下を全てクリアしているか確認する：
+
+| # | チェック項目 | NGの例 |
+|---|------------|--------|
+| 1 | **タイトルとテスト内容が合致している（十分である）** | タイトルが「フィルタ適用中にのみ一括編集がかかること」なのに、`.navbar` が表示されているだけを確認している |
+| 2 | **テスト内容が正しく最後まで完遂している** | 途中で `return` / `console.log('...スキップ')` して実質何もテストしていない |
+| 3 | **スキップされていない** | `test.skip(...)` / 早期 `return` / graceful skip で終わっている |
+
+### NGパターン（絶対に許可しない）
+
+```javascript
+// ❌ NG: UIが見つからないと言ってreturnするだけ — 何もテストしていない
+if (!filterBtnVisible) {
+    console.log('フィルタUIが見つからないためスキップ');
+    await expect(page.locator('.navbar')).toBeVisible();
+    return;  // ← passed になるが何も確認していない
+}
+
+// ❌ NG: test.skip で逃げる
+test.skip(true, 'todo');
+
+// ❌ NG: タイトルと無関係なアサーション
+// タイトル: 「フィルタ適用中にのみ一括編集がかかること」
+await expect(page.locator('.navbar')).toBeVisible();  // ← navbarの表示はタイトルと無関係
+```
+
+### OKパターン（こうすること）
+
+```javascript
+// ✅ OK: タイトルに書いてある動作を実際に操作・確認している
+// タイトル: 「フィルタ適用中にのみ一括編集がかかること」
+// → フィルタを掛ける → 一括編集を実行 → フィルタ対象のレコードのみ変更されたことを確認
+
+// ✅ OK: UIが存在しない場合は「機能未実装」として記録し、テスト削除または実装待ち
+// → UIが存在しないなら test を削除するか、機能実装後に対応
+
+// ✅ OK: フォールバックより具体的な確認
+const filterUI = page.locator('.filter-btn');
+if (await filterUI.count() === 0) {
+    throw new Error('フィルタUIが存在しない — テスト環境か実装を確認してください');
+}
+```
+
+### シートへの書き込みルール（品質情報を追加）
+
+テスト結果をGoogle Sheetsに書き込む際、単純な `OK/NG` に加えて **品質判定** も記録する：
+
+- `OK` → チェックリスト3項目を全てクリアしている場合のみ
+- `OK*` （アスタリスク付き）→ passed だがチェック項目に疑義がある場合（内容が薄い等）
+- `NG` → failed / 実質スキップ / タイトルと内容が不一致
+
+**具体的には**: `e2e_report_sheet.py` でシートに書き込む際、「テスト品質」列（または備考）に以下を追記：
+- `✓ 完全実装` → 3項目クリア
+- `⚠ 内容不十分` → passed だがタイトルと内容が乖離
+- `⚠ スキップ` → 早期returnや test.skip
+
+### spec.js生成・修正時のセルフレビュー手順
+
+spec.jsを書いた後、**コミット前に必ず以下を自分でレビューする**：
+
+1. 各 `test('...', ...)` のタイトルを読む
+2. テスト本体のコードを読む
+3. 「このコードはタイトルに書いてあることを本当に確認しているか？」を自問する
+4. `return` で途中終了していないか確認する
+5. `test.skip` がないか確認する
+
+もし疑問があれば、**MCP Playwrightでブラウザを実際に操作して確認**し、正しく実装してからコミットすること。
+
+---
+
+## テスト修正フロー — テスト作成君（必須・永続ルール）
+
+**E2Eテストが失敗した場合、以下のフローを必ず実行すること。このルールは永続的に適用される。**
+
+### フロー概要
+
+```
+失敗テスト発見
+  ↓
+① 原因分類（specバグ / プロダクトバグ / 環境依存）
+  ↓
+[specバグの場合]              [プロダクトバグの場合]
+  ↓                             ↓
+② ソースコード確認              `.claude/product-bugs.md` に記録
+  ↓                             （テストコードは絶対に修正しない）
+③ MCP Playwrightで実UIを確認
+  ↓
+④ spec.jsを修正・実装
+  ↓
+⑤ `npx playwright test` で自動実行・Pass確認
+  ↓
+⑥ 怒りくん（/check-specs）にレビュー依頼
+  ↓
+[怒りくん ✅ OK]              [怒りくん ❌ NG]
+  ↓                             ↓
+⑦ git commit                  ③に戻って再修正
+```
+
+### テスト作成君の実行コマンド
+
+```bash
+# 特定のspecの特定ケースを修正
+/spec-create [spec名] [case_no]
+
+# 特定のspecの全失敗を修正
+/spec-create [spec名]
+
+# 全失敗を修正（フルパイプライン）
+/spec-create
+```
+
+### 絶対ルール
+
+1. **MCP Playwright (`mcp__playwright__*`) を使って実際のUIを確認してからコードを書く**
+2. **`npx playwright test` で実行確認してからコミットする**
+3. **怒りくんのレビューを通過してからコミットする**
+4. **プロダクトバグはテストコードで隠蔽しない**（スキップ・緩いアサーションへの変更も禁止）
+5. **スクリーンショットも怒りくんが確認する**（テスト完了後）
+
+### プロダクトバグの記録（`.claude/product-bugs.md`）
+
+```markdown
+## {spec名}/{case_no}: {テスト名}
+
+- **発見日**: YYYY-MM-DD
+- **症状**: {何が起きているか}
+- **期待値**: {タイトルに書いてある期待動作}
+- **実際**: {実際に起きていること}
+- **判定**: プロダクトバグ
+- **対応**: 開発チームに報告待ち
+```
 
 ---
 

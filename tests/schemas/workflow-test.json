@@ -1,0 +1,12 @@
+{
+  "name": "ワークフローテスト",
+  "fields": [
+    { "type": "text", "label": "件名", "required": true },
+    { "type": "textarea", "label": "内容" },
+    { "type": "select", "label": "優先度", "options": ["高", "中", "低"] }
+  ],
+  "workflow": {
+    "enabled": true,
+    "fix_flow": false
+  }
+}

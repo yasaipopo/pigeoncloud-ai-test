@@ -140,6 +140,25 @@ Resources:
         Enabled: true
 
   # =========================================
+  # DynamoDBテーブル: パイプラインチェックシート
+  # =========================================
+  PipelineTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: all-test-check-list
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: spec
+          AttributeType: S
+        - AttributeName: caseNo
+          AttributeType: S
+      KeySchema:
+        - AttributeName: spec
+          KeyType: HASH
+        - AttributeName: caseNo
+          KeyType: RANGE
+
+  # =========================================
   # IAMロール: Lambda実行用
   # =========================================
   LambdaExecutionRole:
@@ -174,6 +193,8 @@ Resources:
                   - !Sub '${RunsTable.Arn}/index/*'
                   - !GetAtt CasesTable.Arn
                   - !Sub '${CasesTable.Arn}/index/*'
+                  - !GetAtt PipelineTable.Arn
+                  - !Sub '${PipelineTable.Arn}/index/*'
         - PolicyName: S3Access
           PolicyDocument:
             Version: '2012-10-17'
@@ -206,6 +227,7 @@ Resources:
         Variables:
           RUNS_TABLE: !Ref RunsTable
           CASES_TABLE: !Ref CasesTable
+          PIPELINE_TABLE: !Ref PipelineTable
           ASSETS_BUCKET: !Ref AssetsBucket
           REGION: !Sub '${AWS::Region}'
           ADMIN_PASSWORD: !Ref AdminPassword
@@ -343,3 +365,9 @@ Outputs:
     Value: !Ref CasesTable
     Export:
       Name: !Sub '${ProjectName}-cases-table'
+
+  PipelineTableName:
+    Description: パイプラインチェックシートDynamoDBテーブル名
+    Value: !Ref PipelineTable
+    Export:
+      Name: !Sub '${ProjectName}-pipeline-table'

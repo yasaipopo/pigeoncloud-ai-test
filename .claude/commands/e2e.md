@@ -2,7 +2,51 @@
 
 引数: `$ARGUMENTS`
 
-以下の完全自動パイプラインを実行してください。引数がある場合は挙動を調整します。
+あなたは**リーダー**です。E2Eテストパイプライン全体を管理し、各エージェントに指示を出してください。
+
+---
+
+## エージェント体制
+
+| キャラ | スキル | 役割 |
+|---|---|---|
+| **リーダー**（あなた） | `/e2e` | パイプライン全体管理。TEST_NUMBER管理、agent起動、結果集計、シート更新、通知 |
+| **テスト作成君** | `/spec-create` | spec.jsの設計・修正。MCP Playwrightで実UI確認してからコードを書く |
+| **怒りくん** | `/check-specs` | テスト品質チェック。タイトルと実装の一致、早期return、スキップを判定 |
+| **チェックくん** | `/check-run` | Playwright実行確認。failedをPigeonCloudソースと照合してspecバグ／プロダクトバグ／環境依存に振り分け |
+
+### パイプラインフロー
+
+```
+リーダー: TEST_NUMBER決定・agent起動
+  ↓
+[テスト実行] → 結果集計 → シート更新
+  ↓
+チェックくん: failedを振り分け
+  ├─ Specバグ → テスト作成君に差し戻し
+  │    → 怒りくんがレビュー → チェックくんが再実行
+  ├─ プロダクトバグ → .claude/product-bugs.md に記録（テストは修正しない）
+  └─ 環境依存 → 再実行で解消見込みとして記録
+```
+
+### リーダーの管理事項
+
+1. **TEST_NUMBER**: E2Eビューアーの `/runs` APIで最新番号を確認し、+1して使う
+2. **今回使用するagent番号**: 実行するagentのAGENT_NUMを明示する
+3. **古いデータとの混在防止**: 集計時は今回のAGENT_NUMのみを対象にする
+4. **ステータス管理**: 各agentの状態（実行中/完了/失敗）をテーブルで管理する
+
+### ステータステーブル（常に更新すること）
+
+```markdown
+## 第N回 E2Eテスト ステータス
+
+| エージェント | AGENT_NUM | 対象Spec | 状態 | passed | failed | skip |
+|---|---|---|---|---|---|---|
+| テストくん | 30 | ... | 🔄/✅/❌ | - | - | - |
+| 怒くん | 31 | ... | 🔄/✅/❌ | - | - | - |
+| チェックくん | 32 | ... | 🔄/✅/❌ | - | - | - |
+```
 
 ---
 
@@ -61,6 +105,37 @@ git -C src/pigeon_cloud diff HEAD~5..HEAD --name-only
 spec修正が必要と判断した場合：
 1. 影響を受けるspecファイルを特定して修正
 
+### Step 2.5: テスト開始前の必須確認（ユーザーへの通知）
+
+**サブエージェント起動前に必ずユーザーに以下を報告すること:**
+
+```
+▶ 第{N}回テストを開始します。
+
+📋 確認事項:
+- TEST_NUMBER: {N}（{上書き有無: 既存の第N回を上書きします / 新規作成}）
+- screenshot: {on / only-on-failure / off} → {'on'であること確認済み' / '⚠️ on に変更が必要'}
+- video: {on / only-on-failure / off} → {'on'であること確認済み' / '⚠️ on に変更が必要'}
+```
+
+**TEST_NUMBERの決め方:**
+1. `.env` の `TEST_NUMBER` を確認する
+2. E2E API でセッション一覧を確認して最新番号を取得する:
+   ```bash
+   curl -s 'https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com/runs' | python3 -m json.tool | grep sessionId | sort -t'"' -k4 -n | tail -5
+   ```
+3. 最新番号 + 1 を TEST_NUMBER として使う（同じ番号は「上書き」になる）
+4. 同じ番号を使う場合はその旨をユーザーに明示する
+
+**screenshot / video の確認:**
+```bash
+grep -E 'screenshot|video' playwright.config.js | grep -v '//'
+```
+- `'on'` であれば OK
+- `'only-on-failure'` / `'retain-on-failure'` になっていたら `'on'` に修正してから進む
+
+---
+
 ### Step 3: サブエージェント並列起動
 
 **Dockerは使わない。Agent toolでサブエージェントを直接ホストで並列起動する。**
@@ -91,6 +166,7 @@ mkdir -p reports/agent-{AGENT_NUM}
 # .envを読み込む（AGENT_NUMは上書きして正しい番号を設定）
 set -a; source .env; set +a
 export AGENT_NUM={AGENT_NUM}
+export TEST_NUMBER={TEST_NUMBER}
 npx playwright test {SPEC_FILES} \
   2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
 echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done
@@ -98,8 +174,16 @@ echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done
 完了したら passed/failed/skipped の件数を報告してください。
 ```
 
-**注意**: `--reporter=json` はコマンドラインに追加しないこと。config で設定済みの
+**注意1**: `--reporter=json` はコマンドラインに追加しないこと。config で設定済みの
 JSON reporter（`reports/agent-N/playwright-results.json`）が上書きされる。
+
+**注意2: スクリーンショット・動画は必ず全テストで取得すること**:
+`playwright.config.js` の `use` セクションに以下が設定されていること（デフォルト値）:
+```javascript
+screenshot: 'on',   // 全テストでスクリーンショット取得（失敗時のみはNG）
+video: 'on',        // 全テストで動画を保存（失敗時のみはNG）
+```
+これらが `'only-on-failure'` / `'retain-on-failure'` になっていたら必ず `'on'` に戻すこと。
 
 SPEC_FILESは `tests/workflow.spec.js tests/uncategorized.spec.js` のように展開する。
 
@@ -121,13 +205,18 @@ tail -5 reports/agent-30/run.log
 `e2e-viewer/reporter.js` が Playwright のカスタムレポーターとして動作し、
 テスト1件完了ごとにリアルタイムで DynamoDB/S3 に登録する。
 
-**サブエージェント起動コマンドに `E2E_API_URL` を追加する:**
+**サブエージェント起動コマンドに `E2E_API_URL` と `TEST_NUMBER` を追加する:**
+
+> **⚠️ `TEST_NUMBER` はビューアーの「第N回」表示を決める重要な設定。**
+> 必ず毎回インクリメントして設定すること（設定なし・`'1'`固定だと全実行が同じセッションに混ざる）。
+> 現在の最大値は `GET /runs` レスポンスの `sessionId` を確認するか、ビューアーの実行履歴件数 + 1 を使う。
 
 ```bash
 cd /Users/yasaipopo/PycharmProjects/pigeon-test
 mkdir -p reports/agent-{AGENT_NUM}
 set -a; source .env; set +a
 export AGENT_NUM={AGENT_NUM}
+export TEST_NUMBER={TEST_NUMBER}
 export E2E_API_URL='https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com'
 npx playwright test {SPEC_FILES} \
   2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
@@ -376,6 +465,8 @@ cd /Users/yasaipopo/PycharmProjects/pigeon-test
 mkdir -p reports/agent-{AGENT_NUM}
 set -a; source .env; set +a
 export AGENT_NUM={AGENT_NUM}
+export TEST_NUMBER={TEST_NUMBER}
+export E2E_API_URL='https://ausatkfji9.execute-api.ap-northeast-1.amazonaws.com'
 npx playwright test {SPEC_FILES} \
   2>&1 | tee reports/agent-{AGENT_NUM}/repair_run.log
 echo "exit:${PIPESTATUS[0]}" > reports/agent-{AGENT_NUM}/done

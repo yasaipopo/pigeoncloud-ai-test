@@ -26,12 +26,12 @@ async function reloginIfNeeded(page) {
     const password = process.env.TEST_PASSWORD || '';
     try {
         await page.goto(baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.waitForSelector('#id', { timeout: 15000 });
+        await page.waitForSelector('#id', { timeout: 5000 });
         await page.fill('#id', email);
         await page.fill('#password', password);
         await page.click('button[type=submit].btn-primary');
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 }).catch(() => {});
-        await page.waitForTimeout(1500);
+        await page.waitForURL('**/admin/dashboard', { timeout: 5000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
     } catch (e) {
         // 再ログイン失敗は無視して継続
     }
@@ -46,7 +46,7 @@ async function reloginIfNeeded(page) {
  * @param {number} [options.maxPolls=20] - 最大ポーリング回数（20×10秒=200秒）
  * @returns {Promise<{result: string, tableId: string|null}>} 成功時 {result: 'success', tableId: string}、失敗時 {result: 'failure', tableId: null}
  */
-async function setupAllTypeTable(page, { pollIntervalMs = 10000, maxPolls = 20 } = {}) {
+async function setupAllTypeTable(page, { pollIntervalMs = 2000, maxPolls = 60 } = {}) {
     // 1. まず既存テーブルを確認（deleteしない）
     const existingId = await getAllTypeTableId(page);
     if (existingId === LOGIN_ERROR_SENTINEL) {
@@ -111,22 +111,60 @@ async function setupAllTypeTable(page, { pollIntervalMs = 10000, maxPolls = 20 }
  *   テーブルID or null（未作成）or '__LOGIN_ERROR__'（セッション切れ）
  */
 async function getAllTypeTableId(page) {
-    try {
-        const baseUrl = process.env.TEST_BASE_URL || BASE_URL;
+    const baseUrl = process.env.TEST_BASE_URL || BASE_URL;
+
+    // 内部のfetch処理（セッション切れ検出付き）
+    async function _fetchTableId() {
+        // about:blankからのfetchではcookiesが送られないため、先にページ遷移する
+        if (!page.url() || page.url() === 'about:blank') {
+            await page.goto(baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        // ログインページにリダイレクトされている場合はセッション切れ
+        if (page.url().includes('/admin/login')) {
+            return LOGIN_ERROR_SENTINEL;
+        }
         const status = await page.evaluate(async (baseUrl) => {
-            const res = await fetch(baseUrl + '/api/admin/debug/status', {
-                credentials: 'include',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            });
-            return res.json();
+            try {
+                const res = await fetch(baseUrl + '/api/admin/debug/status', {
+                    credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    return { result: 'error', error_type: 'parse_error', text: text.substring(0, 100) };
+                }
+            } catch (e) {
+                return { result: 'error', message: e.message };
+            }
         }, baseUrl);
-        // セッション切れ（login_max_devices等）を検出
-        if (status?.result === 'error' && status?.error_type === 'login_error') {
-            return '__LOGIN_ERROR__';
+        if (status?.result === 'error' && (status?.error_type === 'login_error' || status?.error_type === 'parse_error')) {
+            return LOGIN_ERROR_SENTINEL;
         }
         const table = (status?.all_type_tables || []).find(t => t.label === 'ALLテストテーブル');
         if (table) return String(table.table_id || table.id);
-    } catch (e) {}
+        return null;
+    }
+
+    try {
+        let result = await _fetchTableId();
+        // セッション切れの場合、フルログインしてリトライ（1回のみ）
+        if (result === LOGIN_ERROR_SENTINEL) {
+            console.log('[getAllTypeTableId] セッション切れ検出。フルログインしてリトライ...');
+            try {
+                const { ensureLoggedIn } = require('./ensure-login');
+                await ensureLoggedIn(page);
+                result = await _fetchTableId();
+            } catch (loginErr) {
+                console.error('[getAllTypeTableId] フルログイン失敗:', loginErr.message);
+                return LOGIN_ERROR_SENTINEL;
+            }
+        }
+        return result;
+    } catch (e) {
+        console.error('[getAllTypeTableId] 予期しないエラー:', e.message);
+    }
     return null;
 }
 

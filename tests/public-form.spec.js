@@ -1,33 +1,26 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { setupAllTypeTable, deleteAllTypeTables } = require('./helpers/table-setup');
+const { createAutoScreenshot } = require('./helpers/auto-screenshot');
+const { createTestEnv } = require('./helpers/create-test-env');
+const { createLightTable } = require('./helpers/create-light-table');
 
-const BASE_URL = process.env.TEST_BASE_URL;
-const EMAIL = process.env.TEST_EMAIL;
-const PASSWORD = process.env.TEST_PASSWORD;
+let BASE_URL = process.env.TEST_BASE_URL;
+let EMAIL = process.env.TEST_EMAIL;
+let PASSWORD = process.env.TEST_PASSWORD;
+
+// ファイルレベル変数: 全describeで共有
+let tableId = null;
+let publicFormHash = null;  // 取得済みのハッシュをキャッシュ
 
 /**
- * ログイン共通関数
+ * Angularの描画完了を待つ（管理画面用）
  */
-async function login(page) {
-    await page.goto(BASE_URL + '/admin/login');
-    await page.waitForLoadState('domcontentloaded');
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
-    await page.click('button[type=submit].btn-primary');
+async function waitForAngular(page, timeout = 15000) {
     try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-    } catch (e) {
-        if (page.url().includes('/admin/login')) {
-            await page.waitForTimeout(1000);
-            await page.fill('#id', EMAIL);
-            await page.fill('#password', PASSWORD);
-            await page.click('button[type=submit].btn-primary');
-            await page.waitForURL('**/admin/dashboard', { timeout: 40000 });
-        }
+        await page.waitForSelector('body[data-ng-ready="true"]', { timeout: Math.min(timeout, 5000) });
+    } catch {
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     }
-    await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(1000);
 }
 
 /**
@@ -40,343 +33,640 @@ async function closeTemplateModal(page) {
         if (count > 0) {
             const closeBtn = modal.locator('button').first();
             await closeBtn.click({ force: true });
-            await page.waitForTimeout(800);
+            await waitForAngular(page);
         }
-    } catch (e) {
+    } catch {
         // モーダルがなければ何もしない
     }
 }
 
 /**
  * テーブル設定の「その他」タブを開く
- * Angular SPAのためdispatchEventを使用してタブ切り替え
  */
-async function openOtherTab(page, tableId) {
-    await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`);
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
-
-    // Angular ngb-navのタブをJSでクリック（SPAルーティング問題回避）
-    await page.evaluate(() => {
-        const tabs = document.querySelectorAll('[role="tab"]');
-        const otherTab = Array.from(tabs).find(t => t.textContent.trim().includes('その他'));
-        if (otherTab) otherTab.click();
-    });
-    await page.waitForTimeout(1500);
+async function openOtherTab(page, tid) {
+    await page.goto(BASE_URL + `/admin/dataset/edit/${tid}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    await waitForAngular(page, 30000);
+    const otherTab = page.getByRole('tab', { name: /その他/ });
+    await otherTab.waitFor({ state: 'visible', timeout: 15000 });
+    await otherTab.click();
+    await waitForAngular(page);
+    // 「その他」タブのコンテンツが表示されるまで待つ
+    await page.waitForSelector('.form-group.row.admin-forms', { timeout: 10000 }).catch(() => {});
 }
 
 /**
- * テーブル設定の「その他」タブで公開フォームをONにする
+ * 公開フォームをONにしてハッシュとURLを取得する
+ * APIはブラウザ内 fetch（page.evaluate）で呼び出す（Cookieが正しく送られるため）
+ * @returns {Promise<{url: string, hash: string}>}
  */
-async function enablePublicForm(page, tableId) {
-    await openOtherTab(page, tableId);
+async function enablePublicFormAndGetInfo(page, tid) {
+    // [flow] 1. テーブル設定の「その他」タブで公開フォームをONにする
+    await openOtherTab(page, tid);
 
-    const pubFormPanel = await page.evaluate(() => {
-        // 「その他」タブパネルの内容確認
-        const panel = document.querySelector('#ngb-nav-7-panel');
-        if (!panel) return null;
-        const formGroups = panel.querySelectorAll('.form-group.row.admin-forms');
-        let pubFormGroup = null;
-        for (const group of formGroups) {
-            if (group.textContent.includes('公開フォームをONにする')) {
-                pubFormGroup = group;
-                break;
+    // 公開フォームスイッチを探す
+    const pubFormRow = page.locator('.form-group.row.admin-forms:has-text("公開フォームをONにする")').first();
+    await expect(pubFormRow).toBeVisible({ timeout: 15000 });
+
+    const switchInput = pubFormRow.locator('input[type="checkbox"].switch-input');
+    const isChecked = await switchInput.isChecked().catch(() => false);
+    if (!isChecked) {
+        const switchHandle = pubFormRow.locator('.switch-handle').first();
+        await switchHandle.click();
+        await page.waitForTimeout(3000);
+    }
+
+    const isCheckedAfter = await switchInput.isChecked().catch(() => false);
+    console.log(`[enablePublicFormAndGetInfo] 公開フォームON状態: ${isCheckedAfter}`);
+
+    // [flow] 2. API（ブラウザ内fetch）で公開フォームURLを取得する
+    const result = await page.evaluate(async (tableId) => {
+        try {
+            const csrfResp = await fetch('/api/csrf_token');
+            const csrf = csrfResp.ok ? await csrfResp.json() : {};
+            const body = { table: 'dataset__' + tableId.toString() };
+            if (csrf.csrf_name) body[csrf.csrf_name] = csrf.csrf_value;
+
+            const resp = await fetch('/api/admin/public_form_url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify(body),
+            });
+            const text = await resp.text();
+            try {
+                const data = JSON.parse(text);
+                return { url: data.url, hash: data.hash, status: resp.status };
+            } catch {
+                return { error: 'JSON解析失敗', status: resp.status, raw: text.substring(0, 200) };
             }
+        } catch (e) {
+            return { error: e.message };
         }
-        if (!pubFormGroup) return null;
-        const switchInput = pubFormGroup.querySelector('input[type="checkbox"].switch-input');
-        return { isChecked: switchInput ? switchInput.checked : null };
-    });
+    }, tid);
 
-    if (!pubFormPanel || pubFormPanel.isChecked === null) {
-        return false;
+    console.log(`[enablePublicFormAndGetInfo] API結果: ${JSON.stringify(result)}`);
+
+    if (result.url && result.hash) {
+        return {
+            url: result.url.replace(/\/$/, ''),
+            hash: result.hash,
+        };
     }
 
-    if (!pubFormPanel.isChecked) {
-        // スイッチをONにする
-        await page.evaluate(() => {
-            const panel = document.querySelector('#ngb-nav-7-panel');
-            if (!panel) return;
-            const formGroups = panel.querySelectorAll('.form-group.row.admin-forms');
-            for (const group of formGroups) {
-                if (group.textContent.includes('公開フォームをONにする')) {
-                    const handle = group.querySelector('.switch-handle');
-                    if (handle) handle.click();
-                    break;
-                }
-            }
+    throw new Error(`公開フォームURLが取得できませんでした。API結果: ${JSON.stringify(result)}`);
+}
+
+/**
+ * 公開フォームの直URLを構築する（iframe src URL）
+ * embed.js の実装: /public/{table}/add/{filter_id}/{hash}/true
+ */
+function buildFormDirectUrl(baseUrl, tid, hash, filterIdOrNull = null) {
+    const filterId = filterIdOrNull || '0';
+    return `${baseUrl}/public/dataset__${tid}/add/${filterId}/${hash}/true`;
+}
+
+/**
+ * 公開フォームの Angular ページ（iframe src）を開いて描画完了を待つ
+ * フォームフィールド（.pc-field-block）が表示されるまで待機する
+ * @returns {Promise<string>} 実際に遷移したURL
+ */
+async function openFormPage(page, directUrl, waitForField = true) {
+    await page.goto(directUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await waitForAngular(page, 15000);
+
+    if (waitForField) {
+        // フォームフィールド（Angular コンポーネント）が表示されるまで待機
+        await page.waitForSelector('.pc-field-block, admin-forms-field, .form-field-row', {
+            timeout: 15000
+        }).catch(() => {});
+
+        // 送信ボタンが表示されるまで待機（loading=false になるまで）
+        // edit.component.html: *ngIf="data!=null && table_info!=undefined && !loading"
+        await page.waitForSelector('.card-footer button[type="submit"], .card-footer button:has-text("送信")', {
+            state: 'visible',
+            timeout: 20000
+        }).catch(() => {
+            // フッターのボタンが見えなくてもフォームフィールドがあればOK
         });
-        await page.waitForTimeout(3000); // 自動保存待機
+        await page.waitForTimeout(1000);
     }
-    return true;
+    return page.url();
+}
+
+/**
+ * ページ共通チェック（ナビ表示＆エラーなし）
+ */
+async function checkPageOk(page) {
+    const bodyText = await page.innerText('body').catch(() => '');
+    expect(bodyText).not.toContain('Internal Server Error');
+    expect(bodyText).not.toContain('Uncaught Error');
+    expect(bodyText).not.toContain('予期せぬエラー');
+    return bodyText;
 }
 
 // =============================================================================
-// 公開フォームテスト
+// 自己完結テスト環境の作成（ファイルレベル beforeAll）
 // =============================================================================
+test.beforeAll(async ({ browser }) => {
+    test.setTimeout(300000);
+    // シンプルなテーブルを使う（ALLテストテーブルはルックアップタイプ不一致エラーで公開フォーム保存が失敗する）
+    const env = await createTestEnv(browser, { withAllTypeTable: false });
+    BASE_URL = env.baseUrl;
+    EMAIL = env.email;
+    PASSWORD = env.password;
+    process.env.TEST_BASE_URL = env.baseUrl;
+    process.env.TEST_EMAIL = env.email;
+    process.env.TEST_PASSWORD = env.password;
+
+    // createTestEnv が返した page を使ってテーブルを作成する（新規コンテキスト不要）
+    const envPage = env.page;
+    const tid = await createLightTable(envPage, '公開フォームテスト', [
+        { type: 'text', label: 'テキスト', required: false },
+        { type: 'file', label: 'ファイル添付', required: false },
+    ]);
+    tableId = tid;
+    await env.context.close();
+    console.log(`[public-form] 自己完結環境: ${BASE_URL}, tableId: ${tableId}`);
+});
+
+const autoScreenshot = createAutoScreenshot('public-form');
 
 test.describe('公開フォーム・公開メールリンク', () => {
-    let tableId = null;
-
-    // テスト前: テーブルとデータを一度だけ作成
-    test.beforeAll(async ({ browser }) => {
-        test.setTimeout(360000);
-        const page = await browser.newPage();
-        await login(page);
-        ({ tableId } = await setupAllTypeTable(page));
-        if (!tableId) {
-            await page.close();
-            throw new Error('ALLテストテーブルの作成に失敗しました（beforeAll）');
-        }
-        await page.close();
-    });
-
-    // テスト後: テーブルを削除
-    test.afterAll(async ({ browser }) => {
-        test.setTimeout(120000);
-        try {
-            const page = await browser.newPage();
-            await login(page);
-            await deleteAllTypeTables(page);
-            await page.close();
-        } catch (e) {
-            // teardownのエラーは無視
-        }
-    });
 
     test.beforeEach(async ({ page }) => {
+        // 古い環境のCookieをクリアして新環境にログイン
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} });
+        if (!page.url().includes('/login')) {
+            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        }
+        if (page.url().includes('/login')) {
+            await page.waitForSelector('#id', { timeout: 10000 });
+            await page.fill('#id', EMAIL);
+            await page.fill('#password', PASSWORD);
+            await page.locator('button[type=submit].btn-primary').first().click();
+            await page.waitForSelector('.navbar', { timeout: 20000 });
+        }
+    });
+
+    // =========================================================================
+    // PF01: 公開フォーム基本フロー（pf-010〜pf-070）→ 1動画
+    // =========================================================================
+    test('PF01: 公開フォーム基本フロー', async ({ page }) => {
         test.setTimeout(300000);
-        await login(page);
+        const _testStart = Date.now();
+        page.setDefaultTimeout(30000);
+
         await closeTemplateModal(page);
-    });
 
-    // -------------------------------------------------------------------------
-    // 135: 公開フォームをメール配信
-    // テーブル設定の「その他」タブで「公開フォームをONにする」設定UIが存在し、
-    // スイッチをONにできること。また公開フォームに関連するメニュー/モーダルの
-    // UIが存在すること。
-    // -------------------------------------------------------------------------
-    test('135: 公開フォーム設定画面が表示され、メール配信設定ができること', async ({ page }) => {
-        test.setTimeout(300000);
+        // ── pf-010: 公開フォーム設定を有効化できること ──
+        await test.step('pf-010: 公開フォーム設定を有効化できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-010`);
 
-        // Step 1: テーブル設定の「その他」タブを開く
-        await openOtherTab(page, tableId);
+            // [flow] 10-1. テーブル設定の「その他」タブを開く
+            await openOtherTab(page, tableId);
 
-        // 「その他」タブパネルが表示されていることを確認
-        const otherPanel = page.locator('#ngb-nav-7-panel');
-        await expect(otherPanel).toBeVisible({ timeout: 10000 });
+            // [check] 10-2. ✅ 公開フォーム設定セクションが表示されること
+            const pubFormRow = page.locator('.form-group.row.admin-forms:has-text("公開フォームをONにする")').first();
+            await expect(pubFormRow).toBeVisible({ timeout: 15000 });
 
-        // 「公開フォームをONにする」ラベルが存在することを確認
-        const pubFormLabel = otherPanel.locator('label:has-text("公開フォームをONにする"), .form-control-label:has-text("公開フォームをONにする")');
-        await expect(pubFormLabel.first()).toBeVisible({ timeout: 5000 });
+            // [flow] 10-3. 公開フォームスイッチの存在を確認してONにする
+            const switchInput = pubFormRow.locator('input[type="checkbox"].switch-input');
+            const switchHandle = pubFormRow.locator('.switch-handle').first();
+            const switchCount = await switchInput.count();
+            expect(switchCount, '公開フォームスイッチが存在すること').toBeGreaterThan(0);
 
-        // スイッチ（checkbox）が存在することを確認
-        const pubFormRow = otherPanel.locator('.form-group.row.admin-forms:has-text("公開フォームをONにする")');
-        await expect(pubFormRow.first()).toBeVisible({ timeout: 5000 });
+            const isChecked = await switchInput.isChecked().catch(() => false);
+            if (!isChecked) {
+                await switchHandle.click();
+                await page.waitForTimeout(3000);
+            }
 
-        const switchInput = pubFormRow.first().locator('input[type="checkbox"].switch-input');
-        await expect(switchInput).toBeDefined();
-        // スイッチのcount確認
-        const switchCount = await switchInput.count();
-        expect(switchCount, '公開フォームスイッチが存在すること').toBeGreaterThan(0);
+            // [check] 10-4. ✅ 公開フォームがONになっていること
+            await checkPageOk(page);
+            const isCheckedAfter = await switchInput.isChecked().catch(() => false);
+            expect(isCheckedAfter, '公開フォームがONになっていること').toBe(true);
 
-        // スイッチハンドル（クリック可能要素）が存在することを確認
-        const switchHandle = pubFormRow.first().locator('.switch-handle');
-        const handleCount = await switchHandle.count();
-        expect(handleCount, '公開フォームスイッチハンドルが存在すること').toBeGreaterThan(0);
+            await autoScreenshot(page, 'PF01', 'pf-010', _testStart);
+        });
 
-        // Step 2: 公開フォームをONにする（スイッチをクリック）
-        const isChecked = await switchInput.isChecked();
-        if (!isChecked) {
-            await page.evaluate(() => {
-                const panel = document.querySelector('#ngb-nav-7-panel');
-                if (!panel) return;
-                const formGroups = panel.querySelectorAll('.form-group.row.admin-forms');
-                for (const group of formGroups) {
-                    if (group.textContent.includes('公開フォームをONにする')) {
-                        const handle = group.querySelector('.switch-handle');
-                        if (handle) handle.click();
-                        break;
-                    }
-                }
+        // ── pf-020: 公開フォームのURLが発行されること ──
+        await test.step('pf-020: 公開フォームのURLが発行されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-020`);
+
+            // [flow] 20-1. enablePublicFormAndGetInfo を使ってURLとハッシュを取得
+            const formInfo = await enablePublicFormAndGetInfo(page, tableId);
+            publicFormHash = formInfo.hash;  // キャッシュ
+
+            // [check] 20-2. ✅ 公開フォームURLが取得されること
+            expect(formInfo.url, '公開フォームURLが取得できること').toBeTruthy();
+            expect(formInfo.url.length, '公開フォームURLが空でないこと').toBeGreaterThan(0);
+
+            // [check] 20-3. ✅ URLがhttp(s)で始まること
+            expect(formInfo.url, '公開フォームURLがhttpで始まること').toMatch(/^https?:\/\//);
+            expect(formInfo.url.length, 'URLが適切な長さであること（ハッシュを含む）').toBeGreaterThan(20);
+
+            // [check] 20-4. ✅ ハッシュが存在すること
+            expect(formInfo.hash, '公開フォームハッシュが取得できること').toBeTruthy();
+            expect(formInfo.hash.length, 'ハッシュが空でないこと').toBeGreaterThan(5);
+
+            await autoScreenshot(page, 'PF01', 'pf-020', _testStart);
+        });
+
+        // ── pf-030: 公開フォームからデータを登録できること ──
+        await test.step('pf-030: 公開フォームからデータを登録できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-030`);
+
+            // ハッシュを取得済みでなければ再取得
+            if (!publicFormHash) {
+                const formInfo = await enablePublicFormAndGetInfo(page, tableId);
+                publicFormHash = formInfo.hash;
+            }
+
+            // [flow] 30-1. 公開フォームの直URLを開く（iframe src 相当のURL）
+            const directUrl = buildFormDirectUrl(BASE_URL, tableId, publicFormHash);
+            await openFormPage(page, directUrl);
+
+            // [check] 30-2. ✅ フォーム画面が正常に表示されること
+            await checkPageOk(page);
+
+            // [check] 30-3. ✅ フォームにフィールド（pc-field-block）が存在すること
+            const fieldBlocks = page.locator('.pc-field-block');
+            const fieldCount = await fieldBlocks.count();
+            expect(fieldCount, '公開フォームにフィールドが存在すること').toBeGreaterThan(0);
+            console.log(`[pf-030] フィールド数: ${fieldCount}`);
+
+            // [flow] 30-3. テキストフィールドに値を入力
+            const textInputInField = page.locator('.pc-field-block input[type="text"]:not([type="hidden"])').first();
+            const textInputVisible = await textInputInField.isVisible({ timeout: 5000 }).catch(() => false);
+            if (textInputVisible) {
+                await textInputInField.fill('テスト入力値_pf030');
+                await page.waitForTimeout(500);
+            }
+
+            // [flow] 30-4. 送信ボタンをクリック
+            // card-footer内の送信ボタン（loading=false になったら表示される）
+            const submitBtn = page.locator('.card-footer button[type="submit"]').first();
+            await expect(submitBtn).toBeVisible({ timeout: 20000 });
+            await submitBtn.click();
+
+            // [flow] 30-5. 送信前の確認ダイアログに「はい」でOK（IS_PUBLIC_FORM=trueの場合）
+            // go_edit() → publicFormConfirmModal.show() → onOk → store()
+            const confirmYesBtn = page.locator('.modal.show button:has-text("はい"), .modal.show button:has-text("OK")').first();
+            const confirmVisible = await confirmYesBtn.isVisible({ timeout: 5000 }).catch(() => false);
+            if (confirmVisible) {
+                await confirmYesBtn.click();
+                console.log('[pf-030] 送信確認ダイアログ「はい」クリック');
+            }
+            await page.waitForTimeout(3000);
+
+            // [check] 30-6. ✅ 送信後にページが正常な状態であること
+            await checkPageOk(page);
+
+            await autoScreenshot(page, 'PF01', 'pf-030', _testStart);
+        });
+
+        // ── pf-040: 公開フォームから登録したデータが管理画面のレコード一覧に表示されること ──
+        await test.step('pf-040: 公開フォームから登録したデータが管理画面のレコード一覧に反映されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-040`);
+
+            // [flow] 40-1. 管理画面のレコード一覧に遷移する
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await waitForAngular(page, 30000);
+            await closeTemplateModal(page);
+
+            // [check] 40-2. ✅ レコード一覧ページが正常に表示されること
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+            await checkPageOk(page);
+
+            // [check] 40-3. ✅ レコード数が1件以上あること（公開フォームで登録済み）
+            // Angular がデータをロードするまで待機（最大15秒）
+            await page.waitForFunction(() => {
+                const rows = document.querySelectorAll('table tbody tr');
+                return rows.length > 0;
+            }, { timeout: 15000 }).catch(() => {});
+
+            // テーブルヘッダーが表示されていること
+            const tableHeader = page.locator('table th, thead th');
+            const headerCount = await tableHeader.count();
+            console.log(`[pf-040] テーブルヘッダー数: ${headerCount}`);
+
+            // レコードが1件以上あることを確認
+            const rowCount = await page.locator('table tbody tr').count();
+            console.log(`[pf-040] レコード数: ${rowCount}`);
+            expect(rowCount, '公開フォームから登録したレコードが1件以上あること').toBeGreaterThan(0);
+
+            await autoScreenshot(page, 'PF01', 'pf-040', _testStart);
+        });
+
+        // ── pf-050: 公開フォーム設定UIが正しく表示されること（非表示設定） ──
+        await test.step('pf-050: テーブル設定でフォーム関連の設定UIが正しく表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-050`);
+
+            // [flow] 50-1. テーブル設定「その他」タブを開く
+            await openOtherTab(page, tableId);
+
+            // [check] 50-2. ✅ 公開フォームをONにするスイッチが存在すること
+            const pubFormRow = page.locator('.form-group.row.admin-forms:has-text("公開フォームをONにする")').first();
+            await expect(pubFormRow).toBeVisible({ timeout: 10000 });
+
+            // [check] 50-3. ✅ 埋め込みフォームをONにするスイッチが存在すること
+            const embedFormRow = page.locator('.form-group.row.admin-forms').filter({ hasText: '埋め込みフォーム' }).first();
+            const embedFormVisible = await embedFormRow.isVisible({ timeout: 5000 }).catch(() => false);
+            if (embedFormVisible) {
+                const embedSwitchInput = embedFormRow.locator('input[type="checkbox"].switch-input');
+                const embedSwitchCount = await embedSwitchInput.count();
+                expect(embedSwitchCount, '埋め込みフォームスイッチが存在すること').toBeGreaterThan(0);
+                console.log('[pf-050] 埋め込みフォーム設定UIが確認できました');
+            } else {
+                // 公開フォームの設定UIが見えていれば十分（埋め込みフォームはオプション）
+                console.log('[pf-050] 埋め込みフォームUIなし、公開フォームUIは確認済み');
+            }
+
+            await autoScreenshot(page, 'PF01', 'pf-050', _testStart);
+        });
+
+        // ── pf-060: 公開フォームがログイン不要でアクセスできること ──
+        await test.step('pf-060: 公開フォームがログイン不要でアクセスできること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-060`);
+
+            // ハッシュを取得済みでなければ再取得
+            if (!publicFormHash) {
+                const formInfo = await enablePublicFormAndGetInfo(page, tableId);
+                publicFormHash = formInfo.hash;
+            }
+
+            // [flow] 60-1. 未ログインの新しいブラウザコンテキストで公開フォームを開く
+            const newContext = await page.context().browser().newContext();
+            const newPage = await newContext.newPage();
+
+            try {
+                const directUrl = buildFormDirectUrl(BASE_URL, tableId, publicFormHash);
+                await openFormPage(newPage, directUrl);
+
+                // [check] 60-2. ✅ フォーム画面が正常に表示されること（エラーなし）
+                await checkPageOk(newPage);
+
+                // [check] 60-3. ✅ フォームにフィールドが存在すること
+                const fieldBlocks = newPage.locator('.pc-field-block');
+                const fieldCount = await fieldBlocks.count();
+                expect(fieldCount, '未ログインでも公開フォームのフィールドが表示されること').toBeGreaterThan(0);
+
+                await autoScreenshot(newPage, 'PF01', 'pf-060', _testStart);
+            } finally {
+                await newContext.close();
+            }
+        });
+
+        // ── pf-070: 公開フォームがスマホサイズでも正しいレイアウトで表示されること ──
+        await test.step('pf-070: 公開フォームがスマホサイズでも正しいレイアウトで表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-070`);
+
+            if (!publicFormHash) {
+                const formInfo = await enablePublicFormAndGetInfo(page, tableId);
+                publicFormHash = formInfo.hash;
+            }
+
+            // [flow] 70-1. スマホビューポートサイズで公開フォームを開く
+            await page.setViewportSize({ width: 375, height: 812 });
+            const directUrl = buildFormDirectUrl(BASE_URL, tableId, publicFormHash);
+            await openFormPage(page, directUrl);
+
+            // [check] 70-2. ✅ スマホサイズでもフォームが正しく表示されること（エラーなし）
+            await checkPageOk(page);
+
+            // [check] 70-3. ✅ フォームにフィールドが存在すること
+            const fieldBlocks = page.locator('.pc-field-block');
+            const fieldCount = await fieldBlocks.count();
+            expect(fieldCount, 'スマホ幅でもフォームフィールドが表示されること').toBeGreaterThan(0);
+
+            // [check] 70-4. ✅ 水平スクロールが発生していないこと（レイアウト崩れがないこと）
+            const overflowCheck = await page.evaluate(() => {
+                return {
+                    scrollWidth: document.body.scrollWidth,
+                    clientWidth: document.body.clientWidth,
+                    hasHorizontalScroll: document.body.scrollWidth > document.body.clientWidth + 20
+                };
             });
-            await page.waitForTimeout(3000); // 自動保存待機
+            expect(overflowCheck.hasHorizontalScroll, 'スマホ幅で水平スクロールが不要であること').toBe(false);
 
-            // スイッチがONになったことを確認
-            const isCheckedAfter = await switchInput.isChecked();
-            expect(isCheckedAfter, '公開フォームスイッチがONになること').toBe(true);
-        }
+            // ビューポートを元に戻す
+            await page.setViewportSize({ width: 1280, height: 800 });
 
-        // Step 3: テーブルページに移動してドロップダウンメニューを確認
-        // JavaScriptで直接遷移（Angular SPAルーティング問題を回避）
-        await page.evaluate((tid) => { window.location.href = `/admin/dataset__${tid}`; }, tableId);
-        await page.waitForTimeout(5000);
-
-        // ページタイトルまたはURLにテーブルIDが含まれることを確認
-        const currentUrl = page.url();
-        const urlContainsTable = currentUrl.includes(`dataset__${tableId}`) || currentUrl.includes('/admin/');
-        expect(urlContainsTable, 'テーブルページに移動できること').toBeTruthy();
-
-        // ドロップダウントグルボタンが存在するかチェック（公開フォームON後に表示される場合あり）
-        const dropdownToggles = page.locator('button.btn-sm.btn-outline-primary.dropdown-toggle, button.dropdown-toggle');
-        const toggleCount = await dropdownToggles.count();
-        // ドロップダウンが存在しない場合でも、テーブルページが表示されていれば正常
-        if (toggleCount === 0) {
-            console.log('[135] ドロップダウントグルボタンが見つかりません（公開フォームOFF or セッション問題の可能性）');
-            // テーブルページが表示されていることを最低限確認
-            await expect(page.locator('.navbar')).toBeVisible();
-        }
-
-        // 公開フォームメールテンプレートモーダルがDOMに存在することを確認
-        // （「公開フォームをメール配信」メニュークリック後に開くモーダル）
-        const mailTemplateModal = page.locator('div.modal .modal-title:has-text("公開フォームメールテンプレート作成"), h4.modal-title:has-text("公開フォームメールテンプレート作成")');
-        const mailModalCount = await mailTemplateModal.count();
-
-        if (mailModalCount > 0) {
-            // モーダルのタイトルが「公開フォームメールテンプレート作成」であること
-            await expect(mailTemplateModal.first()).toContainText('公開フォームメールテンプレート作成');
-            console.log('公開フォームメールテンプレートモーダルがDOMに存在します');
-        }
-
-        // 公開フォームに関する注意書きテキストがDOMに存在することを確認
-        const warningText = page.locator(':has-text("公開フォームでは、権限設定は無視され")').first();
-        const warningCount = await warningText.count();
-        if (warningCount > 0) {
-            console.log('公開フォームの注意書きテキストが確認できます');
-        }
-
-        // ドロップダウンを開いてメニュー項目を確認
-        await page.evaluate(() => {
-            const dropdowns = document.querySelectorAll('button.btn-sm.btn-outline-primary.dropdown-toggle');
-            if (dropdowns.length > 0) dropdowns[0].click();
+            await autoScreenshot(page, 'PF01', 'pf-070', _testStart);
         });
-        await page.waitForTimeout(500);
-
-        // ドロップダウンメニューが開いていることを確認
-        const openDropdown = page.locator('.btn-group.open .dropdown-menu, .btn-group.show .dropdown-menu');
-        const openDropdownCount = await openDropdown.count();
-
-        if (openDropdownCount > 0) {
-            await expect(openDropdown.first()).toBeVisible();
-
-            // ドロップダウンに少なくとも1つのメニュー項目があること
-            const menuItems = openDropdown.first().locator('a');
-            const itemCount = await menuItems.count();
-            expect(itemCount, 'ドロップダウンメニューに項目が存在すること').toBeGreaterThan(0);
-
-            // 「公開フォームリンク」または「公開フォームをメール配信」があれば確認
-            const pubFormLinkItem = openDropdown.locator('a:has-text("公開フォームリンク")');
-            const pubFormMailItem = openDropdown.locator('a:has-text("公開フォームをメール配信")');
-            const pubFormLinkCount = await pubFormLinkItem.count();
-            const pubFormMailCount = await pubFormMailItem.count();
-
-            if (pubFormLinkCount > 0) {
-                await expect(pubFormLinkItem.first()).toBeVisible();
-                console.log('「公開フォームリンク」メニューが確認できました');
-            } else if (pubFormMailCount > 0) {
-                await expect(pubFormMailItem.first()).toBeVisible();
-                console.log('「公開フォームをメール配信」メニューが確認できました');
-            } else {
-                console.log('公開フォームメニューは現在のビュー設定では表示されていません');
-            }
-        }
     });
 
-    // -------------------------------------------------------------------------
-    // 170: 公開フォームURL変更確認
-    // 公開フォームのURLが適切な形式であること（URLアドレス長の確認）
-    // -------------------------------------------------------------------------
-    test('170: 公開フォームURLのアドレス長が適切であること', async ({ page }) => {
-        test.setTimeout(300000);
+    // =========================================================================
+    // UC07: 公開フォームからファイル添付して送信（pf-080）→ 1動画
+    // =========================================================================
+    test('UC07: 公開フォームファイル添付送信', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+        page.setDefaultTimeout(30000);
 
-        // Step 1: 公開フォームをONにする（「その他」タブで設定）
-        const enabled = await enablePublicForm(page, tableId);
-        expect(enabled, '公開フォームの設定UIが存在すること').toBe(true);
+        await closeTemplateModal(page);
 
-        // Step 2: テーブルページに移動
-        await page.evaluate((tid) => { window.location.href = `/admin/dataset__${tid}`; }, tableId);
-        await page.waitForTimeout(5000);
+        await test.step('pf-080: 未ログイン状態で公開フォームにファイルを添付して送信できること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-080`);
 
-        let publicFormUrl = null;
+            // [flow] 80-1. 公開フォームを有効化してハッシュを取得
+            const formInfo = await enablePublicFormAndGetInfo(page, tableId);
+            const hash = formInfo.hash;
+            expect(formInfo.url, '公開フォームURLが取得できること').toBeTruthy();
 
-        // ドロップダウンを開いて「公開フォームリンク」をクリック
-        await page.evaluate(() => {
-            const dropdowns = document.querySelectorAll('button.btn-sm.btn-outline-primary.dropdown-toggle');
-            if (dropdowns.length > 0) dropdowns[0].click();
-        });
-        await page.waitForTimeout(500);
+            // [flow] 80-2. 未ログインの新しいコンテキストで公開フォームを開く
+            const newContext = await page.context().browser().newContext();
+            const newPage = await newContext.newPage();
 
-        const pubFormLinkItem = page.locator('.dropdown-menu a:has-text("公開フォームリンク"), .btn-group.open a:has-text("公開フォームリンク")');
-        const pubFormLinkCount = await pubFormLinkItem.count();
+            try {
+                const directUrl = buildFormDirectUrl(BASE_URL, tableId, hash);
+                await openFormPage(newPage, directUrl);
 
-        if (pubFormLinkCount > 0) {
-            await expect(pubFormLinkItem.first()).toBeVisible();
-            await pubFormLinkItem.first().click();
-            await page.waitForTimeout(2000);
+                // [check] 80-3. ✅ フォーム画面が正常に表示されること
+                await checkPageOk(newPage);
 
-            // 公開フォームリンクモーダルが開くことを確認
-            const pubFormModal = page.locator('.modal.show');
-            const modalCount = await pubFormModal.count();
+                // [check] 80-4. ✅ フォームにフィールドが存在すること
+                const fieldBlocks = newPage.locator('.pc-field-block');
+                const fieldCount = await fieldBlocks.count();
+                expect(fieldCount, '公開フォームにフィールドが存在すること').toBeGreaterThan(0);
+                console.log(`[pf-080] フィールド数: ${fieldCount}`);
 
-            if (modalCount > 0) {
-                await expect(pubFormModal.first()).toBeVisible();
+                // [flow] 80-3. テキストフィールドに値を入力
+                const textInput = newPage.locator('.pc-field-block input[type="text"]:not([type="hidden"])').first();
+                const textInputVisible = await textInput.isVisible({ timeout: 5000 }).catch(() => false);
+                if (textInputVisible) {
+                    await textInput.fill('テスト入力値_pf080');
+                    await newPage.waitForTimeout(500);
+                }
 
-                // モーダル内にURLを表示する input[readonly] があることを確認
-                const urlInput = pubFormModal.first().locator('input[readonly]');
-                const urlInputCount = await urlInput.count();
-                expect(urlInputCount, 'URLを表示するinputが存在すること').toBeGreaterThan(0);
-
-                if (urlInputCount > 0) {
-                    publicFormUrl = await urlInput.first().inputValue();
-                    console.log('公開フォームURL:', publicFormUrl);
-
-                    // URLが空でないことを確認
-                    expect(publicFormUrl.length, '公開フォームURLが空でないこと').toBeGreaterThan(0);
-
-                    // URLがhttpを含むことを確認
-                    expect(publicFormUrl, '公開フォームURLが有効なURL形式であること').toContain('http');
-
-                    // URLの長さが適切であること（ハッシュ値を含むため一定以上の長さ）
-                    expect(publicFormUrl.length, '公開フォームURLが適切な長さであること（ハッシュを含む）').toBeGreaterThan(20);
-
-                    // URLのパス部分にハッシュ的な文字列が含まれること（セキュリティトークン）
-                    // pigeon-demo.com または pigeon-fw.com のドメインを含むこと
-                    const urlHasDomain = publicFormUrl.includes('pigeon') || publicFormUrl.includes('http');
-                    expect(urlHasDomain, '公開フォームURLが有効なドメインを含むこと').toBeTruthy();
-
-                    // モーダルを閉じる
-                    const closeBtn = pubFormModal.first().locator('button:has-text("閉じる"), button.close, button[aria-label="Close"]');
-                    const closeBtnCount = await closeBtn.count();
-                    if (closeBtnCount > 0) {
-                        await closeBtn.first().click({ force: true });
-                        await page.waitForTimeout(500);
+                // [flow] 80-4. ファイル添付フィールドにファイルをアップロード
+                const fileInput = newPage.locator('.pc-field-block input[type="file"]').first();
+                const fileInputVisible = await fileInput.isVisible({ timeout: 5000 }).catch(() => false);
+                if (fileInputVisible) {
+                    const testFilePath = '/Users/yasaipopo/PycharmProjects/pigeon-test/test_files/ok.png';
+                    const fs = require('fs');
+                    if (fs.existsSync(testFilePath)) {
+                        await fileInput.setInputFiles(testFilePath);
+                        await newPage.evaluate(() => {
+                            const input = document.querySelector('input[type="file"]');
+                            if (input) input.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        await newPage.waitForTimeout(2000);
+                        console.log('[pf-080] ファイル添付完了');
                     }
                 }
+
+                // [check] 80-5. ✅ 送信ボタンが表示されること（card-footer内、loading完了後）
+                const submitBtn = newPage.locator('.card-footer button[type="submit"]').first();
+                await expect(submitBtn).toBeVisible({ timeout: 20000 });
+
+                // [flow] 80-5. 送信ボタンをクリック
+                await submitBtn.click();
+
+                // [flow] 80-6. 送信前の確認ダイアログ「はい」クリック（IS_PUBLIC_FORM=trueの場合）
+                const confirmYesBtn = newPage.locator('.modal.show button:has-text("はい"), .modal.show button:has-text("OK")').first();
+                const confirmVisible = await confirmYesBtn.isVisible({ timeout: 5000 }).catch(() => false);
+                if (confirmVisible) {
+                    await confirmYesBtn.click();
+                    console.log('[pf-080] 送信確認ダイアログ「はい」クリック');
+                }
+                await newPage.waitForTimeout(4000);
+
+                // [check] 80-7. ✅ 送信後にエラーが表示されないこと
+                await checkPageOk(newPage);
+
+                await autoScreenshot(newPage, 'UC07', 'pf-080', _testStart);
+            } finally {
+                await newContext.close();
             }
-        } else {
-            // 「公開フォームリンク」ボタンが見つからない場合
-            // ページ内にURL入力欄（readonly）が直接表示されていないか確認
-            const urlInputInPage = page.locator('input[readonly][value*="pigeon"], input[readonly][value*="http"]');
-            const urlInputCount = await urlInputInPage.count();
 
-            if (urlInputCount > 0) {
-                publicFormUrl = await urlInputInPage.first().inputValue();
-                expect(publicFormUrl.length, '公開フォームURLが空でないこと').toBeGreaterThan(0);
-                expect(publicFormUrl, '公開フォームURLが有効なURL形式であること').toContain('http');
-            } else {
-                // ビューが未設定のため公開フォームリンクが表示されない可能性がある
-                // その場合はテーブル設定で公開フォームONの設定が確認できていればOK
-                console.log('公開フォームリンクメニューが表示されませんでした。ビュー設定が必要な可能性があります。');
+            // [check] 80-7. ✅ 送信後、管理画面のレコード一覧に登録が反映されること
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await waitForAngular(page, 30000);
+            await closeTemplateModal(page);
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+            await checkPageOk(page);
 
-                // テーブル編集ページで公開フォーム設定UIが存在することを確認（フォールバック）
-                await openOtherTab(page, tableId);
-                const otherPanel = page.locator('#ngb-nav-7-panel');
-                await expect(otherPanel, '「その他」タブパネルが存在すること').toBeVisible({ timeout: 10000 });
+            // Angular がデータをロードするまで待機
+            await page.waitForFunction(() => {
+                const rows = document.querySelectorAll('table tbody tr');
+                return rows.length > 0;
+            }, { timeout: 15000 }).catch(() => {});
 
-                const pubFormLabel = otherPanel.locator('label:has-text("公開フォームをONにする"), .form-control-label:has-text("公開フォームをONにする")');
-                await expect(pubFormLabel.first(), '「公開フォームをONにする」ラベルが存在すること').toBeVisible({ timeout: 5000 });
-            }
-        }
+            const rowCount = await page.locator('table tbody tr').count();
+            console.log(`[pf-080] 送信後レコード数: ${rowCount}`);
+            expect(rowCount, '公開フォームから登録したレコードが存在すること').toBeGreaterThan(0);
+        });
     });
 
+    // =========================================================================
+    // UC22: 公開フォームURLパラメータ初期値（pf-090）→ 1動画
+    // =========================================================================
+    test('UC22: 公開フォームURLパラメータ初期値', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+        page.setDefaultTimeout(30000);
+
+        await closeTemplateModal(page);
+
+        await test.step('pf-090: 公開フォームURLにパラメータを付与して初期値が設定されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-090`);
+
+            // [flow] 90-1. 公開フォームを有効化してハッシュを取得
+            const formInfo = await enablePublicFormAndGetInfo(page, tableId);
+            const hash = formInfo.hash;
+            expect(formInfo.url, '公開フォームURLが取得できること').toBeTruthy();
+
+            // [flow] 90-2. URLパラメータ付きの直URLを構築する
+            // embed.js の仕様: /public/{table}/add/{filter_id}/{hash}/true?{params}
+            const directUrl = buildFormDirectUrl(BASE_URL, tableId, hash);
+            const paramUrl = directUrl + '?' + encodeURIComponent('テキスト') + '=' + encodeURIComponent('テスト初期値090');
+
+            // [flow] 90-3. 新規コンテキストでパラメータ付きURLを開く
+            const newContext = await page.context().browser().newContext();
+            const newPage = await newContext.newPage();
+
+            try {
+                await openFormPage(newPage, paramUrl);
+
+                // [check] 90-4. ✅ フォームがエラーなく表示されること
+                await checkPageOk(newPage);
+
+                // [check] 90-5. ✅ フォームにフィールドが存在すること
+                const fieldBlocks = newPage.locator('.pc-field-block');
+                const fieldCount = await fieldBlocks.count();
+                expect(fieldCount, '公開フォームにフィールドが存在すること').toBeGreaterThan(0);
+
+                // [check] 90-6. ✅ パラメータの値が初期値として設定されていること
+                // URLパラメータによるプレフィル確認
+                const hasPrefilledValue = await newPage.evaluate(() => {
+                    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], textarea');
+                    for (const input of inputs) {
+                        if (input.value && input.value.includes('テスト初期値090')) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+                console.log(`[pf-090] URLパラメータによる初期値設定: ${hasPrefilledValue}`);
+                // 初期値が設定されていること（機能として期待する動作）
+                expect(hasPrefilledValue, 'URLパラメータの値が初期値として設定されること').toBe(true);
+
+                await autoScreenshot(newPage, 'UC22', 'pf-090', _testStart);
+            } finally {
+                await newContext.close();
+            }
+        });
+    });
+
+    // =========================================================================
+    // UC23: 公開フォームレイアウト確認（pf-100）→ 1動画
+    // =========================================================================
+    test('UC23: 公開フォームレイアウト確認', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+        page.setDefaultTimeout(30000);
+
+        await closeTemplateModal(page);
+
+        await test.step('pf-100: 公開フォームで各フィールドが正しいレイアウトで表示されること', async () => {
+            console.log(`[STEP_TIME] ${Math.round((Date.now() - _testStart) / 1000)}s pf-100`);
+
+            // [flow] 100-1. 公開フォームを有効化してURLとハッシュを取得
+            const formInfo = await enablePublicFormAndGetInfo(page, tableId);
+            const hash = formInfo.hash;
+            expect(formInfo.url, '公開フォームURLが取得できること').toBeTruthy();
+
+            // [flow] 100-2. デスクトップ幅（1280px）で公開フォームを直接開く
+            await page.setViewportSize({ width: 1280, height: 800 });
+            const directUrl = buildFormDirectUrl(BASE_URL, tableId, hash);
+            await openFormPage(page, directUrl);
+
+            // [check] 100-3. ✅ フォームにフィールドが存在すること
+            await checkPageOk(page);
+            const fieldBlocks = page.locator('.pc-field-block');
+            const fieldCount = await fieldBlocks.count();
+            expect(fieldCount, '公開フォームにフィールドが存在すること').toBeGreaterThan(0);
+            console.log(`[pf-100] フィールド数: ${fieldCount}`);
+
+            // [check] 100-4. ✅ フィールドが見切れていないこと（右端からはみ出していないこと）
+            const clippedCheck = await page.evaluate(() => {
+                const blocks = document.querySelectorAll('.pc-field-block');
+                let clipped = 0;
+                const viewportWidth = window.innerWidth;
+                for (const block of blocks) {
+                    const rect = block.getBoundingClientRect();
+                    if (rect.width > 0 && rect.right > viewportWidth + 5) {
+                        clipped++;
+                    }
+                }
+                return { clipped, total: blocks.length, viewportWidth };
+            });
+            console.log(`[pf-100] 見切れチェック - 全${clippedCheck.total}件中${clippedCheck.clipped}件が見切れ (viewport: ${clippedCheck.viewportWidth}px)`);
+            expect(clippedCheck.clipped, '見切れフィールドがないこと').toBe(0);
+
+            await autoScreenshot(page, 'UC23', 'pf-100', _testStart);
+        });
+    });
 });

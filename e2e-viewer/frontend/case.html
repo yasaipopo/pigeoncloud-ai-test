@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テストケース詳細 - PigeonCloud E2E</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+
+    /* ステータス別アクセントカラー */
+    .status-accent-passed  { border-top: 4px solid #198754; }
+    .status-accent-failed  { border-top: 4px solid #dc3545; }
+    .status-accent-skipped { border-top: 4px solid #6c757d; }
+
+    .status-badge-passed  { background: #198754; }
+    .status-badge-failed  { background: #dc3545; }
+    .status-badge-skipped { background: #6c757d; }
+
+    /* ヘッダーカード */
+    .case-header-card {
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    /* テストタイトル */
+    .case-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    /* エラー表示 */
+    .error-block {
+      font-size: .83rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .stack-block {
+      font-size: .75rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 250px;
+      overflow-y: auto;
+      color: #495057;
+    }
+
+    /* スクリーンショットギャラリー（横スクロール） */
+    .screenshot-gallery {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .screenshot-gallery::-webkit-scrollbar { height: 6px; }
+    .screenshot-gallery::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 3px; }
+
+    .screenshot-item {
+      flex: 0 0 auto;
+      width: 320px;
+    }
+    .screenshot-item img {
+      width: 100%;
+      height: 220px;
+      object-fit: contain;
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      cursor: zoom-in;
+      transition: box-shadow .15s;
+    }
+    .screenshot-item img:hover { box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+
+    /* スクショが1枚のみの場合は横スクロールなし */
+    .screenshot-gallery.single-shot {
+      flex-wrap: wrap;
+    }
+    .screenshot-gallery.single-shot .screenshot-item {
+      width: 100%;
+      max-width: 700px;
+    }
+    .screenshot-gallery.single-shot .screenshot-item img {
+      height: auto;
+      max-height: 480px;
+    }
+
+    /* 動画 */
+    .video-player {
+      width: 100%;
+      max-height: 520px;
+      background: #000;
+      border-radius: 8px;
+    }
+
+    /* テストステップ */
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: .85rem;
+      line-height: 1.6;
+      padding: 3px 0;
+    }
+    .step-item.step-ok   { color: #333; }
+    .step-item.step-fail { color: #dc3545; font-weight: 600; }
+    .step-icon { flex-shrink: 0; font-size: .8rem; padding-top: 2px; }
+
+    /* パンくず */
+    .breadcrumb-nav { font-size: .85rem; }
+  </style>
+</head>
+<body>
+
+<!-- ナビゲーションバー -->
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container">
+    <a href="index.html" class="navbar-brand text-decoration-none">
+      <i class="bi bi-clipboard-check me-2"></i>PigeonCloud E2E ビューアー
+    </a>
+    <button class="btn btn-sm btn-outline-secondary" onclick="doLogout()">
+      <i class="bi bi-box-arrow-right me-1"></i>ログアウト
+    </button>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <!-- パンくずナビ -->
+  <nav class="breadcrumb-nav mb-3" aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item">
+        <a href="index.html" class="text-decoration-none">
+          <i class="bi bi-house me-1"></i>実行一覧
+        </a>
+      </li>
+      <li class="breadcrumb-item" id="breadcrumb-run">
+        <a href="#" id="breadcrumb-run-link" class="text-decoration-none">実行詳細</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page" id="breadcrumb-case">テストケース</li>
+    </ol>
+  </nav>
+
+  <!-- ローディング -->
+  <div class="text-center py-5" id="loading">
+    <div class="spinner-border text-secondary"></div>
+    <div class="text-muted mt-2">読み込み中...</div>
+  </div>
+
+  <!-- エラー -->
+  <div class="alert alert-danger d-none" id="error-msg">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <span id="error-text"></span>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div id="main-content" style="display:none">
+
+    <!-- ケースヘッダーカード -->
+    <div class="card case-header-card shadow-sm mb-4" id="case-header-card">
+      <div class="card-body">
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <span class="fs-3 pt-1" id="status-icon"></span>
+          <div class="flex-grow-1">
+            <div class="case-title mb-2" id="case-title">-</div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <span class="badge fs-6" id="status-badge"></span>
+              <span class="text-muted">
+                <i class="bi bi-stopwatch me-1"></i><span id="case-duration">-</span>
+              </span>
+              <span class="text-muted small" id="case-spec"></span>
+              <span class="text-muted small" id="case-suite"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- エラーメッセージ（failedの場合のみ） -->
+    <div class="card mb-4 d-none" id="error-section">
+      <div class="card-header bg-danger bg-opacity-10 text-danger fw-bold">
+        <i class="bi bi-exclamation-triangle me-2"></i>エラーメッセージ
+      </div>
+      <div class="card-body p-0">
+        <pre class="error-block text-danger p-3 mb-0" id="error-message"></pre>
+      </div>
+    </div>
+
+    <!-- スタックトレース（failedの場合のみ） -->
+    <div class="card mb-4 d-none" id="stack-section">
+      <div class="card-header fw-bold">
+        <i class="bi bi-stack me-2"></i>スタックトレース
+      </div>
+      <div class="card-body p-0">
+        <pre class="stack-block bg-light p-3 mb-0" id="error-stack"></pre>
+      </div>
+    </div>
+
+    <!-- 動画 -->
+    <div class="card mb-4 d-none" id="video-section">
+      <div class="card-header fw-bold d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-camera-video me-2"></i>テスト動画</span>
+        <small class="text-muted fw-normal" id="video-timestamp" style="font-size:0.8em"></small>
+      </div>
+      <div class="card-body">
+        <div class="text-center py-3 d-none" id="video-loading">
+          <div class="spinner-border spinner-border-sm text-secondary me-2"></div>
+          <span class="text-muted small">動画を読み込み中...</span>
+        </div>
+        <video controls class="video-player d-none" id="video-player">
+          <source id="video-source" src="" type="video/webm">
+          動画を再生できません
+        </video>
+      </div>
+    </div>
+
+    <!-- スクリーンショット -->
+    <div class="card mb-4 d-none" id="screenshot-section">
+      <div class="card-header fw-bold d-flex align-items-center gap-2">
+        <span><i class="bi bi-images me-2"></i>スクリーンショット</span>
+        <span class="badge bg-secondary" id="screenshot-count"></span>
+      </div>
+      <div class="card-body">
+        <div class="text-center py-3 d-none" id="screenshot-loading">
+          <div class="spinner-border spinner-border-sm text-secondary me-2"></div>
+          <span class="text-muted small">画像を読み込み中...</span>
+        </div>
+        <div class="screenshot-gallery" id="screenshot-gallery"></div>
+      </div>
+    </div>
+
+    <!-- テストステップ -->
+    <div class="card mb-4 d-none" id="steps-section">
+      <div class="card-header fw-bold">
+        <i class="bi bi-list-check me-2"></i>テストステップ
+      </div>
+      <div class="card-body py-2">
+        <div id="steps-list"></div>
+      </div>
+    </div>
+
+    <!-- trace.zip ダウンロード -->
+    <div class="d-none" id="trace-section">
+      <button class="btn btn-sm btn-outline-secondary" id="trace-btn" onclick="downloadTrace()">
+        <i class="bi bi-download me-1"></i>trace.zip をダウンロード
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// =========================================
+// 設定（deploy.sh で __API_URL__ を置換）
+// =========================================
+const CONFIG = {
+  apiUrl: '__API_URL__',
+};
+
+// =========================================
+// 認証チェック
+// =========================================
+const _token = localStorage.getItem('e2e_auth_token');
+if (!_token) {
+  location.href = 'login.html';
+}
+
+function authHeaders() {
+  return {
+    'Authorization': `Bearer ${localStorage.getItem('e2e_auth_token')}`,
+    'Content-Type': 'application/json'
+  };
+}
+
+function doLogout() {
+  localStorage.removeItem('e2e_auth_token');
+  location.href = 'login.html';
+}
+
+// =========================================
+// URLパラメータ取得
+// =========================================
+const urlParams = new URLSearchParams(location.search);
+const runId  = urlParams.get('runId');
+const caseId = urlParams.get('caseId');
+
+let caseData = null;
+let traceKey = null;
+
+// =========================================
+// 初期化
+// =========================================
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!runId || !caseId) {
+    showError('runId または caseId が指定されていません');
+    return;
+  }
+
+  // パンくずの「実行詳細」リンクを設定
+  const runLink = document.getElementById('breadcrumb-run-link');
+  runLink.href = `run.html?runId=${encodeURIComponent(runId)}`;
+  runLink.textContent = runId;
+
+  try {
+    await loadCase();
+  } catch (e) {
+    showError('読み込みエラー: ' + e.message);
+  }
+});
+
+// =========================================
+// テストケース詳細取得
+// =========================================
+async function loadCase() {
+  // APIからケース一覧を取得して対象ケースを特定
+  const r = await fetch(
+    `${CONFIG.apiUrl}/runs/${encodeURIComponent(runId)}/cases?limit=1000`,
+    { headers: authHeaders() }
+  );
+  if (r.status === 401) { doLogout(); throw new Error('認証が切れました'); }
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+  const data = await r.json();
+  const found = (data.items || []).find(c => c.caseId === caseId);
+
+  if (!found) {
+    throw new Error(`caseId が見つかりません: ${caseId}`);
+  }
+
+  caseData = found;
+  renderCase(caseData);
+
+  // アセット（動画・スクリーンショット）をロード
+  await loadAssets(caseData);
+}
+
+// =========================================
+// ケース情報をUIに描画
+// =========================================
+function renderCase(c) {
+  const statusClass = { passed: 'success', failed: 'danger', skipped: 'secondary' }[c.caseStatus] || 'secondary';
+  const statusLabel = { passed: 'PASS', failed: 'FAIL', skipped: 'SKIP' }[c.caseStatus] || c.caseStatus;
+  const statusIcon  = {
+    passed:  '<i class="bi bi-check-circle-fill text-success"></i>',
+    failed:  '<i class="bi bi-x-circle-fill text-danger"></i>',
+    skipped: '<i class="bi bi-skip-forward-circle-fill text-secondary"></i>',
+  }[c.caseStatus] || '';
+
+  // ページタイトル
+  document.title = `${c.testTitle} - PigeonCloud E2E`;
+
+  // パンくず
+  document.getElementById('breadcrumb-case').textContent = c.testTitle.length > 60
+    ? c.testTitle.substring(0, 57) + '...' : c.testTitle;
+
+  // ヘッダーカード
+  document.getElementById('case-header-card').classList.add(`status-accent-${c.caseStatus}`);
+  document.getElementById('status-icon').innerHTML = statusIcon;
+  document.getElementById('case-title').textContent = c.testTitle;
+
+  const badge = document.getElementById('status-badge');
+  badge.textContent = statusLabel;
+  badge.className = `badge fs-6 status-badge-${c.caseStatus}`;
+
+  document.getElementById('case-duration').textContent = formatDuration(parseInt(c.durationMs) || 0);
+
+  if (c.specFile) {
+    const specEl = document.getElementById('case-spec');
+    specEl.innerHTML = `<i class="bi bi-file-code me-1"></i>${escHtml(c.specFile)}`;
+  }
+  if (c.suiteName) {
+    const suiteEl = document.getElementById('case-suite');
+    suiteEl.innerHTML = `<i class="bi bi-collection me-1"></i>${escHtml(c.suiteName)}`;
+  }
+
+  // エラーメッセージ
+  if (c.errorMessage) {
+    document.getElementById('error-message').textContent = c.errorMessage;
+    document.getElementById('error-section').classList.remove('d-none');
+  }
+
+  // スタックトレース
+  if (c.errorStack) {
+    document.getElementById('error-stack').textContent = c.errorStack;
+    document.getElementById('stack-section').classList.remove('d-none');
+  }
+
+  // テストステップ
+  if (c.steps && c.steps.length > 0) {
+    const listEl = document.getElementById('steps-list');
+    c.steps.forEach(s => {
+      const item = document.createElement('div');
+      item.className = `step-item ${s.ok ? 'step-ok' : 'step-fail'}`;
+      item.innerHTML = `
+        <span class="step-icon">${s.ok ? '✅' : '❌'}</span>
+        <span>${escHtml(s.title)}</span>`;
+      listEl.appendChild(item);
+    });
+    document.getElementById('steps-section').classList.remove('d-none');
+  }
+
+  // trace.zip
+  if (c.traceKey) {
+    traceKey = c.traceKey;
+    document.getElementById('trace-section').classList.remove('d-none');
+  }
+
+  // 動画・スクショのプレースホルダーを表示
+  if (c.videoKey) {
+    document.getElementById('video-section').classList.remove('d-none');
+    document.getElementById('video-loading').classList.remove('d-none');
+    // 動画の撮影日時（run_idのUTCタイムスタンプ→JST変換）
+    const tsEl = document.getElementById('video-timestamp');
+    if (tsEl) {
+      const m = c.videoKey.match(/runs\/(\d{8})_(\d{6})_/);
+      if (m) {
+        const [, date, time] = m;
+        const y=date.slice(0,4),mo=date.slice(4,6),d=date.slice(6,8);
+        const h=time.slice(0,2),mi=time.slice(2,4),s=time.slice(4,6);
+        const utc = new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}Z`);
+        const jst = utc.toLocaleString('ja-JP', {timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        tsEl.textContent = `📅 撮影: ${jst} JST`;
+      }
+    }
+  }
+  if (c.screenshotKeys && c.screenshotKeys.length > 0) {
+    document.getElementById('screenshot-section').classList.remove('d-none');
+    document.getElementById('screenshot-loading').classList.remove('d-none');
+    document.getElementById('screenshot-count').textContent = `${c.screenshotKeys.length}枚`;
+  }
+
+  // コンテンツを表示
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main-content').style.display = '';
+}
+
+// =========================================
+// アセット（動画・スクリーンショット）読み込み
+// =========================================
+async function loadAssets(c) {
+  await Promise.all([
+    loadVideo(c),
+    loadScreenshots(c),
+  ]);
+}
+
+async function loadVideo(c) {
+  if (!c.videoKey) return;
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
+      method: 'POST', headers: authHeaders(), body: JSON.stringify({ key: c.videoKey })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+
+    const videoPlayer = document.getElementById('video-player');
+    document.getElementById('video-source').src = data.downloadUrl;
+    videoPlayer.load();
+
+    document.getElementById('video-loading').classList.add('d-none');
+    videoPlayer.classList.remove('d-none');
+  } catch (e) {
+    document.getElementById('video-loading').innerHTML =
+      `<span class="text-muted small"><i class="bi bi-exclamation-circle me-1"></i>動画を読み込めませんでした</span>`;
+  }
+}
+
+async function loadScreenshots(c) {
+  if (!c.screenshotKeys || c.screenshotKeys.length === 0) return;
+
+  try {
+    const urls = [];
+    await Promise.all(c.screenshotKeys.map(async key => {
+      try {
+        const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
+          method: 'POST', headers: authHeaders(), body: JSON.stringify({ key })
+        });
+        if (r.ok) {
+          const data = await r.json();
+          urls.push({ url: data.downloadUrl, filename: key.split('/').pop(), key });
+        }
+      } catch (e) {}
+    }));
+
+    // キー順で並び替え（ファイル名のアルファベット順）
+    urls.sort((a, b) => a.key.localeCompare(b.key));
+
+    const gallery = document.getElementById('screenshot-gallery');
+    if (urls.length === 1) gallery.classList.add('single-shot');
+
+    urls.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'screenshot-item';
+      div.innerHTML = `
+        <img src="${escHtml(item.url)}"
+             alt="${escHtml(item.filename)}"
+             loading="lazy"
+             onclick="openFullImage('${escHtml(item.url)}')">
+        <div class="text-muted small mt-1 text-truncate" title="${escHtml(item.filename)}">
+          ${idx + 1}. ${escHtml(item.filename)}
+        </div>`;
+      gallery.appendChild(div);
+    });
+
+    document.getElementById('screenshot-loading').classList.add('d-none');
+  } catch (e) {
+    document.getElementById('screenshot-loading').innerHTML =
+      `<span class="text-muted small"><i class="bi bi-exclamation-circle me-1"></i>スクリーンショットを読み込めませんでした</span>`;
+  }
+}
+
+// =========================================
+// trace.zip ダウンロード
+// =========================================
+async function downloadTrace() {
+  const btn = document.getElementById('trace-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>準備中...';
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
+      method: 'POST', headers: authHeaders(), body: JSON.stringify({ key: traceKey })
+    });
+    if (r.ok) {
+      const data = await r.json();
+      window.open(data.downloadUrl, '_blank');
+    }
+  } catch (e) {}
+  btn.disabled = false;
+  btn.innerHTML = '<i class="bi bi-download me-1"></i>trace.zip をダウンロード';
+}
+
+// =========================================
+// 画像フルサイズ表示
+// =========================================
+function openFullImage(url) {
+  window.open(url, '_blank');
+}
+
+// =========================================
+// エラー表示
+// =========================================
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  const el = document.getElementById('error-msg');
+  el.classList.remove('d-none');
+  document.getElementById('error-text').textContent = msg;
+}
+
+// =========================================
+// ユーティリティ
+// =========================================
+function formatDuration(ms) {
+  if (!ms || ms <= 0) return '-';
+  const sec = Math.round(ms / 1000);
+  if (sec < 60) return `${sec}秒`;
+  const totalMin = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (totalMin < 60) return `${totalMin}分${s}秒`;
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return `${h}時間${m}分`;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>

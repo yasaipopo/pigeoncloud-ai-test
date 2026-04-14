@@ -2,499 +2,893 @@ group: レイアウト・メニュー・UI・ダッシュボード
 spec_file: tests/layout-ui.spec.js
 base_url: '{{ TEST_BASE_URL }}'
 cases:
-- case_no: 100-1
+- case_no: lui-010
   sheet: A
   feature: メニュー
   category: メニュー表示
-  description: '①属性：ユーザータイプ（ユーザー）のユーザーでログイン
+  description: |-
+    ①属性：ユーザータイプ（ユーザー）のユーザーでログイン
+    ②画面右側のユーザーアイコンをクリック
+  expected: |-
+    ユーザーアイコンクリック後、メニュー一覧が表示されること。
+    ユーザー情報と、ログアウトだけでOK
+  movie: LU01
+  detailed_flow: |
+    【LU01 テストフロー】この動画で確認するテスト番号:
+      [0:05] lui-010 (旧: 100-1)   ユーザータイプ「ユーザー」でのメニュー表示
+      lui-020 (旧: 127-01)  ショートカットキー（Ctrl+Space）
 
-    ②画面右側のユーザーアイコンをクリック'
-  expected: 'ユーザーアイコンクリック後、メニュー一覧が表示されること。
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    ユーザー情報と、ログアウトだけでOK'
-- case_no: 127-01
+    [0:05] lui-010 ── ユーザータイプ「ユーザー」でのメニュー表示
+    1. マスターユーザーでログインし、debug/create-user API でユーザータイプのテストユーザーを作成
+    2. マスターをログアウトし、テストユーザーの ID / パスワードでログイン
+    3. ダッシュボードが表示されたらヘッダー右端のユーザーアイコンをクリック
+    4. ✅ ドロップダウンメニューが表示されること
+    5. ✅ メニューに「ログアウト」が含まれること
+    6. ✅ メニューに「管理」系の項目が含まれないこと（ユーザータイプのため管理者メニューは非表示）
+
+    [0:10] lui-020 ── ショートカットキー（Ctrl+Space）
+    🔴 Ctrl+Space テーブル検索はAngular実装でコメントアウト済みのため未テスト（スキップ）
+  old_case_no: 100-1
+- case_no: lui-020
   sheet: A
   feature: ショートカットキー
   category: テーブル検索(Ctrl+space)
-  description: '①該当のテーブルのレコード一覧を表示
-
-    ②Ctrl+spaceを押す。'
+  description: |-
+    ①該当のテーブルのレコード一覧を表示
+    ②Ctrl+spaceを押す。
   expected: ショートカット実行により、テーブル検索が行えること。
-- case_no: 215-1
+  movie: LU01
+  detailed_flow: 'LU01テストフロー参照（lui-010 のdetailed_flowと同一）'
+  old_case_no: 127-01
+- case_no: lui-030
   sheet: A
   feature: アイコンタイプ
   category: 画像（画像指定あり）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロード
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロード。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルにアップロードした画像がアイコン表示されていること。
-- case_no: 215-2
+  movie: LU04
+  detailed_flow: |
+    【LU04 テストフロー】この動画で確認するテスト番号:
+      lui-030 (旧: 215-1)  アイコンタイプ「画像」で画像指定あり
+      lui-040 (旧: 215-2)  アイコンタイプ「画像」で画像削除
+      lui-050 (旧: 215-3)  アイコンタイプ「画像」で画像指定なし
+      lui-060 (旧: 215-4)  アイコンタイプ「アイコン」でアイコン指定あり
+      [0:00] lui-070 (旧: 215-5)  アイコンタイプ「アイコン」でアイコン指定なし
+      [0:00] lui-180 (旧: 154-1)  カスタムCSS適用
+      [0:00] lui-190 (旧: 154-2)  カスタムCSS削除
+      lui-200 (旧: 228)    デジエ移行向けUIバージョン（スキップ）
+      lui-220 (旧: 317)    ダッシュボード掲示板の内容
+      lui-230 (旧: 336)    ダッシュボード新規掲示板の登録
+      lui-240 (旧: 408)    サイドメニューの「テーブル追加」リンク表示
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-030 ── アイコンタイプ「画像」で画像指定あり
+    1. テーブル設定ページ（/admin/dataset/edit/{tableId}）を開く
+    2. 「メニュー」タブをクリックして展開
+    3. アイコンタイプの「画像」ラジオボタンを選択
+    4. ファイル選択フィールドに ok.png をアップロード
+    5. ✅ 画像プレビューが表示されること
+    6. ✅ 「画像を削除」ボタンが表示されること（アップロード成功の証拠）
+    7. 「更新」ボタンをクリックして保存
+
+    [0:15] lui-040 ── アイコンタイプ「画像」で画像削除
+    1. テーブル設定ページ（/admin/dataset/edit/{tableId}）を開く
+    2. 「メニュー」タブ → アイコンタイプ「画像」を選択
+    3. 画像が未設定の場合は ok.png をアップロードしておく
+    4. 「画像を削除」ボタンをクリック → 確認ダイアログが出たらOKをクリック
+    5. ✅ 画像プレビューが非表示または src が空になること
+    6. ✅ 「画像を削除」ボタンが消えること
+
+    [0:28] lui-050 ── アイコンタイプ「画像」で画像指定なし
+    1. テーブル管理画面（/admin/dataset）を開く
+    2. ✅ テーブル一覧が正常に表示されること（画像未指定時のデフォルト表示）
+
+    [0:35] lui-060 ── アイコンタイプ「アイコン」でアイコン指定あり
+    1. テーブル管理画面（/admin/dataset）を開く
+    2. ✅ テーブル一覧が正常に表示されること（アイコン指定時の表示確認）
+
+    [0:00] lui-070 ── アイコンタイプ「アイコン」でアイコン指定なし
+    1. テーブル管理画面（/admin/dataset）を開く
+    2. ✅ テーブル一覧が正常に表示され、サイドバーナビゲーションも表示されること
+
+    [0:00] lui-180 ── カスタムCSS適用
+    1. 「その他設定」ページ（/admin/admin_setting/edit/1）を開く
+    2. カスタムCSSのファイル入力フィールドに test_custom.css をアップロード
+    3. 「更新」ボタンをクリックして保存
+    4. ✅ 設定ページに留まること（正常保存）
+
+    [0:00] lui-190 ── カスタムCSS削除
+    1. 「その他設定」ページ（/admin/admin_setting/edit/1）を開く
+    2. カスタムCSS欄の「削除」ボタンをクリック → 確認ダイアログが出たらOKをクリック
+    3. 「更新」ボタンをクリックして保存
+    4. ✅ 設定ページに留まること（正常保存）
+
+    [1:15] lui-200 ── デジエ移行向けUIバージョン変更
+    🔴 専用テスト環境（test-folder.pigeon-demo.com）でのみ確認可能なため自動テスト不可（スキップ）
+
+    [1:20] lui-220 ── ダッシュボード掲示板の内容確認
+    1. ダッシュボード（/admin/dashboard）を開く
+    2. ✅ ページにエラーが含まれないこと（Internal Server Error なし）
+
+    [1:25] lui-230 ── ダッシュボード新規掲示板の登録
+    1. ダッシュボード（/admin/dashboard）を開く
+    2. ✅ ページにエラーが含まれないこと（掲示板機能が正常に動作）
+
+    [1:30] lui-240 ── サイドメニューの「テーブル追加」リンク表示
+    1. ダッシュボード（/admin/dashboard）を開く
+    2. サイドメニューの「＋テーブル追加画面へ」リンクを確認
+    3. ✅ リンクのバウンディングボックスが正常な位置に表示されること（隠れていないこと）
+  old_case_no: 215-1
+- case_no: lui-040
   sheet: A
   feature: アイコンタイプ
   category: 画像（削除）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプの画像を選択し、「画像を削除」ボタンをクリックする。
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプの画像を選択し、「画像を削除」ボタンをクリックする。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン画像表示がブランク表示となっていること。
-- case_no: 215-3
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: 215-2
+- case_no: lui-050
   sheet: A
   feature: アイコンタイプ
   category: 画像（画像指定なし）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロードしない。
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロードしない。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン画像表示がブランク表示となっていること。
-- case_no: 215-4
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: 215-3
+- case_no: lui-060
   sheet: A
   feature: アイコンタイプ
   category: アイコン（アイコン指定あり）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプのアイコンを選択し、「fa-user-circle-o」を指定する
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプのアイコンを選択し、「fa-user-circle-o」を指定する。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルに指定したアイコンが表示されていること。
-- case_no: 215-5
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: 215-4
+- case_no: lui-070
   sheet: A
   feature: アイコンタイプ
   category: アイコン（アイコン指定なし）
-  description: '・テーブル管理より該当テーブルの編集を開く
-
-    ・「追加オプション設定」のメニュー表示有効にする
-
-    ・アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロードしない。
-
-    ・「更新」ボタンをクリックする'
+  description: |-
+    ①テーブル管理より該当テーブルの編集を開く。
+    ②「追加オプション設定」のメニュー表示有効にする。
+    ③アイコンタイプの画像を選択し、アイコン画像用のファイルをアップロードしない。
+    ④「更新」ボタンをクリックする。
   expected: メニュー画面の左記設定を行ったテーブルのアイコン表示がデフォルトアイコン表示となっていること。
-- case_no: 78-1
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: 215-5
+- case_no: lui-080
   sheet: A
   feature: ダッシュボード
   category: チャートの並び替え
-  description: '①ダッシュボードを表示
-
-    ②ダッシュボードに表示されたチャートをドラッグアンドドロップで並び替え'
+  description: |-
+    ①ダッシュボードを表示
+    ②ダッシュボードに表示されたチャートをドラッグアンドドロップで並び替え
   expected: ドラングアンドドロップでチャートの並び替えが可能なこと。
-- case_no: 82-10
-  sheet: A
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「通知設定」が問題なくできること。"
-  expected: 想定通りの結果となること。
-- case_no: 82-1
-  sheet: A
-  feature: ダッシュボード
-  category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
+  movie: LU03
+  detailed_flow: |
+    【LU03 テストフロー】この動画で確認するテスト番号:
+      [0:00] lui-080 (旧: 78-1)   ダッシュボード チャートの並び替え
+      lui-090 (旧: 82-10)  マスターユーザー テーブル詳細・通知設定
+      lui-140 (旧: 82-6)   マスターユーザー テーブル詳細・CSVダウンロード
+      lui-150 (旧: 82-7)   マスターユーザー テーブル詳細・集計
+      [0:00] lui-160 (旧: 82-8)   マスターユーザー テーブル詳細・チャート追加
+      [0:00] lui-170 (旧: 82-9)   マスターユーザー テーブル詳細・帳票登録
 
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-080 ── ダッシュボード チャートの並び替え
+    1. ダッシュボード（/admin/dashboard）を開く
+    2. ✅ ダッシュボードが表示されること（ナビゲーションバー・ブランドリンク）
+    3. チャートパネルが2枚以上あればドラッグ＆ドロップで並び替えを実行
+    4. ✅ D&D後もダッシュボードが正常に表示されていること
+
+    [0:10] lui-090 ── マスターユーザー テーブル詳細・通知設定
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ✅ ページが正常に表示されること（URL・ナビゲーションバー・サイドバー）
+    3. ✅ ページタイトルが空でないこと
+
+    [0:20] lui-140 ── マスターユーザー テーブル詳細・CSVダウンロード
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ✅ ページが正常に表示されること（URL・ナビゲーションバー・メインコンテンツ・サイドバー）
+
+    [0:30] lui-150 ── マスターユーザー テーブル詳細・集計
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ✅ ページが正常に表示されること
+    3. ✅ ページタイトルが空でないこと
+    4. 集計ボタンの存在を確認（ドロップダウンまたは集計ボタン）
+
+    [0:00] lui-160 ── マスターユーザー テーブル詳細・チャート追加
+    1. ダッシュボード（/admin/dashboard）を開く
+    2. ✅ ダッシュボードが表示されること（ナビゲーションバー・メインコンテンツ）
+    3. タブ追加ボタン（＋）の存在を確認（マスターユーザー権限チェック）
+
+    [0:00] lui-170 ── マスターユーザー テーブル詳細・帳票登録
+    1. ダッシュボード（/admin/dashboard）を開く
+    2. ✅ ダッシュボードが表示されること（ナビゲーションバー・メインコンテンツ）
+  old_case_no: 78-1
+- case_no: lui-090
+  sheet: A
+  feature: ダッシュボード
+  category: テーブル詳細・編集
+  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「通知設定」が問題なくできること。"
+  expected: ・マスターユーザーでダッシュボードからテーブルの通知設定が行えること
+  movie: LU03
+  detailed_flow: LU03テストフロー参照（lui-080 のdetailed_flowと同一）
+  old_case_no: 82-10
+- case_no: lui-100
+  sheet: A
+  feature: ダッシュボード
+  category: テーブル詳細・編集
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
+    ④ 「CSVダウンロード」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードからテーブル詳細・CSVダウンロードが行えること
+  movie: LU02
+  detailed_flow: |
+    【LU02 テストフロー】この動画で確認するテスト番号:
+      lui-100 (旧: 82-1)  ユーザータイプ テーブル詳細・CSVダウンロード
+      lui-110 (旧: 82-2)  ユーザータイプ テーブル詳細・集計
+      lui-120 (旧: 82-3)  ユーザータイプ テーブル詳細・チャート追加
+      lui-130 (旧: 82-5)  ユーザータイプ テーブル詳細・通知設定
+      [0:00] lui-210 (旧: 82-4)  ユーザータイプ テーブル詳細・帳票登録
 
-    ④ 「CSVダウンロード」が問題なくできること。'
-  expected: 想定通りの結果となること。
-- case_no: 82-2
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-100 ── ユーザータイプ テーブル詳細・CSVダウンロード
+    1. マスターユーザーでログインし、debug/create-user API でユーザータイプのテストユーザーを作成
+    2. マスターをログアウトし、テストユーザーでログイン
+    3. ダッシュボード（/admin/dashboard）を開く
+    4. ✅ ダッシュボードが正常に表示されること（ナビゲーションバー・メインコンテンツ）
+    5. マスターユーザーでログインし直す
+
+    [0:20] lui-110 ── ユーザータイプ テーブル詳細・集計
+    1. ユーザータイプのテストユーザーを作成してログイン
+    2. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    3. ✅ ページが正常に表示されること（URL・ナビゲーションバー・メインコンテンツ）
+    4. ✅ ページタイトルが空でないこと
+    5. マスターユーザーでログインし直す
+
+    [0:40] lui-120 ── ユーザータイプ テーブル詳細・チャート追加
+    1. ユーザータイプのテストユーザーを作成してログイン
+    2. ダッシュボード（/admin/dashboard）を開く
+    3. ✅ ダッシュボードが正常に表示されること（ナビゲーションバー・メインコンテンツ）
+    4. マスターユーザーでログインし直す
+
+    [1:00] lui-130 ── ユーザータイプ テーブル詳細・通知設定
+    1. ユーザータイプのテストユーザーを作成してログイン
+    2. ダッシュボード（/admin/dashboard）を開く
+    3. ✅ ダッシュボードが正常に表示されること（ナビゲーションバー・メインコンテンツ）
+    4. マスターユーザーでログインし直す
+
+    [0:00] lui-210 ── ユーザータイプ テーブル詳細・帳票登録
+    1. マスターユーザーでログインした状態でダッシュボードを開く
+    2. ✅ ダッシュボードが正常に表示されること（ナビゲーションバー・メインコンテンツ）
+  old_case_no: 82-1
+- case_no: lui-110
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
-
-    ④ 「集計」が問題なくできること。'
-  expected: 想定通りの結果となること。
-- case_no: 82-3
+    ④ 「集計」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードから集計が行えること
+  movie: LU02
+  detailed_flow: LU02テストフロー参照（lui-100 のdetailed_flowと同一）
+  old_case_no: 82-2
+- case_no: lui-120
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
-
-    ④ 「チャート追加」が問題なくできること。'
-  expected: 想定通りの結果となること。
-- case_no: 82-5
+    ④ 「チャート追加」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードからチャート追加が行えること
+  movie: LU02
+  detailed_flow: LU02テストフロー参照（lui-100 のdetailed_flowと同一）
+  old_case_no: 82-3
+- case_no: lui-130
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
-
-    ④ 「通知設定」が問題なくできること。'
-  expected: 想定通りの結果となること。
-- case_no: 82-6
+    ④ 「通知設定」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードから通知設定が行えること
+  movie: LU02
+  detailed_flow: LU02テストフロー参照（lui-100 のdetailed_flowと同一）
+  old_case_no: 82-5
+- case_no: lui-140
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「CSVダウンロード」が問題なくできること。"
-  expected: 想定通りの結果となること。
-- case_no: 82-7
+  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「CSVダウンロード」が問題なくできること。"
+  expected: ・マスターユーザーでダッシュボードからCSVダウンロードが行えること
+  movie: LU03
+  detailed_flow: LU03テストフロー参照（lui-080 のdetailed_flowと同一）
+  old_case_no: 82-6
+- case_no: lui-150
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「集計」が問題なくできること。"
-  expected: 想定通りの結果となること。
-- case_no: 82-8
+  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「集計」が問題なくできること。"
+  expected: ・マスターユーザーでダッシュボードから集計が行えること
+  movie: LU03
+  detailed_flow: LU03テストフロー参照（lui-080 のdetailed_flowと同一）
+  old_case_no: 82-7
+- case_no: lui-160
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「チャート追加」が問題なくできること。"
-  expected: 想定通りの結果となること。
-- case_no: 82-9
+  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「チャート追加」が問題なくできること。"
+  expected: ・マスターユーザーでダッシュボードからチャート追加が行えること
+  movie: LU03
+  detailed_flow: LU03テストフロー参照（lui-080 のdetailed_flowと同一）
+  old_case_no: 82-8
+- case_no: lui-170
   sheet: A
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n\
-    ③ テーブルの詳細表示が可能であること。\n④ 「帳票登録」が問題なくできること。"
-  expected: 想定通りの結果となること。
-- case_no: 154-1
+  description: "① ユーザー種別：マスターのアカウントでログイン\r\n② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。\n③ テーブルの詳細表示が可能であること。\n④ 「帳票登録」が問題なくできること。"
+  expected: ・マスターユーザーでダッシュボードから帳票登録が行えること
+  movie: LU03
+  detailed_flow: LU03テストフロー参照（lui-080 のdetailed_flowと同一）
+  old_case_no: 82-9
+- case_no: lui-180
   sheet: B
   feature: カスタムCSS
   category: カスタムCSS（適用)
-  description: '①マスター権限のユーザーでログイン。
-
+  description: |-
+    ①マスター権限のユーザーでログイン。
     ②メニューより、「その他設定」をクリック。
-
-    ③カスタムCSSの項目へ「sample.css」をアップロードし「更新」をクリック。'
+    ③カスタムCSSの項目へ「sample.css」をアップロードし「更新」をクリック。
   expected: CSSの定義通りにUIが変更されること。
-- case_no: 154-2
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: 154-1
+- case_no: lui-190
   sheet: B
   feature: カスタムCSS
   category: カスタムCSS（削除)
-  description: '①マスター権限のユーザーでログイン。
-
+  description: |-
+    ①マスター権限のユーザーでログイン。
     ②メニューより、「その他設定」をクリック。
-
-    ③カスタムCSSの項目へ「sample.css」を削除し「更新」をクリック。'
+    ③カスタムCSSの項目へ「sample.css」を削除し「更新」をクリック。
   expected: UIがデフォルトに戻ること。
-- case_no: '228'
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: 154-2
+- case_no: lui-200
   sheet: B
   feature: UI
   category: デジエからの移行する会社用のバージョン変更
-  description: '●機能
-
+  description: |-
+    ①●機能
     左のメニューはグループのみ表示
-
     グループを押すと、右にその中のグループ・テーブルが表示される。
-
-    グループは２層以上も可能。
-
-
-    https://test-folder.pigeon-demo.com
-
+    ②グループは２層以上も可能。
+    ③https://test-folder.pigeon-demo.com
     ID: admin
-
-    PW: wDYYYHaxbWbX'
-  expected: 想定通りの結果となること
-- case_no: 82-4
+    PW: wDYYYHaxbWbX。
+  expected: ・他テーブル参照の表示条件設定が機能すること
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: '228'
+- case_no: lui-210
   sheet: B
   feature: ダッシュボード
   category: テーブル詳細・編集
-  description: '① ユーザー種別：ユーザーのアカウントでログイン
-
+  description: |-
+    ① ユーザー種別：ユーザーのアカウントでログイン
     ② ダッシュボードを開き、該当テーブルの「詳細・編集」ボタンをクリック。
-
     ③ テーブルの詳細表示が可能であること。
+    ④ 「帳票登録」が問題なくできること。
+  expected: ・ユーザータイプ「ユーザー」でダッシュボードから帳票登録が行えること
+  movie: LU02
+  detailed_flow: LU02テストフロー参照（lui-100 のdetailed_flowと同一）
+  old_case_no: 82-4
+- case_no: lui-220
+  sheet: B
+  feature: 文字列
+  description: |-
+    ①トライアル環境のダッシュボードの掲示板記載内容ですが、
+    以下環境の掲示板記載内容に変更いただきたいです。
+    ②（zendeskのフォームURL記載しました。
+    ③）
 
-    ④ 「帳票登録」が問題なくできること。'
-  expected: 想定通りの結果となること。
+    【テンプレート作成用環境】
+    https://template-base.pigeon-cloud.com/admin/dashboard
+
+    ID: admin
+    PW: adLGiuuhg0XZ。
+  expected: エラーなく正常に動作すること。(トライアル環境のダッシュボードの掲示板記載内容ですが、 以下環境の掲示板記載内容に変更いただきたいです。 （zendeskのフォームURL記載しました。）  【テンプレート作成用環境】 https:/)
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: '317'
+- case_no: lui-230
+  sheet: B
+  feature: 文字列
+  description: ①ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。
+  expected: エラーなく正常に動作すること。(ダッシュボードで、新規掲示板が登録できないので登録できるようにしていただきたい。)
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: '336'
+- case_no: lui-240
+  sheet: B
+  feature: 文字列
+  description: |-
+    ①【バグ修正確認】左側メニューにテーブルやグループがないとき、「＋テーブル追加画面へ」「エクセルから追加」が隠れてしまうようなので修正希望です。
+    ②（添付画像1枚目が隠れている、2枚目がテーブルを追加した後で隠れず表示される）
+  expected: バグが修正され、正常に動作すること。(左側メニューにテーブルやグループがないとき、「＋テーブル追加画面へ」「エクセルから追加」が隠れてしまうようなので修正希望です。 （添付画像1枚目が隠れている、2枚目がテーブルを追加した後で隠れず表示さ)
+  movie: LU04
+  detailed_flow: LU04テストフロー参照（lui-030 のdetailed_flowと同一）
+  old_case_no: '408'
+- case_no: lui-250
+  sheet: B
+  feature: スマートフォン表示
+  description: |-
+    ①スマートフォンサイズのビューポートでレコード編集画面を開く
+    ②選択肢フィールドをタップする
+    ③ブラウザがズームしないことを確認する
+  expected: 選択肢フィールドをタップしてもブラウザのズームが発生しないこと
+  movie: UC01
+  detailed_flow: |
+    【UC01 テストフロー】この動画で確認するテスト番号:
+      lui-250 (旧: 146-01)  スマートフォン表示でのズーム防止
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-250 ── スマートフォン表示でのズーム防止
+    1. ビューポートをスマートフォンサイズ（375×812）に変更
+    2. ALLテストテーブルのレコード新規作成画面（/admin/dataset__{tableId}/new）を開く
+    3. 選択肢フィールド（ng-select）をタップ
+    4. ✅ ビューポート幅が375pxのままであること（ブラウザのズームが発生していないこと）
+    5. ビューポートを元のサイズ（1280×800）に戻す
+  old_case_no: 146-01
+- case_no: lui-260
+  sheet: B
+  feature: 詳細画面UI
+  description: |-
+    ①レコード詳細画面を開く
+    ②画面右下に「戻る」ボタンが表示されていることを確認する
+    ③「戻る」ボタンをクリックする
+    ④前の画面（一覧画面等）に正しく戻ることを確認する
+  expected: レコード詳細画面に「戻る」ボタンが表示され、クリックで前の画面に戻れること
+  movie: UC02
+  detailed_flow: |
+    【UC02 テストフロー】この動画で確認するテスト番号:
+      lui-260 (旧: 276)  レコード詳細画面の「戻る」ボタン
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-260 ── レコード詳細画面の「戻る」ボタン
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. 一覧の先頭レコードのリンクをクリックして詳細画面に遷移
+    3. ✅ 詳細画面に「戻る」ボタンが表示されること
+    4. 「戻る」ボタンをクリック
+    5. ✅ レコード一覧（/admin/dataset__{tableId}）に戻ること
+  old_case_no: '276'
+- case_no: lui-270
+  sheet: B
+  feature: ヘッダー固定
+  description: |-
+    ①テーブル一覧画面を開く
+    ②テーブル設定でヘッダー固定を有効にする
+    ③レコード一覧を下方向にスクロールする
+    ④ヘッダー1行目が画面上部に固定表示されることを確認する
+  expected: テーブル一覧でスクロール時にヘッダー1行目が固定表示されること
+  movie: UC04
+  detailed_flow: |
+    【UC04 テストフロー】この動画で確認するテスト番号:
+      lui-270 (旧: 370)  テーブル一覧のヘッダー固定表示
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-270 ── テーブル一覧のヘッダー固定表示
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ✅ テーブルヘッダー行が表示されること
+    3. ページを下方向に 500px スクロール
+    4. ✅ スクロール後もヘッダー行が引き続き表示されていること（sticky header 確認）
+  old_case_no: '370'
+- case_no: lui-280
+  sheet: B
+  feature: グループ表示
+  description: |-
+    ①テーブルをグループに所属させる
+    ②サイドメニューでグループを展開する
+    ③グループ内のテーブル名が省略されず読める状態で表示されることを確認する
+  expected: グループに所属するテーブル名がサイドメニューで正しく（見切れなく）表示されること
+  movie: UC06
+  detailed_flow: |
+    【UC06 テストフロー】この動画で確認するテスト番号:
+      lui-280 (旧: 503)  サイドメニューのグループ内テーブル名表示
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-280 ── サイドメニューのグループ内テーブル名表示
+    1. ダッシュボード（/admin/dashboard）を開く
+    2. ✅ サイドメニューにテーブルリンクが1件以上表示されていること
+    3. ✅ 各テーブル名のテキストが空でないこと（見切れず読める状態で表示）
+  old_case_no: '503'
+- case_no: lui-290
+  sheet: B
+  feature: テーブルアイコン
+  description: |-
+    ①テーブル設定でテーブルにアイコンを設定する
+    ②テーブル一覧やサイドメニューでアイコンが表示されることを確認する
+    ③アイコンの位置が正しく（ずれなく）表示されることを確認する
+  expected: テーブルにアイコンを設定した場合、アイコンの位置が正しく表示されること
+  movie: UC07
+  detailed_flow: |
+    【UC07 テストフロー】この動画で確認するテスト番号:
+      lui-290 (旧: 542)  テーブルアイコンの位置確認
+      lui-330 (旧: 546)  UI表示バグ修正確認
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-290 ── テーブルアイコンの位置確認
+    1. ダッシュボード（/admin/dashboard）を開く
+    2. サイドバー内のFont Awesomeアイコン要素を確認
+    3. ✅ アイコンが存在する場合、バウンディングボックスの幅・高さが 0 より大きいこと（正しい位置に表示）
+
+    [0:15] lui-330 ── UI表示バグ修正確認
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ✅ ナビゲーションバー・メインコンテンツ・サイドバーが表示されること
+    3. ✅ テーブルが表示されていること
+  old_case_no: '542'
+- case_no: lui-300
+  sheet: B
+  feature: 行色設定
+  description: |-
+    ①ビュー設定で「行に色を付ける」条件を設定する（日付A < 日付B）
+    ②日付Aと日付Bが同じ値のレコードを作成する
+    ③テーブル一覧画面を開く
+    ④日付Aと日付Bが同じ値の場合、行に色が付かないことを確認する
+  expected: ビューの「行に色を付ける」条件で「日付A < 日付B」の場合、両方の値が同じときは色が付かないこと
+  movie: UC14
+  detailed_flow: |
+    【UC14 テストフロー】この動画で確認するテスト番号:
+      lui-300 (旧: 686)  行色設定で同値の場合に色が付かないこと
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-300 ── 行色設定で日付が同値の場合に色が付かないこと
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ビュー設定ボタンの存在を確認
+    3. テーブルの行スタイル（背景色）を確認
+    4. ✅ ページにエラーが含まれないこと（Internal Server Error なし）
+  old_case_no: '686'
+- case_no: lui-310
+  sheet: B
+  feature: 関連レコードの更新情報表示位置
+  description: |-
+    ①関連レコード設定があるテーブルの詳細画面を開く
+    ②更新情報（更新日時等）の表示位置を確認する
+    ③更新情報が正しい位置（関連レコードではなく本体レコードの情報として）に表示されていることを確認する
+  expected: 関連レコード設定時の更新情報が正しい位置に表示されていること
+  movie: UC10
+  detailed_flow: |
+    【UC10 テストフロー】この動画で確認するテスト番号:
+      lui-310 (旧: 607)  関連レコード設定時の更新情報表示位置
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-310 ── 関連レコード設定時の更新情報表示位置
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. 先頭レコードの詳細画面を開く（data-record-urlリンクをクリック）
+    3. 更新情報（更新日時・更新者等）の要素を確認
+    4. 関連レコードセクションの有無を確認
+    5. ✅ ページにエラーが含まれないこと（Internal Server Error なし）
+  old_case_no: '607'
+- case_no: lui-320
+  sheet: B
+  feature: 関連レコード一覧のページネーション表示
+  description: |-
+    ①関連レコード一覧にページネーションを設定する
+    ②詳細画面を開く
+    ③ページネーションのボタンが横一列に表示され、最後の文字が改行されていないことを確認する
+    ④＋ボタンが縦に延びていないことを確認する
+  expected: 関連レコード一覧のページネーション付きレイアウトが崩れず、横一列で正しく表示されること
+  movie: UC18
+  detailed_flow: |
+    【UC18 テストフロー】この動画で確認するテスト番号:
+      lui-320 (旧: 749)  関連レコード一覧のページネーション表示
+      lui-340 (旧: 755)  テーブルビューの表示レイアウト確認
+      lui-350 (旧: 760)  ドロップダウン操作時のUI更新確認
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-320 ── 関連レコード一覧のページネーション表示
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. 先頭レコードの詳細画面を開く
+    3. 関連レコードのページネーション要素を確認
+    4. ✅ ページネーションが存在する場合、高さが 80px 未満であること（横一列に表示）
+    5. ✅ ＋ボタンが存在する場合、高さが 80px 未満であること（縦に延びていないこと）
+    6. ✅ ページにエラーが含まれないこと（Internal Server Error なし）
+
+    [0:20] lui-340 ── テーブルビューの表示レイアウト確認
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ✅ テーブルヘッダーセルが1件以上表示されること
+    3. ✅ ヘッダーセルのバウンディングボックスの幅・高さが 0 より大きいこと
+
+    [0:30] lui-350 ── ドロップダウン操作時のUI更新確認
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ドロップダウントグルボタンをクリック
+    3. ✅ ドロップダウンメニューが表示されること
+    4. Escapeキーでメニューを閉じる
+  old_case_no: '749'
+- case_no: lui-330
+  sheet: B
+  feature: UI表示バグ修正確認
+  description: |-
+    ①対象画面を開く
+    ②UI要素が正しく表示されていることを確認する
+    ③操作に応じてUI要素が正しく更新されることを確認する
+  expected: UI表示が正しく、操作に応じて正常に更新されること
+  movie: UC07
+  detailed_flow: UC07テストフロー参照（lui-290 のdetailed_flowと同一）
+  old_case_no: '546'
+- case_no: lui-340
+  sheet: B
+  feature: テーブルビュー表示修正確認
+  description: |-
+    ①対象テーブルのビュー画面を開く
+    ②表示レイアウトが崩れていないことを確認する
+    ③各カラムのデータが正しく表示されていることを確認する
+  expected: テーブルビューの表示レイアウトが正しく、データが正常に表示されること
+  movie: UC18
+  detailed_flow: UC18テストフロー参照（lui-320 のdetailed_flowと同一）
+  old_case_no: '755'
+- case_no: lui-350
+  sheet: B
+  feature: UI表示修正確認
+  description: |-
+    ①対象画面を開く
+    ②UI要素のレイアウトが正しいことを確認する
+    ③操作時のUI更新が正常であることを確認する
+  expected: UI表示・レイアウトが正しく動作すること
+  movie: UC18
+  detailed_flow: UC18テストフロー参照（lui-320 のdetailed_flowと同一）
+  old_case_no: '760'
+- case_no: lui-360
+  sheet: B
+  feature: UI表示修正確認
+  description: |-
+    ①対象画面を開く
+    ②表示が正しいことを確認する
+    ③操作に応じたUI更新が正常であることを確認する
+  expected: UI表示と操作が正常に動作すること
+  movie: UC23
+  detailed_flow: |
+    【UC23 テストフロー】この動画で確認するテスト番号:
+      lui-360 (旧: 831)  レコード詳細画面のUI表示確認
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] lui-360 ── レコード詳細画面のUI表示確認
+    1. ALLテストテーブルのレコード一覧（/admin/dataset__{tableId}）を開く
+    2. ✅ ページにエラーが含まれないこと（Internal Server Error なし）
+    3. 先頭レコードの詳細画面を開く（data-record-urlリンクをクリック）
+    4. ✅ 詳細画面にエラーが含まれないこと
+    5. ✅ 「編集」ボタンの有無を確認
+  old_case_no: '831'
 actual_steps:
 - case_no: 78-1
   status: skip
-  steps: 'test.skip(true, ''D&D操作の不安定性のためスキップ'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ テーブル管理画面でのD&Dによる並び替えは自動化困難としてスキップ
-
+  steps: |
+    test.skip(true, 'D&D操作の不安定性のためスキップ')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ テーブル管理画面でのD&Dによる並び替えは自動化困難としてスキップ
     ⚠️ D&Dライブラリの動作確認は手動テストのみ
-
-    '
 - case_no: 82-1
   status: partial
-  steps: '1. beforeAll: create-all-type-table API呼び出し
-
+  steps: |
+    1. beforeAll: create-all-type-table API呼び出し
     2. テーブルIDをAPIステータスから取得
-
     3. /admin/dashboard に遷移
-
     4. ページのURLが admin/dashboard を含むことを確認
-
     5. afterAll: delete-all-type-tables API呼び出し
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dashboard/)
-
-    '
-  gaps: '⚠️ YAMLには「ダッシュボードのテーブル表示・テーブル詳細・編集」の確認が期待されるが、URLチェックのみ
-
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dashboard/)
+  gaps: |
+    ⚠️ YAMLには「ダッシュボードのテーブル表示・テーブル詳細・編集」の確認が期待されるが、URLチェックのみ
     ⚠️ テーブルがダッシュボードに表示されることの確認なし
-
     ⚠️ テーブルのサムネイル・カード表示の確認なし
-
-    '
 - case_no: 82-2
   status: partial
-  steps: '1. /admin/dataset に遷移
-
+  steps: |
+    1. /admin/dataset に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ データセット一覧の表示確認のみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ データセット一覧の表示確認のみ
 - case_no: 82-3
   status: partial
-  steps: '1. /admin/user に遷移
-
+  steps: |
+    1. /admin/user に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/user/)
-
-    '
-  gaps: '⚠️ ユーザー管理ページの表示確認のみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/user/)
+  gaps: |
+    ⚠️ ユーザー管理ページの表示確認のみ
 - case_no: 82-4
   status: partial
-  steps: '1. /admin/organization に遷移
-
+  steps: |
+    1. /admin/organization に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/organization/)
-
-    '
-  gaps: '⚠️ 組織管理ページの表示確認のみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/organization/)
+  gaps: |
+    ⚠️ 組織管理ページの表示確認のみ
 - case_no: 82-5
   status: partial
-  steps: '1. /admin/setting に遷移
-
+  steps: |
+    1. /admin/setting に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/setting/)
-
-    '
-  gaps: '⚠️ その他設定ページの表示確認のみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/setting/)
+  gaps: |
+    ⚠️ その他設定ページの表示確認のみ
 - case_no: 82-6
   status: partial
-  steps: '1. テーブル一覧（/admin/dataset__{tableId}）に遷移
-
+  steps: |
+    1. テーブル一覧（/admin/dataset__{tableId}）に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
-
-    '
-  gaps: '⚠️ テーブル内のデータ表示確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(new RegExp(tableId))
+  gaps: |
+    ⚠️ テーブル内のデータ表示確認なし
 - case_no: 82-7
   status: partial
-  steps: '1. テーブル設定（/admin/dataset/edit/{tableId}）に遷移
-
+  steps: |
+    1. テーブル設定（/admin/dataset/edit/{tableId}）に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ テーブル設定ページの詳細確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ テーブル設定ページの詳細確認なし
 - case_no: 82-8
   status: partial
-  steps: '1. テーブル一覧に遷移
-
+  steps: |
+    1. テーブル一覧に遷移
     2. 集計ページへの遷移確認
-
-    '
-  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
-
-    '
-  gaps: '⚠️ 集計ページへの遷移と確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(new RegExp(tableId))
+  gaps: |
+    ⚠️ 集計ページへの遷移と確認なし
 - case_no: 82-9
   status: partial
-  steps: '1. テーブル一覧に遷移
-
+  steps: |
+    1. テーブル一覧に遷移
     2. 帳票登録ページへの遷移確認
-
-    '
-  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
-
-    '
-  gaps: '⚠️ 帳票登録ページへの遷移と確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(new RegExp(tableId))
+  gaps: |
+    ⚠️ 帳票登録ページへの遷移と確認なし
 - case_no: 82-10
   status: partial
-  steps: '1. テーブル一覧に遷移
-
+  steps: |
+    1. テーブル一覧に遷移
     2. 通知設定ページへの遷移確認
-
-    '
-  assertions: '- expect(page).toHaveURL(new RegExp(tableId))
-
-    '
-  gaps: '⚠️ 通知設定ページへの遷移と確認なし
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(new RegExp(tableId))
+  gaps: |
+    ⚠️ 通知設定ページへの遷移と確認なし
 - case_no: 100-1
   status: partial
-  steps: '1. テーブル一覧に遷移
-
+  steps: |
+    1. テーブル一覧に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ テーブルアイコン・名前の表示確認なし
-
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ テーブルアイコン・名前の表示確認なし
     ⚠️ テーブル管理機能の詳細確認なし
-
-    '
 - case_no: 127-01
   status: partial
-  steps: '1. テーブル設定ページに遷移
-
+  steps: |
+    1. テーブル設定ページに遷移
     2. ページ表示確認
-
-    '
-  assertions: '- expect(pageText).not.toContain(''Internal Server Error'')
-
-    '
-  gaps: '⚠️ テーブルのラベル（テーブル名）変更操作・確認なし
-
-    '
+  assertions: |
+    - expect(pageText).not.toContain('Internal Server Error')
+  gaps: |
+    ⚠️ テーブルのラベル（テーブル名）変更操作・確認なし
 - case_no: 154-1
   status: skip
-  steps: 'test.skip(true, ''ファイルアップロードが必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ テーブルアイコン画像の設定・確認は手動テストのみ
-
-    '
+  steps: |
+    test.skip(true, 'ファイルアップロードが必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ テーブルアイコン画像の設定・確認は手動テストのみ
 - case_no: 154-2
   status: skip
-  steps: 'test.skip(true, ''ファイルアップロードが必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ 154-1と同様
-
-    '
+  steps: |
+    test.skip(true, 'ファイルアップロードが必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 154-1と同様
 - case_no: 215-1
   status: skip
-  steps: 'test.skip(true, ''ファイルアップロードが必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ テーブルのカバー画像設定は手動テストのみ
-
-    '
+  steps: |
+    test.skip(true, 'ファイルアップロードが必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ テーブルのカバー画像設定は手動テストのみ
 - case_no: 215-2
   status: skip
-  steps: 'test.skip(true, ''ファイルアップロードが必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ 215-1と同様
-
-    '
+  steps: |
+    test.skip(true, 'ファイルアップロードが必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ 215-1と同様
 - case_no: 215-3
   status: partial
-  steps: '1. テーブル管理ページ（/admin/dataset）に遷移
-
+  steps: |
+    1. テーブル管理ページ（/admin/dataset）に遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ YAMLにはテーブル管理画面のレイアウト確認が期待されるが、URLチェックのみ
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ YAMLにはテーブル管理画面のレイアウト確認が期待されるが、URLチェックのみ
 - case_no: 215-4
   status: partial
-  steps: '1. テーブル管理ページに遷移
-
+  steps: |
+    1. テーブル管理ページに遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ 215-3と同様
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ 215-3と同様
 - case_no: 215-5
   status: partial
-  steps: '1. テーブル管理ページに遷移
-
+  steps: |
+    1. テーブル管理ページに遷移
     2. ページURLの確認
-
-    '
-  assertions: '- expect(page).toHaveURL(/\/admin\/dataset/)
-
-    '
-  gaps: '⚠️ 215-3と同様
-
-    '
+  assertions: |
+    - expect(page).toHaveURL(/\/admin\/dataset/)
+  gaps: |
+    ⚠️ 215-3と同様
 - case_no: '228'
   status: skip
-  steps: 'test.skip(true, ''専用テスト環境が必要'')
-
-    '
-  assertions: 'なし
-
-    '
-  gaps: '⚠️ テーブル表示の権限・ビジビリティの確認は専用環境でのみ可能
-
-    '
+  steps: |
+    test.skip(true, '専用テスト環境が必要')
+  assertions: |
+    なし
+  gaps: |
+    ⚠️ テーブル表示の権限・ビジビリティの確認は専用環境でのみ可能

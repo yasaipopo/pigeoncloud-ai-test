@@ -36,3 +36,5 @@ tests/*.bak3
 test-results/
 test_files/
 .playwright-mcp/
+.claude/thread-*.md
+.claude/thread-*.md

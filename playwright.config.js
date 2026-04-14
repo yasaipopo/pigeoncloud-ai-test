@@ -34,8 +34,9 @@ const videoDir = `${reportsDir}/videos/${dateStr}_${commitHash}`;
 module.exports = defineConfig({
     testDir: './tests',
     globalSetup: './tests/global-setup.js',
-    timeout: 300000, // setupAllTypeTableのポーリング(最大200秒)に対応するため5分に延長
-    expect: { timeout: 10000 },
+    globalTeardown: './tests/global-teardown.js',
+    timeout: 300000, // テスト関数全体: 300秒。beforeAll内のポーリング(最大60s)対応のため延長
+    expect: { timeout: 5000 },
     fullyParallel: false,
     retries: 1,
     workers: process.env.PLAYWRIGHT_WORKERS ? parseInt(process.env.PLAYWRIGHT_WORKERS) : 1,
@@ -55,7 +56,7 @@ module.exports = defineConfig({
         // storageStateがあればログイン済みクッキーを再利用（login()呼び出し頻度を大幅削減）
         ...(fs.existsSync(authStatePath) ? { storageState: authStatePath } : {}),
         launchOptions: {
-            args: ['--no-sandbox', '--disable-dev-shm-usage'],
+            args: ['--no-sandbox', '--disable-dev-shm-usage', `--test-agent=${agentNum}`],
             // Docker(Linux)はシステムパス、ホストmacOSはデフォルトパス（Playwrightが自動解決）
             ...(process.platform === 'linux' ? {
                 executablePath: process.env.PLAYWRIGHT_BROWSERS_PATH

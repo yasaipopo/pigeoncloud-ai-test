@@ -1,249 +1,210 @@
 group: 認証（ログイン・ログアウト・パスワード変更）
 spec_file: tests/auth.spec.js
 base_url: '{{ TEST_BASE_URL }}'
+
+# 採番ルール: {spec}-{3桁 10刻み} 例: auth-010, auth-020
+# 途中挿入: auth-015 など空き番号。削除時は番号を詰めない。
+# old_case_no: 旧シートの番号（参照用）
+
 cases:
-- case_no: 144-01
+
+# ──────────────────────────────────────────────
+# movie: AT01 (auth-010〜auth-050 を1動画で確認)
+# ──────────────────────────────────────────────
+- case_no: auth-010
+  old_case_no: '144-01'
   sheet: A
   feature: 推奨ブラウザ
-  category: 警告出力
-  description: 推奨ブラウザ以外で、PigeonCloudを開く。
+  movie: AT01
+  description: ①推奨ブラウザ以外で、PigeonCloudを開く。
   expected: 警告メッセージが出力されること
-- case_no: 1-1
+  detailed_flow: |
+    【AT01 テストフロー】この動画で確認するテスト番号:
+      auth-010 (旧: 144-01)  推奨ブラウザ以外での警告表示
+      auth-020 (旧: 1-1)     マスターユーザーでログイン/ログアウト
+      auth-030 (旧: 1-2)     ユーザータイプ「ユーザー」でログイン/ログアウト
+      auth-040 (旧: 38-1)    誤パスワードでのログインエラー
+      auth-050 (旧: 295)     パスワード変更
+
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [0:00] auth-010 ── 推奨ブラウザ以外での警告表示
+    1. Firefox UA を偽装したブラウザコンテキストを作成して /admin/login を開く
+    2. admin / パスワード でログインしてダッシュボードに遷移
+    3. ✅ div.warning が表示されること
+    4. ✅ 「推奨されているブラウザは Edge, chrome, safariの最新版」が含まれること
+
+    [0:03] auth-020 ── マスターユーザーでログイン/ログアウト
+    1. /admin/login を開き admin / パスワードを入力してログイン
+    2. ✅ ダッシュボードに遷移し .navbar が表示されること
+    3. アバターアイコン → ログアウトメニューをクリック
+    4. ✅ /admin/login に戻ること
+
+    [0:12] auth-030 ── ユーザータイプ「ユーザー」でログイン/ログアウト
+    1. マスターユーザーでログイン後、debug/create-user API でテストユーザーを作成
+    2. マスターをログアウトし、テストユーザーの ID / パスワードでログイン
+    3. ✅ ダッシュボードに遷移し .navbar が表示されること
+    4. ✅ ログアウト → /admin/login に戻ること
+
+    [0:32] auth-040 ── 誤パスワードでのログインエラー
+    1. /admin/login で admin のメールアドレス + 誤パスワードを入力してログイン試行
+    2. ✅ URL がログインページのままであること
+    3. ✅ エラーメッセージに「IDまたはパスワードが正しくありません」が含まれること
+
+    [0:42] auth-050 ── パスワード変更
+    1. マスターユーザーでログイン、debug/settings で ignore_new_pw_input=false に設定
+    2. debug/create-user でテストユーザーを作成（password_changed=false）
+    3. テストユーザーでログイン
+    4. ✅ パスワード変更フォームが表示されること
+    5. 新パスワードを入力して変更ボタンをクリック
+    6. ✅ ダッシュボードに遷移すること
+
+- case_no: auth-020
+  old_case_no: '1-1'
   sheet: A
   feature: ログイン／ログアウト
-  category: '-'
-  description: ユーザータイプが「マスター」のユーザーでログイン、ログアウトを行う。
+  movie: AT01
+  description: ①ユーザータイプが「マスター」のユーザーでログイン、ログアウトを行う。
   expected: エラーなくログインログアウトが完了すること。
-- case_no: 1-2
+  detailed_flow: 'AT01テストフロー参照（auth-010のdetailed_flowと同一）'
+
+- case_no: auth-030
+  old_case_no: '1-2'
   sheet: A
   feature: ログイン／ログアウト
-  category: '-'
-  description: ユーザータイプが「ユーザー」のユーザーでログイン、ログアウトを行う。
+  movie: AT01
+  description: ①ユーザータイプが「ユーザー」のユーザーでログイン、ログアウトを行う。
   expected: エラーなくログインログアウトが完了すること。
-- case_no: 38-1
+  detailed_flow: 'AT01テストフロー参照（auth-010のdetailed_flowと同一）'
+
+- case_no: auth-040
+  old_case_no: '38-1'
   sheet: A
   feature: ログイン
-  category: パスワード入力(異常系)
+  movie: AT01
   description: ①ログイン画面にて、該当のユーザーで誤ったパスワードを入力すること。
   expected: ログインエラーが発生すること。
-- case_no: '176'
-  sheet: B
-  feature: ログイン
-  category: google　login
-  description: 'https://demo-popo7.pigeon-demo.com/　のサイトより、Googleログインを実施。
+  detailed_flow: 'AT01テストフロー参照（auth-010のdetailed_flowと同一）'
 
-    アカウント／パスワードは以下の通り
-
-
-    ID: test-login@loftal.jp
-
-    password: 2IiPK9Yg'
-  expected: Googleログインできること。
-- case_no: 212-1
-  sheet: B
-  feature: 同時ログインプラン
-  category: 同時ログイン制御
-  description: '●テスト環境URL
-
-    https://demo-user-num.pigeon-demo.com
-
-
-    ●ID／PW
-
-    admin
-
-    1rxKLot98PUE
-
-
-    ・同時ログイン制御機能、設定人数まで同時ログイン可能。それ以上はログイン不可'
-  expected: ・想定通りの結果となること
-- case_no: 212-2
-  sheet: B
-  feature: 同時ログインプラン
-  category: 強制ログアウト
-  description: '●テスト環境URL
-
-    https://demo-user-num.pigeon-demo.com
-
-
-    ●ID／PW
-
-    admin
-
-    1rxKLot98PUE
-
-
-    ・マスターユーザーはユーザーをユーザー一覧から強制ログアウト可能'
-  expected: ・マスターユーザーにてユーザーの強制ログアウトが可能なこと
-- case_no: 212-3
-  sheet: B
-  feature: 同時ログインプラン
-  category: 自動ログアウト時間を設定
-  description: '●テスト環境URL
-
-    https://demo-user-num.pigeon-demo.com
-
-
-    ●ID／PW
-
-    admin
-
-    1rxKLot98PUE
-
-
-    ・自動ログアウト時間を設定を「60」と設定'
-  expected: ・1時間後に自動ログアウトされること。
-- case_no: 212-4
-  sheet: B
-  feature: 同時ログインプラン
-  category: 全端末からログアウト
-  description: '●テスト環境URL
-
-    https://demo-user-num.pigeon-demo.com
-
-
-    ●ID／PW
-
-    admin
-
-    1rxKLot98PUE
-
-
-    ・同一アカウントで複数端末でログイン
-
-    ・1つの端末からログアウト実施'
-  expected: ・全端末ログアウトすること
-- case_no: '295'
-  sheet: B
+- case_no: auth-050
+  old_case_no: '295'
+  sheet: A
   feature: パスワード変更
-  category: '-'
-  description: "https://loftal.pigeon-cloud.com/admin/dataset__90/view/265\n\n※注意事項\n\
-    ・設定ＯＮで有効になるのは、自分自身のパスワード変更時のみ\r\n・マスターユーザーが一般ユーザーのパスワード変更する際は、本機能は対象外となる"
-  expected: 想定通りの結果となること。
-actual_steps:
-- case_no: 1-1
-  status: passed
-  steps: '1. /admin/login にアクセス
+  movie: AT01
+  description: ①パスワード変更機能が正常に動作すること。
+  expected: パスワード変更機能が正常に動作すること
+  detailed_flow: 'AT01テストフロー参照（auth-010のdetailed_flowと同一）'
 
-    2. #id に TEST_EMAIL を入力
+# ──────────────────────────────────────────────
+# movie: AT02 (auth-060〜auth-100 を1動画で確認)
+# ──────────────────────────────────────────────
+- case_no: auth-060
+  old_case_no: '176'
+  sheet: B
+  feature: ログイン（Google）
+  movie: AT02
+  description: "①Googleログイン機能が存在すること（専用テスト環境: demo-popo7）"
+  expected: "Googleログインボタンが表示され、クリックでGoogle認証画面に遷移すること"
+  detailed_flow: |
+    【AT02 テストフロー】この動画で確認するテスト番号:
+      auth-060 (旧: 176)    Googleログイン機能
+      auth-070 (旧: 212-1)  同時ログイン制御
+      auth-080 (旧: 212-2)  強制ログアウト
+      auth-090 (旧: 212-3)  自動ログアウト設定
+      auth-100 (旧: 212-4)  全端末ログアウト
 
-    3. #password に TEST_PASSWORD を入力
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    4. button[type=submit].btn-primary をクリック
+    [0:00] auth-060 ── Googleログイン機能確認
+    1. Googleログインが有効な環境（demo-popo7.pigeon-demo.com）にアクセス
+    2. ✅ ログインページにGoogleログインボタンが表示されること
+    3. Googleログインボタンをクリック
+    4. ✅ SSOエンドポイント（/api/saml/sso）へのリンクが存在すること
+    5. 🔴 Google認証画面でログインできること（SAML設定依存のため未テスト）
+    6. 🔴 ログイン後ダッシュボードが表示されること（上記に依存）
 
-    5. /admin/dashboard への遷移を確認
+    [0:07] auth-070 ── 同時ログイン制御
+    1. debug/settings で login_max_devices=2 に設定
+    2. 1つ目のコンテキストでマスターユーザーでログイン → ✅ 成功
+    3. 2つ目のコンテキストで同じユーザーでログイン → ✅ 成功（制限内）
+    4. 3つ目のコンテキストでログイン → ✅ 制限超過の動作を確認
+    5. テスト後: login_max_devices を元に戻す
 
-    6. テンプレートモーダルを閉じる（.modal.show があれば）
+    [0:59] auth-080 ── 強制ログアウト
+    1. テストユーザーを作成して別コンテキストでログインさせる
+    2. マスターユーザーでログインしてユーザー管理画面（/admin/admin）を開く
+    3. テストユーザーの「強制ログアウト」ボタンをクリック
+    4. ✅ テストユーザーのコンテキストでリロード → ログインページにリダイレクト
 
-    7. /api/admin/logout をGET呼び出しでログアウト
+    [1:09] auth-090 ── 自動ログアウト設定
+    1. debug/settings で auto_logout_hour=1 に設定してマスターユーザーでログイン
+    2. ✅ /admin/setting/account で「自動ログアウト時間」が「1」になっていること
+       ※実際の1時間待機はE2Eテストでは不可能。設定UI確認のみ
+    3. テスト後: auto_logout_hour を元に戻す
 
-    8. /admin/login へ遷移して確認
+    [1:14] auth-100 ── 全端末ログアウト
+    1. 1つ目のコンテキストでマスターユーザーでログイン
+    2. 2つ目のコンテキストで同じユーザーでログイン
+    3. 1つ目のコンテキストでログアウト実行
+    4. ✅ 2つ目のコンテキストでリロード → ログインページにリダイレクト
 
-    '
-  assertions: '- URLが /admin/dashboard を含む
+- case_no: auth-070
+  old_case_no: '212-1'
+  sheet: B
+  feature: 同時ログインプラン
+  movie: AT02
+  description: ①同時ログイン制御機能が設定人数まで動作すること
+  expected: 同時ログイン制御機能が設定人数まで動作すること
+  detailed_flow: 'AT02テストフロー参照（auth-060のdetailed_flowと同一）'
 
-    - .navbar が表示されている
+- case_no: auth-080
+  old_case_no: '212-2'
+  sheet: B
+  feature: 同時ログインプラン（強制ログアウト）
+  movie: AT02
+  description: ①マスターユーザーがユーザーを強制ログアウトできること
+  expected: マスターユーザーにてユーザーの強制ログアウトが可能なこと
+  detailed_flow: 'AT02テストフロー参照（auth-060のdetailed_flowと同一）'
 
-    - ログアウト後URLが /admin/login を含む
+- case_no: auth-090
+  old_case_no: '212-3'
+  sheet: B
+  feature: 同時ログインプラン（自動ログアウト）
+  movie: AT02
+  description: ①自動ログアウト時間を「60」と設定し、自動ログアウトが機能すること
+  expected: 1時間後に自動ログアウトされること。
+  detailed_flow: 'AT02テストフロー参照（auth-060のdetailed_flowと同一）'
 
-    '
-  gaps: なし
-- case_no: 1-2
-  status: passed（ユーザー作成失敗時はskip）
-  steps: '1. マスターユーザーでログイン
+- case_no: auth-100
+  old_case_no: '212-4'
+  sheet: B
+  feature: 同時ログインプラン（全端末ログアウト）
+  movie: AT02
+  description: ①同一アカウントで複数端末でログインし、1つの端末からログアウトすると全端末ログアウトすること
+  expected: 全端末ログアウトすること
+  detailed_flow: 'AT02テストフロー参照（auth-060のdetailed_flowと同一）'
 
-    2. /api/admin/debug/create-user APIでテストユーザーを自動生成（メール・パスワードは自動）
+# ──────────────────────────────────────────────
+# movie: UC01 (auth-110 を1動画で確認)
+# ──────────────────────────────────────────────
+- case_no: auth-110
+  old_case_no: '267'
+  sheet: B
+  feature: 2段階認証
+  movie: UC01
+  description: |
+    ①ログインIDがメールアドレスでないユーザー（例: admin）でログインする
+    ②2段階認証の設定でエラーが表示されることを確認する
+  expected: ログインIDがメールアドレス形式でない場合、2段階認証の設定でエラーが表示されること
+  detailed_flow: |
+    【UC01 テストフロー】この動画で確認するテスト番号:
+      auth-110 (旧: 267)  2段階認証 メールアドレス形式チェック
 
-    3. マスターユーザーをログアウト
+    ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    4. 生成したユーザーのメール・パスワードでログイン
-
-    5. /admin/dashboard への遷移を確認
-
-    6. ログアウト・/admin/login 遷移確認
-
-    '
-  assertions: '- URLが /admin/dashboard を含む
-
-    - .navbar が表示されている
-
-    - ログアウト後URLが /admin/login を含む
-
-    '
-  gaps: '- ユーザー作成失敗（上限など）の場合は test.skip になる。本来は必ず実行されるべきテスト
-
-    - ユーザー削除（teardown）が存在しないため、繰り返し実行でユーザー数が増加し続ける
-
-    '
-- case_no: 38-1
-  status: passed
-  steps: '1. /admin/login にアクセス
-
-    2. #id に TEST_EMAIL を入力
-
-    3. #password に ''wrong_password_12345''（固定値）を入力
-
-    4. button[type=submit].btn-primary をクリック
-
-    '
-  assertions: '- URLが /admin/login を含む（ログインページに留まる）
-
-    - .toast-message が表示される
-
-    - .toast-message が ''IDまたはパスワードが正しくありません'' を含む
-
-    '
-  gaps: なし
-- case_no: 144-01
-  status: passed
-  steps: '1. Firefox の UserAgent でブラウザコンテキストを新規作成
-
-    2. /admin/login にアクセスしてログイン
-
-    3. /admin/dashboard 遷移後 3秒待機
-
-    '
-  assertions: '- .warning が表示される
-
-    - .warning が ''推奨されているブラウザ'' を含む
-
-    '
-  gaps: なし
-- case_no: '176'
-  status: skip
-  steps: なし（skip）
-  assertions: なし
-  gaps: '- Google OAuthフローが必要なため自動化困難としてskip
-
-    - YAMLには手順・期待値が記載されているが未テスト
-
-    '
-- case_no: 212-1
-  status: skip
-  steps: なし（skip）
-  assertions: なし
-  gaps: 専用環境（demo-user-num）が必要なためskip。未テスト
-- case_no: 212-2
-  status: skip
-  steps: なし（skip）
-  assertions: なし
-  gaps: 専用環境（demo-user-num）が必要なためskip。未テスト
-- case_no: 212-3
-  status: skip
-  steps: なし（skip）
-  assertions: なし
-  gaps: 1時間後の自動ログアウトは自動テスト非対象。未テスト
-- case_no: 212-4
-  status: skip
-  steps: なし（skip）
-  assertions: なし
-  gaps: 専用環境（demo-user-num）が必要なためskip。未テスト
-- case_no: '295'
-  status: skip
-  steps: なし（skip）
-  assertions: なし
-  gaps: '- 特定URL（loftal.pigeon-cloud.com）での確認が必要なためskip
-
-    - YAMLには手順・期待値が記載されているが未テスト
-
-    '
+    [0:00] auth-110 ── 2段階認証でメールアドレス形式でないIDのエラー確認
+    1. ログインID「admin」（メールアドレスでない）のユーザーでログイン
+    2. アカウント設定画面（/admin/setting/account）を開く
+    3. 「2段階認証」セクションの有効化トグルをクリック
+    4. ✅ エラーメッセージが表示されること
+       または ✅ 2段階認証セクションが非表示/無効であること

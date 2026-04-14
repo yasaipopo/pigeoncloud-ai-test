@@ -113,6 +113,12 @@
     </span>
     <div class="d-flex align-items-center gap-3">
       <span class="text-secondary small" id="last-updated"></span>
+      <a href="sheet.html" class="btn btn-sm btn-outline-warning">
+        <i class="bi bi-kanban me-1"></i>チェックシート
+      </a>
+      <a href="specs.html" class="btn btn-sm btn-outline-info">
+        <i class="bi bi-list-check me-1"></i>テスト一覧
+      </a>
       <button class="btn btn-sm btn-outline-secondary" onclick="doLogout()">
         <i class="bi bi-box-arrow-right me-1"></i>ログアウト
       </button>
@@ -586,7 +592,9 @@ function renderRuns(items, clear) {
   );
 
   sessions.forEach((sess, idx) => {
-    const sessionNo = sessions.length - idx; // 古いほど小さい番号
+    // sessionIdが数値ならその値をそのまま使う（TEST_NUMBER=5なら第5回）
+    // 旧データ(runId形式)の場合のみ通し番号にフォールバック
+    const sessionNo = /^\d+$/.test(sess.sid) ? parseInt(sess.sid) : (sessions.length - idx);
     if (renderedSids.has(sess.sid)) {
       // 既存カードはdata属性だけ更新（ポーリング時に updateSessionCard が使う）
       return;
