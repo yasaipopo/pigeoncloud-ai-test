@@ -634,9 +634,12 @@ test.describe('レコード編集・保存', () => {
         // [flow] 80-2. 編集画面に遷移
         await goToEditPage(page, dynId);
 
-        // [check] 80-1. ✅ テキスト入力欄が表示されること
-        const textInput = page.locator('input[type="text"][placeholder="例：山田太郎"], input[type="text"][id^="field__"]').first();
-        await expect(textInput, 'テキスト入力欄が表示されること').toBeVisible();
+        // [check] 80-1. ✅ 「テキスト」フィールド入力欄が表示されること
+        // label text-is で完全一致（「テキスト_ユニーク」等を除外）→ ancestor の form-group / admin-forms から input を特定
+        const textInput = page.locator('label:text-is("テキスト")')
+            .locator('xpath=ancestor::*[contains(@class,"form-group") or contains(@class,"admin-forms") or self::admin-forms-field][1]')
+            .locator('input[type="text"]').first();
+        await expect(textInput, '「テキスト」フィールド入力欄が表示されること').toBeVisible({ timeout: 10000 });
 
         // [flow] 80-3. テキストフィールドに新しい値を入力
         await textInput.click();
