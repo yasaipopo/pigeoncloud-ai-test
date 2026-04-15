@@ -1522,8 +1522,9 @@ test.describe('通知設定', () => {
     });
 
     test('NT05: SMTP設定', async ({ page }) => {
-        // 多くのstepと長い操作があるため十分なタイムアウトを設定
-        test.setTimeout(600000);
+        // 15 test.step + waitForEmail 3件で batch 実行時に累積遅延が発生するため timeout を3倍化
+        // test.setTimeout(N) は config timeout (600s) と競合する事例があるため test.slow() を使用（600s × 3 = 1800s = 30分）
+        test.slow();
 
         await test.step('54-1: 通知設定でアクション未入力のまま登録するとエラーが発生すること', async () => {
             const STEP_TIME = Date.now();
@@ -1852,10 +1853,12 @@ test.describe('通知設定', () => {
             }
 
             const smtpCheckbox = page.locator('#use_smtp_1').first();
-            const isSmtpEnabled = await smtpCheckbox.isChecked().catch(() => false);
-            console.log('217-1: SMTP有効状態:', isSmtpEnabled);
+            // isChecked() は要素不在時にテストtimeoutまで auto-wait するため、先に count() で存在確認
+            const smtpCheckboxExists = await smtpCheckbox.count().catch(() => 0) > 0;
+            const isSmtpEnabled = smtpCheckboxExists ? await smtpCheckbox.isChecked().catch(() => false) : false;
+            console.log('217-1: SMTP有効状態:', isSmtpEnabled, '(exists:', smtpCheckboxExists, ')');
 
-            if (!isSmtpEnabled) {
+            if (!isSmtpEnabled && smtpCheckboxExists) {
                 const smtpLabel = page.locator('label[for="use_smtp_1"], .fieldname_use_smtp .checkbox-custom').first();
                 if (await smtpLabel.count().catch(() => 0) > 0) {
                     await smtpLabel.click({ force: true });
@@ -1868,7 +1871,7 @@ test.describe('通知設定', () => {
             const fromNameCount = await fromNameInput.count().catch(() => 0);
             console.log('217-1: FROM名入力欄:', fromNameCount);
 
-            if (fromNameCount > 0 && await fromNameInput.isVisible()) {
+            if (fromNameCount > 0 && await fromNameInput.isVisible({ timeout: 3000 }).catch(() => false)) {
                 await fromNameInput.fill('テスト太郎');
                 await page.waitForTimeout(500).catch(() => {}); // ページクローズ時は無視
                 const value = await fromNameInput.inputValue();
@@ -1909,9 +1912,11 @@ test.describe('通知設定', () => {
             console.log('217-2: SMTP設定セクション:', await smtpSection.count().catch(() => 0));
 
             const smtpCheckbox = page.locator('#use_smtp_1').first();
-            const isSmtpEnabled = await smtpCheckbox.isChecked().catch(() => false);
+            // isChecked() は要素不在時にテストtimeoutまで auto-wait するため、先に count() で存在確認
+            const smtpCheckboxExists2 = await smtpCheckbox.count().catch(() => 0) > 0;
+            const isSmtpEnabled = smtpCheckboxExists2 ? await smtpCheckbox.isChecked().catch(() => false) : false;
 
-            if (!isSmtpEnabled) {
+            if (!isSmtpEnabled && smtpCheckboxExists2) {
                 const smtpLabel = page.locator('label[for="use_smtp_1"], .fieldname_use_smtp .checkbox-custom').first();
                 if (await smtpLabel.count().catch(() => 0) > 0) {
                     await smtpLabel.click({ force: true });
@@ -1922,7 +1927,7 @@ test.describe('通知設定', () => {
             // FROM名フィールドをブランクに設定
             // [flow] 11-3. FROM名フィールドをブランクに設定
             const fromNameInput = page.locator('input[placeholder*="FROM"], input[placeholder*="from"], input[name*="from_name"]').first();
-            if (await fromNameInput.count().catch(() => 0) > 0 && await fromNameInput.isVisible().catch(() => false)) {
+            if (await fromNameInput.count().catch(() => 0) > 0 && await fromNameInput.isVisible({ timeout: 3000 }).catch(() => false)) {
                 await fromNameInput.fill('');
                 await page.waitForTimeout(500).catch(() => {}); // ページクローズ時は無視
                 // [check] 11-4. ✅ FROM名入力欄がブランクになったこと

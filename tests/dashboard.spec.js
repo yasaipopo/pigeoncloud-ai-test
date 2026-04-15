@@ -397,6 +397,10 @@ test.describe('ダッシュボード', () => {
             const tabB = tablist.locator('[role=tab]').filter({ hasText: tabBName });
             await expect(tabB.first(), `「${tabBName}」タブが追加されていること`).toBeVisible({ timeout: 8000 });
 
+            // createTab の作成モーダルが完全に閉じ切るまで待機（残留モーダルを避ける）
+            await page.locator('.modal.show').waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+            await page.waitForTimeout(300);
+
             // [flow] 30-3. 「テストタブB」の▼メニューを開く
             await openTabMenu(page, tabB.first());
 
@@ -409,19 +413,21 @@ test.describe('ダッシュボード', () => {
             await page.waitForTimeout(800);
 
             // [flow] 30-5. 名前を「タブB改名」に変更して保存
-            // 設定ダイアログ（「ダッシュボード」モーダル）のダッシュボード名入力欄を操作
-            // モーダルはBootstrap .modal.show で開く。入力欄のidはname_2（タブ作成はname）
-            const settingDialog = page.locator('.modal.show').filter({ hasText: 'ダッシュボード' }).first();
+            // 設定ダイアログ（「ダッシュボード」モーダル）— 新しく開いたモーダル（.last()）を参照
+            const settingDialog = page.locator('.modal.show').filter({ hasText: 'ダッシュボード' }).last();
             await expect(settingDialog, '設定ダイアログが開くこと').toBeVisible({ timeout: 8000 });
 
-            // ダッシュボード名入力欄（id=name_2 または最初のtextbox）をクリアして入力
+            // ダッシュボード名入力欄（settingDialog 内の最初の text input）をクリアして入力
             const nameInputEl = settingDialog.locator('input[type=text]').first();
             await nameInputEl.click({ clickCount: 3 });
             await nameInputEl.fill(tabBRename);
             await page.waitForTimeout(500);
 
-            // 「送信」ボタンをpage全体のgetByRoleでクリック
-            await page.getByRole('button', { name: '送信' }).click();
+            // 「送信」ボタンを settingDialog 内でクリック（複数モーダル時の曖昧さ回避）
+            await settingDialog.getByRole('button', { name: '送信' }).click();
+
+            // 設定モーダルが閉じ切るまで待機
+            await settingDialog.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
 

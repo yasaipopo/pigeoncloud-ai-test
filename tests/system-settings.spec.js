@@ -1334,11 +1334,15 @@ test.describe('共通設定・システム設定', () => {
             // [check] 190-2. ✅ レコード一覧ページが正常に表示されること
             await expect(page).toHaveURL(new RegExp(`/admin/dataset__${tableId}`));
 
+            // テーブルツールバーの描画完了を待機（102フィールドテーブルは描画に時間がかかる）
+            await page.waitForSelector('input[placeholder="簡易検索"], tr[mat-row], table', { timeout: 20000 }).catch(() => {});
+            await waitForAngular(page);
+
             // [check] 190-3. ✅ テーブル名がナビゲーションに表示されること
             // h5 table-name は sp_display クラスでデスクトップ非表示のため削除
 
             // [check] 190-4. ✅ 簡易検索フィールドが表示されること
-            await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible();
+            await expect(page.locator('input[placeholder="簡易検索"]')).toBeVisible({ timeout: 15000 });
 
             // [check] 190-5. ✅ IDカラムが存在すること（テーブルヘッダーの確認）
             await expect(page.locator('th, [role="columnheader"]').filter({ hasText: 'ID' }).first()).toBeVisible();

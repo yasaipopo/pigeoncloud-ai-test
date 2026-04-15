@@ -78,12 +78,18 @@ async function gotoDatasetList(page) {
  * ログイン共通関数
  */
 async function login(page) {
-    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-    if (page.url().includes('/login')) {
-        await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
-        await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-        await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    // 最大3回までリトライ（batch実行時のセッション切れ/Angular初期化遅延対策）
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+        if (page.url().includes('/login')) {
+            await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
+            await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
+            await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
+        }
+        const navbar = await page.waitForSelector('.navbar', { timeout: 20000 }).catch(() => null);
+        if (navbar) return;
+        console.log(`[login] navbar未検出 attempt=${attempt}, url=${page.url()}`);
+        await page.waitForTimeout(1500);
     }
 }
 
