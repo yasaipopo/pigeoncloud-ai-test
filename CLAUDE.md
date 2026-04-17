@@ -5,6 +5,48 @@
 
 ---
 
+## 【必須】pigeon_cloud（PHP）リポジトリの修正は tmprepo 経由
+
+pigeon_cloud のコードを修正する場合、**必ず `tmprepo` で /tmp にクローンしてから作業する**。
+`/Users/yasaipopo/PhpStormProjects/PopoframeworkSlim` を直接編集しない（ユーザーの作業中ブランチ・stash を壊す）。
+
+```bash
+# staging ベースで修正する場合
+tmprepo staging
+# → /tmp/PopoframeworkSlim{unixtime} にクローンされる
+# → そのディレクトリで feature branch を切って修正 → PR 作成
+```
+
+---
+
+## 【作業分担】重い処理は gemini CLI / 単純テスト実行は sonnet subagent
+
+メインエージェント（Opus）のコンテキストを節約するため、以下の方針で作業を分担する:
+
+- **考えながら進める調査・分析** → `gemini` CLI に投げる（バックグラウンド実行）
+  - 例: PHPプロダクトコードの仕様調査、Angular ルーティングのバグ追跡、複雑なログ解析
+  - コマンド: `gemini -p "..."` または `gemini --prompt-file ...`
+- **単純なテスト実行・結果収集**（考える必要なし） → `Agent` tool で sonnet subagent
+  - 例: `npx playwright test ... --reporter=list` を実行して結果を返すだけ
+  - subagent_type: `general-purpose`, model: `sonnet`
+- **メインエージェントが直接やること**: 計画立案、ファイル編集、コミット、ユーザーとの対話
+
+理由: バックグラウンド長時間実行や深い調査タスクをメインで持つとコンテキストが埋まる。
+
+---
+
+## 【最重要】テストが通らない＝コードが間違っているかもしれない
+
+テストは「仕様のドキュメント」であり、**全部通る前提で書かれるものではない**。
+テストが仕様通りに書かれているなら、fail したときに疑うべきは **プロダクトコード側** である。
+
+- テストを通すために assertion を緩める・`test.skip` する・期待値を現実値に合わせる → **禁止**
+- fail を調査するときは必ず **spec.js の期待値が仕様通りか** を先に確認する
+- 期待値が仕様通りなら、プロダクトコード（`/Users/yasaipopo/PhpStormProjects/PopoframeworkSlim`）を読んで原因を特定する
+- プロダクトバグと判明したら `.claude/product-bugs.md` に記録し、テストコードは変更しない
+
+---
+
 ## 【最初に必ず確認】Playwright環境 & 知見ファイル
 
 ### Playwrightバージョン確認（テスト実行前に必ず実施）

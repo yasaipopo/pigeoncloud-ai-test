@@ -1522,9 +1522,8 @@ test.describe('通知設定', () => {
     });
 
     test('NT05: SMTP設定', async ({ page }) => {
-        // 15 test.step + waitForEmail 3件で batch 実行時に累積遅延が発生するため timeout を3倍化
-        // test.setTimeout(N) は config timeout (600s) と競合する事例があるため test.slow() を使用（600s × 3 = 1800s = 30分）
-        test.slow();
+        // 15 step: isChecked修正後は2.4分で完了するため test.slow() は不要
+        test.setTimeout(255000);
 
         await test.step('54-1: 通知設定でアクション未入力のまま登録するとエラーが発生すること', async () => {
             const STEP_TIME = Date.now();

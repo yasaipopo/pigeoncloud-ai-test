@@ -71,6 +71,7 @@ async function createTestEnv(browser, options = {}) {
             baseUrl = result.url;
             password = result.pw;
             tableId = result.table_id || null;
+            console.log(`[createTestEnv] create-trial response: table_id=${result.table_id}, table_creating=${result.table_creating}, keys=${Object.keys(result).join(',')}`);
             break;
         }
         console.log(`[createTestEnv] create-trial attempt ${attempt}/3 失敗:`, JSON.stringify(result).substring(0, 100));
@@ -140,7 +141,7 @@ async function createTestEnv(browser, options = {}) {
     // PHP側はバックグラウンドでテーブル作成中 → ALBタイムアウトに依存しない
     if (withAllTypeTable && !tableId) {
         console.log('[createTestEnv] テーブル作成完了をポーリング中...');
-        for (let i = 0; i < 24; i++) {
+        for (let i = 0; i < 48; i++) {
             await page.waitForTimeout(5000);
             const status = await page.evaluate(async () => {
                 try {
@@ -160,7 +161,7 @@ async function createTestEnv(browser, options = {}) {
             }
         }
         if (!tableId) {
-            console.warn('[createTestEnv] テーブル作成が120秒以内に完了しませんでした');
+            console.warn('[createTestEnv] テーブル作成が240秒以内に完了しませんでした');
         }
     }
 
