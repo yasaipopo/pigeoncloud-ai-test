@@ -5,6 +5,52 @@
 
 ---
 
+## 【最重要】E2E テスト追加・修正の「黄金ループ」（必ずこの順で実施）
+
+新規テスト追加 or 既存テスト修正は、以下のステップを**必ず順番通り**実施する。スキップ禁止。
+
+```
+[1] 調査        gemcli 並列で仕様書・コード・既存 spec を調査
+[2] 実機確認    Playwright codegen or 手動操作で仕様の動作を確認
+[3] 実装        gemcli でテストコード生成。@requirement(ID) タグ必須
+[4] 品質ゲート   python3 scripts/quality-gate.py で静的解析（違反 0 必須）
+[5] テスト実行   単体実行で pass/fail 判定（直列、workers=1）
+[6] sheet.html に動画・スクショをアップロード（sync-results 必須）
+[7] レビュー URL をユーザーに提示:
+    https://dezmzppc07xat.cloudfront.net/sheet.html?spec=XXX&caseNo=YYY&review=pending&reviewLabel=...
+[8] ユーザー承認 → コミット / 差戻し → [1]-[5] のどれかに戻る
+```
+
+### 絶対ルール
+- `test.skip()` 新規追加禁止（既存の `test.skip(fileBeforeAllFailed, ...)` は OK）
+- assertion 緩和禁止（`expect(x || true)`, コメントアウト, navbar/ISE only）
+- プロダクトバグは `.claude/product-bugs.md` に記録、テストは fail のまま残す
+- `@requirement(ID)` タグ必須（coverage-tracker.py で自動紐付け）
+- gemcli と Claude の役割分担:
+  - **gemcli (並列)**: 調査・ボイラープレート生成・静的解析・分類
+  - **Claude (直列)**: 計画・実機確認・統合・コミット
+
+### ツール
+- `scripts/quality-gate.py` — 静的解析（違反検知）
+- `scripts/coverage-tracker.py` — 要件×テスト対応表の自動生成
+- `.claude/coverage-tracker.json` — 現在のカバー状況
+- `.claude/e2e-coverage-roadmap.md` — 全体ロードマップ（短・中・長期施策）
+
+### 参考ファイル
+- `.claude/knowledge-spec-quality-checklist.md` — 品質チェック
+- `.claude/knowledge-detailed-flow-writing-rule.md` — detailedFlow 書き方
+- `.claude/knowledge-e2e-failure-triage.md` — fail 分類
+- `.claude/knowledge-sheet-html-system.md` — sheet.html 動画/スクショの仕組み
+
+### sheet.html のユーザーレビュー機構
+sheet.html は URL パラメータで絞り込み可能:
+- `?spec=auth` — spec タブ自動選択
+- `?caseNo=up-b002` — ケース絞り込み（カンマ区切りで複数可）
+- `?review=pending&reviewLabel=XXX` — レビュー依頼バナー表示 + OK/NG ボタン
+- OK/NG クリックで `POST /pipeline/review` に記録（DynamoDB `userReview` フィールド）
+
+---
+
 ## 【必須】pigeon_cloud（PHP）リポジトリの修正は tmprepo 経由
 
 pigeon_cloud のコードを修正する場合、**必ず `tmprepo` で /tmp にクローンしてから作業する**。
