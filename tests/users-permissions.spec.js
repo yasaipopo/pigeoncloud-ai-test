@@ -4806,7 +4806,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
             await login(page, user.email, 'admin');
 
             // [check] 10-5. ✅ 正常にログインでき、ダッシュボードが表示されること
-            await page.waitForURL(//admin//, { timeout: 15000 });
+            await page.waitForURL(/\/admin\//, { timeout: 15000 });
             await expect(page.locator('.navbar')).toBeVisible();
             await autoScreenshot(page, 'UP11', 'up-ip-010', _testStart);
         });
@@ -4945,7 +4945,7 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
             await page.goto(BASE_URL + '/admin/dashboard');
 
             // [check] 40-3. ✅ ログイン画面へリダイレクトされること
-            await page.waitForURL(//login/);
+            await page.waitForURL(/\/login/);
             expect(page.url()).toContain('/login');
             await autoScreenshot(page, 'UP12', 'up-neg-040', _testStart);
         });
@@ -4998,3 +4998,190 @@ test.describe('バグ修正・機能改善確認（UP10）', () => {
     });
 });
 
+
+/**
+ * UP-B002: IP制限の網羅テスト
+ * @requirements R-IP-001, R-IP-002, R-IP-003, R-IP-004, R-IP-005
+ */
+test.describe('UP-B002: IP制限の網羅テスト', () => {
+    let localBaseUrl;
+    let localEmail;
+    let localPassword;
+    let testUser; // { id, email, password }
+
+    test.beforeAll(async ({ browser }) => {
+        // 1環境1シナリオ: beforeAll で createTestEnv
+        const env = await createTestEnv(browser, { withAllTypeTable: false });
+        localBaseUrl = env.baseUrl;
+        localEmail = env.email;
+        localPassword = env.password;
+
+        // グローバル変数を上書き（ヘルパー用）
+        BASE_URL = localBaseUrl;
+        EMAIL = localEmail;
+        PASSWORD = localPassword;
+
+        // テスト用ユーザーを一人作成しておく
+        const page = await browser.newPage();
+        await login(page, localEmail, localPassword);
+        const result = await createTestUser(page);
+        if (result.result !== 'success') {
+            throw new Error('テストユーザーの作成に失敗しました: ' + JSON.stringify(result));
+        }
+        testUser = { id: result.id, email: result.email, password: result.password || 'admin' };
+        await page.close();
+    });
+
+    test.beforeEach(async ({ page }) => {
+        // 各テストで明示的ログイン
+        await login(page, localEmail, localPassword);
+    });
+
+    /**
+     * @requirement R-IP-001
+     * up-ip-040: 許可範囲内のパブリックIP (0.0.0.0/0) でログインできること
+     */
+    test('up-ip-040: 許可範囲内のパブリックIP (0.0.0.0/0) でログインできること', async ({ page }) => {
+        const _testStart = Date.now();
+        
+        // 1. 管理者でログインしてIP制限設定
+        await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
+        await waitForAngular(page);
+
+        // 「アクセス許可IP」を追加 (0.0.0.0/0)
+        const addIpBtn = page.locator('button.add-btn-admin_allow_ips_multi, button').filter({ hasText: /IP.*追加|追加.*IP/ }).first();
+        if (await addIpBtn.count() > 0) {
+            await addIpBtn.click({ force: true });
+            await waitForAngular(page);
+        }
+        
+        const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
+        await ipInput.fill('0.0.0.0/0');
+        
+        await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click();
+        await waitForAngular(page);
+        await expect(page.locator('.alert-danger')).toHaveCount(0);
+
+        // 2. テストユーザーでログイン試行
+        await logout(page);
+        await login(page, testUser.email, testUser.password);
+        
+        // ログイン成功確認
+        await expect(page.locator('.navbar')).toBeVisible();
+        
+        await autoScreenshot(page, 'UP-B002', 'up-ip-040', _testStart);
+    });
+
+    /**
+     * @requirement R-IP-002
+     * up-ip-041: 許可範囲外のIP (1.1.1.1/32) でログイン拒否されること
+     */
+    test('up-ip-041: 許可範囲外のIP (1.1.1.1/32) でログイン拒否されること', async ({ page }) => {
+        const _testStart = Date.now();
+
+        // 1. 管理者でログインしてIP制限設定 (1.1.1.1/32)
+        await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
+        await waitForAngular(page);
+
+        const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
+        await ipInput.fill('1.1.1.1/32');
+        
+        await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click();
+        await waitForAngular(page);
+
+        // 2. テストユーザーでログイン試行
+        await logout(page);
+        
+        await page.goto(localBaseUrl + '/admin/login');
+        await page.fill('#id', testUser.email);
+        await page.fill('#password', testUser.password);
+        await page.click('button[type=submit].btn-primary');
+        
+        // 拒否メッセージの確認
+        await expect(page.locator('.alert-danger')).toBeVisible();
+        await expect(page.locator('.navbar')).not.toBeVisible();
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-041', _testStart);
+    });
+
+    /**
+     * @requirement R-IP-003
+     * up-ip-042: 許可IPを削除すると全許可に戻ること
+     */
+    test('up-ip-042: 許可IPを削除すると全許可に戻ること', async ({ page }) => {
+        const _testStart = Date.now();
+
+        // 1. 管理者でログインしてIP制限解除
+        await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
+        await waitForAngular(page);
+
+        const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
+        await ipInput.fill('');
+        
+        await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click();
+        await waitForAngular(page);
+
+        // 2. テストユーザーでログイン試行
+        await logout(page);
+        await login(page, testUser.email, testUser.password);
+        
+        // ログイン成功確認
+        await expect(page.locator('.navbar')).toBeVisible();
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-042', _testStart);
+    });
+
+    /**
+     * @requirement R-IP-004
+     * up-ip-043: 不正フォーマット (999.999.999.999) のバリデーションエラー
+     */
+    test('up-ip-043: 不正フォーマット (999.999.999.999) のバリデーションエラー', async ({ page }) => {
+        const _testStart = Date.now();
+
+        await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
+        await waitForAngular(page);
+
+        const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
+        await ipInput.fill('999.999.999.999');
+        
+        await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click();
+        
+        // バリデーションエラーが出るはず
+        await expect(page.locator('.alert-danger')).toBeVisible();
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-043', _testStart);
+    });
+
+    /**
+     * @requirement R-IP-005, bug: B002
+     * up-ip-044: プライベートIP (10.0.0.1/32) を許可設定しても null IP で弾かれるバグ再現 [B002]
+     */
+    test('up-ip-044: プライベートIP (10.0.0.1/32) を許可設定しても null IP で弾かれるバグ再現 [B002]', async ({ page }) => {
+        const _testStart = Date.now();
+
+        // 1. 管理者でログインしてプライベートIPを許可設定
+        await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
+        await waitForAngular(page);
+
+        const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
+        await ipInput.fill('10.0.0.1/32');
+        
+        await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click();
+        await waitForAngular(page);
+
+        // 2. ログアウトしてテストユーザーでログイン試行
+        await logout(page);
+        
+        await page.goto(localBaseUrl + '/admin/login');
+        await page.fill('#id', testUser.email);
+        await page.fill('#password', testUser.password);
+        await page.click('button[type=submit].btn-primary');
+        
+        // バグ再現確認: プライベートIP環境（Staging VPN等）では NetCommon::getIp() が null を返すため拒否される
+        // 修正後は、もし接続元IPが一致していれば成功すべきだが、このテストでは失敗することを期待してアサーションを書く
+        // (ユーザーの指示により fail 期待だが、テストコードとしては成功を期待する形で書く)
+        await expect(page.locator('.navbar'), 'プライベートIP許可設定でログインできること（修正後はパスするはず）').toBeVisible();
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-044', _testStart);
+    });
+});

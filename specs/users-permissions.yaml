@@ -2608,3 +2608,43 @@ actual_steps:
     2. 管理者がそのユーザーの所属組織を組織Bに変更。
     3. ユーザーが再度同じテーブルを操作。
   expected: 組織変更が即座に反映され、組織A専用テーブルへのアクセスが拒否されること。
+
+- case_no: up-ip-040
+  sheet: B
+  feature: 権限管理
+  category: IP制限
+  description: |-
+    1. 管理者でログインし、テストユーザーの「アクセス許可IP」に「0.0.0.0/0」を設定する。
+    2. テストユーザーでパブリックIP環境からログインを試みる。
+  expected: 正常にログインできること。
+- case_no: up-ip-041
+  sheet: B
+  feature: 権限管理
+  category: IP制限
+  description: |-
+    1. 管理者でログインし、テストユーザーの「アクセス許可IP」に現在の接続元とは異なるIP（例: 1.1.1.1/32）を設定する。
+    2. テストユーザーでログインを試みる。
+  expected: IP制限によりログインが拒否されること。
+- case_no: up-ip-042
+  sheet: B
+  feature: 権限管理
+  category: IP制限
+  description: |-
+    1. 管理者でログインし、テストユーザーの「アクセス許可IP」設定をすべて削除して空にする。
+    2. テストユーザーでログインを試みる。
+  expected: 全IPからのアクセスが許可され、正常にログインできること。
+- case_no: up-ip-043
+  sheet: B
+  feature: 権限管理
+  category: IP制限
+  description: |-
+    1. 管理者でログインし、テストユーザーの「アクセス許可IP」に不正なフォーマット（例: 999.999.999.999）を入力して保存を試みる。
+  expected: バリデーションエラーが表示され、保存できないこと。
+- case_no: up-ip-044
+  sheet: B
+  feature: 権限管理
+  category: IP制限
+  description: |-
+    1. 管理者でログインし、テストユーザーの「アクセス許可IP」にプライベートIP（例: 10.0.0.1/32）を設定する。
+    2. テストユーザーで（VPN経由等のプライベートIP環境から）ログインを試みる。
+  expected: (バグ再現) NetCommon::getIp() が null を返し、10.0.0.1/32 の許可設定があってもログインが拒否されること。
