@@ -378,14 +378,94 @@ let editingValue = null;
 // =========================================
 // 初期化
 // =========================================
+// URL パラメータ抽出（?spec=auth&caseNo=up-b002&review=pending&reviewLabel=XXX）
+function getUrlParams() {
+  const sp = new URLSearchParams(location.search);
+  return {
+    spec: sp.get('spec') || null,
+    caseNo: sp.get('caseNo') || null,
+    review: sp.get('review') || null,
+    reviewLabel: sp.get('reviewLabel') || null,
+    runId: sp.get('runId') || null,
+  };
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     await Promise.all([loadPipeline(), loadSummary()]);
+    applyUrlParamFilters();
   } catch (e) {
     document.getElementById('loading').innerHTML =
       `<div class="alert alert-danger">読み込みエラー: ${escHtml(e.message)}</div>`;
   }
 });
+
+// URL パラメータで絞り込み + レビューバナー表示
+function applyUrlParamFilters() {
+  const p = getUrlParams();
+  if (p.spec) {
+    currentSpec = p.spec;
+    const tab = document.querySelector(`.spec-tab[data-spec="${p.spec}"]`);
+    if (tab) {
+      document.querySelectorAll('.spec-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    }
+  }
+  if (p.caseNo) {
+    const box = document.getElementById('search-box');
+    if (box) box.value = p.caseNo;
+  }
+  // review=pending なら該当ケースに review-pending マーキング
+  if (p.review === 'pending' && p.caseNo) {
+    window._reviewPendingCaseNos = (p.caseNo || '').split(',').map(s => s.trim()).filter(Boolean);
+    showReviewBanner(p);
+  }
+  applyFilters();
+}
+
+function showReviewBanner(p) {
+  const banner = document.createElement('div');
+  banner.id = 'review-banner';
+  banner.className = 'alert alert-warning d-flex justify-content-between align-items-center';
+  banner.style.cssText = 'margin:12px 0;border-left:6px solid #f0ad4e;';
+  banner.innerHTML = `
+    <div>
+      <strong>🟡 レビュー依頼:</strong>
+      ${escHtml(p.reviewLabel || '下記テストを確認してください')}
+      <span class="ms-2 badge bg-warning text-dark">${escHtml((p.caseNo || '').replace(/,/g, ', '))}</span>
+    </div>
+    <div>
+      <button class="btn btn-success btn-sm me-2" onclick="submitReviewResult('ok')">OK で承認</button>
+      <button class="btn btn-danger btn-sm" onclick="submitReviewResult('ng')">NG で差し戻し</button>
+    </div>
+  `;
+  const anchor = document.querySelector('.filter-bar') || document.body.firstChild;
+  anchor.parentNode.insertBefore(banner, anchor);
+}
+
+function submitReviewResult(verdict) {
+  const p = getUrlParams();
+  const caseNos = (p.caseNo || '').split(',').map(s => s.trim()).filter(Boolean);
+  const note = prompt(`${verdict === 'ok' ? '✅ 承認' : '❌ 差戻し'}のコメント（任意）:`, '');
+  // 各ケースに review 結果を保存
+  caseNos.forEach(cn => {
+    try {
+      const item = allItems.find(i => i.caseNo === cn);
+      if (item && item.runId) {
+        fetch(`${CONFIG.apiUrl}/pipeline/review?runId=${encodeURIComponent(item.runId)}&caseNo=${encodeURIComponent(cn)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ verdict, note: note || '', reviewer: 'user', reviewedAt: new Date().toISOString() }),
+        });
+      }
+    } catch {}
+  });
+  const banner = document.getElementById('review-banner');
+  if (banner) {
+    banner.className = 'alert ' + (verdict === 'ok' ? 'alert-success' : 'alert-danger');
+    banner.innerHTML = `<strong>${verdict === 'ok' ? '✅ 承認済み' : '❌ 差戻し済み'}</strong>: ${escHtml(note || '')}`;
+  }
+}
 
 // =========================================
 // データ読み込み
@@ -535,6 +615,11 @@ function setStatusFilter(status, btn) {
 function applyFilters() {
   const query = (document.getElementById('search-box').value || '').toLowerCase();
   let filtered = allItems;
+
+  // レビュー待ちモード（?review=pending）: 指定 caseNo のみ表示
+  if (window._reviewPendingCaseNos && window._reviewPendingCaseNos.length > 0) {
+    filtered = filtered.filter(i => window._reviewPendingCaseNos.includes(i.caseNo));
+  }
 
   // specフィルタ
   if (currentSpec !== 'all') {

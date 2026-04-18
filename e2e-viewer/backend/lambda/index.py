@@ -180,6 +180,10 @@ def handler(event, context):
         elif method == 'POST' and path == '/pipeline/cleanup':
             return pipeline_cleanup(event)
 
+        # POST /pipeline/review - ユーザーレビュー結果を記録
+        elif method == 'POST' and path == '/pipeline/review':
+            return pipeline_review(event)
+
         else:
             return response(404, {'error': f'Not found: {method} {path}'})
 
@@ -1284,3 +1288,58 @@ def pipeline_cleanup(event):
         'deleted': deleted,
         'remaining': len(items) - deleted,
     })
+
+
+def pipeline_review(event):
+    """
+    POST /pipeline/review?runId=...&caseNo=... - ユーザーレビュー結果を記録
+    ボディ: { verdict: 'ok'|'ng', note: '...', reviewer: 'user', reviewedAt: ISO }
+    """
+    params = event.get('queryStringParameters') or {}
+    run_id = params.get('runId')
+    case_no = params.get('caseNo')
+    if not run_id or not case_no:
+        return response(400, {'error': 'runId, caseNo は必須です'})
+
+    body = json.loads(event.get('body') or '{}')
+    verdict = body.get('verdict')
+    if verdict not in ('ok', 'ng'):
+        return response(400, {'error': "verdict は 'ok' または 'ng' のみ"})
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    review_data = {
+        'verdict': verdict,
+        'note': body.get('note', ''),
+        'reviewer': body.get('reviewer', 'user'),
+        'reviewedAt': body.get('reviewedAt', now_iso),
+    }
+
+    # pipeline テーブルの該当ケースに review フィールドを追記
+    # spec は caseNo から逆引き不能なので、全 spec でスキャンして該当を探す
+    try:
+        # まず pipeline_table から caseNo 一致する行を検索（スキャンは遅いが review は低頻度操作）
+        result = pipeline_table.scan(
+            FilterExpression='caseNo = :cn',
+            ExpressionAttributeValues={':cn': case_no},
+        )
+        items = result.get('Items', [])
+        if not items:
+            return response(404, {'error': f'caseNo={case_no} が見つかりません'})
+
+        # 全マッチを更新
+        updated = 0
+        for item in items:
+            pipeline_table.update_item(
+                Key={'spec': item['spec'], 'caseNo': item['caseNo']},
+                UpdateExpression='SET userReview = :r, updatedAt = :t',
+                ExpressionAttributeValues={':r': review_data, ':t': now_iso},
+            )
+            updated += 1
+
+        return response(200, {
+            'message': f'レビュー記録完了 ({updated}件)',
+            'verdict': verdict,
+            'caseNo': case_no,
+        })
+    except Exception as e:
+        return response(500, {'error': str(e)})
