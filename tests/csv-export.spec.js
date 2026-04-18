@@ -900,4 +900,70 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             await autoScreenshot(page, 'CE04', 'csv-130', _testStart);
         });
     });
+
+    // =========================================================================
+    // CE-B001: Excel列表示検証
+    // =========================================================================
+
+    test.describe('CE-B001: Excel列表示検証', () => {
+        test('B001: 多項目のExcel(CSV)をインポートした際、プレビューテーブルが適切に表示（スクロール）されること', async ({ page }) => {
+            const _testStart = Date.now();
+            test.setTimeout(120000);
+
+            // [flow] 1. テーブル管理画面（/admin/dataset）へ遷移
+            await page.goto(BASE_URL + '/admin/dataset');
+            await waitForAngular(page);
+
+            // [flow] 2. ハンバーガーメニューから「エクセルから追加」を選択
+            const hamburgerBtn = page.locator('button.dropdown-toggle:has(.fa-bars)').first();
+            await hamburgerBtn.click();
+            const excelBtn = page.locator('a.dropdown-item').filter({ hasText: /エクセルから追加|Excelから追加|Excel/ }).first();
+            await expect(excelBtn).toBeVisible();
+            await excelBtn.click();
+            await waitForAngular(page);
+
+            // [flow] 3. 多項目のCSVファイルを準備してアップロード
+            const fileInput = page.locator('input[type="file"]');
+            await fileInput.setInputFiles('test_files/b001_many_columns.csv');
+            // Angularに通知するためにchangeイベントを発火
+            await fileInput.dispatchEvent('change');
+            await waitForAngular(page);
+
+            // [check] 4. ✅ データプレビューが表示されること
+            const previewTable = page.locator('table').filter({ has: page.locator('th').filter({ hasText: 'col1' }) }).first();
+            await expect(previewTable).toBeVisible({ timeout: 20000 });
+            console.log('[B001] プレビューテーブル表示確認OK');
+
+            // [check] 5. ✅ プレビューテーブルが親要素（モーダル幅）を突き抜けていないこと、または水平スクロールが有効であること
+            const modalBody = page.locator('.modal-body').first();
+            await expect(modalBody).toBeVisible();
+
+            const modalBox = await modalBody.boundingBox();
+            const tableBox = await previewTable.boundingBox();
+
+            if (!modalBox || !tableBox) {
+                throw new Error('Bounding box could not be determined');
+            }
+
+            console.log(`[B001] Modal Width: ${modalBox.width}, Table Width: ${tableBox.width}`);
+
+            const container = previewTable.locator('xpath=..');
+            const overflowX = await container.evaluate(el => window.getComputedStyle(el).overflowX);
+            const isScrollable = overflowX === 'auto' || overflowX === 'scroll';
+            
+            if (!isScrollable) {
+                expect(tableBox.width, 'スクロールが無効な場合、テーブル幅はモーダル幅内に収まっている必要があります').toBeLessThanOrEqual(modalBox.width + 1);
+            } else {
+                const containerBox = await container.boundingBox();
+                if (containerBox) {
+                    expect(containerBox.width, 'スクロールコンテナの幅はモーダル幅内に収まっている必要があります').toBeLessThanOrEqual(modalBox.width + 1);
+                }
+            }
+
+            const col50 = previewTable.locator('th').filter({ hasText: 'col50' });
+            await expect(col50).toBeAttached();
+
+            await autoScreenshot(page, 'CE01', 'B001-preview-scrolling', _testStart);
+        });
+    });
 });
