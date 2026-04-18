@@ -345,7 +345,10 @@ test.describe('メール配信', () => {
 
     test.beforeAll(async ({ browser }) => {
             test.setTimeout(300000);
-            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            const env = await createTestEnv(browser, {
+                withAllTypeTable: true,
+                enableOptions: { mail_option: 'true', step_mail_option: 'true' }
+            });
             BASE_URL = env.baseUrl;
             EMAIL = env.email;
             PASSWORD = env.password;
@@ -353,6 +356,10 @@ test.describe('メール配信', () => {
             process.env.TEST_BASE_URL = env.baseUrl;
             process.env.TEST_EMAIL = env.email;
             process.env.TEST_PASSWORD = env.password;
+
+            // SMTP設定を自動設定
+            await setupSmtp(env.page);
+
             await env.context.close();
         });
 

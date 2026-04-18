@@ -272,8 +272,8 @@ test.describe('大量データ（211系）', () => {
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // レコード一覧テーブルが正常に表示されること
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
             const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
             expect(thCount2).toBeGreaterThanOrEqual(0);
@@ -658,8 +658,8 @@ test.describe('子テーブル（325, 341系）', () => {
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // レコード一覧テーブルが正常に表示されること
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
             const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
             expect(thCount2).toBeGreaterThanOrEqual(0);
@@ -690,13 +690,18 @@ test.describe('子テーブル（325, 341系）', () => {
             }
             await addFieldBtn.click();
             // フィールド追加モーダルが開くことを確認（strict modeエラー回避のため .first() を使用）
-            await page.waitForSelector('div.modal.show', { timeout: 10000 }).catch(() => {});
+            await page.waitForSelector('div.modal.show', { timeout: 15000 }).catch(() => {});
             const addModal = page.locator('div.modal.show').first();
-            await expect(addModal, 'フィールド追加モーダルが開くこと').toBeVisible();
+            await expect(addModal, 'フィールド追加モーダルが開くこと').toBeVisible({ timeout: 10000 });
             console.log('325: フィールド追加モーダル表示確認OK');
+
             // モーダル内に「子テーブル」タイプのボタンが存在することを確認
-            const childTableOption = addModal.locator('button, label, .field-type-option, li').filter({ hasText: /子テーブル|child.*table|subtable/i });
+            const childTableOption = addModal.locator('button, label, .field-type-option, li').filter({ hasText: /子テーブル|サブテーブル|child.*table|subtable/i });
             const childCount = await childTableOption.count();
+            if (childCount === 0) {
+                const allButtons = await addModal.locator('button, span').allInnerTexts();
+                console.log('325: モーダル内のボタンテキスト一覧:', allButtons.filter(t => t.trim().length > 0));
+            }
             console.log('325: 子テーブルオプション数:', childCount);
             await page.screenshot({ path: `${reportsDir}/screenshots/325-child-table-modal.png`, fullPage: true }).catch(() => {});
             expect(childCount, '子テーブルフィールドタイプがモーダル内に存在すること').toBeGreaterThan(0);
@@ -1330,10 +1335,26 @@ test.describe('追加実装テスト（282-593系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
-            // レコード行のコピーボタンを探す
-            const copyBtn = page.locator('a, button, i').filter({ hasText: /コピー/ });
-            const copyIcon = page.locator('.fa-copy, .fa-clone, [title*="コピー"]');
-            const hasCopy = (await copyBtn.count() > 0) || (await copyIcon.count() > 0);
+            // レコード行が存在する場合、詳細画面へ遷移（コピーボタンは詳細画面にある場合が多い）
+            const rows = page.locator('table tbody tr');
+            if (await rows.count() > 0) {
+                const detailLink = rows.first().locator('a, button').filter({ hasText: /詳細/ }).first();
+                if (await detailLink.count() === 0) {
+                    // 詳細リンクが見つからない場合は1番目のAタグ
+                    await rows.first().locator('a').first().click();
+                } else {
+                    await detailLink.click();
+                }
+                await waitForAngular(page);
+                await page.waitForTimeout(1500);
+            }
+
+            // レコード詳細/一覧のコピーボタンを探す（表示されているものを優先）
+            // 1. 詳細画面の「複製」ボタン（btn-outline-info等）を優先
+            const copyBtnVisible = page.locator('button, a').filter({ hasText: /^ 複製 $|^複製$/, visible: true });
+            const copyIconVisible = page.locator('.pc-list-view__btns .fa-clone, .btn-outline-info:has-text("複製"), button:has(.fa-copy):visible, button:has(.fa-clone):visible');
+            
+            const hasCopy = (await copyBtnVisible.count() > 0) || (await copyIconVisible.count() > 0);
 
             if (hasCopy) {
                 // ダイアログリスナーを設定
@@ -1342,13 +1363,15 @@ test.describe('追加実装テスト（282-593系）', () => {
                     await dialog.accept();
                 });
 
-                if (await copyIcon.count() > 0) {
-                    await copyIcon.first().click();
+                if (await copyIconVisible.count() > 0) {
+                    await copyIconVisible.first().click();
                 } else {
-                    await copyBtn.first().click();
+                    await copyBtnVisible.first().click();
                 }
                 await waitForAngular(page);
                 await page.waitForTimeout(2000);
+            } else {
+                console.log('475: 表示されているコピー/複製ボタンが見つかりません');
             }
 
             // エラーが発生しないこと
@@ -1939,8 +1962,8 @@ test.describe('追加実装テスト（282-593系）', () => {
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
 
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors2 = await page.locator('.alert-danger').count();
             expect(errors2).toBe(0);
 
@@ -2092,8 +2115,8 @@ test.describe('追加実装テスト（282-593系）', () => {
             // 一括削除ボタンが存在するか確認
             const bulkDeleteBtn = page.locator('button, a').filter({ hasText: /一括削除/ });
             // 一覧画面が正常に表示されていること
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
 
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
@@ -2474,22 +2497,27 @@ test.describe('追加実装テスト（282-593系）', () => {
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
-            // ユーザー追加ボタンを探す
-            const addBtn = page.locator('a, button').filter({ hasText: /新規|追加|ユーザー作成/ });
+            // ユーザー追加ボタンを探す（表示されているものを優先）
+            // btn-success クラスを持つものを優先
+            const addBtn = page.locator('button.btn-success, a.btn-success, .btn-outline-primary').filter({ hasText: /作成|新規|追加/, visible: true });
             if (await addBtn.count() > 0) {
                 await addBtn.first().click();
                 await waitForAngular(page);
                 await page.waitForTimeout(1500);
 
                 // パスワード入力欄が存在すること
-                const pwInputs = page.locator('input[type=password]');
+                const pwInputs = page.locator('input[type=password]').filter({ visible: true });
                 if (await pwInputs.count() > 0) {
                     // パスワードフィールドが表示されていること
                     await expect(pwInputs.first()).toBeVisible();
+                } else {
+                    console.log('572: 表示されているパスワード入力欄が見つかりません');
                 }
 
                 const createText = await page.innerText('body');
                 expect(createText).not.toContain('Internal Server Error');
+            } else {
+                console.log('572: 表示されている「作成」ボタンが見つかりません');
             }
 
         });
@@ -2705,12 +2733,13 @@ test.describe('追加実装テスト（282-593系）', () => {
                     await page.waitForTimeout(1500);
 
                     // リッチテキストフィールドの拡大ボタンを探す
-                    const expandBtn = page.locator('.ql-expand, [class*=expand], button[title*="拡大"]');
+                    // リッチテキストの拡大ボタンを探す
+                    const expandBtn = page.locator('.ql-toolbar .ql-expand, .pc-richtext-toolbar .fa-expand, .pc-richtext-container .fa-expand').filter({ visible: true });
                     if (await expandBtn.count() > 0) {
                         await expandBtn.first().click();
                         await page.waitForTimeout(1000);
                         // 拡大表示が開いたことを確認
-                        const modal = page.locator('.modal.show, .modal.in, [role=dialog]');
+                        const modal = page.locator('.modal.show, .modal.in, [role=dialog]').filter({ visible: true });
                         if (await modal.count() > 0) {
                             await expect(modal.first()).toBeVisible().catch(() => {});
                         }
@@ -2781,8 +2810,8 @@ test.describe('追加実装テスト（282-593系）', () => {
             }
 
             // テーブル一覧が正常に表示されていること
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
 
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
@@ -2845,8 +2874,8 @@ test.describe('追加実装テスト（282-593系）', () => {
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -2901,8 +2930,8 @@ test.describe('追加実装テスト（282-593系）', () => {
             // CSVダウンロードメニューが存在すること
             const csvBtn = page.locator('button, a, [class*=dropdown]').filter({ hasText: /CSV|エクスポート|ダウンロード/ });
             // テーブルが正常に表示されていること
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -2983,8 +3012,8 @@ test.describe('追加実装テスト（282-593系）', () => {
             const hasLastUpdater = headerTexts.some(t => t.includes('最終更新者') || t.includes('更新者'));
             // ALLテストテーブルには最終更新者列が含まれている可能性がある
             // テーブルが正常に表示されていれば基本確認OK
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3035,8 +3064,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             if (!bodyText.includes('404') && !bodyText.includes('Not Found')) {
                 expect(bodyText).not.toContain('Internal Server Error');
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('610: 他テーブル参照の表示項目が空欄の場合バリデーションエラーが表示されること', async () => {
@@ -3091,8 +3119,7 @@ test.describe('追加実装テスト（282-593系）', () => {
                 await waitForAngular(page);
                 await page.waitForTimeout(1000);
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
     });
@@ -3116,8 +3143,7 @@ test.describe('追加実装テスト（282-593系）', () => {
                 expect(bodyText).not.toContain('Internal Server Error');
             }
             // チャート関連のUIが表示されていること
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3199,15 +3225,14 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // テーブル設定画面が正常にロードされていること
-            const hasForm = await page.locator('form, input, select').count();
-            expect(hasForm).toBeGreaterThan(0);
+            await expect(page.locator('form, input, select').first()).toBeVisible({ timeout: 15000 });
 
             // レコード一覧で他テーブル参照フィールドの絞り込みUIを確認
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3260,12 +3285,11 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // ユーザー管理画面が正常に表示されること
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
             // テーブルが表示されていること
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
 
         });
         await test.step('632: テーブル設定変更後にレコード一覧がエラーなく表示されること', async () => {
@@ -3285,8 +3309,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // 設定画面が正常にロードされていること
-            const hasForm = await page.locator('form, input, select').count();
-            expect(hasForm).toBeGreaterThan(0);
+            await expect(page.locator('form, input, select').first()).toBeVisible({ timeout: 15000 });
 
             // レコード一覧に遷移
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
@@ -3294,8 +3317,8 @@ test.describe('追加実装テスト（282-593系）', () => {
             await page.waitForTimeout(1500);
             bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3316,9 +3339,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // テーブル設定画面にフィールド一覧が表示されていること
-            const fields = page.locator('[class*=field], .field-item, .cdk-drag, input[name*=label]');
-            const fieldCount = await fields.count();
-            expect(fieldCount, 'フィールドが1つ以上存在すること').toBeGreaterThan(0);
+            await expect(page.locator('[class*=field], .field-item, .cdk-drag, input[name*=label]').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('637: 数字のみの項目名でも計算フィールドで正しく参照・計算できること', async () => {
@@ -3337,15 +3358,14 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // テーブル設定画面が正常にロードされていること
-            const hasForm = await page.locator('form, input, select').count();
-            expect(hasForm).toBeGreaterThan(0);
+            await expect(page.locator('form, input, select').first()).toBeVisible({ timeout: 15000 });
 
             // レコード一覧画面で計算値が表示されることを確認
             await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
             await page.waitForTimeout(1500);
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3375,8 +3395,7 @@ test.describe('追加実装テスト（282-593系）', () => {
                 await waitForAngular(page);
                 await page.waitForTimeout(1000);
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('639: ブラウザタブのタイトルにテーブル名が正しく表示されること', async () => {
@@ -3456,8 +3475,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // テーブル設定画面が正常に表示されていること
-            const hasForm = await page.locator('form, input, select').count();
-            expect(hasForm).toBeGreaterThan(0);
+            await expect(page.locator('form, input, select').first()).toBeVisible({ timeout: 15000 });
 
             // 主キー設定セクションを探す
             const primaryKeySection = page.locator('[class*=primary], label, span').filter({ hasText: /主キー|プライマリ/ });
@@ -3483,8 +3501,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // テーブル管理画面にテーブル一覧が表示されていること
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3510,8 +3527,8 @@ test.describe('追加実装テスト（282-593系）', () => {
                 // フィルタボタンが存在すること
                 expect(await filterBtn.first().isVisible()).toBeTruthy();
             }
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3556,8 +3573,7 @@ test.describe('追加実装テスト（282-593系）', () => {
                 expect(bodyText).not.toContain('Internal Server Error');
             }
             // 通知設定画面またはテーブル設定画面が表示されること
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('651: SMTP設定画面でテストメール送信が成功すること', async () => {
@@ -3585,8 +3601,7 @@ test.describe('追加実装テスト（282-593系）', () => {
                     }
                 }
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('652: 関連レコードの表示条件が他テーブル参照でもSUM計算が正しく動作すること', async () => {
@@ -3651,8 +3666,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // テーブル設定画面にフィールドが表示されていること
-            const hasForm = await page.locator('form, input, select').count();
-            expect(hasForm).toBeGreaterThan(0);
+            await expect(page.locator('form, input, select').first()).toBeVisible({ timeout: 15000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3673,8 +3687,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             if (!bodyText.includes('404')) {
                 expect(bodyText).not.toContain('Internal Server Error');
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('659: 相対値「来年度」フィルタが年度開始月に基づいて正しく絞り込まれること', async () => {
@@ -3697,8 +3710,8 @@ test.describe('追加実装テスト（282-593系）', () => {
             if (await filterBtn.count() > 0) {
                 expect(await filterBtn.first().isVisible()).toBeTruthy();
             }
-            const tableCount = await page.locator('table, [role="columnheader"]').count();
-            expect(tableCount).toBeGreaterThan(0);
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3719,8 +3732,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             if (!bodyText.includes('404')) {
                 expect(bodyText).not.toContain('Internal Server Error');
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3747,8 +3759,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             // 追加オプションセクションを探す
             const additionalOptions = page.locator('[class*=option], label, span').filter({ hasText: /追加オプション|一括否認|一括削除/ });
             // テーブル設定画面が正常にロードされていること
-            const hasForm = await page.locator('form, input, select').count();
-            expect(hasForm).toBeGreaterThan(0);
+            await expect(page.locator('form, input, select').first()).toBeVisible({ timeout: 15000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3811,8 +3822,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             expect(bodyText).not.toContain('Internal Server Error');
 
             // テーブル設定画面にフォーム要素が存在すること
-            const hasForm = await page.locator('form, input, select').count();
-            expect(hasForm).toBeGreaterThan(0);
+            await expect(page.locator('form, input, select').first()).toBeVisible({ timeout: 15000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -3865,8 +3875,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             if (!bodyText.includes('404') && !bodyText.includes('Not Found')) {
                 expect(bodyText).not.toContain('Internal Server Error');
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('671: 大量レコードのCSVダウンロードで重複が発生しないこと', async () => {
@@ -3915,8 +3924,7 @@ test.describe('追加実装テスト（282-593系）', () => {
                 await waitForAngular(page);
                 await page.waitForTimeout(1000);
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('674: Yes/Noフィールドのラベル空白時もCSVダウンロードで値が正しく出力されること', async () => {
@@ -3980,8 +3988,7 @@ test.describe('追加実装テスト（282-593系）', () => {
             if (!bodyText.includes('404')) {
                 expect(bodyText).not.toContain('Internal Server Error');
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
             const errors = await page.locator('.alert-danger').count();
             expect(errors).toBe(0);
 
@@ -4012,8 +4019,7 @@ test.describe('追加実装テスト（282-593系）', () => {
                 await waitForAngular(page);
                 await page.waitForTimeout(1000);
             }
-            const navbar = await page.locator('.navbar, header.app-header').count();
-            expect(navbar).toBeGreaterThan(0);
+            await expect(page.locator('.navbar, header.app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('681: 関連レコード一覧の表示条件で他テーブル参照の他テーブル参照が正しく反映されること', async () => {

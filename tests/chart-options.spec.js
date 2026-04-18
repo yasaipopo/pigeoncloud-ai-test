@@ -622,7 +622,7 @@ async function ensureCalendarView(page) {
     if (dtNgSelectId) {
         // ng-selectのコンテナをPlaywrightネイティブクリックで開く
         const ngSelectLocator = dtNgSelectId === '__no_id__'
-            ? page.locator('label:text-is("参照する日時フィールド")').locator('..').locator('..').locator('ng-select').first()
+            ? page.locator('.row, .form-group, tr').filter({ hasText: '参照する日時フィールド' }).locator('ng-select').first()
             : page.locator('#' + dtNgSelectId);
         await ngSelectLocator.locator('.ng-select-container').first().click({ force: true });
         await page.waitForTimeout(500);
@@ -2754,12 +2754,9 @@ test.describe('集計 - 詳細権限設定', () => {
         await waitForAngular(page);
 
         // 設定タブ
-        await page.evaluate(() => {
-            const tabs = document.querySelectorAll('a.nav-link');
-            for (const tab of tabs) {
-                if (tab.textContent.trim() === '設定') { tab.click(); break; }
-            }
-        });
+        const settingTab = page.locator('a.nav-link').filter({ hasText: '設定' }).first();
+        await settingTab.scrollIntoViewIfNeeded().catch(() => {});
+        await settingTab.click({ force: true });
         await waitForAngular(page);
 
         // タイトル入力
@@ -2769,19 +2766,17 @@ test.describe('集計 - 詳細権限設定', () => {
         }
 
         // 「詳細権限設定」を選択
-        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), input[value="detail"], .radio-label:has-text("詳細権限設定")').first();
-        if (await detailPermLabel.count() > 0) {
-            await detailPermLabel.click({ force: true });
-            await waitForAngular(page);
-        }
+        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), .radio-label:has-text("詳細権限設定"), input[value="detail"]').first();
+        await detailPermLabel.scrollIntoViewIfNeeded().catch(() => {});
+        await detailPermLabel.click({ force: true });
+        await waitForAngular(page);
 
         // 対象セクション（編集可能 or 閲覧のみ）の「選択」ボタンをクリック
         const sectionLabel = permType === 'edit' ? '編集可能' : '閲覧のみ';
-        const selectBtn = page.locator(`text=${sectionLabel}`).locator('..').locator('..').locator('button:has-text("選択")').first();
-        if (await selectBtn.count() > 0) {
-            await selectBtn.click({ force: true });
-            await waitForAngular(page);
-        }
+        const selectBtn = page.locator('.row, .form-group, tr').filter({ hasText: sectionLabel }).locator('button:has-text("選択")').first();
+        await expect(selectBtn).toBeVisible({ timeout: 5000 });
+        await selectBtn.click({ force: true });
+        await waitForAngular(page);
 
         if (targetType === 'all_users') {
             // 「全ユーザー」にチェック
@@ -2899,12 +2894,9 @@ test.describe('集計 - 詳細権限設定', () => {
         await waitForAngular(page);
 
         // 設定タブ
-        await page.evaluate(() => {
-            const tabs = document.querySelectorAll('a.nav-link');
-            for (const tab of tabs) {
-                if (tab.textContent.trim() === '設定') { tab.click(); break; }
-            }
-        });
+        const settingTab = page.locator('a.nav-link').filter({ hasText: '設定' }).first();
+        await settingTab.scrollIntoViewIfNeeded().catch(() => {});
+        await settingTab.click({ force: true });
         await waitForAngular(page);
 
         // タイトル
@@ -2914,11 +2906,10 @@ test.describe('集計 - 詳細権限設定', () => {
         }
 
         // 「詳細権限設定」を選択
-        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), input[value="detail"]').first();
-        if (await detailPermLabel.count() > 0) {
-            await detailPermLabel.click({ force: true });
-            await waitForAngular(page);
-        }
+        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), .radio-label:has-text("詳細権限設定"), input[value="detail"]').first();
+        await detailPermLabel.scrollIntoViewIfNeeded().catch(() => {});
+        await detailPermLabel.click({ force: true });
+        await waitForAngular(page);
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
@@ -2968,12 +2959,9 @@ test.describe('チャート - 詳細権限設定', () => {
         await waitForAngular(page);
 
         // 設定タブ
-        await page.evaluate(() => {
-            const tabs = document.querySelectorAll('a.nav-link');
-            for (const tab of tabs) {
-                if (tab.textContent.trim() === '設定') { tab.click(); break; }
-            }
-        });
+        const settingTab = page.locator('a.nav-link').filter({ hasText: '設定' }).first();
+        await settingTab.scrollIntoViewIfNeeded().catch(() => {});
+        await settingTab.click({ force: true });
         await waitForAngular(page);
 
         // タイトル入力
@@ -2983,19 +2971,17 @@ test.describe('チャート - 詳細権限設定', () => {
         }
 
         // 「詳細権限設定」を選択
-        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), input[value="detail"]').first();
-        if (await detailPermLabel.count() > 0) {
-            await detailPermLabel.click({ force: true });
-            await waitForAngular(page);
-        }
+        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), .radio-label:has-text("詳細権限設定"), input[value="detail"]').first();
+        await detailPermLabel.scrollIntoViewIfNeeded().catch(() => {});
+        await detailPermLabel.click({ force: true });
+        await waitForAngular(page);
 
         // 対象セクション
         const sectionLabel = permType === 'edit' ? '編集可能' : '閲覧のみ';
-        const selectBtn = page.locator(`text=${sectionLabel}`).locator('..').locator('..').locator('button:has-text("選択")').first();
-        if (await selectBtn.count() > 0) {
-            await selectBtn.click({ force: true });
-            await waitForAngular(page);
-        }
+        const selectBtn = page.locator('.row, .form-group, tr').filter({ hasText: sectionLabel }).locator('button:has-text("選択")').first();
+        await expect(selectBtn).toBeVisible({ timeout: 5000 });
+        await selectBtn.click({ force: true });
+        await waitForAngular(page);
 
         if (targetType === 'all_users') {
             const allUsersCheck = page.locator('label:has-text("全ユーザー"), input[type="checkbox"]').filter({ hasText: '全ユーザー' }).first();
@@ -3107,12 +3093,9 @@ test.describe('チャート - 詳細権限設定', () => {
         await waitForAngular(page);
 
         // 設定タブ
-        await page.evaluate(() => {
-            const tabs = document.querySelectorAll('a.nav-link');
-            for (const tab of tabs) {
-                if (tab.textContent.trim() === '設定') { tab.click(); break; }
-            }
-        });
+        const settingTab = page.locator('a.nav-link').filter({ hasText: '設定' }).first();
+        await settingTab.scrollIntoViewIfNeeded().catch(() => {});
+        await settingTab.click({ force: true });
         await waitForAngular(page);
 
         // タイトル
@@ -3122,11 +3105,10 @@ test.describe('チャート - 詳細権限設定', () => {
         }
 
         // 「詳細権限設定」を選択
-        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), input[value="detail"]').first();
-        if (await detailPermLabel.count() > 0) {
-            await detailPermLabel.click({ force: true });
-            await waitForAngular(page);
-        }
+        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), .radio-label:has-text("詳細権限設定"), input[value="detail"]').first();
+        await detailPermLabel.scrollIntoViewIfNeeded().catch(() => {});
+        await detailPermLabel.click({ force: true });
+        await waitForAngular(page);
 
         // 保存
         const saveBtn = page.locator('button:has-text("保存"), .btn:has-text("保存する")').first();
