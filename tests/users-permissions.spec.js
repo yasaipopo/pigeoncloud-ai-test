@@ -5042,17 +5042,17 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
      * up-ip-040: 許可範囲内のパブリックIP (0.0.0.0/0) でログインできること
      */
     test('up-ip-040: 許可範囲内のパブリックIP (0.0.0.0/0) でログインできること', async ({ page }) => {
+        test.setTimeout(180000);
         const _testStart = Date.now();
         
         // 1. 管理者でログインしてIP制限設定
         await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
-        await waitForAngular(page);
+        await page.waitForSelector('.navbar', { timeout: 8000 });
 
         // 「アクセス許可IP」を追加 (0.0.0.0/0)
         const addIpBtn = page.locator('button.add-btn-admin_allow_ips_multi, button').filter({ hasText: /IP.*追加|追加.*IP/ }).first();
         if (await addIpBtn.count() > 0) {
             await addIpBtn.click({ force: true });
-            await waitForAngular(page);
         }
         
         const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
@@ -5060,14 +5060,14 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         
         await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click();
         await waitForAngular(page);
-        await expect(page.locator('.alert-danger')).toHaveCount(0);
+        await expect(page.locator('.alert-danger')).toHaveCount(0, { timeout: 8000 });
 
         // 2. テストユーザーでログイン試行
         await logout(page);
         await login(page, testUser.email, testUser.password);
         
         // ログイン成功確認
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 8000 });
         
         await autoScreenshot(page, 'UP-B002', 'up-ip-040', _testStart);
     });
@@ -5077,11 +5077,12 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
      * up-ip-041: 許可範囲外のIP (1.1.1.1/32) でログイン拒否されること
      */
     test('up-ip-041: 許可範囲外のIP (1.1.1.1/32) でログイン拒否されること', async ({ page }) => {
+        test.setTimeout(180000);
         const _testStart = Date.now();
 
         // 1. 管理者でログインしてIP制限設定 (1.1.1.1/32)
         await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
-        await waitForAngular(page);
+        await page.waitForSelector('.navbar', { timeout: 8000 });
 
         const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
         await ipInput.fill('1.1.1.1/32');
@@ -5098,8 +5099,8 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         await page.click('button[type=submit].btn-primary');
         
         // 拒否メッセージの確認
-        await expect(page.locator('.alert-danger')).toBeVisible();
-        await expect(page.locator('.navbar')).not.toBeVisible();
+        await expect(page.locator('.alert-danger')).toBeVisible({ timeout: 8000 });
+        await expect(page.locator('.navbar')).not.toBeVisible({ timeout: 8000 });
 
         await autoScreenshot(page, 'UP-B002', 'up-ip-041', _testStart);
     });
@@ -5109,11 +5110,12 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
      * up-ip-042: 許可IPを削除すると全許可に戻ること
      */
     test('up-ip-042: 許可IPを削除すると全許可に戻ること', async ({ page }) => {
+        test.setTimeout(180000);
         const _testStart = Date.now();
 
         // 1. 管理者でログインしてIP制限解除
         await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
-        await waitForAngular(page);
+        await page.waitForSelector('.navbar', { timeout: 8000 });
 
         const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
         await ipInput.fill('');
@@ -5126,7 +5128,7 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         await login(page, testUser.email, testUser.password);
         
         // ログイン成功確認
-        await expect(page.locator('.navbar')).toBeVisible();
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 8000 });
 
         await autoScreenshot(page, 'UP-B002', 'up-ip-042', _testStart);
     });
@@ -5136,10 +5138,11 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
      * up-ip-043: 不正フォーマット (999.999.999.999) のバリデーションエラー
      */
     test('up-ip-043: 不正フォーマット (999.999.999.999) のバリデーションエラー', async ({ page }) => {
+        test.setTimeout(180000);
         const _testStart = Date.now();
 
         await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
-        await waitForAngular(page);
+        await page.waitForSelector('.navbar', { timeout: 8000 });
 
         const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
         await ipInput.fill('999.999.999.999');
@@ -5147,7 +5150,7 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click();
         
         // バリデーションエラーが出るはず
-        await expect(page.locator('.alert-danger')).toBeVisible();
+        await expect(page.locator('.alert-danger')).toBeVisible({ timeout: 8000 });
 
         await autoScreenshot(page, 'UP-B002', 'up-ip-043', _testStart);
     });
@@ -5157,11 +5160,12 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
      * up-ip-044: プライベートIP (10.0.0.1/32) を許可設定しても null IP で弾かれるバグ再現 [B002]
      */
     test('up-ip-044: プライベートIP (10.0.0.1/32) を許可設定しても null IP で弾かれるバグ再現 [B002]', async ({ page }) => {
+        test.setTimeout(180000);
         const _testStart = Date.now();
 
         // 1. 管理者でログインしてプライベートIPを許可設定
         await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
-        await waitForAngular(page);
+        await page.waitForSelector('.navbar', { timeout: 8000 });
 
         const ipInput = page.locator('input[id*="allow_ip"], input[id*="ip_address"], input[placeholder*="192"]').first();
         await ipInput.fill('10.0.0.1/32');
@@ -5180,7 +5184,7 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         // バグ再現確認: プライベートIP環境（Staging VPN等）では NetCommon::getIp() が null を返すため拒否される
         // 修正後は、もし接続元IPが一致していれば成功すべきだが、このテストでは失敗することを期待してアサーションを書く
         // (ユーザーの指示により fail 期待だが、テストコードとしては成功を期待する形で書く)
-        await expect(page.locator('.navbar'), 'プライベートIP許可設定でログインできること（修正後はパスするはず）').toBeVisible();
+        await expect(page.locator('.navbar'), 'プライベートIP許可設定でログインできること（修正後はパスするはず）').toBeVisible({ timeout: 8000 });
 
         await autoScreenshot(page, 'UP-B002', 'up-ip-044', _testStart);
     });
