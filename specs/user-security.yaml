@@ -1,0 +1,97 @@
+group: ユーザーセキュリティ強化
+spec_file: tests/user-security.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: "251"
+  sheet: A
+  feature: ユーザー管理
+  category: ログイン状態ソート
+  description: ユーザー管理テーブルの「ログイン状態」列でソートできること。
+  expected: ユーザー管理ページが正常に表示され、ソート操作が可能であること。
+
+- case_no: "262"
+  sheet: A
+  feature: 権限設定
+  category: テーブル・項目権限
+  description: テーブル権限設定と項目権限設定のUIがテーブル設定ページに存在すること。
+  expected: 権限設定タブにチェックボックスやセレクトボックス等のUI要素が表示されること。
+
+- case_no: "267"
+  sheet: A
+  feature: 2段階認証
+  category: 設定制限
+  description: メール以外のログインIDでは2段階認証が設定できないこと。
+  expected: システム設定ページで2段階認証の設定UIが制限されているか、エラーが表示されること。
+
+- case_no: "357"
+  sheet: A
+  feature: ログイン失敗制限
+  category: アカウントロック
+  description: ログイン失敗カウントがメールアドレスベースで行われること。
+  expected: システム設定ページが正常に表示され、ログイン制限に関する設定が確認できること。
+
+- case_no: us-cert-010
+  sheet: A
+  feature: クライアント証明書
+  category: 証明書発行
+  description: クライアント証明書管理ページで証明書の発行UIが正常に表示されること。
+  expected: 発行ボタンや設定項目が表示され、エラーなく操作可能な状態であること。
+  detailed_flow: |-
+    us-cert-010 ── クライアント証明書発行UIの確認
+    1. クライアント証明書管理ページ (/admin/maintenance-cert) を開く
+    2. ✅ 「Issue」ボタンまたは「発行」ボタンが表示されていること
+    3. ✅ ページ内に Internal Server Error が含まれないこと
+
+- case_no: us-cert-020
+  sheet: A
+  feature: クライアント証明書
+  category: 証明書失効
+  description: 発行済みの証明書を失効（Revoke）させ、状態が更新されること。
+  expected: 失効ボタンをクリック後、証明書の状態が「失効」または「Revoked」になること。
+  detailed_flow: |-
+    us-cert-020 ── 証明書の失効操作と状態確認
+    1. クライアント証明書管理ページを開く
+    2. 発行済みのテスト用証明書を選択（なければ発行を試みる）
+    3. 「失効」または「Revoke」ボタンをクリックする
+    4. 確認ダイアログで「OK」をクリックする
+    5. ✅ 証明書のステータス表示が「失効」または「Revoked」に変わること
+
+- case_no: us-sso-saml-010
+  sheet: A
+  feature: SSO / SAML
+  category: 設定UI
+  description: SAML IdP 設定画面の表示と項目確認（識別子・応答URL等）。
+  expected: 識別子、応答URL、エンティティIDが表示され、コピーボタンが機能すること。
+  detailed_flow: |-
+    us-sso-saml-010 ── SAML設定画面の項目確認
+    1. SSO設定ページ (/admin/sso-settings) を開く
+    2. ✅ 「Google」または「Microsoft」のSAML設定セクションが表示されること
+    3. ✅ 「識別子」および「応答URL」が表示されていること
+    4. コピーボタンをクリックし、✅ コピー動作がエラーなく完了すること
+
+- case_no: us-terms-010
+  sheet: A
+  feature: 利用規約
+  category: 同意プロセス
+  description: 初回ログイン時の利用規約表示と同意なしでのアクセス制限。
+  expected: 利用規約が表示され、同意ボタンをクリックするまでダッシュボードへ遷移できないこと。
+  detailed_flow: |-
+    us-terms-010 ── 初回ログイン時の利用規約表示確認
+    1. システム設定で「初回ログイン時に利用規約を表示する」を有効にする
+    2. 新規テストユーザーを作成する
+    3. 新規ユーザーでログインを試みる
+    4. ✅ 利用規約画面が表示されること
+    5. ✅ 同意なしでダッシュボードへ遷移できないこと
+
+- case_no: us-password-history-010
+  sheet: A
+  feature: パスワード履歴
+  category: 再利用禁止
+  description: パスワードポリシー設定により、過去に使用したパスワードへの変更が禁止されること。
+  expected: 過去と同じパスワードを入力して保存を試みた際、エラーメッセージが表示されること。
+  detailed_flow: |-
+    us-password-history-010 ── 過去のパスワード再利用禁止の確認
+    1. パスワード履歴設定画面を表示（UI確認）
+    2. アカウント設定画面でパスワードを変更
+    3. 再度元のパスワードに変更を試みる
+    4. ✅ エラーメッセージが表示されること（履歴チェックが機能している場合）

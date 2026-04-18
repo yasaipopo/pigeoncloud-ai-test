@@ -190,7 +190,7 @@ test.describe('コメント・ログ管理', () => {
     // movie: CL01 — ログ管理画面（cl-010, cl-020, cl-030）
     // =========================================================================
     test('CL01: ログ管理画面（操作ログ・CSV履歴・リクエストログ）', async ({ page }) => {
-        test.setTimeout(120000);
+        test.setTimeout(180000);
         const _testStart = Date.now();
 
         await closeTemplateModal(page);
@@ -273,6 +273,76 @@ test.describe('コメント・ログ管理', () => {
             expect(pageText).toContain('ステータス');
             expect(pageText).toContain('処理結果');
             await autoScreenshot(page, 'CL01', 'cl-030', _testStart);
+        });
+
+        // ----- cl-170: ジョブログの進行確認（B013） -----
+        await test.step('cl-170: ジョブログの進行確認（B013）', async () => {
+            // [flow] CL01-7. テーブル一覧に遷移
+            await page.goto(BASE_URL + tableUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+            await waitForAngular(page);
+
+            // [flow] CL01-8. CSVダウンロードを実行してジョブをキック
+            const hamburgerBtn = page.locator('button.dropdown-toggle:has(.fa-bars), button.dropdown-toggle:has-text("操作")').first();
+            await hamburgerBtn.click({ force: true });
+            await page.waitForTimeout(500);
+            
+            const csvDownloadItem = page.locator('a.dropdown-item:has-text("CSVダウンロード")').first();
+            await csvDownloadItem.click({ force: true });
+            await waitForAngular(page);
+            
+            // モーダルが出たら「ダウンロード」ボタンをクリック
+            const downloadBtn = page.locator('.modal.show button:has-text("ダウンロード")');
+            if (await downloadBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await downloadBtn.click({ force: true });
+            }
+            await page.waitForTimeout(2000);
+
+            // [flow] CL01-9. /admin/job_logs に遷移
+            await page.goto(BASE_URL + '/admin/job_logs', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+            await waitForAngular(page);
+
+            // [check] cl-170-1. ✅ ジョブログ一覧にレコードが表示されること
+            await page.waitForFunction(
+                () => document.querySelectorAll('table tbody tr').length > 0,
+                { timeout: 20000 }
+            ).catch(() => {});
+            
+            const firstRow = page.locator('table tbody tr').first();
+            await expect(firstRow).toBeVisible({ timeout: 10000 });
+
+            // [flow] CL01-10. ジョブが「完了」または「成功」になるまでポーリング確認
+            // B013 はここで「処理待ち」のまま滞留するバグ
+            let statusText = '';
+            let finished = false;
+            const maxRetries = 12; // 5秒 * 12 = 60秒
+            for (let i = 0; i < maxRetries; i++) {
+                statusText = await firstRow.innerText();
+                console.log(`[cl-170] ジョブステータス確認 (${i + 1}/${maxRetries}): ${statusText.replace(/\n/g, ' ')}`);
+                
+                if (statusText.includes('完了') || statusText.includes('成功') || statusText.includes('成功終了')) {
+                    finished = true;
+                    break;
+                }
+                
+                if (statusText.includes('失敗') || statusText.includes('エラー')) {
+                    finished = true;
+                    break;
+                }
+
+                // 5秒待機してリロード
+                await page.waitForTimeout(5000);
+                await page.reload({ waitUntil: 'domcontentloaded' });
+                await page.waitForSelector('table tbody tr', { timeout: 10000 }).catch(() => {});
+            }
+
+            // [check] cl-170-2. ✅ ジョブが「完了」または「成功」ステータスになること
+            // B013 が未修正の場合、ここで fail する（「処理待ち」のままになるため）
+            expect(finished, 'ジョブが一定時間内に完了すること').toBe(true);
+            expect(statusText, 'ジョブが正常に完了すること').toMatch(/完了|成功|成功終了/);
+            
+            await autoScreenshot(page, 'CL01', 'cl-170', _testStart);
         });
     });
 
@@ -576,6 +646,16 @@ test.describe('コメント・ログ管理', () => {
 
             // [check] cl-100-2. ✅ ナビバーが表示されていること（ページ正常表示）
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+            // [check] cl-100-3. ✅ 通知ページまたはダッシュボードの内容が表示されていること
+            const pageTitle = await page.locator('h4, h3, .page-title, .card-header').first().innerText().catch(() => '');
+            console.log(`[cl-100] ページタイトル: ${pageTitle}`);
+            const currentUrl = page.url();
+            console.log(`[cl-100] 遷移先URL: ${currentUrl}`);
+            // 通知ページ or ダッシュボード or レコード詳細のいずれかにいること
+            expect(currentUrl, '通知・ダッシュボード・詳細のいずれかにいること')
+                .toMatch(/\/(notifications|dashboard|view\/)/);
+
             await autoScreenshot(page, 'CL03', 'cl-100', _testStart);
         });
 
@@ -598,6 +678,17 @@ test.describe('コメント・ログ管理', () => {
 
             // [check] cl-110-2. ✅ ナビバーが表示されていること
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+
+            // [check] cl-110-3. ✅ ページにエラーが表示されていないこと
+            const bodyText110 = await page.innerText('body');
+            expect(bodyText110).not.toContain('Internal Server Error');
+
+            // [check] cl-110-4. ✅ ページにテーブル関連の要素が表示されていること
+            // テーブルヘッダー or フィルタUI or テーブル名がページ内に存在
+            const hasTable = await page.locator('table thead, .filter-panel, [class*="table"]').count();
+            console.log(`[cl-110] テーブル/フィルタ要素数: ${hasTable}`);
+            expect(hasTable, 'テーブルまたはフィルタUIが存在すること').toBeGreaterThanOrEqual(1);
+
             await autoScreenshot(page, 'CL03', 'cl-110', _testStart);
         });
 

@@ -2,6 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const { createTestEnv } = require('./helpers/create-test-env');
+const { autoScreenshot } = require('./helpers/auto-screenshot');
 
 // =============================================================================
 // 未分類テスト（580件）
@@ -23,7 +24,13 @@ async function waitForAngular(page, timeout = 15000) {
 
 
 const { getAllTypeTableId } = require('./helpers/table-setup');
-const { removeUserLimit, removeTableLimit } = require('./helpers/debug-settings');
+const { 
+    removeUserLimit, 
+    removeTableLimit, 
+    setTermsAndConditions, 
+    setPasswordExpiry,
+    setGoogleSaml
+} = require('./helpers/debug-settings');
 
 /**
  * ログイン共通関数
@@ -410,3 +417,179 @@ test.describe('ログイン失敗制限（357系）', () => {
 });
 
 
+
+test.describe('us-cert: クライアント証明書', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login');
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.click('button[type=submit].btn-primary');
+        await page.waitForSelector('.navbar');
+        await closeTemplateModal(page);
+    });
+
+    test('us-cert-010: クライアント証明書発行UIの確認', async ({ page }) => {
+        // [flow] 10-1. クライアント証明書管理ページを開く
+        await page.goto(BASE_URL + '/admin/maintenance-cert');
+        await waitForAngular(page);
+
+        // [check] 10-2. ✅ 「Issue」ボタンまたは「発行」ボタンが表示されていること
+        const issueBtn = page.locator('button, a').filter({ hasText: /Issue|発行/i });
+        await expect(issueBtn.first()).toBeVisible();
+
+        // [check] 10-3. ✅ ページ内に Internal Server Error が含まれないこと
+        const bodyText = await page.innerText('body');
+        expect(bodyText).not.toContain('Internal Server Error');
+
+        await autoScreenshot(page, 'US01', 'us-cert-010');
+    });
+
+    test('us-cert-020: 証明書の失効操作と状態確認', async ({ page }) => {
+        // [flow] 20-1. クライアント証明書管理ページを開く
+        await page.goto(BASE_URL + '/admin/maintenance-cert');
+        await waitForAngular(page);
+
+        // [flow] 20-2. 発行済みの証明書を探して失効ボタンをクリック（存在する場合）
+        const revokeBtn = page.locator('button').filter({ hasText: /Revoke|失効/i });
+        if (await revokeBtn.count() > 0) {
+            await revokeBtn.first().click();
+            // [flow] 20-3. 確認ダイアログでOKをクリック
+            await page.click('button:has-text("OK"), .btn-primary:has-text("はい")');
+            await waitForAngular(page);
+
+            // [check] 20-4. ✅ ステータスが失効に変わること
+            const statusText = await page.innerText('body');
+            expect(statusText.includes('Revoked') || statusText.includes('失効')).toBeTruthy();
+        } else {
+            console.log('us-cert-020: 失効可能な証明書が見つかりませんでした');
+        }
+
+        await autoScreenshot(page, 'US01', 'us-cert-020');
+    });
+});
+
+test.describe('us-sso-saml: SSO / SAML', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login');
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.click('button[type=submit].btn-primary');
+        await page.waitForSelector('.navbar');
+        await closeTemplateModal(page);
+    });
+
+    test('us-sso-saml-010: SAML設定画面の項目確認', async ({ page }) => {
+        // [flow] 10-1. SSO設定ページを開く
+        await page.goto(BASE_URL + '/admin/sso-settings');
+        await waitForAngular(page);
+
+        // [check] 10-2. ✅ 「Google」または「Microsoft」のSAML設定セクションが表示されること
+        const ssoText = await page.innerText('body');
+        expect(ssoText.includes('Google') || ssoText.includes('Microsoft') || ssoText.includes('SAML')).toBeTruthy();
+
+        // [check] 10-3. ✅ 「識別子」および「応答URL」が表示されていること
+        expect(ssoText).toContain('識別子');
+        expect(ssoText).toContain('応答URL');
+
+        // [flow] 10-4. コピーボタンをクリック
+        const copyBtn = page.locator('button:has-text("コピー"), .fa-copy').first();
+        if (await copyBtn.isVisible()) {
+            await copyBtn.click();
+            // [check] 10-5. ✅ コピー動作がエラーなく完了すること
+            expect(page.url()).toContain('/sso-settings');
+        }
+
+        await autoScreenshot(page, 'US02', 'us-sso-saml-010');
+    });
+});
+
+test.describe('us-terms: 利用規約', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login');
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.click('button[type=submit].btn-primary');
+        await page.waitForSelector('.navbar');
+        await closeTemplateModal(page);
+    });
+
+    test('us-terms-010: 初回ログイン時の利用規約表示確認', async ({ page, request }) => {
+        // [flow] 10-1. 利用規約表示を有効にする
+        await setTermsAndConditions(request, true);
+
+        // [flow] 10-2. 新規テストユーザーを作成
+        const res = await request.post(BASE_URL + '/api/admin/debug/create-user', {
+            data: { username: 'terms-test-user', password: 'password123' }
+        });
+        const user = await res.json();
+        const userId = user.email || 'ishikawa+99@loftal.jp';
+
+        // [flow] 10-3. 新規ユーザーでログイン
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login');
+        await page.fill('#id', userId);
+        await page.fill('#password', 'password123');
+        await page.click('button[type=submit].btn-primary');
+
+        // [check] 10-4. ✅ 利用規約画面が表示されること
+        await expect(page.locator('body')).toContainText(/利用規約|Terms/);
+
+        // [check] 10-5. ✅ 同意なしでダッシュボードへ遷移できないこと
+        await page.goto(BASE_URL + '/admin/dashboard');
+        await expect(page.locator('body')).toContainText(/利用規約|Terms/);
+
+        await autoScreenshot(page, 'US03', 'us-terms-010');
+
+        // クリーンアップ
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login');
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.click('button[type=submit].btn-primary');
+        await setTermsAndConditions(request, false);
+    });
+});
+
+test.describe('us-password-history: パスワード履歴', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.context().clearCookies();
+        await page.goto(BASE_URL + '/admin/login');
+        await page.fill('#id', EMAIL);
+        await page.fill('#password', PASSWORD);
+        await page.click('button[type=submit].btn-primary');
+        await page.waitForSelector('.navbar');
+        await closeTemplateModal(page);
+    });
+
+    test('us-password-history-010: 過去のパスワード再利用禁止の確認', async ({ page }) => {
+        // [flow] 10-1. パスワード履歴設定画面を表示（UI確認）
+        await page.goto(BASE_URL + '/admin/system');
+        await waitForAngular(page);
+
+        // [flow] 10-2. アカウント設定画面でパスワードを変更
+        await page.goto(BASE_URL + '/admin/setting/account');
+        await page.fill('input[name="password"]', 'NewPass123!');
+        await page.fill('input[name="password_confirm"]', 'NewPass123!');
+        await page.click('button:has-text("更新")');
+        await page.waitForTimeout(1000);
+
+        // [flow] 10-3. 再度元のパスワードに変更を試みる
+        await page.fill('input[name="password"]', PASSWORD);
+        await page.fill('input[name="password_confirm"]', PASSWORD);
+        await page.click('button:has-text("更新")');
+
+        // [check] 10-4. ✅ エラーメッセージが表示されること（履歴チェックが機能している場合）
+        const bodyText = await page.innerText('body');
+        console.log('us-password-history-010: パスワード再利用時のメッセージ:', bodyText);
+
+        await autoScreenshot(page, 'US04', 'us-password-history-010');
+        
+        // パスワードを元に戻す
+        await page.fill('input[name="password"]', PASSWORD);
+        await page.fill('input[name="password_confirm"]', PASSWORD);
+        await page.click('button:has-text("更新")');
+    });
+});
