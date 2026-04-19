@@ -429,6 +429,9 @@ test.describe('us-cert: クライアント証明書', () => {
         await closeTemplateModal(page);
     });
 
+    /**
+     * @requirements.txt(R-127, R-130, R-133)
+     */
     test('us-cert-010: クライアント証明書発行UIの確認', async ({ page }) => {
         // [flow] 10-1. クライアント証明書管理ページを開く
         await page.goto(BASE_URL + '/admin/maintenance-cert');
@@ -445,6 +448,9 @@ test.describe('us-cert: クライアント証明書', () => {
         await autoScreenshot(page, 'US01', 'us-cert-010');
     });
 
+    /**
+     * @requirements.txt(R-129, R-136)
+     */
     test('us-cert-020: 証明書の失効操作と状態確認', async ({ page }) => {
         // [flow] 20-1. クライアント証明書管理ページを開く
         await page.goto(BASE_URL + '/admin/maintenance-cert');
@@ -480,6 +486,9 @@ test.describe('us-sso-saml: SSO / SAML', () => {
         await closeTemplateModal(page);
     });
 
+    /**
+     * @requirements.txt(R-109, R-115, R-122, R-125)
+     */
     test('us-sso-saml-010: SAML設定画面の項目確認', async ({ page }) => {
         // [flow] 10-1. SSO設定ページを開く
         await page.goto(BASE_URL + '/admin/sso-settings');
@@ -516,6 +525,9 @@ test.describe('us-terms: 利用規約', () => {
         await closeTemplateModal(page);
     });
 
+    /**
+     * @requirements.txt(R-125)
+     */
     test('us-terms-010: 初回ログイン時の利用規約表示確認', async ({ page, request }) => {
         // [flow] 10-1. 利用規約表示を有効にする
         await setTermsAndConditions(request, true);
@@ -564,6 +576,9 @@ test.describe('us-password-history: パスワード履歴', () => {
         await closeTemplateModal(page);
     });
 
+    /**
+     * @requirements.txt(R-124)
+     */
     test('us-password-history-010: 過去のパスワード再利用禁止の確認', async ({ page }) => {
         // [flow] 10-1. パスワード履歴設定画面を表示（UI確認）
         await page.goto(BASE_URL + '/admin/system');

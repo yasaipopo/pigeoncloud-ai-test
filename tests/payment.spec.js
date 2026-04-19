@@ -87,6 +87,9 @@ const autoScreenshot = createAutoScreenshot('payment');
 
 test.describe('支払い・プラン管理', () => {
 
+    /**
+     * @requirements.txt(R-162)
+     */
     test('PM01: 支払いページ基本機能確認', async ({ page }) => {
         await login(page);
         const _testStart = Date.now();
@@ -326,6 +329,9 @@ test.describe('支払い・プラン管理', () => {
         });
     });
 
+    /**
+     * @requirements.txt(R-168)
+     */
     test('UC16: 支払いページでクレジットカードブランド表示確認', async ({ page }) => {
         await login(page);
         const _testStart = Date.now();
@@ -361,6 +367,9 @@ test.describe('支払い・プラン管理', () => {
         });
     });
 
+    /**
+     * @requirements.txt(R-165)
+     */
     test('UC03: 請求情報メニュー・領収書ダウンロード確認', async ({ page }) => {
         await login(page);
         const _testStart = Date.now();
@@ -408,6 +417,9 @@ test.describe('支払い・プラン管理', () => {
         });
     });
 
+    /**
+     * @requirements.txt(R-169)
+     */
     test('UC09: 決済後のユーザー数変更確認', async ({ page }) => {
         await login(page);
         const _testStart = Date.now();

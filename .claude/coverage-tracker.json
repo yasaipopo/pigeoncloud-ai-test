@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-19T05:21:54.838345",
+  "generated_at": "2026-04-19T21:07:28.261155",
   "summary": {
     "total_requirements": 254,
-    "covered": 3,
-    "uncovered": 251,
-    "coverage_rate": 0.01,
+    "covered": 26,
+    "uncovered": 228,
+    "coverage_rate": 0.1,
     "feature_area_summary": {
       "カレンダー / Calendar": {
         "total": 12,
@@ -43,23 +43,23 @@
       },
       "認証・認可 / Authentication & Authorization": {
         "total": 12,
-        "covered": 0,
-        "coverage_rate": 0.0
+        "covered": 8,
+        "coverage_rate": 0.67
       },
       "認証システム / Authentication System": {
         "total": 12,
-        "covered": 0,
-        "coverage_rate": 0.0
+        "covered": 3,
+        "coverage_rate": 0.25
       },
       "クライアント証明書 / Client Certificates": {
         "total": 12,
-        "covered": 0,
-        "coverage_rate": 0.0
+        "covered": 2,
+        "coverage_rate": 0.17
       },
       "IP制限 / IP Restriction": {
         "total": 10,
-        "covered": 3,
-        "coverage_rate": 0.3
+        "covered": 9,
+        "coverage_rate": 0.9
       },
       "利用規約 / Terms and Conditions": {
         "total": 12,
@@ -68,8 +68,8 @@
       },
       "決済システム / Payment System": {
         "total": 12,
-        "covered": 0,
-        "coverage_rate": 0.0
+        "covered": 4,
+        "coverage_rate": 0.33
       },
       "ChatGPT統合 / ChatGPT Integration": {
         "total": 12,
@@ -822,15 +822,23 @@
       "requirement": "ユーザー認証ができる",
       "feature_area": "認証・認可 / Authentication & Authorization",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/auth.spec.js:212: * @requirements.txt(R-103)",
+        "tests/auth.spec.js:339: * @requirements.txt(R-103, R-124)",
+        "tests/auth.spec.js:1022: * @requirements.txt(R-103)",
+        "tests/auth.spec.js:1041: * @requirements.txt(R-103)"
+      ],
+      "status": "covered"
     },
     "R-104": {
       "requirement": "2段階認証ができる",
       "feature_area": "認証・認可 / Authentication & Authorization",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/auth.spec.js:716: * @requirements.txt(R-104, R-111, R-116, R-123)",
+        "tests/auth.spec.js:807: * @requirements.txt(R-104, R-116)"
+      ],
+      "status": "covered"
     },
     "R-105": {
       "requirement": "IP制限ができる",
@@ -843,8 +851,10 @@
       "requirement": "権限管理ができる",
       "feature_area": "認証・認可 / Authentication & Authorization",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/auth.spec.js:532: * @requirements.txt(R-106, R-113)"
+      ],
+      "status": "covered"
     },
     "R-107": {
       "requirement": "ロール管理ができる",
@@ -857,29 +867,38 @@
       "requirement": "セッション管理ができる",
       "feature_area": "認証・認可 / Authentication & Authorization",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/auth.spec.js:903: * @requirements.txt(R-108)"
+      ],
+      "status": "covered"
     },
     "R-109": {
       "requirement": "SAML認証ができる",
       "feature_area": "認証・認可 / Authentication & Authorization",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/user-security.spec.js:490: * @requirements.txt(R-109, R-115, R-122, R-125)"
+      ],
+      "status": "covered"
     },
     "R-110": {
       "requirement": "Error Case: 認証エラーの場合",
       "feature_area": "認証・認可 / Authentication & Authorization",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/auth.spec.js:1079: * @requirements.txt(R-110)",
+        "tests/auth.spec.js:1102: * @requirements.txt(R-110)"
+      ],
+      "status": "covered"
     },
     "R-111": {
       "requirement": "Error Case: 2FA検証エラーの場合",
       "feature_area": "認証・認可 / Authentication & Authorization",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/auth.spec.js:840: * @requirements.txt(R-111, R-123)"
+      ],
+      "status": "covered"
     },
     "R-112": {
       "requirement": "Error Case: IP制限エラーの場合",
@@ -892,8 +911,11 @@
       "requirement": "Error Case: 権限エラーの場合",
       "feature_area": "認証・認可 / Authentication & Authorization",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/auth.spec.js:957: * @requirements.txt(R-113, R-121)",
+        "tests/auth.spec.js:981: * @requirements.txt(R-113)"
+      ],
+      "status": "covered"
     },
     "R-114": {
       "requirement": "Error Case: セッションエラーの場合",
@@ -941,8 +963,10 @@
       "requirement": "セッションを管理できる",
       "feature_area": "認証システム / Authentication System",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/auth.spec.js:922: * @requirements.txt(R-120)"
+      ],
+      "status": "covered"
     },
     "R-121": {
       "requirement": "アクセス制御できる",
@@ -969,15 +993,21 @@
       "requirement": "Error Case: セッションエラーの場合",
       "feature_area": "認証システム / Authentication System",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/user-security.spec.js:580: * @requirements.txt(R-124)",
+        "tests/auth.spec.js:873: * @requirements.txt(R-124)",
+        "tests/auth.spec.js:1057: * @requirements.txt(R-124)"
+      ],
+      "status": "covered"
     },
     "R-125": {
       "requirement": "Error Case: 設定エラーの場合",
       "feature_area": "認証システム / Authentication System",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/user-security.spec.js:529: * @requirements.txt(R-125)"
+      ],
+      "status": "covered"
     },
     "R-126": {
       "requirement": "Error Case: 統合エラーの場合",
@@ -990,8 +1020,10 @@
       "requirement": "証明書を生成できる",
       "feature_area": "クライアント証明書 / Client Certificates",
       "priority": "low",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/user-security.spec.js:433: * @requirements.txt(R-127, R-130, R-133)"
+      ],
+      "status": "covered"
     },
     "R-128": {
       "requirement": "証明書を検証できる",
@@ -1004,8 +1036,10 @@
       "requirement": "証明書の失効を管理できる",
       "feature_area": "クライアント証明書 / Client Certificates",
       "priority": "low",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/user-security.spec.js:452: * @requirements.txt(R-129, R-136)"
+      ],
+      "status": "covered"
     },
     "R-130": {
       "requirement": "証明書のライフサイクルを管理できる",
@@ -1075,10 +1109,11 @@
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
       "covered_by": [
-        "tests/users-permissions.spec.js:4685: * @requirements.txt(R-139)",
-        "tests/users-permissions.spec.js:5026: * @requirements.txt(R-139, R-140, R-141)",
-        "tests/users-permissions.spec.js:5064: * @requirements.txt(R-139)",
-        "tests/users-permissions.spec.js:5203: * @requirements.txt(R-139)"
+        "tests/users-permissions.spec.js:4691: * @requirements.txt(R-139)",
+        "tests/users-permissions.spec.js:5033: * @requirements.txt(R-139, R-140, R-141, R-142, R-143, R-145, R-146, R-147, R-148)",
+        "tests/users-permissions.spec.js:5178: * @requirements.txt(R-139)",
+        "tests/users-permissions.spec.js:5202: * @requirements.txt(R-139)",
+        "tests/users-permissions.spec.js:5223: * @requirements.txt(R-139)"
       ],
       "status": "covered"
     },
@@ -1087,10 +1122,10 @@
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
       "covered_by": [
-        "tests/users-permissions.spec.js:4829: * @requirements.txt(R-140)",
-        "tests/users-permissions.spec.js:4854: * @requirements.txt(R-140)",
-        "tests/users-permissions.spec.js:5105: * @requirements.txt(R-140)",
-        "tests/users-permissions.spec.js:5175: * @requirements.txt(R-140)"
+        "tests/users-permissions.spec.js:4836: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:4861: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:5251: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:5273: * @requirements.txt(R-140)"
       ],
       "status": "covered"
     },
@@ -1099,8 +1134,8 @@
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
       "covered_by": [
-        "tests/users-permissions.spec.js:4787: * @requirements.txt(R-141)",
-        "tests/users-permissions.spec.js:5140: * @requirements.txt(R-141)"
+        "tests/users-permissions.spec.js:4794: * @requirements.txt(R-141)",
+        "tests/users-permissions.spec.js:5299: * @requirements.txt(R-141)"
       ],
       "status": "covered"
     },
@@ -1108,15 +1143,20 @@
       "requirement": "アクセスログを取得できる",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:5340: * @requirements.txt(R-142)",
+        "tests/users-permissions.spec.js:5372: * @requirements.txt(R-142)"
+      ],
+      "status": "covered"
     },
     "R-143": {
       "requirement": "例外設定ができる",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:5407: * @requirements.txt(R-143)"
+      ],
+      "status": "covered"
     },
     "R-144": {
       "requirement": "一時的な許可ができる",
@@ -1129,29 +1169,39 @@
       "requirement": "CIDR表記に対応される",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:5448: * @requirements.txt(R-145)",
+        "tests/users-permissions.spec.js:5475: * @requirements.txt(R-145)"
+      ],
+      "status": "covered"
     },
     "R-146": {
       "requirement": "Error Case: IP検証エラーの場合",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:5509: * @requirements.txt(R-146)",
+        "tests/users-permissions.spec.js:5541: * @requirements.txt(R-146)"
+      ],
+      "status": "covered"
     },
     "R-147": {
       "requirement": "Error Case: ルール設定エラーの場合",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:5584: * @requirements.txt(R-147)"
+      ],
+      "status": "covered"
     },
     "R-148": {
       "requirement": "Error Case: 許可されていないIPアドレスからのアクセスの場合 (403 Forbidden)",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:5617: * @requirements.txt(R-148)"
+      ],
+      "status": "covered"
     },
     "R-149": {
       "requirement": "利用規約を管理できる",
@@ -1248,8 +1298,10 @@
       "requirement": "Stripe決済ができる",
       "feature_area": "決済システム / Payment System",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/payment.spec.js:91: * @requirements.txt(R-162)"
+      ],
+      "status": "covered"
     },
     "R-163": {
       "requirement": "定期支払いができる",
@@ -1269,8 +1321,10 @@
       "requirement": "請求書を生成できる",
       "feature_area": "決済システム / Payment System",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/payment.spec.js:371: * @requirements.txt(R-165)"
+      ],
+      "status": "covered"
     },
     "R-166": {
       "requirement": "返金処理ができる",
@@ -1290,15 +1344,19 @@
       "requirement": "Error Case: 決済エラーの場合",
       "feature_area": "決済システム / Payment System",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/payment.spec.js:333: * @requirements.txt(R-168)"
+      ],
+      "status": "covered"
     },
     "R-169": {
       "requirement": "Error Case: 認証エラーの場合",
       "feature_area": "決済システム / Payment System",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/payment.spec.js:421: * @requirements.txt(R-169)"
+      ],
+      "status": "covered"
     },
     "R-170": {
       "requirement": "Error Case: 通信エラーの場合",
