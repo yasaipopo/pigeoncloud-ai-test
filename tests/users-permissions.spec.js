@@ -5269,8 +5269,28 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         await autoScreenshot(page, 'UP-B002', 'up-ip-050', _testStart);
     });
 
-    // up-ip-060 削除: PHPUnit IpCheckerTest で CIDR /24 範囲外判定は網羅済み (責務分離)
-    //   参照: .claude/test-responsibility-boundary.md
+    /**
+     * @requirements.txt(R-140)
+     * up-ip-060: 現在IPと別レンジの /24 → ログイン拒否
+     * 方針 2026-04-20: PHPUnit カバー済みでも E2E で UI 経由で全パターン検証する
+     */
+    test('up-ip-060: 現在IPと別レンジの /24 → ログイン拒否', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        const diffCidr = ipInDifferentSubnet(currentIp);
+        // [flow] 60-1. 現在IPと異なる /24 レンジを設定
+        await setAllowIps(page, localBaseUrl, testUser.id, [diffCidr]);
+
+        // [flow] 60-2. testUser で再ログイン試行
+        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
+
+        // [check] 60-3. ✅ 拒否される
+        await expect(page).toHaveURL(/\/admin\/login/);
+        await expect(page.locator('.navbar')).not.toBeVisible({ timeout: 8000 });
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-060', _testStart);
+    });
 
     /**
      * @requirements.txt(R-140, R-141)
@@ -5471,10 +5491,83 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
     // =========================================================================
     // R-145: CIDR表記に対応される (境界値)
     // =========================================================================
-    // up-ip-120 (/31 ペア), up-ip-130 (/16, /8) 削除:
-    //   PHPUnit IpCheckerTest で CIDR 境界値判定 (/32, /24, /16, /8, /0) は網羅済み。
-    //   UI→ロジック統合は up-ip-050 (/24) が代表として残存。
+    // 方針 2026-04-20: PHPUnit カバー済みでも E2E でも全 CIDR パターンを検証する
     //   参照: .claude/test-responsibility-boundary.md
+
+    /**
+     * @requirements.txt(R-145)
+     * up-ip-120: CIDR /31 (2IP マッチ) - 現在IP を含む /31 で許可
+     */
+    test('up-ip-120: CIDR /31 レンジ (2IP) でログイン可能', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        const parts = currentIp.split('.').map(Number);
+        const base = parts[3] - (parts[3] % 2);
+        const cidr31 = `${parts[0]}.${parts[1]}.${parts[2]}.${base}/31`;
+
+        await setAllowIps(page, localBaseUrl, testUser.id, [cidr31]);
+        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
+
+        await expect(page.locator('.navbar'), `${cidr31} に ${currentIp} が含まれるので成功すべき`).toBeVisible({ timeout: 10000 });
+        await expect(page).toHaveURL(/\/admin\/(dashboard|dataset)/);
+        await expect(page.locator('.nav-link.nav-pill.avatar, .user-menu, [class*="avatar"]').first()).toBeVisible({ timeout: 8000 });
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-120', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-145)
+     * up-ip-130: CIDR /16 と /8 の大レンジでもマッチ
+     */
+    test('up-ip-130: CIDR /16 / /8 の大レンジでログイン可能', async ({ page }) => {
+        test.setTimeout(240000);
+        const _testStart = Date.now();
+
+        const cidr16 = ipInSameSubnet(currentIp, 16);
+        const cidr8 = ipInSameSubnet(currentIp, 8);
+
+        // /16 レンジ設定
+        await setAllowIps(page, localBaseUrl, testUser.id, [cidr16]);
+        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
+        await expect(page.locator('.navbar'), `${cidr16} でログイン成功`).toBeVisible({ timeout: 10000 });
+        await expect(page).toHaveURL(/\/admin\/(dashboard|dataset)/);
+
+        // /8 に切り替え
+        await reLoginAs(page, localBaseUrl, localEmail, localPassword);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+        await setAllowIps(page, localBaseUrl, testUser.id, [cidr8]);
+        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
+        await expect(page.locator('.navbar'), `${cidr8} でログイン成功`).toBeVisible({ timeout: 10000 });
+        await expect(page).toHaveURL(/\/admin\/(dashboard|dataset)/);
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-130', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-140, R-141)
+     * up-ip-220: 複数IP OR (全マッチ冗長) - 2 件とも現在IPにマッチ → ログイン成功
+     */
+    test('up-ip-220: 複数IP OR (現在IP/32 + 現在IPを含む /24) 全マッチでログイン成功', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        const cidr32 = `${currentIp}/32`;
+        const cidr24 = ipInSameSubnet(currentIp, 24);
+
+        // [flow] 220-1. 現在IP にマッチする 2 件を設定
+        await setAllowIps(page, localBaseUrl, testUser.id, [cidr32, cidr24]);
+        await expect(page.locator('.alert-danger')).toHaveCount(0, { timeout: 8000 });
+
+        // [flow] 220-2. testUser で再ログイン
+        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
+
+        // [check] 220-3. ✅ OR で両方マッチしてログイン成功
+        await expect(page.locator('.navbar'), '両方の許可IPにマッチしてログイン成功').toBeVisible({ timeout: 10000 });
+        await expect(page).toHaveURL(/\/admin\/(dashboard|dataset)/);
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-220', _testStart);
+    });
 
     // =========================================================================
     // R-146: Error Case: IP検証エラー
@@ -5510,6 +5603,73 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         expect(errCount, '不正IP 999.999.999.999 で何らかのエラー表示があること').toBeGreaterThan(0);
 
         await autoScreenshot(page, 'UP-B002', 'up-ip-043', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-146)
+     * up-ip-230: 不正マスク /33 でバリデーションエラー (PHPUnit: IpCheckerTest でも検証)
+     */
+    test('up-ip-230: 不正マスク /33 のバリデーション', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
+        await page.waitForSelector('.navbar');
+        await waitForAngular(page);
+
+        const ipSection = page.locator('[class*="wrap-field-allow_ips"]');
+        if (await ipSection.locator('input[type="text"]').count() === 0) {
+            await ipSection.locator('button.btn-success').first().click({ force: true });
+            await page.waitForTimeout(300);
+        }
+        await ipSection.locator('input[type="text"]').first().fill('192.168.1.1/33');
+
+        await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click({ force: true });
+        await page.waitForTimeout(3000);
+
+        // ✅ 不正マスクで何らかのエラー表示
+        const errorLocator = page.locator('.alert-danger, .has-error, .is-invalid, .invalid-feedback');
+        const errCount = await errorLocator.count();
+        expect(errCount, '不正マスク /33 で何らかのエラー表示').toBeGreaterThan(0);
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-230', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-146)
+     * up-ip-240: IPv6 形式入力 (プロダクト仕様: IPv4 のみ対応 → エラー or 保存拒否)
+     */
+    test('up-ip-240: IPv6 (::1) 入力の挙動 (非対応)', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
+        await page.waitForSelector('.navbar');
+        await waitForAngular(page);
+
+        const ipSection = page.locator('[class*="wrap-field-allow_ips"]');
+        if (await ipSection.locator('input[type="text"]').count() === 0) {
+            await ipSection.locator('button.btn-success').first().click({ force: true });
+            await page.waitForTimeout(300);
+        }
+        await ipSection.locator('input[type="text"]').first().fill('2001:db8::1');
+
+        await page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first().click({ force: true });
+        await page.waitForTimeout(3000);
+
+        // ✅ Internal Server Error は出ないこと (graceful な挙動、エラー表示 or サイレント無視いずれか)
+        const body = await page.locator('body').innerText();
+        expect(body, 'IPv6 入力で 500 エラーが発生しないこと').not.toContain('Internal Server Error');
+
+        // 仕様確認中 (test-env-limitations 記録): エラー表示が出ない場合もあるため soft assertion
+        // ただし保存後にページリロードして実際に IPv6 が保存されていないことを最低限確認
+        await page.goto(localBaseUrl + '/admin/admin/edit/' + testUser.id);
+        await page.waitForSelector('.navbar');
+        await waitForAngular(page);
+        const sectionText = await page.locator('[class*="wrap-field-allow_ips"]').innerText();
+        expect(sectionText, 'IPv6 アドレスが保存されていないこと (IPv4 専用)').not.toContain('2001:db8');
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-240', _testStart);
     });
 
     /**
