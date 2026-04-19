@@ -73,14 +73,14 @@ class QualityGate:
         # Find test(...) or test.step(...) blocks
         # This is an approximation for multi-line blocks
         test_pattern = re.compile(r"((?:test|test\.step)\s*\(\s*['\"].*?['\"].*?async.*?\{)(.*?)(\n\s*\}\s*\)\s*;|\n\s*\}\s*\))", re.DOTALL)
-        
+
         for match in test_pattern.finditer(content):
             header = match.group(1)
             body = match.group(2)
-            
+
             # Find line number
             line_num = content.count('\n', 0, match.start()) + 1
-            
+
             test_name_match = re.search(r"['\"](.*?)['\"]", header)
             test_name = test_name_match.group(1) if test_name_match else "unknown"
 
@@ -103,7 +103,14 @@ class QualityGate:
                         self.report_violation(file_path, line_num, f"test '{test_name}' only checks navbar and/or Internal Server Error")
 
             # Rule 7: @requirements.txt(ID) tag missing
-            if not re.search(r"@requirements\.txt\(R-\d{3}\)|\[req:R-\d{3}\]", header + body):
+            # test ブロック本体だけでなく、直前の JSDoc コメント（/** ... */）も検査対象に含める。
+            # タグは `@requirements.txt(R-XXX)` または `[req:R-XXX]` を許容する。
+            # JSDoc は test 宣言の直前 500 文字以内に現れる最後のコメントブロックを参照する。
+            before = content[max(0, match.start() - 500):match.start()]
+            jsdoc_m = re.search(r"/\*\*[\s\S]*?\*/\s*$", before)
+            jsdoc = jsdoc_m.group(0) if jsdoc_m else ''
+            haystack = jsdoc + header + body
+            if not re.search(r"@requirements\.txt\s*\(\s*R-\d{3}(?:\s*,\s*R-\d{3})*\s*\)|\[req:R-\d{3}\]", haystack):
                 self.report_violation(file_path, line_num, f"test '{test_name}' is missing @requirements.txt(ID) tag")
 
     def check_yaml_file(self, file_path):

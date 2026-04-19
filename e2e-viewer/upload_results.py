@@ -197,7 +197,24 @@ def _process_spec(spec, suite_name, spec_file, cases):
 
     for test in spec.get('tests', []):
         results = test.get('results', [])
+        test_status = test.get('status', '')
+
         if not results:
+            # results が空 = 実行されなかった (skipped / did not run)
+            # test.status が 'skipped' / 'expected' (expectedStatus skipped) 等の場合は skipped として記録
+            if test_status in ('skipped', 'expected') or test.get('expectedStatus') == 'skipped':
+                cases.append({
+                    'caseId': slugify(spec.get('title', '')) or str(uuid.uuid4())[:8],
+                    'testTitle': spec.get('title', ''),
+                    'suiteName': suite_name,
+                    'specFile': spec_file,
+                    'caseStatus': 'skipped',
+                    'durationMs': 0,
+                    'errorMessage': '',
+                    'errorStack': '',
+                    'attachments': [],
+                    'startedAt': ''
+                })
             continue
 
         # 最後のresult（リトライ考慮）を使用

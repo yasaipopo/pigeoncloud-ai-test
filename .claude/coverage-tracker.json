@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-18T22:48:55.697520",
+  "generated_at": "2026-04-19T05:21:54.838345",
   "summary": {
     "total_requirements": 254,
-    "covered": 0,
-    "uncovered": 254,
-    "coverage_rate": 0.0,
+    "covered": 3,
+    "uncovered": 251,
+    "coverage_rate": 0.01,
     "feature_area_summary": {
       "カレンダー / Calendar": {
         "total": 12,
@@ -58,8 +58,8 @@
       },
       "IP制限 / IP Restriction": {
         "total": 10,
-        "covered": 0,
-        "coverage_rate": 0.0
+        "covered": 3,
+        "coverage_rate": 0.3
       },
       "利用規約 / Terms and Conditions": {
         "total": 12,
@@ -1074,22 +1074,35 @@
       "requirement": "IPアドレスで制限できる",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:4685: * @requirements.txt(R-139)",
+        "tests/users-permissions.spec.js:5026: * @requirements.txt(R-139, R-140, R-141)",
+        "tests/users-permissions.spec.js:5064: * @requirements.txt(R-139)",
+        "tests/users-permissions.spec.js:5203: * @requirements.txt(R-139)"
+      ],
+      "status": "covered"
     },
     "R-140": {
       "requirement": "ネットワーク範囲で制限できる",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:4829: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:4854: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:5105: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:5175: * @requirements.txt(R-140)"
+      ],
+      "status": "covered"
     },
     "R-141": {
       "requirement": "ホワイトリスト・ブラックリスト管理ができる",
       "feature_area": "IP制限 / IP Restriction",
       "priority": "high",
-      "covered_by": [],
-      "status": "uncovered"
+      "covered_by": [
+        "tests/users-permissions.spec.js:4787: * @requirements.txt(R-141)",
+        "tests/users-permissions.spec.js:5140: * @requirements.txt(R-141)"
+      ],
+      "status": "covered"
     },
     "R-142": {
       "requirement": "アクセスログを取得できる",

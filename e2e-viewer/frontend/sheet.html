@@ -31,7 +31,17 @@
     .pipeline-table .desc-col { max-width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
     .pipeline-table .desc-col:hover { background: #e9ecef; }
     /* フィルタ時はテスト内容を全文表示 */
-    .pipeline-table.filtered .desc-col { max-width: none; white-space: pre-wrap; word-break: break-word; }
+    .pipeline-table.filtered .desc-col,
+    .pipeline-table.expanded-all .desc-col { max-width: none; white-space: pre-wrap; word-break: break-word; }
+    /* 全て展開モード: 詳細フロー行を表示 */
+    .pipeline-table .detailed-flow-row { display: none; }
+    .pipeline-table.expanded-all .detailed-flow-row { display: table-row; }
+    .pipeline-table .detailed-flow-row td {
+      background: #f8f9fa; padding: 8px 14px; font-size: .82rem;
+      white-space: pre-wrap; word-break: break-word; color: #495057;
+      border-left: 3px solid #0d6efd;
+    }
+    .pipeline-table .detailed-flow-row .flow-label { font-weight: 600; color: #0d6efd; margin-right: 6px; }
     /* テーブル幅を広げる */
     .container-fluid { max-width: 100%; padding: 0 20px; }
 
@@ -240,6 +250,7 @@
       <button class="btn btn-sm btn-outline-success" data-status-filter="ok" onclick="setStatusFilter('ok', this)">OK/PASSのみ</button>
       <button class="btn btn-sm btn-outline-danger" data-status-filter="ng" onclick="setStatusFilter('ng', this)">NG/FAILのみ</button>
     </div>
+    <button class="btn btn-sm btn-outline-primary" id="expand-all-btn" onclick="toggleExpandAll()" title="説明・期待結果・詳細フローを全て展開表示">📋 全て展開</button>
     <input class="form-control form-control-sm ms-auto" style="max-width:220px"
            id="search-box" placeholder="ケースNo/機能名で絞り込み..." oninput="applyFilters()">
     <span class="text-muted small" id="display-count"></span>
@@ -411,7 +422,8 @@ function applyUrlParamFilters() {
       tab.classList.add('active');
     }
   }
-  if (p.caseNo) {
+  // caseNo が 1件の場合のみ search box に入れる（複数 comma 区切りは含有チェックが壊れるため除外）
+  if (p.caseNo && !p.caseNo.includes(',')) {
     const box = document.getElementById('search-box');
     if (box) box.value = p.caseNo;
   }
@@ -602,6 +614,16 @@ function selectSpec(spec, el) {
   applyFilters();
 }
 
+function toggleExpandAll() {
+  const table = document.querySelector('.pipeline-table');
+  const btn = document.getElementById('expand-all-btn');
+  if (!table || !btn) return;
+  const expanded = table.classList.toggle('expanded-all');
+  btn.textContent = expanded ? '📋 折りたたむ' : '📋 全て展開';
+  btn.classList.toggle('btn-primary', expanded);
+  btn.classList.toggle('btn-outline-primary', !expanded);
+}
+
 function setStatusFilter(status, btn) {
   currentStatusFilter = status;
   document.querySelectorAll('[data-status-filter]').forEach(b => b.classList.remove('active'));
@@ -786,6 +808,15 @@ function renderRow(tbody, item) {
     <td class="media-cell">${videoIcon}</td>
     <td>${updatedInfo}</td>
   `;
+
+  // 詳細フロー行を追加（「全て展開」ボタンで表示切替）
+  if (item.detailedFlow && item.detailedFlow.trim()) {
+    const flowRow = tbody.insertRow();
+    flowRow.className = 'detailed-flow-row';
+    flowRow.dataset.parentCaseNo = item.caseNo;
+    flowRow.innerHTML = `<td colspan="14"><span class="flow-label">📖 詳細フロー:</span>${escHtml(item.detailedFlow)}</td>`;
+  }
+
   return row;
 }
 
