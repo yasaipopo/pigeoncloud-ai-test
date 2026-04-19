@@ -29,13 +29,31 @@
 
 1. **要件列挙**: 対象機能の要件 (R-XXX 全件) を `.claude/coverage-tracker.json` から抽出
 2. **既存テスト分析**: 該当 spec.js の既存テストを列挙、各要件にマッピング
-3. **ギャップ洗い出し（Claude）**: 各要件に対して最低 2-3 ケース設計 (正常系/異常系/境界値)
-4. **ダブルチェック（gemcli 並列、最低 2 本）**:
-   - Agent A: プロダクトコード読んで「実装されている全機能」を列挙 → Claude の設計と突合
+3. **【必須】PHPUnit / Integration テスト確認**: 対象機能の PHPUnit テスト (`/Users/yasaipopo/PhpStormProjects/PopoframeworkSlim/tests/Unit/**`, `tests/Integration/**`, `tests/Feature/**`) を gemcli で全洗い出し
+   - `tests/test_coverage.md` も参照
+   - PHPUnit でロジック検証済みのものは E2E で重複しない
+4. **E2E と PHPUnit の責務分離を明示**（設計書に必ず記載）:
+   - **PHPUnit 責務**: 純粋ロジック / 境界値 / CIDR 判定 / バリデーション関数 / エンティティ単体
+   - **E2E 責務**: UI 入力 → 保存 → 表示ラウンドトリップ、ログインフロー、UI エラー表示、画面遷移、統合シナリオ
+   - 判断: 同じロジックを PHPUnit で 10 パターン検証済みなら、E2E では「UI から 1-2 代表シナリオのみ」統合検証
+5. **ギャップ洗い出し（Claude）**: PHPUnit で未カバーの UI / 統合シナリオを設計 (正常系/異常系/境界値)
+6. **ダブルチェック（gemcli 並列、最低 2 本）**:
+   - Agent A: プロダクトコード + **PHPUnit 既存テスト** を列挙 → Claude の設計と突合
    - Agent B: 既存 spec.js と競合チェック、他 spec への影響、抜け観点検出
-5. **統合設計書を作成**: `/tmp/design-{spec名}-{feature}.md` にテーブル形式で保存
-   - 要件ID / ケースID / 操作フロー / 期待結果 / 網羅種別 / 実装有無
-6. **ユーザーに提示**: 設計書を見せて OK を得る → その時点で初めて [4] 実機確認に進む
+7. **統合設計書を作成**: `/tmp/design-{spec名}-{feature}.md` にテーブル形式で保存
+   - 要件ID / ケースID / 操作フロー / 期待結果 / **テストレベル (PHPUnit済 / E2E必須 / 両方必須)** / 実装有無
+8. **ユーザーに提示**: 設計書を見せて OK を得る → その時点で初めて [4] 実機確認に進む
+
+### テストレベル区分（設計書で明示）
+- **L1: PHPUnit で十分カバー**: 純粋ロジック、バリデーション関数、エンティティ単体テスト → E2E 不要
+- **L2: ロジックは PHPUnit、UI 統合のみ E2E**: UI 入力→保存→取得のラウンドトリップ、代表シナリオ1-2 件
+- **L3: UI 固有挙動 → E2E 必須**: 画面遷移、ドラッグ並び替え、モーダル、エラー表示、ログイン拒否フロー
+- **L0: 外部依存で E2E 不可**: `.claude/test-env-limitations.md` に記録
+
+### E2E と PHPUnit の責務分離ポリシー
+- PHPUnit で既にカバー済みのロジックを E2E で重複させない（メンテナンスコスト増）
+- 「UI から入力した値が正しくロジックに渡るか」の統合検証は E2E 必須
+- 複数条件の組み合わせ（OR/AND）は、代表 2-3 シナリオを E2E で検証（全パターンは PHPUnit）
 
 ### 絶対ルール（勝手判断禁止）
 - **勝手なスキップ禁止**: 「この要件は不要」「このケースは省略可」などの **自律判断を絶対にしない**
@@ -81,6 +99,9 @@
 - `scripts/coverage-tracker.py` — 要件×テスト対応表の自動生成
 - `.claude/coverage-tracker.json` — 現在のカバー状況
 - `.claude/e2e-coverage-roadmap.md` — 全体ロードマップ（短・中・長期施策）
+- `.claude/test-responsibility-boundary.md` — **E2E vs PHPUnit の責務分離マトリクス** (必読)
+- `.claude/test-env-limitations.md` — スキップ対象の記録 (機能未実装/外部依存)
+- `/Users/yasaipopo/PhpStormProjects/PopoframeworkSlim/tests/test_coverage.md` — pigeon_cloud 側 PHPUnit カバレッジ
 
 ### 参考ファイル
 - `.claude/knowledge-spec-quality-checklist.md` — 品質チェック

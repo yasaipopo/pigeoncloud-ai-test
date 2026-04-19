@@ -5269,26 +5269,54 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         await autoScreenshot(page, 'UP-B002', 'up-ip-050', _testStart);
     });
 
+    // up-ip-060 削除: PHPUnit IpCheckerTest で CIDR /24 範囲外判定は網羅済み (責務分離)
+    //   参照: .claude/test-responsibility-boundary.md
+
     /**
-     * @requirements.txt(R-140)
-     * up-ip-060: 現在IPと別レンジの /24 → ログイン拒否
+     * @requirements.txt(R-140, R-141)
+     * up-ip-200: 複数IP OR (現在IP + ダミー) で現在IPマッチ → ログイン成功
+     * テストレベル: L2 (UI 入力→DB 保存→ログイン統合。OR ロジック自体は IpCheckerTest でカバー済み)
      */
-    test('up-ip-060: 現在IPと別レンジの /24 → ログイン拒否', async ({ page }) => {
+    test('up-ip-200: 複数IP OR (現在IP + ダミー) で現在IPマッチしてログイン成功', async ({ page }) => {
         test.setTimeout(180000);
         const _testStart = Date.now();
 
-        const diffCidr = ipInDifferentSubnet(currentIp);
-        // [flow] 60-1. 現在IPと異なる /24 レンジを設定
-        await setAllowIps(page, localBaseUrl, testUser.id, [diffCidr]);
+        // [flow] 200-1. 許可IP 2 件設定: [現在IP/32, ダミー 1.1.1.1/32]
+        await setAllowIps(page, localBaseUrl, testUser.id, [`${currentIp}/32`, '1.1.1.1/32']);
+        await expect(page.locator('.alert-danger')).toHaveCount(0, { timeout: 8000 });
 
-        // [flow] 60-2. testUser で再ログイン試行
+        // [flow] 200-2. testUser で再ログイン試行
         await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
 
-        // [check] 60-3. ✅ 拒否される
+        // [check] 200-3. ✅ OR 条件で現在IP マッチ → ログイン成功
+        await expect(page.locator('.navbar'), 'OR で現在IP がマッチしてログイン成功すべき').toBeVisible({ timeout: 8000 });
+        await expect(page).toHaveURL(/\/admin\/(dashboard|dataset)/);
+        await expect(page.locator('.nav-link.nav-pill.avatar, .user-menu, [class*="avatar"]').first()).toBeVisible({ timeout: 8000 });
+
+        await autoScreenshot(page, 'UP-B002', 'up-ip-200', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-140, R-141)
+     * up-ip-210: 複数IP OR (全てミス) でログイン拒否
+     * テストレベル: L2 (UI 複数設定→全ミスで拒否の統合検証)
+     */
+    test('up-ip-210: 複数IP OR (全て現在IPと不一致) でログイン拒否', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        // [flow] 210-1. 許可IP 2 件設定: [1.1.1.1/32, 8.8.8.8/32] - どちらも現在IPと不一致
+        await setAllowIps(page, localBaseUrl, testUser.id, ['1.1.1.1/32', '8.8.8.8/32']);
+        await expect(page.locator('.alert-danger')).toHaveCount(0, { timeout: 8000 });
+
+        // [flow] 210-2. testUser で再ログイン試行
+        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
+
+        // [check] 210-3. ✅ OR でも全てミス → ログイン拒否
         await expect(page).toHaveURL(/\/admin\/login/);
         await expect(page.locator('.navbar')).not.toBeVisible({ timeout: 8000 });
 
-        await autoScreenshot(page, 'UP-B002', 'up-ip-060', _testStart);
+        await autoScreenshot(page, 'UP-B002', 'up-ip-210', _testStart);
     });
 
     // =========================================================================
@@ -5443,63 +5471,10 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
     // =========================================================================
     // R-145: CIDR表記に対応される (境界値)
     // =========================================================================
-
-    /**
-     * @requirements.txt(R-145)
-     * up-ip-120: CIDR /31 (2IP マッチ) - 現在IP を含む /31 で許可
-     */
-    test('up-ip-120: CIDR /31 レンジ (2IP) でログイン可能', async ({ page }) => {
-        test.setTimeout(180000);
-        const _testStart = Date.now();
-
-        // /31 は末尾ビット1ビットのみ使うのでペア (偶数IP, 奇数IP) を表す
-        const parts = currentIp.split('.').map(Number);
-        const base = parts[3] - (parts[3] % 2); // 偶数側
-        const cidr31 = `${parts[0]}.${parts[1]}.${parts[2]}.${base}/31`;
-
-        // [flow] 120-1. /31 レンジを設定
-        await setAllowIps(page, localBaseUrl, testUser.id, [cidr31]);
-
-        // [flow] 120-2. testUser 再ログイン
-        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
-
-        // [check] 120-3. ✅ /31 範囲内なのでログイン成功、ダッシュボード URL とアバターも確認
-        await expect(page.locator('.navbar'), `${cidr31} に ${currentIp} が含まれるので成功すべき`).toBeVisible({ timeout: 8000 });
-        await expect(page).toHaveURL(/\/admin\/(dashboard|dataset)/);
-        await expect(page.locator('.nav-link.nav-pill.avatar, .user-menu, [class*="avatar"]').first()).toBeVisible({ timeout: 8000 });
-
-        await autoScreenshot(page, 'UP-B002', 'up-ip-120', _testStart);
-    });
-
-    /**
-     * @requirements.txt(R-145)
-     * up-ip-130: CIDR /16 と /8 の大レンジでもマッチ
-     */
-    test('up-ip-130: CIDR /16 / /8 の大レンジでログイン可能', async ({ page }) => {
-        test.setTimeout(240000); // /16 + /8 で 2 回ラウンドトリップするため長め
-        const _testStart = Date.now();
-
-        const cidr16 = ipInSameSubnet(currentIp, 16);
-        const cidr8 = ipInSameSubnet(currentIp, 8);
-
-        // [flow] 130-1. /16 レンジ設定
-        await setAllowIps(page, localBaseUrl, testUser.id, [cidr16]);
-        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
-        // [check] 130-2. ✅ /16 でマッチ (URL + アバター込み)
-        await expect(page.locator('.navbar'), `${cidr16} でログイン成功`).toBeVisible({ timeout: 10000 });
-        await expect(page).toHaveURL(/\/admin\/(dashboard|dataset)/);
-
-        // [flow] 130-3. /8 に切り替え
-        await reLoginAs(page, localBaseUrl, localEmail, localPassword);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-        await setAllowIps(page, localBaseUrl, testUser.id, [cidr8]);
-        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
-        // [check] 130-4. ✅ /8 でマッチ (URL 確認も含む)
-        await expect(page.locator('.navbar'), `${cidr8} でログイン成功`).toBeVisible({ timeout: 10000 });
-        await expect(page).toHaveURL(/\/admin\/(dashboard|dataset)/);
-
-        await autoScreenshot(page, 'UP-B002', 'up-ip-130', _testStart);
-    });
+    // up-ip-120 (/31 ペア), up-ip-130 (/16, /8) 削除:
+    //   PHPUnit IpCheckerTest で CIDR 境界値判定 (/32, /24, /16, /8, /0) は網羅済み。
+    //   UI→ロジック統合は up-ip-050 (/24) が代表として残存。
+    //   参照: .claude/test-responsibility-boundary.md
 
     // =========================================================================
     // R-146: Error Case: IP検証エラー
