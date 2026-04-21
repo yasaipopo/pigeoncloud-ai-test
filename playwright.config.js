@@ -37,7 +37,7 @@ module.exports = defineConfig({
     testDir: './tests',
     globalSetup: './tests/global-setup.js',
     globalTeardown: './tests/global-teardown.js',
-    timeout: 600000, // テスト関数全体: 600秒。beforeAll内のポーリング(最大120s)+ログインリトライ対応のため延長
+    timeout: 180000, // テスト関数全体: 180秒。長時間テストは test.setTimeout() で個別延長 (2026-04-21 変更: auth fail 時の timeout 待機削減)
     expect: { timeout: 5000 },
     fullyParallel: false,
     retries: 1,

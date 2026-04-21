@@ -35,8 +35,9 @@ def load_requirements():
 
 def scan_tests(mapped_reqs):
     # Regex patterns
-    # Handles: @requirements.txt(R-001), @requirements.txt R-001, // @requirements.txt R-001
-    tag_pattern = re.compile(r"@requirements\.txt(?:\s*\(?\s*)(R-\d{3})(?:\s*\)?)?")
+    req_line_marker = re.compile(r" @requirements\.txt")
+    r_id_pattern = re.compile(r"R-\d{3}")
+
     # Handles: [req:R-001], test('req:R-001', ...)
     title_pattern = re.compile(r"\[?req:(R-\d{3})\]?")
     
@@ -52,12 +53,14 @@ def scan_tests(mapped_reqs):
                     with open(path, 'r', encoding='utf-8') as f:
                         lines = f.readlines()
                         for i, line in enumerate(lines, 1):
+                            found_ids = set()
                             # Check for tags in comments or code
-                            tags = tag_pattern.findall(line)
-                            # Check for tags in test titles
-                            titles = title_pattern.findall(line)
+                            if req_line_marker.search(line):
+                                found_ids.update(r_id_pattern.findall(line))
                             
-                            found_ids = set(tags + titles)
+                            # Check for tags in test titles
+                            found_ids.update(title_pattern.findall(line))
+                            
                             for rid in found_ids:
                                 if rid in mapped_reqs:
                                     match_info = f"{path}:{i}: {line.strip()}"

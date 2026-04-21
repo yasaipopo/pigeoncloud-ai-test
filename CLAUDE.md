@@ -12,12 +12,14 @@
 ```
 [1] 調査           gemcli 並列で仕様書・コード・既存 spec を調査
 [2] 網羅フロー設計 機能ごとに要件網羅のテストフロー一覧を作成（Claude + gemcli 並列レビュー必須）
+    (外部依存回避策: モック/Debug API/Sandbox 検討必須)
 [3] ユーザー承認①  網羅フロー設計をユーザーに提示 → OK を得てから [4] に進む
 [4] 実機確認       Playwright codegen or 手動操作で仕様の動作を確認
 [5] 実装           gemcli でテストコード生成。@requirements.txt(R-XXX) タグ必須
 [6] 品質ゲート     python3 scripts/quality-gate.py で静的解析（違反 0 必須）
 [7] テスト実行     単体実行で pass/fail 判定（直列、workers=1）
-[8] sheet.html に動画・スクショをアップロード（sync-results 必須）
+[8] sync-results     E2Eビューアーへ結果同期
+[8.5] fail分析レポート (原因が SPEC / PRODUCT / ENV か判定)
 [9] ユーザー承認②  レビュー URL を提示:
     https://dezmzppc07xat.cloudfront.net/sheet.html?spec=XXX&caseNo=YYY&review=pending&reviewLabel=...
 [10] OK → コミット / NG → [1]-[7] のどれかに戻る
@@ -80,6 +82,11 @@
 - gemcli と Claude の役割分担:
   - **gemcli (並列、2本以上)**: 調査・網羅レビュー・ボイラープレート生成・静的解析・分類
   - **Claude (直列)**: 計画統合・実機確認・コミット・ユーザー対話
+- 🚨 **gemcli 委託時は必ず `.claude/knowledge-gemcli-safety.md` のテンプレートを冒頭に含める**（2026-04-21 インシデント後の必須ルール）
+  - 「git checkout / restore / reset / stash は絶対禁止」「スコープ外ファイルに触れるな」「revert 禁止」を毎回明示
+  - 並列実行時は各 agent の編集対象が重ならないこと
+  - 委託完了後に `git status --short` でスコープ外変更が無いか必ず自分で確認
+  - gemcli に `git add` / `git commit` をさせない（Claude 側の仕事）
 
 ### 🚨 テスト不可ケースの取り扱い（超重要）
 
@@ -231,6 +238,17 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 
 - **step数が0-2のテストには`test.setTimeout`を書かない**（config defaultの60秒で十分）
 - テストを新規作成・step追加時は、上記計算式でタイムアウトを設定する
+
+### 全体 timeout の変更 (2026-04-21)
+
+`playwright.config.js` の `timeout` を **600000 (10 分) → 180000 (3 分)** に変更した。理由:
+- hang 時に 10 分待たされるのを避け、迅速に fail させるため
+- 2026-04-21 auth.spec.js 実行で 22 件中 8 件が 10 分タイムアウトで fail し、総実行 83 分の大半がタイムアウト待機だった
+
+**ルール:**
+- 180 秒を超えるテストは必ず `test.setTimeout(Math.max(180000, stepCount * 15000 + 30000))` で明示延長する
+- 20 回ログイン試行など不可避に長いテストは個別に 300 秒以上設定する（例: `auth.spec.js` の `auth-240`）
+- `test.setTimeout(600000)` 以上の極長設定は原則禁止。真に必要な場合はコメントで理由を明記する
 
 ### 次にやること（2026-04-01時点の残タスク）
 

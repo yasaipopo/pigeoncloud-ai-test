@@ -601,7 +601,7 @@ test.describe('通知設定', () => {
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(300000); // 2026-04-21 600→300 (beforeAll リトライ時間短縮)
             // createTestEnvが偶発的に失敗する場合(ネットワーク不安定等)に備えてリトライ
             let env = null;
             let lastError = null;

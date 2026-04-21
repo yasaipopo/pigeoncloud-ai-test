@@ -1112,7 +1112,7 @@ def pipeline_sync_results(event):
         spec_name = spec_file.replace('tests/', '').replace('.spec.js', '').replace('.spec.ts', '')
 
         # caseNoの推測:
-        # testTitleから "AT01:", "RC01:", "1-1:", "F201:", "UC01:" 等のパターンを抽出
+        # testTitleから "AT01:", "RC01:", "1-1:", "F201:", "UC01:", "auth-130:" 等のパターンを抽出
         case_no = ''
 
         # パターン1: "数字-数字" (旧形式: 1-1, 144-01)
@@ -1125,10 +1125,15 @@ def pipeline_sync_results(event):
             if movie_match:
                 case_no = movie_match.group(1)
             else:
-                # パターン3: caseIdから試行
-                case_id_match = re.match(r'^(\d+-\d+|[A-Z]+\d+)', case_id)
-                if case_id_match:
-                    case_no = case_id_match.group(1)
+                # パターン3: 小文字プレフィックス対応 (auth-130, up-ip-010, etc.)
+                prefix_match = re.match(r'^([a-z]+-[a-z0-9]+(?:-[a-z0-9]+)*)', test_title)
+                if prefix_match:
+                    case_no = prefix_match.group(1)
+                else:
+                    # パターン4: caseIdから試行
+                    case_id_match = re.match(r'^(\d+-\d+|[A-Z]+\d+|[a-z]+-[a-z0-9]+(?:-[a-z0-9]+)*)', case_id)
+                    if case_id_match:
+                        case_no = case_id_match.group(1)
 
         if not spec_name or not case_no:
             skipped_count += 1

@@ -1737,36 +1737,29 @@ test.describe('共通設定・システム設定', () => {
     // -------------------------------------------------------------------------
     // 840-1: クライアント証明書管理 - 証明書管理UIの確認
     // -------------------------------------------------------------------------
+    /**
+     * @requirements.txt(R-127, R-128)
+     */
     test('840-1: クライアント証明書管理ページが表示され証明書発行・一覧UIが確認できること', async ({ page }) => {
+        test.setTimeout(Math.max(60000, 4 * 15000 + 30000));
         // [flow] 840-1-1. クライアント証明書管理ページを開く
         await page.goto(BASE_URL + '/admin/maintenance-cert', { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
         await page.waitForLoadState('domcontentloaded');
         await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
         await waitForAngular(page);
 
-        // [check] 840-1-2. ✅ 証明書管理に関するコンテンツが表示されること（または管理画面へリダイレクト）
-        const certPageContent = await page.evaluate(() => {
-            const text = document.body.innerText || '';
-            return {
-                hasCert: text.includes('証明書') || text.includes('certificate') || text.includes('Certificate'),
-                hasIssue: text.includes('発行') || text.includes('issue'),
-                hasList: text.includes('一覧') || document.querySelector('table') !== null,
-                url: window.location.href,
-            };
-        });
-        // 証明書ページまたは管理画面（リダイレクト先）が正常表示されること
-        if (certPageContent.hasCert) {
-            console.log('840-1: 証明書管理ページを確認:', certPageContent);
-        } else {
-            // URLが/maintenance-certでない場合はリダイレクトされた（機能がこのテナントでは無効の可能性）
-            console.log('840-1: 証明書管理ページへのアクセスはリダイレクトされました（URL:', certPageContent.url + '）');
-        }
+        // [check] 840-1-2. ✅ クライアント証明書に関するコンテンツが表示されること
+        const bodyText = await page.innerText('body');
+        expect(bodyText).toMatch(/証明書|certificate|Certificate/);
+        expect(bodyText).toMatch(/発行|issue/);
 
-        // [check] 840-1-3. ✅ ページにエラーが表示されないこと
+        // [check] 840-1-3. ✅ 一覧要素（table または list）の存在確認
+        const listArea = page.locator('table, .cert-list, .list');
+        await expect(listArea.first()).toBeVisible();
+
+        // [check] 840-1-4. ✅ ページにエラーが表示されないこと
         expect(page.url()).toContain('/admin');
-        const has500 = await page.evaluate(() => document.body.innerText.includes('Internal Server Error'));
-        expect(has500).toBe(false);
-        console.log('840-1: 証明書管理ページ確認:', certPageContent);
+        expect(bodyText).not.toContain('Internal Server Error');
     });
 
     // -------------------------------------------------------------------------

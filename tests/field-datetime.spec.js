@@ -4500,7 +4500,7 @@ test.describe('表示条件設定（223-229系）', () => {
     });
 
     test('FD06: 選択肢(単一選択)', async ({ page }) => {
-        test.setTimeout(600000); // 4ステップ×各種モーダル操作があるため延長
+        test.setTimeout(300000); // 4ステップ×各種モーダル操作があるため延長 (2026-04-21 600→300)
         await test.step('223: 選択肢(単一選択)フィールドに表示条件設定ができること', async () => {
             // モーダルが残っていたらリロード（cascade failure防止）
             if (await page.locator(".modal.show").count() > 0) {
