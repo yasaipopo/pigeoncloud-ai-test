@@ -178,6 +178,11 @@
 #### R-121, R-126 / auth-280: INTERNAL_MANAGE_KEY
 - **スキップ理由**: 環境変数 `INTERNAL_MANAGE_KEY` 未設定のため、正常系アクセスは未検証。
 
+#### us-password-history-010: 過去のパスワード再利用禁止の確認 (2026-04-23 追加)
+- **スキップ理由**: `/admin/admin/edit/1` 画面では password 入力欄が初期表示で 0 個。「パスワード変更」トグルまたは別モーダルで展開する UI 構造と推測されるが、正しい遷移パスと UI 展開トリガーが特定できていない
+- **解消条件**: MCP Playwright で実機確認し、password 変更の正しい UI フロー（トグルクリック / 別画面 / モーダル）を特定してセレクターを修正
+- **現状**: test は fail のまま維持（スキップしない。正しいフロー特定後に自然と pass する）
+
 #### us-sso-saml-010: SAML 設定画面の項目確認 (2026-04-23 追加)
 - **スキップ理由**: テスト環境で SAML 機能の Feature Flag が有効化されていないため、SAML 設定画面にアクセスしてもメニューに表示されないか、リダイレクトされる。
 - **調査経緯**: 2026-04-23 gemcli 独立分析で `html_angular4/src/app/pages/sso-settings/sso-settings.component.html` にセレクター（`識別子`、`応答 URL`、`.fa-copy` 等）は正しく実装されていることを確認。fail は環境側 Feature Flag 未設定が原因
