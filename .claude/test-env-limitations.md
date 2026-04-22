@@ -177,3 +177,9 @@
 
 #### R-121, R-126 / auth-280: INTERNAL_MANAGE_KEY
 - **スキップ理由**: 環境変数 `INTERNAL_MANAGE_KEY` 未設定のため、正常系アクセスは未検証。
+
+#### us-sso-saml-010: SAML 設定画面の項目確認 (2026-04-23 追加)
+- **スキップ理由**: テスト環境で SAML 機能の Feature Flag が有効化されていないため、SAML 設定画面にアクセスしてもメニューに表示されないか、リダイレクトされる。
+- **調査経緯**: 2026-04-23 gemcli 独立分析で `html_angular4/src/app/pages/sso-settings/sso-settings.component.html` にセレクター（`識別子`、`応答 URL`、`.fa-copy` 等）は正しく実装されていることを確認。fail は環境側 Feature Flag 未設定が原因
+- **解消条件**: テスト環境の `admin_setting` or `cloud_setting` で SAML 機能を有効化する（debug API で切替可能になるまで待ち）
+- **担当**: インフラ/プロダクト側の設定変更が必要
