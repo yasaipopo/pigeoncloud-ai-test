@@ -607,33 +607,42 @@ test.describe('us-cert: クライアント証明書', () => {
      * @requirements.txt(R-138)
      */
     test('us-cert-080: クライアント証明書の発行上限超過エラーの確認', async ({ page }) => {
-        test.setTimeout(Math.max(120000, 4 * 15000 + 30000));
+        test.setTimeout(Math.max(180000, 6 * 15000 + 30000));
         // [flow] 80-1. クライアント証明書管理ページを開く
         await page.goto(BASE_URL + '/admin/admin/view/1');
         await waitForAngular(page);
+        await page.waitForSelector('.cert-section', { timeout: 15000 });
 
-        // [flow] 80-2. 既存の発行状況を確認し、上限まで発行試行
+        // [flow] 80-2. 発行を 3 回繰り返して上限に到達させる
+        // 各発行は name modal → 発行 button → zip download を伴う
         const issueBtn = page.locator('.cert-section button').filter({ hasText: /Issue|発行/i }).first();
-
-        for (let i = 0; i < 4; i++) {
-            if (await issueBtn.isVisible() && !(await issueBtn.isDisabled())) {
-                await issueBtn.click();
-                const modalIssueBtn = page.locator('.modal.show button.btn-primary').filter({ hasText: /発行/ });
-                if (await modalIssueBtn.isVisible()) {
-                    await modalIssueBtn.click();
-                    await page.waitForTimeout(2000);
-                    await waitForAngular(page);
-                }
-            } else {
-                break;
-            }
+        for (let i = 0; i < 3; i++) {
+            await issueBtn.click();
+            // name 入力モーダルの表示待ち
+            const nameInput = page.locator('.modal.show input[placeholder*="証明書の名前"]');
+            await nameInput.waitFor({ state: 'visible', timeout: 15000 });
+            await nameInput.fill(`test-cert-${i + 1}`);
+            // 発行ボタン (モーダル内)
+            const modalIssueBtn = page.locator('.modal.show .modal-footer button.btn-primary').filter({ hasText: /発行/ });
+            // ダウンロードイベント待機と同時に click
+            await Promise.all([
+                page.waitForEvent('download', { timeout: 30000 }).catch(() => null),
+                modalIssueBtn.click(),
+            ]);
+            // モーダル close 待機
+            await page.waitForSelector('.modal.show', { state: 'detached', timeout: 15000 }).catch(() => {});
+            await page.waitForTimeout(1500);
         }
 
-        // [check] 80-4. ✅ 上限超過エラーメッセージまたは発行ボタンの無効化を確認
+        // [flow] 80-3. 4 回目の発行試行 → 上限エラーがトースターまたは警告表示で確認できること
+        await issueBtn.click();
+        await page.waitForTimeout(2000);
+
+        // [check] 80-4. ✅ 上限超過メッセージまたは警告表示
         const bodyText = await page.innerText('body');
-        const hasLimitError = /上限|limit|maximum|3件|3枚/.test(bodyText);
-        const isBtnDisabled = await issueBtn.isDisabled().catch(() => true);
-        expect(hasLimitError || isBtnDisabled).toBeTruthy();
+        const hasLimitError = /上限|最大3|1ユーザーにつき/.test(bodyText);
+        const hasAlertWarn = await page.locator('.cert-alert-warn').count() > 0;
+        expect(hasLimitError || hasAlertWarn, `4回目の発行で上限超過エラーが表示されること (bodyText抜粋: ${bodyText.slice(0, 300)})`).toBeTruthy();
 
         await autoScreenshot(page, 'US01', 'us-cert-080');
     });
@@ -780,15 +789,10 @@ test.describe('us-password-history: パスワード履歴', () => {
         await page.goto(BASE_URL + '/admin/admin/edit/1');
         await waitForAngular(page);
         await page.waitForSelector('.navbar', { timeout: 15000 });
+        // Angular の admin-forms-field は非同期描画のため、password 入力欄が 2 つ揃うまで待つ
+        await page.waitForFunction(() => document.querySelectorAll('input[type="password"]').length >= 2, null, { timeout: 30000 });
 
-        // Angular の admin-forms が生成する password 入力欄を特定
-        // type="password" の 2 つ目以降が confirm のため、最初の password フィールドと confirm フィールドで分ける
         const pwFields = page.locator('input[type="password"]');
-        const pwCount = await pwFields.count();
-        console.log('password field count:', pwCount);
-        if (pwCount < 2) {
-            throw new Error(`edit/1 画面に password 入力欄が 2 つ以上必要だが ${pwCount} 個のみ`);
-        }
         await pwFields.nth(0).fill('NewPass123!');
         await pwFields.nth(1).fill('NewPass123!');
 
@@ -806,6 +810,7 @@ test.describe('us-password-history: パスワード履歴', () => {
         await page.goto(BASE_URL + '/admin/admin/edit/1');
         await waitForAngular(page);
         await page.waitForSelector('.navbar', { timeout: 15000 });
+        await page.waitForFunction(() => document.querySelectorAll('input[type="password"]').length >= 2, null, { timeout: 30000 });
         const pwFields2 = page.locator('input[type="password"]');
         await pwFields2.nth(0).fill(PASSWORD);
         await pwFields2.nth(1).fill(PASSWORD);

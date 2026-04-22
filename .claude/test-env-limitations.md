@@ -178,10 +178,11 @@
 #### R-121, R-126 / auth-280: INTERNAL_MANAGE_KEY
 - **スキップ理由**: 環境変数 `INTERNAL_MANAGE_KEY` 未設定のため、正常系アクセスは未検証。
 
-#### us-password-history-010: 過去のパスワード再利用禁止の確認 (2026-04-23 追加)
-- **スキップ理由**: `/admin/admin/edit/1` 画面では password 入力欄が初期表示で 0 個。「パスワード変更」トグルまたは別モーダルで展開する UI 構造と推測されるが、正しい遷移パスと UI 展開トリガーが特定できていない
-- **解消条件**: MCP Playwright で実機確認し、password 変更の正しい UI フロー（トグルクリック / 別画面 / モーダル）を特定してセレクターを修正
-- **現状**: test は fail のまま維持（スキップしない。正しいフロー特定後に自然と pass する）
+#### us-cert-080: 証明書発行上限超過エラーの確認 (2026-04-23 追加)
+- **スキップ理由**: 上限超過 (certificates.length >= 3) を検証するには実際に 3 枚の証明書を発行する必要があるが、テスト環境の Lambda (cert generation) が未設定 or 応答が遅く、3 回発行完了後も UI の `.cert-alert-warn` / toastr が確認できない
+- **調査経緯**: 2026-04-23 発行ボタン → 名前入力モーダル → 発行クリックを 3 回繰り返した後の 4 回目で上限超過確認を試みたが、bodyText に cert-alert-warn も "1ユーザーにつき最大3つまで" も現れず失敗
+- **解消条件**: Lambda cert generation が test 環境で stable に動作 (または mock/stub される) + 発行完了から certificates list reload までの race condition 対策
+- **現状**: test は fail のまま維持
 
 #### us-sso-saml-010: SAML 設定画面の項目確認 (2026-04-23 追加)
 - **スキップ理由**: テスト環境で SAML 機能の Feature Flag が有効化されていないため、SAML 設定画面にアクセスしてもメニューに表示されないか、リダイレクトされる。
