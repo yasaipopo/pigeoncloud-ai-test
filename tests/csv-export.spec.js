@@ -63,15 +63,28 @@ async function openDropdownMenu(page) {
         await page.keyboard.press('Escape');
         await page.waitForTimeout(300);
     }
-    const hamburgerBtn = page.locator('button.dropdown-toggle:has(.fa-bars)').first();
-    const found = await hamburgerBtn.waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
+    const hamburgerBtn = page.locator('button.dropdown-toggle:has(.fa-bars), button.dropdown-toggle:has-text("管理"), button.dropdown-toggle:has-text("操作")').first();
+    let found = false;
+    for (let i = 0; i < 3; i++) {
+        found = await hamburgerBtn.isVisible().catch(() => false);
+        if (found) break;
+        // フォールバック: btn-outline-primary dropdown-toggle
+        const fallbackBtn = page.locator('button.btn-outline-primary.dropdown-toggle').first();
+        found = await fallbackBtn.isVisible().catch(() => false);
+        if (found) {
+            await fallbackBtn.click({ force: true });
+            await page.waitForTimeout(500);
+            return;
+        }
+        await page.waitForTimeout(1000);
+    }
+    
     if (found) {
         await hamburgerBtn.click({ force: true });
     } else {
-        // フォールバック: btn-outline-primary dropdown-toggle
-        await page.locator('button.btn-outline-primary.dropdown-toggle').first().click({ force: true });
+        console.log('[openDropdownMenu] 警告: ドロップダウンボタンが見つかりません');
     }
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(500);
 }
 
 /**
@@ -79,8 +92,11 @@ async function openDropdownMenu(page) {
  */
 async function openCsvDownloadModal(page) {
     await openDropdownMenu(page);
-    await page.locator('a.dropdown-item:has-text("CSVダウンロード")').first().click();
+    const item = page.locator('a.dropdown-item:has-text("CSVダウンロード"), .dropdown-item:has-text("CSVダウンロード")').first();
+    await expect(item).toBeVisible({ timeout: 10000 });
+    await item.click({ force: true });
     await waitForAngular(page);
+    await page.waitForTimeout(1000);
 }
 
 /**

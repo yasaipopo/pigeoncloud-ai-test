@@ -497,7 +497,10 @@ test.describe('共通設定・システム設定', () => {
 
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(300000);
-        const env = await createTestEnv(browser, { withAllTypeTable: true });
+        const env = await createTestEnv(browser, { 
+            withAllTypeTable: true,
+            enableOptions: { max_client_secure_user_num: 5 }
+        });
         BASE_URL = env.baseUrl;
         EMAIL = env.email;
         PASSWORD = env.password;
@@ -1198,6 +1201,7 @@ test.describe('共通設定・システム設定', () => {
             // [flow] 80-7. 設定ページを再読み込みして反映を確認する
             await gotoAdminSetting(page);
             await waitForAngular(page);
+            await page.waitForSelector('#setTermsAndConditions_1', { timeout: 10000 }).catch(() => {});
             const isCheckedAfter = await page.locator('#setTermsAndConditions_1').isChecked();
             console.log('利用規約表示OFF反映確認（ページ）: ' + !isCheckedAfter);
             // [check] 80-8. ✅ 利用規約表示チェックボックスがOFF（未チェック）になっていること

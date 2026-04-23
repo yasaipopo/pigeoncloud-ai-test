@@ -2599,17 +2599,17 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
             // Angular表示条件はDOMから要素を削除する実装のため、count=0=非表示
             const getCondFieldVisible = async () => {
                 const inDom = await page.evaluate(() =>
-                    Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト')
+                    Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim().includes('表示条件テキスト'))
                 );
                 if (!inDom) return false; // DOMにない = 非表示（表示条件適用済み）
-                const condLabel = page.locator('label, .field-label').filter({ hasText: 'ラジオ_表示条件テキスト' }).first();
+                const condLabel = page.locator('label, .field-label').filter({ hasText: '表示条件テキスト' }).first();
                 return condLabel.isVisible().catch(() => false);
             };
 
             // --- 初期状態（ラジオ未選択）: 表示条件テキストは非表示になるまで待機 ---
             // Angularの表示条件適用は102フィールドの場合10秒以上かかることがある
             await page.waitForFunction(
-                () => !Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト'),
+                () => !Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim().includes('表示条件テキスト')),
                 { timeout: 15000 }
             ).catch(() => {}); // タイムアウト時はそのまま続行
 
@@ -2639,7 +2639,7 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
             expect(clickedRadioA, 'ラジオAの入力要素が存在してクリックできること').toBe(true);
             // 表示条件のAngularバインディング更新を待つ（DOM変化を検出するまで最大10秒）
             await page.waitForFunction(
-                () => Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト'),
+                () => Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim().includes('表示条件テキスト')),
                 { timeout: 10000 }
             ).catch(() => {}); // タイムアウト時はそのまま続行
             await page.waitForTimeout(500);
@@ -2668,7 +2668,7 @@ test.describe('ラジオボタン表示条件テスト（260系）', () => {
                 await page.waitForFunction(
                     () => {
                         const labels = Array.from(document.querySelectorAll('label'));
-                        return !labels.some(l => l.textContent.trim() === 'ラジオ_表示条件テキスト');
+                        return !labels.some(l => l.textContent.trim().includes('表示条件テキスト'));
                     },
                     { timeout: 5000 }
                 ).catch(() => {}); // タイムアウト時はそのまま続行

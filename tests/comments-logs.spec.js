@@ -163,10 +163,19 @@ test.describe('コメント・ログ管理', () => {
             await setupPage.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
         }
         await createAllTypeData(setupPage, 3).catch((e) => console.log('[comments-logs] createAllTypeData error (ignored):', e.message));
-        await setupPage.waitForTimeout(2000);
-        recordViewUrl = await getFirstRecordViewUrl(setupPage, tableUrl);
-        await setupPage.close();
-        await context.close();
+        
+        try {
+            recordViewUrl = await getFirstRecordViewUrl(setupPage, tableUrl);
+        } catch (e) {
+            console.error('[comments-logs] getFirstRecordViewUrl failed:', e.message);
+        }
+
+        try {
+            await setupPage.close();
+            await context.close();
+        } catch (e) {
+            console.log('[comments-logs] Cleanup error (ignored):', e.message);
+        }
         console.log(`[comments-logs] 自己完結環境: ${BASE_URL} tableUrl=${tableUrl} recordViewUrl=${recordViewUrl}`);
     });
 

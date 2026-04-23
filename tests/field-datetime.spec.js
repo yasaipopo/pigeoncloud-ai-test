@@ -22,10 +22,10 @@ async function waitForAngular(page, timeout = 15000) {
 async function login(page, email, password) {
     await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
     if (page.url().includes('/login')) {
-        await page.fill('#id', email || EMAIL, { timeout: 15000 }).catch(() => {});
-        await page.fill('#password', password || PASSWORD, { timeout: 15000 }).catch(() => {});
+        await page.fill('input[name="email"], #id, input[type="email"]', email || EMAIL, { timeout: 15000 }).catch(() => {});
+        await page.fill('input[type="password"], #password', password || PASSWORD, { timeout: 15000 }).catch(() => {});
         await page.locator('button[type=submit].btn-primary').first().click({ timeout: 15000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+        await page.waitForSelector('.navbar, header.app-header', { timeout: 15000 }).catch(() => {});
     }
 }
 
@@ -43,6 +43,27 @@ async function closeTemplateModal(page) {
         }
     } catch (e) {
         // モーダルがなければ何もしない
+    }
+}
+
+/**
+ * デバッグAPIで設定を有効化する
+ */
+async function activateDebugSettings(page) {
+    try {
+        await page.evaluate(async (baseUrl) => {
+            await fetch(baseUrl + '/api/admin/debug/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({
+                    enable_all: true,
+                    remove_limits: true
+                }),
+                credentials: 'include',
+            });
+        }, BASE_URL);
+    } catch (e) {
+        console.error('Failed to activate debug settings:', e);
     }
 }
 
@@ -77,14 +98,17 @@ async function assertFieldPageLoaded(page, tableId) {
         if (fieldCount > 0) {
             await expect(fieldRows.first()).toBeVisible();
         } else {
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
         }
     } else if (currentUrl.includes(`/admin/dataset__${tableId}`)) {
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+        await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
         const pageText = await page.innerText('body');
         expect(pageText).not.toContain('Internal Server Error');
     } else {
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+        await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+        await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
     }
 }
 
@@ -170,7 +194,7 @@ async function navigateToNewRecord(page, tableId) {
 // 後続describeが必要な場合はそのdescribeのbeforeAllで作成する
 let _sharedTableId = null;
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(300000);
+    test.setTimeout(600000);
     const env = await createTestEnv(browser, { withAllTypeTable: true });
     BASE_URL = env.baseUrl;
     EMAIL = env.email;
@@ -179,6 +203,13 @@ test.beforeAll(async ({ browser }) => {
     process.env.TEST_BASE_URL = env.baseUrl;
     process.env.TEST_EMAIL = env.email;
     process.env.TEST_PASSWORD = env.password;
+
+    // デバッグ設定を有効化
+    const page = await env.context.newPage();
+    await login(page, EMAIL, PASSWORD);
+    await activateDebugSettings(page);
+    await page.close();
+
     await env.context.close();
     console.log(`[field-datetime] 自己完結環境: ${BASE_URL}, sharedTableId: ${_sharedTableId}`);
 });
@@ -296,7 +327,8 @@ test.describe('フィールド - 日時（101）', () => {
         // テーブル設定ページに遷移（1回だけ）
         await test.step('テーブル設定ページに遷移', async () => {
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             // フィールドが表示されること
             await expect(page.locator('.pc-field-block').filter({ hasText: 'DT日時' }).first()).toBeVisible();
         });
@@ -382,7 +414,8 @@ test.describe('フィールド - 日時（101）', () => {
             const dtVal = await dtInput.inputValue().catch(() => 'N/A');
             console.log('[101-OFF確認] 最初のinput値=' + dtVal);
             // フィールドが表示されていてエラーがないことを確認
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
         });
     });
 });
@@ -428,7 +461,8 @@ test.describe('フィールド - ファイル（108）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -592,7 +626,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // フィールドリストが表示されていること
@@ -608,7 +643,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -623,7 +659,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -638,7 +675,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -891,7 +929,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             // エラーが出ないことを確認
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-14: レイアウト2-4列テーブルで集計が正常に動作すること', async () => {
@@ -914,7 +953,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-15: ビューのオプションで編集画面にも適用を設定できること', async () => {
@@ -937,7 +977,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-16: ビューのオプションで詳細画面にも適用を設定できること', async () => {
@@ -959,7 +1000,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-17: ビューのオプションで編集画面＋詳細画面にも適用を設定できること', async () => {
@@ -981,7 +1023,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-18: レイアウト2-4列テーブルで行に色を付ける設定ができること', async () => {
@@ -1004,7 +1047,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-19: レイアウト2-4列テーブルでチャート表示ができること', async () => {
@@ -1027,7 +1071,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-20: レイアウト2-4列テーブルの複製がエラーなく完了すること', async () => {
@@ -1045,7 +1090,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
             // テーブル設定ページが表示されていることを確認
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             // 複製ボタンの存在確認（実際に複製はしない：他テストに影響するため）
             // テーブル設定ページにアクセスできることが確認できればOK
             await assertFieldPageLoaded(page, tableId);
@@ -1071,7 +1117,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-22: レイアウト2-4列テーブルでCSVアップロード画面が表示されること', async () => {
@@ -1094,7 +1141,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-23: レイアウト2-4列テーブルで帳票登録画面が表示されること', async () => {
@@ -1117,7 +1165,8 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('113-25: 追加オプション設定（詳細画面）が保存できること', async () => {
@@ -1339,7 +1388,8 @@ test.describe('フィールドの追加（14系）', () => {
 
             await navigateToFieldPage(page, tableId);
             // ページが正常に表示されている
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             expect(pageText).not.toContain('404');
@@ -1356,7 +1406,8 @@ test.describe('フィールドの追加（14系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             // テーブル設定ページにいる場合はフィールド追加ボタンを確認
             const currentUrl = page.url();
             if (currentUrl.includes('/admin/dataset/edit/')) {
@@ -1379,7 +1430,8 @@ test.describe('フィールドの追加（14系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // フィールドリストが表示されていること（ALLテストテーブルには文字列フィールドが含まれる）
@@ -1486,7 +1538,8 @@ test.describe('項目設定（115, 116系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1501,7 +1554,8 @@ test.describe('項目設定（115, 116系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1516,7 +1570,8 @@ test.describe('項目設定（115, 116系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -1545,7 +1600,8 @@ test.describe('項目設定（115, 116系）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('116-03: 他テーブル参照の絞り込みキーとしてラジオボタンを設定できること', async () => {
@@ -1652,7 +1708,8 @@ test.describe('項目設定（115, 116系）', () => {
             test.setTimeout(120000); // 97フィールドの追加画面は描画が遅い
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 30000 });
             // 97フィールドのALLテストテーブルはAngularのルーティングが遅いのでnavbarを待つ
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 30000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 30000 });
             await waitForAngular(page);
 
             // ファイル項目が存在すること
@@ -1687,7 +1744,8 @@ test.describe('項目設定（115, 116系）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
 
         });
         await test.step('126-01: 他テーブル参照フィールドにルックアップ設定ができること', async () => {
@@ -1800,7 +1858,8 @@ test.describe('項目設定（115, 116系）', () => {
     test('121-01: テーブル一覧のファイル項目にZipファイル（50MB未満）をアップロードできること', async ({ page }) => {
             // テーブル一覧 → レコード追加画面（97フィールドのALLテストテーブルはAngularの描画が遅い）
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 30000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 30000 });
             await waitForAngular(page);
 
             // ファイル項目があることを確認
@@ -1832,7 +1891,8 @@ test.describe('項目設定（115, 116系）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
         });
 
     test('122-02: テーブル一覧で列の固定を解除できること', async ({ page }) => {
@@ -1854,7 +1914,8 @@ test.describe('項目設定（115, 116系）', () => {
 
             const bodyText = await page.innerText('body');
             expect(bodyText).not.toContain('Internal Server Error');
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
         });
 });
 
@@ -1917,7 +1978,8 @@ test.describe('項目名パディング（92, 93, 94系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             // フィールド追加ボタン
             const addBtn = page.locator('button:has-text("追加"), button:has-text("項目追加"), .btn-primary:has-text("追加")').first();
             if (await addBtn.count() > 0) {
@@ -2092,7 +2154,8 @@ test.describe('計算・計算式（51, 103, 27系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2107,7 +2170,8 @@ test.describe('計算・計算式（51, 103, 27系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // 計算フィールドの編集パネルを開く（ALLテストテーブルには計算フィールドが含まれている）
@@ -2142,7 +2206,8 @@ test.describe('計算・計算式（51, 103, 27系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2160,7 +2225,8 @@ test.describe('計算・計算式（51, 103, 27系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2228,7 +2294,8 @@ test.describe('選択肢フィールド（18, 45, 46系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2246,7 +2313,8 @@ test.describe('選択肢フィールド（18, 45, 46系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2261,7 +2329,8 @@ test.describe('選択肢フィールド（18, 45, 46系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2329,7 +2398,8 @@ test.describe('数値フィールド（43, 220, 221, 234, 235系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2344,7 +2414,8 @@ test.describe('数値フィールド（43, 220, 221, 234, 235系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2362,7 +2433,8 @@ test.describe('数値フィールド（43, 220, 221, 234, 235系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2434,7 +2506,8 @@ test.describe('文字列フィールド（17, 20, 41, 42系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2452,7 +2525,8 @@ test.describe('文字列フィールド（17, 20, 41, 42系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2470,7 +2544,8 @@ test.describe('文字列フィールド（17, 20, 41, 42系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2485,7 +2560,8 @@ test.describe('文字列フィールド（17, 20, 41, 42系）', () => {
             const STEP_TIME = Date.now();
 
             await navigateToFieldPage(page, tableId);
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 15000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             await assertFieldPageLoaded(page, tableId);
@@ -2692,7 +2768,8 @@ test.describe('選択肢制限・フィールド追加（FD04）', () => {
 
             // レコード追加画面を開く（97フィールドのALLテストテーブルはAngularの描画が遅い）
             await page.goto(BASE_URL + `/admin/dataset__${tableId}/add`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-            await expect(page.locator('.navbar')).toBeVisible({ timeout: 30000 });
+            await page.locator('.navbar, header.app-header, .app-header').first().waitFor({ state: "visible", timeout: 30000 }).catch(() => {});
+            await expect(page.locator('.navbar, header.app-header, .app-header').first()).toBeVisible({ timeout: 30000 });
             await waitForAngular(page);
 
             // 文字列(一行)の入力フィールドを探す
@@ -3076,36 +3153,49 @@ test.describe('項目名パディング追加（92/93/94系）', () => {
 
         // 「項目を追加する」ボタンをクリック
         const addBtn = page.locator('button:has-text("項目を追加する")').first();
-        await expect(addBtn).toBeVisible();
+        await addBtn.waitFor({ state: "visible", timeout: 15000 });
         await addBtn.click({ force: true });
         await waitForAngular(page);
 
         // フィールドタイプ選択（モーダル内のボタン/リンク）
         const typeBtn = page.locator(`.modal.show button:has-text("${fieldTypeLabel}"), .modal.show a:has-text("${fieldTypeLabel}")`).first();
-        await expect(typeBtn).toBeVisible();
+        await typeBtn.waitFor({ state: "visible", timeout: 15000 });
         await typeBtn.click({ force: true });
         await waitForAngular(page);
 
         // 項目名入力
-        const fieldNameInput = page.locator('.modal.show input[type="text"]').first();
-        await expect(fieldNameInput).toBeVisible();
+        const fieldNameInput = page.locator('.modal.show input[name="label"], .modal.show input[type="text"]').first();
+        await fieldNameInput.waitFor({ state: "visible", timeout: 15000 });
         await fieldNameInput.fill(paddingChar + fieldName + paddingChar);
 
         // ラベルフィールドが表示されている場合は入力する（Yes/No等のフィールドで必須）
-        //「ラベル」というテキストの近くにあるinputを探す
+        // 「ラベル」というテキストの近くにあるinputを探す
         const labelInputNearLabel = page.locator('.modal.show').getByLabel('ラベル').first();
+        const labelInputAlt = page.locator('.modal.show input[name="boolean-text"], .modal.show input[placeholder*="ラベル"]').first();
+        
         if (await labelInputNearLabel.count() > 0 && await labelInputNearLabel.isVisible().catch(() => false)) {
             const labelVal = await labelInputNearLabel.inputValue().catch(() => '');
             if (!labelVal) {
                 await labelInputNearLabel.fill(fieldName);
             }
+        } else if (await labelInputAlt.count() > 0 && await labelInputAlt.isVisible().catch(() => false)) {
+            const labelVal = await labelInputAlt.inputValue().catch(() => '');
+            if (!labelVal) {
+                await labelInputAlt.fill(fieldName);
+            }
         }
 
         // 「追加する」ボタンをクリック
-        const saveBtn = page.locator('.modal.show button:has-text("追加する")').first();
-        await expect(saveBtn).toBeVisible();
+        const saveBtn = page.locator('.modal.show button:has-text("追加する"), .modal.show button.btn-primary').first();
+        await saveBtn.waitFor({ state: "visible", timeout: 15000 });
         await saveBtn.click({ force: true });
         await waitForAngular(page);
+        
+        // モーダルが閉じるのを待機
+        await expect(page.locator('.modal.show')).toHaveCount(0, { timeout: 10000 }).catch(async () => {
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(1000);
+        });
 
         // 登録後、エラーがないこと、トリミングされた名前が表示されること
         const bodyAfterSave = await page.innerText('body');

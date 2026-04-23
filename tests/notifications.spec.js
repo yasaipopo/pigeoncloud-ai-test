@@ -3394,7 +3394,7 @@ test.describe('通知設定', () => {
             // 編集アイコンが存在する場合はクリック
             const editBtn = page.locator('a[href*="step_mail/edit"], .fa-edit, .fa-pencil, a:has-text("編集")').first();
             if (await editBtn.count().catch(() => 0) > 0) {
-                await editBtn.click();
+                await editBtn.click({ force: true });
                 await waitForAngular(page);
 
                 // 有効トグルをOFFに変更
@@ -3424,7 +3424,7 @@ test.describe('通知設定', () => {
 
             const editBtn = page.locator('a[href*="step_mail/edit"], .fa-edit, .fa-pencil, a:has-text("編集")').first();
             if (await editBtn.count().catch(() => 0) > 0) {
-                await editBtn.click();
+                await editBtn.click({ force: true });
                 await waitForAngular(page);
 
                 // 有効トグルをONに変更
