@@ -184,6 +184,44 @@
 - **解消条件**: Lambda cert generation が test 環境で stable に動作 (または mock/stub される) + 発行完了から certificates list reload までの race condition 対策
 - **現状**: test は fail のまま維持
 
+#### srh-010〜060: OpenSearch グローバル検索 (2026-04-24 追加)
+- **スキップ理由**: Playwright でモーダル (`.global-search-modal.show`) を開く動作が不安定。Playwright native click (force オプション含む)・JS `element.click()`・event dispatch いずれも Angular (click) ハンドラまで安定して到達できない。また、検索結果生成には `this.options` (サイドバーテーブル一覧) のロード完了が必要で、モーダル open 直後の検索はレース条件で 0 件になる
+- **プロダクト側実装**: `html_angular4/src/app/layouts/full-layout.component.html:236` + `full-layout.component.ts:98` (handleSearchClick)
+- **スキップ基準該当**: インフラ/Angular zone 依存（基準 2）
+- **代替実装**: 5 spec 実装済 (tests/global-search.spec.js) 維持、修正待ち
+- **解消条件**:
+  - (a) `this.options` のロード完了を待つ debug helper 追加
+  - (b) モーダル open を API 経由（または URL query）でトリガー可能にするプロダクト変更
+  - (c) PHPUnit で OpenSearchService の検索ロジック検証
+- **関連要件**: R-281/R-282/R-283/R-284/R-286 (OpenSearch グローバル検索)
+- **記載日**: 2026-04-24
+- **見直し予定**: プロダクト側 debug helper 追加後
+
+#### exc-050, exc-070: Excel インポート AI 分析ステップ (2026-04-24 追加)
+- **スキップ理由**: 「AIで分析する」ボタン押下後の GPT API 応答がタイムアウト（2.5 分超）。LLM の非決定的応答時間 + staging の PigeonAI quota で安定実行できない
+- **プロダクト側実装**: `html_angular4/src/app/excel-import/excel-import.component.ts:startAnalysis` → `/api/admin/excel-import-analyze`
+- **スキップ基準該当**: 外部 LLM 依存（基準 2）
+- **代替実装**: exc-020/exc-030 は pass（ファイル種別バリデーション + アップロード→シート選択遷移）
+- **解消条件**:
+  - (a) debug API で AI 応答を mock 固定化
+  - (b) タイムアウトを 5 分まで延長して flaky 許容
+- **関連要件**: R-272/R-274
+- **記載日**: 2026-04-24
+- **見直し予定**: mock API 追加後
+
+#### ms-030: アカウントロック解除 (20回 fail → account_locked → unlock) (2026-04-24 追加)
+- **スキップ理由**: staging 環境 + VPN IP 経由のアクセスでは、`LoginController.php:140-141` の `skip_lock_check = !IS_PRODUCTION && NetCommon::isDebugIp()` 条件により **20 回ログイン失敗してもロック判定が常にスキップされる**。`Record.php:476-491` の `account_locked` 再計算も同条件で skip され、unlock ボタンが表示されない。
+- **プロダクト側実装**: `Application/Controllers/LoginController.php:140`, `Application/Class/Record.php:476`
+- **スキップ基準該当**: インフラ/IP 依存（基準 2）
+- **代替実装**: ms-030 は「非ロック時に unlock ボタンが非表示であること」（UI 条件式の逆検証）のみカバー。実ロック→解除フローは未カバー。
+- **解消条件**:
+  - (a) 非 VPN IP（例: GitHub Actions Runner IP）からのテスト実行環境構築
+  - (b) プロダクト側に debug API で `ignore_login_fail_flg=false` の login_fail ログを強制 INSERT できる機能追加
+  - (c) PHPUnit でロック判定ロジックをカバー
+- **関連要件**: R-265（アカウントロック解除 UI + API）
+- **記載日**: 2026-04-24
+- **見直し予定**: 上記いずれかの解消条件充足時
+
 #### us-sso-saml-010: SAML 設定画面の項目確認 (2026-04-23 追加)
 - **スキップ理由**: テスト環境で SAML 機能の Feature Flag が有効化されていないため、SAML 設定画面にアクセスしてもメニューに表示されないか、リダイレクトされる。
 - **調査経緯**: 2026-04-23 gemcli 独立分析で `html_angular4/src/app/pages/sso-settings/sso-settings.component.html` にセレクター（`識別子`、`応答 URL`、`.fa-copy` 等）は正しく実装されていることを確認。fail は環境側 Feature Flag 未設定が原因
