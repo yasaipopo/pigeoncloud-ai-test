@@ -5365,12 +5365,13 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         await page.waitForSelector('.navbar');
         await waitForAngular(page);
 
-        // [check] 70-4. ✅ IP セクション内に IP が 1 件以上表示されていること
-        //   (input の value / label / span など、DOM に現在IPまたは他IPの文字列が含まれる)
-        const sectionText = await page.locator('[class*="wrap-field-allow_ips"]').innerText();
-        const hasCurrentIp = sectionText.includes(currentIp) || sectionText.includes(ipA);
-        const hasOtherIp = sectionText.includes('1.1.1.1') || sectionText.includes('8.8.8.8');
-        expect(hasCurrentIp || hasOtherIp, `IP が 1 件以上保存/表示されていること (セクションテキスト: ${sectionText.substring(0, 200)})`).toBeTruthy();
+        // [check] 70-4. ✅ IP セクション内の input に IP 値が 1 件以上保存されていること
+        //   innerText は input の value を拾わないため、input value を直接読み取る
+        const ipInputValues = await page.locator('[class*="wrap-field-allow_ips"] input').evaluateAll(els => els.map(e => e.value || '').filter(v => v));
+        const allValues = ipInputValues.join(',');
+        const hasCurrentIp = allValues.includes(currentIp) || allValues.includes(ipA);
+        const hasOtherIp = allValues.includes('1.1.1.1') || allValues.includes('8.8.8.8');
+        expect(hasCurrentIp || hasOtherIp, `IP が 1 件以上保存/表示されていること (input values: ${allValues})`).toBeTruthy();
 
         // [flow] 70-5. testUser で再ログイン (現在IP が ipA で許可されるため成功)
         await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
