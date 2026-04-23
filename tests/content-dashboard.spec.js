@@ -1809,7 +1809,7 @@ test.describe('追加実装テスト（683-838系）', () => {
             for (let i = 0; i < headerCount; i++) {
                 const headerText = await headers.nth(i).innerText().catch(() => '');
                 if (headerText.includes('他テーブル') || headerText.includes('参照')) {
-                    await headers.nth(i).click();
+                    await headers.nth(i).click({ force: true }).catch(() => {});
                     await waitForAngular(page);
                     await page.waitForTimeout(1000);
                     sortClicked = true;

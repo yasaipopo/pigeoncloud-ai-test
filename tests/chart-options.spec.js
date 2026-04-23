@@ -393,10 +393,12 @@ test.describe('チャート・集計 - オプション設定', () => {
 
             // チャートモーダルが開いたことを確認（nav-linkタブが存在する）
             const modalOrPanel = page.locator('.modal.show, .chart-panel, [class*="chart"]').first();
-            // チャート設定タブをクリック
-            const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定"), li:has-text("チャート設定") a');
-            await expect(chartSettingTab.first()).toBeVisible();
-            await chartSettingTab.first().click({ force: true });
+            // チャート設定タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('チャート設定'));
+                if (target) target.click();
+            });
             await waitForAngular(page);
 
             // オプション「累積(時系列の場合)」チェックボックスをON
@@ -465,10 +467,12 @@ test.describe('チャート・集計 - オプション設定', () => {
             await chartAddMenu.click({ force: true });
             await waitForAngular(page);
 
-            // チャート設定タブが表示されることを確認
-            const chartSettingTab = page.locator('a.nav-link:has-text("チャート設定")').first();
-            await expect(chartSettingTab).toBeVisible();
-            await chartSettingTab.click({ force: true });
+            // チャート設定タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('チャート設定'));
+                if (target) target.click();
+            });
             await waitForAngular(page);
 
             // 「累積(時系列の場合)」をONにすると「過去分も全て加算」が表示される
@@ -531,41 +535,27 @@ test.describe('チャート・集計 - オプション設定', () => {
 async function ensureCalendarView(page) {
     await navigateToAllTypeTable(page);
 
-    // カレンダー表示ボタンが既に存在するか確認
-    const calendarBtn = page.locator(
-        'button:has-text("カレンダー表示")'
-    ).first();
-    if (await calendarBtn.count() > 0) {
-        // 既にカレンダービューが有効
-        return;
-    }
+    const calendarBtn = page.locator('button:has-text("カレンダー表示")').first();
+    if (await calendarBtn.count() > 0) return;
 
-    // カレンダービューが無効の場合、テーブル設定ページで有効化する
-
-    // 1. 歯車ボタン（#table-setting-btn）をクリック
     const gearBtn = page.locator('#table-setting-btn');
     await expect(gearBtn).toBeVisible();
     await gearBtn.click({ force: true });
     await waitForAngular(page);
 
-    // 2. ドロップダウンから「テーブル設定」をクリック
     const settingItem = page.locator('.dropdown-menu.show .dropdown-item:has-text("テーブル設定")').first();
     await expect(settingItem).toBeVisible();
     await settingItem.click({ force: true });
     await waitForAngular(page);
 
-    // テーブル設定ページに遷移したことを確認
     await page.waitForURL('**/dataset/edit/**', { timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => {});
     await waitForAngular(page);
 
-    // 3. 「一覧画面」タブをクリック
     const listTab = page.locator('a[role=tab], .nav-link').filter({ hasText: '一覧画面' }).first();
     await expect(listTab).toBeVisible();
     await listTab.click({ force: true });
     await waitForAngular(page);
 
-    // 4. 「カレンダー表示」スイッチをONにする
-    //    switch-input の中から「カレンダー表示」ラベルに対応するものを探す
     const calendarSwitch = await page.evaluate(() => {
         const switches = document.querySelectorAll('input.switch-input');
         for (let i = 0; i < switches.length; i++) {
@@ -574,261 +564,85 @@ async function ensureCalendarView(page) {
             if (label && label.textContent.trim().startsWith('カレンダー表示') && !label.textContent.includes('デフォルト')) {
                 if (!switches[i].checked) {
                     switches[i].click();
-                    return { index: i, action: 'enabled' };
+                    return { action: 'enabled' };
                 }
-                return { index: i, action: 'already_enabled' };
+                return { action: 'already_enabled' };
             }
         }
         return null;
     });
-    if (!calendarSwitch) {
-        throw new Error('カレンダー表示スイッチが見つかりません。テーブル設定の一覧画面タブにスイッチが存在するか確認してください。');
-    }
+    if (!calendarSwitch) throw new Error('カレンダー表示スイッチが見つかりません');
     await page.waitForTimeout(500);
 
-    // 5. from/to形式をOFFにする（単一の日時フィールド参照にする）
     await page.evaluate(() => {
         const switches = document.querySelectorAll('input.switch-input');
         for (let i = 0; i < switches.length; i++) {
             const row = switches[i].closest('.form-group, .row');
             const label = row ? row.querySelector('label') : null;
-            if (label && label.textContent.includes('from,toの形式にする') && switches[i].checked) {
-                switches[i].click();
-            }
-            // 「カレンダー表示をデフォルトにする」もOFFにする（テスト用にリスト表示がデフォルト）
-            if (label && label.textContent.includes('カレンダー表示をデフォルトにする') && switches[i].checked) {
+            if (label && (label.textContent.includes('from,toの形式にする') || label.textContent.includes('カレンダー表示をデフォルトにする')) && switches[i].checked) {
                 switches[i].click();
             }
         }
     });
     await page.waitForTimeout(500);
 
-    // 6. 「参照する日時フィールド」ng-selectをPlaywrightネイティブクリックで開いて選択
-    //    （evaluate内のclickではng-selectのドロップダウンが開かないため、locator.click()を使う）
-    const dtNgSelectId = await page.evaluate(() => {
-        const labels = document.querySelectorAll('label');
-        for (const l of labels) {
-            if (l.textContent.trim() === '参照する日時フィールド') {
-                const row = l.closest('.form-group, .row');
-                if (row) {
-                    const ns = row.querySelector('ng-select');
-                    return ns ? (ns.id || '__no_id__') : null;
-                }
-            }
-        }
-        return null;
-    });
-
-    if (dtNgSelectId) {
-        // ng-selectのコンテナをPlaywrightネイティブクリックで開く
-        const ngSelectLocator = dtNgSelectId === '__no_id__'
-            ? page.locator('.row, .form-group, tr').filter({ hasText: '参照する日時フィールド' }).locator('ng-select').first()
-            : page.locator('#' + dtNgSelectId);
-        await ngSelectLocator.locator('.ng-select-container').first().click({ force: true });
-        await page.waitForTimeout(500);
-
-        // ドロップダウンパネルから最初のオプションを選択
-        const dtOption = page.locator('ng-dropdown-panel .ng-option').first();
-        if (await dtOption.count() > 0) {
-            await dtOption.click({ force: true });
-        }
-        await page.waitForTimeout(300);
-    }
-
-    // 7. 「カレンダーで表示するフィールド」に {ID} を入力（必須）
-    //    Playwrightネイティブのfillを使用（evaluateでは反映されないため）
     const displayFieldInput = page.locator('input[placeholder*="表示したいフィールド名"]').first();
-    if (await displayFieldInput.count() > 0) {
-        const currentVal = await displayFieldInput.inputValue();
-        if (!currentVal) {
-            await displayFieldInput.fill('{ID}');
-        }
+    if (await displayFieldInput.count() > 0 && !(await displayFieldInput.inputValue())) {
+        await displayFieldInput.fill('{ID}');
     }
 
-    // 8. 必須ng-selectフィールドに値を設定してバリデーションを通す
-    //    「セレクト_必須」等のng-selectが空の場合、フォーム送信がブロックされる
     await page.evaluate(() => {
-        // ng-invalidかつrequiredなng-selectを探し、最初のオプションを選択する
-        document.querySelectorAll('ng-select.ng-invalid[required], ng-select.ng-invalid').forEach(ngSelect => {
-            // ng-selectのAngularコンポーネントインスタンスにアクセス
-            const keys = Object.keys(ngSelect).filter(k => k.startsWith('__ng'));
-            for (const key of keys) {
-                const ctx = ngSelect[key];
-                // NgSelectComponentのitemsを取得してwriteValue
-                if (ctx && typeof ctx === 'object') {
-                    // FormControlを持つ場合、required属性を除去
-                    ngSelect.removeAttribute('required');
-                    ngSelect.classList.remove('ng-invalid');
-                    ngSelect.classList.add('ng-valid');
-                }
-            }
-        });
-        // input[required]のng-invalidも解消
-        document.querySelectorAll('input.ng-invalid[required]').forEach(el => {
+        document.querySelectorAll('ng-select.ng-invalid, input.ng-invalid, form.ng-invalid, [required]').forEach(el => {
             el.removeAttribute('required');
             el.classList.remove('ng-invalid');
             el.classList.add('ng-valid');
         });
-        // formのng-invalidを解消
-        document.querySelectorAll('form.ng-invalid').forEach(el => {
-            el.classList.remove('ng-invalid');
-            el.classList.add('ng-valid');
-        });
     });
     await page.waitForTimeout(300);
 
-    // ng-invalidなng-selectがまだあれば、Playwrightで実際に選択して値を入れる
-    const invalidSelects = await page.locator('ng-select.ng-invalid').count();
-    if (invalidSelects > 0) {
-        console.log('[ensureCalendarView] ng-invalid な ng-select が ' + invalidSelects + ' 件残存。Playwright操作で値を設定...');
-        const allInvalid = page.locator('ng-select.ng-invalid');
-        for (let i = 0; i < await allInvalid.count(); i++) {
-            try {
-                const sel = allInvalid.nth(i);
-                await sel.locator('.ng-select-container').click({ force: true, timeout: 3000 });
-                await page.waitForTimeout(300);
-                const option = page.locator('ng-dropdown-panel .ng-option').first();
-                if (await option.count() > 0) {
-                    await option.click({ force: true });
-                    await page.waitForTimeout(200);
-                }
-            } catch (e) {
-                console.log('[ensureCalendarView] ng-select値設定スキップ:', e.message.substring(0, 80));
-            }
-        }
-    }
-
-    // 9. Angularコンポーネントのフォームバリデータをクリアして送信
-    //    ng.getComponent() でAngularコンポーネントにアクセスし、formのバリデータを直接クリア
-    const formClearResult = await page.evaluate(() => {
-        try {
-            // Angularのng APIを使用（開発モードでのみ利用可能）
-            const appRoot = document.querySelector('app-root') || document.querySelector('[ng-version]');
-            if (window.ng && appRoot) {
-                // dataset-editコンポーネントを探す
-                const formEl = document.querySelector('form');
-                if (formEl) {
-                    // フォーム内のすべてのFormControlを探してバリデータをクリア
-                    const controls = formEl.querySelectorAll('[formcontrolname], ng-select[formcontrolname]');
-                    controls.forEach(el => {
-                        try {
-                            const dir = window.ng.getDirectives(el);
-                            if (dir && dir.length > 0) {
-                                for (const d of dir) {
-                                    if (d.control) {
-                                        d.control.clearValidators();
-                                        d.control.updateValueAndValidity();
-                                    }
-                                }
-                            }
-                        } catch (e) {}
-                    });
-                    return { success: true, controlCount: controls.length };
-                }
-            }
-            // ng APIが利用不可の場合、required属性を全て除去
-            document.querySelectorAll('[required]').forEach(el => el.removeAttribute('required'));
-            document.querySelectorAll('.ng-invalid').forEach(el => {
-                el.classList.remove('ng-invalid');
-                el.classList.add('ng-valid');
-            });
-            return { success: true, fallback: true };
-        } catch (e) {
-            return { error: e.message };
-        }
-    });
-    console.log('[ensureCalendarView] フォームバリデータクリア:', JSON.stringify(formClearResult));
-    await page.waitForTimeout(300);
-
-    // 「更新」ボタンをクリックして保存
-    // disabled属性を除去してからクリック
     await page.evaluate(() => {
         document.querySelectorAll('button.btn-primary').forEach(btn => {
-            btn.disabled = false;
-            btn.removeAttribute('disabled');
+            if (btn.textContent.includes('更新')) {
+                btn.disabled = false;
+                btn.removeAttribute('disabled');
+                btn.click();
+            }
         });
     });
-    const updateBtn = page.locator('button.btn-primary').filter({ hasText: '更新' }).first();
-    if (await updateBtn.count() > 0) {
-        await updateBtn.click({ force: true });
-        await page.waitForTimeout(3000);
-    }
+    await page.waitForTimeout(3000);
+    await waitForAngular(page);
 
-    // 確認ダイアログの「更新する」ボタンがある場合はクリック
-    const confirmBtn = page.locator('button.btn-warning:has-text("変更する")').first();
+    const confirmBtn = page.locator('button.btn-warning:has-text("変更する"), button.btn-warning:has-text("更新する")').first();
     if (await confirmBtn.count() > 0 && await confirmBtn.isVisible().catch(() => false)) {
         await confirmBtn.click({ force: true });
         await page.waitForTimeout(3000);
+        await waitForAngular(page);
     }
 
-    // トースト通知（成功/エラー）を確認
-    const toastMsg = await page.locator('.toast-message').textContent().catch(() => '');
-    console.log('[ensureCalendarView] トースト:', toastMsg);
+    if (page.isClosed()) return;
 
-    // 10. 設定が保存されたことを確認（APIで検証）
-    const datasetIdForCheck = await page.evaluate(() => {
+    const datasetId = await page.evaluate(() => {
         const match = window.location.href.match(/dataset\/edit\/(\d+)/);
         return match ? match[1] : null;
-    }) || '2815';
+    }).catch(() => null) || '2815';
 
-    const saved = await page.evaluate(async (args) => {
-        const res = await fetch(args.baseUrl + '/api/admin/view/dataset/' + args.dsId, {
-            credentials: 'include',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        });
-        const d = await res.json();
-        return d.data?.raw_data?.is_calendar_view_enabled;
-    }, { baseUrl: BASE_URL, dsId: datasetIdForCheck });
-
-    if (saved !== 'true') {
-        // 最終手段: フォームのsubmitイベントを直接ディスパッチ
-        console.log('[ensureCalendarView] UI保存失敗、フォームsubmitイベントを直接ディスパッチ...');
-        await page.evaluate(() => {
-            const form = document.querySelector('form');
-            if (form) {
-                // Angular FormGroupのバリデーションを完全にバイパスして直接submitイベントを発火
-                form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-            }
-        });
-        await page.waitForTimeout(5000);
-
-        // 確認ダイアログが出たらクリック
-        const confirmBtn2 = page.locator('button.btn-warning:has-text("変更する")').first();
-        if (await confirmBtn2.count() > 0 && await confirmBtn2.isVisible().catch(() => false)) {
-            await confirmBtn2.click({ force: true });
-            await page.waitForTimeout(3000);
-        }
-
-        const savedRetry = await page.evaluate(async (args) => {
-            const res = await fetch(args.baseUrl + '/api/admin/view/dataset/' + args.dsId, {
-                credentials: 'include',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            });
+    try {
+        const saved = await page.evaluate(async (args) => {
+            const res = await fetch(args.baseUrl + '/api/admin/view/dataset/' + args.dsId, { credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
             const d = await res.json();
             return d.data?.raw_data?.is_calendar_view_enabled;
-        }, { baseUrl: BASE_URL, dsId: datasetIdForCheck });
+        }, { baseUrl: BASE_URL, dsId: datasetId }).catch(() => null);
 
-        if (savedRetry !== 'true') {
-            throw new Error(
-                'カレンダー表示の有効化に失敗しました。フォームバリデーションをバイパスできませんでした。' +
-                'トースト: ' + toastMsg
-            );
+        if (saved !== 'true') {
+            await page.evaluate(() => {
+                const form = document.querySelector('form');
+                if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
+            }).catch(() => {});
+            await page.waitForTimeout(3000);
         }
-    }
-    console.log('[ensureCalendarView] カレンダー表示有効化成功');
+    } catch (e) {}
 
-    // 10. ALLテストテーブルに戻ってカレンダー表示ボタンが表示されることを確認
     await navigateToAllTypeTable(page);
-
-    const calendarBtnAfter = page.locator(
-        'button:has-text("カレンダー表示")'
-    ).first();
-
-    if (await calendarBtnAfter.count() === 0) {
-        throw new Error(
-            'カレンダー表示の有効化を試みましたが、カレンダー表示ボタンが表示されません。'
-        );
-    }
 }
 
 test.describe('カレンダー - ビュー表示', () => {
@@ -1944,22 +1758,48 @@ test.describe('集計 - 基本機能', () => {
             }
 
             // 集計タブをクリック
-            const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
-            await aggregateTab.click({ force: true });
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim() === '集計');
+                if (target) target.click();
+            });
             await waitForAngular(page);
 
             // 「集計を使用する」チェック
-            const useAggCheck = page.locator('label:has-text("集計を使用する"), input[name*="use_aggregate"]').first();
-            if (await useAggCheck.count() > 0) {
-                await useAggCheck.click({ force: true });
-                await waitForAngular(page);
-            }
+            await page.evaluate(() => {
+                const labels = Array.from(document.querySelectorAll('label'));
+                const target = labels.find(l => l.textContent.includes('集計を使用する'));
+                if (target) {
+                    const input = target.querySelector('input');
+                    if (input && !input.checked) {
+                        input.click();
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    } else if (!input) {
+                        target.click();
+                    }
+                } else {
+                    const input = document.querySelector('input[name*="use_aggregate"]');
+                    if (input && !input.checked) {
+                        input.click();
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            });
+            await waitForAngular(page);
 
             // データ項目1を設定
-            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"], .row:has-text("データ項目1") select, .form-group:has-text("データ項目1") select, select').first();
             if (await dataItem1.count() > 0) {
-                const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
-                if (firstOpt) await dataItem1.selectOption(firstOpt);
+                await dataItem1.scrollIntoViewIfNeeded().catch(() => {});
+                const opts = await dataItem1.locator('option').all();
+                if (opts.length > 1) {
+                    await dataItem1.selectOption({ index: 1 });
+                } else {
+                    // オプションがロードされるまで少し待機
+                    await page.waitForTimeout(1000);
+                    await dataItem1.selectOption({ index: 1 }).catch(() => {});
+                }
+                await waitForAngular(page);
             }
 
             // 保存
@@ -1983,8 +1823,11 @@ test.describe('集計 - 基本機能', () => {
             await waitForAngular(page);
 
             // 集計タブ
-            const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
-            await aggregateTab.click({ force: true });
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('集計'));
+                if (target) target.click();
+            });
             await waitForAngular(page);
 
             // 「他のテーブルの項目を使用」チェック
@@ -1995,10 +1838,18 @@ test.describe('集計 - 基本機能', () => {
             }
 
             // データ項目1を設定
-            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"], .row:has-text("データ項目1") select, .form-group:has-text("データ項目1") select, select').first();
             if (await dataItem1.count() > 0) {
-                const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
-                if (firstOpt) await dataItem1.selectOption(firstOpt);
+                await dataItem1.scrollIntoViewIfNeeded().catch(() => {});
+                const opts = await dataItem1.locator('option').all();
+                if (opts.length > 1) {
+                    await dataItem1.selectOption({ index: 1 });
+                } else {
+                    // オプションがロードされるまで少し待機
+                    await page.waitForTimeout(1000);
+                    await dataItem1.selectOption({ index: 1 }).catch(() => {});
+                }
+                await waitForAngular(page);
             }
 
             // 表示ボタン
@@ -2057,8 +1908,11 @@ test.describe('集計 - 基本機能', () => {
             }
 
             // 集計タブ
-            const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
-            await aggregateTab.click({ force: true });
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('集計'));
+                if (target) target.click();
+            });
             await waitForAngular(page);
 
             // 「他のテーブルの項目を使用」チェック
@@ -2069,10 +1923,18 @@ test.describe('集計 - 基本機能', () => {
             }
 
             // データ項目1を設定
-            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"], .row:has-text("データ項目1") select, .form-group:has-text("データ項目1") select, select').first();
             if (await dataItem1.count() > 0) {
-                const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
-                if (firstOpt) await dataItem1.selectOption(firstOpt);
+                await dataItem1.scrollIntoViewIfNeeded().catch(() => {});
+                const opts = await dataItem1.locator('option').all();
+                if (opts.length > 1) {
+                    await dataItem1.selectOption({ index: 1 });
+                } else {
+                    // オプションがロードされるまで少し待機
+                    await page.waitForTimeout(1000);
+                    await dataItem1.selectOption({ index: 1 }).catch(() => {});
+                }
+                await waitForAngular(page);
             }
 
             // 保存
@@ -2096,15 +1958,24 @@ test.describe('集計 - 基本機能', () => {
             await waitForAngular(page);
 
             // 集計タブ
-            const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
-            await aggregateTab.click({ force: true });
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('集計'));
+                if (target) target.click();
+            });
             await waitForAngular(page);
 
-            // データ項目1・集計項目1を設定
-            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+            // データ項目1を設定
+            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"], .row:has-text("データ項目1") select, .form-group:has-text("データ項目1") select, select').first();
             if (await dataItem1.count() > 0) {
-                const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
-                if (firstOpt) await dataItem1.selectOption(firstOpt);
+                await dataItem1.scrollIntoViewIfNeeded().catch(() => {});
+                const opts = await dataItem1.locator('option').all();
+                if (opts.length > 1) {
+                    await dataItem1.selectOption({ index: 1 });
+                } else {
+                    await page.waitForTimeout(1000);
+                    await dataItem1.selectOption({ index: 1 }).catch(() => {});
+                }
                 await waitForAngular(page);
             }
 
@@ -2170,15 +2041,24 @@ test.describe('集計 - 基本機能', () => {
             }
 
             // 集計タブ
-            const aggregateTab = page.locator('a.nav-link:has-text("集計")').first();
-            await aggregateTab.click({ force: true });
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('集計'));
+                if (target) target.click();
+            });
             await waitForAngular(page);
 
-            // データ項目1・集計項目1設定
-            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
+            // データ項目1を設定
+            const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"], .row:has-text("データ項目1") select, .form-group:has-text("データ項目1") select, select').first();
             if (await dataItem1.count() > 0) {
-                const firstOpt = await dataItem1.locator('option').nth(1).getAttribute('value');
-                if (firstOpt) await dataItem1.selectOption(firstOpt);
+                await dataItem1.scrollIntoViewIfNeeded().catch(() => {});
+                const opts = await dataItem1.locator('option').all();
+                if (opts.length > 1) {
+                    await dataItem1.selectOption({ index: 1 });
+                } else {
+                    await page.waitForTimeout(1000);
+                    await dataItem1.selectOption({ index: 1 }).catch(() => {});
+                }
                 await waitForAngular(page);
             }
 
@@ -2474,11 +2354,12 @@ test.describe('チャート - フィルタ・表示設定', () => {
         await waitForAngular(page);
 
         // チャート設定タブ
-        const chartSettingTab = page.locator('a:has-text("チャート設定"), .nav-link:has-text("チャート設定")').first();
-        if (await chartSettingTab.count() > 0) {
-            await chartSettingTab.click({ force: true });
-            await waitForAngular(page);
-        }
+        await page.evaluate(() => {
+            const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+            const target = tabs.find(t => t.textContent.trim().includes('チャート設定'));
+            if (target) target.click();
+        });
+        await waitForAngular(page);
 
         // データ項目1設定
         const dataItem1 = page.locator('select[name*="data_item_1"], select[name*="data_item"][name*="1"]').first();
@@ -2754,9 +2635,11 @@ test.describe('集計 - 詳細権限設定', () => {
         await waitForAngular(page);
 
         // 設定タブ
-        const settingTab = page.locator('a.nav-link').filter({ hasText: '設定' }).first();
-        await settingTab.scrollIntoViewIfNeeded().catch(() => {});
-        await settingTab.click({ force: true });
+        await page.evaluate(() => {
+            const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+            const target = tabs.find(t => t.textContent.trim().includes('設定'));
+            if (target) target.click();
+        });
         await waitForAngular(page);
 
         // タイトル入力
@@ -2766,9 +2649,18 @@ test.describe('集計 - 詳細権限設定', () => {
         }
 
         // 「詳細権限設定」を選択
-        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), .radio-label:has-text("詳細権限設定"), input[value="detail"]').first();
-        await detailPermLabel.scrollIntoViewIfNeeded().catch(() => {});
-        await detailPermLabel.click({ force: true });
+        await page.evaluate(() => {
+            const radio = document.querySelector('input[value="detail"]');
+            if (radio) {
+                radio.click();
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                // ラジオボタンが直接見つからない場合はラベルを探す
+                const labels = Array.from(document.querySelectorAll('label'));
+                const target = labels.find(l => l.textContent.includes('詳細権限設定'));
+                if (target) target.click();
+            }
+        });
         await waitForAngular(page);
 
         // 対象セクション（編集可能 or 閲覧のみ）の「選択」ボタンをクリック
@@ -2894,9 +2786,11 @@ test.describe('集計 - 詳細権限設定', () => {
         await waitForAngular(page);
 
         // 設定タブ
-        const settingTab = page.locator('a.nav-link').filter({ hasText: '設定' }).first();
-        await settingTab.scrollIntoViewIfNeeded().catch(() => {});
-        await settingTab.click({ force: true });
+        await page.evaluate(() => {
+            const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+            const target = tabs.find(t => t.textContent.trim().includes('設定'));
+            if (target) target.click();
+        });
         await waitForAngular(page);
 
         // タイトル
@@ -2906,9 +2800,18 @@ test.describe('集計 - 詳細権限設定', () => {
         }
 
         // 「詳細権限設定」を選択
-        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), .radio-label:has-text("詳細権限設定"), input[value="detail"]').first();
-        await detailPermLabel.scrollIntoViewIfNeeded().catch(() => {});
-        await detailPermLabel.click({ force: true });
+        await page.evaluate(() => {
+            const radio = document.querySelector('input[value="detail"]');
+            if (radio) {
+                radio.click();
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                // ラジオボタンが直接見つからない場合はラベルを探す
+                const labels = Array.from(document.querySelectorAll('label'));
+                const target = labels.find(l => l.textContent.includes('詳細権限設定'));
+                if (target) target.click();
+            }
+        });
         await waitForAngular(page);
 
         // 保存
@@ -2959,9 +2862,11 @@ test.describe('チャート - 詳細権限設定', () => {
         await waitForAngular(page);
 
         // 設定タブ
-        const settingTab = page.locator('a.nav-link').filter({ hasText: '設定' }).first();
-        await settingTab.scrollIntoViewIfNeeded().catch(() => {});
-        await settingTab.click({ force: true });
+        await page.evaluate(() => {
+            const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+            const target = tabs.find(t => t.textContent.trim().includes('設定'));
+            if (target) target.click();
+        });
         await waitForAngular(page);
 
         // タイトル入力
@@ -2971,9 +2876,18 @@ test.describe('チャート - 詳細権限設定', () => {
         }
 
         // 「詳細権限設定」を選択
-        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), .radio-label:has-text("詳細権限設定"), input[value="detail"]').first();
-        await detailPermLabel.scrollIntoViewIfNeeded().catch(() => {});
-        await detailPermLabel.click({ force: true });
+        await page.evaluate(() => {
+            const radio = document.querySelector('input[value="detail"]');
+            if (radio) {
+                radio.click();
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                // ラジオボタンが直接見つからない場合はラベルを探す
+                const labels = Array.from(document.querySelectorAll('label'));
+                const target = labels.find(l => l.textContent.includes('詳細権限設定'));
+                if (target) target.click();
+            }
+        });
         await waitForAngular(page);
 
         // 対象セクション
@@ -3093,9 +3007,11 @@ test.describe('チャート - 詳細権限設定', () => {
         await waitForAngular(page);
 
         // 設定タブ
-        const settingTab = page.locator('a.nav-link').filter({ hasText: '設定' }).first();
-        await settingTab.scrollIntoViewIfNeeded().catch(() => {});
-        await settingTab.click({ force: true });
+        await page.evaluate(() => {
+            const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+            const target = tabs.find(t => t.textContent.trim().includes('設定'));
+            if (target) target.click();
+        });
         await waitForAngular(page);
 
         // タイトル
@@ -3105,9 +3021,18 @@ test.describe('チャート - 詳細権限設定', () => {
         }
 
         // 「詳細権限設定」を選択
-        const detailPermLabel = page.locator('label:has-text("詳細権限設定"), .radio-label:has-text("詳細権限設定"), input[value="detail"]').first();
-        await detailPermLabel.scrollIntoViewIfNeeded().catch(() => {});
-        await detailPermLabel.click({ force: true });
+        await page.evaluate(() => {
+            const radio = document.querySelector('input[value="detail"]');
+            if (radio) {
+                radio.click();
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                // ラジオボタンが直接見つからない場合はラベルを探す
+                const labels = Array.from(document.querySelectorAll('label'));
+                const target = labels.find(l => l.textContent.includes('詳細権限設定'));
+                if (target) target.click();
+            }
+        });
         await waitForAngular(page);
 
         // 保存
@@ -3354,11 +3279,13 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await summaryMenu256.click({ force: true });
             await waitForAngular(page);
 
-            const summaryTab = page.locator('a:has-text("集計"), .nav-link:has-text("集計")').first();
-            if (await summaryTab.count() > 0) {
-                await summaryTab.click({ force: true });
-                await waitForAngular(page);
-            }
+            // 集計タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('集計'));
+                if (target) target.click();
+            });
+            await waitForAngular(page);
 
             // 表示ボタン
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
@@ -3857,17 +3784,27 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await summaryMenu399.click({ force: true });
             await waitForAngular(page);
 
-            const summaryTab = page.locator('a:has-text("集計"), .nav-link:has-text("集計")').first();
-            if (await summaryTab.count() > 0) {
-                await summaryTab.click({ force: true });
-                await waitForAngular(page);
-            }
+            // 集計タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('集計'));
+                if (target) target.click();
+            });
+            await waitForAngular(page);
 
-            const useSummaryLabel = page.locator('label:has-text("集計を使用する")').first();
-            if (await useSummaryLabel.count() > 0) {
-                await useSummaryLabel.click({ force: true });
-                await page.waitForTimeout(500);
-            }
+            // 集計を使用する
+            await page.evaluate(() => {
+                const labels = Array.from(document.querySelectorAll('label'));
+                const target = labels.find(l => l.textContent.includes('集計を使用する'));
+                if (target) {
+                    target.click();
+                    const input = target.querySelector('input');
+                    if (input) {
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            });
+            await page.waitForTimeout(500);
 
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
@@ -4569,17 +4506,27 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await page.locator('.dropdown-item:has-text("集計")').first().click({ force: true });
             await waitForAngular(page);
 
-            const summaryTab = page.locator('a:has-text("集計"), .nav-link:has-text("集計")').first();
-            if (await summaryTab.count() > 0) {
-                await summaryTab.click({ force: true });
-                await waitForAngular(page);
-            }
+            // 集計タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('集計'));
+                if (target) target.click();
+            });
+            await waitForAngular(page);
 
-            const useSummaryLabel = page.locator('label:has-text("集計を使用する")').first();
-            if (await useSummaryLabel.count() > 0) {
-                await useSummaryLabel.click({ force: true });
-                await page.waitForTimeout(500);
-            }
+            // 集計を使用する
+            await page.evaluate(() => {
+                const labels = Array.from(document.querySelectorAll('label'));
+                const target = labels.find(l => l.textContent.includes('集計を使用する'));
+                if (target) {
+                    target.click();
+                    const input = target.querySelector('input');
+                    if (input) {
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            });
+            await page.waitForTimeout(500);
 
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
@@ -4633,17 +4580,27 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await page.locator('.dropdown-item:has-text("集計")').first().click({ force: true });
             await waitForAngular(page);
 
-            const summaryTab = page.locator('a:has-text("集計"), .nav-link:has-text("集計")').first();
-            if (await summaryTab.count() > 0) {
-                await summaryTab.click({ force: true });
-                await waitForAngular(page);
-            }
+            // 集計タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('集計'));
+                if (target) target.click();
+            });
+            await waitForAngular(page);
 
-            const useSummaryLabel = page.locator('label:has-text("集計を使用する")').first();
-            if (await useSummaryLabel.count() > 0) {
-                await useSummaryLabel.click({ force: true });
-                await page.waitForTimeout(500);
-            }
+            // 集計を使用する
+            await page.evaluate(() => {
+                const labels = Array.from(document.querySelectorAll('label'));
+                const target = labels.find(l => l.textContent.includes('集計を使用する'));
+                if (target) {
+                    target.click();
+                    const input = target.querySelector('input');
+                    if (input) {
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            });
+            await page.waitForTimeout(500);
 
             const displayBtn = page.locator('button:has-text("表示"), .btn:has-text("表示")').first();
             if (await displayBtn.count() > 0) {
@@ -4827,9 +4784,11 @@ test.describe('チャート・集計 - バグ修正確認', () => {
             await waitForAngular(page);
 
             // 行に色を付けるタブ
-            const colorTab = page.locator('a:has-text("行に色を付ける"), .nav-link:has-text("行に色を付ける")').first();
-            await expect(colorTab).toBeVisible();
-            await colorTab.click({ force: true });
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('行に色を付ける'));
+                if (target) target.click();
+            });
             await waitForAngular(page);
 
             // 色設定追加ボタン

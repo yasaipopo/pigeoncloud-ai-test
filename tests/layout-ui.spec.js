@@ -1162,7 +1162,7 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
                 const selectEl = page.locator('ng-select, select').first();
                 const selectCount = await selectEl.count();
                 if (selectCount > 0) {
-                    await selectEl.click().catch(() => {});
+                    await selectEl.click({ force: true }).catch(() => {});
                     await page.waitForTimeout(1000);
                 }
 
@@ -1437,11 +1437,10 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
             const STEP_TIME = Date.now();
 
             test.setTimeout(120000);
-            await login(page);
-            const tableId = await getAllTypeTableId(page);
+            const tid = tableId || await getAllTypeTableId(page);
 
             // レコード詳細を開く
-            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset__${tid}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
             await waitForAngular(page);
 
             const firstRow = page.locator('tr[mat-row]').first();
