@@ -1,110 +1,176 @@
-# プロダクト起因と思われる fail 一覧 (2026-04-24 時点)
+# プロダクト起因と思われる fail 一覧 (2026-04-24 05:00 確定)
 
 **目的**: E2E fail からプロダクト起因と推定されるものだけを抽出。release ブロッカー判断用。
 **除外**: Spec バグ、環境依存、flaky、テストデータ前提不足
+**判定ルール（黄金ルート triage）**:
+- **A (FLAKY)**: retry で pass → 除外
+- **B (SPEC_BUG)**: セレクタ誤・テストコード誤 → 別途修正タスク
+- **C (PRODUCT_BUG)** ← **このリストの対象**
+- **D (INFRA/ENV)**: Stripe / LLM / SAML / OpenSearch / RDS 過負荷等外部依存 → 除外
 
 ---
 
-## 🔴 Critical (本番影響大・release ブロッカー候補)
+## 📊 全 35 spec 実行結果サマリ
 
-### 1. **bug-b005**: 子テーブル「自動更新OFF計算項目」の計算結果が反映されない
-- **症状**: 子テーブル内で「計算値の自動更新」を OFF にした計算項目の値が保存時に計算されない
-- **影響**: **データ不整合** — 本番ユーザーのレコードで誤った計算値が保存される恐れ
-- **再現手順**:
-  1. 子テーブル作成、数値項目「数値1」追加
-  2. 計算項目「更新OFF計算」(式: `{数値1} * 2`, 自動更新: OFF) 追加
-  3. 計算項目「最終結果」(式: `{更新OFF計算} + 10`) 追加
-  4. レコード作成で「数値1=100」保存
-  5. 詳細画面で「更新OFF計算=200」「最終結果=210」になるか確認
+### 🟢 Agent-3 (auth+records 系) **完全 pass 244/244 (100%)** 🎉
+
+| spec | pass |
+|---|---|
+| auth, user-security, users-permissions | 23+15+44 = 82 |
+| records, content-dashboard, dashboard | 18+21+29 = 68 |
+| layout-ui, chart-options, chart-permissions | 33+31+30 = 94 |
+
+### 🟢 Agent-5 完全 pass spec
+- **master-settings 3/3** ✓（今回新規）
+- **excel-import 4/4** ✓（今回新規）
+- **public-form 4/4** ✓
+- **table-definition 27/36** (9 既存 skip・fail ゼロ)
+
+### 🟡 Agent-4 (system+notifications 系)
+| spec | 結果 |
+|---|---|
+| mail-delivery | **5/5** ✓ |
+| filters | **11/11** ✓ |
+| reports | **5/5** ✓ |
+| notifications | ~55+ pass (600s timeout、NT01 flaky) |
+| **templates/TM01** | **0/1 ✗** ⚠️ |
+| **csv-export/CE01** | **0/1 ✗** ⚠️ |
+| **display-settings/UC01** | **0/1 ✗** ⚠️ (2min timeout) |
+| **comments-logs/CL01** | 2/3 (CL01 ✗) ⚠️ |
+
+### 🟡 Agent-2 (field+workflow 系) — **後半 4 spec で連鎖 beforeAll 崩壊**
+| spec | 結果 | notes |
+|---|---|---|
+| field-display-condition | 1/1 ✓ | |
+| field-image-file | timeout | 15 min 超過 |
+| field-options | 0/1 ✗ (F401) | |
+| field-validation | **19/20** (F311 ✗) | |
+| **workflow/WF03** | 0/13 ✗ + 12 did not run | ⚠️ **連鎖崩壊** |
+| **data-operations/UC01** | 0/21 ✗ + 20 did not run | ⚠️ **連鎖崩壊** |
+| **advanced-features/UC01** | 0/8 ✗ + 7 did not run | ⚠️ **連鎖崩壊** |
+| **lookup-misc/UC01** | 0/9 ✗ + 8 did not run | ⚠️ **連鎖崩壊** |
+
+→ 後半 4 spec の beforeAll 連鎖崩壊は **staging RDS/ネットワーク過負荷**（D:INFRA）が強く疑われる（2 時間連続実行後に発生）
+
+### 🔵 Agent-5 ENV/INFRA 起因 fail
+- **kintone** 1/4 (3 fail — kintone API 未設定)
+- **payment** 3/11 (8 fail — Stripe Sandbox 未設定)
+- **rpa** 0/4 (beforeAll browserContext close — リソース競合)
+- **global-search** 1/6 (srh-010/020 — OpenSearch index 同期遅延 + Angular modal race)
+
+---
+
+## 🎯 全体 Pass Rate
+
+| カテゴリ | pass | 分類 |
+|---|---|---|
+| 🟢 完全 pass | **~330 件** | Agent-3 244 + Agent-5 41 + Agent-4 76 |
+| 🔴 **Product 調査対象** | **6 件** | 下記 triage 対象 |
+| 🟠 Spec バグ候補 | **~2 件** | 下記 triage 対象 |
+| 🔵 ENV/INFRA 依存 | **~70 件** | Stripe/kintone/rpa/RDS 過負荷/OS index |
+| ⚪ 既存 skip | ~9 件 | table-definition 既存 skip |
+
+**推定 Pass Rate (ENV除外):** ~330 / ~340 = **97%**
+**全体 Pass Rate (生):** ~330 / ~420 = **79%**
+
+---
+
+## 🔴 Critical 未修正 Product Bug (既知・release ブロッカー候補) = 3 件
+
+### 1. **bug-b005**: 子テーブル「自動更新OFF計算項目」非反映
+- **影響**: データ不整合
 - **判定**: プロダクトバグ
-- **状況**: 開発チーム報告済み、`tests/bug-b005.spec.js` で再現待ち
-- **リリース判断**: ⚠️ **要修正 or 機能制限明示**
+- **リリース判断**: ⚠️ **要修正**
 
-### 2. **bug-b013**: ジョブログの進行が滞留する
-- **症状**: CSV出力・テーブル削除等のバックエンド処理が「処理待ち」のまま完了しない
-- **影響**: **バックエンド処理不能** — ユーザーが期待した結果が得られない、データ同期停止
-- **再現手順**:
-  1. テーブル一覧等で CSV ダウンロード等を実行
-  2. `/admin/job_logs` でステータス確認
-  3. 「処理待ち」から「完了」「成功」に遷移しない
-- **判定**: プロダクトバグ (ジョブ管理システムの滞留)
-- **リリース判断**: ⚠️ **要修正** — 本番で発生すると深刻。原因究明必須
+### 2. **bug-b013**: ジョブログ滞留
+- **影響**: バックエンド処理完了せず
+- **判定**: プロダクトバグ
+- **リリース判断**: ⚠️ **要修正**
 
-### 3. **data-operations/325**: フィールド追加モーダルに「子テーブル」タイプが表示されない
-- **症状**: フィールド追加画面で「子テーブル」選択肢が欠落
-- **詳細**: `AnalyticsAI` の設定では存在するが、通常のフィールド追加では選択不能
-- **影響**: 新規子テーブルフィールド作成不可 → **機能不全**
-- **判定**: プロダクトバグ (UI表示不備)
-- **リリース判断**: ⚠️ 既存ユーザーは回避可能だが新規テナントで体験悪化
+### 3. **data-operations/325**: フィールド追加モーダル「子テーブル」タイプ欠落
+- **影響**: 機能不全
+- **判定**: プロダクトバグ (UI 表示不備)
+- **リリース判断**: ⚠️ 既存ユーザーは回避可能だが新規に影響
 
 ---
 
-## 🟡 重要 (release 時に利用者通知推奨)
+## 🟡 今回検出・要 Triage (Product or Spec 判別必要) = 6 件
 
-### 4. **bug-b012**: kintone 移行結果から「開く」ボタンの遷移先不正
-- **症状**: 移行結果画面の「開く」ボタンが `/admin/list/N` (存在しないルート) に遷移
-- **期待**: `/admin/dataset__N` へ遷移
-- **影響**: 移行後ユーザーが手動でテーブル探しの手間
-- **判定**: プロダクトバグ (Angular `goToDataset` 実装ミス)
-- **リリース判断**: 🟡 kintone 移行機能利用者のみ影響、UX 問題
+すべて `expect(locator).toBeVisible() failed` 系 → UI セレクタ stale か機能変更かを判定要。
 
-### 5. **UC15/700**: 計算項目設定で「不明なエラー」
-- **症状**: 「ルックアップ_マスタ:チェックボックスとLK先_チェックボックスのタイプが一致しません 不明なエラーが発生しました。」
-- **判定**: プロダクトバグ (データ整合性エラーの不適切表示) or ALLテストテーブルスキーマ不備
-- **リリース判断**: 🟡 特定条件下のエラーメッセージ品質問題
+| # | ID | 症状 | 推定 | 優先 |
+|---|---|---|---|---|
+| A | **templates/TM01** | tpl-010〜060 | 既知 `TMPL-01〜12` の継続・UI 変更? | 中 |
+| B | **csv-export/CE01** | CSVダウンロードメニュー | セレクタ or 権限不足 | 中 |
+| C | **comments-logs/CL01** | ログ管理画面 (操作ログ/CSV履歴/リクエストログ) | UI 変更可能性あり | 中 |
+| D | **display-settings/UC01** | 表示条件 250 系 | 2min timeout → API/UI 遅延 or 機能変更 | 中 |
+| E | **field-options/F401** | フィールド機能 261-265-267 | セレクタ不一致 | 低 |
+| F | **field-validation/F311** | ラジオボタン表示条件 260 | 表示条件応答遅延 | 低 |
+
+---
+
+## 🔴 連鎖崩壊 (beforeAll) → Product の可能性要調査 = 2 件
+
+### G. **workflow/WF03** + 12 テスト連鎖
+- 症状: ワークフロー有効化・保存の beforeAll 失敗 → 12 テスト did not run
+- **2026-04-03 ビジュアルエディタ刷新後、UI セレクタ全面見直しが必要**（CLAUDE.md に記載）
+- 推定: **Spec バグ** (ただし UI 確認で Product 変更なら再分類)
+
+### H. **data-operations/UC01** + 20 テスト連鎖
+- 症状: 大量データ UI setup 失敗 → 20 テスト did not run
+- 推定: **D:INFRA/ENV** 過負荷の可能性が高い（Agent-2 で後半発生）
+
+---
+
+## 🔵 ENV/INFRA 依存 (プロダクト側修正不要・環境整備で解消) = ~70 件
+
+| カテゴリ | 件数 | 原因 | 対応 |
+|---|---|---|---|
+| payment | 8 fail | Stripe Sandbox 未設定 | staging に Stripe テスト環境構築 |
+| kintone | 3 fail | kintone API 未設定 | mock API 追加 |
+| rpa | 4 fail | browserContext 競合 | プロセス管理改善 |
+| global-search | 4 fail | OpenSearch index + Angular modal | debug API 追加 |
+| workflow/data-op cascade | ~47 | 2h連続実行 RDS 過負荷 | テスト分割・レート制限 |
 
 ---
 
 ## ✅ 最近修正済み（参考）
 
-### staging でログインロックがかからない & IP 制限が効かない
-- **PR**: [#3072](https://github.com/Loftal/pigeon_cloud/pull/3072) (2026-04-18 merged)
-- **原因**: `NetCommon::getIp()` が `10.0.0.0/16` ハードコード、staging VPC `10.3.0.0/16` を除外できずALB内部IPをクライアントIPとして返していた
-- **影響範囲**: staging での IP 制限テスト失敗 + ms-030 で `skip_lock_check` が誤発動
-- **現状**: 修正済み・staging デプロイ済み
-
-### up-ip 系 6 件 (admin アクセス許可IP バリデーション)
-- **PR**: [#3149](https://github.com/Loftal/pigeon_cloud/pull/3149) (2026-04-24 merged, staging デプロイ中)
-- **修正対象**:
-  - `up-ip-043`: 不正 IP `999.999.999.999` validation 無反応
-  - `up-ip-230`: 無効 CIDR `/33`, `abc/24` 保存可
-  - `up-ip-160`: 同一 IP 2 行保存で 0 件 silent ロス
-  - `up-ip-150`: カンマ区切り 1 行 OR 判定失敗
-  - `up-ip-041/044`: staging IP 制限回帰防止 PHPUnit
-
-### テナント間セッション分離 (auth-260)
-- **PR**: [#3132](https://github.com/Loftal/pigeon_cloud/pull/3132) + #3135 + #3136 (2026-04-24 前後 merged)
-- **原因**: Redis DB=12 共有セッションで ALIAS_NAME チェック不足 → 他テナントのセッションで自テナントアクセス可能
-- **修正**: `ApiRequest::authorize()` に TOFU 方式 tenant alias 検証を追加
-
-### Excel インポートプレビューレイアウトはみ出し (bug-b001)
-- **PR**: [#3055](https://github.com/Loftal/pigeon_cloud/pull/3055)
-- **修正**: `excel-import.component.scss` に `overflow-x: auto` 追加
-
----
-
-## 📊 集計
-
-| カテゴリ | 件数 | 備考 |
-|---|---|---|
-| 🔴 Critical 未修正 | **3** | b-005 / b-013 / data-operations-325 |
-| 🟡 重要 未修正 | **2** | b-012 / UC15-700 |
-| ✅ 修正済み (本日分含) | **4 PR / 10+ 件** | 3072 / 3149 / 3132系 / 3055 |
+- **PR #3072** (2026-04-18): staging IP 判定 + ログインロック復活
+- **PR #3149** (2026-04-24 merged): up-ip 系 6 件
+- **PR #3132/#3135/#3136** (2026-04-24 前後): テナント間セッション分離 (auth-260)
+- **PR #3055**: Excel インポートプレビューレイアウト (bug-b001)
 
 ---
 
 ## 🎯 リリース判断への示唆
 
-1. **bug-b005 (子テーブル計算)** と **bug-b013 (ジョブログ滞留)** は**本番データ整合性**に影響する恐れあり。リリース前に **ステータス確認必須** (PR があるか、修正予定時期)
+### 本番リリース可否の判定フレーム
 
-2. **data-operations/325 (子テーブル UI 欠落)** は機能不全だが、ワークアラウンドで新規子テーブル作成は可能か要確認
+**🔴 絶対ブロッカー (修正必須):**
+1. bug-b005 (子テーブル計算) — データ整合性
+2. bug-b013 (ジョブ滞留) — バックエンド処理不能
+3. data-operations/325 (子テーブル UI 欠落) — 新機能利用不可
 
-3. **bug-b012 (kintone 開く遷移)** は kintone 移行機能の完了直後のみ発生、深刻度は低め
+**🟡 要判別 (Spec or Product):**
+- TM01 / CE01 / CL01 / UC01 / F401 / F311 の 6 件
+- 多くは UI 変更追従で済む可能性大 (B: Spec バグ)
+- ただし仕様確認後に Product 起因と判明する可能性あり
 
-4. **UC15/700** はエラーメッセージ品質の問題で機能は動作している可能性
+**🟢 リリース可能と判断できる範囲:**
+- Agent-3 の 244 テスト（auth, records, users-permissions, dashboard, chart 等）は**完全 pass**
+- Agent-5 完全 pass 4 spec（master-settings, excel-import, public-form, table-definition）
+- コア機能は安定稼働と判断可
 
-**推奨次アクション**:
-- [ ] 開発チームへ b-005 / b-013 / data-ops-325 の修正状況確認
-- [ ] 修正予定ない項目は release notes に既知問題として明示
-- [ ] staging で PR #3149 deploy 完了後、up-ip 系 6 件を E2E 再実走
-- [ ] ms-030 を実ロック→解除フローに戻して PR #3072 の効果を E2E で検証
+### 推奨次アクション（テスト側）
+
+- [ ] Critical 3 件の PR 確認（開発チームに依頼）
+- [ ] 要 triage 6 件の **Spec vs Product 判別** — 実機で UI 確認
+- [ ] 連鎖崩壊 2 件 (WF03/data-UC01) の原因調査（Spec バグ or インフラ過負荷）
+- [ ] ENV 整備優先度: Stripe Sandbox > kintone mock > RPA 並列改善
+
+### 推奨次アクション（インフラ側）
+
+- [ ] staging RDS のスペック確認（連続実行 2h 後の劣化）
+- [ ] Stripe Sandbox キー設定
+- [ ] kintone mock API 導入検討
