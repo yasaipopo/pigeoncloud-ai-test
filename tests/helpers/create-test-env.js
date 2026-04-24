@@ -22,11 +22,14 @@ async function createTestEnv(browser, options = {}) {
     const adminPage = await adminContext.newPage();
 
     // ログインリトライ（並列実行時のセッション競合対策）
+    const maxAttempts = parseInt(process.env.CREATE_TRIAL_MAX_ATTEMPTS || '6', 10);
     let loginOk = false;
-    for (let loginAttempt = 1; loginAttempt <= 3; loginAttempt++) {
+    let lastLoginError = null;
+
+    for (let loginAttempt = 1; loginAttempt <= maxAttempts; loginAttempt++) {
         try {
             await adminPage.goto(ADMIN_BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
-            await adminPage.waitForSelector('#id', { timeout: 15000 });
+            await adminPage.waitForSelector('#id', { timeout: 30000 });
             await adminPage.fill('#id', ADMIN_EMAIL);
             await adminPage.fill('#password', ADMIN_PASSWORD);
             await adminPage.locator('button[type=submit].btn-primary').first().click();
@@ -34,24 +37,28 @@ async function createTestEnv(browser, options = {}) {
             loginOk = true;
             break;
         } catch (e) {
-            console.log(`[createTestEnv] ログイン attempt ${loginAttempt}/3 失敗: ${e.message.substring(0, 50)}`);
-            if (loginAttempt < 3) {
-                // net::ERR_ABORTEDなどでpageが無効になる場合があるためtry/catch
-                try { await adminPage.waitForTimeout(3000 + Math.random() * 2000); } catch {}
+            lastLoginError = e;
+            console.log(`[createTestEnv] ログイン attempt ${loginAttempt}/${maxAttempts} 失敗: ${e.message.substring(0, 100)}`);
+            if (loginAttempt < maxAttempts) {
+                // 指数バックオフ: 5s, 10s, 20s, 40s... (最大60s)
+                const backoffMs = Math.min(Math.pow(2, loginAttempt - 1) * 5000, 60000);
+                console.log(`[createTestEnv] ${backoffMs}ms 待機してリトライします...`);
+                try { await adminPage.waitForTimeout(backoffMs); } catch {}
             }
         }
     }
     if (!loginOk) {
         await adminContext.close();
-        throw new Error('管理画面ログインが3回とも失敗');
+        throw new Error(`管理画面ログインが${maxAttempts}回とも失敗: ${lastLoginError?.message || 'Unknown error'}`);
     }
 
-    // 2. create-trial（リトライ3回）
+    // 2. create-trial（リトライ）
     let baseUrl, password, tableId = null;
     const body = { email: 'admin' };
     if (withAllTypeTable) body.with_all_type_table = true;
 
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    let lastResult = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         const result = await adminPage.evaluate(async (b) => {
             try {
                 const r = await fetch('/api/admin/create-trial', {
@@ -66,20 +73,26 @@ async function createTestEnv(browser, options = {}) {
                 return { error: true, message: e.message };
             }
         }, body);
+        lastResult = result;
 
         if (result.url && result.pw) {
             baseUrl = result.url;
             password = result.pw;
             tableId = result.table_id || null;
+            console.log(`[createTestEnv] create-trial response: table_id=${result.table_id}, table_creating=${result.table_creating}, keys=${Object.keys(result).join(',')}`);
             break;
         }
-        console.log(`[createTestEnv] create-trial attempt ${attempt}/3 失敗:`, JSON.stringify(result).substring(0, 100));
-        if (attempt < 3) await adminPage.waitForTimeout(5000);
+        console.log(`[createTestEnv] create-trial attempt ${attempt}/${maxAttempts} 失敗:`, JSON.stringify(result).substring(0, 100));
+        if (attempt < maxAttempts) {
+            // 指数バックオフ
+            const backoffMs = Math.min(Math.pow(2, attempt - 1) * 5000, 60000);
+            await adminPage.waitForTimeout(backoffMs);
+        }
     }
 
     if (!baseUrl || !password) {
         await adminContext.close();
-        throw new Error('create-trial が3回とも失敗');
+        throw new Error(`create-trial が${maxAttempts}回とも失敗: ${JSON.stringify(lastResult)}`);
     }
 
     console.log(`[createTestEnv] 環境作成完了: ${baseUrl}${tableId ? ', tableId: ' + tableId : ', テーブル作成中...'}`);
@@ -124,7 +137,7 @@ async function createTestEnv(browser, options = {}) {
     const page = await context.newPage();
 
     await page.goto(baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForSelector('#id', { timeout: 15000 });
+    await page.waitForSelector('#id', { timeout: 30000 });
     await page.fill('#id', email);
     await page.fill('#password', password);
     await page.locator('button[type=submit].btn-primary').first().click();
@@ -140,7 +153,7 @@ async function createTestEnv(browser, options = {}) {
     // PHP側はバックグラウンドでテーブル作成中 → ALBタイムアウトに依存しない
     if (withAllTypeTable && !tableId) {
         console.log('[createTestEnv] テーブル作成完了をポーリング中...');
-        for (let i = 0; i < 24; i++) {
+        for (let i = 0; i < 48; i++) {
             await page.waitForTimeout(5000);
             const status = await page.evaluate(async () => {
                 try {
@@ -160,7 +173,7 @@ async function createTestEnv(browser, options = {}) {
             }
         }
         if (!tableId) {
-            console.warn('[createTestEnv] テーブル作成が120秒以内に完了しませんでした');
+            console.warn('[createTestEnv] テーブル作成が240秒以内に完了しませんでした');
         }
     }
 

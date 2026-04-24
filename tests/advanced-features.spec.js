@@ -387,9 +387,13 @@ test.describe('追加実装テスト（314-579系）', () => {
             await createAllTypeData(page, 3).catch(e => {
                 console.error('[beforeAll] createAllTypeData失敗:', e.message);
             });
-            await page.waitForTimeout(1000);
-            await page.close();
-            await context.close();
+            
+            try {
+                await page.close();
+                await context.close();
+            } catch (e) {
+                console.log('[advanced-features] Cleanup error (ignored):', e.message);
+            }
             console.log(`[advanced-features] 自己完結環境: ${BASE_URL}`);
         });
 

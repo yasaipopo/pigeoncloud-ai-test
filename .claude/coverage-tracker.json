@@ -1,0 +1,1957 @@
+{
+  "generated_at": "2026-04-19T21:07:28.261155",
+  "summary": {
+    "total_requirements": 254,
+    "covered": 26,
+    "uncovered": 228,
+    "coverage_rate": 0.1,
+    "feature_area_summary": {
+      "カレンダー / Calendar": {
+        "total": 12,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "データセット管理 / Dataset Management": {
+        "total": 10,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "ファイル管理 / File Management": {
+        "total": 12,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "通知システム / Notification System": {
+        "total": 8,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "レポート・帳票 / Reports & Forms": {
+        "total": 12,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "ワークフロー / Workflow": {
+        "total": 13,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "API Endpoints": {
+        "total": 35,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "認証・認可 / Authentication & Authorization": {
+        "total": 12,
+        "covered": 8,
+        "coverage_rate": 0.67
+      },
+      "認証システム / Authentication System": {
+        "total": 12,
+        "covered": 3,
+        "coverage_rate": 0.25
+      },
+      "クライアント証明書 / Client Certificates": {
+        "total": 12,
+        "covered": 2,
+        "coverage_rate": 0.17
+      },
+      "IP制限 / IP Restriction": {
+        "total": 10,
+        "covered": 9,
+        "coverage_rate": 0.9
+      },
+      "利用規約 / Terms and Conditions": {
+        "total": 12,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "決済システム / Payment System": {
+        "total": 12,
+        "covered": 4,
+        "coverage_rate": 0.33
+      },
+      "ChatGPT統合 / ChatGPT Integration": {
+        "total": 12,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "メールシステム / Email System": {
+        "total": 12,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "インポート/エクスポートシステム / Import/Export System": {
+        "total": 12,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "リアルタイム更新 / Real-time Updates": {
+        "total": 12,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "pfc3 batch/prod シェル パッチ仕様書": {
+        "total": 8,
+        "covered": 0,
+        "coverage_rate": 0.0
+      },
+      "Pigeon Cloud API Endpoints": {
+        "total": 26,
+        "covered": 0,
+        "coverage_rate": 0.0
+      }
+    }
+  },
+  "mapping": {
+    "R-001": {
+      "requirement": "イベントやスケジュールをカレンダー形式で管理できる",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-002": {
+      "requirement": "Google Calendarと連携できる",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-003": {
+      "requirement": "スケジュールを表示できる",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-004": {
+      "requirement": "繰り返しイベントを設定できる",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-005": {
+      "requirement": "通知を設定できる",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-006": {
+      "requirement": "カレンダーを共有できる",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-007": {
+      "requirement": "ビューを切替できる",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-008": {
+      "requirement": "Error Case: 同期エラーの場合",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-009": {
+      "requirement": "Error Case: イベント作成エラーの場合",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-010": {
+      "requirement": "Error Case: 繰り返し設定エラーの場合",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-011": {
+      "requirement": "Error Case: 通知送信エラーの場合",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-012": {
+      "requirement": "Error Case: タイムゾーンエラーの場合",
+      "feature_area": "カレンダー / Calendar",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-013": {
+      "requirement": "データセットを作成・管理できる",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-014": {
+      "requirement": "レコードを管理できる",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-015": {
+      "requirement": "Excel等のデータソースからデータをインポート/エクスポートできる",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-016": {
+      "requirement": "カスタムフィールドを設定できる",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-017": {
+      "requirement": "データ型を定義できる",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-018": {
+      "requirement": "関連テーブルを設定できる",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-019": {
+      "requirement": "Error Case: データ検証エラーの場合",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-020": {
+      "requirement": "Error Case: 一意性制約違反の場合",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-021": {
+      "requirement": "Error Case: ファイル形式エラーの場合",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-022": {
+      "requirement": "Error Case: 権限エラーの場合",
+      "feature_area": "データセット管理 / Dataset Management",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-023": {
+      "requirement": "ファイルをアップロードできる",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-024": {
+      "requirement": "ファイルをダウンロードできる",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-025": {
+      "requirement": "ストレージを管理できる",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-026": {
+      "requirement": "S3と統合してファイル管理される",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-027": {
+      "requirement": "ファイル権限を管理できる",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-028": {
+      "requirement": "ファイル形式を検証できる",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-029": {
+      "requirement": "バージョンを管理できる",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-030": {
+      "requirement": "Error Case: アップロードエラーの場合",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-031": {
+      "requirement": "Error Case: ダウンロードエラーの場合",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-032": {
+      "requirement": "Error Case: ストレージエラーの場合",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-033": {
+      "requirement": "Error Case: 権限エラーの場合",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-034": {
+      "requirement": "Error Case: ファイル形式エラーの場合",
+      "feature_area": "ファイル管理 / File Management",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-035": {
+      "requirement": "メール、Slack、Microsoft Teams、Webhookを通じて通知を送信・管理できる",
+      "feature_area": "通知システム / Notification System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-036": {
+      "requirement": "通知をスケジューリングできる",
+      "feature_area": "通知システム / Notification System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-037": {
+      "requirement": "テンプレートを管理できる",
+      "feature_area": "通知システム / Notification System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-038": {
+      "requirement": "配信状態を管理できる",
+      "feature_area": "通知システム / Notification System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-039": {
+      "requirement": "Error Case: 送信エラーの場合",
+      "feature_area": "通知システム / Notification System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-040": {
+      "requirement": "Error Case: テンプレート検証エラーの場合",
+      "feature_area": "通知システム / Notification System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-041": {
+      "requirement": "Error Case: チャネル設定エラーの場合",
+      "feature_area": "通知システム / Notification System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-042": {
+      "requirement": "Error Case: 配信状態エラーの場合",
+      "feature_area": "通知システム / Notification System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-043": {
+      "requirement": "レポートを生成できる",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-044": {
+      "requirement": "データをエクスポートできる",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-045": {
+      "requirement": "カスタマイズ可能なテンプレートを管理・使用できる",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-046": {
+      "requirement": "カスタムフォーマットを設定できる",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-047": {
+      "requirement": "バッチ処理できる",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-048": {
+      "requirement": "スケジュール出力できる",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-049": {
+      "requirement": "複数形式に対応する",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-050": {
+      "requirement": "Error Case: データ取得エラーの場合",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-051": {
+      "requirement": "Error Case: フォーマットエラーの場合",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-052": {
+      "requirement": "Error Case: テンプレートエラーの場合",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-053": {
+      "requirement": "Error Case: 出力エラーの場合",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-054": {
+      "requirement": "Error Case: バッチ処理エラーの場合",
+      "feature_area": "レポート・帳票 / Reports & Forms",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-055": {
+      "requirement": "プロセス自動化ができる",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-056": {
+      "requirement": "承認フローを管理できる",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-057": {
+      "requirement": "ステータス(申請中, 承認済み, 却下, 取り下げ, 差し戻し, 完了)を管理できる",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-058": {
+      "requirement": "条件分岐を設定できる",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-059": {
+      "requirement": "通知を連携できる",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-060": {
+      "requirement": "期限を管理できる",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-061": {
+      "requirement": "標準承認アクション（承認、却下、差し戻し、コメント付き承認）が実行される",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-062": {
+      "requirement": "特殊承認アクション（一括承認、一括却下、引き上げ承認、再申請）が実行される",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-063": {
+      "requirement": "申請者アクション（申請取り下げ、再申請、コメント追加、修正申請）が実行される",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-064": {
+      "requirement": "Error Case: 承認権限エラーの場合",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-065": {
+      "requirement": "Error Case: ステータス遷移エラーの場合",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-066": {
+      "requirement": "Error Case: 通知送信エラーの場合",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-067": {
+      "requirement": "Error Case: テンプレート検証エラーの場合",
+      "feature_area": "ワークフロー / Workflow",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-068": {
+      "requirement": "テーブルの全レコードを削除できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-069": {
+      "requirement": "削除は非同期で実行される",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-070": {
+      "requirement": "Error Case: tableが指定されていない無効なテーブルの場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-071": {
+      "requirement": "Error Case: 権限がない場合",
+      "feature_area": "API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-072": {
+      "requirement": "指定したIDのレコードを削除できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-073": {
+      "requirement": "Error Case: tableが指定されていない無効なテーブルの場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-074": {
+      "requirement": "Error Case: 権限がない場合",
+      "feature_area": "API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-075": {
+      "requirement": "Error Case: 削除対象のレコードが見つからない無効なIDの場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-076": {
+      "requirement": "テーブル一覧を取得できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-077": {
+      "requirement": "Error Case: 権限がない場合",
+      "feature_area": "API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-078": {
+      "requirement": "テーブルの項目定義を取得できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-079": {
+      "requirement": "Error Case: tableが未指定の場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-080": {
+      "requirement": "Error Case: tableが見つからない無効なテーブルの場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-081": {
+      "requirement": "Error Case: 権限がない場合",
+      "feature_area": "API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-082": {
+      "requirement": "ファイルをダウンロードできる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-083": {
+      "requirement": "Error Case: ファイルIDが未指定の場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-084": {
+      "requirement": "Error Case: info errorとなる無効なファイルの場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-085": {
+      "requirement": "レコード一覧を取得できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-086": {
+      "requirement": "limit, offsetでページネーションができる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-087": {
+      "requirement": "orderでソートできる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-088": {
+      "requirement": "filter_idでフィルターできる",
+      "feature_area": "API Endpoints",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-089": {
+      "requirement": "fieldsで取得するフィールドを指定できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-090": {
+      "requirement": "include_relationで関連データを含めることができる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-091": {
+      "requirement": "Error Case: tableが未指定の場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-092": {
+      "requirement": "Error Case: 権限がない場合",
+      "feature_area": "API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-093": {
+      "requirement": "Error Case: limitが0から100の範囲外の場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-094": {
+      "requirement": "新しいレコードを作成できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-095": {
+      "requirement": "notifyパラメータで通知を送信するか指定できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-096": {
+      "requirement": "Error Case: tableが未指定の場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-097": {
+      "requirement": "Error Case: 権限がない場合",
+      "feature_area": "API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-098": {
+      "requirement": "Error Case: バリデーションエラーとなる場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-099": {
+      "requirement": "既存のレコードを更新できる",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-100": {
+      "requirement": "Error Case: tableが未指定の場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-101": {
+      "requirement": "Error Case: 権限がない場合",
+      "feature_area": "API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-102": {
+      "requirement": "Error Case: 更新対象のレコードが見つからない場合",
+      "feature_area": "API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-103": {
+      "requirement": "ユーザー認証ができる",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [
+        "tests/auth.spec.js:212: * @requirements.txt(R-103)",
+        "tests/auth.spec.js:339: * @requirements.txt(R-103, R-124)",
+        "tests/auth.spec.js:1022: * @requirements.txt(R-103)",
+        "tests/auth.spec.js:1041: * @requirements.txt(R-103)"
+      ],
+      "status": "covered"
+    },
+    "R-104": {
+      "requirement": "2段階認証ができる",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [
+        "tests/auth.spec.js:716: * @requirements.txt(R-104, R-111, R-116, R-123)",
+        "tests/auth.spec.js:807: * @requirements.txt(R-104, R-116)"
+      ],
+      "status": "covered"
+    },
+    "R-105": {
+      "requirement": "IP制限ができる",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-106": {
+      "requirement": "権限管理ができる",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [
+        "tests/auth.spec.js:532: * @requirements.txt(R-106, R-113)"
+      ],
+      "status": "covered"
+    },
+    "R-107": {
+      "requirement": "ロール管理ができる",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-108": {
+      "requirement": "セッション管理ができる",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [
+        "tests/auth.spec.js:903: * @requirements.txt(R-108)"
+      ],
+      "status": "covered"
+    },
+    "R-109": {
+      "requirement": "SAML認証ができる",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [
+        "tests/user-security.spec.js:490: * @requirements.txt(R-109, R-115, R-122, R-125)"
+      ],
+      "status": "covered"
+    },
+    "R-110": {
+      "requirement": "Error Case: 認証エラーの場合",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [
+        "tests/auth.spec.js:1079: * @requirements.txt(R-110)",
+        "tests/auth.spec.js:1102: * @requirements.txt(R-110)"
+      ],
+      "status": "covered"
+    },
+    "R-111": {
+      "requirement": "Error Case: 2FA検証エラーの場合",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [
+        "tests/auth.spec.js:840: * @requirements.txt(R-111, R-123)"
+      ],
+      "status": "covered"
+    },
+    "R-112": {
+      "requirement": "Error Case: IP制限エラーの場合",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-113": {
+      "requirement": "Error Case: 権限エラーの場合",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [
+        "tests/auth.spec.js:957: * @requirements.txt(R-113, R-121)",
+        "tests/auth.spec.js:981: * @requirements.txt(R-113)"
+      ],
+      "status": "covered"
+    },
+    "R-114": {
+      "requirement": "Error Case: セッションエラーの場合",
+      "feature_area": "認証・認可 / Authentication & Authorization",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-115": {
+      "requirement": "SAML認証ができる",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-116": {
+      "requirement": "QR二要素認証ができる",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-117": {
+      "requirement": "クライアント証明書認証ができる",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-118": {
+      "requirement": "マルチテナントに対応される",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-119": {
+      "requirement": "シングルサインオンができる",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-120": {
+      "requirement": "セッションを管理できる",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [
+        "tests/auth.spec.js:922: * @requirements.txt(R-120)"
+      ],
+      "status": "covered"
+    },
+    "R-121": {
+      "requirement": "アクセス制御できる",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-122": {
+      "requirement": "Error Case: SAML認証エラーの場合",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-123": {
+      "requirement": "Error Case: 2FA検証エラーの場合",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-124": {
+      "requirement": "Error Case: セッションエラーの場合",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [
+        "tests/user-security.spec.js:580: * @requirements.txt(R-124)",
+        "tests/auth.spec.js:873: * @requirements.txt(R-124)",
+        "tests/auth.spec.js:1057: * @requirements.txt(R-124)"
+      ],
+      "status": "covered"
+    },
+    "R-125": {
+      "requirement": "Error Case: 設定エラーの場合",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [
+        "tests/user-security.spec.js:529: * @requirements.txt(R-125)"
+      ],
+      "status": "covered"
+    },
+    "R-126": {
+      "requirement": "Error Case: 統合エラーの場合",
+      "feature_area": "認証システム / Authentication System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-127": {
+      "requirement": "証明書を生成できる",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [
+        "tests/user-security.spec.js:433: * @requirements.txt(R-127, R-130, R-133)"
+      ],
+      "status": "covered"
+    },
+    "R-128": {
+      "requirement": "証明書を検証できる",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-129": {
+      "requirement": "証明書の失効を管理できる",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [
+        "tests/user-security.spec.js:452: * @requirements.txt(R-129, R-136)"
+      ],
+      "status": "covered"
+    },
+    "R-130": {
+      "requirement": "証明書のライフサイクルを管理できる",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-131": {
+      "requirement": "クライアント認証ができる",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-132": {
+      "requirement": "証明書を更新できる",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-133": {
+      "requirement": "証明書をインポート/エクスポートできる",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-134": {
+      "requirement": "Error Case: 証明書生成エラーの場合",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-135": {
+      "requirement": "Error Case: 認証エラーの場合",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-136": {
+      "requirement": "Error Case: 失効エラーの場合",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-137": {
+      "requirement": "Error Case: 更新エラーの場合",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-138": {
+      "requirement": "Error Case: 設定エラーの場合",
+      "feature_area": "クライアント証明書 / Client Certificates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-139": {
+      "requirement": "IPアドレスで制限できる",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:4691: * @requirements.txt(R-139)",
+        "tests/users-permissions.spec.js:5033: * @requirements.txt(R-139, R-140, R-141, R-142, R-143, R-145, R-146, R-147, R-148)",
+        "tests/users-permissions.spec.js:5178: * @requirements.txt(R-139)",
+        "tests/users-permissions.spec.js:5202: * @requirements.txt(R-139)",
+        "tests/users-permissions.spec.js:5223: * @requirements.txt(R-139)"
+      ],
+      "status": "covered"
+    },
+    "R-140": {
+      "requirement": "ネットワーク範囲で制限できる",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:4836: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:4861: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:5251: * @requirements.txt(R-140)",
+        "tests/users-permissions.spec.js:5273: * @requirements.txt(R-140)"
+      ],
+      "status": "covered"
+    },
+    "R-141": {
+      "requirement": "ホワイトリスト・ブラックリスト管理ができる",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:4794: * @requirements.txt(R-141)",
+        "tests/users-permissions.spec.js:5299: * @requirements.txt(R-141)"
+      ],
+      "status": "covered"
+    },
+    "R-142": {
+      "requirement": "アクセスログを取得できる",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:5340: * @requirements.txt(R-142)",
+        "tests/users-permissions.spec.js:5372: * @requirements.txt(R-142)"
+      ],
+      "status": "covered"
+    },
+    "R-143": {
+      "requirement": "例外設定ができる",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:5407: * @requirements.txt(R-143)"
+      ],
+      "status": "covered"
+    },
+    "R-144": {
+      "requirement": "一時的な許可ができる",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-145": {
+      "requirement": "CIDR表記に対応される",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:5448: * @requirements.txt(R-145)",
+        "tests/users-permissions.spec.js:5475: * @requirements.txt(R-145)"
+      ],
+      "status": "covered"
+    },
+    "R-146": {
+      "requirement": "Error Case: IP検証エラーの場合",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:5509: * @requirements.txt(R-146)",
+        "tests/users-permissions.spec.js:5541: * @requirements.txt(R-146)"
+      ],
+      "status": "covered"
+    },
+    "R-147": {
+      "requirement": "Error Case: ルール設定エラーの場合",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:5584: * @requirements.txt(R-147)"
+      ],
+      "status": "covered"
+    },
+    "R-148": {
+      "requirement": "Error Case: 許可されていないIPアドレスからのアクセスの場合 (403 Forbidden)",
+      "feature_area": "IP制限 / IP Restriction",
+      "priority": "high",
+      "covered_by": [
+        "tests/users-permissions.spec.js:5617: * @requirements.txt(R-148)"
+      ],
+      "status": "covered"
+    },
+    "R-149": {
+      "requirement": "利用規約を管理できる",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-150": {
+      "requirement": "ユーザーの同意プロセスが実行される",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-151": {
+      "requirement": "バージョンを管理できる",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-152": {
+      "requirement": "同意履歴を記録できる",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-153": {
+      "requirement": "多言語対応される",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-154": {
+      "requirement": "強制同意を設定できる",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-155": {
+      "requirement": "通知を管理できる",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-156": {
+      "requirement": "Error Case: バージョン競合エラーの場合",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-157": {
+      "requirement": "Error Case: 保存エラーの場合",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-158": {
+      "requirement": "Error Case: 通知エラーの場合",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-159": {
+      "requirement": "Error Case: 検証エラーの場合",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-160": {
+      "requirement": "Error Case: アクセス制限エラーの場合",
+      "feature_area": "利用規約 / Terms and Conditions",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-161": {
+      "requirement": "PayPal決済ができる",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-162": {
+      "requirement": "Stripe決済ができる",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [
+        "tests/payment.spec.js:91: * @requirements.txt(R-162)"
+      ],
+      "status": "covered"
+    },
+    "R-163": {
+      "requirement": "定期支払いができる",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-164": {
+      "requirement": "支払い履歴を管理できる",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-165": {
+      "requirement": "請求書を生成できる",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [
+        "tests/payment.spec.js:371: * @requirements.txt(R-165)"
+      ],
+      "status": "covered"
+    },
+    "R-166": {
+      "requirement": "返金処理ができる",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-167": {
+      "requirement": "通貨換算ができる",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-168": {
+      "requirement": "Error Case: 決済エラーの場合",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [
+        "tests/payment.spec.js:333: * @requirements.txt(R-168)"
+      ],
+      "status": "covered"
+    },
+    "R-169": {
+      "requirement": "Error Case: 認証エラーの場合",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [
+        "tests/payment.spec.js:421: * @requirements.txt(R-169)"
+      ],
+      "status": "covered"
+    },
+    "R-170": {
+      "requirement": "Error Case: 通信エラーの場合",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-171": {
+      "requirement": "Error Case: 返金エラーの場合",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-172": {
+      "requirement": "Error Case: 定期支払いエラーの場合",
+      "feature_area": "決済システム / Payment System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-173": {
+      "requirement": "テキストを分析できる",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-174": {
+      "requirement": "レポートを自動生成できる",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-175": {
+      "requirement": "データを要約できる",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-176": {
+      "requirement": "自然言語でクエリできる",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-177": {
+      "requirement": "センチメント分析ができる",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-178": {
+      "requirement": "コンテンツを生成できる",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-179": {
+      "requirement": "多言語サポートされる",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-180": {
+      "requirement": "Error Case: API接続エラーの場合",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-181": {
+      "requirement": "Error Case: レート制限エラーの場合",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-182": {
+      "requirement": "Error Case: 解析エラーの場合",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-183": {
+      "requirement": "Error Case: タイムアウトエラーの場合",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-184": {
+      "requirement": "Error Case: コンテンツ生成エラーの場合",
+      "feature_area": "ChatGPT統合 / ChatGPT Integration",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-185": {
+      "requirement": "メールリストを管理できる",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-186": {
+      "requirement": "テンプレートを管理できる",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-187": {
+      "requirement": "配信をスケジュールできる",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-188": {
+      "requirement": "ステップメールを配信できる",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-189": {
+      "requirement": "メール履歴を管理できる",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-190": {
+      "requirement": "バウンス処理ができる",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-191": {
+      "requirement": "HTMLメールに対応される",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-192": {
+      "requirement": "Error Case: 配信エラーの場合",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-193": {
+      "requirement": "Error Case: テンプレートエラーの場合",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-194": {
+      "requirement": "Error Case: バウンスエラーの場合",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-195": {
+      "requirement": "Error Case: スケジュールエラーの場合",
+      "feature_area": "メールシステム / Email System",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-196": {
+      "requirement": "Error Case: 認証エラーの場合",
+      "feature_area": "メールシステム / Email System",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-197": {
+      "requirement": "CSVインポート/エクスポートができる",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-198": {
+      "requirement": "TSVインポート/エクスポートができる",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-199": {
+      "requirement": "メールからインポートできる",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-200": {
+      "requirement": "データを検証できる",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-201": {
+      "requirement": "フォーマットを変換できる",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-202": {
+      "requirement": "一括処理ができる",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-203": {
+      "requirement": "エラーを処理できる",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-204": {
+      "requirement": "Error Case: ファイル形式エラーの場合",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-205": {
+      "requirement": "Error Case: データ検証エラーの場合",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-206": {
+      "requirement": "Error Case: 文字コードエラーの場合",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-207": {
+      "requirement": "Error Case: メモリ不足エラーの場合",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-208": {
+      "requirement": "Error Case: 処理タイムアウトの場合",
+      "feature_area": "インポート/エクスポートシステム / Import/Export System",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-209": {
+      "requirement": "リアルタイムイベントを処理できる",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-210": {
+      "requirement": "プッシュ通知ができる",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-211": {
+      "requirement": "チャネルを管理できる",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-212": {
+      "requirement": "プレゼンス機能を利用できる",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-213": {
+      "requirement": "イベントをブロードキャストできる",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-214": {
+      "requirement": "接続を管理できる",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-215": {
+      "requirement": "クライアントを認証できる",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-216": {
+      "requirement": "Error Case: 接続エラーの場合",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-217": {
+      "requirement": "Error Case: 認証エラーの場合",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-218": {
+      "requirement": "Error Case: ブロードキャストエラーの場合",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-219": {
+      "requirement": "Error Case: チャネルエラーの場合",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-220": {
+      "requirement": "Error Case: 容量超過エラーの場合",
+      "feature_area": "リアルタイム更新 / Real-time Updates",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-221": {
+      "requirement": "copy_to_check_db.shのEXPORT_TABLESからsettingを除外する",
+      "feature_area": "pfc3 batch/prod シェル パッチ仕様書",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-222": {
+      "requirement": "事後UPDATEの失敗を無視しないようにset -eと検証を追加する",
+      "feature_area": "pfc3 batch/prod シェル パッチ仕様書",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-223": {
+      "requirement": "resetdb_check.sqlのDROP USER IF EXISTSをCREATE USER IF NOT EXISTSに変更する",
+      "feature_area": "pfc3 batch/prod シェル パッチ仕様書",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-224": {
+      "requirement": "update_setting.sqlにsetting.db_user / db_pwをターゲット値で上書きするクエリを追加する",
+      "feature_area": "pfc3 batch/prod シェル パッチ仕様書",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-225": {
+      "requirement": "共有user検出の定期実行コマンドをscript.phpに追加する",
+      "feature_area": "pfc3 batch/prod シェル パッチ仕様書",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-226": {
+      "requirement": "Error Case: SETTING_DB_USER / SETTING_DB_PW が空な場合の中断",
+      "feature_area": "pfc3 batch/prod シェル パッチ仕様書",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-227": {
+      "requirement": "Error Case: 事後UPDATEが失敗した場合の中断",
+      "feature_area": "pfc3 batch/prod シェル パッチ仕様書",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-228": {
+      "requirement": "Error Case: db_userの検証が失敗した場合の中断",
+      "feature_area": "pfc3 batch/prod シェル パッチ仕様書",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-229": {
+      "requirement": "全てのAPIリクエストにAPIキーを使用した認証が必要",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-230": {
+      "requirement": "APIキーはBase64エンコードされた {ID}:{PASSWORD} 形式でX-Pigeon-Authorizationヘッダーに含める",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-231": {
+      "requirement": "Error Case: 認証エラーの場合 (HTTPステータスコード: 400)",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-232": {
+      "requirement": "GET /v1/tableでテーブル一覧を取得できる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-233": {
+      "requirement": "GET /v1/fieldsでテーブルの項目定義を取得できる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-234": {
+      "requirement": "Error Case: GET /v1/table: 権限のないテーブルの場合レスポンスから除外される",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-235": {
+      "requirement": "Error Case: GET /v1/fields: tableが未指定の場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-236": {
+      "requirement": "Error Case: GET /v1/fields: tableが見つからない場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-237": {
+      "requirement": "Error Case: GET /v1/fields: 権限がない場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-238": {
+      "requirement": "POST /v1/get_recordで検索条件、フィルター、ソート、ページネーション付きでレコード一覧を取得できる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "medium",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-239": {
+      "requirement": "POST /v1/recordで新しいレコードを作成でき、通知を送信するか指定できる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-240": {
+      "requirement": "PUT /v1/record または POST /v1/update_recordで既存のレコードを更新できる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-241": {
+      "requirement": "POST /v1/delete_recordで指定したIDのレコードを削除できる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-242": {
+      "requirement": "POST /v1/delete-all-recordで全レコードを非同期で削除できる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-243": {
+      "requirement": "Error Case: POST /v1/get_record: limitが0から100の範囲外の場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-244": {
+      "requirement": "Error Case: POST /v1/get_record: offsetが0未満の場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-245": {
+      "requirement": "Error Case: POST /v1/record: バリデーションエラーの場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-246": {
+      "requirement": "Error Case: PUT /v1/record: ID未指定の場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-247": {
+      "requirement": "Error Case: PUT /v1/record: レコード未検出の場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-248": {
+      "requirement": "Error Case: PUT /v1/record: 編集権限がない場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "high",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-249": {
+      "requirement": "Error Case: POST /v1/delete_record: 関連データの制約等により削除できない場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-250": {
+      "requirement": "GET /v1/fileでファイルをダウンロードできる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-251": {
+      "requirement": "Error Case: ファイルIDが未指定の場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-252": {
+      "requirement": "Error Case: info errorとなる無効なファイルの場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-253": {
+      "requirement": "GET /v1/job-status/{job_id}で非同期ジョブのステータスを確認できる",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    },
+    "R-254": {
+      "requirement": "Error Case: 無効なジョブIDの場合",
+      "feature_area": "Pigeon Cloud API Endpoints",
+      "priority": "low",
+      "covered_by": [],
+      "status": "uncovered"
+    }
+  }
+}

@@ -5,6 +5,181 @@
 
 ---
 
+## 【最重要】E2E テスト追加・修正の「黄金ループ」（必ずこの順で実施）
+
+新規テスト追加 or 既存テスト修正は、以下のステップを**必ず順番通り**実施する。スキップ禁止。
+
+```
+[1] 調査           gemcli 並列で仕様書・コード・既存 spec を調査
+[2] 網羅フロー設計 機能ごとに要件網羅のテストフロー一覧を作成（Claude + gemcli 並列レビュー必須）
+    (外部依存回避策: モック/Debug API/Sandbox 検討必須)
+[3] ユーザー承認①  網羅フロー設計をユーザーに提示 → OK を得てから [4] に進む
+[4] 実機確認       Playwright codegen or 手動操作で仕様の動作を確認
+[5] 実装           gemcli でテストコード生成。@requirements.txt(R-XXX) タグ必須
+[6] 品質ゲート     python3 scripts/quality-gate.py で静的解析（違反 0 必須）
+[7] テスト実行     単体実行で pass/fail 判定（直列、workers=1）
+[8] sync-results     E2Eビューアーへ結果同期
+[8.5] fail分析レポート (原因が SPEC / PRODUCT / ENV か判定)
+[9] ユーザー承認②  レビュー URL を提示:
+    https://dezmzppc07xat.cloudfront.net/sheet.html?spec=XXX&caseNo=YYY&review=pending&reviewLabel=...
+[10] OK → コミット / NG → [1]-[7] のどれかに戻る
+```
+
+### Step [2] 網羅フロー設計の詳細（必須プロセス）
+
+機能ごとに **まずフロー一覧を作る**。勝手に実装に入らない。
+
+1. **要件列挙**: 対象機能の要件 (R-XXX 全件) を `.claude/coverage-tracker.json` から抽出
+2. **既存テスト分析**: 該当 spec.js の既存テストを列挙、各要件にマッピング
+3. **【必須】PHPUnit / Integration テスト確認**: 対象機能の PHPUnit テスト (`/Users/yasaipopo/PhpStormProjects/PopoframeworkSlim/tests/Unit/**`, `tests/Integration/**`, `tests/Feature/**`) を gemcli で全洗い出し
+   - `tests/test_coverage.md` も参照
+   - **目的は「E2E を重複削減する」ではなく「Integration側の抜けを検出する」こと**
+4. **Integration テストの不足があれば先に埋める**: 
+   - PHPUnit で未カバーのロジックパターンがあれば、**プロダクト側の PHPUnit を先に追加** (tmprepo 経由で PR)
+   - それから E2E でも同じパターンを全て検証する
+5. **E2E でも全パターンを網羅**:
+   - PHPUnit が同じロジックをカバーしていても、**E2E は UI 統合含めて全パターンをテストする**
+   - 単一ケース、複数ケース (0件/1件/複数件)、各境界値、OR/AND 条件、正常系/異常系/エッジケース すべて
+   - 「PHPUnit で十分カバー済み」を理由に E2E ケースを削減しない
+6. **ダブルチェック（gemcli 並列、最低 2 本）**:
+   - Agent A: プロダクトコード + PHPUnit 既存テスト列挙 → Integration 側の抜けを検出
+   - Agent B: 既存 spec.js と競合、他 spec 影響、抜け観点検出
+7. **統合設計書を作成**: `/tmp/design-{spec名}-{feature}.md` にテーブル形式で保存
+   - 要件ID / ケースID / 操作フロー / 期待結果 / PHPUnit カバー / E2E カバー / 実装有無
+8. **ユーザーに提示**: 設計書を見せて OK を得る → その時点で初めて [4] 実機確認に進む
+
+### 🎯 テストカバレッジ方針 (2026-04-20 改訂)
+
+**基本原則: PHPUnit と E2E の両方で全パターンを網羅する**
+
+- ❌ **旧方針(廃止)**: 「PHPUnit でカバー済みだから E2E では重複しない」
+- ✅ **新方針**: 「PHPUnit でロジック全網羅 + E2E でも UI 経由で全パターン網羅」
+
+理由:
+- PHPUnit = ロジックの正当性を高速に検証
+- E2E = UI 入力→DB 保存→ロジック適用→UI 表示 の統合経路を実際の挙動で検証
+- **同じロジックでも経路が違えば検証価値がある**
+- UI バリデーション、フォーム状態、ブラウザ挙動、ネットワーク層などは E2E でしか検出できない
+
+**Integration テスト不足への対応**:
+- PHPUnit に抜けがあった場合 → **プロダクト側を先に修正** (tmprepo 経由で PR)
+- E2E 側はロジック網羅と独立に、**すべての UI/統合シナリオを全パターン検証**
+
+**スキップ例外**:
+- 外部依存 (SAML IdP, ALB mTLS 実走等) → `.claude/test-env-limitations.md` に記録
+- プロダクト未実装機能 → 同上
+- それ以外の理由で E2E をスキップしない
+
+### 絶対ルール（勝手判断禁止）
+- **勝手なスキップ禁止**: 「この要件は不要」「このケースは省略可」などの **自律判断を絶対にしない**
+- **勝手な要件削除禁止**: 要件 R-XXX を「実装されていないから除外」は不可。必ずユーザーに判断を仰ぐ
+- **網羅性の自己検証禁止**: 自分だけで「これで網羅できた」と判断しない。必ず gemcli 並列でダブルチェック
+- **判断に迷ったら必ずユーザーに確認**。「〜が見つからないからスキップ」「〜は自明なので省略」などは全て禁止
+- `test.skip()` 新規追加禁止（既存の `test.skip(fileBeforeAllFailed, ...)` は OK）
+- assertion 緩和禁止（`expect(x || true)`, コメントアウト, navbar/ISE only）
+- プロダクトバグは `.claude/product-bugs.md` に記録、テストは fail のまま残す
+- `@requirements.txt(R-XXX)` タグ必須（coverage-tracker.py / quality-gate.py で自動紐付け）
+- gemcli と Claude の役割分担:
+  - **gemcli (並列、2本以上)**: 調査・網羅レビュー・ボイラープレート生成・静的解析・分類
+  - **Claude (直列)**: 計画統合・実機確認・コミット・ユーザー対話
+- 🚨 **gemcli 委託時は必ず `.claude/knowledge-gemcli-safety.md` のテンプレートを冒頭に含める**（2026-04-21 インシデント後の必須ルール）
+  - 「git checkout / restore / reset / stash は絶対禁止」「スコープ外ファイルに触れるな」「revert 禁止」を毎回明示
+  - 並列実行時は各 agent の編集対象が重ならないこと
+  - 委託完了後に `git status --short` でスコープ外変更が無いか必ず自分で確認
+  - gemcli に `git add` / `git commit` をさせない（Claude 側の仕事）
+
+### 🚨 テスト不可ケースの取り扱い（超重要）
+
+**環境・設定・プロダクト未実装で E2E 検証ができないケース**は、必ず以下を遵守する:
+
+1. **必ず `.claude/test-env-limitations.md` に記録する**
+   - スキップした瞬間に追記（後回し禁止）
+   - 要件ID / 理由 / 解消条件 / 見直し予定日 を全て書く
+   - ユーザーに報告してから初めてスキップ可
+
+2. **スキップ許容基準（以下いずれか満たす場合のみ）**:
+   - プロダクトに機能自体が実装されていない（コード・DB・UI 全てなし）
+   - インフラ・外部システム依存で E2E 再現不可（DNS/CloudFront 経路偽装等）
+   - 破壊的操作で staging 環境を壊すリスクが極めて高い
+
+3. **スキップ禁止パターン（絶対にやらない）**:
+   - ❌ 「UI セレクタが見つからない」→ MCP Playwright で調査・修正する
+   - ❌ 「機能はあるがテストが難しい」→ 工夫して実装する
+   - ❌ 「assertion が通らない」→ プロダクトバグ疑いで調査する
+   - ❌ 「時間がない」「面倒」→ スキップ理由にならない
+
+4. **スキップ率の目標**: priority:high 要件のうち **常に 5% 以下** に保つ
+
+5. **何でもかんでもスキップしない**: スキップ追加時は必ずユーザー確認を取る。勝手にスキップは絶対禁止
+
+詳細・現状一覧は `.claude/test-env-limitations.md` 参照。
+
+### ツール
+- `scripts/quality-gate.py` — 静的解析（違反検知）
+- `scripts/coverage-tracker.py` — 要件×テスト対応表の自動生成
+- `.claude/coverage-tracker.json` — 現在のカバー状況
+- `.claude/e2e-coverage-roadmap.md` — 全体ロードマップ（短・中・長期施策）
+- `.claude/test-responsibility-boundary.md` — **E2E vs PHPUnit の責務分離マトリクス** (必読)
+- `.claude/test-env-limitations.md` — スキップ対象の記録 (機能未実装/外部依存)
+- `/Users/yasaipopo/PhpStormProjects/PopoframeworkSlim/tests/test_coverage.md` — pigeon_cloud 側 PHPUnit カバレッジ
+
+### 参考ファイル
+- `.claude/knowledge-spec-quality-checklist.md` — 品質チェック
+- `.claude/knowledge-detailed-flow-writing-rule.md` — detailedFlow 書き方
+- `.claude/knowledge-e2e-failure-triage.md` — fail 分類
+- `.claude/knowledge-sheet-html-system.md` — sheet.html 動画/スクショの仕組み
+
+### sheet.html のユーザーレビュー機構
+sheet.html は URL パラメータで絞り込み可能:
+- `?spec=auth` — spec タブ自動選択
+- `?caseNo=up-b002` — ケース絞り込み（カンマ区切りで複数可）
+- `?review=pending&reviewLabel=XXX` — レビュー依頼バナー表示 + OK/NG ボタン
+- OK/NG クリックで `POST /pipeline/review` に記録（DynamoDB `userReview` フィールド）
+
+---
+
+## 【必須】pigeon_cloud（PHP）リポジトリの修正は tmprepo 経由
+
+pigeon_cloud のコードを修正する場合、**必ず `tmprepo` で /tmp にクローンしてから作業する**。
+`/Users/yasaipopo/PhpStormProjects/PopoframeworkSlim` を直接編集しない（ユーザーの作業中ブランチ・stash を壊す）。
+
+```bash
+# staging ベースで修正する場合
+tmprepo staging
+# → /tmp/PopoframeworkSlim{unixtime} にクローンされる
+# → そのディレクトリで feature branch を切って修正 → PR 作成
+```
+
+---
+
+## 【作業分担】重い処理は gemini CLI / 単純テスト実行は sonnet subagent
+
+メインエージェント（Opus）のコンテキストを節約するため、以下の方針で作業を分担する:
+
+- **考えながら進める調査・分析** → `gemini` CLI に投げる（バックグラウンド実行）
+  - 例: PHPプロダクトコードの仕様調査、Angular ルーティングのバグ追跡、複雑なログ解析
+  - コマンド: `gemini -p "..."` または `gemini --prompt-file ...`
+- **単純なテスト実行・結果収集**（考える必要なし） → `Agent` tool で sonnet subagent
+  - 例: `npx playwright test ... --reporter=list` を実行して結果を返すだけ
+  - subagent_type: `general-purpose`, model: `sonnet`
+- **メインエージェントが直接やること**: 計画立案、ファイル編集、コミット、ユーザーとの対話
+
+理由: バックグラウンド長時間実行や深い調査タスクをメインで持つとコンテキストが埋まる。
+
+---
+
+## 【最重要】テストが通らない＝コードが間違っているかもしれない
+
+テストは「仕様のドキュメント」であり、**全部通る前提で書かれるものではない**。
+テストが仕様通りに書かれているなら、fail したときに疑うべきは **プロダクトコード側** である。
+
+- テストを通すために assertion を緩める・`test.skip` する・期待値を現実値に合わせる → **禁止**
+- fail を調査するときは必ず **spec.js の期待値が仕様通りか** を先に確認する
+- 期待値が仕様通りなら、プロダクトコード（`/Users/yasaipopo/PhpStormProjects/PopoframeworkSlim`）を読んで原因を特定する
+- プロダクトバグと判明したら `.claude/product-bugs.md` に記録し、テストコードは変更しない
+
+---
+
 ## 【最初に必ず確認】Playwright環境 & 知見ファイル
 
 ### Playwrightバージョン確認（テスト実行前に必ず実施）
@@ -63,6 +238,17 @@ timeout = Math.max(60000, stepCount * 15000 + 30000)
 
 - **step数が0-2のテストには`test.setTimeout`を書かない**（config defaultの60秒で十分）
 - テストを新規作成・step追加時は、上記計算式でタイムアウトを設定する
+
+### 全体 timeout の変更 (2026-04-21)
+
+`playwright.config.js` の `timeout` を **600000 (10 分) → 180000 (3 分)** に変更した。理由:
+- hang 時に 10 分待たされるのを避け、迅速に fail させるため
+- 2026-04-21 auth.spec.js 実行で 22 件中 8 件が 10 分タイムアウトで fail し、総実行 83 分の大半がタイムアウト待機だった
+
+**ルール:**
+- 180 秒を超えるテストは必ず `test.setTimeout(Math.max(180000, stepCount * 15000 + 30000))` で明示延長する
+- 20 回ログイン試行など不可避に長いテストは個別に 300 秒以上設定する（例: `auth.spec.js` の `auth-240`）
+- `test.setTimeout(600000)` 以上の極長設定は原則禁止。真に必要な場合はコメントで理由を明記する
 
 ### 次にやること（2026-04-01時点の残タスク）
 

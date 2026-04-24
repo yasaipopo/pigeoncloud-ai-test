@@ -601,7 +601,7 @@ test.describe('通知設定', () => {
 
 
     test.beforeAll(async ({ browser }) => {
-            test.setTimeout(600000);
+            test.setTimeout(300000); // 2026-04-21 600→300 (beforeAll リトライ時間短縮)
             // createTestEnvが偶発的に失敗する場合(ネットワーク不安定等)に備えてリトライ
             let env = null;
             let lastError = null;
@@ -1522,9 +1522,8 @@ test.describe('通知設定', () => {
     });
 
     test('NT05: SMTP設定', async ({ page }) => {
-        // 15 test.step + waitForEmail 3件で batch 実行時に累積遅延が発生するため timeout を3倍化
-        // test.setTimeout(N) は config timeout (600s) と競合する事例があるため test.slow() を使用（600s × 3 = 1800s = 30分）
-        test.slow();
+        // 15 step: isChecked修正後は2.4分で完了するため test.slow() は不要
+        test.setTimeout(255000);
 
         await test.step('54-1: 通知設定でアクション未入力のまま登録するとエラーが発生すること', async () => {
             const STEP_TIME = Date.now();
@@ -3395,7 +3394,7 @@ test.describe('通知設定', () => {
             // 編集アイコンが存在する場合はクリック
             const editBtn = page.locator('a[href*="step_mail/edit"], .fa-edit, .fa-pencil, a:has-text("編集")').first();
             if (await editBtn.count().catch(() => 0) > 0) {
-                await editBtn.click();
+                await editBtn.click({ force: true });
                 await waitForAngular(page);
 
                 // 有効トグルをOFFに変更
@@ -3425,7 +3424,7 @@ test.describe('通知設定', () => {
 
             const editBtn = page.locator('a[href*="step_mail/edit"], .fa-edit, .fa-pencil, a:has-text("編集")').first();
             if (await editBtn.count().catch(() => 0) > 0) {
-                await editBtn.click();
+                await editBtn.click({ force: true });
                 await waitForAngular(page);
 
                 // 有効トグルをONに変更

@@ -180,6 +180,21 @@ def handler(event, context):
         elif method == 'POST' and path == '/pipeline/cleanup':
             return pipeline_cleanup(event)
 
+        # POST /pipeline/review - ユーザーレビュー結果を記録
+        elif method == 'POST' and path == '/pipeline/review':
+            return pipeline_review(event)
+
+        # =========================================
+        # プロダクトバグ一覧 (product-bugs-suspected.md)
+        # =========================================
+        # GET /bugs - 最新のバグ一覧 md を取得
+        elif method == 'GET' and path == '/bugs':
+            return bugs_get()
+
+        # PUT /bugs - md をアップロード
+        elif method == 'PUT' and path == '/bugs':
+            return bugs_put(event)
+
         else:
             return response(404, {'error': f'Not found: {method} {path}'})
 
@@ -1108,7 +1123,7 @@ def pipeline_sync_results(event):
         spec_name = spec_file.replace('tests/', '').replace('.spec.js', '').replace('.spec.ts', '')
 
         # caseNoの推測:
-        # testTitleから "AT01:", "RC01:", "1-1:", "F201:", "UC01:" 等のパターンを抽出
+        # testTitleから "AT01:", "RC01:", "1-1:", "F201:", "UC01:", "auth-130:" 等のパターンを抽出
         case_no = ''
 
         # パターン1: "数字-数字" (旧形式: 1-1, 144-01)
@@ -1121,10 +1136,15 @@ def pipeline_sync_results(event):
             if movie_match:
                 case_no = movie_match.group(1)
             else:
-                # パターン3: caseIdから試行
-                case_id_match = re.match(r'^(\d+-\d+|[A-Z]+\d+)', case_id)
-                if case_id_match:
-                    case_no = case_id_match.group(1)
+                # パターン3: 小文字プレフィックス対応 (auth-130, up-ip-010, etc.)
+                prefix_match = re.match(r'^([a-z]+-[a-z0-9]+(?:-[a-z0-9]+)*)', test_title)
+                if prefix_match:
+                    case_no = prefix_match.group(1)
+                else:
+                    # パターン4: caseIdから試行
+                    case_id_match = re.match(r'^(\d+-\d+|[A-Z]+\d+|[a-z]+-[a-z0-9]+(?:-[a-z0-9]+)*)', case_id)
+                    if case_id_match:
+                        case_no = case_id_match.group(1)
 
         if not spec_name or not case_no:
             skipped_count += 1
@@ -1284,3 +1304,134 @@ def pipeline_cleanup(event):
         'deleted': deleted,
         'remaining': len(items) - deleted,
     })
+
+
+def pipeline_review(event):
+    """
+    POST /pipeline/review?runId=...&caseNo=... - ユーザーレビュー結果を記録
+    ボディ: { verdict: 'ok'|'ng', note: '...', reviewer: 'user', reviewedAt: ISO }
+    """
+    params = event.get('queryStringParameters') or {}
+    run_id = params.get('runId')
+    case_no = params.get('caseNo')
+    if not run_id or not case_no:
+        return response(400, {'error': 'runId, caseNo は必須です'})
+
+    body = json.loads(event.get('body') or '{}')
+    verdict = body.get('verdict')
+    if verdict not in ('ok', 'ng'):
+        return response(400, {'error': "verdict は 'ok' または 'ng' のみ"})
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    review_data = {
+        'verdict': verdict,
+        'note': body.get('note', ''),
+        'reviewer': body.get('reviewer', 'user'),
+        'reviewedAt': body.get('reviewedAt', now_iso),
+    }
+
+    # pipeline テーブルの該当ケースに review フィールドを追記
+    # spec は caseNo から逆引き不能なので、全 spec でスキャンして該当を探す
+    try:
+        # まず pipeline_table から caseNo 一致する行を検索（スキャンは遅いが review は低頻度操作）
+        result = pipeline_table.scan(
+            FilterExpression='caseNo = :cn',
+            ExpressionAttributeValues={':cn': case_no},
+        )
+        items = result.get('Items', [])
+        if not items:
+            return response(404, {'error': f'caseNo={case_no} が見つかりません'})
+
+        # 全マッチを更新
+        updated = 0
+        for item in items:
+            pipeline_table.update_item(
+                Key={'spec': item['spec'], 'caseNo': item['caseNo']},
+                UpdateExpression='SET userReview = :r, updatedAt = :t',
+                ExpressionAttributeValues={':r': review_data, ':t': now_iso},
+            )
+            updated += 1
+
+        return response(200, {
+            'message': f'レビュー記録完了 ({updated}件)',
+            'verdict': verdict,
+            'caseNo': case_no,
+        })
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+
+
+# バグ一覧 upload の最大サイズ (10MB — 通常 md は数十 KB 程度)
+BUGS_MD_MAX_SIZE = 10 * 1024 * 1024
+
+
+def bugs_get():
+    """GET /bugs - プロダクトバグ一覧 md を取得 (S3 から)"""
+    if not ASSETS_BUCKET:
+        return response(500, {'error': 'ASSETS_BUCKET が未設定'})
+    key = 'bugs/product-bugs-suspected.md'
+    try:
+        obj = s3_client.get_object(Bucket=ASSETS_BUCKET, Key=key)
+        content = obj['Body'].read().decode('utf-8')
+        last_modified = obj.get('LastModified')
+        updated_at = last_modified.isoformat() if last_modified else None
+        return response(200, {
+            'markdown': content,
+            'updatedAt': updated_at,
+            'size': obj.get('ContentLength', len(content)),
+        })
+    except ClientError as e:
+        error_code = e.response['Error']['Code']
+        if error_code == 'NoSuchKey':
+            return response(404, {
+                'error': 'バグ一覧がまだ upload されていません',
+                'hint': 'python3 e2e-viewer/upload_bugs.py を実行してください',
+            })
+        # S3 エラー詳細はログのみ。レスポンスは抽象化してバケット情報等の漏洩を防ぐ
+        print(f'[bugs_get] S3 ClientError: code={error_code}, full={e}')
+        return response(500, {'error': 'バグ一覧の取得に失敗しました'})
+    except Exception as e:
+        print(f'[bugs_get] Unexpected error: {e}')
+        return response(500, {'error': 'バグ一覧の取得に失敗しました'})
+
+
+def bugs_put(event):
+    """PUT /bugs - プロダクトバグ一覧 md をアップロード (upload_bugs.py が呼ぶ)
+
+    注: 認証は verify_token による Bearer token 検証で済ませている。
+    本ビューアーは社内専用ツールで、管理パスワードを知る全員が全操作を許可される
+    単一ロールモデル。より細かい RBAC が必要な場合はここに role check を追加する。
+    """
+    if not ASSETS_BUCKET:
+        return response(500, {'error': 'ASSETS_BUCKET が未設定'})
+    body = json.loads(event.get('body') or '{}')
+    md_content = body.get('markdown', '')
+    if not md_content:
+        return response(400, {'error': 'markdown が空'})
+
+    # サイズ上限チェック (DoS / S3 storage cost 抑制)
+    md_size = len(md_content.encode('utf-8'))
+    if md_size > BUGS_MD_MAX_SIZE:
+        return response(413, {
+            'error': f'md が大きすぎます ({md_size} bytes, 上限 {BUGS_MD_MAX_SIZE})',
+        })
+
+    key = 'bugs/product-bugs-suspected.md'
+    try:
+        s3_client.put_object(
+            Bucket=ASSETS_BUCKET,
+            Key=key,
+            Body=md_content.encode('utf-8'),
+            ContentType='text/markdown; charset=utf-8',
+        )
+        return response(200, {
+            'message': 'プロダクトバグ一覧を更新しました',
+            'size': md_size,
+        })
+    except ClientError as e:
+        print(f'[bugs_put] S3 ClientError: code={e.response["Error"]["Code"]}, full={e}')
+        return response(500, {'error': 'バグ一覧の保存に失敗しました'})
+    except Exception as e:
+        print(f'[bugs_put] Unexpected error: {e}')
+        return response(500, {'error': 'バグ一覧の保存に失敗しました'})

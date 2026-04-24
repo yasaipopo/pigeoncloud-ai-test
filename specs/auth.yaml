@@ -1,18 +1,9 @@
 group: 認証（ログイン・ログアウト・パスワード変更）
 spec_file: tests/auth.spec.js
 base_url: '{{ TEST_BASE_URL }}'
-
-# 採番ルール: {spec}-{3桁 10刻み} 例: auth-010, auth-020
-# 途中挿入: auth-015 など空き番号。削除時は番号を詰めない。
-# old_case_no: 旧シートの番号（参照用）
-
 cases:
-
-# ──────────────────────────────────────────────
-# movie: AT01 (auth-010〜auth-050 を1動画で確認)
-# ──────────────────────────────────────────────
 - case_no: auth-010
-  old_case_no: '144-01'
+  old_case_no: 144-01
   sheet: A
   feature: 推奨ブラウザ
   movie: AT01
@@ -20,72 +11,65 @@ cases:
   expected: 警告メッセージが出力されること
   detailed_flow: |
     【AT01 テストフロー】この動画で確認するテスト番号:
-      auth-010 (旧: 144-01)  推奨ブラウザ以外での警告表示
-      auth-020 (旧: 1-1)     マスターユーザーでログイン/ログアウト
-      auth-030 (旧: 1-2)     ユーザータイプ「ユーザー」でログイン/ログアウト
-      auth-040 (旧: 38-1)    誤パスワードでのログインエラー
-      auth-050 (旧: 295)     パスワード変更
+      auth-010       (旧: 144-01)     ログイン画面の初期表示が正常であること
+      auth-020       (旧: 1-1)        マスターユーザーでログインしてダッシュボードに遷移できること
+      auth-030       (旧: 1-2)        ログアウトしてログイン画面に戻れること
+      auth-040       (旧: 38-1)       誤パスワードでログインするとエラーが表示されること
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    [0:00] auth-010 ── 推奨ブラウザ以外での警告表示
-    1. Firefox UA を偽装したブラウザコンテキストを作成して /admin/login を開く
-    2. admin / パスワード でログインしてダッシュボードに遷移
-    3. ✅ div.warning が表示されること
-    4. ✅ 「推奨されているブラウザは Edge, chrome, safariの最新版」が含まれること
+    auth-010 ── ログイン画面の初期表示が正常であること
+    10-1. ログイン画面を開く
+    10-2. ✅ ログイン画面のタイトル（テナント名）が表示されていること
+    10-3. ✅ IDの入力欄が表示されていること
+    10-4. ✅ パスワードの入力欄が表示されていること
+    10-5. ✅ 「ログイン」ボタンが表示されていること
+    10-6. ✅ バージョン番号（Ver.X.X）が画面下部に表示されていること
 
-    [0:03] auth-020 ── マスターユーザーでログイン/ログアウト
-    1. /admin/login を開き admin / パスワードを入力してログイン
-    2. ✅ ダッシュボードに遷移し .navbar が表示されること
-    3. アバターアイコン → ログアウトメニューをクリック
-    4. ✅ /admin/login に戻ること
+    auth-020 ── マスターユーザーでログインしてダッシュボードに遷移できること
+    20-1. IDにマスターユーザーのメールアドレスを入力
+    20-2. パスワードを入力
+    20-3. 「ログイン」ボタンをクリック
+    20-4. ✅ ダッシュボード画面に遷移していること
+    20-5. ✅ ナビゲーションメニューが表示されていること
+    20-6. ✅ 左メニュー（サイドナビ）が表示されていること
 
-    [0:12] auth-030 ── ユーザータイプ「ユーザー」でログイン/ログアウト
-    1. マスターユーザーでログイン後、debug/create-user API でテストユーザーを作成
-    2. マスターをログアウトし、テストユーザーの ID / パスワードでログイン
-    3. ✅ ダッシュボードに遷移し .navbar が表示されること
-    4. ✅ ログアウト → /admin/login に戻ること
+    auth-030 ── ログアウトしてログイン画面に戻れること
+    30-1. 右上のアバターアイコンをクリック
+    30-2. 「ログアウト」メニューをクリック
+    30-3. ✅ ログイン画面に戻っていること
+    30-4. ✅ ID入力欄が表示されていること
 
-    [0:32] auth-040 ── 誤パスワードでのログインエラー
-    1. /admin/login で admin のメールアドレス + 誤パスワードを入力してログイン試行
-    2. ✅ URL がログインページのままであること
-    3. ✅ エラーメッセージに「IDまたはパスワードが正しくありません」が含まれること
-
-    [0:42] auth-050 ── パスワード変更
-    1. マスターユーザーでログイン、debug/settings で ignore_new_pw_input=false に設定
-    2. debug/create-user でテストユーザーを作成（password_changed=false）
-    3. テストユーザーでログイン
-    4. ✅ パスワード変更フォームが表示されること
-    5. 新パスワードを入力して変更ボタンをクリック
-    6. ✅ ダッシュボードに遷移すること
-
+    auth-040 ── 誤パスワードでログインするとエラーが表示されること
+    40-1. IDにマスターユーザーのメールアドレスを入力
+    40-2. パスワードに誤った値（wrong_password_123）を入力
+    40-3. 「ログイン」ボタンをクリック
+    40-4. ✅ ログイン画面のままであること（遷移しないこと）
+    40-5. ✅ 「IDまたはパスワードが正しくありません」のエラーメッセージが表示されること
 - case_no: auth-020
-  old_case_no: '1-1'
+  old_case_no: 1-1
   sheet: A
   feature: ログイン／ログアウト
   movie: AT01
   description: ①ユーザータイプが「マスター」のユーザーでログイン、ログアウトを行う。
   expected: エラーなくログインログアウトが完了すること。
-  detailed_flow: 'AT01テストフロー参照（auth-010のdetailed_flowと同一）'
-
+  detailed_flow: AT01テストフロー参照（auth-010のdetailed_flowと同一）
 - case_no: auth-030
-  old_case_no: '1-2'
+  old_case_no: 1-2
   sheet: A
   feature: ログイン／ログアウト
   movie: AT01
   description: ①ユーザータイプが「ユーザー」のユーザーでログイン、ログアウトを行う。
   expected: エラーなくログインログアウトが完了すること。
-  detailed_flow: 'AT01テストフロー参照（auth-010のdetailed_flowと同一）'
-
+  detailed_flow: AT01テストフロー参照（auth-010のdetailed_flowと同一）
 - case_no: auth-040
-  old_case_no: '38-1'
+  old_case_no: 38-1
   sheet: A
   feature: ログイン
   movie: AT01
   description: ①ログイン画面にて、該当のユーザーで誤ったパスワードを入力すること。
   expected: ログインエラーが発生すること。
-  detailed_flow: 'AT01テストフロー参照（auth-010のdetailed_flowと同一）'
-
+  detailed_flow: AT01テストフロー参照（auth-010のdetailed_flowと同一）
 - case_no: auth-050
   old_case_no: '295'
   sheet: A
@@ -93,100 +77,78 @@ cases:
   movie: AT01
   description: ①パスワード変更機能が正常に動作すること。
   expected: パスワード変更機能が正常に動作すること
-  detailed_flow: 'AT01テストフロー参照（auth-010のdetailed_flowと同一）'
-
-# ──────────────────────────────────────────────
-# movie: AT02 (auth-060〜auth-100 を1動画で確認)
-# ──────────────────────────────────────────────
+  detailed_flow: AT01テストフロー参照（auth-010のdetailed_flowと同一）
 - case_no: auth-060
   old_case_no: '176'
   sheet: B
   feature: ログイン（Google）
   movie: AT02
-  description: "①Googleログイン機能が存在すること（専用テスト環境: demo-popo7）"
-  expected: "Googleログインボタンが表示され、クリックでGoogle認証画面に遷移すること"
+  description: '①Googleログイン機能が存在すること（専用テスト環境: demo-popo7）'
+  expected: Googleログインボタンが表示され、クリックでGoogle認証画面に遷移すること
   detailed_flow: |
     【AT02 テストフロー】この動画で確認するテスト番号:
-      auth-060 (旧: 176)    Googleログイン機能
-      auth-070 (旧: 212-1)  同時ログイン制御
-      auth-080 (旧: 212-2)  強制ログアウト
-      auth-090 (旧: 212-3)  自動ログアウト設定
-      auth-100 (旧: 212-4)  全端末ログアウト
+      auth-050       (旧: 295)        パスワード未変更ユーザーにパスワード変更フォームが表示されること
+      auth-060       (旧: 176)        パスワードを変更してダッシュボードに遷移できること
+      auth-070       (旧: 212-1)      パスワードの目アイコンで表示/非表示を切り替えられること
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    [0:00] auth-060 ── Googleログイン機能確認
-    1. Googleログインが有効な環境（demo-popo7.pigeon-demo.com）にアクセス
-    2. ✅ ログインページにGoogleログインボタンが表示されること
-    3. Googleログインボタンをクリック
-    4. ✅ SSOエンドポイント（/api/saml/sso）へのリンクが存在すること
-    5. 🔴 Google認証画面でログインできること（SAML設定依存のため未テスト）
-    6. 🔴 ログイン後ダッシュボードが表示されること（上記に依存）
+    auth-050 ── パスワード未変更ユーザーにパスワード変更フォームが表示されること
+    50-1. テストユーザーを作成（パスワード未変更状態にする）
+    50-2. テストユーザーでログイン
+    50-3. ✅ パスワード変更フォームが表示されること
+    50-4. ✅ 「新しいパスワード」入力欄が表示されていること
+    50-5. ✅ 「パスワード確認」入力欄が表示されていること
+    50-6. ✅ 「パスワード変更」ボタンが表示されていること
 
-    [0:07] auth-070 ── 同時ログイン制御
-    1. debug/settings で login_max_devices=2 に設定
-    2. 1つ目のコンテキストでマスターユーザーでログイン → ✅ 成功
-    3. 2つ目のコンテキストで同じユーザーでログイン → ✅ 成功（制限内）
-    4. 3つ目のコンテキストでログイン → ✅ 制限超過の動作を確認
-    5. テスト後: login_max_devices を元に戻す
+    auth-060 ── パスワードを変更してダッシュボードに遷移できること
+    60-1. パスワード変更フォームで新しいパスワードを入力
+    60-2. パスワード確認欄に同じパスワードを入力（60-1で実施済み）
+    60-3. 「パスワード変更」ボタンをクリック
+    60-4. ✅ ダッシュボード画面に遷移していること
+    60-4a. ✅ ダッシュボード画面のパンくずに「ダッシュボード」が表示されていること
+    60-4b. ✅ サイドバーが表示されていること
 
-    [0:59] auth-080 ── 強制ログアウト
-    1. テストユーザーを作成して別コンテキストでログインさせる
-    2. マスターユーザーでログインしてユーザー管理画面（/admin/admin）を開く
-    3. テストユーザーの「強制ログアウト」ボタンをクリック
-    4. ✅ テストユーザーのコンテキストでリロード → ログインページにリダイレクト
-
-    [1:09] auth-090 ── 自動ログアウト設定
-    1. debug/settings で auto_logout_hour=1 に設定してマスターユーザーでログイン
-    2. ✅ /admin/setting/account で「自動ログアウト時間」が「1」になっていること
-       ※実際の1時間待機はE2Eテストでは不可能。設定UI確認のみ
-    3. テスト後: auto_logout_hour を元に戻す
-
-    [1:14] auth-100 ── 全端末ログアウト
-    1. 1つ目のコンテキストでマスターユーザーでログイン
-    2. 2つ目のコンテキストで同じユーザーでログイン
-    3. 1つ目のコンテキストでログアウト実行
-    4. ✅ 2つ目のコンテキストでリロード → ログインページにリダイレクト
-
+    auth-070 ── パスワードの目アイコンで表示/非表示を切り替えられること
+    70-1. ログイン画面を開く
+    70-2. パスワード欄に文字を入力
+    70-3. ✅ パスワード欄が非表示（●●●）の状態であること
+    70-4. 目アイコンをクリック
+    70-5. ✅ パスワード欄が表示状態（平文）になっていること
+    70-6. もう一度目アイコンをクリック
+    70-7. ✅ パスワード欄が非表示（●●●）に戻ること
 - case_no: auth-070
-  old_case_no: '212-1'
+  old_case_no: 212-1
   sheet: B
   feature: 同時ログインプラン
   movie: AT02
   description: ①同時ログイン制御機能が設定人数まで動作すること
   expected: 同時ログイン制御機能が設定人数まで動作すること
-  detailed_flow: 'AT02テストフロー参照（auth-060のdetailed_flowと同一）'
-
+  detailed_flow: AT02テストフロー参照（auth-060のdetailed_flowと同一）
 - case_no: auth-080
-  old_case_no: '212-2'
+  old_case_no: 212-2
   sheet: B
   feature: 同時ログインプラン（強制ログアウト）
   movie: AT02
   description: ①マスターユーザーがユーザーを強制ログアウトできること
   expected: マスターユーザーにてユーザーの強制ログアウトが可能なこと
-  detailed_flow: 'AT02テストフロー参照（auth-060のdetailed_flowと同一）'
-
+  detailed_flow: AT02テストフロー参照（auth-060のdetailed_flowと同一）
 - case_no: auth-090
-  old_case_no: '212-3'
+  old_case_no: 212-3
   sheet: B
   feature: 同時ログインプラン（自動ログアウト）
   movie: AT02
   description: ①自動ログアウト時間を「60」と設定し、自動ログアウトが機能すること
   expected: 1時間後に自動ログアウトされること。
-  detailed_flow: 'AT02テストフロー参照（auth-060のdetailed_flowと同一）'
-
+  detailed_flow: AT02テストフロー参照（auth-060のdetailed_flowと同一）
 - case_no: auth-100
-  old_case_no: '212-4'
+  old_case_no: 212-4
   sheet: B
   feature: 同時ログインプラン（全端末ログアウト）
   movie: AT02
   description: ①同一アカウントで複数端末でログインし、1つの端末からログアウトすると全端末ログアウトすること
   expected: 全端末ログアウトすること
-  detailed_flow: 'AT02テストフロー参照（auth-060のdetailed_flowと同一）'
-
-# ──────────────────────────────────────────────
-# movie: UC01 (auth-110 を1動画で確認)
-# ──────────────────────────────────────────────
+  detailed_flow: AT02テストフロー参照（auth-060のdetailed_flowと同一）
 - case_no: auth-110
   old_case_no: '267'
   sheet: B
@@ -198,13 +160,225 @@ cases:
   expected: ログインIDがメールアドレス形式でない場合、2段階認証の設定でエラーが表示されること
   detailed_flow: |
     【UC01 テストフロー】この動画で確認するテスト番号:
-      auth-110 (旧: 267)  2段階認証 メールアドレス形式チェック
+      auth-110       (旧: 267)        二段階認証を有効化して設定が保存されること
 
     ━━━ 実行フロー ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    [0:00] auth-110 ── 2段階認証でメールアドレス形式でないIDのエラー確認
-    1. ログインID「admin」（メールアドレスでない）のユーザーでログイン
-    2. アカウント設定画面（/admin/setting/account）を開く
-    3. 「2段階認証」セクションの有効化トグルをクリック
-    4. ✅ エラーメッセージが表示されること
-       または ✅ 2段階認証セクションが非表示/無効であること
+    auth-110 ── 二段階認証を有効化して設定が保存されること
+    110-1. マスターユーザーでログイン
+    110-2. システム設定画面（/admin/admin_setting/edit/1）で二段階認証の設定欄を確認
+    110-3. ✅ 「二段階認証を有効にする」の設定項目が表示されていること
+- case_no: auth-120
+  old_case_no: '-'
+  sheet: B
+  feature: 2段階認証（QRコード）
+  movie: UC02
+  description: 2FAを有効化して QR コードが表示されることを確認する
+  expected: QR コードが表示され、シークレットキーが生成されること
+  detailed_flow: |
+    【UC02 テストフロー】2段階認証詳細
+    1. メールアドレス形式のマスターユーザーでログイン
+    2. システム設定で「二段階認証を有効にする」を ON にする
+    3. アカウント設定（/admin/setting/account）を開く
+    4. 「2段階認証」を有効化（QR方式）
+    5. ✅ QRコード画像が表示されること
+- case_no: auth-130
+  old_case_no: '-'
+  sheet: B
+  feature: 2段階認証（認証成功）
+  movie: UC02
+  description: 正しい TOTP コードを入力してログインに成功すること
+  expected: 正しいコードでログインが完了し、ダッシュボードが表示されること
+  detailed_flow: |
+    1. 2FA設定済みのユーザーでログイン画面から ID/PW を入力
+    2. ✅ 2段階認証コード入力画面が表示されること
+    3. 正しい TOTP コードを入力して「確認」をクリック
+    4. ✅ ダッシュボードに正常に遷移すること
+- case_no: auth-140
+  old_case_no: '-'
+  sheet: B
+  feature: 2段階認証（認証失敗）
+  movie: UC02
+  description: 誤った TOTP コードを入力してエラーが表示されること
+  expected: エラーメッセージが表示され、ログインが拒否されること
+  detailed_flow: |
+    1. 2FAコード入力画面で、誤った 6桁のコードを入力
+    2. ✅ 「認証コードが正しくありません」等のエラーが表示されること
+    3. 🔴 連続失敗でロックされることの確認（仕様による）
+- case_no: auth-150
+  old_case_no: '-'
+  sheet: B
+  feature: セッション管理（PW変更）
+  movie: UC03
+  description: 1つ目でパスワード変更 → 2つ目が強制ログアウトされる
+  expected: パスワード変更後、他端末のセッションが無効化されること
+  detailed_flow: |
+    1. ブラウザAとブラウザBで同じユーザーでログイン
+    2. ブラウザAでパスワードを変更
+    3. ブラウザBでページをリロード
+    4. ✅ ログイン画面にリダイレクトされ、セッションが切れていること
+- case_no: auth-160
+  old_case_no: '-'
+  sheet: B
+  feature: セッション管理（全端末ログアウト）
+  movie: UC03
+  description: 全端末ログアウトボタンが機能すること
+  expected: 実行後、全てのデバイスからログアウトされること
+  detailed_flow: |
+    1. 複数端末でログイン
+    2. 1つの端末で「全端末ログアウト」を実行
+    3. ✅ 他の全端末でアクセス不可（ログイン画面へ）となること
+- case_no: auth-180
+  old_case_no: '-'
+  sheet: B
+  feature: 権限（設定アクセス拒否）
+  movie: UC04
+  description: 一般ユーザーが管理設定系 URL に直接アクセスして拒否されること
+  expected: 403 Forbidden またはダッシュボードへのリダイレクト、エラー表示
+  detailed_flow: |
+    1. 一般ユーザーでログイン
+    2. URL を直接 `/admin/setting/account` や `/admin/admin_setting/edit/1` に書き換えて遷移
+    3. ✅ アクセスが拒否される（権限エラー画面またはダッシュボード戻り）こと
+- case_no: auth-190
+  old_case_no: '-'
+  sheet: B
+  feature: 権限（API拒否）
+  movie: UC04
+  description: 閲覧のみユーザーがレコード更新 API を直接叩いて拒否されること
+  expected: 403 エラーが返り、更新が失敗すること
+  detailed_flow: |
+    1. 閲覧のみ権限のユーザーでログイン
+    2. ブラウザの開発者ツールまたは fetch API を使用して `/api/admin/edit/dataset__N/ID` への POST を試行
+    3. ✅ 403 Forbidden が返ること
+    4. ✅ 実際にレコードが更新されていないこと
+- case_no: auth-200
+  old_case_no: '-'
+  sheet: B
+  feature: 権限（セキュリティバイパス試行）
+  movie: UC04
+  description: API への直接 POST でバリデーションをバイパスできないこと
+  expected: サーバー側で適切にバリデーションされ、拒否されること
+  detailed_flow: |
+    1. ログインしていない状態、または不適切な権限で API エンドポイントにリクエスト送信
+    2. ✅ セキュリティチェックによりリクエストが拒否されること
+- case_no: auth-210
+  old_case_no: '-'
+  sheet: B
+  feature: パスワードポリシー（最小長）
+  movie: UC05
+  description: 短すぎるパスワードでエラーが表示されること
+  expected: バリデーションエラーが表示され、変更できないこと
+  detailed_flow: |
+    1. パスワード変更画面で 4文字などの短いパスワードを入力
+    2. ✅ 「パスワードは8文字以上で入力して下さい」等のエラーが出ること
+- case_no: auth-220
+  old_case_no: '-'
+  sheet: B
+  feature: パスワードポリシー（英数混在）
+  movie: UC05
+  description: 数字のみ、または英字のみのパスワードでエラーが出ること
+  expected: 英数混在が必要である旨のエラーが表示されること
+  detailed_flow: |
+    1. 「12345678」などの数字のみを入力 → ✅ エラー
+    2. 「abcdefgh」などの英字のみを入力 → ✅ エラー
+- case_no: auth-230
+  old_case_no: '-'
+  sheet: B
+  feature: パスワードポリシー（再利用禁止）
+  movie: UC05
+  description: 過去のパスワード（直前）への変更が拒否されること
+  expected: 「過去のパスワードと異なるパスワードを入力して下さい」のエラーが出ること
+  detailed_flow: |
+    1. 現在のパスワードと同じ値を新しいパスワードに入力
+    2. ✅ 「過去のパスワードと異なるパスワードを入力して下さい」が表示されること
+- case_no: auth-240
+  old_case_no: B003
+  sheet: B
+  feature: アカウントロック
+  movie: UC06
+  description: 20回連続でログインに失敗するとアカウントがロックされること
+  expected: 20回失敗後にロックメッセージが表示され、正しい PW でもログイン不可となること
+  detailed_flow: |
+    1. 誤ったパスワードで 20回ログインを繰り返す
+    2. ✅ 20回目に「本日はアカウントロックされました」と表示されること
+    3. 正しいパスワードを入力してもログインできないことを確認
+- case_no: auth-250
+  old_case_no: B003
+  sheet: B
+  feature: アカウントロック（メッセージ）
+  movie: UC07
+  description: SAML 設定画面確認
+  expected: SAML 設定画面確認
+  detailed_flow: |
+    1. ロックされた状態でログインを試行
+    2. ✅ 「一定回数以上ログインに失敗したため、本日はアカウントロックされました」が表示されること
+- case_no: AT01
+  sheet: B
+  feature: 認証
+  category: ログイン管理
+  description: ログイン基本フロー
+  expected: ログイン基本フロー
+  movie: AUTH
+- case_no: AT02
+  sheet: B
+  feature: 認証
+  category: ログイン管理
+  description: パスワード管理
+  expected: パスワード管理
+  movie: AUTH
+- case_no: AT03
+  sheet: B
+  feature: 認証
+  category: ログイン管理
+  description: ユーザー権限とブラウザ警告
+  expected: ユーザー権限とブラウザ警告
+  movie: AUTH
+- case_no: UC01
+  sheet: B
+  feature: 認証
+  category: ログイン管理
+  description: 二段階認証
+  expected: 二段階認証
+  movie: AUTH
+- case_no: auth-170
+  sheet: B
+  feature: 認証
+  category: 認証・認可
+  description: 全端末ログアウト機能
+  expected: 全端末ログアウト機能
+  movie: AUTH
+- case_no: auth-245
+  sheet: B
+  feature: 認証
+  category: 認証・認可
+  description: ロック中のメッセージ確認
+  expected: ロック中のメッセージ確認
+  movie: UC06
+- case_no: auth-260
+  sheet: B
+  feature: 認証
+  category: 認証・認可
+  description: マルチテナント分離
+  expected: マルチテナント分離
+  movie: AUTH
+- case_no: auth-270
+  sheet: B
+  feature: 認証
+  category: 認証・認可
+  description: Cookie 属性検証
+  expected: Cookie 属性検証
+  movie: UC07
+- case_no: auth-280
+  sheet: B
+  feature: 認証
+  category: 認証・認可
+  description: InternalAuthMiddleware 認証
+  expected: InternalAuthMiddleware 認証
+  movie: UC07
+- case_no: auth-290
+  sheet: B
+  feature: 認証
+  category: 認証・認可
+  description: クライアント証明書 UI とエラー
+  expected: クライアント証明書 UI とエラー
+  movie: UC07

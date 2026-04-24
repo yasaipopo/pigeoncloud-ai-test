@@ -1,0 +1,28 @@
+group: kintone移行機能
+spec_file: tests/kintone.spec.js
+base_url: '{{ TEST_BASE_URL }}'
+cases:
+- case_no: b007-010
+  sheet: B
+  feature: kintone移行
+  category: 管理機能
+  description: kintone移行：アプリ一覧取得〜移行開始（正常系）
+  expected: kintoneのアプリ一覧が表示され、移行設定画面を経て移行が開始されること。
+- case_no: b007-020
+  sheet: B
+  feature: kintone移行
+  category: 管理機能
+  description: kintone移行：同一テーブル名バリデーション
+  expected: 既に存在するテーブル名と同じ名前を指定した場合、エラーメッセージが表示されること。
+- case_no: b007-030
+  sheet: B
+  feature: kintone移行
+  category: 管理機能
+  description: kintone移行：レコード移行オプションの確認
+  expected: 移行設定画面で「レコードも移行する」オプションが操作可能であることを確認する。
+- case_no: B012-010
+  sheet: B
+  feature: kintone移行
+  category: 管理機能
+  description: kintone移行結果の「開く」ボタンからテーブル一覧に遷移できること
+  expected: 該当テーブルの一覧画面（/admin/dataset__N）に正常に遷移できること。

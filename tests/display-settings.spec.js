@@ -490,6 +490,15 @@ test.describe('表示条件設定（250系）', () => {
             // フィールド設定ページへ移動
             await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
             await waitForAngular(page);
+
+            // フィールドタブをクリック
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link'));
+                const target = tabs.find(t => t.textContent.trim().includes('フィールド'));
+                if (target) target.click();
+            });
+            await waitForAngular(page);
+
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
             // フィールドリストの存在確認

@@ -63,15 +63,28 @@ async function openDropdownMenu(page) {
         await page.keyboard.press('Escape');
         await page.waitForTimeout(300);
     }
-    const hamburgerBtn = page.locator('button.dropdown-toggle:has(.fa-bars)').first();
-    const found = await hamburgerBtn.waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
+    const hamburgerBtn = page.locator('button.dropdown-toggle:has(.fa-bars), button.dropdown-toggle:has-text("管理"), button.dropdown-toggle:has-text("操作")').first();
+    let found = false;
+    for (let i = 0; i < 3; i++) {
+        found = await hamburgerBtn.isVisible().catch(() => false);
+        if (found) break;
+        // フォールバック: btn-outline-primary dropdown-toggle
+        const fallbackBtn = page.locator('button.btn-outline-primary.dropdown-toggle').first();
+        found = await fallbackBtn.isVisible().catch(() => false);
+        if (found) {
+            await fallbackBtn.click({ force: true });
+            await page.waitForTimeout(500);
+            return;
+        }
+        await page.waitForTimeout(1000);
+    }
+    
     if (found) {
         await hamburgerBtn.click({ force: true });
     } else {
-        // フォールバック: btn-outline-primary dropdown-toggle
-        await page.locator('button.btn-outline-primary.dropdown-toggle').first().click({ force: true });
+        console.log('[openDropdownMenu] 警告: ドロップダウンボタンが見つかりません');
     }
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(500);
 }
 
 /**
@@ -79,8 +92,11 @@ async function openDropdownMenu(page) {
  */
 async function openCsvDownloadModal(page) {
     await openDropdownMenu(page);
-    await page.locator('a.dropdown-item:has-text("CSVダウンロード")').first().click();
+    const item = page.locator('a.dropdown-item:has-text("CSVダウンロード"), .dropdown-item:has-text("CSVダウンロード")').first();
+    await expect(item).toBeVisible({ timeout: 10000 });
+    await item.click({ force: true });
     await waitForAngular(page);
+    await page.waitForTimeout(1000);
 }
 
 /**
@@ -898,6 +914,72 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             expect(hasTable || hasEmptyMsg, 'CSV履歴ページに何らかのコンテンツが表示されること').toBeTruthy();
             console.log('[csv-130] CSV UP/DL履歴ページ表示確認OK（テーブル:', hasTable, '）');
             await autoScreenshot(page, 'CE04', 'csv-130', _testStart);
+        });
+    });
+
+    // =========================================================================
+    // CE-B001: Excel列表示検証
+    // =========================================================================
+
+    test.describe('CE-B001: Excel列表示検証', () => {
+        test('B001: 多項目のExcel(CSV)をインポートした際、プレビューテーブルが適切に表示（スクロール）されること', async ({ page }) => {
+            const _testStart = Date.now();
+            test.setTimeout(120000);
+
+            // [flow] 1. テーブル管理画面（/admin/dataset）へ遷移
+            await page.goto(BASE_URL + '/admin/dataset');
+            await waitForAngular(page);
+
+            // [flow] 2. ハンバーガーメニューから「エクセルから追加」を選択
+            const hamburgerBtn = page.locator('button.dropdown-toggle:has(.fa-bars)').first();
+            await hamburgerBtn.click();
+            const excelBtn = page.locator('a.dropdown-item').filter({ hasText: /エクセルから追加|Excelから追加|Excel/ }).first();
+            await expect(excelBtn).toBeVisible();
+            await excelBtn.click();
+            await waitForAngular(page);
+
+            // [flow] 3. 多項目のCSVファイルを準備してアップロード
+            const fileInput = page.locator('input[type="file"]');
+            await fileInput.setInputFiles('test_files/b001_many_columns.csv');
+            // Angularに通知するためにchangeイベントを発火
+            await fileInput.dispatchEvent('change');
+            await waitForAngular(page);
+
+            // [check] 4. ✅ データプレビューが表示されること
+            const previewTable = page.locator('table').filter({ has: page.locator('th').filter({ hasText: 'col1' }) }).first();
+            await expect(previewTable).toBeVisible({ timeout: 20000 });
+            console.log('[B001] プレビューテーブル表示確認OK');
+
+            // [check] 5. ✅ プレビューテーブルが親要素（モーダル幅）を突き抜けていないこと、または水平スクロールが有効であること
+            const modalBody = page.locator('.modal-body').first();
+            await expect(modalBody).toBeVisible();
+
+            const modalBox = await modalBody.boundingBox();
+            const tableBox = await previewTable.boundingBox();
+
+            if (!modalBox || !tableBox) {
+                throw new Error('Bounding box could not be determined');
+            }
+
+            console.log(`[B001] Modal Width: ${modalBox.width}, Table Width: ${tableBox.width}`);
+
+            const container = previewTable.locator('xpath=..');
+            const overflowX = await container.evaluate(el => window.getComputedStyle(el).overflowX);
+            const isScrollable = overflowX === 'auto' || overflowX === 'scroll';
+            
+            if (!isScrollable) {
+                expect(tableBox.width, 'スクロールが無効な場合、テーブル幅はモーダル幅内に収まっている必要があります').toBeLessThanOrEqual(modalBox.width + 1);
+            } else {
+                const containerBox = await container.boundingBox();
+                if (containerBox) {
+                    expect(containerBox.width, 'スクロールコンテナの幅はモーダル幅内に収まっている必要があります').toBeLessThanOrEqual(modalBox.width + 1);
+                }
+            }
+
+            const col50 = previewTable.locator('th').filter({ hasText: 'col50' });
+            await expect(col50).toBeAttached();
+
+            await autoScreenshot(page, 'CE01', 'B001-preview-scrolling', _testStart);
         });
     });
 });

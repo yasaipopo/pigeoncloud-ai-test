@@ -7,6 +7,8 @@ const agentNum = process.env.AGENT_NUM || '1';
 // storageState（ログイン済みクッキー）のパス: global-setupが作成する
 const authStatePath = `.auth-state.${agentNum}.json`;
 const reportsDir = process.env.REPORTS_DIR || `reports/agent-${agentNum}`;
+// CLIで--reporter=jsonが指定された場合でも出力先が固定されるように環境変数をセット
+process.env.PLAYWRIGHT_JSON_OUTPUT_NAME = `${reportsDir}/playwright-results.json`;
 
 // 動画保存ディレクトリ: videos/YYYYMMDD_HHmmss_<commitHash>/
 const now = new Date();
@@ -35,7 +37,7 @@ module.exports = defineConfig({
     testDir: './tests',
     globalSetup: './tests/global-setup.js',
     globalTeardown: './tests/global-teardown.js',
-    timeout: 300000, // テスト関数全体: 300秒。beforeAll内のポーリング(最大60s)対応のため延長
+    timeout: 180000, // テスト関数全体: 180秒。長時間テストは test.setTimeout() で個別延長 (2026-04-21 変更: auth fail 時の timeout 待機削減)
     expect: { timeout: 5000 },
     fullyParallel: false,
     retries: 1,

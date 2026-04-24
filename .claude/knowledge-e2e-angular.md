@@ -498,3 +498,8 @@ await field.locator('.overSetting').click({ force: true });
 - 古いID(22)が壊れて新しいID(137)が作成された
 - global-setupの`getAllTypeTableId`が最新のIDを返すため、各specはこれに依存すべき
 - **テーブルIDをハードコードしない**（`.test_env_runtime`等にキャッシュされた古い値にも注意）
+
+### 知見: サブエージェントへの指示ルール
+- `knowledge-*.md` ファイルは**読むだけ、書き込み禁止**。サブエージェントが上書きして内容が消える事故が発生した（2026-04-12）
+- spec.jsファイルのみ修正対象と明記する
+- `playwright.config.js`, `create-test-env.js` 等の共通ファイルの変更は要注意（他のspecに影響）

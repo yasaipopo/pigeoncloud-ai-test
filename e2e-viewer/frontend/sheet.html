@@ -31,7 +31,17 @@
     .pipeline-table .desc-col { max-width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
     .pipeline-table .desc-col:hover { background: #e9ecef; }
     /* フィルタ時はテスト内容を全文表示 */
-    .pipeline-table.filtered .desc-col { max-width: none; white-space: pre-wrap; word-break: break-word; }
+    .pipeline-table.filtered .desc-col,
+    .pipeline-table.expanded-all .desc-col { max-width: none; white-space: pre-wrap; word-break: break-word; }
+    /* 全て展開モード: 詳細フロー行を表示 */
+    .pipeline-table .detailed-flow-row { display: none; }
+    .pipeline-table.expanded-all .detailed-flow-row { display: table-row; }
+    .pipeline-table .detailed-flow-row td {
+      background: #f8f9fa; padding: 8px 14px; font-size: .82rem;
+      white-space: pre-wrap; word-break: break-word; color: #495057;
+      border-left: 3px solid #0d6efd;
+    }
+    .pipeline-table .detailed-flow-row .flow-label { font-weight: 600; color: #0d6efd; margin-right: 6px; }
     /* テーブル幅を広げる */
     .container-fluid { max-width: 100%; padding: 0 20px; }
 
@@ -102,6 +112,9 @@
       <i class="bi bi-arrow-left me-2"></i>PigeonCloud E2E ビューアー
     </a>
     <div class="d-flex gap-2">
+      <a href="bugs.html" class="btn btn-sm btn-outline-danger" title="プロダクトバグ一覧">
+        <i class="bi bi-bug-fill me-1"></i>バグ一覧
+      </a>
       <button class="btn btn-sm btn-outline-success sync-btn" onclick="openSyncModal()" title="E2E実行結果をシートに同期">
         <i class="bi bi-arrow-repeat me-1"></i>結果同期
       </button>
@@ -240,6 +253,7 @@
       <button class="btn btn-sm btn-outline-success" data-status-filter="ok" onclick="setStatusFilter('ok', this)">OK/PASSのみ</button>
       <button class="btn btn-sm btn-outline-danger" data-status-filter="ng" onclick="setStatusFilter('ng', this)">NG/FAILのみ</button>
     </div>
+    <button class="btn btn-sm btn-outline-primary" id="expand-all-btn" onclick="toggleExpandAll()" title="説明・期待結果・詳細フローを全て展開表示">📋 全て展開</button>
     <input class="form-control form-control-sm ms-auto" style="max-width:220px"
            id="search-box" placeholder="ケースNo/機能名で絞り込み..." oninput="applyFilters()">
     <span class="text-muted small" id="display-count"></span>
@@ -378,14 +392,95 @@ let editingValue = null;
 // =========================================
 // 初期化
 // =========================================
+// URL パラメータ抽出（?spec=auth&caseNo=up-b002&review=pending&reviewLabel=XXX）
+function getUrlParams() {
+  const sp = new URLSearchParams(location.search);
+  return {
+    spec: sp.get('spec') || null,
+    caseNo: sp.get('caseNo') || null,
+    review: sp.get('review') || null,
+    reviewLabel: sp.get('reviewLabel') || null,
+    runId: sp.get('runId') || null,
+  };
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     await Promise.all([loadPipeline(), loadSummary()]);
+    applyUrlParamFilters();
   } catch (e) {
     document.getElementById('loading').innerHTML =
       `<div class="alert alert-danger">読み込みエラー: ${escHtml(e.message)}</div>`;
   }
 });
+
+// URL パラメータで絞り込み + レビューバナー表示
+function applyUrlParamFilters() {
+  const p = getUrlParams();
+  if (p.spec) {
+    currentSpec = p.spec;
+    const tab = document.querySelector(`.spec-tab[data-spec="${p.spec}"]`);
+    if (tab) {
+      document.querySelectorAll('.spec-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    }
+  }
+  // caseNo が 1件の場合のみ search box に入れる（複数 comma 区切りは含有チェックが壊れるため除外）
+  if (p.caseNo && !p.caseNo.includes(',')) {
+    const box = document.getElementById('search-box');
+    if (box) box.value = p.caseNo;
+  }
+  // review=pending なら該当ケースに review-pending マーキング
+  if (p.review === 'pending' && p.caseNo) {
+    window._reviewPendingCaseNos = (p.caseNo || '').split(',').map(s => s.trim()).filter(Boolean);
+    showReviewBanner(p);
+  }
+  applyFilters();
+}
+
+function showReviewBanner(p) {
+  const banner = document.createElement('div');
+  banner.id = 'review-banner';
+  banner.className = 'alert alert-warning d-flex justify-content-between align-items-center';
+  banner.style.cssText = 'margin:12px 0;border-left:6px solid #f0ad4e;';
+  banner.innerHTML = `
+    <div>
+      <strong>🟡 レビュー依頼:</strong>
+      ${escHtml(p.reviewLabel || '下記テストを確認してください')}
+      <span class="ms-2 badge bg-warning text-dark">${escHtml((p.caseNo || '').replace(/,/g, ', '))}</span>
+    </div>
+    <div>
+      <button class="btn btn-success btn-sm me-2" onclick="submitReviewResult('ok')">OK で承認</button>
+      <button class="btn btn-danger btn-sm" onclick="submitReviewResult('ng')">NG で差し戻し</button>
+    </div>
+  `;
+  const anchor = document.querySelector('.filter-bar') || document.body.firstChild;
+  anchor.parentNode.insertBefore(banner, anchor);
+}
+
+function submitReviewResult(verdict) {
+  const p = getUrlParams();
+  const caseNos = (p.caseNo || '').split(',').map(s => s.trim()).filter(Boolean);
+  const note = prompt(`${verdict === 'ok' ? '✅ 承認' : '❌ 差戻し'}のコメント（任意）:`, '');
+  // 各ケースに review 結果を保存
+  caseNos.forEach(cn => {
+    try {
+      const item = allItems.find(i => i.caseNo === cn);
+      if (item && item.runId) {
+        fetch(`${CONFIG.apiUrl}/pipeline/review?runId=${encodeURIComponent(item.runId)}&caseNo=${encodeURIComponent(cn)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ verdict, note: note || '', reviewer: 'user', reviewedAt: new Date().toISOString() }),
+        });
+      }
+    } catch {}
+  });
+  const banner = document.getElementById('review-banner');
+  if (banner) {
+    banner.className = 'alert ' + (verdict === 'ok' ? 'alert-success' : 'alert-danger');
+    banner.innerHTML = `<strong>${verdict === 'ok' ? '✅ 承認済み' : '❌ 差戻し済み'}</strong>: ${escHtml(note || '')}`;
+  }
+}
 
 // =========================================
 // データ読み込み
@@ -522,6 +617,16 @@ function selectSpec(spec, el) {
   applyFilters();
 }
 
+function toggleExpandAll() {
+  const table = document.querySelector('.pipeline-table');
+  const btn = document.getElementById('expand-all-btn');
+  if (!table || !btn) return;
+  const expanded = table.classList.toggle('expanded-all');
+  btn.textContent = expanded ? '📋 折りたたむ' : '📋 全て展開';
+  btn.classList.toggle('btn-primary', expanded);
+  btn.classList.toggle('btn-outline-primary', !expanded);
+}
+
 function setStatusFilter(status, btn) {
   currentStatusFilter = status;
   document.querySelectorAll('[data-status-filter]').forEach(b => b.classList.remove('active'));
@@ -535,6 +640,11 @@ function setStatusFilter(status, btn) {
 function applyFilters() {
   const query = (document.getElementById('search-box').value || '').toLowerCase();
   let filtered = allItems;
+
+  // レビュー待ちモード（?review=pending）: 指定 caseNo のみ表示
+  if (window._reviewPendingCaseNos && window._reviewPendingCaseNos.length > 0) {
+    filtered = filtered.filter(i => window._reviewPendingCaseNos.includes(i.caseNo));
+  }
 
   // specフィルタ
   if (currentSpec !== 'all') {
@@ -701,6 +811,15 @@ function renderRow(tbody, item) {
     <td class="media-cell">${videoIcon}</td>
     <td>${updatedInfo}</td>
   `;
+
+  // 詳細フロー行を追加（「全て展開」ボタンで表示切替）
+  if (item.detailedFlow && item.detailedFlow.trim()) {
+    const flowRow = tbody.insertRow();
+    flowRow.className = 'detailed-flow-row';
+    flowRow.dataset.parentCaseNo = item.caseNo;
+    flowRow.innerHTML = `<td colspan="14"><span class="flow-label">📖 詳細フロー:</span>${escHtml(item.detailedFlow)}</td>`;
+  }
+
   return row;
 }
 

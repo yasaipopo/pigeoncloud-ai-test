@@ -155,7 +155,8 @@ test.describe('テンプレート', () => {
 
             // [check] 10-3. ✅ テンプレートのアイコンが1件以上表示されていること
             const templateIcons = modal.locator('.template_icon');
-            await expect(templateIcons.first()).toBeVisible({ timeout: 10000 });
+            await page.waitForSelector('.modal.show .template_icon', { timeout: 15000 }).catch(() => {});
+            await expect(templateIcons.first()).toBeVisible({ timeout: 15000 });
             const iconCount = await templateIcons.count();
             expect(iconCount).toBeGreaterThan(0);
 

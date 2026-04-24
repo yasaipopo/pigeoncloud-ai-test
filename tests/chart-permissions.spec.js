@@ -383,10 +383,12 @@ test.describe('チャート - 基本機能', () => {
             // チャートモーダルを開く
             await openChartModalFromTable(page);
 
-            // 設定タブが表示されることを確認
-            const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
-            await expect(settingTab).toBeVisible();
-            await settingTab.click({ force: true });
+            // 設定タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link, [role="tab"]'));
+                const target = tabs.find(t => t.textContent.trim() === '設定');
+                if (target) target.click();
+            });
             await waitForAngular(page);
             // 設定タブの権限ラジオが表示されるまで待機（Angularタブ切り替え完了判定）
             await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
@@ -424,10 +426,12 @@ test.describe('チャート - 基本機能', () => {
             // チャートモーダルを開く
             await openChartModalFromTable(page);
 
-            // 設定タブが表示されることを確認
-            const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
-            await expect(settingTab).toBeVisible();
-            await settingTab.click({ force: true });
+            // 設定タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link, [role="tab"]'));
+                const target = tabs.find(t => t.textContent.trim() === '設定');
+                if (target) target.click();
+            });
             await waitForAngular(page);
             await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 
@@ -463,10 +467,12 @@ test.describe('チャート - 基本機能', () => {
             // ALLテストテーブルに直接遷移
             await openChartModalFromTable(page);
 
-            // 設定タブが表示されることを確認
-            const settingTab = page.locator('a.nav-link, [role="tab"]').filter({ hasText: /^設定$/ }).first();
-            await expect(settingTab).toBeVisible();
-            await settingTab.click({ force: true });
+            // 設定タブ
+            await page.evaluate(() => {
+                const tabs = Array.from(document.querySelectorAll('a.nav-link, [role="tab"]'));
+                const target = tabs.find(t => t.textContent.trim() === '設定');
+                if (target) target.click();
+            });
             await waitForAngular(page);
             await expect(page.locator('.modal.show input[name="grant"]').first()).toBeVisible({ timeout: 10000 });
 

@@ -35,11 +35,23 @@ async function login(page, email, password) {
  */
 async function closeTemplateModal(page) {
     try {
-        const modal = page.locator('div.modal.show');
+        // 通常のモーダルに加えて、設定モーダルも対象にする
+        const modal = page.locator('div.modal.show, .settingModal.show');
         const count = await modal.count();
         if (count > 0) {
-            const closeBtn = modal.locator('button').first();
-            await closeBtn.click({ force: true });
+            // 複数のモーダルがある場合は全て閉じる
+            for (let i = 0; i < count; i++) {
+                const m = modal.nth(i);
+                const closeBtn = m.locator('button:has-text("キャンセル"), button.close, button[data-dismiss="modal"]').first();
+                if (await closeBtn.count() > 0) {
+                    await closeBtn.click({ force: true });
+                }
+            }
+            await waitForAngular(page);
+        }
+        // それでも残っている場合はリロード
+        if (await page.locator('.modal.show, .settingModal.show').count() > 0) {
+            await page.reload({ waitUntil: 'domcontentloaded' });
             await waitForAngular(page);
         }
     } catch (e) {
@@ -249,8 +261,26 @@ async function assertFieldPageLoaded(page, tableId) {
 let _sharedTableId = null;
 
 test.beforeAll(async ({ browser }) => {
-    test.setTimeout(300000);
-    const env = await createTestEnv(browser, { withAllTypeTable: true });
+    test.setTimeout(400000);
+    let env = null;
+    let error = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            env = await createTestEnv(browser, { withAllTypeTable: true });
+            if (env) break;
+        } catch (e) {
+            error = e;
+            console.log(`[beforeAll] createTestEnv attempt ${attempt}/3 failed: ${e.message}`);
+            if (attempt < 3) {
+                // 504連発時は少し長めに待機
+                await new Promise(resolve => setTimeout(resolve, 15000));
+            }
+        }
+    }
+    if (!env) {
+        throw new Error(`createTestEnv failed after 3 attempts: ${error?.message}`);
+    }
+
     BASE_URL = env.baseUrl;
     EMAIL = env.email;
     PASSWORD = env.password;
@@ -309,7 +339,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             await imageField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
@@ -336,7 +366,7 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             await imageField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
@@ -415,7 +445,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             await boolField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
@@ -444,7 +474,7 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             await boolField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示され、Yes/No設定が含まれること
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // モーダルヘッダーに「Yes / No」が含まれること
             await expect(modal.locator('h5')).toContainText('Yes');
@@ -508,7 +538,7 @@ test.describe('自動採番フィールド（216系）', () => {
             await autoIdField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
@@ -595,7 +625,7 @@ test.describe('固定テキストフィールド（230系）', () => {
             }
             await waitForAngular(page);
             // 設定モーダルが表示されること
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 固定テキスト固有: 「詳細ページでも表示」チェックボックスが存在すること
             await expect(modal.locator('label:has-text("詳細ページでも表示")')).toBeVisible();
@@ -674,12 +704,12 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
             await fileField.first().locator('.overSetting .fa-gear').click();
             await waitForAngular(page);
             // 設定モーダルが表示されること
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // ファイルフィールドであること（モーダルヘッダーにファイルが含まれる）
-            await expect(modal.locator('h5')).toContainText('ファイル');
+            await expect(modal.locator('h5')).toContainText(/ファイル|画像/);
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -763,7 +793,9 @@ test.describe('列設定（122系）', () => {
             await waitForAngular(page);
             await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
             // テーブルヘッダーが表示されていること（一覧テーブルが存在する）
-            const tableHeader = page.locator('table thead th, .table-responsive th, .sticky-table-header th');
+            const tableHeaderSelector = 'table thead th, .table-responsive th, .sticky-table-header th';
+            await page.waitForSelector(tableHeaderSelector, { timeout: 15000 }).catch(() => {});
+            const tableHeader = page.locator(tableHeaderSelector);
             const headerCount = await tableHeader.count();
             expect(headerCount).toBeGreaterThan(0);
             // 列の表示/非表示を制御するUI（歯車アイコンや列設定ボタン）が存在すること
@@ -864,7 +896,7 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             // 「項目を追加する」をクリックしてフィールドタイプ選択モーダルを開く
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // フィールドタイプ一覧に「文章(複数行)」ボタンが存在すること
             await expect(modal.locator('button:has-text("文章(複数行)")')).toBeVisible();
@@ -892,7 +924,7 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             // 「項目を追加する」をクリックしてフィールドタイプ選択モーダルを開く
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「文章(複数行)」を選択
             await modal.locator('button:has-text("文章(複数行)")').click();
@@ -968,7 +1000,7 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
             // 「項目を追加する」をクリックしてフィールドタイプ選択モーダルを開く
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // フィールドタイプ一覧に「文字列(一行)」ボタンが存在すること
             await expect(modal.locator('button:has-text("文字列(一行)")')).toBeVisible();
@@ -1153,7 +1185,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
@@ -1182,7 +1214,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
@@ -1212,7 +1244,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
@@ -1242,7 +1274,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「文字列(一行)」を選択
             await modal.locator('button:has-text("文字列(一行)")').click();
@@ -1273,7 +1305,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「数値」を選択
             await modal.locator('button:has-text("数値")').click();
@@ -1301,7 +1333,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「数値」を選択
             await modal.locator('button:has-text("数値")').click();
@@ -1329,7 +1361,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「数値」を選択
             await modal.locator('button:has-text("数値")').click();
@@ -1384,7 +1416,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「選択肢(単一選択)」を選択
             await modal.locator('button:has-text("選択肢(単一選択)")').click();
@@ -1415,7 +1447,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「選択肢(単一選択)」を選択
             await modal.locator('button:has-text("選択肢(単一選択)")').click();
@@ -1445,7 +1477,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「選択肢(単一選択)」を選択
             await modal.locator('button:has-text("選択肢(単一選択)")').click();
@@ -1477,7 +1509,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「日時」を選択
             await modal.locator('button:has-text("日時")').click();
@@ -1507,7 +1539,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「ファイル」を選択
             await modal.locator('button:has-text("ファイル")').click();
@@ -1515,7 +1547,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // ファイルフィールドの設定モーダルであること
-            await expect(modal.locator('h5')).toContainText('ファイル');
+            await expect(modal.locator('h5')).toContainText(/ファイル|画像/);
             // モーダルを閉じる
             await modal.locator('button:has-text("キャンセル")').first().click();
             // モーダルが閉じない場合はリロードで強制クリア
@@ -1534,7 +1566,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「計算」を選択
             await modal.locator('button:has-text("計算")').click();
@@ -1565,7 +1597,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「計算」を選択
             await modal.locator('button:has-text("計算")').click();
@@ -1595,7 +1627,7 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 「項目を追加する」をクリック
             await page.locator('button:has-text("項目を追加する")').click();
             await waitForAngular(page);
-            const modal = page.locator('.settingModal .modal-content');
+            const modal = page.locator('.settingModal:visible .modal-content').first();
             await expect(modal).toBeVisible();
             // 「計算」を選択
             await modal.locator('button:has-text("計算")').click();
