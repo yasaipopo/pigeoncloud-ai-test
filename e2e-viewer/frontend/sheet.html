@@ -429,7 +429,7 @@ let editingValue = null;
 // =========================================
 // 初期化
 // =========================================
-// URL パラメータ抽出（?spec=auth&caseNo=up-b002&review=pending&reviewLabel=XXX）
+// URL パラメータ抽出（?spec=auth&caseNo=up-b002&review=pending&reviewLabel=XXX&autoplay=1&status=ng）
 function getUrlParams() {
   const sp = new URLSearchParams(location.search);
   return {
@@ -438,6 +438,8 @@ function getUrlParams() {
     review: sp.get('review') || null,
     reviewLabel: sp.get('reviewLabel') || null,
     runId: sp.get('runId') || null,
+    autoplay: sp.get('autoplay') || null,  // '1' | 'ng' | 'ok' | 'unchecked' | 'sorted' — 指定時にフロート動画を自動再生
+    status: sp.get('status') || null,      // 'ng' | 'ok' | 'unchecked' | 'sorted' — ステータスフィルタの直接指定
   };
 }
 
@@ -472,7 +474,33 @@ function applyUrlParamFilters() {
     window._reviewPendingCaseNos = (p.caseNo || '').split(',').map(s => s.trim()).filter(Boolean);
     showReviewBanner(p);
   }
+  // status=ng|ok|unchecked|sorted (直接指定) または autoplay=ng 等 (互換)
+  const statusFromUrl = p.status || (['ng','ok','unchecked','sorted'].includes(p.autoplay) ? p.autoplay : null);
+  if (statusFromUrl) {
+    currentStatusFilter = statusFromUrl;
+    const btn = document.querySelector(`[data-status-filter="${statusFromUrl}"]`);
+    if (btn) {
+      document.querySelectorAll('[data-status-filter]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  }
   applyFilters();
+  // autoplay=1 または autoplay=ng|ok|unchecked|sorted で指定があればフロート動画を自動起動
+  if (p.autoplay) {
+    // allItems / filter 反映後に実行する必要があるので setTimeout で遅延
+    setTimeout(() => {
+      if (p.caseNo && !p.caseNo.includes(',')) {
+        // 特定ケース指定 → そのケースから再生開始
+        const item = allItems.find(i => i.caseNo === p.caseNo && (!p.spec || i.spec === p.spec));
+        if (item && item.videoKey) {
+          startFloatPlaylistFromCase(item.videoKey);
+          return;
+        }
+      }
+      // それ以外は現在のフィルタで全部連続再生
+      startFloatPlaylistFromFilter();
+    }, 300);
+  }
 }
 
 function showReviewBanner(p) {
