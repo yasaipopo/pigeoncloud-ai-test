@@ -184,6 +184,17 @@ def handler(event, context):
         elif method == 'POST' and path == '/pipeline/review':
             return pipeline_review(event)
 
+        # =========================================
+        # プロダクトバグ一覧 (product-bugs-suspected.md)
+        # =========================================
+        # GET /bugs - 最新のバグ一覧 md を取得
+        elif method == 'GET' and path == '/bugs':
+            return bugs_get()
+
+        # PUT /bugs - md をアップロード
+        elif method == 'PUT' and path == '/bugs':
+            return bugs_put(event)
+
         else:
             return response(404, {'error': f'Not found: {method} {path}'})
 
@@ -1345,6 +1356,56 @@ def pipeline_review(event):
             'message': f'レビュー記録完了 ({updated}件)',
             'verdict': verdict,
             'caseNo': case_no,
+        })
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+
+
+def bugs_get():
+    """GET /bugs - プロダクトバグ一覧 md を取得 (S3 から)"""
+    if not ASSETS_BUCKET:
+        return response(500, {'error': 'ASSETS_BUCKET が未設定'})
+    key = 'bugs/product-bugs-suspected.md'
+    try:
+        obj = s3_client.get_object(Bucket=ASSETS_BUCKET, Key=key)
+        content = obj['Body'].read().decode('utf-8')
+        last_modified = obj.get('LastModified')
+        updated_at = last_modified.isoformat() if last_modified else None
+        return response(200, {
+            'markdown': content,
+            'updatedAt': updated_at,
+            'size': obj.get('ContentLength', len(content)),
+        })
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchKey':
+            return response(404, {
+                'error': 'バグ一覧がまだ upload されていません',
+                'hint': 'python3 e2e-viewer/upload_bugs.py を実行してください',
+            })
+        return response(500, {'error': str(e)})
+
+
+def bugs_put(event):
+    """PUT /bugs - プロダクトバグ一覧 md をアップロード (upload_bugs.py が呼ぶ)"""
+    if not ASSETS_BUCKET:
+        return response(500, {'error': 'ASSETS_BUCKET が未設定'})
+    body = json.loads(event.get('body') or '{}')
+    md_content = body.get('markdown', '')
+    if not md_content:
+        return response(400, {'error': 'markdown が空'})
+
+    key = 'bugs/product-bugs-suspected.md'
+    try:
+        s3_client.put_object(
+            Bucket=ASSETS_BUCKET,
+            Key=key,
+            Body=md_content.encode('utf-8'),
+            ContentType='text/markdown; charset=utf-8',
+        )
+        return response(200, {
+            'message': 'プロダクトバグ一覧を更新しました',
+            'size': len(md_content),
         })
     except Exception as e:
         return response(500, {'error': str(e)})
