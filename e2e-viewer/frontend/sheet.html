@@ -92,6 +92,42 @@
     #mediaModal .modal-body img { max-width: 100%; max-height: 80vh; object-fit: contain; }
     #mediaModal .modal-body video { max-width: 100%; max-height: 80vh; }
 
+    /* フロート動画プレイヤー (右下固定・連続再生) */
+    #floatPlayer {
+      position: fixed; bottom: 20px; right: 20px; width: 480px;
+      background: #1a1a1a; color: #fff; border-radius: 8px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4); z-index: 1055;
+      display: none; overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    #floatPlayer.minimized { width: 200px; }
+    #floatPlayer.minimized .fp-body { display: none; }
+    #floatPlayer .fp-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 10px; background: #2a2a2a; font-size: 0.78rem; cursor: move;
+    }
+    #floatPlayer .fp-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #floatPlayer .fp-ctrl { background: none; border: none; color: #ccc; padding: 0 6px; font-size: 1rem; cursor: pointer; }
+    #floatPlayer .fp-ctrl:hover { color: #fff; }
+    #floatPlayer .fp-body { padding: 0; }
+    #floatPlayer video { width: 100%; max-height: 50vh; display: block; background: #000; }
+    #floatPlayer .fp-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 10px; background: #2a2a2a; font-size: 0.75rem;
+    }
+    #floatPlayer .fp-nav-btn {
+      background: #3a3a3a; border: none; color: #fff; padding: 3px 10px;
+      border-radius: 4px; cursor: pointer; font-size: 0.75rem;
+    }
+    #floatPlayer .fp-nav-btn:hover { background: #4a4a4a; }
+    #floatPlayer .fp-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    #floatPlayer .fp-progress { color: #aaa; font-size: 0.7rem; }
+    #floatPlayer .fp-status { color: #888; font-size: 0.7rem; }
+    #floatPlayer.auto-advance .fp-auto { color: #4caf50; }
+
+    /* 「全動画再生」ボタン */
+    .playlist-btn { font-size: .75rem; }
+
     /* 同期ボタン */
     .sync-btn { font-size: .75rem; }
 
@@ -254,6 +290,7 @@
       <button class="btn btn-sm btn-outline-danger" data-status-filter="ng" onclick="setStatusFilter('ng', this)">NG/FAILのみ</button>
     </div>
     <button class="btn btn-sm btn-outline-primary" id="expand-all-btn" onclick="toggleExpandAll()" title="説明・期待結果・詳細フローを全て展開表示">📋 全て展開</button>
+    <button class="btn btn-sm btn-outline-dark playlist-btn" onclick="startFloatPlaylistFromFilter()" title="フィルタ対象の動画を右下プレイヤーで連続再生">🎬 動画連続再生</button>
     <input class="form-control form-control-sm ms-auto" style="max-width:220px"
            id="search-box" placeholder="ケースNo/機能名で絞り込み..." oninput="applyFilters()">
     <span class="text-muted small" id="display-count"></span>
@@ -853,7 +890,11 @@ function resultBadge(val, runId) {
 function mediaIcon(key, type, spec, caseNo) {
   if (!key) return '<span class="text-muted" style="font-size:.7rem">-</span>';
   const icon = type === 'screenshot' ? 'bi-camera' : 'bi-play-circle';
-  return `<i class="bi ${icon} media-icon has-media" onclick="openMedia('${escAttr(key)}','${type}','${escAttr(spec)}','${escAttr(caseNo)}')"></i>`;
+  // 動画クリックはフロートプレイヤー (プレイリスト連続再生)、スクショはモーダル
+  const handler = type === 'video'
+    ? `startFloatPlaylistFromCase('${escAttr(key)}')`
+    : `openMedia('${escAttr(key)}','${type}','${escAttr(spec)}','${escAttr(caseNo)}')`;
+  return `<i class="bi ${icon} media-icon has-media" onclick="${handler}" title="${type === 'video' ? 'クリックで連続再生開始' : 'スクリーンショット表示'}"></i>`;
 }
 
 function parseRunTimestamp(key) {
@@ -898,6 +939,173 @@ async function openMedia(key, type, spec, caseNo) {
     body.innerHTML = `<div class="text-white p-3">読み込みエラー: ${escHtml(e.message)}</div>`;
   }
 }
+
+// =========================================
+// フロート動画プレイヤー (連続再生)
+// =========================================
+let fpPlaylist = [];   // [{key, spec, caseNo, title}] — 再生対象リスト
+let fpIndex = -1;      // 現在再生中のインデックス
+
+function startFloatPlaylistFromFilter() {
+  // 現在 applyFilters() で見えている items から videoKey がある item を抽出
+  const visibleItems = getVisibleItems();
+  const withVideo = visibleItems.filter(i => i.videoKey);
+  if (withVideo.length === 0) {
+    alert('表示中のケースに動画がありません');
+    return;
+  }
+  fpPlaylist = withVideo.map(i => ({
+    key: i.videoKey,
+    spec: i.spec,
+    caseNo: i.caseNo,
+    title: `${i.spec} / ${i.caseNo}${i.feature ? ' — ' + i.feature : ''}`,
+  }));
+  fpIndex = 0;
+  document.getElementById('floatPlayer').style.display = 'block';
+  fpLoadCurrent();
+}
+
+// 個別動画から float 再生開始 (そのケースを含む現在の絞込で plylist 構築し、そこからスタート)
+function startFloatPlaylistFromCase(startKey) {
+  const visibleItems = getVisibleItems();
+  const withVideo = visibleItems.filter(i => i.videoKey);
+  if (withVideo.length === 0) return;
+  const startIdx = withVideo.findIndex(i => i.videoKey === startKey);
+  fpPlaylist = withVideo.map(i => ({
+    key: i.videoKey,
+    spec: i.spec,
+    caseNo: i.caseNo,
+    title: `${i.spec} / ${i.caseNo}${i.feature ? ' — ' + i.feature : ''}`,
+  }));
+  fpIndex = startIdx >= 0 ? startIdx : 0;
+  document.getElementById('floatPlayer').style.display = 'block';
+  fpLoadCurrent();
+}
+
+function getVisibleItems() {
+  // applyFilters と同じロジックで現在絞り込み中の items を返す
+  // 既存の allItems を再フィルタ (DRY 的には applyFilters と共通化したいが安全のため再計算)
+  const query = (document.getElementById('search-box').value || '').toLowerCase();
+  let filtered = allItems;
+  if (window._reviewPendingCaseNos && window._reviewPendingCaseNos.length > 0) {
+    filtered = filtered.filter(i => window._reviewPendingCaseNos.includes(i.caseNo));
+  }
+  if (currentSpec !== 'all') {
+    filtered = filtered.filter(i => i.spec === currentSpec);
+  }
+  if (currentStatusFilter === 'unchecked') {
+    filtered = filtered.filter(i => !i.yamlCheck || !i.specCheck || !i.runCheck);
+  } else if (currentStatusFilter === 'ok') {
+    filtered = filtered.filter(i => (i.yamlCheck === 'ok' || i.specCheck === 'ok' || i.runCheck === 'pass'));
+  } else if (currentStatusFilter === 'sorted') {
+    filtered = filtered.filter(i => {
+      const d = i.description || '';
+      return d.includes('【バグ修正確認】') || d.includes('【機能改善確認】') || d.includes('【実装確認】');
+    });
+  } else if (currentStatusFilter === 'ng') {
+    filtered = filtered.filter(i =>
+      i.yamlCheck === 'ng' || i.specCheck === 'ng' ||
+      (i.runCheck && i.runCheck.startsWith('fail'))
+    );
+  }
+  if (query) {
+    filtered = filtered.filter(i =>
+      (i.caseNo || '').toLowerCase().includes(query) ||
+      (i.feature || '').toLowerCase().includes(query) ||
+      (i.description || '').toLowerCase().includes(query)
+    );
+  }
+  return filtered;
+}
+
+async function fpLoadCurrent() {
+  if (fpIndex < 0 || fpIndex >= fpPlaylist.length) return;
+  const cur = fpPlaylist[fpIndex];
+  const video = document.getElementById('fpVideo');
+  const title = document.getElementById('fpTitle');
+  const progress = document.getElementById('fpProgress');
+  const prevBtn = document.getElementById('fpPrev');
+  const nextBtn = document.getElementById('fpNext');
+
+  title.textContent = cur.title;
+  progress.textContent = `${fpIndex + 1} / ${fpPlaylist.length}`;
+  prevBtn.disabled = fpIndex === 0;
+  nextBtn.disabled = fpIndex === fpPlaylist.length - 1;
+
+  video.pause();
+  video.src = '';
+  video.poster = '';
+
+  try {
+    const r = await fetch(`${CONFIG.apiUrl}/assets/download-url`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ key: cur.key })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    video.src = data.downloadUrl;
+    await video.play().catch(() => {}); // autoplay policy で弾かれても警告のみ
+  } catch (e) {
+    title.textContent = `[読込エラー] ${cur.title}: ${e.message}`;
+  }
+}
+
+function fpPrev() {
+  if (fpIndex > 0) { fpIndex--; fpLoadCurrent(); }
+}
+
+function fpNext() {
+  if (fpIndex < fpPlaylist.length - 1) { fpIndex++; fpLoadCurrent(); }
+}
+
+function closeFloatPlayer() {
+  const video = document.getElementById('fpVideo');
+  video.pause();
+  video.src = '';
+  document.getElementById('floatPlayer').style.display = 'none';
+  fpPlaylist = [];
+  fpIndex = -1;
+}
+
+function toggleFloatPlayerMinimize() {
+  document.getElementById('floatPlayer').classList.toggle('minimized');
+}
+
+// 動画終了で自動次へ
+document.addEventListener('DOMContentLoaded', () => {
+  const video = document.getElementById('fpVideo');
+  if (video) {
+    video.addEventListener('ended', () => {
+      // 自動で次へ (最後のケースなら停止)
+      if (fpIndex < fpPlaylist.length - 1) {
+        fpIndex++;
+        fpLoadCurrent();
+      }
+    });
+  }
+  // ヘッダードラッグで位置変更
+  const header = document.getElementById('fpHeader');
+  const fp = document.getElementById('floatPlayer');
+  if (header && fp) {
+    let drag = null;
+    header.addEventListener('mousedown', (e) => {
+      const r = fp.getBoundingClientRect();
+      drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!drag) return;
+      const x = Math.max(0, Math.min(window.innerWidth - 100, e.clientX - drag.dx));
+      const y = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - drag.dy));
+      fp.style.left = x + 'px';
+      fp.style.top = y + 'px';
+      fp.style.right = 'auto';
+      fp.style.bottom = 'auto';
+    });
+    document.addEventListener('mouseup', () => { drag = null; });
+  }
+});
 
 // =========================================
 // 結果同期
@@ -1173,6 +1381,24 @@ function toggleMovieGroup(headerRow) {
       </div>
       <div class="modal-body p-0" id="mediaModalBody" style="background:#000;text-align:center;min-height:200px">
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- フロート動画プレイヤー (右下固定・連続再生) -->
+<div id="floatPlayer">
+  <div class="fp-header" id="fpHeader">
+    <span class="fp-title" id="fpTitle">—</span>
+    <button class="fp-ctrl" onclick="toggleFloatPlayerMinimize()" title="最小化">🗕</button>
+    <button class="fp-ctrl" onclick="closeFloatPlayer()" title="閉じる">✕</button>
+  </div>
+  <div class="fp-body">
+    <video id="fpVideo" controls></video>
+    <div class="fp-footer">
+      <button class="fp-nav-btn" id="fpPrev" onclick="fpPrev()">◀ 前</button>
+      <span class="fp-progress" id="fpProgress">0 / 0</span>
+      <span class="fp-status fp-auto" id="fpAuto" title="再生終了で自動次へ">▸ 自動</span>
+      <button class="fp-nav-btn" id="fpNext" onclick="fpNext()">次 ▶</button>
     </div>
   </div>
 </div>
