@@ -1362,6 +1362,10 @@ def pipeline_review(event):
 
 
 
+# バグ一覧 upload の最大サイズ (10MB — 通常 md は数十 KB 程度)
+BUGS_MD_MAX_SIZE = 10 * 1024 * 1024
+
+
 def bugs_get():
     """GET /bugs - プロダクトバグ一覧 md を取得 (S3 から)"""
     if not ASSETS_BUCKET:
@@ -1378,22 +1382,40 @@ def bugs_get():
             'size': obj.get('ContentLength', len(content)),
         })
     except ClientError as e:
-        if e.response['Error']['Code'] == 'NoSuchKey':
+        error_code = e.response['Error']['Code']
+        if error_code == 'NoSuchKey':
             return response(404, {
                 'error': 'バグ一覧がまだ upload されていません',
                 'hint': 'python3 e2e-viewer/upload_bugs.py を実行してください',
             })
-        return response(500, {'error': str(e)})
+        # S3 エラー詳細はログのみ。レスポンスは抽象化してバケット情報等の漏洩を防ぐ
+        print(f'[bugs_get] S3 ClientError: code={error_code}, full={e}')
+        return response(500, {'error': 'バグ一覧の取得に失敗しました'})
+    except Exception as e:
+        print(f'[bugs_get] Unexpected error: {e}')
+        return response(500, {'error': 'バグ一覧の取得に失敗しました'})
 
 
 def bugs_put(event):
-    """PUT /bugs - プロダクトバグ一覧 md をアップロード (upload_bugs.py が呼ぶ)"""
+    """PUT /bugs - プロダクトバグ一覧 md をアップロード (upload_bugs.py が呼ぶ)
+
+    注: 認証は verify_token による Bearer token 検証で済ませている。
+    本ビューアーは社内専用ツールで、管理パスワードを知る全員が全操作を許可される
+    単一ロールモデル。より細かい RBAC が必要な場合はここに role check を追加する。
+    """
     if not ASSETS_BUCKET:
         return response(500, {'error': 'ASSETS_BUCKET が未設定'})
     body = json.loads(event.get('body') or '{}')
     md_content = body.get('markdown', '')
     if not md_content:
         return response(400, {'error': 'markdown が空'})
+
+    # サイズ上限チェック (DoS / S3 storage cost 抑制)
+    md_size = len(md_content.encode('utf-8'))
+    if md_size > BUGS_MD_MAX_SIZE:
+        return response(413, {
+            'error': f'md が大きすぎます ({md_size} bytes, 上限 {BUGS_MD_MAX_SIZE})',
+        })
 
     key = 'bugs/product-bugs-suspected.md'
     try:
@@ -1405,7 +1427,11 @@ def bugs_put(event):
         )
         return response(200, {
             'message': 'プロダクトバグ一覧を更新しました',
-            'size': len(md_content),
+            'size': md_size,
         })
+    except ClientError as e:
+        print(f'[bugs_put] S3 ClientError: code={e.response["Error"]["Code"]}, full={e}')
+        return response(500, {'error': 'バグ一覧の保存に失敗しました'})
     except Exception as e:
-        return response(500, {'error': str(e)})
+        print(f'[bugs_put] Unexpected error: {e}')
+        return response(500, {'error': 'バグ一覧の保存に失敗しました'})

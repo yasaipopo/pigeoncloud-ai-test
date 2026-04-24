@@ -61,14 +61,16 @@ def main():
     parser = argparse.ArgumentParser(description='プロダクトバグ md を E2E Viewer にアップロード')
     parser.add_argument('--api-url', default=os.environ.get('E2E_API_URL'),
                         help='API Gateway URL (env: E2E_API_URL)')
-    parser.add_argument('--password', default=os.environ.get('E2E_API_PASSWORD', 'pigeon-e2e-2026'),
-                        help='管理パスワード (env: E2E_API_PASSWORD)')
+    parser.add_argument('--password', default=os.environ.get('E2E_API_PASSWORD'),
+                        help='管理パスワード (env: E2E_API_PASSWORD) — 必須、デフォルト値なし')
     parser.add_argument('--md', default=DEFAULT_MD_PATH,
                         help=f'md ファイルパス (default: {DEFAULT_MD_PATH})')
     args = parser.parse_args()
 
     if not args.api_url:
         sys.exit('ERROR: --api-url または E2E_API_URL 環境変数が必要です')
+    if not args.password:
+        sys.exit('ERROR: --password または E2E_API_PASSWORD 環境変数が必要です')
     if not os.path.exists(args.md):
         sys.exit(f'ERROR: md ファイルが見つかりません: {args.md}')
 
