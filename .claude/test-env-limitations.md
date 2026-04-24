@@ -227,3 +227,46 @@
 - **調査経緯**: 2026-04-23 gemcli 独立分析で `html_angular4/src/app/pages/sso-settings/sso-settings.component.html` にセレクター（`識別子`、`応答 URL`、`.fa-copy` 等）は正しく実装されていることを確認。fail は環境側 Feature Flag 未設定が原因
 - **解消条件**: テスト環境の `admin_setting` or `cloud_setting` で SAML 機能を有効化する（debug API で切替可能になるまで待ち）
 - **担当**: インフラ/プロダクト側の設定変更が必要
+
+### spec: workflow / CSV (2026-04-25 staging 差分調査で判明)
+
+#### wf-040/050 旧 `workflow-setting` は廃止済み → 代替実装済み
+- **経緯**: PR #2924 (fix/approval-route-radio-button-linkage) は `html_angular4/src/app/admin/workflow/workflow-setting.component.html` のラジオ name 属性を修正
+- **重要発見**: この `workflow-setting` コンポーネントは:
+  - `html_angular4/src/app/admin/edit/workflow-modal.component.html:62` で `<!-- <workflow-setting *ngIf="viewMode === 'form'" ... --> -->` とコメントアウト
+  - `html_angular4/src/app/admin/workflow/workflow-flow-fixed-modal.component.html:151` で同様にコメントアウト
+  - TODO コメント: 「フォームモードは廃止予定。ビジュアルモードで全機能カバー済みのため、後で workflow-setting 参照と viewMode 関連コードを削除する」
+- **結論**: PR #2924 はデッドコード (ユーザー影響ゼロ) への修正。代替として新 UI `workflow-visual-editor` での同機能テスト (wf-040/050) を実装済み (2026-04-25)
+- **新 UI での対応確認**: `workflow-visual-editor.component.html` は `[name]="'step_type_' + selectedStepIndex"` / `[name]="'andor_type_' + selectedStepIndex + '_' + ai"` で `selectedStepIndex` 込みのユニーク化済み → 同バグ (PR #2924) は発生しない
+
+#### ctc-010: 子テーブル計算項目 自動更新 OFF × CSV インポート (PR #3145)
+- **スキップ理由**: `create-light-table` debug API が:
+  - `calc` 型の式 (formula) パラメータをサポートしていない
+  - `auto_update = false` フラグをサポートしていない
+  - `relation` (子テーブル) の parent-child 連結をサポートしていない
+- **PHPUnit カバー状況**: ✅ 網羅済み
+  - `tests/Unit/UseCase/StoreRecordActionAbstractTest.php` (CSV インポート時のジョブ蓄積挙動)
+  - `tests/Unit/Class/CalcAutoReloadOffTest.php` (親レコード INSERT 再計算)
+  - 追加で PR #3145 で `CalcAutoReloadOffTest` に子テーブル INSERT/CSV 側カバー済み
+- **スキップ基準該当**: インフラ依存（基準 2 — debug API 未拡張）
+- **解消条件**:
+  - (a) pigeon_cloud 側の `create-light-table` API 拡張: calc 式 / auto_update / relation 設定パラメータ追加
+  - (b) 手動 UI 操作で 2-3 時間かけて setup (現実的には (a) 推奨)
+- **関連要件**: R-302 (子テーブル計算 自動更新 OFF)
+- **記載日**: 2026-04-25
+- **見直し予定**: (a) debug API 拡張完了時
+
+#### csv-100/101: CSV 他テーブル参照フィールド × 表示条件 (PR #3113)
+- **スキップ理由**: `create-light-table` debug API が:
+  - `select_other_table` 型の参照先 table_id (`ref_table_id` / `reference_table`) をサポートしていない
+  - 2 テーブルを連携させる設定フローが UI 手動のみ
+- **PHPUnit カバー状況**: ✅ 網羅済み
+  - `tests/Unit/UseCase/Csv/CsvDisplayConditionKeyMatchTest.php` (Test 1〜10 で「他テーブル参照 × 表示条件」の全パターンを ID ベース比較キーで検証)
+  - PR #3113 で同テストに修正分を追加済み
+- **スキップ基準該当**: インフラ依存（基準 2 — debug API 未拡張）
+- **解消条件**:
+  - (a) pigeon_cloud 側の `create-light-table` API 拡張: `select_other_table` の `ref_table_id` + `display_condition` の参照先 field 指定をサポート
+  - (b) 手動 UI 操作で 2-3 時間 (現実的には (a) 推奨)
+- **関連要件**: R-303 (CSV 他テーブル参照 × 表示条件)
+- **記載日**: 2026-04-25
+- **見直し予定**: (a) debug API 拡張完了時
