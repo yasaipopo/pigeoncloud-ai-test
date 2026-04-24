@@ -94,18 +94,45 @@
 
 ---
 
-## 🟡 今回検出・要 Triage (Product or Spec 判別必要) = 6 件
+## 🟡 今回検出 6 件 Triage 結果 (2026-04-24 gemcli 調査)
 
-すべて `expect(locator).toBeVisible() failed` 系 → UI セレクタ stale か機能変更かを判定要。
+**判定ルール**: `expect(locator).toBeVisible() failed` 系を個別調査し Product / Spec に分類。
 
-| # | ID | 症状 | 推定 | 優先 |
-|---|---|---|---|---|
-| A | **templates/TM01** | tpl-010〜060 | 既知 `TMPL-01〜12` の継続・UI 変更? | 中 |
-| B | **csv-export/CE01** | CSVダウンロードメニュー | セレクタ or 権限不足 | 中 |
-| C | **comments-logs/CL01** | ログ管理画面 (操作ログ/CSV履歴/リクエストログ) | UI 変更可能性あり | 中 |
-| D | **display-settings/UC01** | 表示条件 250 系 | 2min timeout → API/UI 遅延 or 機能変更 | 中 |
-| E | **field-options/F401** | フィールド機能 261-265-267 | セレクタ不一致 | 低 |
-| F | **field-validation/F311** | ラジオボタン表示条件 260 | 表示条件応答遅延 | 低 |
+| # | ID | 症状 | **判定** | 根拠 | 優先 |
+|---|---|---|---|---|---|
+| A | **templates/TM01** | tpl-010〜060 モーダル非表示 | **SPEC_BUG** 候補 | error-context 確認: モーダル自体が開かない → `openTemplateModal()` helper のセレクタ誤りと推定。既知 `TMPL-01〜12` の継続問題 | 中 |
+| B | **csv-export/CE01** | CSVダウンロードメニュー | **SPEC_BUG** (テスト環境権限不足) | ソース `*ngIf="grant.csv_upload"` / `grant.csv_download` で権限制御。既知 table-definition/98-1,2 と同根 | 中 |
+| C | **comments-logs/CL01** | ログ管理画面 | **要追加調査** | `/admin/logs` `/admin/csv` `/admin/job_logs` ルートは存在するが、ページ構造の変更可能性 | 中 |
+| D | **display-settings/UC01** | 表示条件 250 系 2min timeout | **要追加調査** (Product 疑い) | gemcli 調査で `dataset-form.component.html` に「フィールド」タブが見つからず — 機能削除/リネームの可能性。**2分タイムアウトは product 起因が有力** | **高** |
+| E | **field-options/F401** | 「セレクト」ラベル非表示 | **SPEC_BUG** 候補 | ALL テストテーブルに「セレクト」ラベル field が存在しない可能性。テストデータ前提不足 | 低 |
+| F | **field-validation/F311** | ラジオボタン表示条件 | **TIMING_ISSUE** (Product/Spec 混合) | Angular `Form.ts` の `is_show_by_condition` 初期値が `true` → サーバーの `reflectRequiredShowCondition` API 応答前は visible のまま。**API 遅延 or テスト wait 不足** | 低 |
+
+### 🔴 詳細が重要な項目
+
+**D. display-settings/UC01 (product 疑い)**
+- `dataset-form.component.html` から「フィールド」タブが確認できず
+- `forms.component.html` の `.overSetting` は `opacity:0` で hover 時のみ visible
+- 2min タイムアウトは product 側の応答停止が有力（`on-edit` API 無限待機?）
+- **推奨アクション**: MCP Playwright で `/admin/dataset/edit/{tableId}` を開き、「フィールド」タブの有無と API 応答を直接確認
+
+**F. field-validation/F311 (Product + Spec 混合)**
+- Angular 側実装: `Form.ts` `is_show_by_condition = true` (default)
+- 表示条件評価は `reflectRequiredShowCondition` API が決定
+- **Spec 側で API 完了まで待つロジックが不十分** → Spec 修正推奨
+- 併せて API 応答時間の product 側確認も必要
+
+### 📊 今回 6 件の最終分類
+
+| 分類 | 件数 | 内訳 |
+|---|---|---|
+| **SPEC_BUG (テスト側修正)** | **3 件** | A:templates / B:csv-export / E:field-options |
+| **Product 疑い (要追加調査)** | **2 件** | C:comments-logs / D:display-settings |
+| **TIMING/Spec-Product 混合** | **1 件** | F:field-validation |
+
+**結論**:
+- 今回検出 6 件のうち、**リリースブロッカーとなる純粋な Product バグは確認できず**
+- D は Product 疑いが強いが実機確認が必要
+- 他はテスト側修正 or テスト環境権限設定で解消
 
 ---
 
