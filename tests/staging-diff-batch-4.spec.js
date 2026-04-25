@@ -17,6 +17,7 @@
 const { test, expect } = require('@playwright/test');
 const { createTestEnv } = require('./helpers/create-test-env');
 const { createAutoScreenshot } = require('./helpers/auto-screenshot');
+const { fullLogin } = require('./helpers/ensure-login');
 
 const autoScreenshot = createAutoScreenshot('staging-diff-batch-4');
 
@@ -37,17 +38,7 @@ async function waitForAngular(page, timeout = 10000) {
 
 async function login(page) {
     await page.context().clearCookies().catch(() => {});
-    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-    if (!page.url().includes('/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
-        return;
-    }
-    await page.waitForSelector('#id', { timeout: 10000 });
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
-    await page.locator('button[type=submit].btn-primary').first().click();
-    await page.waitForSelector('.navbar', { timeout: 15000 });
+    await fullLogin(page, EMAIL, PASSWORD);
 }
 
 test.describe.serial('staging 差分 第 5 弾 (10 件 structural regression)', () => {
