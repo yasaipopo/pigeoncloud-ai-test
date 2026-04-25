@@ -685,20 +685,34 @@ test.describe('子テーブル（325, 341系）', () => {
                 await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
                 await page.waitForSelector(".navbar", { timeout: 5000 }).catch(() => {});
             }
-            const STEP_TIME = Date.now();
 
-            await page.goto(BASE_URL + `/admin/dataset__${tableId || 'ALL'}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            expect(tableId, 'ALLテストテーブルID取得済み (beforeAll)').toBeTruthy();
+            // ALLテストテーブル (子テーブル「ALLテスト_子テーブル」が設定済み) のレコード一覧へ
+            await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
             await waitForAngular(page);
+
+            // navbar が描画されている (ページが正常ロード)
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
             const pageText = await page.innerText('body');
             expect(pageText).not.toContain('Internal Server Error');
-            // レコード一覧テーブルが正常に表示されること
-            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
-            await page.locator('table, [role="columnheader"]').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
-            await expect(page.locator('table, [role="columnheader"]').first()).toBeVisible({ timeout: 10000 });
-            // テーブル構造が正常であること（データがない場合もあるため行数チェックは省略）
-            const thCount2 = await page.locator('table thead th, [role="columnheader"]').count();
-            expect(thCount2).toBeGreaterThanOrEqual(0);
 
+            // table 要素が DOM に存在 (visible 状態は表示モード切替や絞込で変動するため count で確認)
+            await page.waitForSelector('table, [role="columnheader"]', { timeout: 15000 }).catch(() => {});
+            const tableCount = await page.locator('table, [role="columnheader"]').count();
+            expect(tableCount, 'テーブル/カラムヘッダーが DOM に存在').toBeGreaterThan(0);
+
+            // タイトル要件: 「レコード詳細画面が正常に表示されること」 — 1 件目のレコード詳細画面を開く
+            const firstRecordLink = page.locator('table tbody tr td a[href*="/view/"], a[href*="/view/"]').first();
+            if (await firstRecordLink.count() > 0) {
+                await firstRecordLink.click({ force: true }).catch(() => {});
+                await page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+                await waitForAngular(page);
+                // レコード詳細画面でも Internal Server Error が出ないこと
+                const detailText = await page.innerText('body').catch(() => '');
+                expect(detailText, 'レコード詳細画面が ISE なく表示').not.toContain('Internal Server Error');
+                // navbar が引き続き表示されていること
+                await expect(page.locator('.navbar')).toBeVisible({ timeout: 5000 });
+            }
         });
     });
 
@@ -4147,17 +4161,29 @@ test.describe('追加実装テスト（282-593系）', () => {
     // DO-B005: 子テーブル計算
     // =========================================================================
     test.describe('DO-B005: 子テーブル計算', () => {
-        let b005BaseUrl, b005TableId, b005Page;
+        let b005BaseUrl, b005TableId, b005Page, b005Context;
         const autoScreenshot = createAutoScreenshot('data-operations');
 
         test.beforeAll(async ({ browser }) => {
+            // createTestEnv で作った env.page は新環境に既にログイン済みなのでそれを使う。
+            // test fixture の page は global-setup の古い storageState を引きずるため使わない。
             const env = await createTestEnv(browser, { withAllTypeTable: false });
             b005BaseUrl = env.baseUrl;
             b005Page = env.page;
-            b005TableId = await createLightTable(b005Page, 'B005 Parent', [{ type: 'text', label: '親レコード名' }]);
+            b005Context = env.context;
+            b005TableId = await createLightTable(env.page, 'B005 Parent', [{ type: 'text', label: '親レコード名' }]);
+            // env.context は test 中も保持 (close しない) — env.page を test 全体で使う
+            // helper 関数群は process.env.TEST_BASE_URL を動的に参照するので、
+            // beforeAll で書き換えた値 (=b005BaseUrl) が helper にも届く。
+        });
+
+        test.afterAll(async () => {
+            // セッション最後で env.context をクローズ
+            if (b005Context) await b005Context.close().catch(() => {});
         });
 
         test('B005 reproduction', async () => {
+            test.setTimeout(180000);
             const page = b005Page;
             const baseUrl = b005BaseUrl;
             const tableId = b005TableId;
@@ -4193,16 +4219,43 @@ test.describe('追加実装テスト（282-593系）', () => {
                     await page.waitForTimeout(1000);
                 });
 
-                // [flow] BUG-005-01-3. 作成された子テーブルのIDを特定して、そのテーブルの設定画面へ
-                await page.goto(baseUrl + '/admin/dataset');
-                await waitForAngular(page);
-                
-                const childTableLink = page.locator('li:has-text("テスト子テーブル") a, tr:has-text("テスト子テーブル") a').first();
-                await expect(childTableLink, '作成された子テーブルへのリンクが存在すること').toBeVisible();
-                const childTableHref = await childTableLink.getAttribute('href');
-                const childTableIdMatch = childTableHref.match(/dataset__(\d+)|edit\/(\d+)/);
-                const childTableId = childTableIdMatch[1] || childTableIdMatch[2];
-                
+                // [flow] BUG-005-01-3. 作成された子テーブルのIDを特定 (API 直接取得)
+                // /admin/dataset 画面のサイドバーは反映遅延があるため API で確実に取得する
+                let childTableId = null;
+                for (let attempt = 0; attempt < 5 && !childTableId; attempt++) {
+                    childTableId = await page.evaluate(async () => {
+                        try {
+                            const r = await fetch('/api/admin/v2/dataset?per_page=200', {
+                                credentials: 'include',
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            });
+                            const data = await r.json();
+                            const items = data.result?.items || data.items || data.result || data;
+                            const list = Array.isArray(items) ? items : [];
+                            const found = list.find(t =>
+                                (t.label || t.name || '').includes('テスト子テーブル')
+                            );
+                            return found ? (found.id || found.dataset_id || null) : null;
+                        } catch { return null; }
+                    });
+                    if (!childTableId) await page.waitForTimeout(2000);
+                }
+                // API で取れなければ /admin/dataset 画面 reload して link 探索
+                if (!childTableId) {
+                    await page.goto(baseUrl + '/admin/dataset');
+                    await waitForAngular(page);
+                    await page.reload({ waitUntil: 'domcontentloaded' });
+                    await waitForAngular(page);
+                    const childTableLink = page.locator(
+                        'a:has-text("テスト子テーブル"), li:has-text("テスト子テーブル") a, tr:has-text("テスト子テーブル") a'
+                    ).first();
+                    await expect(childTableLink, '作成された子テーブルへのリンクが存在すること').toBeVisible({ timeout: 15000 });
+                    const childTableHref = await childTableLink.getAttribute('href');
+                    const childTableIdMatch = childTableHref.match(/dataset__(\d+)|edit\/(\d+)/);
+                    childTableId = childTableIdMatch[1] || childTableIdMatch[2];
+                }
+                expect(childTableId, '子テーブル ID が取得できること').toBeTruthy();
+
                 await page.goto(baseUrl + `/admin/dataset/edit/${childTableId}`);
                 await waitForAngular(page);
 

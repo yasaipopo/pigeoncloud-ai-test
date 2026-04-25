@@ -10,7 +10,11 @@
  *   const { waitForAngular, closeModal, openBulkEditModal, clickDialogButton } = require('./helpers/ui-operations');
  */
 
-const BASE_URL = process.env.TEST_BASE_URL;
+// process.env.TEST_BASE_URL は spec の beforeAll で createTestEnv 後に書き換わるため
+// require 時の snapshot ではなく、毎回 getter で動的に取得する。
+function getBaseUrl() {
+    return process.env.TEST_BASE_URL || '';
+}
 
 // =============================================================================
 // Angular / ページ待機
@@ -49,7 +53,7 @@ async function waitForTableRows(page, timeout = 30000) {
  * @param {import('@playwright/test').Page} page
  */
 async function goDashboard(page) {
-    await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await page.goto(getBaseUrl() + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
 }
 
@@ -59,7 +63,7 @@ async function goDashboard(page) {
  * @param {string} tableId
  */
 async function goRecordList(page, tableId) {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await page.goto(getBaseUrl() + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
@@ -71,7 +75,7 @@ async function goRecordList(page, tableId) {
  * @param {string} recordId
  */
 async function goRecordView(page, tableId, recordId) {
-    await page.goto(BASE_URL + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await page.goto(getBaseUrl() + `/admin/dataset__${tableId}/view/${recordId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
@@ -82,7 +86,7 @@ async function goRecordView(page, tableId, recordId) {
  * @param {string} tableId
  */
 async function goTableEdit(page, tableId) {
-    await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await page.goto(getBaseUrl() + `/admin/dataset/edit/${tableId}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
@@ -92,7 +96,7 @@ async function goTableEdit(page, tableId) {
  * @param {import('@playwright/test').Page} page
  */
 async function goDatasetList(page) {
-    await page.goto(BASE_URL + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await page.goto(getBaseUrl() + '/admin/dataset', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     await waitForAngular(page);
     await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
 }
@@ -292,7 +296,7 @@ async function getFirstRecordUrl(page) {
 async function openFirstRecord(page, tableId) {
     const recUrl = await getFirstRecordUrl(page);
     if (recUrl) {
-        await page.goto(BASE_URL + recUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await page.goto(getBaseUrl() + recUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
     } else {
         const recordId = await getFirstRecordId(page);
         if (recordId) {
