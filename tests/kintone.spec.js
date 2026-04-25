@@ -22,23 +22,23 @@ async function waitForAngular(page, timeout = 15000) {
  * 明示的ログイン
  */
 async function login(page) {
-    for (let i = 0; i < 3; i++) {
-        try {
-            await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
-            if (page.url().includes('/login')) {
-                await page.fill('#id', EMAIL, { timeout: 15000 });
-                await page.fill('#password', PASSWORD, { timeout: 15000 });
-                await page.locator('button[type=submit].btn-primary').first().click();
-                await page.waitForSelector('.navbar', { timeout: 20000 });
-                return;
-            } else if (await page.locator('.navbar').count() > 0) {
-                return;
-            }
-        } catch (e) {
-            console.log(`[login] attempt ${i+1} failed: ${e.message}`);
-        }
-        await page.waitForTimeout(2000);
+    // 古い環境の cookie をクリア
+    await page.context().clearCookies().catch(() => {});
+
+    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+
+    if (!page.url().includes('/login')) {
+        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
+        return;
     }
+
+    await page.waitForSelector('#id', { timeout: 10000 });
+    await page.fill('#id', EMAIL);
+    await page.fill('#password', PASSWORD);
+    await page.locator('button[type=submit].btn-primary').first().click();
+    await page.waitForURL(/\/(admin\/dashboard|admin\/[a-z_]+)/, { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector('.navbar', { timeout: 15000 });
 }
 
 const autoScreenshot = createAutoScreenshot('kintone');
@@ -46,7 +46,6 @@ const autoScreenshot = createAutoScreenshot('kintone');
 test.describe('kintone移行機能', () => {
     test.beforeAll(async ({ browser }) => {
         test.setTimeout(120000);
-        // テスト環境の作成
         const env = await createTestEnv(browser, { withAllTypeTable: false });
         BASE_URL = env.baseUrl;
         EMAIL = env.email;
@@ -65,31 +64,30 @@ test.describe('kintone移行機能', () => {
         test.setTimeout(180000);
         const _testStart = Date.now();
 
-        // [flow] 1. /admin/kintone-migration に直接遷移
+        // 1. /admin/kintone-migration に直接遷移
         await page.goto(BASE_URL + '/admin/kintone-migration');
         await waitForAngular(page);
 
-        // [check] 移行前の注意事項が表示されていること
-        await expect(page.locator('body')).toContainText('kintoneから乗り換え');
-        await expect(page.locator('body')).toContainText('移行前の注意事項');
+        // 移行前の注意事項
+        await expect(page.locator('.disclaimer-box')).toContainText('移行前の注意事項');
 
-        // [flow] 2. 注意事項に同意して次へ
-        await page.click('input[type="checkbox"]');
+        // 2. 注意事項に同意して次へ
+        await page.check('label.agree-label input[type="checkbox"]');
         await page.click('button:has-text("同意して続ける")');
-        await page.waitForTimeout(1000);
 
-        // [check] 資格情報入力画面が表示されること
-        await expect(page.locator('body')).toContainText('kintone ログイン情報');
+        // 資格情報入力画面
+        await expect(page.getByText('kintone認証情報を入力')).toBeVisible();
 
-        // [flow] 3. 資格情報を入力してアプリ一覧を取得（API mock）
+        // 3. 資格情報を入力してアプリ一覧を取得
         await page.route('**/api/admin/kintone/apps', async (route) => {
             await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
                 body: JSON.stringify({
+                    result: 'success',
                     apps: [
-                        { app_id: '1', name: '顧客管理アプリ' },
-                        { app_id: '2', name: '案件管理アプリ' }
+                        { appId: '1', name: '顧客管理アプリ', description: '', spaceId: null, createdAt: '' },
+                        { appId: '2', name: '案件管理アプリ', description: '', spaceId: null, createdAt: '' }
                     ]
                 })
             });
@@ -100,43 +98,30 @@ test.describe('kintone移行機能', () => {
         await page.fill('input[placeholder="パスワード"]', 'test-password');
         
         await page.click('button:has-text("アプリ一覧を取得")');
-        await page.waitForTimeout(2000);
-        await expect(page.locator('text=顧客管理アプリ').first()).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.app-name').filter({ hasText: '顧客管理アプリ' })).toBeVisible({ timeout: 15000 });
 
-        await page.route('**/api/admin/kintone/app-details/1', async (route) => {
-            await route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify({
-                    app_id: '1',
-                    name: '顧客管理アプリ',
-                    fields: [
-                        { code: 'company_name', label: '会社名', type: 'SINGLE_LINE_TEXT' },
-                        { code: 'address', label: '住所', type: 'SINGLE_LINE_TEXT' }
-                    ]
-                })
-            });
-        });
-
+        // 4. アプリを選択して移行確認へ
         await page.click('text=顧客管理アプリ');
-        await page.click('button:has-text("次へ")');
-        await page.waitForTimeout(1000);
+        await page.click('button:has-text("1件のアプリを移行する")');
 
-        // [check] 12. ✅ 移行設定画面（テーブル名、項目一覧）が表示されること
-        await expect(page.locator('body')).toContainText('移行設定');
-        await expect(page.locator('input[value="顧客管理アプリ"]')).toBeVisible();
-
-        // [flow] 5. 移行開始（API mock）
-        await page.route('**/api/admin/kintone/migrate', async (route) => {
+        // 5. 一括移行開始
+        await page.route('**/api/admin/kintone/migrate-async', async (route) => {
             await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
-                body: JSON.stringify({ job_id: '999' })
+                body: JSON.stringify({ result: 'success', job_log_id: 999, message: 'started' })
             });
         });
 
-        await page.click('button:has-text("移行開始")');
-        await page.waitForURL(/admin\/kintone-migration-result\/999/);
+        await page.click('button:has-text("1件のアプリを一括移行する")');
+        
+        // キュー投入完了
+        await expect(page.getByText('バックグラウンドで移行を開始しました')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.queued-info')).toContainText('ジョブID: 999');
+        
+        // 結果ページへ
+        await page.click('button:has-text("結果ページを開く")');
+        await page.waitForURL(new RegExp(`/admin/kintone-migration-result/999`));
         
         await autoScreenshot(page, 'KT01', 'b007-010', _testStart);
     });
@@ -145,14 +130,17 @@ test.describe('kintone移行機能', () => {
         const _testStart = Date.now();
 
         await page.goto(BASE_URL + '/admin/kintone-migration');
-        await page.click('input[type="checkbox"]');
+        await page.check('label.agree-label input[type="checkbox"]');
         await page.click('button:has-text("同意して続ける")');
 
         await page.route('**/api/admin/kintone/apps', async (route) => {
             await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
-                body: JSON.stringify({ apps: [{ app_id: '1', name: '既存テーブル' }] })
+                body: JSON.stringify({ 
+                    result: 'success',
+                    apps: [{ appId: '1', name: '既存テーブル', description: '', spaceId: null, createdAt: '' }] 
+                })
             });
         });
 
@@ -161,30 +149,25 @@ test.describe('kintone移行機能', () => {
         await page.fill('input[placeholder="パスワード"]', 'test');
         await page.click('button:has-text("アプリ一覧を取得")');
 
-        await page.route('**/api/admin/kintone/app-details/1', async (route) => {
+        await page.click('text=既存テーブル');
+        await page.click('button:has-text("1件のアプリを移行する")');
+
+        // Mock error from migrate-async (API level validation)
+        // status 200 + result:error で next() 分岐の error_a パスを通す
+        // (status 400 だと Angular HttpClient が err.error に body を入れるが
+        //  Connect サービスが間で wrap する可能性があるため status 200 で返す)
+        await page.route('**/api/admin/kintone/migrate-async', async (route) => {
             await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
-                body: JSON.stringify({ app_id: '1', name: '既存テーブル', fields: [] })
+                body: JSON.stringify({ result: 'error', error_a: ['既に存在するテーブル名です'] })
             });
         });
 
-        await page.click('text=既存テーブル');
-        await page.click('button:has-text("次へ")');
+        await page.click('button:has-text("1件のアプリを一括移行する")');
 
-        await page.fill('input[label="移行先テーブル名"]', '既存テーブル'); 
-        
-        await page.route('**/api/admin/kintone/migrate', async (route) => {
-            await route.fulfill({
-                status: 400,
-                contentType: 'application/json',
-                body: JSON.stringify({ error: '既に存在するテーブル名です' })
-            });
-        });
-
-        await page.click('button:has-text("移行開始")');
-
-        await expect(page.locator('.text-danger')).toContainText('既に存在するテーブル名です');
+        // Check error message in .alert-danger
+        await expect(page.locator('.alert-danger')).toContainText('既に存在するテーブル名です');
 
         await autoScreenshot(page, 'KT01', 'b007-020', _testStart);
     });
@@ -193,50 +176,44 @@ test.describe('kintone移行機能', () => {
         const _testStart = Date.now();
 
         await page.goto(BASE_URL + '/admin/kintone-migration');
-        await page.click('input[type="checkbox"]');
+        await page.check('label.agree-label input[type="checkbox"]');
         await page.click('button:has-text("同意して続ける")');
 
         await page.route('**/api/admin/kintone/apps', async (route) => {
             await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
-                body: JSON.stringify({ apps: [{ app_id: '1', name: 'テストアプリ' }] })
+                body: JSON.stringify({ 
+                    result: 'success',
+                    apps: [
+                        { appId: '1', name: 'テストアプリ1', description: '', spaceId: null, createdAt: '' },
+                        { appId: '2', name: 'テストアプリ2', description: '', spaceId: null, createdAt: '' }
+                    ] 
+                })
             });
         });
         await page.fill('input[placeholder="your-company"]', 'test');
         await page.fill('input[placeholder="admin@example.com"]', 'test');
         await page.fill('input[placeholder="パスワード"]', 'test');
         await page.click('button:has-text("アプリ一覧を取得")');
-        await page.waitForTimeout(2000);
-        await expect(page.locator('text=テストアプリ').first()).toBeVisible({ timeout: 15000 });
+        
+        await expect(page.locator('.app-name').filter({ hasText: 'テストアプリ1' })).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.app-meta').filter({ hasText: 'アプリID: 1' })).toBeVisible();
 
-        await page.route('**/api/admin/kintone/app-details/1', async (route) => {
-            await route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify({
-                    app_id: '1',
-                    name: 'テストアプリ',
-                    fields: [
-                        { code: 'f1', label: '項目1', type: 'SINGLE_LINE_TEXT' },
-                        { code: 'f2', label: '項目2', type: 'SINGLE_LINE_TEXT' }
-                    ]
-                })
-            });
-        });
+        // 全選択テスト (button.btn-primary は複数あるため getByRole で絞る)
+        await page.click('button:has-text("全選択")');
+        await expect(page.locator('.selected-count')).toContainText('2件選択中');
+        const migrateBtn = page.getByRole('button', { name: /件のアプリを移行する/ });
+        await expect(migrateBtn).toContainText('2件のアプリを移行する');
 
-        await page.click('text=テストアプリ');
-        await page.click('button:has-text("次へ")');
+        // 全解除テスト
+        await page.click('button:has-text("全解除")');
+        await expect(page.locator('.selected-count')).not.toBeVisible();
+        await expect(migrateBtn).toBeDisabled();
 
-        const recordOption = page.locator('label:has-text("レコードも移行する")').locator('input[type="checkbox"]');
-        await expect(recordOption).toBeVisible();
-        await recordOption.check();
-        expect(await recordOption.isChecked()).toBe(true);
-        await recordOption.uncheck();
-        expect(await recordOption.isChecked()).toBe(false);
-
-        await expect(page.locator('body')).toContainText('項目1');
-        await expect(page.locator('body')).toContainText('項目2');
+        // 個別選択
+        await page.click('text=テストアプリ1');
+        await expect(page.locator('.selected-count')).toContainText('1件選択中');
 
         await autoScreenshot(page, 'KT01', 'b007-030', _testStart);
     });
