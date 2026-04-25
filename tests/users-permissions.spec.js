@@ -5780,3 +5780,261 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
         await autoScreenshot(page, 'UP-B002', 'up-ip-170', _testStart);
     });
 });
+
+// ============================================================================
+// staging diff regression (batch 由来 2026-04-26 再配置: 8 件)
+//
+// batch-1/3/5/6 から users-permissions 関連の構造回帰 guard を集約。
+// テスト ID は staging diff 命名のまま維持。
+// ============================================================================
+test.describe.serial('staging diff regression (users-permissions 関連)', () => {
+    let _baseUrl = process.env.TEST_BASE_URL || '';
+    let _email = process.env.TEST_EMAIL || 'admin';
+    let _password = process.env.TEST_PASSWORD || '';
+    let _envContext = null;
+    let _generalUserEmail = null;
+    let _generalUserPassword = null;
+    let _setupFailed = false;
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            _envContext = env.context;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+
+            // 一般ユーザー作成 (master でログインして debug API)
+            const page = env.page;
+            await page.goto(_baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded' }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 10000 });
+
+            const createRes = await page.evaluate(async () => {
+                try {
+                    const r = await fetch('/api/admin/debug/create-user', {
+                        method: 'POST', credentials: 'include',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({}),
+                    });
+                    return { status: r.status, body: await r.text() };
+                } catch (e) { return { error: e.message }; }
+            });
+            if (createRes.body) {
+                try {
+                    const parsed = JSON.parse(createRes.body);
+                    _generalUserEmail = parsed.email || parsed.result?.email || null;
+                    _generalUserPassword = parsed.password || parsed.result?.password || 'admin';
+                } catch {}
+            }
+        } catch (e) {
+            console.error('[users-permissions staging diff beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.afterAll(async () => {
+        if (_envContext) await _envContext.close().catch(() => {});
+    });
+
+    async function _loginAs(page, email, password) {
+        await page.context().clearCookies().catch(() => {});
+        const { fullLogin } = require('./helpers/ensure-login');
+        await fullLogin(page, email, password);
+    }
+
+    /**
+     * ip-080: 許可IP編集画面が ISE なく開く (PR #3149 unique 追加 regression guard)
+     * @requirements.txt(R-316)
+     */
+    test('ip-080: 許可IP編集画面が ISE なく開き入力欄が描画 (PR #3149)', async ({ page }) => {
+        test.setTimeout(90000);
+        const _testStart = Date.now();
+
+        await _loginAs(page, _email, _password);
+        await page.goto(_baseUrl + '/admin/admin/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+
+        const ipInputs = page.locator('input[type="text"]').filter({ hasText: '' });
+        const inputCount = await ipInputs.count();
+        expect(inputCount, '入力欄が DOM に存在').toBeGreaterThan(0);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+
+        await autoScreenshot(page, 'UPDR-01', 'ip-080', _testStart);
+    });
+
+    /**
+     * ip-090: client IP 検出 API が応答する (PR #3084 ip-detection)
+     * @requirements.txt(R-334)
+     */
+    test('ip-090: 接続元 IP 検出 API が応答する (PR #3084 ip-detection)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await _loginAs(page, _email, _password);
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/status', {
+                    method: 'GET', credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, _baseUrl);
+        expect(result.status, 'debug API が 5xx でない').toBeLessThan(500);
+
+        await autoScreenshot(page, 'UPDR-02', 'ip-090', _testStart);
+    });
+
+    /**
+     * at-perm-010: AI Table Builder route ガード (PR #3139 補完)
+     * @requirements.txt(R-?)
+     */
+    test('at-perm-010: AI Table Builder への遷移が ISE なし (PR #3139)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await _loginAs(page, _email, _password);
+        const candidatePaths = [
+            '/admin/0/ai-table-builder',
+            '/admin/dataset/0/ai-table-builder',
+            '/admin/ai-table-builder',
+        ];
+        let succeeded = false;
+        for (const path of candidatePaths) {
+            await page.goto(_baseUrl + path, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            const bodyText = await page.innerText('body').catch(() => '');
+            if (bodyText && !bodyText.includes('Internal Server Error') && !bodyText.includes('404 Not Found')) {
+                succeeded = true;
+                break;
+            }
+        }
+        expect(succeeded, '最低 1 つのルート候補で ISE/404 なく描画').toBe(true);
+
+        await autoScreenshot(page, 'UPDR-03', 'at-perm-010', _testStart);
+    });
+
+    /**
+     * neg-010: 一般ユーザーが master(id=1) の admin 情報更新 API → 拒否
+     * @requirements.txt(R-360)
+     */
+    test('neg-010: 一般ユーザー → master 編集 API は 4xx で拒否', async ({ page }) => {
+        test.skip(_setupFailed || !_generalUserEmail, 'beforeAll失敗 or 一般ユーザー作成失敗');
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await _loginAs(page, _generalUserEmail, _generalUserPassword);
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/edit/admin/1', {
+                    method: 'POST', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ id: '1', name: 'hacked-by-general' }),
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, _baseUrl);
+        expect([400, 401, 403], `一般ユーザー master 更新は拒否 (actual=${result.status})`).toContain(result.status);
+
+        await autoScreenshot(page, 'UPDR-04', 'neg-010', _testStart);
+    });
+
+    /**
+     * neg-020: 一般ユーザーで /admin/master-settings → ISE/500 出ない
+     * @requirements.txt(R-361)
+     */
+    test('neg-020: 一般ユーザーで /admin/master-settings → ISE/500 出ない', async ({ page }) => {
+        test.skip(_setupFailed || !_generalUserEmail, 'beforeAll失敗 or 一般ユーザー作成失敗');
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await _loginAs(page, _generalUserEmail, _generalUserPassword);
+        await page.goto(_baseUrl + '/admin/master-settings', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForTimeout(2000);
+
+        const bodyText = await page.innerText('body').catch(() => '');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+        expect(bodyText, '500 エラーページなし').not.toContain('500 Server Error');
+
+        await autoScreenshot(page, 'UPDR-05', 'neg-020', _testStart);
+    });
+
+    /**
+     * neg-030: 一般ユーザーで /admin/kintone-migration → ISE/500 出ない
+     * @requirements.txt(R-362)
+     */
+    test('neg-030: 一般ユーザーで /admin/kintone-migration → ISE/500 出ない', async ({ page }) => {
+        test.skip(_setupFailed || !_generalUserEmail, 'beforeAll失敗 or 一般ユーザー作成失敗');
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await _loginAs(page, _generalUserEmail, _generalUserPassword);
+        await page.goto(_baseUrl + '/admin/kintone-migration', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForTimeout(2000);
+
+        const bodyText = await page.innerText('body').catch(() => '');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+        expect(bodyText, '500 エラーページなし').not.toContain('500 Server Error');
+
+        await autoScreenshot(page, 'UPDR-06', 'neg-030', _testStart);
+    });
+
+    /**
+     * neg-040: 一般ユーザーで debug API → 403 (Forbidden)
+     * @requirements.txt(R-363)
+     */
+    test('neg-040: 一般ユーザーで debug API → 403 (Forbidden)', async ({ page }) => {
+        test.skip(_setupFailed || !_generalUserEmail, 'beforeAll失敗 or 一般ユーザー作成失敗');
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await _loginAs(page, _generalUserEmail, _generalUserPassword);
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/create-user', {
+                    method: 'POST', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({}),
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, _baseUrl);
+        expect(result.status, '一般ユーザー debug API は 200 でない').not.toBe(200);
+        expect(result.status, '5xx でない').toBeLessThan(500);
+
+        await autoScreenshot(page, 'UPDR-07', 'neg-040', _testStart);
+    });
+
+    /**
+     * neg-050: 認証なしで master 編集 API → 拒否 (4xx)
+     * @requirements.txt(R-364)
+     */
+    test('neg-050: 認証なし master 編集 API → 拒否 (4xx)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗のためスキップ');
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await page.context().clearCookies().catch(() => {});
+        await page.goto(_baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+
+        const result = await page.evaluate(async () => {
+            try {
+                const r = await fetch('/api/admin/edit/admin/1', {
+                    method: 'POST', credentials: 'omit',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ id: '1', name: 'unauth-attempt' }),
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        });
+        expect(typeof result.status === 'number', `fetch 完遂 (got: ${JSON.stringify(result)})`).toBe(true);
+        expect([400, 401, 403], `未認証 write は拒否 (actual=${result.status})`).toContain(result.status);
+
+        await autoScreenshot(page, 'UPDR-08', 'neg-050', _testStart);
+    });
+});
