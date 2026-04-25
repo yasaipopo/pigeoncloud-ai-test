@@ -669,4 +669,59 @@ test.describe('公開フォーム・公開メールリンク', () => {
             await autoScreenshot(page, 'UC23', 'pf-100', _testStart);
         });
     });
+
+    // =========================================================================
+    // staging diff regression (batch 由来 2026-04-26 再配置: 2 件)
+    // =========================================================================
+    test.describe('staging diff regression (public-form 関連)', () => {
+
+        /**
+         * pf-010: 公開フォーム iframe lookup API が認証なしで 401 を返さないこと (PR #3079)
+         * @requirements.txt(R-314)
+         */
+        test('pf-010: 公開フォーム関連 API path が認証なしで 401 を返さないこと (PR #3079)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            const result = await page.evaluate(async (baseUrl) => {
+                try {
+                    const r = await fetch(baseUrl + '/api/iframe/lookup/dummy?value=test', {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    return { status: r.status, ok: r.ok };
+                } catch (e) {
+                    return { error: e.message };
+                }
+            }, process.env.TEST_BASE_URL);
+
+            expect(result.status, '/api/iframe/lookup が 401 不認可ではないこと').not.toBe(401);
+
+            await autoScreenshot(page, 'PFDR-01', 'pf-010', _testStart);
+        });
+
+        /**
+         * pf-020: 公開フォーム iframe path が認証なしで 5xx を返さないこと (PR #3093 補完)
+         * @requirements.txt(R-?)
+         */
+        test('pf-020: 公開フォーム iframe path が認証なしで 5xx を返さないこと (PR #3093)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            const result = await page.evaluate(async (baseUrl) => {
+                try {
+                    const r = await fetch(baseUrl + '/api/iframe/get/dummy', {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    return { status: r.status };
+                } catch (e) {
+                    return { error: e.message };
+                }
+            }, process.env.TEST_BASE_URL);
+            expect(result.status, 'public form API が 5xx でない').toBeLessThan(500);
+
+            await autoScreenshot(page, 'PFDR-02', 'pf-020', _testStart);
+        });
+    });
 });

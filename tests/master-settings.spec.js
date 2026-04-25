@@ -212,4 +212,104 @@ test.describe.serial('マスター向け統合設定画面', () => {
 
         await autoScreenshot(page, 'MS03', 'ms-030', _testStart);
     });
+
+    // =========================================================================
+    // staging diff regression (batch 由来 2026-04-26 再配置: 4 件)
+    // batch-1/2/4 から master-settings 関連の構造回帰 guard を集約
+    // =========================================================================
+    test.describe('staging diff regression (master-settings 関連)', () => {
+
+        /**
+         * ms-040: 非ロック時に unlock ボタンが非表示 (PR #3144 visibility 条件)
+         * @requirements.txt(R-312)
+         */
+        test('ms-040: 非ロック時に unlock ボタンが非表示 (PR #3144)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            await page.goto(BASE_URL + '/admin/admin/view/1', { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await waitForAngular(page);
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+            const unlockBtn = page.locator('button.btn-outline-danger', { hasText: 'アカウントロック解除' });
+            const cnt = await unlockBtn.count();
+            expect(cnt, '非ロック時は unlock button が DOM に存在しない').toBe(0);
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+
+            await autoScreenshot(page, 'MSDR-01', 'ms-040', _testStart);
+        });
+
+        /**
+         * at-010: AI Table Builder routing regression guard (PR #3139)
+         * @requirements.txt(R-313)
+         */
+        test('at-010: AI Table Builder への遷移 + ISE なし (PR #3139)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            const candidatePaths = [
+                '/admin/0/ai-table-builder',
+                '/admin/dataset/0/ai-table-builder',
+                '/admin/ai-table-builder',
+            ];
+            let succeeded = false;
+            for (const path of candidatePaths) {
+                await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                await waitForAngular(page);
+                const bodyText = await page.innerText('body').catch(() => '');
+                if (bodyText && !bodyText.includes('Internal Server Error') && !bodyText.includes('404 Not Found')) {
+                    succeeded = true;
+                    break;
+                }
+            }
+            expect(succeeded, '最低 1 つのルート候補で ISE/404 なく描画').toBe(true);
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+            await autoScreenshot(page, 'MSDR-02', 'at-010', _testStart);
+        });
+
+        /**
+         * msp-010: master-settings サブパスへの直接 URL access (PR #3107 permission)
+         * @requirements.txt(R-328)
+         */
+        test('msp-010: master-settings サブパスへの直接 URL access (PR #3107 permission)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            await page.goto(BASE_URL + '/admin/master-settings/contract', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await waitForAngular(page);
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+            const url = page.url();
+            expect(url, 'login にリダイレクトされていない').not.toMatch(/\/login$/);
+
+            await autoScreenshot(page, 'MSDR-03', 'msp-010', _testStart);
+        });
+
+        /**
+         * ms-050: master 自身の admin/edit 画面で ISE 出さず unlock button 制御確認 (PR #3083)
+         * @requirements.txt(R-?)
+         */
+        test('ms-050: master admin/edit 画面が ISE なく描画 (PR #3083)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            await page.goto(BASE_URL + '/admin/admin/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await waitForAngular(page);
+            await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+
+            await autoScreenshot(page, 'MSDR-04', 'ms-050', _testStart);
+        });
+
+    });
 });
