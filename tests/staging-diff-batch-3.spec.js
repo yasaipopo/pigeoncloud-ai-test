@@ -119,35 +119,7 @@ test.describe.serial('staging 差分 第 4 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD4-04', 'q-010', _testStart);
     });
 
-    /**
-     * ip-090: client IP 検出 API が応答する (PR #3084 ip-detection cloudfront debug)
-     * @requirements.txt(R-334)
-     * 背景: PR #3084 で IP 検出 CloudFront debug 機能追加。
-     */
-    test('ip-090: 接続元 IP 検出 API が応答する (PR #3084 ip-detection)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // debug API で client IP を返す endpoint がある想定 (なければ navbar 確認のみ)
-        const result = await page.evaluate(async (baseUrl) => {
-            try {
-                const r = await fetch(baseUrl + '/api/admin/debug/status', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                return { status: r.status, ok: r.ok };
-            } catch (e) {
-                return { error: e.message };
-            }
-        }, BASE_URL);
-        // debug-status が応答 (5xx でない)
-        expect(result.status, 'debug API が 5xx でない').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD4-05', 'ip-090', _testStart);
-    });
+    // ip-090: users-permissions.spec.js に再配置 (2026-04-26 PR #17)
 
     /**
      * cm-010: cloud master 系 API への並行リクエスト時に DB 接続エラーが起きない

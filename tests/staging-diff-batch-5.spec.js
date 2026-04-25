@@ -111,36 +111,7 @@ test.describe.serial('staging 差分 第 6 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD6-02', 'chart-perm-020', _testStart);
     });
 
-    /**
-     * at-perm-010: AI Table Builder 権限関連 (master 権限あり、画面到達)
-     * @requirements.txt(R-352)
-     */
-    test('at-perm-010: AI Table Builder への遷移が ISE なし (PR #3139 補完)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // 複数 URL 候補で routing 確認 (PR #3139 影響)
-        const candidatePaths = [
-            '/admin/0/ai-table-builder',
-            '/admin/dataset/0/ai-table-builder',
-            '/admin/ai-table-builder',
-        ];
-        let succeeded = false;
-        for (const path of candidatePaths) {
-            await page.goto(BASE_URL + path, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-            await waitForAngular(page);
-            const bodyText = await page.innerText('body').catch(() => '');
-            if (bodyText && !bodyText.includes('Internal Server Error') && !bodyText.includes('404 Not Found')) {
-                succeeded = true;
-                break;
-            }
-        }
-        expect(succeeded, 'いずれかのルートで ISE/404 出ていない').toBe(true);
-
-        await autoScreenshot(page, 'SD6-03', 'at-perm-010', _testStart);
-    });
+    // at-perm-010: users-permissions.spec.js に再配置 (2026-04-26 PR #17)
 
     /**
      * excel-105: ExcelImportJobHandler hotfix (PR #3048)

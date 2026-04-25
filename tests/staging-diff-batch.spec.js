@@ -254,31 +254,7 @@ test.describe.serial('staging 差分 第 2 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD06', 'kt-100', _testStart);
     });
 
-    /**
-     * ip-080: 許可 IP 設定の duplicate (重複) を試みた場合のバリデーション
-     * @requirements.txt(R-316)
-     * 背景: PR #3149 admin_allow_ips_multi に is_unique 追加 (up-ip-6 系)
-     */
-    test('ip-080: 許可IP編集画面が ISE なく開き入力欄が描画 (PR #3149 unique 追加 regression guard)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(90000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/admin/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        // 許可 IP 入力欄が存在することを確認 (実 unique 保存テストは複雑、UI 確認のみ)
-        const ipInputs = page.locator('input[type="text"]').filter({ hasText: '' });
-        const inputCount = await ipInputs.count();
-        expect(inputCount, '入力欄が DOM に存在').toBeGreaterThan(0);
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD07', 'ip-080', _testStart);
-    });
+    // ip-080: users-permissions.spec.js に再配置 (2026-04-26 PR #17)
 
     // mail-010: notifications.spec.js に再配置 (2026-04-26 PR #16)
 
