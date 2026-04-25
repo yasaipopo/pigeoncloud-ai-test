@@ -192,34 +192,7 @@ test.describe.serial('staging 差分 第 3 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD3-05', 'mob-010', _testStart);
     });
 
-    /**
-     * ten-010: テナントセッション分離 (auth-260 と同等の API 直叩き確認)
-     * @requirements.txt(R-325)
-     * 背景: PR #3132/#3135/#3136 で tenant session isolation 強化 (TOFU 方式)。
-     */
-    test('ten-010: 別テナント API 直叩きでセッション分離 (PR #3132/#3135/#3136)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // 自テナントの dataset 一覧 API は 200 で応答する
-        const ownResult = await page.evaluate(async (baseUrl) => {
-            try {
-                const r = await fetch(baseUrl + '/api/admin/v2/dataset', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                return { status: r.status, ok: r.ok };
-            } catch (e) {
-                return { error: e.message };
-            }
-        }, BASE_URL);
-        expect(ownResult.status, '自テナントの API は認証済み (200/3xx/4xx で 5xx ではない)').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD3-06', 'ten-010', _testStart);
-    });
+    // ten-010: auth.spec.js に再配置 (2026-04-26 PR #15)
 
     /**
      * dbg-010: debug-status エンドポイントが応答する (sort column 修正)
