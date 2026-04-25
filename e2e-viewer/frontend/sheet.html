@@ -744,6 +744,9 @@ function applyFilters() {
     );
   }
 
+  // フロート動画プレイヤーのプレイリスト構築用にキャッシュ (DRY: getVisibleItems から参照)
+  window._filteredItems = filtered;
+
   renderTable(filtered);
   document.getElementById('display-count').textContent = `${filtered.length}件表示`;
 }
@@ -1011,39 +1014,14 @@ function startFloatPlaylistFromCase(startKey) {
 }
 
 function getVisibleItems() {
-  // applyFilters と同じロジックで現在絞り込み中の items を返す
-  // 既存の allItems を再フィルタ (DRY 的には applyFilters と共通化したいが安全のため再計算)
-  const query = (document.getElementById('search-box').value || '').toLowerCase();
-  let filtered = allItems;
-  if (window._reviewPendingCaseNos && window._reviewPendingCaseNos.length > 0) {
-    filtered = filtered.filter(i => window._reviewPendingCaseNos.includes(i.caseNo));
+  // applyFilters() がキャッシュしたフィルタ結果を再利用 (DRY)
+  // 未初期化の場合 (applyFilters 未実行) は allItems を再フィルタする fallback
+  if (Array.isArray(window._filteredItems)) {
+    return window._filteredItems;
   }
-  if (currentSpec !== 'all') {
-    filtered = filtered.filter(i => i.spec === currentSpec);
-  }
-  if (currentStatusFilter === 'unchecked') {
-    filtered = filtered.filter(i => !i.yamlCheck || !i.specCheck || !i.runCheck);
-  } else if (currentStatusFilter === 'ok') {
-    filtered = filtered.filter(i => (i.yamlCheck === 'ok' || i.specCheck === 'ok' || i.runCheck === 'pass'));
-  } else if (currentStatusFilter === 'sorted') {
-    filtered = filtered.filter(i => {
-      const d = i.description || '';
-      return d.includes('【バグ修正確認】') || d.includes('【機能改善確認】') || d.includes('【実装確認】');
-    });
-  } else if (currentStatusFilter === 'ng') {
-    filtered = filtered.filter(i =>
-      i.yamlCheck === 'ng' || i.specCheck === 'ng' ||
-      (i.runCheck && i.runCheck.startsWith('fail'))
-    );
-  }
-  if (query) {
-    filtered = filtered.filter(i =>
-      (i.caseNo || '').toLowerCase().includes(query) ||
-      (i.feature || '').toLowerCase().includes(query) ||
-      (i.description || '').toLowerCase().includes(query)
-    );
-  }
-  return filtered;
+  // fallback: applyFilters を呼んでキャッシュさせる
+  applyFilters();
+  return window._filteredItems || allItems || [];
 }
 
 async function fpLoadCurrent() {
