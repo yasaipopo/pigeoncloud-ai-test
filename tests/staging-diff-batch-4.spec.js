@@ -66,34 +66,7 @@ test.describe.serial('staging 差分 第 5 弾 (10 件 structural regression)', 
         if (envContext) await envContext.close().catch(() => {});
     });
 
-    /**
-     * frm-010: フィールド追加モーダルが開く (lodash import 修正後)
-     * @requirements.txt(R-340) 背景: PR #3095 lodash import 修正
-     */
-    test('frm-010: フィールド追加モーダルが開ける (PR #3095 lodash import regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + `/admin/dataset/edit/${allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        // 「項目を追加する」ボタンクリック → settingModal 開く
-        const addBtn = page.locator('button:has-text("項目を追加する")').first();
-        await expect(addBtn).toBeVisible({ timeout: 10000 });
-        await addBtn.click();
-        await page.waitForSelector('.modal.settingModal.show', { timeout: 10000 });
-        // モーダル内に「数値」「文字列」等のフィールドタイプボタンが描画 (lodash 経由のリスト構築)
-        const typeBtnCount = await page.locator('.modal.settingModal.show button').count();
-        expect(typeBtnCount, 'フィールドタイプボタンが描画 (lodash 動作確認)').toBeGreaterThan(5);
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD5-01', 'frm-010', _testStart);
-    });
+    // frm-010: records.spec.js に再配置 (2026-04-26 PR #21)
 
     /**
      * pf-020: public-form.spec.js に再配置 (2026-04-26 PR #18)

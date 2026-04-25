@@ -68,55 +68,10 @@ test.describe.serial('staging 差分 第 3 弾 (10 件 structural regression)', 
         if (envContext) await envContext.close().catch(() => {});
     });
 
-    /**
-     * cf-010: 子テーブルファイルフィールドの HY093 エラーが発生していないこと
-     * @requirements.txt(R-320)
-     * 背景: PR #2916 で StoreRecordActionAbstract.php の子テーブルファイル bind エラー修正。
-     *      ALL テストテーブルのレコード一覧を開いて 500 エラーが出ない確認。
-     */
-    test('cf-010: ALL テーブル一覧が ISE 出さず描画 (PR #2916 子テーブルファイル regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + `/admin/dataset__${allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        expect(bodyText, 'HY093 エラー (PDO bind) も出ていない').not.toContain('HY093');
-
-        await autoScreenshot(page, 'SD3-01', 'cf-010', _testStart);
-    });
-
+    // cf-010: records.spec.js に再配置 (2026-04-26 PR #21)
     // dv-010: table-definition.spec.js に再配置 (2026-04-26 PR #20)
     // wf-070: workflow.spec.js に再配置 (2026-04-26 PR #20)
-
-    /**
-     * oer-010: レコード編集画面で on-edit メモリ race condition が起きないこと
-     * @requirements.txt(R-323)
-     * 背景: PR #2815 on-edit memory race condition 修正。
-     */
-    test('oer-010: レコード編集画面が race condition なく開く (PR #2815 on-edit memory)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // ALL テストテーブル initial data 1 件目の編集画面
-        await page.goto(BASE_URL + `/admin/dataset__${allTypeTableId}/edit/1`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-        // 編集画面は ai-test に redirect されないこと (master 権限あり)
-        const url = page.url();
-        expect(url, 'edit URL に留まる or view にリダイレクト').toMatch(/\/edit\/|\/view\/|\/dataset__/);
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD3-04', 'oer-010', _testStart);
-    });
+    // oer-010: records.spec.js に再配置 (2026-04-26 PR #21)
 
     /**
      * mob-010: モバイル viewport でハンバーガーメニュー + 検索が overlap しない
@@ -176,34 +131,7 @@ test.describe.serial('staging 差分 第 3 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD3-07', 'dbg-010', _testStart);
     });
 
-    /**
-     * cam-010: カメラ未対応デバイスで適切な fallback (camera 機能 UI 表示)
-     * @requirements.txt(R-327)
-     * 背景: PR #2877 camera no device check staging。
-     *      Playwright headless で navigator.mediaDevices.getUserMedia() が
-     *      利用できない場合の fallback 確認。
-     */
-    test('cam-010: カメラ未対応 viewport でも UI 描画 (PR #2877)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // mediaDevices.getUserMedia() を mock で reject (カメラ無し状態)
-        await page.addInitScript(() => {
-            if (navigator.mediaDevices) {
-                navigator.mediaDevices.getUserMedia = () => Promise.reject(new Error('NotFoundError: Requested device not found'));
-            }
-        });
-        await page.goto(BASE_URL + `/admin/dataset__${allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'カメラ未対応でも ISE が出ていない').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD3-08', 'cam-010', _testStart);
-    });
+    // cam-010: records.spec.js に再配置 (2026-04-26 PR #21)
 
     /**
      * msp-010: master-settings.spec.js に再配置 (2026-04-26 PR #18)
