@@ -3564,5 +3564,96 @@ test.describe('通知設定', () => {
 
             expect(page.url()).toContain('/admin/');
         });
+
+        // =====================================================================
+        // staging diff regression (batch 由来 2026-04-26 再配置: 4 件)
+        // batch-1/3/4 から notifications 関連の構造回帰 guard を集約
+        // =====================================================================
+        test.describe('staging diff regression (notifications 関連)', () => {
+
+            /**
+             * mail-010: master-settings 経由でメール取り込み menu が描画
+             * @requirements.txt(R-317)
+             * 背景: PR #3148 ImportMailSetting で UTC → JST 統一 (UI 影響なし)。UI が壊れていないか確認
+             */
+            test('mail-010: master-settings 画面にメール取り込みメニューが存在 (PR #3148 regression check)', async ({ page }) => {
+                test.setTimeout(60000);
+                const _testStart = Date.now();
+
+                await login(page);
+                await page.goto(BASE_URL + '/admin/master-settings', { waitUntil: 'domcontentloaded', timeout: 15000 });
+                await waitForAngular(page);
+                await expect(page.locator('.master-settings-page')).toBeVisible({ timeout: 15000 });
+
+                const bodyText = await page.innerText('body');
+                expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+                const hasKeyword = bodyText.includes('メール取り込み') || bodyText.includes('メールの取り込み');
+                expect(hasKeyword, 'メール取り込み関連の文言が master-settings 画面に含まれる').toBe(true);
+
+                await autoScreenshot(page, 'NDR-01', 'mail-010', _testStart);
+            });
+
+            /**
+             * mail-020: master-settings 経由でメール取り込み画面に到達
+             * @requirements.txt(R-?)
+             * 背景: PR #2961 関連
+             */
+            test('mail-020: master-settings 配下でメール取り込み画面に到達 (PR #2961)', async ({ page }) => {
+                test.setTimeout(60000);
+                const _testStart = Date.now();
+
+                await login(page);
+                await page.goto(BASE_URL + '/admin/master-settings', { waitUntil: 'domcontentloaded', timeout: 15000 });
+                await waitForAngular(page);
+                await expect(page.locator('.master-settings-page')).toBeVisible({ timeout: 15000 });
+
+                const bodyText = await page.innerText('body');
+                expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+
+                await autoScreenshot(page, 'NDR-02', 'mail-020', _testStart);
+            });
+
+            /**
+             * mail-030: master-settings 配下でメール取り込み機能の文言が描画
+             * @requirements.txt(R-?)
+             * 背景: PR #2963 関連
+             */
+            test('mail-030: master-settings 配下でメール取り込み機能の文言が描画 (PR #2963)', async ({ page }) => {
+                test.setTimeout(60000);
+                const _testStart = Date.now();
+
+                await login(page);
+                await page.goto(BASE_URL + '/admin/master-settings', { waitUntil: 'domcontentloaded', timeout: 15000 });
+                await waitForAngular(page);
+                await expect(page.locator('.master-settings-page')).toBeVisible({ timeout: 15000 });
+
+                const bodyText = await page.innerText('body');
+                expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+                expect(bodyText.length, '画面に content が描画').toBeGreaterThan(50);
+
+                await autoScreenshot(page, 'NDR-03', 'mail-030', _testStart);
+            });
+
+            /**
+             * hms-010: 通知ログ画面が ISE なく描画 (PR #3127 hermes silent failure detection)
+             * @requirements.txt(R-336)
+             * 背景: PR #3127 hermes-send silent failure detection 改善
+             */
+            test('hms-010: 通知ログ画面が ISE なく開く (PR #3127 hermes regression)', async ({ page }) => {
+                test.setTimeout(60000);
+                const _testStart = Date.now();
+
+                await login(page);
+                await page.goto(BASE_URL + '/admin/notification_log', { waitUntil: 'domcontentloaded', timeout: 15000 });
+                await waitForAngular(page);
+                await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+                const bodyText = await page.innerText('body');
+                expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+
+                await autoScreenshot(page, 'NDR-04', 'hms-010', _testStart);
+            });
+
+        });
 });
 

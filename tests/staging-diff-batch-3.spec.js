@@ -179,26 +179,7 @@ test.describe.serial('staging 差分 第 4 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD4-06', 'cm-010', _testStart);
     });
 
-    /**
-     * hms-010: 通知ログ画面が表示される (PR #3127 hermes silent failure detection)
-     * @requirements.txt(R-336)
-     * 背景: PR #3127 hermes-send silent failure detection 改善。
-     */
-    test('hms-010: 通知ログ画面が ISE なく開く (PR #3127 hermes regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/notification_log', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD4-07', 'hms-010', _testStart);
-    });
+    // hms-010: notifications.spec.js に再配置 (2026-04-26 PR #16)
 
     // asec-010: auth.spec.js に再配置 (2026-04-26 PR #15)
 
