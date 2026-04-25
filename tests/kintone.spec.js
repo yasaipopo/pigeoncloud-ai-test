@@ -283,4 +283,32 @@ test.describe('kintone移行機能', () => {
 
         await autoScreenshot(page, 'KT01', 'B012-result-navigation', _testStart);
     });
+
+    // =========================================================================
+    // staging diff regression (batch 由来 2026-04-26 再配置: 1 件)
+    // =========================================================================
+
+    /**
+     * kt-100: kintone migration result page URL に master が直アクセス可能 (PR #3152)
+     * @requirements.txt(R-315)
+     * 背景: PR #3152 bug-b012 kintone-migration-result/{id} routing 修正
+     */
+    test('kt-100: kintone migration result page URL が master でアクセス可能 (PR #3152)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await login(page);
+        // 存在しない job_log_id (例: 99999) でも routing は成功し、画面が描画される (ISE 出ない)
+        await page.goto(process.env.TEST_BASE_URL + '/admin/kintone-migration-result/99999', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+
+        const url = page.url();
+        expect(url, 'URL は kintone-migration-result を含む').toContain('kintone-migration-result');
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+
+        await autoScreenshot(page, 'KTDR-01', 'kt-100', _testStart);
+    });
+
 });

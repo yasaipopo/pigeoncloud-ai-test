@@ -253,29 +253,8 @@ test.describe.serial('staging 差分 第 3 弾 (10 件 structural regression)', 
     });
 
     /**
-     * msp-010: master-settings permission checks (PR #3107)
-     * @requirements.txt(R-328)
-     * 背景: PR #3107 master-settings の permission check テスト追加 (pigeon_cloud 内 E2E)。
-     *      pigeon-test 側でも master 権限なしユーザーでアクセス禁止を確認 (既存 ms-020 補完)。
+     * msp-010: master-settings.spec.js に再配置 (2026-04-26 PR #18)
      */
-    test('msp-010: master-settings サブパスへの直接 URL access (PR #3107 permission)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // master-settings の任意サブパス (例: /admin/master-settings/contract) で master は到達可能
-        await page.goto(BASE_URL + '/admin/master-settings/contract', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        // master ユーザーは master-settings 配下にいる (login 画面に飛ばされていない)
-        const url = page.url();
-        expect(url, 'login にリダイレクトされていない').not.toMatch(/\/login$/);
-
-        await autoScreenshot(page, 'SD3-09', 'msp-010', _testStart);
-    });
 
     /**
      * sb-010: サイドバーヘッダーが描画される (PR #2864 staging-ui-sidebar-header-fix)

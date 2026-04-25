@@ -96,32 +96,8 @@ test.describe.serial('staging 差分 第 5 弾 (10 件 structural regression)', 
     });
 
     /**
-     * pf-020: 公開フォーム iframe_api 認可 endpoint 別 path での確認 (pf-010 補完)
-     * @requirements.txt(R-341) 背景: PR #3093 で iframe_api 認可自動通過
+     * pf-020: public-form.spec.js に再配置 (2026-04-26 PR #18)
      */
-    test('pf-020: 公開フォーム iframe path が認証なしで 5xx を返さないこと (PR #3093 補完)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        const result = await page.evaluate(async (baseUrl) => {
-            try {
-                // 別 endpoint: dummy public form path
-                const r = await fetch(baseUrl + '/api/public/f/dummy-form-id', {
-                    method: 'GET',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                return { status: r.status, ok: r.ok };
-            } catch (e) {
-                return { error: e.message };
-            }
-        }, BASE_URL);
-        // 5xx ではない (認可エラー or 404 は OK)
-        expect(result.status, 'public form API が 5xx でない').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD5-02', 'pf-020', _testStart);
-    });
 
     /**
      * opn-020: opensearch search params format API (PR #3094)
@@ -245,28 +221,5 @@ test.describe.serial('staging 差分 第 5 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD5-09', 'prv-010', _testStart);
     });
 
-    /**
-     * ms-050: master 自身の admin 編集画面で unlock button visibility (PR #3083)
-     * @requirements.txt(R-349)
-     * 背景: PR #3083 master-unlock-button-missing 修正。
-     *      ms-040 と相補で、別 admin id (= 1, master 自身) で確認。
-     */
-    test('ms-050: master 自身の admin/edit 画面で ISE 出さず unlock button 制御確認 (PR #3083)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/admin/edit/1', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        // 非ロック時 unlock button 非表示
-        const unlockBtn = page.locator('button.btn-outline-danger', { hasText: 'アカウントロック解除' });
-        expect(await unlockBtn.count(), '非ロック時は unlock 非表示').toBe(0);
-
-        await autoScreenshot(page, 'SD5-10', 'ms-050', _testStart);
-    });
+    // ms-050: master-settings.spec.js に再配置 (2026-04-26 PR #18)
 });
