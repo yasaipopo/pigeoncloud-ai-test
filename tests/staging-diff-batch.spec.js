@@ -280,32 +280,7 @@ test.describe.serial('staging 差分 第 2 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD07', 'ip-080', _testStart);
     });
 
-    /**
-     * mail-010: メール取り込み設定画面が描画される (PR #3148 backend timezone fix)
-     * @requirements.txt(R-317)
-     * 背景: PR #3148 ImportMailSetting で UTC → JST 統一 (backend のみ、UI は影響なし)
-     *      UI が壊れていないかの確認。
-     */
-    test('mail-010: master-settings 画面にメール取り込みメニューが存在 (PR #3148 regression check)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // PR #3091 で master-settings に集約。メール取り込み設定は左サイドメニューの常設項目。
-        // master-settings レイアウトは navbar 無し (master-settings-page 専用 layout)。
-        await page.goto(BASE_URL + '/admin/master-settings', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.master-settings-page')).toBeVisible({ timeout: 15000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        // 左サイドメニューに「メール取り込み」項目が含まれる
-        const hasKeyword = bodyText.includes('メール取り込み') || bodyText.includes('メールの取り込み');
-        expect(hasKeyword, 'メール取り込み関連の文言が master-settings 画面に含まれる').toBe(true);
-
-        await autoScreenshot(page, 'SD08', 'mail-010', _testStart);
-    });
+    // mail-010: notifications.spec.js に再配置 (2026-04-26 PR #16)
 
     /**
      * exc-080: Excel インポート画面の事前バリデーション (テーブル名重複等)

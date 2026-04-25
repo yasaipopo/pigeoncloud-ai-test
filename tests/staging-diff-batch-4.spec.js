@@ -222,49 +222,7 @@ test.describe.serial('staging 差分 第 5 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD5-06', 'ng-010', _testStart);
     });
 
-    /**
-     * mail-020: メール取り込み設定画面 (master-settings 配下) で adaptive window が UI 上に存在
-     * @requirements.txt(R-346) 背景: PR #2961 adaptive-window 修正
-     */
-    test('mail-020: master-settings 経由でメール取り込み画面に到達 (PR #2961)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/master-settings/mail-import', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        // master-settings に redirect or stay (login 画面でない)
-        const url = page.url();
-        expect(url, 'login にリダイレクトされていない').not.toMatch(/\/login$/);
-
-        await autoScreenshot(page, 'SD5-07', 'mail-020', _testStart);
-    });
-
-    /**
-     * mail-030: メール取り込み画面で日付関連の表示が壊れていないこと
-     * @requirements.txt(R-347) 背景: PR #2963 mail-import date fix
-     */
-    test('mail-030: master-settings 配下でメール取り込み機能の文言が描画 (PR #2963)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/master-settings', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.master-settings-page')).toBeVisible({ timeout: 15000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        const hasMailKeyword = bodyText.includes('メール取り込み') || bodyText.includes('メールの取り込み');
-        expect(hasMailKeyword, 'メール取り込み関連メニューが存在').toBe(true);
-
-        await autoScreenshot(page, 'SD5-08', 'mail-030', _testStart);
-    });
+    // mail-020 / mail-030: notifications.spec.js に再配置 (2026-04-26 PR #16)
 
     /**
      * prv-010: preview env IAM policy 関連で Excel import 画面が壊れていないこと (PR #3032)
