@@ -642,4 +642,213 @@ test.describe('ワークフロー', () => {
         expect(bodyText).not.toContain('Internal Server Error');
         expect(bodyText).toContain('自己承認テスト');
     });
+
+    // -------------------------------------------------------
+    // ビジュアルエディタ（workflow-visual-editor）テスト
+    // workflow-setting (旧フォーム UI) はコメントアウト済みで廃止済みのため、
+    // 新しいビジュアルエディタでのステップ構築・承認者種別切替・
+    // ラジオボタン独立性 (PR #2924 regression guard) を検証する。
+    // -------------------------------------------------------
+
+    /**
+     * フロー設計モーダルを開いてテンプレートとステップ 1 件を追加した状態にする共通セットアップ。
+     * 戻り値: 成功したら true、開けなかった場合は false
+     * @requirements.txt(R-301)
+     */
+    async function openFlowDesignWithStep(page, tid) {
+        await navigateToWorkflowTab(page, tid);
+        await setWorkflowToggle(page, true);
+        await setWorkflowOption(page, 'フローを固定する', true);
+        // 「フロー設計」ボタンが attach されるまで待つ (count() は auto-wait しないため)
+        const fixedBtn = page.locator('button.wf-flow-fixed-btn');
+        await fixedBtn.waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
+        if (await fixedBtn.count() === 0) return false;
+        await fixedBtn.click();
+        // モーダルが開くまで待つ
+        const addTemplateBtn = page.locator('[data-testid="wf-btn-add-template"]');
+        await addTemplateBtn.waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
+        if (await addTemplateBtn.count() === 0) return false;
+        await addTemplateBtn.click();
+        // テンプレート名 input が出現するまで待つ
+        const flowNameInput = page.locator('[data-testid="wf-input-flow-name"]');
+        await flowNameInput.waitFor({ state: 'visible', timeout: 5000 });
+        await flowNameInput.fill('wf-visual-テンプレ' + Date.now());
+        // 初回ステップ追加ボタン (.wf-add-btn-wrapper 内) を押す
+        const initialAddBtn = page.locator('.wf-add-btn').first();
+        await initialAddBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await initialAddBtn.click();
+        // ステップカードが少なくとも 1 件出現するまで待つ
+        await page.locator('.wf-step-card').first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+        const stepCount = await page.locator('.wf-step-card').count();
+        if (stepCount === 0) return false;
+        return true;
+    }
+
+    /**
+     * フロー設計モーダルを確実に閉じる後片付けヘルパー。
+     * done ボタンが効かない場合はページリロードでクリーンアップ。
+     */
+    async function closeFlowDesignModal(page) {
+        const doneBtn = page.locator('[data-testid="wf-btn-modal-done"]');
+        await doneBtn.click({ force: true, timeout: 5000 }).catch(() => {});
+        await page.waitForTimeout(500);
+        // モーダルが残っていればリロードで強制クリーンアップ
+        const stuck = await page.locator('.wf-modal, .modal.show').count().catch(() => 0);
+        if (stuck > 0) {
+            await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
+        }
+    }
+
+    /**
+     * wf-040: visual editor でステップを選択し承認者種別ラジオ (admin/division/field) を切替
+     *         UI に反映され、パネル閉→再選択後も状態が維持される
+     * @requirements.txt(R-301)
+     */
+    test('wf-040: ビジュアルエディタで承認者種別ラジオ切替が反映されること', async ({ page }) => {
+        test.setTimeout(150000);
+        const _testStart = Date.now();
+
+        // [flow] 40-1. ワークフロー有効化 + フロー固定 ON でフロー設計モーダル起動 + ステップ追加
+        //         addStep() は selectedStepIndex を自動で設定するため編集パネルは既に開いている
+        const opened = await openFlowDesignWithStep(page, tableId);
+        expect(opened, 'フロー設計モーダルとステップが準備できていること').toBeTruthy();
+
+        // [check] 40-2. ✅ ステップ追加直後で編集パネル (.wf-edit-panel) が既に表示されている
+        //         (selectStep は toggle 動作なので、既に open のカードをクリックすると閉じる)
+        await expect(page.locator('.wf-edit-panel')).toBeVisible({ timeout: 5000 });
+
+        // 編集パネル内の「承認者種別」セクションの radio 3 つと、division 条件 radio を
+        // label テキスト経由で取得 (Angular [name] binding はタイミング依存のため value + type 指定にする)
+        const stepTypeSection = page.locator('.wf-edit-section').filter({ hasText: '承認者種別' }).first();
+
+        // [check] 40-4. ✅ 承認者種別 radio 3 つ (admin/division/field) 存在
+        await expect(stepTypeSection.locator('input[type="radio"][value="admin"]')).toHaveCount(1, { timeout: 5000 });
+        await expect(stepTypeSection.locator('input[type="radio"][value="division"]')).toHaveCount(1);
+        await expect(stepTypeSection.locator('input[type="radio"][value="field"]')).toHaveCount(1);
+
+        // [flow] 40-5. 「組織(役職)」(value=division) を選択
+        await stepTypeSection.locator('input[type="radio"][value="division"]').click({ force: true });
+        await page.waitForTimeout(500);
+
+        // [check] 40-6. ✅ division ラジオが checked 状態、かつ「組織に対する条件」(grant_type) セクションが出現
+        const divisionChecked = await stepTypeSection.locator('input[type="radio"][value="division"]').isChecked();
+        expect(divisionChecked, 'division ラジオが選択されていること').toBe(true);
+        const grantSection = page.locator('.wf-edit-section').filter({ hasText: '組織に対する条件' }).first();
+        await expect(grantSection).toBeVisible({ timeout: 5000 });
+        await expect(grantSection.locator('input[type="radio"][value="all"]')).toHaveCount(1);
+        await expect(grantSection.locator('input[type="radio"][value="one"]')).toHaveCount(1);
+
+        // [flow] 40-7. 「一人の承認が必要」(value=one) を選択
+        await grantSection.locator('input[type="radio"][value="one"]').click({ force: true });
+        await page.waitForTimeout(300);
+
+        // [check] 40-8. ✅ one ラジオ選択状態、all ラジオは未選択
+        const grantOne = await grantSection.locator('input[type="radio"][value="one"]').isChecked();
+        expect(grantOne).toBe(true);
+        const grantAll = await grantSection.locator('input[type="radio"][value="all"]').isChecked();
+        expect(grantAll).toBe(false);
+
+        // [flow] 40-9. 編集パネルを×で閉じる → ステップカードをクリックして再選択
+        await page.locator('.wf-edit-panel-close').click();
+        await page.waitForTimeout(800);
+        // パネルが閉じたことを確認してから再選択
+        await expect(page.locator('.wf-edit-panel')).toHaveCount(0, { timeout: 3000 });
+        await page.locator('.wf-step-card').first().click();
+        await page.waitForTimeout(800);
+        await expect(page.locator('.wf-edit-panel')).toBeVisible({ timeout: 5000 });
+
+        // [check] 40-10. ✅ 再選択しても division + one が維持されている
+        const stepTypeSectionAgain = page.locator('.wf-edit-section').filter({ hasText: '承認者種別' }).first();
+        const grantSectionAgain = page.locator('.wf-edit-section').filter({ hasText: '組織に対する条件' }).first();
+        const typeStill = await stepTypeSectionAgain.locator('input[type="radio"][value="division"]').isChecked();
+        const grantStill = await grantSectionAgain.locator('input[type="radio"][value="one"]').isChecked();
+        expect(typeStill, '再選択後も division 維持').toBe(true);
+        expect(grantStill, '再選択後も one 維持').toBe(true);
+
+        await autoScreenshot(page, 'WF04', 'wf-040', 0, _testStart);
+
+        // 後片付け: モーダルを確実に閉じる (リロード fallback 付き)
+        await closeFlowDesignModal(page);
+    });
+
+    /**
+     * wf-050: visual editor で 2 ステップそれぞれの承認者種別ラジオを独立に設定でき、
+     *         片方の変更がもう片方に波及しないこと (PR #2924 regression guard for new UI)
+     * @requirements.txt(R-301)
+     */
+    test('wf-050: ビジュアルエディタで 2 ステップ独立にラジオ設定できること', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        // [flow] 50-1. フロー設計モーダル + ステップ 1 追加まで
+        //         addStep 後 selectedStepIndex=0 で編集パネルが開いている
+        const opened = await openFlowDesignWithStep(page, tableId);
+        expect(opened, 'フロー設計モーダルとステップ 1 が準備できていること').toBeTruthy();
+
+        // [flow] 50-2. ステップ 1 の承認者種別を「組織(役職)」に設定
+        //         (ステップ 1 の edit panel は既に selectedStepIndex=0 で開いている)
+        await expect(page.locator('.wf-edit-panel')).toBeVisible({ timeout: 5000 });
+        const stepTypeSection1 = page.locator('.wf-edit-section').filter({ hasText: '承認者種別' }).first();
+        await stepTypeSection1.locator('input[type="radio"][value="division"]').click({ force: true });
+        await page.waitForTimeout(500);
+        const grantSection1 = page.locator('.wf-edit-section').filter({ hasText: '組織に対する条件' }).first();
+        await expect(grantSection1).toBeVisible({ timeout: 5000 });
+        await grantSection1.locator('input[type="radio"][value="all"]').click({ force: true });
+        await page.waitForTimeout(300);
+
+        // [flow] 50-3. ステップ間の + ボタン (.wf-add-btn-between) でステップ 2 追加
+        //         addStepAfter は selectedStepIndex=1 に切替わり、ステップ 2 の edit panel が開く
+        const addBetween = page.locator('.wf-add-btn-between').first();
+        await expect(addBetween).toBeVisible({ timeout: 5000 });
+        await addBetween.click();
+        await page.waitForTimeout(1500);
+
+        // [check] 50-4. ✅ ステップが 2 件ある
+        const step2Count = await page.locator('.wf-step-card').count();
+        expect(step2Count, 'ステップ 2 件以上').toBeGreaterThanOrEqual(2);
+
+        // ステップ 2 の編集パネルが開いている (selectedStepIndex=1)
+        //   Panel 内の「承認者種別」セクションは常に 1 つだけ表示される
+        await expect(page.locator('.wf-edit-panel')).toBeVisible({ timeout: 5000 });
+        const stepTypeSection2 = page.locator('.wf-edit-section').filter({ hasText: '承認者種別' }).first();
+        // ステップ 2 はまだ admin (デフォルト) のはず
+        const s2DefaultAdmin = await stepTypeSection2.locator('input[type="radio"][value="admin"]').isChecked();
+        expect(s2DefaultAdmin, 'ステップ 2 のデフォルトは admin').toBe(true);
+
+        // [flow] 50-5. ステップ 2 を「項目」に設定
+        await stepTypeSection2.locator('input[type="radio"][value="field"]').click({ force: true });
+        await page.waitForTimeout(500);
+
+        // [check] 50-6. ✅ ステップ 2 の field ラジオが checked 状態
+        const step2FieldChecked = await stepTypeSection2.locator('input[type="radio"][value="field"]').isChecked();
+        expect(step2FieldChecked, 'ステップ 2 field ラジオ選択').toBe(true);
+
+        // [flow] 50-7. ステップ 1 に戻る (selectStep は toggle 動作のためパネル状態で挙動が変わる)
+        //   ステップ 2 が現在開いているので、ステップ 1 クリックで selectedStepIndex=0 に切替わる。
+        //   万一切替わらず閉じた場合はもう一度クリックして開く。
+        //   isVisible() は引数を取らない (timeout 指定不可) ため waitFor で明示待機する。
+        const editPanel = page.locator('.wf-edit-panel');
+        const firstStepCard = page.locator('.wf-step-card').first();
+        await firstStepCard.click();
+        let panelVisible = await editPanel.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
+        if (!panelVisible) {
+            await firstStepCard.click();
+            panelVisible = await editPanel.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
+        }
+        expect(panelVisible, 'ステップ 1 の edit panel が開いていること').toBe(true);
+
+        // [check] 50-8. ✅ ステップ 1 が独立に保持されている (division + all のまま、ステップ 2 の field 変更に引きずられない)
+        const stepTypeSectionBack = page.locator('.wf-edit-section').filter({ hasText: '承認者種別' }).first();
+        const step1StillDivision = await stepTypeSectionBack.locator('input[type="radio"][value="division"]').isChecked();
+        expect(step1StillDivision, 'ステップ 1 は division のまま').toBe(true);
+        const grantSectionBack = page.locator('.wf-edit-section').filter({ hasText: '組織に対する条件' }).first();
+        const step1StillAll = await grantSectionBack.locator('input[type="radio"][value="all"]').isChecked();
+        expect(step1StillAll, 'ステップ 1 は全員の承認のまま').toBe(true);
+
+        await autoScreenshot(page, 'WF04', 'wf-050', 0, _testStart);
+
+        // 後片付け: モーダルを確実に閉じる (リロード fallback 付き)
+        await closeFlowDesignModal(page);
+    });
 });
