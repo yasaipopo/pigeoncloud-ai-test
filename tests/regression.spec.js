@@ -332,4 +332,67 @@ test.describe.serial('regression — 機能横断 構造回帰テスト集 (a11y
 
         await autoScreenshot(page, 'SD8-10', 'resp-010', _testStart);
     });
+
+    /**
+     * ng-010: 任意画面遷移後に body[data-ng-ready=true] が設定される (PR #2819)
+     * @requirements.txt(R-345)
+     */
+    test('ng-010: 任意画面遷移後に body[data-ng-ready=true] が設定される (PR #2819)', async ({ page }) => {
+        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
+        test.setTimeout(60000);
+
+        await login(page);
+        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await page.waitForSelector('body[data-ng-ready="true"]', { timeout: 5000 });
+        const ready = await page.evaluate(() => document.body.getAttribute('data-ng-ready'));
+        expect(ready, 'body[data-ng-ready] が "true"').toBe('true');
+    });
+
+    /**
+     * paginate-010: dataset list API で per_page=5 / page=1 指定
+     * @requirements.txt(R-367)
+     */
+    test('paginate-010: dataset list API で ページング指定 (per_page=5, page=1)', async ({ page }) => {
+        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
+        test.setTimeout(60000);
+
+        await login(page);
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/dataset/list?per_page=5&page=1', {
+                    method: 'GET', credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, BASE_URL);
+        expect(result.status, 'ページング指定 API 応答').toBeLessThan(500);
+    });
+
+    /**
+     * rate-010: 連続 5 回 dataset list API → 全て 5xx 出ない
+     * @requirements.txt(R-368)
+     */
+    test('rate-010: 連続 5 回 dataset list API → 全て 5xx 出ない', async ({ page }) => {
+        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
+        test.setTimeout(60000);
+
+        await login(page);
+        const results = await page.evaluate(async (baseUrl) => {
+            const out = [];
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const r = await fetch(baseUrl + '/api/admin/dataset/list?per_page=5', {
+                        method: 'GET', credentials: 'include',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    out.push(r.status);
+                } catch (e) { out.push('err:' + e.message); }
+            }
+            return out;
+        }, BASE_URL);
+        for (const s of results) {
+            expect(typeof s === 'number' && s < 500, `応答 ${s} が 5xx でない`).toBe(true);
+        }
+    });
 });

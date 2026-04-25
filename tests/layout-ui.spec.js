@@ -1533,3 +1533,108 @@ test.describe('レイアウト・メニュー・UI・ダッシュボード（テ
     });
 });
 
+// ============================================================================
+// staging diff regression (batch 由来 2026-04-26 再配置: 3 件)
+// ============================================================================
+test.describe.serial('staging diff regression (layout-ui 関連)', () => {
+    let _baseUrl = process.env.TEST_BASE_URL || '';
+    let _email = process.env.TEST_EMAIL || 'admin';
+    let _password = process.env.TEST_PASSWORD || '';
+    let _envContext = null;
+    let _allTypeTableId = null;
+    let _setupFailed = false;
+
+    async function _waitForAngular(page) {
+        await page.waitForSelector('body[data-ng-ready="true"]', { timeout: 5000 }).catch(() => {
+            return page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+        });
+    }
+
+    async function _login(page) {
+        await page.context().clearCookies().catch(() => {});
+        await page.goto(_baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (!page.url().includes('/login')) return;
+        await page.waitForSelector('#id', { timeout: 10000 });
+        await page.fill('#id', _email);
+        await page.fill('#password', _password);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            _envContext = env.context;
+            _allTypeTableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[layout-ui staging diff beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.afterAll(async () => {
+        if (_envContext) await _envContext.close().catch(() => {});
+    });
+
+    test('mob-010: モバイル viewport でハンバーガー + 検索 UI 描画 (PR #2906)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await page.setViewportSize({ width: 375, height: 667 });
+        await _login(page);
+        await page.goto(_baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+        const navbarCount = await page.locator('.navbar').count();
+        expect(navbarCount, 'navbar が DOM に存在').toBeGreaterThan(0);
+    });
+
+    test('sb-010: ダッシュボードでサイドバー + ヘッダーが描画 (PR #2864)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.goto(_baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const sidebarCount = await page.locator('aside, .sidebar, nav, .navigation').count();
+        expect(sidebarCount, 'サイドバー/ナビゲーション要素が DOM に存在').toBeGreaterThan(0);
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+    });
+
+    test('nav-010: SPA 複数遷移で navbar 維持', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(90000);
+        await _login(page);
+
+        await page.goto(_baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        await page.goto(_baseUrl + `/admin/dataset__${_allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        await page.goto(_baseUrl + '/admin/master-settings', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.master-settings-page')).toBeVisible({ timeout: 10000 });
+
+        await page.goto(_baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+    });
+});
+

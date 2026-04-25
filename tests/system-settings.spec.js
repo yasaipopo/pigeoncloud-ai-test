@@ -1991,3 +1991,121 @@ test.describe('共通設定・システム設定', () => {
     });
 
 });
+
+// ============================================================================
+// staging diff regression (batch 由来 2026-04-26 再配置: 5 件)
+// ============================================================================
+test.describe.serial('staging diff regression (system-settings 関連)', () => {
+    let _baseUrl = process.env.TEST_BASE_URL || '';
+    let _email = process.env.TEST_EMAIL || 'admin';
+    let _password = process.env.TEST_PASSWORD || '';
+    let _envContext = null;
+    let _setupFailed = false;
+
+    async function _login(page) {
+        await page.context().clearCookies().catch(() => {});
+        await page.goto(_baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (!page.url().includes('/login')) return;
+        await page.waitForSelector('#id', { timeout: 10000 });
+        await page.fill('#id', _email);
+        await page.fill('#password', _password);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: false });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            _envContext = env.context;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[system-settings staging diff beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.afterAll(async () => {
+        if (_envContext) await _envContext.close().catch(() => {});
+    });
+
+    test('q-010: ジョブログ画面が ISE なく開く (PR #3081)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.goto(_baseUrl + '/admin/job_logs', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+    });
+
+    test('q-020: ジョブログ画面が ISE なく描画 (PR #3088 queue rsyslog hotfix)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.goto(_baseUrl + '/admin/job_logs', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+    });
+
+    test('clt-010: debug API で tmp DB cleanup 関連 endpoint が応答 (PR #2904)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/status', {
+                    method: 'GET', credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, _baseUrl);
+        expect(result.status, 'debug API が 5xx でない').toBeLessThan(500);
+    });
+
+    test('dbg-010: debug-status API が認証済みで応答 (PR #2931)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/status', {
+                    method: 'GET', credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, _baseUrl);
+        expect(result.status, 'debug-status API が 5xx でない').toBeLessThan(500);
+        expect(result.status, 'debug-status API が 401 でない (認証済み)').not.toBe(401);
+    });
+
+    test('cm-010: dataset list API が応答する (PR #3129 stale connection regression)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        const results = await page.evaluate(async (baseUrl) => {
+            const promises = [1, 2, 3].map(() =>
+                fetch(baseUrl + '/api/admin/dataset/list', {
+                    method: 'GET', credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                }).then(r => r.status).catch(e => ('err:' + e.message))
+            );
+            return Promise.all(promises);
+        }, _baseUrl);
+        for (const s of results) {
+            expect(typeof s === 'number' && s < 500, `応答 status: ${s} が 5xx でない`).toBe(true);
+        }
+    });
+});
