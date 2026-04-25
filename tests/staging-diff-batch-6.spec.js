@@ -99,53 +99,7 @@ test.describe.serial('staging 差分 第 7 弾 (10 件 認可ネガティブ + A
 
     // neg-010 〜 neg-050: users-permissions.spec.js に再配置 (2026-04-26 PR #17)
 
-    /**
-     * dat-400: dataset list API レスポンスが 5xx でない (回帰)
-     * 注: pigeon_cloud では `/api/admin/dataset/list` は表示用 list 取得用途で、
-     * 環境状態によっては SPA HTML を返すケースもある。ここでは「5xx でない」のみ保証。
-     * @requirements.txt(R-365)
-     */
-    test('dat-400: dataset list API が 5xx を返さない (回帰)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await loginAs(page, EMAIL, PASSWORD);
-        const result = await page.evaluate(async (baseUrl) => {
-            try {
-                const r = await fetch(baseUrl + '/api/admin/dataset/list', {
-                    method: 'GET', credentials: 'include',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                return { status: r.status };
-            } catch (e) { return { error: e.message }; }
-        }, BASE_URL);
-        expect(typeof result.status === 'number', `fetch 完遂 (got: ${JSON.stringify(result)})`).toBe(true);
-        expect(result.status, '5xx でない').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD7-06', 'dat-400', _testStart);
-    });
-
-    /**
-     * rec-400: レコード詳細画面の主要 DOM 構造確認
-     * @requirements.txt(R-366)
-     */
-    test('rec-400: ALLテストテーブル詳細画面で table+tablist DOM 描画', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await loginAs(page, EMAIL, PASSWORD);
-        await page.goto(BASE_URL + `/admin/dataset__${allTypeTableId}/view/1`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const tableCount = await page.locator('table').count();
-        const tabCount = await page.locator('[role="tab"], [role="tablist"]').count();
-        expect(tableCount + tabCount, '詳細画面に table or tab が描画').toBeGreaterThan(0);
-
-        await autoScreenshot(page, 'SD7-07', 'rec-400', _testStart);
-    });
+    // dat-400 / rec-400: records.spec.js に再配置 (2026-04-26 PR #21)
 
     /**
      * paginate-010: dataset API ページング指定が応答

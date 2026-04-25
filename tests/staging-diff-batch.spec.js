@@ -72,35 +72,7 @@ test.describe.serial('staging 差分 第 2 弾 (10 件 structural regression)', 
         if (envContext) await envContext.close().catch(() => {});
     });
 
-    /**
-     * rr-010: ALLテストテーブルレコード詳細画面が Internal Server Error なく表示
-     * @requirements.txt(R-310)
-     * 背景: PR #3074 で `c6fae929f2` で消失した `relation_add` クラスを復元 (顧客 CSS 互換性)。
-     *      これは class 名追加のみの compatibility 修正で、Angular Unit Test 範囲。
-     *      E2E では「関連レコードを含む可能性がある詳細画面で regression が起きていない」
-     *      structural regression guard とする。
-     */
-    test('rr-010: ALLテストテーブルレコード詳細画面が ISE なく表示 (PR #3074 regression guard)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(90000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // ALLテストテーブル initial data 1 件目の詳細画面
-        await page.goto(BASE_URL + `/admin/dataset__${allTypeTableId}/view/1`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし (PR #3074 の class 追加で他コードに影響していない)').not.toContain('Internal Server Error');
-
-        // 詳細画面の主要 DOM が描画されている (詳細画面に必ず出るタブ・テーブル要素・ボタンを使用)
-        const tableEl = page.locator('table, [role="tablist"], button:has-text("レコード"), button:has-text("前のレコード")').first();
-        const tableOrTab = await tableEl.count();
-        expect(tableOrTab, '詳細画面の主要 DOM (table or tab) が描画').toBeGreaterThan(0);
-
-        await autoScreenshot(page, 'SD01', 'rr-010', _testStart);
-    });
+    // rr-010: records.spec.js に再配置 (2026-04-26 PR #21)
 
     // ccl-010: chart-permissions.spec.js に再配置 (2026-04-26 PR #20)
 

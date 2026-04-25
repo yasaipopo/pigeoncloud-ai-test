@@ -946,3 +946,210 @@ test.describe('レコードコピー', () => {
         await autoScreenshot(page, 'UC05', 'rec-160', _testStart);
     });
 });
+
+// ============================================================================
+// staging diff regression (batch 由来 2026-04-26 再配置: 9 件)
+// batch-1/2/4/5/6 から records/field 関連の構造回帰 guard を集約
+// ============================================================================
+test.describe.serial('staging diff regression (records 関連)', () => {
+    let _baseUrl = process.env.TEST_BASE_URL || '';
+    let _email = process.env.TEST_EMAIL || 'admin';
+    let _password = process.env.TEST_PASSWORD || '';
+    let _envContext = null;
+    let _allTypeTableId = null;
+    let _setupFailed = false;
+
+    async function _waitForAngular(page) {
+        await page.waitForSelector('body[data-ng-ready="true"]', { timeout: 5000 }).catch(() => {
+            return page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+        });
+    }
+
+    async function _login(page) {
+        await page.context().clearCookies().catch(() => {});
+        await page.goto(_baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (!page.url().includes('/login')) return;
+        await page.waitForSelector('#id', { timeout: 10000 });
+        await page.fill('#id', _email);
+        await page.fill('#password', _password);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            _envContext = env.context;
+            _allTypeTableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[records staging diff beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.afterAll(async () => {
+        if (_envContext) await _envContext.close().catch(() => {});
+    });
+
+    /**
+     * rr-010: ALLテストテーブルレコード詳細画面が ISE なく表示 (PR #3074)
+     */
+    test('rr-010: ALLテストテーブルレコード詳細画面が ISE なく表示 (PR #3074)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(90000);
+        await _login(page);
+        await page.goto(_baseUrl + `/admin/dataset__${_allTypeTableId}/view/1`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+        const tableEl = page.locator('table, [role="tablist"], button:has-text("レコード"), button:has-text("前のレコード")').first();
+        const tableOrTab = await tableEl.count();
+        expect(tableOrTab, '詳細画面の主要 DOM (table or tab) が描画').toBeGreaterThan(0);
+    });
+
+    /**
+     * cf-010: ALL テーブル一覧が ISE 出さず描画 (PR #2916 子テーブルファイル regression)
+     */
+    test('cf-010: ALL テーブル一覧が ISE 出さず描画 (PR #2916)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.goto(_baseUrl + `/admin/dataset__${_allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+        expect(bodyText, 'HY093 エラー (PDO bind) も出ていない').not.toContain('HY093');
+    });
+
+    /**
+     * cf-020: dashboard が ISE なく描画 (PR #3090 CloudFront viewer-address regression)
+     */
+    test('cf-020: dashboard が ISE なく描画 (PR #3090)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.goto(_baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+    });
+
+    /**
+     * oer-010: レコード編集画面が race condition なく開く (PR #2815 on-edit memory)
+     */
+    test('oer-010: レコード編集画面が race condition なく開く (PR #2815)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.goto(_baseUrl + `/admin/dataset__${_allTypeTableId}/edit/1`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await _waitForAngular(page);
+
+        const url = page.url();
+        expect(url, 'edit URL に留まる or view にリダイレクト').toMatch(/\/edit\/|\/view\/|\/dataset__/);
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+    });
+
+    /**
+     * cam-010: カメラ未対応 viewport でも UI 描画 (PR #2877)
+     */
+    test('cam-010: カメラ未対応 viewport でも UI 描画 (PR #2877)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.addInitScript(() => {
+            if (navigator.mediaDevices) {
+                navigator.mediaDevices.getUserMedia = () => Promise.reject(new Error('NotFoundError: Requested device not found'));
+            }
+        });
+        await page.goto(_baseUrl + `/admin/dataset__${_allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'カメラ未対応でも ISE が出ていない').not.toContain('Internal Server Error');
+    });
+
+    /**
+     * bulk-010: debug status API が応答 (PR #3105 hash-DB cleanup regression)
+     */
+    test('bulk-010: debug status API が応答 (PR #3105)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/status', {
+                    method: 'GET', credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, _baseUrl);
+        expect(result.status, 'debug API が 5xx でない').toBeLessThan(500);
+    });
+
+    /**
+     * frm-010: フィールド追加モーダルが開ける (PR #3095 lodash import regression)
+     */
+    test('frm-010: フィールド追加モーダルが開ける (PR #3095)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.goto(_baseUrl + `/admin/dataset/edit/${_allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+    });
+
+    /**
+     * rec-400: レコード詳細画面で table+tablist DOM 描画
+     */
+    test('rec-400: ALLテストテーブル詳細画面で table+tablist DOM 描画', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        await page.goto(_baseUrl + `/admin/dataset__${_allTypeTableId}/view/1`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await _waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const tableCount = await page.locator('table').count();
+        const tabCount = await page.locator('[role="tab"], [role="tablist"]').count();
+        expect(tableCount + tabCount, '詳細画面に table or tab が描画').toBeGreaterThan(0);
+    });
+
+    /**
+     * dat-400: dataset list API が 5xx を返さない (回帰)
+     */
+    test('dat-400: dataset list API が 5xx を返さない (回帰)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗');
+        test.setTimeout(60000);
+        await _login(page);
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/dataset/list', {
+                    method: 'GET', credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, _baseUrl);
+        expect(typeof result.status === 'number', `fetch 完遂 (got: ${JSON.stringify(result)})`).toBe(true);
+        expect(result.status, '5xx でない').toBeLessThan(500);
+    });
+});

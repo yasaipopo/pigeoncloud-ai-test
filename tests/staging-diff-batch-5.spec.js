@@ -72,25 +72,7 @@ test.describe.serial('staging 差分 第 6 弾 (10 件 structural regression)', 
     // excel-105 / excel-106: excel-import.spec.js に再配置 (2026-04-26 PR #19)
     // opn-050 / opn-060: global-search.spec.js に再配置 (2026-04-26 PR #19)
 
-    /**
-     * cf-020: cloudfront viewer address forward 関連で IP 取得が機能している
-     * @requirements.txt(R-357) 背景: PR #3090 CloudFront でクライアント IP forward
-     */
-    test('cf-020: dashboard が ISE なく描画 (PR #3090 CloudFront viewer-address regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD6-08', 'cf-020', _testStart);
-    });
+    // cf-020: records.spec.js に再配置 (2026-04-26 PR #21)
 
     /**
      * q-020: queue rsyslog hotfix (PR #3088) - debug API 経由で job_logs 確認
@@ -112,30 +94,5 @@ test.describe.serial('staging 差分 第 6 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD6-09', 'q-020', _testStart);
     });
 
-    /**
-     * bulk-010: 10桁ハッシュ DB cleanup (PR #3105) - debug status で正常応答
-     * @requirements.txt(R-359)
-     */
-    test('bulk-010: debug status API が応答 (PR #3105 hash-DB cleanup regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        const result = await page.evaluate(async (baseUrl) => {
-            try {
-                const r = await fetch(baseUrl + '/api/admin/debug/status', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                return { status: r.status };
-            } catch (e) {
-                return { error: e.message };
-            }
-        }, BASE_URL);
-        expect(result.status, 'debug API が 5xx でない').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD6-10', 'bulk-010', _testStart);
-    });
+    // bulk-010: records.spec.js に再配置 (2026-04-26 PR #21)
 });
