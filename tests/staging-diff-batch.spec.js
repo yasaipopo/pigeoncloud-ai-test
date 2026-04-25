@@ -20,6 +20,7 @@
 const { test, expect } = require('@playwright/test');
 const { createTestEnv } = require('./helpers/create-test-env');
 const { createAutoScreenshot } = require('./helpers/auto-screenshot');
+const { fullLogin } = require('./helpers/ensure-login');
 
 const autoScreenshot = createAutoScreenshot('staging-diff-batch');
 
@@ -41,17 +42,7 @@ async function waitForAngular(page, timeout = 10000) {
 
 async function login(page) {
     await page.context().clearCookies().catch(() => {});
-    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-    if (!page.url().includes('/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
-        return;
-    }
-    await page.waitForSelector('#id', { timeout: 10000 });
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
-    await page.locator('button[type=submit].btn-primary').first().click();
-    await page.waitForSelector('.navbar', { timeout: 15000 });
+    await fullLogin(page, EMAIL, PASSWORD);
 }
 
 test.describe.serial('staging 差分 第 2 弾 (10 件 structural regression)', () => {
@@ -127,16 +118,11 @@ test.describe.serial('staging 差分 第 2 弾 (10 件 structural regression)', 
         await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
 
         // カレンダー表示ボタンを探す (存在しなければ skip — debug API で view 設定要)
+        // 注: isVisible({timeout}) は API 仕様上 timeout を無視するので waitFor を使う
         const calendarBtn = page.locator('button:has-text("カレンダー表示"), button:has(.fa-calendar)').first();
-        const hasCalendarBtn = await calendarBtn.isVisible({ timeout: 5000 }).catch(() => false);
-        if (!hasCalendarBtn) {
-            // ALL テストテーブルにカレンダー設定が無い環境では UI 確認できない (limitations 記録対象)
-            console.log('ccl-010: カレンダーボタンなし — テーブルのカレンダー view 設定が無効');
-            // navbar チェックのみ実施 (Internal Server Error が出ていない確認)
-            const bodyText = await page.innerText('body');
-            expect(bodyText).not.toContain('Internal Server Error');
-            return;
-        }
+        const hasCalendarBtn = await calendarBtn.waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+        // ALL テストテーブルにカレンダー設定が無い場合はテスト不可 (test-env-limitations.md 参照)
+        test.skip(!hasCalendarBtn, 'ccl-010: ALL テストテーブルにカレンダー view 設定が無いためスキップ (limitations 記録)');
         await calendarBtn.click({ force: true });
         await waitForAngular(page);
         // FullCalendar 要素表示確認
@@ -273,7 +259,7 @@ test.describe.serial('staging 差分 第 2 弾 (10 件 structural regression)', 
      * @requirements.txt(R-316)
      * 背景: PR #3149 admin_allow_ips_multi に is_unique 追加 (up-ip-6 系)
      */
-    test('ip-080: 許可IP重複登録時のバリデーション (PR #3149)', async ({ page }) => {
+    test('ip-080: 許可IP編集画面が ISE なく開き入力欄が描画 (PR #3149 unique 追加 regression guard)', async ({ page }) => {
         test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
         test.setTimeout(90000);
         const _testStart = Date.now();

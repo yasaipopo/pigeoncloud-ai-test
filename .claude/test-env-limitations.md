@@ -270,3 +270,22 @@
 - **関連要件**: R-303 (CSV 他テーブル参照 × 表示条件)
 - **記載日**: 2026-04-25
 - **見直し予定**: (a) debug API 拡張完了時
+
+---
+
+### spec: staging-diff-batch / カレンダー表示
+
+#### R-311 / ccl-010: カレンダー表示の sort fix regression guard
+
+- **スキップ理由**: ALLテストテーブル (debug API `create-trial` で生成) には
+  カレンダー view (date-based view) が設定されていないため、
+  カレンダー表示ボタンが UI に存在しない。試験環境上で view 追加 API も未提供。
+- **PR 背景**: PR #2754 で eventOrder の null ハンドリング修正
+- **スキップ基準該当**: インフラ依存（基準 2 — テストデータ生成 API 未拡張）
+- **解消条件**:
+  - (a) pigeon_cloud 側 debug API に「カレンダー view 自動設定オプション」追加
+    （例: `create-trial` の `with_calendar_view: true` フラグ）
+  - (b) 手動 UI 操作で view 設定（テスト時間 +30 秒、フレイキー化リスク）
+- **関連要件**: R-311 (カレンダー sort fix)
+- **記載日**: 2026-04-26
+- **見直し予定**: (a) debug API 拡張完了時

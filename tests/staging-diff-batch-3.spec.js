@@ -19,6 +19,7 @@
 const { test, expect } = require('@playwright/test');
 const { createTestEnv } = require('./helpers/create-test-env');
 const { createAutoScreenshot } = require('./helpers/auto-screenshot');
+const { fullLogin } = require('./helpers/ensure-login');
 
 const autoScreenshot = createAutoScreenshot('staging-diff-batch-3');
 
@@ -39,17 +40,7 @@ async function waitForAngular(page, timeout = 10000) {
 
 async function login(page) {
     await page.context().clearCookies().catch(() => {});
-    await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-    if (!page.url().includes('/login')) {
-        await page.waitForSelector('.navbar', { timeout: 5000 }).catch(() => {});
-        return;
-    }
-    await page.waitForSelector('#id', { timeout: 10000 });
-    await page.fill('#id', EMAIL);
-    await page.fill('#password', PASSWORD);
-    await page.locator('button[type=submit].btn-primary').first().click();
-    await page.waitForSelector('.navbar', { timeout: 15000 });
+    await fullLogin(page, EMAIL, PASSWORD);
 }
 
 test.describe.serial('staging 差分 第 4 弾 (10 件 structural regression)', () => {
@@ -82,7 +73,7 @@ test.describe.serial('staging 差分 第 4 弾 (10 件 structural regression)', 
      * @requirements.txt(R-330)
      * 背景: PR #3025 Excelインポートからテーブルを AI 自動作成する機能追加。
      */
-    test('exc-ai-010: Excel import 画面で AI 自動作成関連 UI が描画 (PR #3025)', async ({ page }) => {
+    test('exc-ai-010: Excel import 画面が ISE なく描画 (PR #3025 AI 自動作成 regression guard)', async ({ page }) => {
         test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
         test.setTimeout(60000);
         const _testStart = Date.now();
