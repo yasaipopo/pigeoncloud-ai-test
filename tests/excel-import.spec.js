@@ -226,4 +226,113 @@ test.describe.serial('Excel インポート事前バリデーション', () => {
 
         await autoScreenshot(page, 'EXC07', 'exc-070', _testStart);
     });
+
+    // =========================================================================
+    // staging diff regression (batch 由来 2026-04-26 再配置: 5 件)
+    // =========================================================================
+    test.describe('staging diff regression (excel-import 関連)', () => {
+
+        /**
+         * exc-080: Excel インポート画面の事前バリデーション (PR #3035/#3101)
+         * @requirements.txt(R-318)
+         */
+        test('exc-080: Excel インポート画面が表示されエラーなく開く (PR #3035/#3101)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            await page.goto(BASE_URL + '/admin/excel-import', { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await waitForAngular(page);
+            await expect(page.locator('.drop-zone')).toBeVisible({ timeout: 10000 });
+
+            const accept = await page.locator('.drop-zone input[type=file]').getAttribute('accept');
+            expect(accept || '', 'accept 属性が .xlsx を含む').toMatch(/\.xlsx/);
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+
+            await autoScreenshot(page, 'EXCDR-01', 'exc-080', _testStart);
+        });
+
+        /**
+         * exc-ai-010: Excel import 画面が ISE なく描画 (PR #3025 AI 自動作成)
+         * @requirements.txt(R-330)
+         */
+        test('exc-ai-010: Excel import 画面が ISE なく描画 (PR #3025)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            await page.goto(BASE_URL + '/admin/excel-import', { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await waitForAngular(page);
+            await expect(page.locator('.drop-zone')).toBeVisible({ timeout: 10000 });
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+            expect(bodyText.length, '画面に何らかの content が表示').toBeGreaterThan(100);
+
+            await autoScreenshot(page, 'EXCDR-02', 'exc-ai-010', _testStart);
+        });
+
+        /**
+         * excel-105: Excel import use 文欠落 hotfix regression (PR #3048)
+         * @requirements.txt(R-353)
+         */
+        test('excel-105: Excel import 画面が ISE なく描画 (PR #3048)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            await page.goto(BASE_URL + '/admin/excel-import', { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await waitForAngular(page);
+            await expect(page.locator('.drop-zone')).toBeVisible({ timeout: 10000 });
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+
+            await autoScreenshot(page, 'EXCDR-03', 'excel-105', _testStart);
+        });
+
+        /**
+         * excel-106: Excel import drop-zone が viewport 内に収まる (PR #3055)
+         * @requirements.txt(R-?)
+         */
+        test('excel-106: Excel import drop-zone が viewport 内に収まる (PR #3055)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            await page.goto(BASE_URL + '/admin/excel-import', { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await waitForAngular(page);
+            await expect(page.locator('.drop-zone')).toBeVisible({ timeout: 10000 });
+
+            const box = await page.locator('.drop-zone').boundingBox();
+            const vp = page.viewportSize();
+            expect(box, 'drop-zone bounding box が取得できる').not.toBeNull();
+            if (box && vp) {
+                expect(box.x + box.width, 'drop-zone 右端が viewport 内').toBeLessThanOrEqual(vp.width);
+            }
+
+            await autoScreenshot(page, 'EXCDR-04', 'excel-106', _testStart);
+        });
+
+        /**
+         * prv-010: Excel import 画面が ISE なく開く (PR #3032 IAM regression)
+         * @requirements.txt(R-348)
+         */
+        test('prv-010: Excel import 画面が ISE なく開く (PR #3032 IAM regression)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            await page.goto(BASE_URL + '/admin/excel-import', { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await waitForAngular(page);
+
+            const bodyText = await page.innerText('body');
+            expect(bodyText, 'ISE 表示なし (S3 access policy 不足エラー無し)').not.toContain('Internal Server Error');
+            expect(bodyText, 'AccessDenied / S3 IAM エラーが画面に出ていない').not.toContain('AccessDenied');
+
+            await autoScreenshot(page, 'EXCDR-05', 'prv-010', _testStart);
+        });
+    });
 });

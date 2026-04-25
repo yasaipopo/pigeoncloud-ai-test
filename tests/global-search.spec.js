@@ -354,4 +354,159 @@ test.describe.serial('OpenSearch グローバル検索', () => {
 
         await autoScreenshot(page, 'SRH04', 'srh-040', _testStart);
     });
+
+    // =========================================================================
+    // staging diff regression (batch 由来 2026-04-26 再配置: 6 件)
+    // OpenSearch search/reindex API の構造的回帰 guard 集
+    // =========================================================================
+    test.describe('staging diff regression (OpenSearch API 関連)', () => {
+
+        /**
+         * srh-100: OpenSearch search API が認証済みで応答する (PR #3110/#3115/#3117/#3118)
+         * @requirements.txt(R-319)
+         */
+        test('srh-100: OpenSearch search API が認証済みで応答する (PR #3110)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            const result = await page.evaluate(async (baseUrl) => {
+                try {
+                    const r = await fetch(baseUrl + '/api/admin/opensearch/search?keyword=テスト', {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        credentials: 'include',
+                    });
+                    return { status: r.status, ok: r.ok };
+                } catch (e) {
+                    return { error: e.message };
+                }
+            }, BASE_URL);
+            expect(result.status, 'API が 401 でないこと (認証済み)').not.toBe(401);
+            expect(result.status, 'API が 5xx でないこと').toBeLessThan(500);
+
+            await autoScreenshot(page, 'OPNDR-01', 'srh-100', _testStart);
+        });
+
+        /**
+         * mig-010: OpenSearch search 経路が認証済み (PR #3060 EventBridge sync regression)
+         * @requirements.txt(R-339)
+         */
+        test('mig-010: OpenSearch search 経路が認証済み (PR #3060)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            const result = await page.evaluate(async (baseUrl) => {
+                try {
+                    const r = await fetch(baseUrl + '/api/admin/opensearch/search?keyword=t', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    return { status: r.status };
+                } catch (e) { return { error: e.message }; }
+            }, BASE_URL);
+            expect(result.status, 'OpenSearch search API が 5xx でない').toBeLessThan(500);
+
+            await autoScreenshot(page, 'OPNDR-02', 'mig-010', _testStart);
+        });
+
+        /**
+         * opn-020: opensearch search params format API (PR #3094)
+         * @requirements.txt(R-342)
+         */
+        test('opn-020: opensearch search に複数パラメータ渡しても 5xx でない (PR #3094)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            const result = await page.evaluate(async (baseUrl) => {
+                try {
+                    const r = await fetch(baseUrl + '/api/admin/opensearch/search?keyword=テスト&page=1&per_page=10', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    return { status: r.status };
+                } catch (e) { return { error: e.message }; }
+            }, BASE_URL);
+            expect(result.status, 'opensearch params format API が 5xx でない').toBeLessThan(500);
+
+            await autoScreenshot(page, 'OPNDR-03', 'opn-020', _testStart);
+        });
+
+        /**
+         * opn-040: opensearch reindex/bulk-index endpoint (PR #3085)
+         * @requirements.txt(R-343)
+         */
+        test('opn-040: opensearch reindex/bulk-index endpoint が 5xx でない (PR #3085)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            const result = await page.evaluate(async (baseUrl) => {
+                try {
+                    const r = await fetch(baseUrl + '/api/admin/opensearch/reindex', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    return { status: r.status };
+                } catch (e) { return { error: e.message }; }
+            }, BASE_URL);
+            expect(result.status, 'opensearch reindex API が 5xx でない').toBeLessThan(500);
+
+            await autoScreenshot(page, 'OPNDR-04', 'opn-040', _testStart);
+        });
+
+        /**
+         * opn-050: opensearch search が応答 (PR #3080 credential provider regression)
+         * @requirements.txt(R-?)
+         */
+        test('opn-050: opensearch search が応答 (PR #3080 credential provider)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            const result = await page.evaluate(async (baseUrl) => {
+                try {
+                    const r = await fetch(baseUrl + '/api/admin/opensearch/search?keyword=test', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    return { status: r.status };
+                } catch (e) { return { error: e.message }; }
+            }, BASE_URL);
+            expect(result.status, 'opensearch search が 5xx でない').toBeLessThan(500);
+
+            await autoScreenshot(page, 'OPNDR-05', 'opn-050', _testStart);
+        });
+
+        /**
+         * opn-060: opensearch reindex API が認証済みで応答 (PR #3075 FGAC regression)
+         * @requirements.txt(R-?)
+         */
+        test('opn-060: opensearch reindex API が認証済みで応答 (PR #3075 FGAC)', async ({ page }) => {
+            test.setTimeout(60000);
+            const _testStart = Date.now();
+
+            await login(page);
+            const result = await page.evaluate(async (baseUrl) => {
+                try {
+                    const r = await fetch(baseUrl + '/api/admin/opensearch/reindex', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    return { status: r.status };
+                } catch (e) { return { error: e.message }; }
+            }, BASE_URL);
+            expect(result.status, 'reindex API が 5xx でない').toBeLessThan(500);
+            expect(result.status, 'reindex API が 401 でない (認証済み)').not.toBe(401);
+
+            await autoScreenshot(page, 'OPNDR-06', 'opn-060', _testStart);
+        });
+    });
 });

@@ -144,63 +144,6 @@ test.describe.serial('staging 差分 第 2 弾 (10 件 structural regression)', 
 
     // mail-010: notifications.spec.js に再配置 (2026-04-26 PR #16)
 
-    /**
-     * exc-080: Excel インポート画面の事前バリデーション (テーブル名重複等)
-     * @requirements.txt(R-318)
-     * 背景: PR #3101 でテーブル名重複等のバリデーションエラーをユーザーに表示する改善。
-     */
-    test('exc-080: Excel インポート画面が表示されエラーなく開く (PR #3035/#3101 regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/excel-import', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-
-        // ドロップゾーン (.drop-zone) が表示される
-        await expect(page.locator('.drop-zone')).toBeVisible({ timeout: 10000 });
-
-        // input[type=file] が accept=".xlsx,.xls" 限定 (PR #3035)
-        const accept = await page.locator('.drop-zone input[type=file]').getAttribute('accept');
-        expect(accept || '', 'accept 属性が .xlsx を含む').toMatch(/\.xlsx/);
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD09', 'exc-080', _testStart);
-    });
-
-    /**
-     * srh-100: OpenSearch グローバル検索 API が認証済みで応答する
-     * @requirements.txt(R-319)
-     * 背景: PR #3110 ngram + PR #3115/3117/3118 OpenSearch fixes。
-     *      modal 開閉が不安定なので API 経由で疎通確認のみ。
-     */
-    test('srh-100: OpenSearch search API が認証済みで応答する (PR #3110/#3115/#3117/#3118 backend regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // OpenSearch search API を直接呼び出し
-        const result = await page.evaluate(async (baseUrl) => {
-            try {
-                const r = await fetch(baseUrl + '/api/admin/opensearch/search?keyword=テスト', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                    credentials: 'include',
-                });
-                return { status: r.status, ok: r.ok };
-            } catch (e) {
-                return { error: e.message };
-            }
-        }, BASE_URL);
-
-        // 認証済みなら 200 か 404 (endpoint が無い場合) — 401 (認証エラー) は出ない
-        expect(result.status, 'API が 401 でないこと (認証済み)').not.toBe(401);
-        expect(result.status, 'API が 5xx でないこと').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD10', 'srh-100', _testStart);
-    });
+    // exc-080: excel-import.spec.js に再配置 (2026-04-26 PR #19)
+    // srh-100: global-search.spec.js に再配置 (2026-04-26 PR #19)
 });
