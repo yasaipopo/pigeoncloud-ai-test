@@ -91,55 +91,8 @@ test.describe.serial('staging 差分 第 3 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD3-01', 'cf-010', _testStart);
     });
 
-    /**
-     * dv-010: dataset createview join reset 機能の view 作成画面が描画
-     * @requirements.txt(R-321)
-     * 背景: PR #3076 で view 作成時に join 設定がリセットされる問題を修正。
-     */
-    test('dv-010: view 作成画面が ISE なく開く (PR #3076 join reset regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // view 作成画面 (テーブル設定 > view 一覧) は dataset/edit 配下
-        await page.goto(BASE_URL + `/admin/dataset/edit/${allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        // テーブル編集画面の主要 DOM が存在
-        const hasTabsOrForm = await page.locator('[role="tab"], form, input[name*="table"]').count();
-        expect(hasTabsOrForm, '編集画面の主要 UI が描画').toBeGreaterThan(0);
-
-        await autoScreenshot(page, 'SD3-02', 'dv-010', _testStart);
-    });
-
-    /**
-     * wf-070: ワークフロー AND/OR 組織バリデーション関連 UI が機能する
-     * @requirements.txt(R-322)
-     * 背景: PR #2894 ワークフロー設定で AND/OR 組織バリデーション修正。
-     */
-    test('wf-070: ワークフロー設定タブにアクセスして ISE が無いこと (PR #2894)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + `/admin/dataset/edit/${allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        // ワークフロータブが存在
-        const wfTab = page.locator('[role="tab"]').filter({ hasText: /ワークフロー/ }).first();
-        await expect(wfTab, 'ワークフロータブが存在').toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD3-03', 'wf-070', _testStart);
-    });
+    // dv-010: table-definition.spec.js に再配置 (2026-04-26 PR #20)
+    // wf-070: workflow.spec.js に再配置 (2026-04-26 PR #20)
 
     /**
      * oer-010: レコード編集画面で on-edit メモリ race condition が起きないこと

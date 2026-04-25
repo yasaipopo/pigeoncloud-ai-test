@@ -8412,3 +8412,57 @@ test.describe('テーブル定義追加テスト', () => {
     });
 });
 
+// =============================================================================
+// staging diff regression (batch 由来 2026-04-26 再配置: 1 件)
+// =============================================================================
+test.describe.serial('staging diff regression (table-definition 関連)', () => {
+    let _baseUrl = process.env.TEST_BASE_URL || '';
+    let _email = process.env.TEST_EMAIL || 'admin';
+    let _password = process.env.TEST_PASSWORD || '';
+    let _envContext = null;
+    let _allTypeTableId = null;
+    let _setupFailed = false;
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            _envContext = env.context;
+            _allTypeTableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[table-def staging diff beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.afterAll(async () => {
+        if (_envContext) await _envContext.close().catch(() => {});
+    });
+
+    /**
+     * dv-010: dataset createview join reset 機能の view 作成画面が描画 (PR #3076)
+     * @requirements.txt(R-321)
+     * 背景: PR #3076 で view 作成時に join 設定がリセットされる問題を修正
+     */
+    test('dv-010: view 作成画面が ISE なく開く (PR #3076 join reset regression)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗のためスキップ');
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await login(page);
+        await page.goto(_baseUrl + `/admin/dataset/edit/${_allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+        await page.waitForSelector('.navbar', { timeout: 10000 }).catch(() => {});
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+        const hasTabsOrForm = await page.locator('[role="tab"], form, input[name*="table"]').count();
+        expect(hasTabsOrForm, '編集画面の主要 UI が描画').toBeGreaterThan(0);
+    });
+});

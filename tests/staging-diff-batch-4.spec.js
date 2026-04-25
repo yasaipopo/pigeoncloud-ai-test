@@ -101,28 +101,7 @@ test.describe.serial('staging 差分 第 5 弾 (10 件 structural regression)', 
 
     // opn-020 / opn-040: global-search.spec.js に再配置 (2026-04-26 PR #19)
 
-    /**
-     * wf-080: ALL テスト_テーブル詳細画面が ISE 出さず描画 (PR #2780 の影響範囲)
-     * @requirements.txt(R-344)
-     * 背景: PR #2780 ラジオ表示条件テキストフィールド追加。ALL テーブル詳細でも ISE 出ないこと。
-     */
-    test('wf-080: ALLテスト テーブル詳細画面が ISE なく描画 (PR #2780)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + `/admin/dataset__${allTypeTableId}/view/1`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        // 詳細画面の主要 DOM
-        const tabCount = await page.locator('[role="tab"], [role="tablist"]').count();
-        expect(tabCount, 'タブまたは tab list 要素が DOM に存在').toBeGreaterThan(0);
-
-        await autoScreenshot(page, 'SD5-05', 'wf-080', _testStart);
-    });
+    // wf-080: workflow.spec.js に再配置 (2026-04-26 PR #20)
 
     /**
      * ng-010: data-ng-ready 属性が body に設定される (Angular NavigationEnd hook)

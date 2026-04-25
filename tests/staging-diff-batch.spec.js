@@ -102,37 +102,7 @@ test.describe.serial('staging 差分 第 2 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD01', 'rr-010', _testStart);
     });
 
-    /**
-     * ccl-010: カレンダー表示でレコードがエラーなく描画される (sort fix regression guard)
-     * @requirements.txt(R-311)
-     * 背景: PR #2754 で eventOrder の null ハンドリング修正。
-     */
-    test('ccl-010: カレンダー表示でレコードが描画され Internal Server Error が無いこと (PR #2754)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(90000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + `/admin/dataset__${allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        // カレンダー表示ボタンを探す (存在しなければ skip — debug API で view 設定要)
-        // 注: isVisible({timeout}) は API 仕様上 timeout を無視するので waitFor を使う
-        const calendarBtn = page.locator('button:has-text("カレンダー表示"), button:has(.fa-calendar)').first();
-        const hasCalendarBtn = await calendarBtn.waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
-        // ALL テストテーブルにカレンダー設定が無い場合はテスト不可 (test-env-limitations.md 参照)
-        test.skip(!hasCalendarBtn, 'ccl-010: ALL テストテーブルにカレンダー view 設定が無いためスキップ (limitations 記録)');
-        await calendarBtn.click({ force: true });
-        await waitForAngular(page);
-        // FullCalendar 要素表示確認
-        const fcEl = page.locator('.fc, .fc-view, .calendar-view').first();
-        await expect(fcEl, 'FullCalendar 要素が表示').toBeVisible({ timeout: 10000 });
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE が出ていない').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD02', 'ccl-010', _testStart);
-    });
+    // ccl-010: chart-permissions.spec.js に再配置 (2026-04-26 PR #20)
 
     /**
      * ms-040 / at-010: master-settings.spec.js に再配置 (2026-04-26 PR #18)

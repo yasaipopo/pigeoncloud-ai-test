@@ -2523,3 +2523,103 @@ test.describe('集計・チャート - 詳細権限設定', () => {
     });
 });
 
+// ============================================================================
+// staging diff regression (batch 由来 2026-04-26 再配置: 3 件)
+// batch-1/5 から chart/カレンダー関連の構造回帰 guard を集約
+// ============================================================================
+test.describe.serial('staging diff regression (chart/カレンダー 関連)', () => {
+    let _baseUrl = process.env.TEST_BASE_URL || '';
+    let _email = process.env.TEST_EMAIL || 'admin';
+    let _password = process.env.TEST_PASSWORD || '';
+    let _envContext = null;
+    let _allTypeTableId = null;
+    let _setupFailed = false;
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: true });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            _envContext = env.context;
+            _allTypeTableId = env.tableId;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[chart staging diff beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.afterAll(async () => {
+        if (_envContext) await _envContext.close().catch(() => {});
+    });
+
+    /**
+     * chart-perm-010: チャート設定画面が ISE なく開く
+     * @requirements.txt(R-350)
+     */
+    test('chart-perm-010: チャート設定画面が ISE なく開く', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗のためスキップ');
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await login(page, _email, _password);
+        await page.goto(_baseUrl + `/admin/dataset/edit/${_allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+    });
+
+    /**
+     * chart-perm-020: テーブル設定でチャート/集計タブが描画
+     * @requirements.txt(R-351)
+     */
+    test('chart-perm-020: テーブル設定でチャート/集計タブが描画 (UI structure)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗のためスキップ');
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        await login(page, _email, _password);
+        await page.goto(_baseUrl + `/admin/dataset/edit/${_allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
+        const tabCount = await page.locator('[role="tab"]').count();
+        expect(tabCount, 'タブ要素が DOM に存在').toBeGreaterThan(0);
+    });
+
+    /**
+     * ccl-010: カレンダー表示でレコードが描画され ISE が無いこと (PR #2754)
+     * @requirements.txt(R-311)
+     * 注: ALL テーブルにカレンダー view が無い環境では test.skip される
+     */
+    test('ccl-010: カレンダー表示でレコードが描画され ISE が無いこと (PR #2754)', async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll失敗のためスキップ');
+        test.setTimeout(90000);
+        const _testStart = Date.now();
+
+        await login(page, _email, _password);
+        await page.goto(_baseUrl + `/admin/dataset__${_allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await waitForAngular(page);
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        const calendarBtn = page.locator('button:has-text("カレンダー表示"), button:has(.fa-calendar)').first();
+        const hasCalendarBtn = await calendarBtn.waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+        // ALL テストテーブルにカレンダー view 設定が無い環境ではスキップ (test-env-limitations.md 参照)
+        test.skip(!hasCalendarBtn, 'ccl-010: ALL テストテーブルにカレンダー view 設定が無いためスキップ');
+
+        await calendarBtn.click({ force: true });
+        await waitForAngular(page);
+        const fcEl = page.locator('.fc, .fc-view, .calendar-view').first();
+        await expect(fcEl, 'FullCalendar 要素が表示').toBeVisible({ timeout: 10000 });
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ISE が出ていない').not.toContain('Internal Server Error');
+    });
+});

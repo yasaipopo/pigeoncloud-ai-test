@@ -66,51 +66,7 @@ test.describe.serial('staging 差分 第 6 弾 (10 件 structural regression)', 
         if (envContext) await envContext.close().catch(() => {});
     });
 
-    /**
-     * chart-perm-010: チャート設定画面 (既存 chart-options 28 件 fail 領域) が ISE なし
-     * @requirements.txt(R-350)
-     */
-    test('chart-perm-010: チャート設定画面が ISE なく開く (既存 fail 領域 regression check)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // ALLテストテーブルのチャートタブ (テーブル設定 > チャート)
-        await page.goto(BASE_URL + `/admin/dataset__${allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        await autoScreenshot(page, 'SD6-01', 'chart-perm-010', _testStart);
-    });
-
-    /**
-     * chart-perm-020: チャート / 集計ボタンが画面に存在 (権限あり)
-     * @requirements.txt(R-351)
-     */
-    test('chart-perm-020: テーブル設定でチャート/集計タブが描画 (UI structure)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + `/admin/dataset/edit/${allTypeTableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-
-        // チャート/集計関連タブの存在確認 (DOM レベル)
-        const tabCount = await page.locator('[role="tab"]').count();
-        expect(tabCount, 'タブ要素が DOM に存在').toBeGreaterThan(0);
-
-        await autoScreenshot(page, 'SD6-02', 'chart-perm-020', _testStart);
-    });
-
+    // chart-perm-010 / chart-perm-020: chart-permissions.spec.js に再配置 (2026-04-26 PR #20)
     // at-perm-010: users-permissions.spec.js に再配置 (2026-04-26 PR #17)
 
     // excel-105 / excel-106: excel-import.spec.js に再配置 (2026-04-26 PR #19)
