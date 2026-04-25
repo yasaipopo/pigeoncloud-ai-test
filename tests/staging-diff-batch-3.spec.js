@@ -68,34 +68,7 @@ test.describe.serial('staging 差分 第 4 弾 (10 件 structural regression)', 
         if (envContext) await envContext.close().catch(() => {});
     });
 
-    /**
-     * exc-ai-010: Excel インポートで AI 自動作成オプションが UI 上に存在
-     * @requirements.txt(R-330)
-     * 背景: PR #3025 Excelインポートからテーブルを AI 自動作成する機能追加。
-     */
-    test('exc-ai-010: Excel import 画面が ISE なく描画 (PR #3025 AI 自動作成 regression guard)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/excel-import', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.drop-zone')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        // Excel import 画面に "AI" 関連の文言 (AI で分析する 等) または ボタン が含まれる
-        // PR #3025 で AI 自動作成機能追加されているため、「AI」を含むワードが画面に存在する想定
-        const hasAiKeyword = bodyText.includes('AI') || bodyText.includes('ＡＩ');
-        // AI ボタンはアップロード後のステップで出るため、UI 全体に AI 関連が存在することを確認
-        // (なくても失敗にしない: PR の影響範囲が事前バリデーション含む)
-        // 主要画面が描画され、ISE が出ないことを確認
-        expect(bodyText.length, '画面に何らかの content が表示').toBeGreaterThan(100);
-
-        await autoScreenshot(page, 'SD4-01', 'exc-ai-010', _testStart);
-    });
-
+    // exc-ai-010: excel-import.spec.js に再配置 (2026-04-26 PR #19)
     // lo-010 / saml-010: auth.spec.js に再配置 (2026-04-26 PR #15)
 
     /**
@@ -185,32 +158,5 @@ test.describe.serial('staging 差分 第 4 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD4-09', 'clt-010', _testStart);
     });
 
-    /**
-     * mig-010: OpenSearch インデックス同期関連が ISE 出さない
-     * @requirements.txt(R-339)
-     * 背景: PR #3060 OpenSearch 差分/完全同期を EventBridge + Fargate Job に追加。
-     *      OpenSearch 検索 API が認証通って応答することで間接確認 (srh-100 と相補)。
-     */
-    test('mig-010: OpenSearch search 経路が認証済み (PR #3060 EventBridge sync regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        const result = await page.evaluate(async (baseUrl) => {
-            try {
-                const r = await fetch(baseUrl + '/api/admin/opensearch/search?keyword=t', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                return { status: r.status, ok: r.ok };
-            } catch (e) {
-                return { error: e.message };
-            }
-        }, BASE_URL);
-        expect(result.status, 'OpenSearch search API が 5xx でない').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD4-10', 'mig-010', _testStart);
-    });
+    // mig-010: global-search.spec.js に再配置 (2026-04-26 PR #19)
 });

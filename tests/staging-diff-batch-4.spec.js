@@ -99,61 +99,7 @@ test.describe.serial('staging 差分 第 5 弾 (10 件 structural regression)', 
      * pf-020: public-form.spec.js に再配置 (2026-04-26 PR #18)
      */
 
-    /**
-     * opn-020: opensearch search params format API (PR #3094)
-     * @requirements.txt(R-342)
-     */
-    test('opn-020: opensearch search に複数パラメータ渡しても 5xx でない (PR #3094)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        const result = await page.evaluate(async (baseUrl) => {
-            try {
-                // 複数パラメータ (keyword + dataset_id + page) 形式
-                const r = await fetch(baseUrl + '/api/admin/opensearch/search?keyword=テスト&page=1&per_page=10', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                return { status: r.status, ok: r.ok };
-            } catch (e) {
-                return { error: e.message };
-            }
-        }, BASE_URL);
-        expect(result.status, 'opensearch params format API が 5xx でない').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD5-03', 'opn-020', _testStart);
-    });
-
-    /**
-     * opn-040: opensearch bulk index 関連 endpoint (PR #3085)
-     * @requirements.txt(R-343)
-     */
-    test('opn-040: opensearch reindex/bulk-index endpoint が 5xx でない (PR #3085)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        const result = await page.evaluate(async (baseUrl) => {
-            try {
-                // GET で endpoint 存在確認 (POST 必要なら 405 が返るが、5xx ではない)
-                const r = await fetch(baseUrl + '/api/admin/opensearch/reindex', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                return { status: r.status, ok: r.ok };
-            } catch (e) {
-                return { error: e.message };
-            }
-        }, BASE_URL);
-        expect(result.status, 'opensearch reindex API が 5xx でない').toBeLessThan(500);
-
-        await autoScreenshot(page, 'SD5-04', 'opn-040', _testStart);
-    });
+    // opn-020 / opn-040: global-search.spec.js に再配置 (2026-04-26 PR #19)
 
     /**
      * wf-080: ALL テスト_テーブル詳細画面が ISE 出さず描画 (PR #2780 の影響範囲)
@@ -200,26 +146,7 @@ test.describe.serial('staging 差分 第 5 弾 (10 件 structural regression)', 
 
     // mail-020 / mail-030: notifications.spec.js に再配置 (2026-04-26 PR #16)
 
-    /**
-     * prv-010: preview env IAM policy 関連で Excel import 画面が壊れていないこと (PR #3032)
-     * @requirements.txt(R-348)
-     */
-    test('prv-010: Excel import 画面が ISE なく開く (PR #3032 IAM regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/excel-import', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await waitForAngular(page);
-        await expect(page.locator('.drop-zone')).toBeVisible({ timeout: 10000 });
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし (S3 access policy 不足エラー無し)').not.toContain('Internal Server Error');
-        expect(bodyText, 'AccessDenied / S3 IAM エラーが画面に出ていない').not.toContain('AccessDenied');
-
-        await autoScreenshot(page, 'SD5-09', 'prv-010', _testStart);
-    });
+    // prv-010: excel-import.spec.js に再配置 (2026-04-26 PR #19)
 
     // ms-050: master-settings.spec.js に再配置 (2026-04-26 PR #18)
 });
