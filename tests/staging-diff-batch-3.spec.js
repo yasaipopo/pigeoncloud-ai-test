@@ -96,56 +96,7 @@ test.describe.serial('staging 差分 第 4 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD4-01', 'exc-ai-010', _testStart);
     });
 
-    /**
-     * lo-010: login 直後 navigating overlay が永久停止しない
-     * @requirements.txt(R-331)
-     * 背景: PR #3146 login navigating overlay stuck on password change 修正。
-     */
-    test('lo-010: login → navbar 表示まで完了する (PR #3146 navigating overlay regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await page.context().clearCookies().catch(() => {});
-        await page.goto(BASE_URL + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await page.waitForSelector('#id', { timeout: 10000 });
-        await page.fill('#id', EMAIL);
-        await page.fill('#password', PASSWORD);
-        await page.locator('button[type=submit].btn-primary').first().click();
-
-        // navbar 表示まで navigating overlay が stuck しないこと (15 秒以内に完了)
-        await expect(page.locator('.navbar')).toBeVisible({ timeout: 15000 });
-
-        // overlay (.navigating-overlay or .loading-overlay) が残っていないこと
-        const overlayCount = await page.locator('.navigating-overlay, .loading-overlay, .full-screen-overlay').count();
-        expect(overlayCount, 'navigating overlay が残っていない (もしくは hidden)').toBeLessThanOrEqual(1);
-
-        await autoScreenshot(page, 'SD4-02', 'lo-010', _testStart);
-    });
-
-    /**
-     * saml-010: SAML 設定画面の存在確認 (admin/sso-settings)
-     * @requirements.txt(R-332)
-     * 背景: PR #3142 new-user pw change SAML tenant 修正。
-     *      実 SAML IdP は環境制約のため、設定画面の表示確認のみ。
-     */
-    test('saml-010: SAML 設定画面が ISE なく開く (PR #3142 SAML tenant regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        await page.goto(BASE_URL + '/admin/sso-settings', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await waitForAngular(page);
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし').not.toContain('Internal Server Error');
-        // SAML 設定画面に redirect された (login 画面でない)
-        const url = page.url();
-        expect(url, 'login にリダイレクトされていない').not.toMatch(/\/login$/);
-
-        await autoScreenshot(page, 'SD4-03', 'saml-010', _testStart);
-    });
+    // lo-010 / saml-010: auth.spec.js に再配置 (2026-04-26 PR #15)
 
     /**
      * q-010: queue / job_logs 画面が描画される (PR #3081 queue worker recovery)
@@ -249,36 +200,7 @@ test.describe.serial('staging 差分 第 4 弾 (10 件 structural regression)', 
         await autoScreenshot(page, 'SD4-07', 'hms-010', _testStart);
     });
 
-    /**
-     * asec-010: admin SecurityContext import エラーが起きていない
-     * @requirements.txt(R-337)
-     * 背景: PR #3164 SecurityContext を @angular/core から import するように修正。
-     *      Angular ビルドエラーなく画面が描画される確認。
-     */
-    test('asec-010: admin 画面が ISE なく開く (PR #3164 SecurityContext import regression)', async ({ page }) => {
-        test.skip(fileBeforeAllFailed, 'beforeAll失敗のためスキップ');
-        test.setTimeout(60000);
-        const _testStart = Date.now();
-
-        await login(page);
-        // PR #3164 SecurityContext import の影響: Angular bundle がビルドエラーで壊れていないか
-        // 確認するため、ダッシュボード経由で全体描画を見る (ms-040 でも使っている stable ルート)
-        await page.goto(BASE_URL + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 10000 });
-
-        // Angular ロード完了を待つ
-        await page.waitForFunction(
-            () => document.body && document.body.innerText && document.body.innerText.length > 100,
-            { timeout: 10000 }
-        ).catch(() => {});
-
-        const bodyText = await page.innerText('body');
-        expect(bodyText, 'ISE 表示なし (SecurityContext build error 無し)').not.toContain('Internal Server Error');
-        expect(bodyText.length, '画面に content が描画 (Angular bundle 健全)').toBeGreaterThan(50);
-
-        await autoScreenshot(page, 'SD4-08', 'asec-010', _testStart);
-    });
+    // asec-010: auth.spec.js に再配置 (2026-04-26 PR #15)
 
     /**
      * clt-010: 一時テスト DB clean up 機能 (debug API or schedule)
