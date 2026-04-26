@@ -126,9 +126,11 @@ for i in $(seq 1 $WORKERS); do
   (
     export AGENT_NUM=$i
     export REPORTS_DIR="reports/agent-$i"
-    if [ -f ".test_env_runtime.$i" ]; then
+    # ENV_TYPE 別ファイル (staging/production) を読む。env 別物理分離 (env-guard.js と一致)
+    runtime_file=".test_env_runtime.${ENV_TYPE:-staging}.$i"
+    if [ -f "$runtime_file" ]; then
       set -a
-      source ".test_env_runtime.$i"
+      source "$runtime_file"
       set +a
     fi
     npx playwright test $specs 2>&1

@@ -21,7 +21,12 @@ const PRODUCTION_HOST_PATTERN = /pigeon-cloud\.com/i;
 
 function getEnvType(adminBaseUrl) {
     const url = adminBaseUrl || process.env.ADMIN_BASE_URL || '';
-    if (PRODUCTION_HOST_PATTERN.test(url)) return 'production';
+    // URL がある場合は URL ホスト名を最優先する（ENV_TYPE と矛盾していても URL を信じる）。
+    // 例: ADMIN_BASE_URL=staging だが ENV_TYPE=production と書かれているとき、
+    //     ファイル名を 'production' にすると staging のクッキーを production 名で保存する逆転が起きるため。
+    if (url) {
+        return PRODUCTION_HOST_PATTERN.test(url) ? 'production' : 'staging';
+    }
     return process.env.ENV_TYPE === 'production' ? 'production' : 'staging';
 }
 

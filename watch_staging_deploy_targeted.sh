@@ -140,9 +140,9 @@ node -e "
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const envFiles = [
-    '.test_env_runtime.60',  // fields
-    '.test_env_runtime.70',  // table-definition
-    '.test_env_runtime.84',  // records
+    '.test_env_runtime.staging.60',  // fields
+    '.test_env_runtime.staging.70',  // table-definition
+    '.test_env_runtime.staging.84',  // records
 ].map(f => path.join('$(pwd)', f));
 (async () => {
     for (const envFile of envFiles) {
@@ -193,9 +193,9 @@ run_spec() {
 PASS_TOTAL=0
 FAIL_TOTAL=0
 
-run_spec .test_env_runtime.84  84 tests/records.spec.js
-run_spec .test_env_runtime.70  70 tests/table-definition.spec.js
-run_spec .test_env_runtime.60  60 tests/fields.spec.js
+run_spec .test_env_runtime.staging.84  84 tests/records.spec.js
+run_spec .test_env_runtime.staging.70  70 tests/table-definition.spec.js
+run_spec .test_env_runtime.staging.60  60 tests/fields.spec.js
 
 echo ""
 echo "============================================"

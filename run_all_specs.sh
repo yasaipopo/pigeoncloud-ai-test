@@ -45,25 +45,25 @@ run_spec() {
 }
 
 # 小さいもの
-run_spec .test_env_runtime.1   1  tests/auth.spec.js tests/comments-logs.spec.js tests/public-form.spec.js tests/filters.spec.js
-run_spec .test_env_runtime.84  84 tests/records.spec.js tests/reports.spec.js
-run_spec .test_env_runtime.83  83 tests/layout-ui.spec.js tests/csv-export.spec.js
-run_spec .test_env_runtime.82  82 tests/system-settings.spec.js
+run_spec .test_env_runtime.staging.1   1  tests/auth.spec.js tests/comments-logs.spec.js tests/public-form.spec.js tests/filters.spec.js
+run_spec .test_env_runtime.staging.84  84 tests/records.spec.js tests/reports.spec.js
+run_spec .test_env_runtime.staging.83  83 tests/layout-ui.spec.js tests/csv-export.spec.js
+run_spec .test_env_runtime.staging.82  82 tests/system-settings.spec.js
 # 中くらい
-run_spec .test_env_runtime.80  80 tests/workflow.spec.js
-run_spec .test_env_runtime.81  81 tests/chart-calendar.spec.js
-run_spec .test_env_runtime.85  85 tests/chart-calendar-2.spec.js
-run_spec .test_env_runtime.71  71 tests/notifications.spec.js
-run_spec .test_env_runtime.92  92 tests/notifications-2.spec.js
-run_spec .test_env_runtime.72  72 tests/users-permissions.spec.js
+run_spec .test_env_runtime.staging.80  80 tests/workflow.spec.js
+run_spec .test_env_runtime.staging.81  81 tests/chart-calendar.spec.js
+run_spec .test_env_runtime.staging.85  85 tests/chart-calendar-2.spec.js
+run_spec .test_env_runtime.staging.71  71 tests/notifications.spec.js
+run_spec .test_env_runtime.staging.92  92 tests/notifications-2.spec.js
+run_spec .test_env_runtime.staging.72  72 tests/users-permissions.spec.js
 # 大きいもの
-run_spec .test_env_runtime.70  70 tests/table-definition.spec.js
-run_spec .test_env_runtime.62  62 tests/uncategorized-2.spec.js
-run_spec .test_env_runtime.63  63 tests/uncategorized-3.spec.js
-run_spec .test_env_runtime.60  60 tests/fields.spec.js
-run_spec .test_env_runtime.90  90 tests/fields-2.spec.js
-run_spec .test_env_runtime.91  91 tests/fields-3.spec.js
-run_spec .test_env_runtime.61  61 tests/uncategorized.spec.js
+run_spec .test_env_runtime.staging.70  70 tests/table-definition.spec.js
+run_spec .test_env_runtime.staging.62  62 tests/uncategorized-2.spec.js
+run_spec .test_env_runtime.staging.63  63 tests/uncategorized-3.spec.js
+run_spec .test_env_runtime.staging.60  60 tests/fields.spec.js
+run_spec .test_env_runtime.staging.90  90 tests/fields-2.spec.js
+run_spec .test_env_runtime.staging.91  91 tests/fields-3.spec.js
+run_spec .test_env_runtime.staging.61  61 tests/uncategorized.spec.js
 
 echo ""
 echo "============================================"

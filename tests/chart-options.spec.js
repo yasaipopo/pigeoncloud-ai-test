@@ -3,8 +3,8 @@ const { test, expect } = require('@playwright/test');
 const { getAllTypeTableId } = require('./helpers/table-setup');
 const { ensureLoggedIn } = require('./helpers/ensure-login');
 const { createTestEnv } = require('./helpers/create-test-env');
+const { getAuthStatePath } = require('./helpers/env-guard');
 const fs = require('fs');
-const path = require('path');
 
 let BASE_URL = process.env.TEST_BASE_URL;
 let EMAIL = process.env.TEST_EMAIL;
@@ -25,7 +25,7 @@ async function waitForAngular(page, timeout = 15000) {
 async function createLoginContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
 
-    const authStatePath = path.join(__dirname, '..', `.auth-state.${agentNum}.json`);
+    const authStatePath = getAuthStatePath(agentNum);
     if (fs.existsSync(authStatePath)) {
         try {
             return await browser.newContext({ storageState: authStatePath });
