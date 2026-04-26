@@ -2684,3 +2684,175 @@ test.describe.serial('SS-B003: setting/admin_setting coverage gap (中優先度 
         await autoScreenshot(page, 'SS-B003', 'csv-010', _testStart);
     });
 });
+
+// ============================================================================
+// SS-B004: setting カラム coverage gap (機能 ON/OFF・上限値 8 件)
+//
+// PR1〜PR2 で原本 coverage-by-setting.md の高優先度・中優先度を網羅した残り、
+// 機能 ON/OFF 系 / 上限値 系の追加カバー。CRUD レベルで debug API 経由の
+// 永続化を担保。enforcement (UI 表示の出し分け等) は将来的拡張候補。
+//
+// 対象カラム (8 件、全て setting テーブル):
+//   - use_login_id              (ログイン ID 使用)
+//   - max_upload_mb             (アップロード MB 上限)
+//   - use_master_login_url      (マスターログイン URL 利用)
+//   - display_master_on_dashboard (マスターをダッシュボード表示)
+//   - show_only_directory_on_navmenus (ディレクトリのみナビ表示)
+//   - use_phase                 (フェーズ機能)
+//   - use_master_user_auth      (マスターユーザー認証)
+//   - use_google_calendar       (Google カレンダー)
+//
+// 除外: use_freee は debug-tools.php whitelist 未登録のため編集不可
+//       (test-env-limitations.md に記録)
+//
+// 全件 CRUD 専用 (lockout 無し) のため 1 describe 内で連続実行可能。
+// ============================================================================
+test.describe.serial('SS-B004: setting カラム coverage gap (機能 ON/OFF + 上限値 9 件)', () => {
+    let _baseUrl;
+    let _email;
+    let _password;
+    let _setupFailed = false;
+
+    async function _login(page) {
+        await page.context().clearCookies().catch(() => {});
+        await page.goto(_baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (!page.url().includes('/login')) return;
+        await page.waitForSelector('#id', { timeout: 10000 });
+        await page.fill('#id', _email);
+        await page.fill('#password', _password);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
+
+    async function setSetting(page, baseUrl, table, dataObj) {
+        try {
+            const r = await page.request.post(baseUrl + '/api/admin/debug/settings', {
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                data: { table, data: dataObj },
+                failOnStatusCode: false,
+                maxRedirects: 0,
+            });
+            const text = await r.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            return { status: r.status(), json, text: text };
+        } catch (e) { return { error: e.message }; }
+    }
+
+    async function getSettings(page, baseUrl) {
+        try {
+            const r = await page.request.get(baseUrl + '/api/admin/debug/settings', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                failOnStatusCode: false,
+                maxRedirects: 0,
+            });
+            const text = await r.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            return { status: r.status(), json };
+        } catch (e) { return { error: e.message }; }
+    }
+
+    async function verifyCrud(page, baseUrl, table, field, testValue, defaultValue) {
+        const updated = await setSetting(page, baseUrl, table, { [field]: testValue });
+        expect(updated.status, `[${field}] POST 200 (got ${updated.status}, body=${updated.text})`).toBe(200);
+        expect(updated.json && updated.json.success, `[${field}] success: true (got ${JSON.stringify(updated.json)})`).toBe(true);
+
+        const after = await getSettings(page, baseUrl);
+        expect(after.json && after.json[table], `[${field}] ${table} 取得`).toBeTruthy();
+        const savedValue = after.json[table][field];
+        const matches =
+            savedValue === testValue ||
+            String(savedValue) === String(testValue) ||
+            (testValue === 'true' && (savedValue === true || savedValue === 1)) ||
+            (testValue === 'false' && (savedValue === false || savedValue === 0 || savedValue == null));
+        expect(matches, `[${field}] 値が反映 (expected ${testValue}, got ${savedValue})`).toBe(true);
+
+        await setSetting(page, baseUrl, table, { [field]: defaultValue });
+    }
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: false });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[SS-B004 beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll failed');
+        await _login(page);
+    });
+
+    test('lid-010: use_login_id CRUD (ログインID使用)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'use_login_id', 'true', 'false');
+        await autoScreenshot(page, 'SS-B004', 'lid-010', _testStart);
+    });
+
+    test('mu-010: max_upload_mb CRUD (アップロード MB 上限)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'max_upload_mb', '200', '100');
+        await autoScreenshot(page, 'SS-B004', 'mu-010', _testStart);
+    });
+
+    test('mlu-010: use_master_login_url CRUD (マスターログイン URL 利用)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'use_master_login_url', 'true', 'false');
+        await autoScreenshot(page, 'SS-B004', 'mlu-010', _testStart);
+    });
+
+    test('mdb-010: display_master_on_dashboard CRUD (マスターダッシュボード表示)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'display_master_on_dashboard', 'true', 'false');
+        await autoScreenshot(page, 'SS-B004', 'mdb-010', _testStart);
+    });
+
+    test('nav-010: show_only_directory_on_navmenus CRUD (ディレクトリ専用ナビ)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'show_only_directory_on_navmenus', 'true', 'false');
+        await autoScreenshot(page, 'SS-B004', 'nav-010', _testStart);
+    });
+
+    // 注: use_freee は debug-tools.php の whitelist (line 638-651) に含まれず
+    //     debug API 経由では編集不可。テスト環境で freee 連携を切り替えるには
+    //     プロダクト側のマスター画面 or DB 直接操作が必要。
+    //     test-env-limitations.md に記録 → 将来 whitelist 追加または専用 API で対応。
+
+    test('phs-010: use_phase CRUD (フェーズ機能)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'use_phase', 'true', 'false');
+        await autoScreenshot(page, 'SS-B004', 'phs-010', _testStart);
+    });
+
+    test('mua-010: use_master_user_auth CRUD (マスターユーザー認証)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'use_master_user_auth', 'true', 'false');
+        await autoScreenshot(page, 'SS-B004', 'mua-010', _testStart);
+    });
+
+    test('gcl-010: use_google_calendar CRUD (Google カレンダー)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'use_google_calendar', 'true', 'false');
+        await autoScreenshot(page, 'SS-B004', 'gcl-010', _testStart);
+    });
+});
