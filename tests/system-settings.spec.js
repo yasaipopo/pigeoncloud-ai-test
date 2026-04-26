@@ -2109,3 +2109,363 @@ test.describe.serial('staging diff regression (system-settings 関連)', () => {
         }
     });
 });
+
+// ============================================================================
+// SS-B001: setting カラム coverage gap (allow_ip_addresses 同類)
+//
+// 背景:
+//   .claude/coverage-by-setting.md で setting/admin_setting の全カラムを E2E カバー
+//   状況にマトリクス化した結果、UP-B003 で追加した allow_ip_addresses と同様に
+//   "DB 列があり enforcement もあるが E2E 抜け" の高優先度ギャップが 3 件判明:
+//     - is_maintenance        (メンテナンスモード遮断)
+//     - enable_api            (API オプション有効化)
+//     - allow_only_secure_access (クライアント証明書必須)
+//
+// プロダクト調査結果:
+//   1) is_maintenance:
+//      - true 時: /api/* は HTTP 503 + JSON {maintenance:true}
+//                  /admin/* も "メンテナンス中です" でエラー
+//                  HTML /admin/login は影響なし (認証前なので)
+//      - debug API は maintenance チェック対象外 → リカバリ可能
+//      - 場所: routes/public/api.php:338, routes/admin/admin.php:1137
+//
+//   2) enable_api:
+//      - false 時: /api/v1/* (Public API) は HTTP 400 + "APIオプションが有効化されていません"
+//      - /api/admin/* は別ルート (debug 含む) で enable_api チェック対象外 → リカバリ可能
+//      - 場所: routes/public/api.php:346
+//
+//   3) allow_only_secure_access:
+//      - true 時: /check-cert で SEC_DOMAIN/mTLS チェック → 非対応域は 403
+//      - 場所: routes/login/admin/login.php:112
+//      - staging では ALB mTLS 偽装不可 → CRUD 確認のみ + test-env-limitations.md 記録
+// ============================================================================
+test.describe.serial('SS-B001: setting カラム coverage gap (maint / enable_api / secure_access)', () => {
+    let _baseUrl;
+    let _email;
+    let _password;
+    let _setupFailed = false;
+
+    async function _login(page) {
+        await page.context().clearCookies().catch(() => {});
+        await page.goto(_baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (!page.url().includes('/login')) return;
+        await page.waitForSelector('#id', { timeout: 10000 });
+        await page.fill('#id', _email);
+        await page.fill('#password', _password);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
+
+    /**
+     * setting テーブルの値を debug API で更新 (page.request 経由 = ページ遷移耐性あり)
+     * @param {object} dataObj 更新データ (例: { is_maintenance: 'true' })
+     */
+    async function setSetting(page, baseUrl, dataObj) {
+        try {
+            const r = await page.request.post(baseUrl + '/api/admin/debug/settings', {
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                data: { table: 'setting', data: dataObj },
+                failOnStatusCode: false,
+                maxRedirects: 0,
+            });
+            const text = await r.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            // text は full で保持 (maintenance 文字列検出用)
+            return { status: r.status(), json, text: text, snippet: text.slice(0, 300) };
+        } catch (e) { return { error: e.message }; }
+    }
+
+    /**
+     * setting テーブルの値を debug API で取得 (page.request 経由)
+     */
+    async function getSetting(page, baseUrl) {
+        try {
+            const r = await page.request.get(baseUrl + '/api/admin/debug/settings', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                failOnStatusCode: false,
+                maxRedirects: 0,
+            });
+            const text = await r.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            return { status: r.status(), json, text: text.slice(0, 500) };
+        } catch (e) { return { error: e.message }; }
+    }
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: false });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[SS-B001 beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.afterAll(async ({ browser }) => {
+        // 環境破壊防止: maintenance / enable_api を必ず通常状態に戻す
+        if (_setupFailed || !_baseUrl) return;
+        try {
+            const page = await browser.newPage();
+            await _login(page);
+            await setSetting(page, _baseUrl, { is_maintenance: 'false', enable_api: 'true', allow_only_secure_access: 'false' });
+            await page.close();
+        } catch (e) {
+            console.error('[SS-B001 afterAll cleanup failed]', e.message);
+        }
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll failed');
+        await _login(page);
+    });
+
+    /**
+     * page.request 経由で API を叩く (page.evaluate と違い、ページ遷移で context 破棄されない)
+     * @param {object} opts.basicAuth { email, password } を渡すと X-Pigeon-Authorization ヘッダー付与
+     */
+    async function fetchApi(page, baseUrl, path, opts = {}) {
+        try {
+            const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+            if (opts.basicAuth) {
+                const token = Buffer.from(`${opts.basicAuth.email}:${opts.basicAuth.password}`).toString('base64');
+                headers['X-Pigeon-Authorization'] = token;
+            }
+            const r = await page.request.get(baseUrl + path, {
+                headers,
+                failOnStatusCode: false,
+                maxRedirects: 0,
+            });
+            const text = await r.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            return { status: r.status(), json, text: text, snippet: text.slice(0, 300) };
+        } catch (e) { return { error: e.message }; }
+    }
+
+    /**
+     * @requirements.txt(R-152)
+     * api-010: enable_api=false → /api/v1/* (Public API) が HTTP 400 で拒否
+     */
+    test('api-010: enable_api=false → /api/v1/* (Public API) が 400 で拒否', async ({ page }) => {
+        test.setTimeout(90000);
+        const _testStart = Date.now();
+
+        // [flow] 10-1. enable_api=false
+        const updated = await setSetting(page, _baseUrl, { enable_api: 'false' });
+        // [check] 10-2. ✅ POST 200
+        expect(updated.status, `POST status (got ${updated.status}, body=${updated.text})`).toBe(200);
+
+        // [flow] 10-3. /api/v1/* (Public API) を Basic auth で叩く (auth が enable_api チェックの前に走るため)
+        const apiResp = await fetchApi(page, _baseUrl, '/api/v1/table', {
+            basicAuth: { email: _email, password: _password }
+        });
+        // [check] 10-4. ✅ HTTP 400 (or status>=400) + "APIオプションが有効化されていません"
+        // 注: enable_api チェックは Exception throw → catch で 400 + JSON
+        const isApiDisabled = apiResp.json && (
+            (apiResp.json.message && apiResp.json.message.includes('APIオプション')) ||
+            (apiResp.json.error_message && apiResp.json.error_message.includes('APIオプション')) ||
+            (apiResp.json.error_a && JSON.stringify(apiResp.json.error_a).includes('APIオプション'))
+        );
+        expect(isApiDisabled, `enable_api=false でエラーメッセージ "APIオプション..." を含む (status=${apiResp.status}, json=${JSON.stringify(apiResp.json)})`).toBe(true);
+
+        // クリーンアップ: enable_api=true に戻す
+        await setSetting(page, _baseUrl, { enable_api: 'true' });
+
+        await autoScreenshot(page, 'SS-B001', 'api-010', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-152)
+     * api-020: enable_api=true → /api/v1/* が通常応答 (拒否されない)
+     */
+    test('api-020: enable_api=true → /api/v1/* が通常応答', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        // [flow] 20-1. enable_api=true
+        await setSetting(page, _baseUrl, { enable_api: 'true' });
+
+        // [flow] 20-2. /api/v1/* を Basic auth で fetch
+        const apiResp = await fetchApi(page, _baseUrl, '/api/v1/table', {
+            basicAuth: { email: _email, password: _password }
+        });
+        // [check] 20-3. ✅ 「APIオプション無効」エラーは出ない (= enable_api=true で API スコープ通る)
+        const isApiDisabled = apiResp.json && (
+            (apiResp.json.message && apiResp.json.message.includes('APIオプション')) ||
+            (apiResp.json.error_message && apiResp.json.error_message.includes('APIオプション')) ||
+            (apiResp.json.error_a && JSON.stringify(apiResp.json.error_a).includes('APIオプション'))
+        );
+        expect(isApiDisabled, `enable_api=true なら API オプション拒否は出ない (status=${apiResp.status}, json=${JSON.stringify(apiResp.json)})`).not.toBe(true);
+
+        await autoScreenshot(page, 'SS-B001', 'api-020', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-152)
+     * api-030: enable_api=false でも /api/admin/debug/* は通る (リカバリ性 + scope 確認)
+     */
+    test('api-030: enable_api=false でも /api/admin/debug/* は通る (scope: /api/v1/* のみ)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        // [flow] 30-1. enable_api=false
+        await setSetting(page, _baseUrl, { enable_api: 'false' });
+
+        // [flow] 30-2. debug API を再度叩いて確認 (= リカバリ性検証)
+        const debugResp = await getSetting(page, _baseUrl);
+        // [check] 30-3. ✅ debug API は通常通り動作 (enable_api チェック対象外)
+        expect(debugResp.status, `debug API は scope 外 (got ${debugResp.status})`).toBe(200);
+        expect(debugResp.json, `JSON 取得`).toBeTruthy();
+
+        // 復帰: enable_api=true
+        const recovery = await setSetting(page, _baseUrl, { enable_api: 'true' });
+        expect(recovery.status, `復帰 POST 200`).toBe(200);
+
+        await autoScreenshot(page, 'SS-B001', 'api-030', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-117)
+     * sec-010: allow_only_secure_access の保存・取得 CRUD のみ確認
+     *
+     * 注: enforcement (= /check-cert で 403 拒否) は ALB mTLS / SEC_DOMAIN 経由のため
+     * staging Playwright では実走不可。test-env-limitations.md に記録。
+     * ここでは設定値の永続化のみ検証する。
+     */
+    /**
+     * @requirements.txt(R-150)
+     * maint-010: is_maintenance=true → 管理画面で "メンテナンス" 表示
+     *
+     * ⚠ 重要: このテストは "ロックアウト" 状態を作る。is_maintenance=true 設定後は
+     *   admin.php:1137 の maintenance チェックが /admin/* 全体に効き、
+     *   debug API も SPA HTML を返すため復旧できない。
+     *   そのため UP-B003 / glip-040 と同じパターンで describe の **最後** に配置する。
+     *   afterAll は best-effort cleanup (テスト環境は使い捨て)。
+     *
+     * 検証方針: API レイヤーの enforcement (routes/public/api.php:338 / admin.php:1137) は
+     *   検証パスにより返却形式が変わる (HTML / JSON / 503)。最も堅牢な検証は
+     *   "ブラウザで管理画面に行ってメンテナンス画面が表示される" 動作確認。
+     */
+    test('maint-010: is_maintenance=true → 管理画面で メンテナンス 表示される', async ({ page }) => {
+        test.setTimeout(90000);
+        const _testStart = Date.now();
+
+        // [flow] 10-1. is_maintenance=true に設定
+        const updated = await setSetting(page, _baseUrl, { is_maintenance: 'true' });
+        // [check] 10-2. ✅ POST 200
+        expect(updated.status, `POST status (got ${updated.status}, body=${updated.text})`).toBe(200);
+
+        // [flow] 10-3. 管理画面に遷移 (ブラウザ表示)
+        await page.goto(_baseUrl + '/admin/dashboard', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+        // SPA レンダリング待ち
+        await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+
+        // [check] 10-4. ✅ ページ内に "メンテナンス" 文字列が表示される
+        const bodyText = await page.locator('body').innerText({ timeout: 10000 }).catch(() => '');
+        expect(bodyText, `ページ内に "メンテナンス" 文字列が表示される (body sample=${bodyText.slice(0, 200)})`).toContain('メンテナンス');
+
+        // 注: クリーンアップ不能 (debug API も拒否される)。
+        // afterAll で best-effort に試みる。テスト環境は使い捨てなので問題なし。
+
+        await autoScreenshot(page, 'SS-B001', 'maint-010', _testStart);
+    });
+});
+
+// ============================================================================
+// SS-B002: setting カラム coverage gap (allow_only_secure_access 単独)
+//
+// SS-B001 から分離: allow_only_secure_access=true は staging 環境 (SEC_DOMAIN/mTLS なし)
+// で session/login も含めて広範に block する可能性があるため、専用テナント (createTestEnv)
+// で隔離する。SS-B001 の他テストとは別 describe = 別環境で実行。
+// ============================================================================
+test.describe.serial('SS-B002: setting カラム coverage gap (allow_only_secure_access)', () => {
+    let _baseUrl;
+    let _email;
+    let _password;
+    let _setupFailed = false;
+
+    async function _login(page) {
+        await page.context().clearCookies().catch(() => {});
+        await page.goto(_baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (!page.url().includes('/login')) return;
+        await page.waitForSelector('#id', { timeout: 10000 });
+        await page.fill('#id', _email);
+        await page.fill('#password', _password);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
+
+    async function setSetting(page, baseUrl, dataObj) {
+        try {
+            const r = await page.request.post(baseUrl + '/api/admin/debug/settings', {
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                data: { table: 'setting', data: dataObj },
+                failOnStatusCode: false,
+                maxRedirects: 0,
+            });
+            const text = await r.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            return { status: r.status(), json, text: text, snippet: text.slice(0, 300) };
+        } catch (e) { return { error: e.message }; }
+    }
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: false });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[SS-B002 beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll failed');
+        await _login(page);
+    });
+
+    /**
+     * @requirements.txt(R-117)
+     * sec-010: allow_only_secure_access=true の設定保存
+     *
+     * 注: enforcement (= /check-cert で 403 拒否) は ALB mTLS / SEC_DOMAIN 経由のため
+     * staging Playwright では実走不可 → test-env-limitations.md に記録。
+     * ここでは設定 POST が成功することのみ検証 (専用テナントで分離)。
+     */
+    test('sec-010: allow_only_secure_access=true の設定保存 (enforcement は staging 実走不可)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        // [flow] 10-1. true に設定
+        const updated = await setSetting(page, _baseUrl, { allow_only_secure_access: 'true' });
+        // [check] 10-2. ✅ POST 200 + success フラグ
+        expect(updated.status, `POST 200 (got ${updated.status}, body=${updated.text})`).toBe(200);
+        expect(updated.json && updated.json.success, `success: true (got ${JSON.stringify(updated.json)})`).toBe(true);
+
+        // 注: enforcement テストは ALB mTLS 必須のため staging では実走不可。
+        // テスト環境は使い捨てなのでクリーンアップ不要。
+
+        await autoScreenshot(page, 'SS-B002', 'sec-010', _testStart);
+    });
+});
