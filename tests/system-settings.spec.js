@@ -2469,3 +2469,218 @@ test.describe.serial('SS-B002: setting カラム coverage gap (allow_only_secure
         await autoScreenshot(page, 'SS-B002', 'sec-010', _testStart);
     });
 });
+
+// ============================================================================
+// SS-B003: setting / admin_setting カラム coverage gap (中優先度 11 件)
+//
+// .claude/coverage-by-setting.md で抽出された "🟡 中優先度" カラム群を
+// CRUD レベルでカバー (debug API で値の保存・読み戻しを検証)。
+// 各カラムの enforcement (機能 ON/OFF・UI 表示等) は将来的な拡張候補
+// だが、まず CRUD で "設定機能が壊れていない" ことを担保する。
+//
+// 対象カラム (11 件):
+//   setting:
+//     - contract_type            (user_num / login_num)
+//     - enable_filesearch        (AI ファイル検索)
+//     - use_analytics_ai         (AI 分析)
+//     - enable_rpa               (RPA Connect 機能)
+//     - action_limit_per_min     (API レート制限/分)
+//     - action_limit_per_15min   (API レート制限/15分)
+//   admin_setting:
+//     - scrollable               (テーブル UI スクロール)
+//     - use_comma                (数値 3 桁区切り)
+//     - not_close_toastr_auto    (Toastr 自動閉じ)
+//     - lock_timeout_min         (レコードロック)
+//     - ignore_csv_noexist_header (CSV インポート)
+//
+// 全カラム CRUD 専用 (lockout を起こさない) のため 1 describe 内で連続実行可能。
+// ============================================================================
+test.describe.serial('SS-B003: setting/admin_setting coverage gap (中優先度 11 件)', () => {
+    let _baseUrl;
+    let _email;
+    let _password;
+    let _setupFailed = false;
+
+    async function _login(page) {
+        await page.context().clearCookies().catch(() => {});
+        await page.goto(_baseUrl + '/admin/login', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        if (!page.url().includes('/login')) return;
+        await page.waitForSelector('#id', { timeout: 10000 });
+        await page.fill('#id', _email);
+        await page.fill('#password', _password);
+        await page.locator('button[type=submit].btn-primary').first().click();
+        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+    }
+
+    /**
+     * setting / admin_setting テーブルの値を debug API で更新
+     */
+    async function setSetting(page, baseUrl, table, dataObj) {
+        try {
+            const r = await page.request.post(baseUrl + '/api/admin/debug/settings', {
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                data: { table, data: dataObj },
+                failOnStatusCode: false,
+                maxRedirects: 0,
+            });
+            const text = await r.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            return { status: r.status(), json, text: text, snippet: text.slice(0, 300) };
+        } catch (e) { return { error: e.message }; }
+    }
+
+    /**
+     * setting / admin_setting テーブルの値を debug API で取得
+     */
+    async function getSettings(page, baseUrl) {
+        try {
+            const r = await page.request.get(baseUrl + '/api/admin/debug/settings', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                failOnStatusCode: false,
+                maxRedirects: 0,
+            });
+            const text = await r.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            return { status: r.status(), json, text: text };
+        } catch (e) { return { error: e.message }; }
+    }
+
+    /**
+     * 共通 CRUD 検証ヘルパ:
+     *   1) setSetting で値を更新 → POST 200 + success: true
+     *   2) getSettings で読み戻し → 設定値が反映
+     *   3) 元の値に戻す
+     */
+    async function verifyCrud(page, baseUrl, table, field, testValue, defaultValue) {
+        // POST
+        const updated = await setSetting(page, baseUrl, table, { [field]: testValue });
+        expect(updated.status, `[${field}] POST 200 (got ${updated.status}, body=${updated.text})`).toBe(200);
+        expect(updated.json && updated.json.success, `[${field}] success: true (got ${JSON.stringify(updated.json)})`).toBe(true);
+
+        // GET
+        const after = await getSettings(page, baseUrl);
+        expect(after.json && after.json[table], `[${field}] ${table} 取得 (status=${after.status})`).toBeTruthy();
+        const savedValue = after.json[table][field];
+        // 値の比較 (型ゆるめ: 文字列 / boolean / 数値 のいずれかで一致)
+        const matches =
+            savedValue === testValue ||
+            String(savedValue) === String(testValue) ||
+            (testValue === 'true' && (savedValue === true || savedValue === 1)) ||
+            (testValue === 'false' && (savedValue === false || savedValue === 0 || savedValue == null));
+        expect(matches, `[${field}] 値が反映 (expected ${testValue}, got ${savedValue})`).toBe(true);
+
+        // 元に戻す (best-effort)
+        await setSetting(page, baseUrl, table, { [field]: defaultValue });
+    }
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: false });
+            _baseUrl = env.baseUrl;
+            _email = env.email;
+            _password = env.password;
+            BASE_URL = env.baseUrl;
+            EMAIL = env.email;
+            PASSWORD = env.password;
+            process.env.TEST_BASE_URL = env.baseUrl;
+            process.env.TEST_EMAIL = env.email;
+            process.env.TEST_PASSWORD = env.password;
+        } catch (e) {
+            console.error('[SS-B003 beforeAll]', e.message);
+            _setupFailed = true;
+            throw e;
+        }
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll failed');
+        await _login(page);
+    });
+
+    // -------------------------------------------------------------------------
+    // setting テーブル (テナント全体設定)
+    // -------------------------------------------------------------------------
+
+    test('ct-010: contract_type CRUD (user_num / login_num 切替)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'contract_type', 'login_num', 'user_num');
+        await autoScreenshot(page, 'SS-B003', 'ct-010', _testStart);
+    });
+
+    test('fs-010: enable_filesearch CRUD (AI ファイル検索)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'enable_filesearch', 'true', 'false');
+        await autoScreenshot(page, 'SS-B003', 'fs-010', _testStart);
+    });
+
+    test('aa-010: use_analytics_ai CRUD (AI 分析)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'use_analytics_ai', 'true', 'false');
+        await autoScreenshot(page, 'SS-B003', 'aa-010', _testStart);
+    });
+
+    test('rpa-010: enable_rpa CRUD (RPA Connect)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'enable_rpa', 'true', 'false');
+        await autoScreenshot(page, 'SS-B003', 'rpa-010', _testStart);
+    });
+
+    test('rl-010: action_limit_per_min CRUD (API レート制限/分)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'action_limit_per_min', '120', '60');
+        await autoScreenshot(page, 'SS-B003', 'rl-010', _testStart);
+    });
+
+    test('rl-020: action_limit_per_15min CRUD (API レート制限/15分)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'setting', 'action_limit_per_15min', '600', '300');
+        await autoScreenshot(page, 'SS-B003', 'rl-020', _testStart);
+    });
+
+    // -------------------------------------------------------------------------
+    // admin_setting テーブル (UI / 運用設定)
+    // -------------------------------------------------------------------------
+
+    test('ui-010: scrollable CRUD (テーブル UI スクロール)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'admin_setting', 'scrollable', 'true', 'false');
+        await autoScreenshot(page, 'SS-B003', 'ui-010', _testStart);
+    });
+
+    test('ui-020: use_comma CRUD (数値 3 桁区切り)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'admin_setting', 'use_comma', 'true', 'false');
+        await autoScreenshot(page, 'SS-B003', 'ui-020', _testStart);
+    });
+
+    test('ui-030: not_close_toastr_auto CRUD (Toastr 自動閉じ)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'admin_setting', 'not_close_toastr_auto', 'true', 'false');
+        await autoScreenshot(page, 'SS-B003', 'ui-030', _testStart);
+    });
+
+    test('lk-010: lock_timeout_min CRUD (レコードロック分数)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'admin_setting', 'lock_timeout_min', '30', '15');
+        await autoScreenshot(page, 'SS-B003', 'lk-010', _testStart);
+    });
+
+    test('csv-010: ignore_csv_noexist_header CRUD (CSV ヘッダー無視)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+        await verifyCrud(page, _baseUrl, 'admin_setting', 'ignore_csv_noexist_header', 'true', 'false');
+        await autoScreenshot(page, 'SS-B003', 'csv-010', _testStart);
+    });
+});
