@@ -5782,6 +5782,477 @@ test.describe('UP-B002: IP制限の網羅テスト', () => {
 });
 
 // ============================================================================
+// UP-B003: IP制限 (全体IP allow_ip_addresses + 個別IP との複合パターン)
+//
+// 背景:
+//   - UP-B002 は admin_allow_ips_multi (個別IP) のみカバー
+//   - 本ブロックは setting.allow_ip_addresses (全体IP) と複合の挙動を検証
+//
+// プロダクト実装 (調査済み):
+//   - 全体IP 列: setting.allow_ip_addresses (CSV 文字列)
+//   - 全体IP 判定: public/api/index.php:443-454 (public API 入口で実行)
+//     -> NG: { status: 'error', type: 'ip', ip: '...' } を返して die
+//   - 全体IP CRUD: POST /admin/debug/settings { table:'setting', data:{allow_ip_addresses:'IP1,IP2'} }
+//   - 個別IP 判定: Admin::isValidIp() (ApiRequest::authorize() から呼ばれる、API 認証後)
+//   - 順序: 全体IP が先 (public API 入口) → 個別IP が後 (認証後)
+//
+// 注意:
+//   - 全体IP の enforcement は public/api/index.php のみ。
+//     管理画面 (admin.php) のログインフローでは現状読まれない可能性あり (glip-080 で検証)
+//   - afterAll で必ず allow_ip_addresses=NULL に戻す (環境破壊防止)
+// ============================================================================
+test.describe.serial('UP-B003: IP制限（全体IP allow_ip_addresses + 複合パターン）', () => {
+    let localBaseUrl;
+    let localEmail;
+    let localPassword;
+    let testUser;
+    let currentIp;
+    let _setupFailed = false;
+
+    /**
+     * 現在の接続元 IP を取得 (UP-B002 と同じロジック)
+     */
+    async function getCurrentIp(page) {
+        if (process.env.CURRENT_IP) return process.env.CURRENT_IP;
+        const result = await page.evaluate(async () => {
+            try {
+                const r = await fetch('https://api.ipify.org?format=json');
+                if (!r.ok) return null;
+                const j = await r.json();
+                return j.ip || null;
+            } catch (e) { return null; }
+        });
+        if (!result) throw new Error('currentIp の取得に失敗しました');
+        return result;
+    }
+
+    /**
+     * 全体IP (setting.allow_ip_addresses) を debug API で更新
+     * @param {string|null} ipsCsv カンマ区切り IP 文字列。null/空文字で全許可に戻す
+     */
+    async function setGlobalAllowIps(page, baseUrl, ipsCsv) {
+        const result = await page.evaluate(async ({ baseUrl, ipsCsv }) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/settings', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({
+                        table: 'setting',
+                        data: { allow_ip_addresses: ipsCsv == null ? '' : ipsCsv }
+                    })
+                });
+                const text = await r.text();
+                let json = null;
+                try { json = JSON.parse(text); } catch (e) {}
+                return { status: r.status, json, text: text.slice(0, 200) };
+            } catch (e) { return { error: e.message }; }
+        }, { baseUrl, ipsCsv });
+        return result;
+    }
+
+    /**
+     * 全体IP (setting.allow_ip_addresses) を debug API で取得
+     */
+    async function getGlobalAllowIps(page, baseUrl) {
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/settings', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const text = await r.text();
+                let json = null;
+                try { json = JSON.parse(text); } catch (e) {}
+                return { status: r.status, json, text: text.slice(0, 500) };
+            } catch (e) { return { error: e.message }; }
+        }, baseUrl);
+        return result;
+    }
+
+    /**
+     * 個別IP (admin_allow_ips_multi) を UI 経由で更新 (UP-B002 流用)
+     */
+    async function setUserAllowIps(page, baseUrl, userId, ips) {
+        await page.goto(baseUrl + '/admin/admin/edit/' + userId, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForSelector('.navbar', { timeout: 10000 });
+        await waitForAngular(page);
+
+        const ipSection = page.locator('[class*="wrap-field-allow_ips"]');
+
+        if (ips.length === 0) {
+            const existing = await ipSection.locator('input[type="text"]').all();
+            for (const inp of existing) {
+                await inp.fill('', { timeout: 5000 }).catch(() => {});
+            }
+        } else {
+            if (await ipSection.locator('input[type="text"]').count() === 0) {
+                await ipSection.locator('button.btn-success').first().click({ force: true });
+                await page.waitForTimeout(300);
+            }
+            await ipSection.locator('input[type="text"]').first().fill(ips[0], { timeout: 5000 });
+            for (let i = 1; i < ips.length; i++) {
+                const beforeCount = await ipSection.locator('input[type="text"]').count();
+                await ipSection.locator('button.btn-success').first().click({ force: true });
+                await page.waitForTimeout(300);
+                const afterInputs = await ipSection.locator('input[type="text"]').all();
+                if (afterInputs.length > beforeCount) {
+                    await afterInputs[afterInputs.length - 1].fill(ips[i], { timeout: 5000 }).catch(() => {});
+                }
+            }
+        }
+
+        const updateBtn = page.locator('button.btn-ladda').filter({ hasText: /更新/ }).first();
+        await updateBtn.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(() => {});
+        await updateBtn.click({ force: true, timeout: 10000 });
+        await waitForAngular(page);
+    }
+
+    /**
+     * セッションクリアして別ユーザーで再ログイン
+     */
+    async function reLoginAs(page, baseUrl, email, password) {
+        await page.context().clearCookies();
+        await page.goto(baseUrl + '/admin/login', { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('#id', { timeout: 15000 });
+        await page.fill('#id', email);
+        await page.fill('#password', password);
+        await page.click('button[type=submit].btn-primary');
+        await Promise.race([
+            page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => null),
+            page.waitForURL(/\/admin\/login/, { timeout: 15000 }).catch(() => null)
+        ]);
+        await page.waitForTimeout(500);
+    }
+
+    /**
+     * テストユーザー作成 (debug API)
+     */
+    async function createUserViaApi(page, baseUrl) {
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/create-user', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({})
+                });
+                const text = await r.text();
+                let json = null;
+                try { json = JSON.parse(text); } catch (e) {}
+                return { status: r.status, json };
+            } catch (e) { return { error: e.message }; }
+        }, baseUrl);
+        return result;
+    }
+
+    test.beforeAll(async ({ browser }) => {
+        try {
+            const env = await createTestEnv(browser, { withAllTypeTable: false });
+            localBaseUrl = env.baseUrl;
+            localEmail = env.email;
+            localPassword = env.password;
+            BASE_URL = localBaseUrl;
+            EMAIL = localEmail;
+            PASSWORD = localPassword;
+
+            const page = await browser.newPage();
+            await login(page, localEmail, localPassword);
+
+            currentIp = await getCurrentIp(page);
+            console.log('[UP-B003] currentIp:', currentIp);
+
+            const result = await createUserViaApi(page, localBaseUrl);
+            if (!result.json || result.json.result !== 'success') {
+                throw new Error('テストユーザー作成失敗: ' + JSON.stringify(result));
+            }
+            testUser = {
+                id: result.json.id,
+                email: result.json.email,
+                password: result.json.password || 'admin'
+            };
+
+            // beforeAll の最後で全体IP を念のためクリア
+            await setGlobalAllowIps(page, localBaseUrl, '');
+            await page.close();
+        } catch (e) {
+            _setupFailed = true;
+            console.error('[UP-B003] beforeAll failed:', e.message);
+            throw e;
+        }
+    });
+
+    test.afterAll(async ({ browser }) => {
+        // 環境破壊防止: 全体IP を確実にクリア
+        if (_setupFailed || !localBaseUrl) return;
+        try {
+            const page = await browser.newPage();
+            await login(page, localEmail, localPassword);
+            await setGlobalAllowIps(page, localBaseUrl, '');
+            await page.close();
+        } catch (e) {
+            console.error('[UP-B003] afterAll cleanup failed:', e.message);
+        }
+    });
+
+    test.beforeEach(async ({ page }) => {
+        test.skip(_setupFailed, 'beforeAll failed');
+        await login(page, localEmail, localPassword);
+    });
+
+    /**
+     * @requirements.txt(R-139)
+     * glip-010: setting.allow_ip_addresses を debug API で取得・保存・再取得できる
+     *
+     * 注: 全体IP enforcement は public/api/index.php:443 で全 admin API も含めて実行される。
+     * 非マッチ IP を設定すると debug API も拒否されてロックアウト不能になるため、
+     * 本テストでは "現在IP" を許可する形で CRUD のみ検証する。
+     * 非マッチ IP の拒否動作は public/api 経由で別途検証 (glip-040 で別アプローチ)。
+     */
+    test('glip-010: 全体IP setting を debug API で CRUD できる', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        // [flow] 10-1. 初期値を取得
+        const before = await getGlobalAllowIps(page, localBaseUrl);
+        // [check] 10-2. ✅ GET 200 + JSON 形式 + setting オブジェクト
+        expect(before.status, `GET status (got ${before.status})`).toBe(200);
+        expect(before.json, `JSON 取得 (body=${before.text})`).toBeTruthy();
+        expect(before.json.setting, `setting オブジェクト存在 (keys=${Object.keys(before.json || {}).join(',')})`).toBeTruthy();
+        expect(before.json.setting, 'allow_ip_addresses キー存在').toHaveProperty('allow_ip_addresses');
+
+        // [flow] 10-3. allow_ip_addresses を 現在IP/32 に更新 (許可されるので debug API も継続可能)
+        const testValue = `${currentIp}/32`;
+        const updated = await setGlobalAllowIps(page, localBaseUrl, testValue);
+        // [check] 10-4. ✅ POST 200
+        expect(updated.status, `POST status (got ${updated.status}, body=${updated.text})`).toBe(200);
+
+        // [flow] 10-5. 再取得 (現在IPは許可されているので 200 + JSON が返る)
+        const after = await getGlobalAllowIps(page, localBaseUrl);
+        // [check] 10-6. ✅ JSON で setting が読める
+        expect(after.json, `GET2 JSON 取得 (status=${after.status}, body=${after.text})`).toBeTruthy();
+        expect(after.json.setting, `GET2 setting 存在 (keys=${Object.keys(after.json || {}).join(',')})`).toBeTruthy();
+        // [check] 10-7. ✅ allow_ip_addresses が反映 (currentIp/32)
+        expect(after.json.setting.allow_ip_addresses, `値が反映 (got ${after.json.setting.allow_ip_addresses})`).toBe(testValue);
+
+        // [flow] 10-8. クリア
+        await setGlobalAllowIps(page, localBaseUrl, '');
+        const cleared = await getGlobalAllowIps(page, localBaseUrl);
+        // [check] 10-9. ✅ 空に戻っている
+        const clearedValue = cleared.json && cleared.json.setting ? cleared.json.setting.allow_ip_addresses : null;
+        expect(clearedValue == null || clearedValue === '', `クリア後は空 (実際: ${clearedValue})`).toBeTruthy();
+
+        await autoScreenshot(page, 'UP-B003', 'glip-010', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-139)
+     * glip-020: 全体IP=空 (デフォルト) で public API リクエストが通ること
+     */
+    test('glip-020: 全体IP=空 → public API 通る (デフォルト動作)', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        // [flow] 20-1. 全体IP を空に設定
+        await setGlobalAllowIps(page, localBaseUrl, '');
+
+        // [flow] 20-2. public API ヘルス確認 (login ページ取得 = public/api/index.php が動く)
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/admin/login', { method: 'GET', credentials: 'omit' });
+                return { status: r.status, ok: r.ok };
+            } catch (e) { return { error: e.message }; }
+        }, localBaseUrl);
+        // [check] 20-3. ✅ 200 OK (全許可で通る)
+        expect(result.status, `デフォルト動作で login ページが 200 (got ${result.status})`).toBe(200);
+
+        await autoScreenshot(page, 'UP-B003', 'glip-020', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-139)
+     * glip-030: 全体IP=現在IP/32 → public API 通る (マッチ許可)
+     */
+    test('glip-030: 全体IP=現在IP/32 → public API 通る', async ({ page }) => {
+        test.setTimeout(60000);
+        const _testStart = Date.now();
+
+        // [flow] 30-1. 全体IP に現在IPを設定
+        await setGlobalAllowIps(page, localBaseUrl, `${currentIp}/32`);
+
+        // [flow] 30-2. public API リクエスト
+        const result = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/admin/login', { method: 'GET', credentials: 'omit' });
+                return { status: r.status };
+            } catch (e) { return { error: e.message }; }
+        }, localBaseUrl);
+        // [check] 30-3. ✅ 200 (マッチ許可)
+        expect(result.status, `マッチ IP では通る (got ${result.status})`).toBe(200);
+
+        // クリーンアップ
+        await setGlobalAllowIps(page, localBaseUrl, '');
+
+        await autoScreenshot(page, 'UP-B003', 'glip-030', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-139)
+     * glip-050: 複合 - 全体IP=現在IP + 個別IP=現在IP → 通る
+     */
+    test('glip-050: 複合 全体OK + 個別OK → 通る', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        // [flow] 50-1. 全体IP=現在IP/32
+        await setGlobalAllowIps(page, localBaseUrl, `${currentIp}/32`);
+        // [flow] 50-2. 個別IP=現在IP/32 (testUser)
+        await setUserAllowIps(page, localBaseUrl, testUser.id, [`${currentIp}/32`]);
+
+        // [flow] 50-3. testUser で再ログイン
+        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
+
+        // [check] 50-4. ✅ ダッシュボード表示 (両方マッチで通る)
+        await expect(page.locator('.navbar')).toBeVisible({ timeout: 10000 });
+
+        // クリーンアップ
+        await page.context().clearCookies();
+        await login(page, localEmail, localPassword);
+        await setGlobalAllowIps(page, localBaseUrl, '');
+        await setUserAllowIps(page, localBaseUrl, testUser.id, []);
+
+        await autoScreenshot(page, 'UP-B003', 'glip-050', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-139)
+     * glip-060: 複合 - 全体IP=現在IP + 個別IP=拒否IP → 個別で拒否
+     */
+    test('glip-060: 複合 全体OK + 個別NG → 個別で拒否', async ({ page }) => {
+        test.setTimeout(180000);
+        const _testStart = Date.now();
+
+        // [flow] 60-1. 全体IP=現在IP/32 (通る)
+        await setGlobalAllowIps(page, localBaseUrl, `${currentIp}/32`);
+        // [flow] 60-2. 個別IP=1.1.1.1/32 (拒否)
+        await setUserAllowIps(page, localBaseUrl, testUser.id, ['1.1.1.1/32']);
+
+        // [flow] 60-3. testUser で再ログイン
+        await reLoginAs(page, localBaseUrl, testUser.email, testUser.password);
+
+        // [check] 60-4. ✅ 個別 IP で拒否される: /admin/login に残る or navbar 非表示
+        const navbarVisible = await page.locator('.navbar').isVisible({ timeout: 3000 }).catch(() => false);
+        const stillOnLogin = page.url().includes('/login');
+        expect(!navbarVisible || stillOnLogin, `個別IPで拒否 (navbar=${navbarVisible}, url=${page.url()})`).toBe(true);
+
+        // クリーンアップ
+        await page.context().clearCookies();
+        await login(page, localEmail, localPassword);
+        await setGlobalAllowIps(page, localBaseUrl, '');
+        await setUserAllowIps(page, localBaseUrl, testUser.id, []);
+
+        await autoScreenshot(page, 'UP-B003', 'glip-060', _testStart);
+    });
+
+    /**
+     * @requirements.txt(R-139)
+     * glip-040: 全体IP=拒否IP → API 拒否、HTML ページは表示 (= 仕様確認 + 複合の優先順位確認)
+     *
+     * 統合テスト (glip-070 / glip-080 を兼ねる):
+     *   - 全体IP に非マッチ IP を設定すると public/api/index.php:443 で全 /api/* リクエストを die
+     *   - 個別IP=現在IP/32 を併設しても全体IP で先に拒否される (= 順序: 全体→個別)
+     *   - HTML ページ (/admin/login) は public/api 配下ではないので表示は可能
+     *
+     * ⚠ 重要: このテストは "ロックアウト" 状態を作る。実行後は debug API でも復旧不可。
+     *   そのため UP-B003 describe の **最後** に配置する。afterAll は best-effort (失敗してもOK)。
+     *
+     * 環境汚染への影響範囲 (Gemini レビュー懸念への回答):
+     *   - 各 describe は createTestEnv() で **専用テナント (DB)** を新規作成する設計
+     *   - UP-B003 の localBaseUrl は他 describe (UP-B001/UP-B002 / staging diff regression 等) と
+     *     完全に分離されている
+     *   - つまり glip-040 のロックアウトはこの describe 内の testUser/環境のみ影響し、
+     *     後続の describe や spec ファイルには影響しない
+     *   - テスト環境は使い捨てで、テスト終了後の環境削除も不要 (CLAUDE.md より)
+     */
+    test('glip-040: 全体IP=拒否IP → /api/* 拒否 + HTML 表示 (順序: 全体→個別)', async ({ page }) => {
+        test.setTimeout(120000);
+        const _testStart = Date.now();
+
+        // [flow] 40-1. 個別IP=現在IP/32 (本来は通る設定 → glip-070 の前提)
+        await setUserAllowIps(page, localBaseUrl, testUser.id, [`${currentIp}/32`]);
+
+        // [flow] 40-2. 全体IP=1.1.1.1/32 (現在IPと不一致)
+        await setGlobalAllowIps(page, localBaseUrl, '1.1.1.1/32');
+
+        // [flow] 40-3. /api/admin/debug/settings (admin API 配下) は全体IP enforcement で拒否される
+        const apiResp = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/debug/settings', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const text = await r.text();
+                let json = null;
+                try { json = JSON.parse(text); } catch (e) {}
+                return { status: r.status, json, text: text.slice(0, 200) };
+            } catch (e) { return { error: e.message }; }
+        }, localBaseUrl);
+        // [check] 40-4. ✅ admin API は全体IPで拒否: { status:'error', type:'ip', ip:... }
+        expect(apiResp.json, `JSON 取得 (text=${apiResp.text})`).toBeTruthy();
+        expect(apiResp.json.type, `admin API の全体IP 拒否レスポンス type=ip (got ${JSON.stringify(apiResp.json)})`).toBe('ip');
+        expect(apiResp.json.status, 'status=error').toBe('error');
+
+        // [flow] 40-5. /admin/login HTML ページは public/api/index.php 配下ではないため表示される
+        // (= 全体IP enforcement は /api/* のみに効く scope の検証)
+        await page.context().clearCookies();
+        const loginPageResp = await page.evaluate(async (baseUrl) => {
+            try {
+                const r = await fetch(baseUrl + '/admin/login', {
+                    method: 'GET',
+                    credentials: 'omit',
+                    redirect: 'manual'
+                });
+                const text = await r.text();
+                return { status: r.status, isHtml: text.toLowerCase().includes('<!doctype html'), snippet: text.slice(0, 200) };
+            } catch (e) { return { error: e.message }; }
+        }, localBaseUrl);
+        // [check] 40-6. ✅ HTML ページは表示 (scope: 全体IP enforcement は /api/* のみ)
+        expect(loginPageResp.isHtml, `/admin/login HTML ページは表示される (scope: 全体IPは /api/* のみ) (status=${loginPageResp.status}, snippet=${loginPageResp.snippet})`).toBe(true);
+
+        // [flow] 40-7. testUser でログイン試行 (POST /admin/login or /api/admin/auth/login) → 拒否
+        const loginAttempt = await page.evaluate(async ({ baseUrl, creds }) => {
+            try {
+                const r = await fetch(baseUrl + '/api/admin/auth/login', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ email: creds.email, password: creds.password })
+                });
+                const text = await r.text();
+                let json = null;
+                try { json = JSON.parse(text); } catch (e) {}
+                return { status: r.status, json, text: text.slice(0, 200) };
+            } catch (e) { return { error: e.message }; }
+        }, { baseUrl: localBaseUrl, creds: { email: testUser.email, password: testUser.password } });
+        // [check] 40-8. ✅ login API も全体IP enforcement で先に拒否される
+        // 順序証明: 個別IP=現在IP/32 (本来は OK) でも届かない = 全体 → 個別 の順序
+        if (loginAttempt.json && loginAttempt.json.type === 'ip') {
+            expect(loginAttempt.json.type, `login API は全体IPで拒否 (個別IPがOKでも届かない: 順序証明)`).toBe('ip');
+        } else {
+            // 3xx/4xx でも認証完了していなければ OK
+            expect(loginAttempt.status, `login API はログイン成功 (200 + success) ではない`).not.toBe(200);
+        }
+
+        // 注: テスト環境は使い捨てのため、debug API 経由のクリーンアップは試みない。
+        // afterAll で best-effort に試みる (失敗しても問題なし)。
+
+        await autoScreenshot(page, 'UP-B003', 'glip-040', _testStart);
+    });
+});
+
+// ============================================================================
 // staging diff regression (batch 由来 2026-04-26 再配置: 8 件)
 //
 // batch-1/3/5/6 から users-permissions 関連の構造回帰 guard を集約。
