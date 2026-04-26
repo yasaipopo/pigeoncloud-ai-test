@@ -11,6 +11,7 @@
 'use strict';
 
 const fs = require('fs');
+const { getAuthStatePath } = require('./env-guard');
 
 /**
  * storageState を適用した BrowserContext + Page を作成する
@@ -20,7 +21,7 @@ const fs = require('fs');
  */
 async function createAuthContext(browser) {
     const agentNum = process.env.AGENT_NUM || '1';
-    const authStatePath = `.auth-state.${agentNum}.json`;
+    const authStatePath = getAuthStatePath(agentNum);
     const context = await browser.newContext(
         fs.existsSync(authStatePath) ? { storageState: authStatePath } : {}
     );

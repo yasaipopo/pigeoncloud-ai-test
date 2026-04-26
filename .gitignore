@@ -33,6 +33,9 @@ tests/*.bak3
 
 # テスト環境ランタイムファイル（各実行ごとに生成）
 .test_env_runtime.*
+
+# storageState（ログイン済みクッキー、env + agent ごとに生成）
+.auth-state.*.json
 test-results/
 test_files/
 .playwright-mcp/

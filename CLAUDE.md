@@ -365,6 +365,7 @@ cat .claude/knowledge-e2e-failure-triage.md
 | `.claude/knowledge-page-admin-settings.md` | 管理設定、debug API、ログインフロー |
 | `.claude/knowledge-e2e-notifications.md` | **メール系テーブル名（mail_templates/mail_reserve/mail_delivery_list）**、step_mail_option 有効化API、ステップメール/メールテンプレート/メール配信編集ページのセレクター |
 | `.claude/knowledge-e2e-table-definition.md` | **テーブル名マッピング（organization→division）**、`/admin/dataset__N/add` 直接 goto 禁止、ALLテストテーブルの自動採番フィールド特定、サイドバータブクリック方法、gotoRecordAdd helper |
+| `.claude/knowledge-production-testing.md` | **本番 (ai-test.pigeon-cloud.com) で E2E を実行する手順** — `CONFIRM_PRODUCTION=1` 必須、`.auth-state.${envType}.${agentNum}.json` の env 別物理分離、AGENT_NUM レンジルール (本番=200+) |
 
 テスト用テーブルスキーマ定義:
 
