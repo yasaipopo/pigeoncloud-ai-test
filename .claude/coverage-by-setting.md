@@ -6,15 +6,18 @@
 - admin_setting カラム数: 約40 (うち debug-tools 編集可能: 29)
 - E2E カバー済み (1件以上のヒット): **44 カラム** (前回 30 → +14)
 - ギャップ (E2E 抜け): **18 カラム** (前回 32 → -14)
+- enforcement (UI 変化検証) カバー: 3 カラム (enable_rpa / enable_filesearch / show_only_directory_on_navmenus)
 
-## 進捗 (2026-04-26 PR1〜PR2 で改善)
+## 進捗 (2026-04-26 PR1〜PR4 で改善)
 
 | PR | 対象 | 件数 |
 |---|---|---|
 | #23 | UP-B003: allow_ip_addresses (全体IP+個別IP+複合) | 6 テスト |
 | #24 | SS-B001/B002: is_maintenance / enable_api / allow_only_secure_access | 3 件 (5 テスト) |
 | #26 | SS-B003: contract_type / enable_filesearch / use_analytics_ai / enable_rpa / action_limit_*2 / scrollable / use_comma / not_close_toastr_auto / lock_timeout_min / ignore_csv_noexist_header | 11 件 (11 テスト) |
-| **合計** | | **20 件 / 22 テスト追加** |
+| #28 | SS-B004: use_login_id / max_upload_mb / use_master_login_url / display_master_on_dashboard / show_only_directory_on_navmenus / use_phase / use_master_user_auth / use_google_calendar | 8 件 (8 テスト) |
+| #30 (this) | SS-B005: enforcement enable_rpa / enable_filesearch / show_only_directory_on_navmenus | 3 件 (3 テスト) |
+| **合計** | | **31 件 / 33 テスト追加** |
 
 ## setting テーブル
 
