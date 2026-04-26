@@ -7,14 +7,17 @@
  * テーブル作成完了はテスト側でポーリング（ALBタイムアウトに依存しない）。
  */
 
-const path = require('path');
 const fs = require('fs');
+const { assertProductionConfirmed, getAuthStatePath } = require('./env-guard');
 
 const ADMIN_BASE_URL = process.env.ADMIN_BASE_URL || 'https://ai-test.pigeon-demo.com';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.TEST_PASSWORD || '';
 
 async function createTestEnv(browser, options = {}) {
+    // 本番環境ガード: pigeon-cloud.com を指していて CONFIRM_PRODUCTION=1 が無ければ throw
+    assertProductionConfirmed(ADMIN_BASE_URL);
+
     const { withAllTypeTable = true, enableOptions = null } = options;
 
     // 1. 管理画面にログイン
@@ -144,8 +147,9 @@ async function createTestEnv(browser, options = {}) {
     await page.waitForSelector('.navbar', { timeout: 30000 });
 
     // storageState更新（蓄積防止のため上書き前にファイルを削除）
+    // env 別ファイル名で staging/本番のクッキー混入を防ぐ
     const agentNum = process.env.AGENT_NUM || '1';
-    const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
+    const storageStatePath = getAuthStatePath(agentNum, ADMIN_BASE_URL);
     try { if (fs.existsSync(storageStatePath)) fs.unlinkSync(storageStatePath); } catch {}
     await context.storageState({ path: storageStatePath });
 

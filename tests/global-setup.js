@@ -12,15 +12,19 @@ require('dotenv').config();
 
 const { chromium } = require('@playwright/test');
 const fs = require('fs');
-const path = require('path');
 const { setupAllTypeTable } = require('./helpers/table-setup');
+const {
+    assertProductionConfirmed,
+    getAuthStatePath,
+    getEnvRuntimePath,
+} = require('./helpers/env-guard');
 
 /**
  * ログイン済みのstorageState（クッキー）をキャッシュする
  * 既に存在する場合はスキップ（テスト毎のログインを不要にする）
  */
 async function saveStorageStateIfNeeded(agentNum) {
-    const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
+    const storageStatePath = getAuthStatePath(agentNum);
     // 既存ファイルは削除して必ず再作成する（テスト環境が毎回変わるため古いクッキーは無効）
     if (fs.existsSync(storageStatePath)) {
         fs.unlinkSync(storageStatePath);
@@ -65,7 +69,7 @@ async function saveStorageStateIfNeeded(agentNum) {
  */
 async function ensureAllTypeTable(agentNum) {
     const baseUrl = process.env.TEST_BASE_URL || '';
-    const storageStatePath = path.join(process.cwd(), `.auth-state.${agentNum}.json`);
+    const storageStatePath = getAuthStatePath(agentNum);
     if (!baseUrl || !fs.existsSync(storageStatePath)) {
         console.log(`[global-setup] ALLテストテーブル作成スキップ (baseUrl=${baseUrl}, storageState=${fs.existsSync(storageStatePath)})`);
         return;
@@ -102,12 +106,15 @@ module.exports = async function globalSetup() {
         return;
     }
 
+    // 本番環境ガード: pigeon-cloud.com を指していて CONFIRM_PRODUCTION=1 が無ければ throw
+    assertProductionConfirmed(process.env.ADMIN_BASE_URL);
+
     const currentUrl = process.env.TEST_BASE_URL || '';
 
     // .test_env_runtime ファイルが存在する場合は環境変数を読み込んでスキップ
-    // エージェント番号ごとに別ファイルを使用（並列実行での競合を防ぐ）
+    // エージェント番号 + env ごとに別ファイルを使用（並列実行 + staging/本番混入防止）
     const agentNum = process.env.AGENT_NUM || '1';
-    const envRuntimePath = path.join(process.cwd(), `.test_env_runtime.${agentNum}`);
+    const envRuntimePath = getEnvRuntimePath(agentNum);
 
     // REUSE_ENV=1 の場合のみ既存環境を使い回す（デフォルトは毎回新規作成）
     if (process.env.REUSE_ENV === '1' && fs.existsSync(envRuntimePath)) {
@@ -263,8 +270,8 @@ module.exports = async function globalSetup() {
         process.env.TEST_EMAIL    = 'admin';
         process.env.TEST_PASSWORD = newPassword;
 
-        // 再起動なしで spec.js に伝える用のファイルにも保存（エージェント番号ごとに別ファイル）
-        const envFile = path.join(process.cwd(), `.test_env_runtime.${agentNum}`);
+        // 再起動なしで spec.js に伝える用のファイルにも保存（エージェント番号 + env ごとに別ファイル）
+        const envFile = getEnvRuntimePath(agentNum);
         fs.writeFileSync(envFile, [
             `TEST_BASE_URL=${actualUrl}`,
             `TEST_EMAIL=admin`,

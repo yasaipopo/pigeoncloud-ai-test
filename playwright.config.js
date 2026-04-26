@@ -2,10 +2,11 @@
 const { defineConfig, devices } = require('@playwright/test');
 const { execSync } = require('child_process');
 const fs = require('fs');
+const { getAuthStatePath } = require('./tests/helpers/env-guard');
 // エージェント番号ごとに出力先を分ける（並列実行対応）
 const agentNum = process.env.AGENT_NUM || '1';
-// storageState（ログイン済みクッキー）のパス: global-setupが作成する
-const authStatePath = `.auth-state.${agentNum}.json`;
+// storageState（ログイン済みクッキー）のパス: env 別ファイル名で staging/本番混入を防ぐ
+const authStatePath = getAuthStatePath(agentNum);
 const reportsDir = process.env.REPORTS_DIR || `reports/agent-${agentNum}`;
 // CLIで--reporter=jsonが指定された場合でも出力先が固定されるように環境変数をセット
 process.env.PLAYWRIGHT_JSON_OUTPUT_NAME = `${reportsDir}/playwright-results.json`;
