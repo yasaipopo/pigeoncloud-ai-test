@@ -116,6 +116,23 @@
 - **記載日**: 2026-04-19
 - **見直し予定**: 機能追加 PR がマージされた時点
 
+### spec: system-settings / setting カラム coverage gap
+
+#### use_freee: debug-tools whitelist 未登録のため CRUD 不可
+
+- **スキップ理由**: `setting.use_freee` カラムは `routes/admin/debug-tools.php` の
+  `$setting_fields` ホワイトリスト (line 638-651) に含まれていないため、
+  POST /api/admin/debug/settings 経由で値を編集できない。
+- **プロダクト側実装**: `Application/Class/Setting.php` line 53 に `private bool $use_freee`
+- **スキップ基準該当**: 環境/インフラ依存 (基準 2) — debug API インフラ側の whitelist 不足
+- **解消条件**:
+  - (a) pigeon_cloud の debug-tools.php の `$setting_fields` に `use_freee` 追加
+  - (b) 別 API (例: マスター画面の freee 設定 API) を直接叩いて切り替え
+- **関連要件**: なし (低優先度の連携機能)
+- **別途チケット化**: 不要 (whitelist 拡張は軽微、必要時に PR 化)
+- **記載日**: 2026-04-26
+- **見直し予定**: pigeon_cloud whitelist 拡張時
+
 ---
 
 ## 📋 テンプレート（新規追加時の記入例）
