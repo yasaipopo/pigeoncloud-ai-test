@@ -1138,7 +1138,12 @@ test.describe('共通設定・システム設定', () => {
             await expect(page).toHaveURL(/\/admin\/admin_setting/);
 
             // [flow] 70-3. 「初回ログイン時に利用規約を表示する」チェックボックスの存在を確認する
-            const termsCheckbox = page.locator('#setTermsAndConditions_1');
+            // (id 命名規則変更に対応するため複数 selector で検出)
+            const termsCheckbox = page.locator(
+                '#setTermsAndConditions_1, ' +
+                'input[type="checkbox"][id*="setTerms"], ' +
+                'label:has-text("初回ログイン時に利用規約を表示する") input[type="checkbox"]'
+            ).first();
             const cbCount = await termsCheckbox.count();
             console.log('利用規約チェックボックス数: ' + cbCount);
 
@@ -1201,8 +1206,13 @@ test.describe('共通設定・システム設定', () => {
             // [flow] 80-7. 設定ページを再読み込みして反映を確認する
             await gotoAdminSetting(page);
             await waitForAngular(page);
-            await page.waitForSelector('#setTermsAndConditions_1', { timeout: 10000 }).catch(() => {});
-            const isCheckedAfter = await page.locator('#setTermsAndConditions_1').isChecked();
+            const termsCheckboxAfter = page.locator(
+                '#setTermsAndConditions_1, ' +
+                'input[type="checkbox"][id*="setTerms"], ' +
+                'label:has-text("初回ログイン時に利用規約を表示する") input[type="checkbox"]'
+            ).first();
+            await termsCheckboxAfter.waitFor({ state: 'attached', timeout: 10000 }).catch(() => {});
+            const isCheckedAfter = await termsCheckboxAfter.isChecked().catch(() => false);
             console.log('利用規約表示OFF反映確認（ページ）: ' + !isCheckedAfter);
             // [check] 80-8. ✅ 利用規約表示チェックボックスがOFF（未チェック）になっていること
             expect(isCheckedAfter).toBe(false);
