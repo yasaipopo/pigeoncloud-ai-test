@@ -1639,32 +1639,17 @@ test.describe('共通設定・システム設定', () => {
     });
 
     // =========================================================================
-    // SS05: 契約設定
+    // SS05: 契約設定 (PayPal/Stripe 外部決済連携)
+    //
+    // 全 3 step (130-01 PayPal / 131-02 デビット・クレジット / 284-1 Stripe) が
+    // 外部決済サービス連携かつ PigeonCloud 側機能廃止のため、E2E 自動テスト対象外。
+    // 詳細経緯: .claude/test-env-limitations.md
+    //
+    // → test 関数レベルで明示的に skip し、各 step を削除する。
+    //   将来 Stripe 連携が PigeonCloud 内部 API のみで完結する形に変更されたら再有効化。
     // =========================================================================
-    test('SS05: 契約設定', async ({ page }) => {
-        test.setTimeout(75000);
-
-        await test.step('130-01: PayPalサブスクリプション登録が完了すること', async () => {
-            const STEP_TIME = Date.now();
-            // PayPal連携機能は廃止済みのためスキップ（外部PayPalサービス連携・機能変更に伴い不要）
-            test.skip(true, 'PayPalサブスクリプション機能は廃止済み。外部サービス連携のため自動テスト不可かつ手動確認も不要（機能削除済み）。');
-            await autoScreenshot(page, 'SS05', 'sys-250', STEP_TIME);
-        });
-
-        await test.step('131-02: デビットカード/クレジットカード支払いが完了すること', async () => {
-            const STEP_TIME = Date.now();
-            // 機能変更に伴い不要。外部決済サービス連携のため自動テスト不可。
-            // Stripeによる新決済フローは284-1でカバー（手動確認が必要）。
-            test.skip(true, 'クレジットカード支払い機能は機能変更に伴い不要（外部決済サービス連携・手動確認が必要）。Stripeは284-1参照。');
-            await autoScreenshot(page, 'SS05', 'sys-260', STEP_TIME);
-        });
-
-        await test.step('284-1: Stripe経由でクレジットカード支払いが完了すること（外部サービス連携）', async () => {
-            const STEP_TIME = Date.now();
-            test.skip(true, 'Stripe外部サービス連携のため自動テスト不可（手動確認が必要）');
-            await autoScreenshot(page, 'SS05', 'sys-270', STEP_TIME);
-        });
-
+    test('SS05: 契約設定 (PayPal/Stripe 外部決済連携)', async () => {
+        test.skip(true, '契約・課金関連の決済フロー (PayPal/Stripe) は外部サービス連携かつ PigeonCloud 側機能廃止済み。E2E 自動テスト対象外 (.claude/test-env-limitations.md 参照)');
     });
 
     // =========================================================================
