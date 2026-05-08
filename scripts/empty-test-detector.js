@@ -171,8 +171,26 @@ function analyzeTestBody(src, testNode, fileText) {
         }
     }
 
+    // スキップ判定 (カテゴリ F or 永続スキップ) — 偽装判定より前に評価が必要
+    //   test.skip(true, '理由') は永続スキップ (機能廃止/外部依存等)、test-env-limitations.md に記録される前提で妥当
+    //   test.skip(true) (理由なし) は不正スキップ
+    //   test.skip(IS_TRIAL_ENV, ...) / test.skip(fileBeforeAllFailed, ...) は環境ガードで妥当
+    let isImproperSkip = false;
+    let isPermanentSkip = false;
+    const permanentSkipPattern = /test\.skip\s*\(\s*true\s*,\s*['"`]/;
+    if (permanentSkipPattern.test(body)) {
+        isPermanentSkip = true;
+    }
+    if (!isPermanentSkip) {
+        const improperSkipPattern = /test\.skip\s*\(\s*true\s*[,)]/;
+        if (improperSkipPattern.test(body)) {
+            isImproperSkip = true;
+        }
+    }
+
     // 偽装判定 (カテゴリ A 該当)
-    const isFakeTest = (
+    //   永続スキップ (test.skip(true, '理由')) は偽装ではなく妥当な記録
+    const isFakeTest = !isPermanentSkip && (
         // expect が 0 件
         expectCount === 0 ||
         // expect が全て弱いものだけ
@@ -193,15 +211,6 @@ function analyzeTestBody(src, testNode, fileText) {
     if (waitForTimeoutCount > 0) violationsD.push(`waitForTimeout × ${waitForTimeoutCount}`);
     if (firstCount > 5) violationsD.push(`first() × ${firstCount}`);
     if (nthCount > 0) violationsD.push(`nth() × ${nthCount}`);
-
-    // 不正スキップ判定 (カテゴリ F)
-    let isImproperSkip = false;
-    const skipMatch = body.match(/test\.skip\s*\(\s*([^,)]+)/);
-    if (skipMatch) {
-        const skipCondition = skipMatch[1].trim();
-        // 環境ガードでない true 固定
-        if (skipCondition === 'true') isImproperSkip = true;
-    }
 
     const lineRange = {
         start: findLineCol(fileText, testNode.start).line,
@@ -235,7 +244,63 @@ function analyzeTestBody(src, testNode, fileText) {
         titleMismatchVerbs,
         violations,
         isFakeTest,
+        isPermanentSkip,
+        isImproperSkip,
     };
+}
+
+/**
+ * spec 内のヘルパー関数定義をすべて抽出 (function name(){...} / const name = async ...)
+ * 戻り値: Map<関数名, { expectCount, body }>
+ *
+ * これにより `await verifyCrud(...)` のようなヘルパー呼び出しが
+ * 内部 expect を持つかを判定できるようにする (AST false positive 削減)
+ */
+function extractHelpers(ast, src) {
+    const helpers = new Map();
+
+    function recordHelper(name, bodyStart, bodyEnd) {
+        if (!name || bodyStart == null) return;
+        const body = src.slice(bodyStart, bodyEnd);
+        const expectCount = (body.match(/\bexpect\s*\(/g) || []).length;
+        helpers.set(name, { expectCount, bodyLength: body.length });
+    }
+
+    walk.simple(ast, {
+        FunctionDeclaration(node) {
+            if (node.id && node.id.name) {
+                recordHelper(node.id.name, node.body.start, node.body.end);
+            }
+        },
+        VariableDeclarator(node) {
+            // const x = async () => {...} / function () {...}
+            if (node.id && node.id.name && node.init && (
+                node.init.type === 'ArrowFunctionExpression' ||
+                node.init.type === 'FunctionExpression'
+            )) {
+                recordHelper(node.id.name, node.init.body.start, node.init.body.end);
+            }
+        }
+    });
+
+    return helpers;
+}
+
+/**
+ * test body 内のヘルパー呼び出しを集計し、内部 expect を加算する
+ */
+function expandHelperExpects(body, helpers) {
+    let extra = 0;
+    // `await name(...)` / `name(...)` の呼び出し名を抽出
+    const callRegex = /\b(?:await\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g;
+    let m;
+    while ((m = callRegex.exec(body)) !== null) {
+        const fnName = m[1];
+        if (helpers.has(fnName)) {
+            extra += helpers.get(fnName).expectCount;
+        }
+    }
+    return extra;
 }
 
 function analyzeFile(filePath) {
@@ -247,17 +312,51 @@ function analyzeFile(filePath) {
         return { file: filePath, error: e.message, tests: [] };
     }
 
+    // Step 1: ヘルパー関数の expect 数を事前抽出
+    const helpers = extractHelpers(ast, text);
+
     const tests = [];
     walk.simple(ast, {
         CallExpression(node) {
             const kind = isTestCall(node);
             if (!kind) return;
-            // test('xxx', async () => {...}) のフォーマットだけ対象
             if (node.arguments.length < 2) return;
-            // test.step は別処理 (step は test 内部でのみ意味あり)
             const result = analyzeTestBody(text, node, text);
             if (!result) return;
             result.kind = kind;
+
+            // Step 2: ヘルパー呼び出し内の expect を加算
+            const bodyStart = node.arguments[1].start;
+            const bodyEnd = node.arguments[1].end;
+            const body = text.slice(bodyStart, bodyEnd);
+            const helperExtraExpects = expandHelperExpects(body, helpers);
+            result.helperExpectCount = helperExtraExpects;
+            result.totalExpectCount = result.expectCount + helperExtraExpects;
+
+            // Step 3: 偽装判定をヘルパー込みで再判定
+            //   永続スキップ (test.skip(true, '理由')) は偽装ではないので除外
+            const totalEffective = result.totalExpectCount;
+            const weakExpectCount = result.weakExpectCount;
+            const navbarVisibleCount = result.navbarVisibleCount;
+            const hasIseNotContain = result.hasIseNotContain;
+            const isFakeTestRevised = !result.isPermanentSkip && (
+                totalEffective === 0 ||
+                (totalEffective > 0 && weakExpectCount + navbarVisibleCount >= totalEffective) ||
+                (hasIseNotContain && navbarVisibleCount > 0 && totalEffective <= 2 + weakExpectCount)
+            );
+            result.isFakeTestRevised = isFakeTestRevised;
+            // 元の violations を再評価: ヘルパー込みで偽装ではないなら A 違反を取り除く
+            if (!isFakeTestRevised) {
+                result.violations = result.violations.filter(v => v.category !== 'A');
+            }
+            // ヘルパー由来 expect を含めても偽装なら A 維持 + 詳細更新
+            if (isFakeTestRevised && result.violations.find(v => v.category === 'A')) {
+                const aVio = result.violations.find(v => v.category === 'A');
+                aVio.detail = `偽装テスト: total_expect=${totalEffective} (own=${result.expectCount} helper=${helperExtraExpects}) weak=${weakExpectCount} navbar=${navbarVisibleCount} ISE_check=${hasIseNotContain}`;
+            }
+            // isFakeTest フラグも再評価値に置き換え
+            result.isFakeTest = isFakeTestRevised;
+
             tests.push(result);
         }
     });
