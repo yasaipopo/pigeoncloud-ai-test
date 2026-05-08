@@ -54,6 +54,62 @@ PR の main マージはユーザー承認なしで実行してよい。**
 
 ---
 
+## 🔴【絶対】テストコード作成と評価は別 agent で分離 (恒久ルール、2026-05-09 ユーザー指示)
+
+**E2E テストコードの修正・新規追加では、必ず作成と評価を別 agent で分離する。**
+**評価 (review) は必ず gemcli を別プロセスで起動して実施。同一 agent が作成と評価を兼ねない。**
+
+### 役割分担
+1. **作成・修正**: Claude メイン または sonnet subagent
+2. **評価 (review)**: **必ず gemcli を別プロセスで起動**
+   - read-only (コード修正・git 操作禁止)
+   - グローバル `~/.claude/knowledge-test-case-rules.md` + プロジェクト品質 md 群を必読リソースとして渡す
+   - 結果ファイルに書き込んでから exit (stdout だけだと context cut off)
+
+### 修正サイクル (必ず繰り返す)
+```
+1. 修正対象の spec.js を編集 (Claude メイン or sonnet subagent)
+2. gemcli で review 実施 (バックグラウンド推奨)
+3. review 結果を見て、追加修正が必要なら 1 に戻る
+4. 違反 0 件で初めてコミット
+5. 次の対象に進む
+```
+
+### gemcli review 依頼テンプレ
+- task md: `/tmp/gemcli-review-{spec名}.md` 作成
+- 結果出力: `.claude/local/gemcli-review-{spec名}-result.md`
+- 実行:
+  ```bash
+  GEMINI_CLI_TRUST_WORKSPACE=true ~/.gemini/gemini-tracked -y \
+    --include-directories /Users/yasaipopo/.claude \
+    -p "$(cat /tmp/gemcli-review-{spec名}.md)"
+  ```
+- task md には以下を含める:
+  - 必読ルール 6 本のパス (グローバル `knowledge-test-case-rules.md` + プロジェクト品質 md 5 本)
+  - レビュー対象 spec のフルパス
+  - 違反カテゴリ A〜F のチェック観点
+  - 出力フォーマット (サマリー / 違反一覧 / パターン分布 / TOP 10 / 所感)
+  - 制約 (read-only、git 禁止、推測でなくコード実体に基づき判定)
+
+### 違反カテゴリ (gemcli が機械的にチェック)
+- **A: 偽装テスト**: navbar/ISE 不在のみ / 早期 return / try-catch 握り潰し / assertion 0 件
+- **B: assertion 緩和**: `expect(true).toBeTruthy()` / `count >= 0` / `.catch(() => {})`
+- **C: タイトル不一致**: タイトル動詞と内容の乖離
+- **D: 記法違反**: `[flow]`/`[check]` 欠落 / `waitForTimeout` / `first()` 多用 / 通し番号
+- **E: プロダクトバグ隠蔽**: assertion を緩めて pass
+- **F: 不正スキップ**: `test.skip(true)` / 早期 return (妥当: `test.skip(IS_TRIAL_ENV)` 等)
+
+### 並列実行
+- 1 spec ずつ評価が安定 (gemcli が長文 stdout で context cut off するため)
+- 出力先を `.claude/local/gemcli-review-{spec名}-result.md` にすればファイル経由で確実に取得可能
+- 並列実行する場合も spec ごとに別 task として起動 (同一 task 内で複数 spec はリスク)
+
+### Why
+同一 agent が作成と評価を兼ねると「自分のコードを甘く採点する」バイアスでルール違反 (空テスト・assertion 緩和) を見逃す。客観的レビュー agent (gemcli) を介すことで、品質基準を機械的に担保する。
+2026-05-09 5 spec レビューで判明: 平均違反率 77%、334+ 件の偽装テスト存在。pass 数だけでは品質を保証できない。
+
+---
+
 ## 【最重要】E2E テスト追加・修正の「黄金ループ」（必ずこの順で実施）
 
 新規テスト追加 or 既存テスト修正は、以下のステップを**必ず順番通り**実施する。スキップ禁止。

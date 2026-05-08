@@ -40,4 +40,9 @@ test-results/
 test_files/
 .playwright-mcp/
 .claude/thread-*.md
-.claude/thread-*.md
+
+# .claude 配下のセッション固有・一時ファイル (恒久 knowledge-*.md は git 管理する)
+.claude/local/
+.claude/handover-*.md
+.claude/postmortem/
+.claude/scheduled_tasks.lock
