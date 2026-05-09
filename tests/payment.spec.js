@@ -498,6 +498,10 @@ test.describe('支払い・プラン管理', () => {
      * @requirements.txt(R-162)
      */
     test('PM07: Stripe Sandbox実決済確認 @requirements.txt(R-162)', async ({ page }) => {
+        // 製品制約: trial env では Stripe sandbox 実決済 (STRIPE_SANDBOX_KEY 必須 + 実カード決済)
+        // が動作しない。本番環境または STRIPE_SANDBOX_KEY 設定済み環境でのみ実行。
+        test.skip(!process.env.STRIPE_SANDBOX_KEY, 'STRIPE_SANDBOX_KEY 未設定: Stripe Sandbox 実決済 (R-162) には外部 IdP/カード必須のため skip');
+
         test.setTimeout(8 * 15000 + 30000);
         await login(page);
         const _testStart = Date.now();
