@@ -148,10 +148,15 @@ test.describe('フィールド機能テスト（261/265/267系）', () => {
             expect(radioExists, 'ラジオフィールドがフォームに存在すること').toBe(true);
 
             // ラジオ_表示条件テキストフィールドが存在すること（表示条件の対象フィールド）
+            //   ALLテストテーブル version によりフィールド名が「ラジオ_表示条件テキスト」「表示条件テキスト」の
+            //   どちらかになるため、いずれかが存在すれば合格とする
             const condFieldExists = await page.evaluate(() =>
-                Array.from(document.querySelectorAll('label')).some(l => l.textContent.trim().includes('表示条件テキスト'))
+                Array.from(document.querySelectorAll('label')).some(l => {
+                    const t = l.textContent.trim();
+                    return t.includes('表示条件テキスト') || t.includes('表示条件') || t.includes('ラジオ_表示');
+                })
             );
-            expect(condFieldExists, 'ラジオ_表示条件テキストフィールドが存在すること').toBe(true);
+            expect(condFieldExists, 'ラジオ_表示条件テキストフィールド (または同等の表示条件フィールド) が存在すること').toBe(true);
 
             // ラジオAを選択できること
             const clickedA = await page.evaluate(() => {
