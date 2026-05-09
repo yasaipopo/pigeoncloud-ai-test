@@ -1187,36 +1187,58 @@ test.describe('フィルタ作成・保存・適用・削除', () => {
     // ── fil-190: 他テーブル参照（複数選択許可）がビュー並び順の選択肢に出ないこと ──
     test('fil-190: 他テーブル参照（複数選択許可）がビュー並び順の選択肢に出ないこと', async ({ page }) => {
         test.setTimeout(120000);
-        // [flow] 1. ビュー設定画面を開く
-        await page.goto(BASE_URL + `/admin/dataset__${tableId}/view`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
+
+        // [flow] 1-1. ビュー設定一覧画面を開く
+        await page.goto(BASE_URL + `/admin/dataset__${tableId}/view`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await page.waitForSelector('.navbar', { timeout: 15000 });
         await waitForAngular(page);
 
-        // [check] 1. ✅ ビュー設定ページが正常に表示されること
-        const bodyText = await page.innerText('body');
-        expect(bodyText).not.toContain('Internal Server Error');
+        // [flow] 1-1b. Angular 描画完了待機
+        await page.waitForFunction(
+            () => (document.body.innerText || '').length >= 100,
+            null,
+            { timeout: 30000 }
+        );
 
-        // [flow] 2. ビュー編集ボタンをクリックする
+        // [check] 1-2. ✅ ビュー設定ページが ISE なく表示されること
+        const bodyText = await page.innerText('body');
+        expect(bodyText, 'ビュー設定ページが ISE なく表示').not.toContain('Internal Server Error');
+        expect(bodyText, 'ページに「ビュー」関連キーワードが含まれる').toMatch(/ビュー|並び順|表示順|view/i);
+
+        // [flow] 1-3. ビュー編集ボタンをクリックする (存在する場合のみ実操作、なければ並び順 label 検証で代替)
         const editViewBtn = page.locator('a:has-text("編集"), button:has-text("編集"), .fa-edit').first();
-        if (await editViewBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+        const editBtnVisible = await editViewBtn.isVisible({ timeout: 5000 }).catch(() => false);
+
+        if (editBtnVisible) {
+            // [flow] 1-4. 編集モードに遷移
             await editViewBtn.click();
             await waitForAngular(page);
 
-            // [flow] 3. 並び順設定セクションのドロップダウンを確認する
-            const sortSection = page.locator('label:has-text("並び順"), .sort-settings, :has-text("並び順")').first();
-            if (await sortSection.isVisible({ timeout: 5000 }).catch(() => false)) {
-                const sortSelect = page.locator('select').filter({ has: page.locator('option') }).first();
-                if (await sortSelect.isVisible({ timeout: 5000 }).catch(() => false)) {
-                    const options = await sortSelect.locator('option').allTextContents();
-                    console.log(`fil-190: 並び順選択肢（最初の10個）: ${options.slice(0, 10).join(', ')}`);
-                    // 選択肢に複数選択参照フィールドが含まれていないことをログで確認
-                    console.log('fil-190: 並び順選択肢にて複数選択参照フィールドの存在チェック完了');
-                }
+            // [flow] 1-5. 並び順 select の選択肢を取得
+            const sortSelect = page.locator('select').filter({ has: page.locator('option') }).first();
+            if (await sortSelect.isVisible({ timeout: 5000 }).catch(() => false)) {
+                const options = await sortSelect.locator('option').allTextContents();
+
+                // [check] 1-6. ✅ 並び順選択肢が最低 1 件描画されている
+                expect(options.length, '並び順選択肢が最低 1 件描画されている').toBeGreaterThan(0);
+
+                // [check] 1-7. ✅ 並び順選択肢に「複数選択参照」を示すキーワードが含まれていないこと
+                //   (PigeonCloud は他テーブル参照（複数選択許可）をビュー並び順候補から除外する仕様)
+                const hasMultiSelectField = options.some(o => /\(複数\)|複数選択$|複数選択 /.test(o));
+                expect(hasMultiSelectField, '並び順選択肢に複数選択参照フィールドが含まれない').toBe(false);
+            } else {
+                // 編集モードに遷移したが並び順 select が存在しない (UI 構造が想定外)
+                expect(false, '並び順 select が編集モードに描画されない (UI 構造想定外)').toBe(true);
             }
+        } else {
+            // 編集ボタン未描画の場合: ビュー一覧ページに並び順 label が含まれることだけで代替検証
+            //   (新規環境では既存ビューが 0 件のため編集ボタンが出ないケースがある)
+            const sortLabel = bodyText.includes('並び順') || bodyText.includes('表示順');
+            expect(sortLabel, 'ビュー設定ページに並び順関連の見出しが含まれる').toBe(true);
         }
 
-        // [check] 3. ✅ エラーが発生しないこと
+        // [check] 1-8. ✅ 操作後もページが ISE なく表示され続けていること
         const bodyFinal = await page.innerText('body');
-        expect(bodyFinal).not.toContain('Internal Server Error');
+        expect(bodyFinal, '操作後も ISE が発生していない').not.toContain('Internal Server Error');
     });
 });

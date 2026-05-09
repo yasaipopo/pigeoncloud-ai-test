@@ -447,14 +447,19 @@ test.describe('支払い・プラン管理', () => {
 
     /**
      * @requirements.txt(R-161)
+     *
+     * 注: 試用環境 (create-trial) には PayPal 決済機能が組み込まれていないため、
+     * このテストは IS_TRIAL_ENV で skip される。本番環境または PAYMENT_ENABLED=1 設定の
+     * テナントでのみ実行され、その場合は PayPal 関連要素の DOM 存在を厳密に検証する。
      */
     test('PM06: PayPalボタンDOM存在確認 @requirements.txt(R-161)', async ({ page }) => {
+        test.skip(IS_TRIAL_ENV, TRIAL_SKIP_REASON);
         test.setTimeout(4 * 15000 + 30000);
         await login(page);
         const _testStart = Date.now();
         let stepStart;
 
-        await test.step('pay-130: PayPal決済関連の要素がDOM上に存在すること', async () => {
+        await test.step('pay-130: 支払いページに PayPal 関連要素 (DOM) が存在すること', async () => {
             stepStart = Date.now();
 
             // [flow] 130-1. 支払いページに遷移
@@ -462,16 +467,27 @@ test.describe('支払い・プラン管理', () => {
 
             // [flow] 130-2. Angular レンダリング完了待機
             await waitForAngular(page);
+            await page.waitForFunction(
+                () => (document.body.innerText || '').length >= 100,
+                null,
+                { timeout: 30000 }
+            );
 
-            // [check] 130-3. ✅ PayPal ボタンまたは PayPal 関連要素の DOM 存在確認
+            // [check] 130-3. ✅ 支払いページが ISE なく表示されていること
+            const bodyText = await page.innerText('body');
+            expect(bodyText, '支払いページが ISE なく表示').not.toContain('Internal Server Error');
+
+            // [check] 130-4. ✅ PayPal 関連要素 (DOM) が最低 1 件存在すること
+            //   (PAYMENT_ENABLED 環境では PayPal ボタン/ロゴが必ず描画される)
             const paypalElements = page.locator('[class*="paypal"], :has-text("PayPal"), button:has-text("PayPal"), img[src*="paypal"]');
             const count = await paypalElements.count();
-            console.log('pay-130: PayPal要素数:', count);
-            // 要素がなくてもテストは進めるが、存在を期待する
-            expect(count).toBeGreaterThanOrEqual(0);
+            expect(count, 'PayPal 関連要素が DOM 上に最低 1 件存在する').toBeGreaterThan(0);
 
-            // [check] 130-4. 🔴 PayPal 実決済はスキップ（ユーザー指示「PayPal テスト不要」）
-            console.log('pay-130: [check] 130-4. 🔴 PayPal 実決済はスキップ（ユーザー指示「PayPal テスト不要」）');
+            // [check] 130-5. ✅ ページに「PayPal」キーワードが含まれること (DOM 検証の補強)
+            expect(bodyText, '支払いページに「PayPal」キーワードが含まれる').toContain('PayPal');
+
+            // [check] 130-6. 🔴 PayPal 実決済フローはスキップ（ユーザー指示「PayPal テスト不要」、外部サービス連携）
+            //   実決済確認は手動 or 別途 Stripe/PayPal SDK モックで対応 (test-env-limitations.md 参照)
 
             await autoScreenshot(page, 'PM06', 'pay-130', 0, _testStart);
             console.log(`STEP_TIME pay-130: ${Date.now() - stepStart}ms`);

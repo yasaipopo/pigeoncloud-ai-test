@@ -8373,7 +8373,7 @@ test.describe('テーブル定義追加テスト', () => {
     });
 
     test('UC11: 主キー複数項目設定（UI上のレコード作成時）', async ({ page }) => {
-        await test.step('642: テーブル設定で主キー設定UIがエラーなく表示されること', async () => {
+        await test.step('642: テーブル設定の主キー設定 UI が ISE なく描画されタブ切替も正常動作すること', async () => {
             // モーダルが残っていたらリロード
             if (await page.locator(".modal.show").count() > 0) {
                 await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
@@ -8383,14 +8383,31 @@ test.describe('テーブル定義追加テスト', () => {
 
             const tableId = await getAllTypeTableId(page);
             // [flow] 642-1. テーブル管理ページへ遷移
-            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+            await page.goto(BASE_URL + `/admin/dataset/edit/${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 });
             await page.waitForLoadState('domcontentloaded');
-            await page.waitForSelector('[role=tab]', { timeout: 5000 });
+            await page.waitForSelector('[role=tab]', { timeout: 15000 });
             await waitForAngular(page);
+
+            // [flow] 642-1b. Angular 描画完了待機
+            await page.waitForFunction(
+                () => (document.body.innerText || '').length >= 100,
+                null,
+                { timeout: 30000 }
+            );
+
+            // [check] 642-2. ✅ テーブル設定ページが ISE なく描画されること
             const bodyText = await page.innerText('body');
-            // [check] 642-N. ✅ 操作後にエラーが表示されないこと
-            expect(bodyText).not.toContain('Internal Server Error');
-            // 追加オプション設定タブを開く
+            expect(bodyText, 'テーブル設定ページが ISE なく表示').not.toContain('Internal Server Error');
+
+            // [check] 642-3. ✅ テーブル設定タブが複数描画されていること
+            const tabCount = await page.locator('[role=tab]').count();
+            expect(tabCount, 'テーブル設定タブが最低 1 件描画される').toBeGreaterThan(0);
+
+            // [check] 642-4. ✅ ページに「主キー」関連キーワードが含まれること
+            //   (主キー設定 UI がページのいずれかのタブ/領域に存在することを保証)
+            expect(bodyText, 'ページに「主キー」「PK」関連キーワードが含まれる').toMatch(/主キー|PK|primary|プライマリ/i);
+
+            // [flow] 642-5. 追加オプション設定タブを開く
             const tabInfo = await page.evaluate(() => {
                 const tabs = Array.from(document.querySelectorAll('[role=tab]'));
                 for (const tab of tabs) {
@@ -8401,10 +8418,13 @@ test.describe('テーブル定義追加テスト', () => {
                 }
                 return false;
             });
+
+            // [check] 642-6. ✅ 追加オプションタブクリック後も ISE なく表示されていること
             if (tabInfo) {
-                await page.waitForTimeout(2000);
+                await waitForAngular(page);
                 const optionText = await page.innerText('body');
-                expect(optionText).not.toContain('Internal Server Error');
+                expect(optionText, '追加オプション切替後も ISE なし').not.toContain('Internal Server Error');
+                expect(optionText.length, '追加オプション切替後も本体描画されている').toBeGreaterThan(100);
             }
 
             await autoScreenshot(page, 'UC11', 'tbl-1700', STEP_TIME);
