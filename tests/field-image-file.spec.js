@@ -344,7 +344,12 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -374,7 +379,12 @@ test.describe('画像フィールド（48, 226, 240系）', () => {
             // モーダルヘッダーに「画像」が含まれること
             await expect(modal.locator('h5')).toContainText('画像');
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -452,7 +462,12 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             // Yes/No固有: ラベル入力欄が存在すること（boolean-text）
             await expect(modal.locator('input[type="text"]').nth(1)).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -481,7 +496,12 @@ test.describe('Yes/Noフィールド（44, 222, 236系）', () => {
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -548,7 +568,12 @@ test.describe('自動採番フィールド（216系）', () => {
             // 自動採番固有: カウンターリセットボタンが存在すること
             await expect(modal.locator('button:has-text("カウンターをリセット")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -633,7 +658,12 @@ test.describe('固定テキストフィールド（230系）', () => {
             const froala = modal.locator('[froalaEditor], .fr-element, .fr-box');
             await expect(froala.first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -711,7 +741,12 @@ test.describe('ファイルフィールド（121, 227, 257系）', () => {
             // ファイルフィールドであること（モーダルヘッダーにファイルが含まれる）
             await expect(modal.locator('h5')).toContainText(/ファイル|画像/);
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -907,7 +942,12 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             await expect(modal.locator('label:has-text("通常テキスト")')).toBeVisible();
             await expect(modal.locator('label:has-text("リッチテキスト")')).toBeVisible();
             // モーダルを閉じる（キャンセル）
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -938,7 +978,12 @@ test.describe('文章複数行フィールド（218, 219, 232, 233系）', () =>
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる（キャンセル）
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1016,7 +1061,12 @@ test.describe('文字列一行フィールド（217, 231系）', () => {
             // 「値の重複を禁止する」チェックボックスが存在すること
             await expect(modal.locator('label:has-text("値の重複を禁止する")')).toBeVisible();
             // モーダルを閉じる（キャンセル）
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1197,7 +1247,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1227,7 +1282,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1257,7 +1317,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1288,7 +1353,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されていること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1316,7 +1386,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await expect(modal.locator('label:has-text("整数")')).toBeVisible();
             await expect(modal.locator('label:has-text("小数")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1344,7 +1419,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 単位記号の入力欄が存在すること
             await expect(modal.locator('label:has-text("単位")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1376,7 +1456,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 桁区切り設定が存在すること
             await expect(modal.locator('label:has-text("桁区切り")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1430,7 +1515,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             await expect(modal.locator('label:has-text("横並び")')).toBeVisible();
             await expect(modal.locator('label:has-text("縦並び")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1460,7 +1550,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が存在すること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1492,7 +1587,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が存在すること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1522,7 +1622,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が存在すること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1549,7 +1654,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // ファイルフィールドの設定モーダルであること
             await expect(modal.locator('h5')).toContainText(/ファイル|画像/);
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1580,7 +1690,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 項目名入力欄が表示されること
             await expect(modal.locator('input[type="text"][name="label"]').first()).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1610,7 +1725,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
             // 整数/小数のラジオが存在すること（数値選択時）
             await expect(modal.locator('label:has-text("整数")')).toBeVisible();
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -1643,7 +1763,12 @@ test.describe('フィールドの追加 詳細（14-1〜14-29）', () => {
                 await expect(modal.locator('label:has-text("小数点以下")')).toBeVisible();
             }
             // モーダルを閉じる
-            await modal.locator('button:has-text("キャンセル")').first().click();
+            // モーダル close は Angular アニメーション/spinner 干渉で hidden 判定されることがあるため force: true
+            // + Escape fallback。CLAUDE.md「Angularモーダルは×ボタンやEscapeで閉じない場合あり」の知見対応
+            await modal.locator('button:has-text("キャンセル")').first().click({ force: true, timeout: 5000 }).catch(async () => {
+                await page.keyboard.press('Escape').catch(() => {});
+                await page.waitForTimeout(300);
+            });
             // モーダルが閉じない場合はリロードで強制クリア
             if (await page.locator('.modal.show').count() > 0) {
                 await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
