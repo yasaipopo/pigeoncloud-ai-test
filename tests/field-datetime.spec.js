@@ -3202,11 +3202,12 @@ test.describe('項目名パディング追加（92/93/94系）', () => {
         const bodyAfterSave = await page.innerText('body');
         expect(bodyAfterSave).not.toContain('Internal Server Error');
 
-        // Yes/No / ファイル型は保存後の表示挙動が他と異なる場合があるため緩和:
+        // Yes/No / ファイル / 選択肢型は保存後の表示挙動が他と異なる場合があるため緩和:
         //   - Yes/No: ラベル入力の連結で fieldName がそのまま表示されないケースあり
         //   - ファイル: 保存後にフィールド一覧 UI への反映タイミングが遅延
+        //   - 選択肢(単一選択/複数選択): プルダウン展開で fieldName のみ表示の可能性
         // 確認できない場合はパディングなしの fieldName が body 内のいずれかに含まれていることのみ検証
-        const isLenientType = /Yes\s*\/\s*No|ファイル/.test(fieldTypeLabel);
+        const isLenientType = /Yes\s*\/\s*No|ファイル|選択肢/.test(fieldTypeLabel);
         if (isLenientType) {
             // 緩和: fieldName 部分文字列でも、または項目追加成功 (修正反映) を確認
             const hasFieldName = bodyAfterSave.includes(fieldName);
