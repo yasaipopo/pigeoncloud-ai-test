@@ -334,7 +334,11 @@ function analyzeFile(filePath) {
             result.totalExpectCount = result.expectCount + helperExtraExpects;
 
             // Step 3: 偽装判定をヘルパー込みで再判定
-            //   永続スキップ (test.skip(true, '理由')) は偽装ではないので除外
+            //   永続スキップ (test.skip(true, '理由') / test.skip('title', async () => {})) は偽装ではないので除外
+            //   kind === 'test.skip' は test 関数定義レベルの永続スキップ (Playwright の skip 宣言)
+            if (kind === 'test.skip') {
+                result.isPermanentSkip = true;
+            }
             const totalEffective = result.totalExpectCount;
             const weakExpectCount = result.weakExpectCount;
             const navbarVisibleCount = result.navbarVisibleCount;
