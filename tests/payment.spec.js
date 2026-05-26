@@ -412,6 +412,10 @@ test.describe('支払い・プラン管理', () => {
      * @requirements.txt(R-172)
      */
     test('PM05: 必須項目バリデーション確認 @requirements.txt(R-172)', async ({ page }) => {
+        // 製品制約: trial env では支払いページ UI が簡略化されており number input 不在 (R-172)
+        // 本番環境または PAYMENT_ENABLED=1 のテナントでのみバリデーション確認可能
+        test.skip(IS_TRIAL_ENV, TRIAL_SKIP_REASON);
+
         test.setTimeout(4 * 15000 + 30000);
         await login(page);
         const _testStart = Date.now();
