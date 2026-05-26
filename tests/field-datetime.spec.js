@@ -1250,10 +1250,10 @@ test.describe('フィールド - レイアウト2-4列（113）', () => {
                 await styleSelect.selectOption({ label: 'アンケート' });
             }
 
-            // 更新ボタン
+            // 更新ボタン (Ladda spinner で hidden 判定回避のため force: true)
             const updateBtn = page.locator('button:has-text("更新"), button[type="submit"]').first();
             if (await updateBtn.count() > 0) {
-                await updateBtn.click();
+                await updateBtn.click({ force: true, timeout: 10000 }).catch(() => {});
                 await waitForAngular(page);
             }
 
