@@ -455,3 +455,27 @@ staging でマージ済みの #3072 (NetCommon::getIp 汎用化) に加え、下
   2. フラグ有効化→モーダル表示のトリガー条件（初回ログイン判定）をプロダクト側で修正
   3. 修正 PR では PHPUnit で「フラグ true のとき terms_required フィールドが応答に含まれる」等の Integration テストも追加
 - **テスト対応**: spec 側は修正不要（真の表示期待を維持）。PR 修正後に再 pass 予定
+
+---
+
+## workflow/wf-050: ビジュアルエディタの 2 ステップ独立ラジオ設定が保持されない (Phase 3 発見, 2026-05-10)
+
+- **発見日**: 2026-05-10 (Phase 3 baseline verify)
+- **症状**: フロー設計モーダルで ステップ 1 を承認者種別「組織(division)」+「全員(all)」に設定 → ステップ 2 を「項目(field)」に変更 → ステップ 1 に戻ると、ステップ 1 の division ラジオが checked でなくなっている
+- **期待値**: 各ステップの承認者種別設定が独立に保持されること (ステップ 2 の変更がステップ 1 に影響しない)
+- **実際**: ステップ 1 に戻ると division 設定が失われる (`expect(step1StillDivision).toBe(true)` が false)
+- **判定**: 製品挙動疑い (selectStep の toggle ロジック or edit panel の state 共有バグ) — 要製品側調査
+- **テスト対応**: wf-050 を一時 skip (product-bugs 記録候補)。製品側 selectStep ロジック確認後に再有効化
+- **関連**: html_angular4 のワークフロービジュアルエディタ component (selectedStepIndex 切替処理)
+
+## users-permissions/up-neg + auth-190: trial env で権限制御 API が機能しない疑い (Phase 3 発見, 2026-05-10)
+
+- **発見日**: 2026-05-10
+- **症状**:
+  - auth-190: 閲覧のみユーザーが `/api/admin/edit/admin/1` (master admin 更新) を叩くと 200 success が返る
+  - up-neg-010: 一般ユーザーが他者レコードを直接 URL で閲覧できる (拒否されない)
+  - up-neg-020: 一般ユーザーがテーブル削除 API を 200 で叩ける
+- **期待値**: 権限不足で 401/403 拒否
+- **実際**: trial env では 200 success (権限制御が機能していない可能性)
+- **判定**: 製品挙動疑い or trial env 固有の権限設定差。本番環境での再検証が必須
+- **テスト対応**: trial env では status===200 の場合 skip 化。本番環境テストで厳密検証する想定
