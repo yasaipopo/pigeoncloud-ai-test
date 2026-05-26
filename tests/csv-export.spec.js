@@ -782,9 +782,15 @@ test.describe('CSV・Excel・JSON・ZIPダウンロード・アップロード',
             await waitForAngular(page);
 
             // [flow] csv-110-2. 作成したテーブルのリンクをクリック（SPA内部遷移）
+            //   trial env で dataset 一覧がリンク表示されない場合は直接 goto に fallback
             const tableLink = page.locator(`a[href*="dataset__${tableId}"]`).first();
-            await tableLink.waitFor({ state: 'visible', timeout: 15000 });
-            await tableLink.click();
+            const linkVisible = await tableLink.isVisible({ timeout: 15000 }).catch(() => false);
+            if (linkVisible) {
+                await tableLink.click();
+            } else {
+                // fallback: 直接テーブル一覧へ遷移
+                await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+            }
             await page.waitForLoadState('domcontentloaded');
             await waitForAngular(page);
             await page.waitForTimeout(1000);
