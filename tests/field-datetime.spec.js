@@ -235,7 +235,8 @@ test.describe('フィールド - 日時（101）', () => {
             if (hasId) {
                 await page.fill('#id', EMAIL, { timeout: 15000 }).catch(() => {});
                 await page.fill('#password', PASSWORD, { timeout: 15000 }).catch(() => {});
-                await page.locator('button[type=submit].btn-primary').first().click({ force: true });
+                // Ladda spinner で hidden 判定されることがあるため force: true + catch
+                await page.locator('button[type=submit].btn-primary').first().click({ force: true, timeout: 15000 }).catch(() => {});
                 await page.waitForSelector('.navbar', { timeout: 15000 }).catch(() => {});
                 break;
             }
