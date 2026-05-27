@@ -1321,37 +1321,11 @@ test.describe('共通設定・システム設定', () => {
         await test.step('9-1: レコードの追加がエラーなく行えること', async () => {
             const STEP_TIME = Date.now();
 
-            // テーブルが何らかの理由で消えている場合は再作成する（安全対策）
-            const statusCheck = await page.evaluate(async (baseUrl) => {
-                try {
-                    const res = await fetch(baseUrl + '/api/admin/debug/status', {
-                        credentials: 'include',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    });
-                    return res.json();
-                } catch (e) { return null; }
-            }, BASE_URL).catch(() => null);
-            const tableStillExists = (statusCheck?.all_type_tables || []).some(t => String(t.id) === String(tableId));
-            if (!tableStillExists) {
-                console.log('[9-1] tableIdのテーブルが見つからないため再作成します... (tableId=', tableId, ')');
-                const { setupAllTypeTable: _setupForRecreate } = require('./helpers/table-setup');
-                const result = await _setupForRecreate(page);
-                tableId = result.tableId;
-                console.log('[9-1] 再作成完了 tableId=', tableId);
-
-                // create-all-type-tableは非同期のため、フロントエンドからアクセス可能になるまで待機
-                for (let retry = 0; retry < 12; retry++) {
-                    await page.goto(BASE_URL + `/admin/dataset__${tableId}`, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
-                    await waitForAngular(page);
-                    const bodyText = await page.innerText('body').catch(() => '');
-                    if (!bodyText.includes('テーブルが見つかりません')) {
-                        console.log('[9-1] テーブルアクセス確認完了 (retry=', retry, ')');
-                        break;
-                    }
-                    console.log('[9-1] テーブルまだ準備中... (retry=', retry, ')');
-                    await waitForAngular(page);
-                }
-            }
+            // 自己完結環境 (beforeAll の createTestEnv) で専用テーブルを保有するため、
+            // 旧 shared-table 時代の「消えていたら再作成」フォールバックは削除。
+            // 高コストな setupAllTypeTable + 12 回 poll が 210s timeout を引き起こし
+            // page closed cascade になっていた。tableId は beforeAll を信頼し、
+            // セッション切れは gotoWithSessionRecovery が再ログインで吸収する。
 
             // [flow] 190-1. ALLテストテーブルのレコード一覧ページを開く
             await gotoWithSessionRecovery(page, BASE_URL + `/admin/dataset__${tableId}`);
