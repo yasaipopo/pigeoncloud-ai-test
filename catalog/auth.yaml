@@ -1,0 +1,138 @@
+# catalog/auth.yaml
+# 認証シナリオカタログ（8件）
+# 作成: 2026-06-11 / ソース: .claude/design-docs/2026-06-11-pilot-catalog-proposal.md §1
+
+- id: auth-001
+  title: マスターユーザーでログインしてダッシュボードに遷移し、ログアウトでログイン画面に戻れる
+  priority: P1
+  destructive: false
+  scope: local
+  source: ["auth-010", "auth-020", "auth-030"]
+  precondition: マスターadminの認証情報（ID・パスワード）が環境変数 ADMIN_EMAIL / ADMIN_PASSWORD に設定済み。マスターadminのパスワード・メールアドレスはこのシナリオで変更しない
+  steps:
+    - ログイン画面（/admin/login）を開く
+    - ID欄にマスターadminのID、パスワード欄にパスワードを入力して「ログイン」ボタンを押す
+    - ダッシュボード表示後、右上のアバターアイコンから「ログアウト」を選ぶ
+  observations:
+    - ログイン画面にID入力欄・パスワード入力欄・「ログイン」ボタン・バージョン表記（「Ver.」を含む文字列）が表示されている [スクショ]
+    - ログイン後のURLが /admin/dashboard を含み、ナビゲーションバーとサイドメニューが表示されている [スクショ]
+    - ログアウト後のURLが /admin/login を含み、ID入力欄が表示されている [スクショ]
+
+- id: auth-002
+  title: 誤ったパスワードでログインするとエラーメッセージが表示され遷移しない
+  priority: P1
+  destructive: false
+  scope: local
+  source: ["auth-040"]
+  precondition: マスターadminの認証情報が環境変数 ADMIN_EMAIL / ADMIN_PASSWORD に設定済み。テスト用に誤ったパスワード文字列（例："wrong_password_test"）を使用する。マスターadminのパスワードはこのシナリオで変更しない
+  steps:
+    - ログイン画面でIDにマスターadminの正しいID、パスワードに誤った値（"wrong_password_test"）を入力して「ログイン」ボタンを押す
+  observations:
+    - URLが /admin/login のまま遷移しない [スクショ]
+    - 「IDまたはパスワードが正しくありません」を含むエラーメッセージまたはトーストが画面に表示される [スクショ]
+
+- id: auth-003
+  title: 作成した一般ユーザー（ユーザータイプ「ユーザー」）でログイン・ログアウトできる
+  priority: P2
+  destructive: false
+  scope: local
+  source: ["auth-030", "auth-080"]
+  precondition: マスターadminでログイン済みの状態から開始。debug API POST /admin/debug/create-user で「auth-003-」プレフィックスのテスト用一般ユーザー1名を作成して使用する。マスターadminのパスワード・メールアドレスはこのシナリオで変更しない
+  steps:
+    - マスターadminでログインした状態で、debug API（POST /admin/debug/create-user）を使ってテスト用一般ユーザー（ユーザータイプ「ユーザー」）を1名作成する
+    - マスターadminからログアウトする
+    - 作成したユーザーのID・パスワードでログインする
+    - ログアウトする
+  observations:
+    - 作成したユーザーでのログイン後、URLが /admin/dashboard を含みナビゲーションバーが表示されている [スクショ]
+    - ログアウト後のURLが /admin/login を含む [スクショ]
+
+- id: auth-004
+  title: パスワード未変更ユーザーの初回ログインでパスワード変更フォームが出て、変更後は新パスワードでログインできる
+  priority: P2
+  destructive: true
+  scope: global
+  source: ["auth-050", "auth-060"]
+  precondition: |
+    マスターadminの認証情報が環境変数 ADMIN_EMAIL / ADMIN_PASSWORD に設定済み。
+    【重要】対象はマスターadminではなく、このシナリオ内でdebug API POST /admin/debug/create-user で作成する「auth-004-」プレフィックスのテストユーザー。マスターadminのパスワード・メールアドレスは変更禁止。
+    scope: global / destructive: true の理由: パスワード変更強制の管理設定（admin_setting の ignore_new_pw_input フラグ）をシナリオ内で変更するため、テナント全体に一時的に影響する。テスト完了後は元の設定値に戻すこと。
+  steps:
+    - マスターadminでログインし、管理設定でパスワード変更強制を有効にする
+    - debug API（POST /admin/debug/create-user）でパスワード未変更状態のテストユーザーを1名作成する
+    - マスターadminからログアウトし、作成したテストユーザーのIDとデフォルトパスワードでログインする
+    - 表示されたパスワード変更フォームに新しいパスワード（固有文字列 + 数字の8文字以上英数混在）を入力して「パスワード変更」ボタンを押す
+    - ログアウト後、設定した新しいパスワードで再ログインする
+    - テスト完了後、管理設定を元の値に戻す
+  observations:
+    - テストユーザーのログイン直後に「新しいパスワード」「パスワード確認」入力欄と「パスワード変更」ボタンが表示される（ダッシュボードには未遷移）[スクショ]
+    - パスワード変更後にURLが /admin/dashboard を含む [スクショ]
+    - このシナリオで設定した新パスワードでログインに成功し /admin/dashboard に遷移する [スクショ]
+
+- id: auth-005
+  title: パスワード変更時に短すぎる値・単純な値がバリデーションエラーで拒否される
+  priority: P2
+  destructive: false
+  scope: local
+  source: ["auth-210", "auth-220"]
+  precondition: |
+    【重要】対象はマスターadminではなく、このシナリオ内でdebug API POST /admin/debug/create-user で作成する「auth-005-」プレフィックスのテストユーザー。マスターadminのパスワード・メールアドレスは変更禁止。
+    テストユーザー作成後、そのユーザーの編集画面（/admin/user/edit/N）でパスワード欄を操作する。
+    scope: local / destructive: false の理由: テストユーザーのパスワード欄を操作するのみで、バリデーションエラーにより保存されないため環境全体に影響しない。
+  steps:
+    - debug API（POST /admin/debug/create-user）でテストユーザーを1名作成し、そのユーザーの編集画面を開く
+    - パスワード欄に4文字のパスワード（例："abc1"）を入力して保存ボタンを押す
+    - 続けてパスワード欄に数字のみ8桁（例："12345678"）を入力して保存ボタンを押す
+  observations:
+    - 4文字入力時に「8文字以上」等の文字数不足を示すエラーメッセージが画面に表示され、保存リクエストが送信されないかエラーが返る [スクショ]
+    - 数字のみ8桁入力時に英数混在を要求するエラーメッセージが画面に表示され、保存されない [スクショ]
+    - シナリオ終了時点でテストユーザーの元のパスワードでログインできる（パスワードが変わっていない）[スクショ]
+
+- id: auth-006
+  title: 一般ユーザーが管理設定URLに直接アクセスすると拒否される
+  priority: P2
+  destructive: false
+  scope: local
+  source: ["auth-180"]
+  precondition: debug API POST /admin/debug/create-user で「auth-006-」プレフィックスのテスト用一般ユーザー（ユーザータイプ「ユーザー」）を1名作成して使用する。マスターadminのパスワード・メールアドレスはこのシナリオで変更しない
+  steps:
+    - debug API（POST /admin/debug/create-user）でテスト用一般ユーザーを1名作成する
+    - 作成したユーザーのID・パスワードでログインする
+    - URLバーを直接 /admin/admin_setting/edit/1 に書き換えてアクセスする
+  observations:
+    - /admin/admin_setting/edit/1 アクセス後、管理設定の入力フォーム（二段階認証・会社名等の設定入力欄）が1つも描画されていない [スクショ]
+    - 権限エラーメッセージ・ダッシュボードへのリダイレクト・「DATA NOT FOUND」のいずれかが表示される [スクショ]
+
+- id: auth-007
+  title: ログインセッションCookieにHttpOnly/Secure/SameSite属性が付与されている
+  priority: P2
+  destructive: false
+  scope: local
+  source: ["auth-270"]
+  precondition: マスターadminの認証情報が環境変数 ADMIN_EMAIL / ADMIN_PASSWORD に設定済み。Playwright の context.cookies() でCookieを取得して属性値を検証する。マスターadminのパスワード・メールアドレスはこのシナリオで変更しない
+  steps:
+    - マスターadminでログインする
+    - ブラウザコンテキストからセッションCookieの一覧を取得して属性値を確認する
+  observations:
+    - セッションCookieが1件以上存在し、セッションIDを格納するCookieが特定できる [スクショ]
+    - 該当Cookieの httpOnly フラグが true である [スクショ]
+    - 該当Cookieの secure フラグが true である [スクショ]
+    - 該当Cookieの sameSite が "None" / "Lax" / "Strict" のいずれかに設定されている [スクショ]
+
+- id: auth-008
+  title: テナントAのCookieではテナントBのAPI・画面にアクセスできない（マルチテナント分離）
+  priority: P2
+  destructive: false
+  scope: local
+  source: ["auth-260"]
+  precondition: |
+    比較対象テナント（テナントB）は新規環境を作成せず、同一実行の envs.json にある別エージェント環境を借用する（envs.json に複数環境が存在する場合）。別エージェント環境が存在しない場合のみ create-trial API で1件追加作成してよい。
+    テナントAはこのシナリオの実行環境（TEST_BASE_URL）を使用する。
+    マスターadminのパスワード・メールアドレスはこのシナリオで変更しない。
+  steps:
+    - テナントAでマスターadminとしてログインし、Playwright の context.cookies() でセッションCookieを取得する
+    - テナントBのドメインに対してテナントAのCookieをヘッダに付けてAPIエンドポイント（例：/api/admin/dashboard または /api/admin/user）にリクエストを送る
+    - テナントAのCookieをセットした状態でテナントBのダッシュボードURL（/admin/dashboard）にアクセスする
+  observations:
+    - テナントBへのAPIリクエストが HTTPステータス 401 または 403 で返る、あるいはレスポンスに "tenant mismatch" / "unauthorized" / "login_error" 等の拒否を示す文字列が含まれる [スクショ]
+    - テナントBのダッシュボードに入れず、最終的に /admin/login を含むURLに遷移する（ログイン画面にリダイレクトされる）[スクショ]
