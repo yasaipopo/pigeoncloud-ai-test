@@ -1,6 +1,82 @@
-# v2 パイロット実行ランブック（オーケストレーター用）
+# v2 パイロット実行ランブック + フロー設計（オーケストレーター用）
 
-オーケストレーター = Claude メインセッション。以下を順に行う。
+オーケストレーター = Claude メインセッション。設計書 → `.claude/design-docs/2026-06-11-agentic-e2e-v2-design.md`
+
+## フロー設計: スポット実行1回の全体像
+
+```
+【前段】カタログ更新トリアージ（設計書 §7）
+  前回実行以降の merged PR / Slack #テスト-staging 報告をスキャン
+    ├─ (a) ロジックバグ（プロダクト側 Unit/Integration で再発防止済み）→ 反映しない
+    ├─ (b) UI動線の断絶 → 症状の動線シナリオを新設提案（source: にPR番号/障害ID）
+    └─ (c) 既存動線上のバグ → 既存シナリオの observations に観測点を1行追加提案
+  → 更新提案リストをユーザーに提示 → 採否反映 → validate-catalog で機械チェック
+        │
+        ▼
+【0】事前チェック
+  validate-catalog OK + unit tests PASS を確認
+        │
+        ▼
+【1】環境プロビジョニング（直列・再開可能）
+  provision-envs.js が create-trial を N 回直列実行 → runs/{runId}/envs.json
+  ※ 1エージェント1環境。シナリオごとには作らない（環境使い回し方式）
+        │
+        ▼
+【2】実行・判定オーケストレーション（環境チェーン並列 × チェーン内直列）
+  ┌─ チェーン0 (env0): auth 8件 ──────────────────────────┐
+  │  シナリオごとに:                                        │
+  │   実行エージェント(Sonnet・新規コンテキスト)            │
+  │     カタログ読込 → 使い捨てPlaywrightスクリプト作成     │
+  │     → 実行 → 失敗なら修正(最大3回) → evidence 出力      │
+  │         │ status: executed ─────────┐   │ STUCK        │
+  │         ▼                           ▼   ▼              │
+  │   判定エージェント(Sonnet・別コンテキスト)  checkpoint   │
+  │     スクショを実際に開いて観測値と突き合わせ            │
+  │     バッジID一致確認 → PASS / FAIL / EVIDENCE_NG        │
+  │         │ EVIDENCE_NG のとき1回だけ:                    │
+  │         └→ 不足証拠の追加撮影指示付きで実行を再起動      │
+  │            → 再判定 → それでもNGなら確定                │
+  │   → checkpoint.json に逐次記録 → 次のシナリオへ          │
+  │   実行順: scope:local → destructive/global は最後尾      │
+  └──────────────────────────────────────────────────────┘
+  ┌─ チェーン1 (env1): records 12件（同上）─────────────────┐
+  └──────────────────────────────────────────────────────┘
+        │ 全チェーン完了（STUCKでも止まらず次へ進む）
+        ▼
+【3】集計・レポート
+  checkpoint.json 集計（PASS/FAIL/EVIDENCE_NG/STUCK_RETRY_EXCEEDED）
+  FAIL → 再現スクリプト+スクショ+失敗画面を添えてバグ起案（.claude/product-bugs.md）
+  成功スクリプト → cache/scripts/{id}.js 保存（次回の安価再生・全面展開時）
+  → サマリー + カタログ更新提案 をユーザーに提示
+```
+
+### 役割分担（だれが何をするか）
+
+| 役割 | 担当 | やること / やらないこと |
+|---|---|---|
+| オーケストレーター | Claude メインセッション | 環境作成・エージェント起動・checkpoint管理・集計。**ブラウザ操作はしない** |
+| 実行エージェント | Sonnet サブエージェント（シナリオごとに新規） | シナリオ完遂と証拠出力のみ。**判定はしない**。認証情報は envs.json 参照（プロンプト直埋め禁止） |
+| 判定エージェント | Sonnet サブエージェント（実行と別コンテキスト） | 証拠物だけを根拠に三値判定。**実行エージェントの主張を信用しない** |
+| ユーザー | 石川さん | カタログ更新の採否・FAIL のバグ報告判断・GO/NO-GO |
+
+### 止まらない・再開できる仕組み
+
+- **実行エージェントの修正試行は最大3回** → 超過は STUCK_RETRY_EXCEEDED で記録し次へ（コスト暴走防止）
+- **checkpoint.json は atomic write**（tmp+rename）。クラッシュしても壊れない
+- **再開** = 同じ run-dir で再起動: provision は既存スキップ、`pendingScenarios()` が未完了のみ返す
+- 環境作成失敗はリトライ最大2回 → 不能ならその環境の担当分を他チェーンに再配分
+- 朝のレポートは必ず「完走 or 残件と理由」を含める
+
+### 偽装PASS を防ぐ4つの構造
+
+1. **実行と判定の分離**（同一エージェントが自己採点しない）
+2. **証拠物必須**（observation ごとにスクショ + DOM から取得した実値）
+3. **実行IDバッジ**（スクショ右下に DOM 注入。古い/他テストの証拠流用を判定側が検出）
+4. **三値判定**（テストの甘さを FAIL と区別して EVIDENCE_NG として可視化）
+
+---
+
+## 実行手順
 
 ## 0. 事前
 
@@ -9,6 +85,7 @@ node v2/lib/validate-catalog.js catalog   # バリデーション OK を確認
 node --test v2/tests/*.test.js            # ユニットテスト全 PASS を確認（ディレクトリ指定は不可）
 RUN_ID=$(date +%Y%m%d-%H%M)-pilot
 node v2/provision-envs.js --count 2 --run-dir runs/$RUN_ID
+# ローカル実行時は .env.staging を自動ロード（--env-file で変更可）
 ```
 
 ## 1. 初期化
@@ -22,7 +99,8 @@ node v2/provision-envs.js --count 2 --run-dir runs/$RUN_ID
 
 各シナリオについて:
 1. `v2/prompts/executor-prompt.md` の {{変数}} を埋めて Sonnet サブエージェントを起動（Agent tool, model: sonnet）
-   - 変数: SCENARIO_YAML / SCENARIO_ID / ENV_URL / ENV_EMAIL / ENV_PASSWORD / RUN_ID / RUN_DIR / WORK_DIR / PROJECT_ROOT
+   - 変数: SCENARIO_YAML / SCENARIO_ID / ENV_INDEX / RUN_ID / RUN_DIR / WORK_DIR / PROJECT_ROOT
+   - 認証情報は渡さない（エージェントが envs.json から読む）
    - シナリオ単位タイムアウト目安 10分
 2. 報告 JSON を checkpoint に recordResult（status: executed / STUCK）
 3. STUCK → status: STUCK_RETRY_EXCEEDED で記録し次へ（止まらない）
