@@ -3,13 +3,18 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { chromium } = require('@playwright/test');
-const { createTestEnv } = require('../tests/helpers/create-test-env');
 
 function arg(name, def) {
     const i = process.argv.indexOf('--' + name);
     return i >= 0 ? process.argv[i + 1] : def;
 }
+
+// ローカル実行時は .env.staging から ADMIN_* を読む（Docker 外では shell に未設定のため）。
+// create-test-env.js はモジュールロード時に process.env を読むため、require より前に dotenv を実行する
+require('dotenv').config({ path: arg('env-file', '.env.staging') });
+
+const { chromium } = require('@playwright/test');
+const { createTestEnv } = require('../tests/helpers/create-test-env');
 
 (async () => {
     const count = parseInt(arg('count', '2'), 10);
