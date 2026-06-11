@@ -46,3 +46,6 @@ test_files/
 .claude/handover-*.md
 .claude/postmortem/
 .claude/scheduled_tasks.lock
+
+# v2 エージェント実行成果物
+runs/
