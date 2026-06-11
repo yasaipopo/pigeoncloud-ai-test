@@ -16,7 +16,7 @@ node v2/provision-envs.js --count 2 --run-dir runs/$RUN_ID
 - `initRun(runDir, runId, 全シナリオID)` で checkpoint 作成（node -e で実行）
 - 割当: env0 → auth 8件 / env1 → records 12件
 - 各環境内の実行順: scope: local → destructive / global は最後
-- auth-008（マルチテナント分離）は env1 の URL を借用するため、env1 の records 消化と並走してよい（read-only 借用）
+- auth-008（マルチテナント分離）は env1 の URL を借用するため、**全環境のプロビジョニング完了後（envs.json に2件揃ってから）**にのみ実行する。provision-envs.js は実行ループ開始前に全件完了させる運用のため通常は自動的に満たされるが、再開時に envs.json が1件しかない場合は auth-008 を後回しにする（read-only 借用なので env1 の records 消化との並走は可）
 
 ## 2. 実行ループ（環境ごとに並列、環境内は直列）
 

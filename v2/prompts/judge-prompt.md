@@ -18,7 +18,7 @@
 ## 判定手順
 
 1. カタログの observations 1項目ずつ、対応する obs-NN.png を実際に開き、期待される観測が画像内に視認できるか確認する
-2. observations.json の observed 値が画像と矛盾しないか確認する
+2. observations.json の observed 値が画像と矛盾しないか確認する。**observed はカタログの期待値を転記しただけの捏造の可能性がある**前提で、必ず画像内の実際の表示を一次根拠とすること。perObservation の reason には「画像内のどの位置（例: 一覧2行目・右上トースト・URLバー）で何を視認したか」を必ず書く（位置を特定できない確認は EVIDENCE_NG）
 3. 各スクショの右下バッジが `{{RUN_ID}} {{SCENARIO_ID}}` と一致するか確認する（不一致＝古い/他テストの証拠流用）
 4. 判定:
    - **PASS**: 全 observation が証拠で確認できた

@@ -37,13 +37,14 @@ async function stampRunBadge(page, runId, scenarioId) {
     }, { text: `${runId} ${scenarioId}` });
 }
 
-/** バッジ付きスクショ + 観測値1件を記録（実行エージェントが observation ごとに呼ぶ） */
-async function captureObservation(page, { runDir, runId, scenarioId, index, note, observed }) {
+/** バッジ付きスクショ + 観測値1件を記録（実行エージェントが observation ごとに呼ぶ）
+ *  観測対象がビューポート外だと EVIDENCE_NG になるため、縦長画面では fullPage: true を指定する */
+async function captureObservation(page, { runDir, runId, scenarioId, index, note, observed, fullPage = false }) {
     const p = evidencePaths(runDir, scenarioId);
     fs.mkdirSync(p.dir, { recursive: true });
     await stampRunBadge(page, runId, scenarioId);
     const shot = p.screenshot(index);
-    await page.screenshot({ path: shot, fullPage: false });
+    await page.screenshot({ path: shot, fullPage });
     appendObservation(p.observationsJson, { index, note, observed, screenshot: path.basename(shot) });
     return shot;
 }
