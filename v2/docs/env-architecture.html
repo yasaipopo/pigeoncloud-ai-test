@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>E2E v2 環境・並列アーキテクチャ</title>
+<style>
+  body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #f5f7fa; color: #233; margin: 0; padding: 24px; line-height: 1.7; }
+  h1 { font-size: 22px; border-bottom: 3px solid #2c7be5; padding-bottom: 8px; }
+  h2 { font-size: 17px; margin-top: 36px; color: #1a5fb4; }
+  .card { background: #fff; border-radius: 10px; padding: 18px 22px; margin: 14px 0; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .flow { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
+  .box { border: 2px solid #2c7be5; border-radius: 8px; padding: 10px 14px; background: #eef5ff; flex: 1; min-width: 220px; }
+  .box h3 { margin: 0 0 6px; font-size: 14px; color: #1a5fb4; }
+  .box ul { margin: 4px 0; padding-left: 18px; font-size: 13px; }
+  .env { border-color: #2fb380; background: #ecfaf3; }
+  .env h3 { color: #1d7a57; }
+  .warn { border-color: #e5a32c; background: #fff8ec; }
+  .warn h3 { color: #a8721a; }
+  .scenario { display: inline-block; background: #fff; border: 1px solid #aac; border-radius: 4px; padding: 1px 8px; margin: 2px; font-size: 12px; }
+  .pass { border-color: #2fb380; color: #1d7a57; }
+  .fail { border-color: #d9534f; color: #b52b27; }
+  .pend { border-color: #999; color: #777; }
+  .destr { border-color: #e5a32c; color: #a8721a; font-weight: bold; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { border: 1px solid #cdd6e0; padding: 6px 10px; text-align: left; }
+  th { background: #eef2f7; }
+  .arrow { text-align: center; font-size: 20px; color: #2c7be5; align-self: center; }
+  .num { font-size: 26px; font-weight: bold; color: #2c7be5; }
+  .small { font-size: 12px; color: #667; }
+  .tag { display: inline-block; border-radius: 10px; padding: 0 10px; font-size: 11px; color: #fff; }
+  .tag-now { background: #2c7be5; } .tag-prop { background: #2fb380; }
+</style>
+</head>
+<body>
+
+<h1>E2E v2 — 環境・並列アーキテクチャ（2026-06-11 パイロット時点）</h1>
+
+<h2>1. いまの並列度 <span class="tag tag-now">現状</span></h2>
+<div class="card">
+  <p><span class="num">2 並列</span>（環境チェーン2本）。<b>1チェーン = 1環境 = その中はシナリオ直列</b>です。
+  同時に動くエージェントは基本2体（各チェーンの実行 or 判定エージェント）。</p>
+  <div class="flow">
+    <div class="box env">
+      <h3>環境0: sx0qqhjnw0.pigeon-demo.com</h3>
+      <p class="small">チェーン0が専有。auth 8件を直列消化</p>
+      <span class="scenario pass">auth-001</span><span class="scenario pass">002</span><span class="scenario pass">003</span><span class="scenario pass">005</span><span class="scenario pass">006</span><span class="scenario pass">007</span><span class="scenario fail">008</span><span class="scenario destr">004 (destructive・最後)</span>
+    </div>
+    <div class="box env">
+      <h3>環境1: g4dxnnk9cx.pigeon-demo.com</h3>
+      <p class="small">チェーン1が専有。records 12件を直列消化</p>
+      <span class="scenario pass">rec-001</span><span class="scenario pass">002</span><span class="scenario pass">003</span><span class="scenario fail">004</span><span class="scenario fail">005</span><span class="scenario pass">006</span><span class="scenario fail">007</span><span class="scenario fail">008</span><span class="scenario pend">009</span><span class="scenario pend">010</span><span class="scenario pend">011</span><span class="scenario pend">012</span>
+    </div>
+  </div>
+  <p class="small">※ FAIL 5件は切り分け済みで全てテスト/判定側の問題（プロダクトバグ0件）。全面展開時は環境を5〜6本に増やして並列度を上げる（200件を一晩で消化する計算）。</p>
+</div>
+
+<h2>2. 環境のライフサイクル <span class="tag tag-now">現状</span></h2>
+<div class="card">
+  <div class="flow">
+    <div class="box">
+      <h3>① 実行開始時に作成</h3>
+      <ul>
+        <li>create-trial API で<b>このスポット実行専用</b>のテナントを2個、直列に新規作成</li>
+        <li>旧体制は「specごとに毎回作成」（36回/実行）→ <b>今は2回/実行</b></li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="box env">
+      <h3>② 実行中: リセットなし・使い回し</h3>
+      <ul>
+        <li><b>reset-all 等のリセットは一切呼ばない</b></li>
+        <li>各シナリオは <code>rec-008-</code> のような自分専用プレフィックスのテーブル/ユーザーを作って検証（他の残骸と干渉しない）</li>
+        <li>環境を壊しうる destructive シナリオ（PW変更強制等）は<b>各チェーンの最後尾</b></li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="box warn">
+      <h3>③ 実行後: 使い捨て（現状）</h3>
+      <ul>
+        <li>削除せず放置（従来運用と同じ）</li>
+        <li>次回スポット実行ではまた新規作成 ← <b>ここが見直し対象</b></li>
+      </ul>
+    </div>
+  </div>
+  <p>「メニュー数が変わると壊れるからリセット」していた旧体制の前提は、画面を見て適応するエージェント実行では不要になったため、<b>実行内のリセットは全廃</b>しました。</p>
+</div>
+
+<h2>3. 提案: 実行をまたいだ環境再利用 <span class="tag tag-prop">次回から</span></h2>
+<div class="card">
+  <p><b>ご指摘どおり「一度作った環境の再利用」を既定にするのが合理的</b>です。create-trial は最重量処理（1回数分・504リスク・staging RDS蓄積）で、環境作成自体はテスト対象ではなく単なるセットアップだからです。「作る経路のエラーは影響範囲が小さい」という判断にも同意です（壊れても気づくのはセットアップ時で、ユーザーデータには波及しない）。</p>
+  <div class="flow">
+    <div class="box env">
+      <h3>環境レジストリ方式（提案）</h3>
+      <ul>
+        <li><code>v2/envs-registry.json</code> に作成済み環境を永続記録</li>
+        <li>実行開始時: レジストリの環境に<b>ヘルスチェック</b>（ログイン可? 上限余裕あり?）→ OKなら再利用</li>
+        <li>NG（ログイン不能・上限到達・消滅）の環境だけ作り直し（自動回復）</li>
+      </ul>
+    </div>
+    <div class="box warn">
+      <h3>再利用の管理ポイント（対策込み）</h3>
+      <ul>
+        <li><b>trialプラン上限</b>: 今回も max_user=5 に到達。→ 実行末尾にシナリオプレフィックスのテーブル/ユーザーを掃除（cleanup ステップ）</li>
+        <li><b>destructive の後遺症</b>(PW変更等): destructive 専用環境を分離 or 実行後にその環境だけ作り直し</li>
+        <li><b>状態の肥大でUIが重くなる</b>: ヘルスチェックで閾値超えたら作り直し（月1程度の自然リフレッシュ）</li>
+      </ul>
+    </div>
+  </div>
+  <table>
+    <tr><th></th><th>毎回新規作成（現状）</th><th>レジストリ再利用（提案）</th></tr>
+    <tr><td>実行開始までの時間</td><td>環境数 × 2〜4分</td><td><b>ヘルスチェックのみ（数十秒）</b></td></tr>
+    <tr><td>staging RDS 蓄積</td><td>毎回 N 個のDB追加</td><td><b>追加ほぼゼロ</b>（壊れた時だけ）</td></tr>
+    <tr><td>create-trial 504リスク</td><td>毎回さらされる</td><td>初回と故障時のみ</td></tr>
+    <tr><td>リスク</td><td>なし（常にクリーン）</td><td>上限・後遺症 → 上記対策で吸収</td></tr>
+  </table>
+</div>
+
+<h2>4. 役割の整理（誰がどの環境を触るか）</h2>
+<div class="card">
+  <table>
+    <tr><th>主体</th><th>環境との関わり</th></tr>
+    <tr><td>オーケストレーター（メインセッション）</td><td>環境の作成/ヘルスチェック/割当のみ。ブラウザ操作はしない</td></tr>
+    <tr><td>実行エージェント（Sonnet）</td><td>割当てられた1環境のみ。自分のプレフィックス外のデータ変更・システム設定変更は禁止</td></tr>
+    <tr><td>判定エージェント（Sonnet）</td><td>環境に触らない（証拠ファイルだけ見る）</td></tr>
+  </table>
+</div>
+
+<p class="small">関連: 設計書 .claude/design-docs/2026-06-11-agentic-e2e-v2-design.md ／ フロー詳細 v2/RUNBOOK.md</p>
+</body>
+</html>
