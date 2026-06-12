@@ -36,6 +36,11 @@
   │         │ EVIDENCE_NG のとき1回だけ:                    │
   │         └→ 不足証拠の追加撮影指示付きで実行を再起動      │
   │            → 再判定 → それでもNGなら確定                │
+  │         │ FAIL / STUCK のとき:                          │
+  │         └→ トリアージエージェント（自動・人手でやらない）│
+  │            証拠再精査→環境の現状確認→再現性確認→コード照合│
+  │            → PRODUCT_BUG/CATALOG_ISSUE/TIMING_FLAKE/    │
+  │               ENV_ISSUE/TEST_ISSUE に分類               │
   │   → checkpoint.json に逐次記録 → 次のシナリオへ          │
   │   実行順: scope:local → destructive/global は最後尾      │
   └──────────────────────────────────────────────────────┘
@@ -43,12 +48,19 @@
   └──────────────────────────────────────────────────────┘
         │ 全チェーン完了（STUCKでも止まらず次へ進む）
         ▼
-【3】集計・レポート
-  checkpoint.json 集計（PASS/FAIL/EVIDENCE_NG/STUCK_RETRY_EXCEEDED）
-  FAIL → 再現スクリプト+スクショ+失敗画面を添えてバグ起案（.claude/product-bugs.md）
+【3】レポート自動生成（レポーターエージェント）
+  checkpoint 更新 + runs/{runId}/report.md 生成
+  （サマリー表 / トリアージ分類済み結果 / カタログ更新提案 / プロダクトバグ報告ドラフト / 運用上の注意）
   成功スクリプト → cache/scripts/{id}.js 保存（次回の安価再生・全面展開時）
-  → サマリー + カタログ更新提案 をユーザーに提示
+  → オーケストレーターは完成したレポートをユーザーに提示するだけ
 ```
+
+### 実行コマンド（【2】【3】は保存版ワークフローで全自動）
+
+実行〜レポートまでは Workflow `e2e-v2-spot-run`（`.claude/workflows/e2e-v2-spot-run.js`）を
+`args: { runId, runDir, projectRoot, chains: [{envIndex, file, ids}] }` で起動する。
+オーケストレーター（メインセッション）が手作業で行うのは環境準備・ワークフロー起動・レポート提示のみ。
+FAIL の切り分け・checkpoint 更新・レポート作成を**メインセッションが手でやるのはルール違反**（2026-06-12 ユーザー指示）。
 
 ### 役割分担（だれが何をするか）
 

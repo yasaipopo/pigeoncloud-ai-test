@@ -131,8 +131,9 @@
     マスターadminのパスワード・メールアドレスはこのシナリオで変更しない。
   steps:
     - テナントAでマスターadminとしてログインし、Playwright の context.cookies() でセッションCookieを取得する
-    - テナントBのドメインに対してテナントAのCookieをヘッダに付けてAPIエンドポイント（例：/api/admin/dashboard または /api/admin/user）にリクエストを送る
+    - テナントBのドメインに対してテナントAのCookieと X-Requested-With XMLHttpRequest ヘッダを付けてAPIエンドポイント（例：/api/admin/user）にリクエストを送る
     - テナントAのCookieをセットした状態でテナントBのダッシュボードURL（/admin/dashboard）にアクセスする
   observations:
-    - テナントBへのAPIリクエストが HTTPステータス 401 または 403 で返る、あるいはレスポンスに "tenant mismatch" / "unauthorized" / "login_error" 等の拒否を示す文字列が含まれる [スクショ]
+    # 2026-06-12 修正: ヘッダなしGETはSPAシェルHTML(200)が返るだけでデータ漏洩ではない（パイロットrun 20260611-1247 の偽陽性教訓）。中身で判定する
+    - テナントBへのAPIレスポンスにテナントBのユーザーデータ（メールアドレス等を含むJSON）が一切含まれない。401/403/400 や SPAシェルHTML・ログインリダイレクトは「拒否」として合格 [スクショ]
     - テナントBのダッシュボードに入れず、最終的に /admin/login を含むURLに遷移する（ログイン画面にリダイレクトされる）[スクショ]
