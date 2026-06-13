@@ -49,4 +49,34 @@ async function captureObservation(page, { runDir, runId, scenarioId, index, note
     return shot;
 }
 
-module.exports = { evidencePaths, appendObservation, stampRunBadge, captureObservation };
+/** runDir/video/{scenarioId}/ */
+function videoDir(runDir, scenarioId) {
+    return path.join(runDir, 'video', scenarioId);
+}
+
+/** 動画録画を有効にした context を作る（実行エージェントは page をこの context から作る）
+ *  全シナリオ録画（2026-06-13 ユーザー指示）。1280x800 固定 */
+async function newRecordingContext(browser, { runDir, scenarioId, width = 1280, height = 800, extra = {} }) {
+    const dir = videoDir(runDir, scenarioId);
+    fs.mkdirSync(dir, { recursive: true });
+    return browser.newContext({
+        viewport: { width, height },
+        recordVideo: { dir, size: { width, height } },
+        ...extra,
+    });
+}
+
+/** context を閉じて録画を確定し、{scenarioId}.webm にリネームしてパスを返す
+ *  （必ず finally で呼ぶ。close しないと webm が flush されない） */
+async function finalizeVideo(context, runDir, scenarioId) {
+    try { await context.close(); } catch {}
+    const dir = videoDir(runDir, scenarioId);
+    if (!fs.existsSync(dir)) return null;
+    const webm = fs.readdirSync(dir).find(f => f.endsWith('.webm') && f !== `${scenarioId}.webm`);
+    if (!webm) return null;
+    const dest = path.join(dir, `${scenarioId}.webm`);
+    fs.renameSync(path.join(dir, webm), dest);
+    return dest;
+}
+
+module.exports = { evidencePaths, appendObservation, stampRunBadge, captureObservation, videoDir, newRecordingContext, finalizeVideo };
