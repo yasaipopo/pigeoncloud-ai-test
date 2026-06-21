@@ -5,6 +5,7 @@ export const meta = {
   phases: [
     { title: 'Execute', detail: '実行エージェント（環境チェーン並列・チェーン内直列）' },
     { title: 'Judge', detail: '判定エージェント（証拠物ベース三値判定）' },
+    { title: 'Check', detail: 'PASS後の第三者チェック（要件すり替え・簡略化を別エージェントが検出）' },
     { title: 'Triage', detail: 'FAIL/STUCKの切り分け（プロダクトバグ/カタログ不備/タイミング/環境/テスト不備）' },
     { title: 'Report', detail: 'checkpoint更新 + レポートmd生成 + カタログ更新提案' },
   ],
@@ -64,6 +65,38 @@ const TRIAGE_SCHEMA = {
     envNote: { type: 'string' },
   },
   required: ['scenarioId', 'classification', 'confidence', 'evidence'],
+}
+
+// PASS後の第三者チェック（要件すり替え・簡略化の検出・2026-06-22 ユーザー指示）
+const CHECK_SCHEMA = {
+  type: 'object',
+  properties: {
+    scenarioId: { type: 'string' },
+    ok: { type: 'boolean' },
+    issue: { type: 'string' },
+  },
+  required: ['scenarioId', 'ok'],
+}
+
+function checkPrompt(chain, id) {
+  return [
+    'あなたは E2E の「テスト結果・動作手順」第三者チェック担当です（実行・判定とは別の独立エージェント）。',
+    'judge が PASS を出したシナリオについて、executor が要件をすり替え・簡略化していないかを検証します。本体の結論に同調せず、客観事実だけで判断してください。',
+    '',
+    '検証材料（自分で読むこと）:',
+    `   - シナリオ要件: ${projectRoot}/${chain.file} 内の「id: ${id}」（precondition / steps / observations を厳密に読む）`,
+    `   - executor の実際の操作手順: ${runDir}/work/${id}/ 配下の最終成功スクリプト（run*.js の最新）`,
+    `   - 観測結果: ${runDir}/evidence/${id}/observations.json と obs-*.png（必要なら開く）`,
+    '',
+    '🔴 重点検出（PASSを取り消すべき例）:',
+    '   - 別人性の要件回避: 「申請者≠承認者」等を同一ユーザー（master 自己申請・自己承認）で代替していないか（誰でログインし誰が承認したかをスクリプトで確認）',
+    '   - 観測対象のすり替え: observations が要求する対象と別の表示で代替していないか',
+    '   - 検証主操作のAPI代替: ブラウザUIで行うべき主操作を raw API 直叩きで済ませていないか',
+    '   - 前提の未充足: precondition のリソース/ロールを実際に作らず簡略化していないか',
+    '',
+    'ok=true は「要件どおりに実行され PASS が妥当」なときのみ。少しでも要件のすり替え/簡略化があれば ok=false にし、issue に具体箇所を書く。',
+    '最終報告は JSON（CHECK_SCHEMA）で StructuredOutput として返すこと。',
+  ].join('\n')
 }
 
 function vars(chain, id) {
@@ -147,12 +180,28 @@ async function runScenario(chain, id) {
     }
     r.judge = judge
     r.final = judge ? judge.verdict : 'EVIDENCE_NG'
+
+    // PASS は第三者チェック必須（要件すり替え・簡略化の検出・2026-06-22 ユーザー指示）
+    if (r.final === 'PASS') {
+      const check = await agent(checkPrompt(chain, id), {
+        label: `check:${id}`, phase: 'Check', model: 'sonnet', schema: CHECK_SCHEMA,
+      })
+      r.check = check
+      if (check && check.ok === false) {
+        log(`${id}: PASS → 第三者チェックで要件すり替え検出 → TEST_ISSUE に降格 (${check.issue || ''})`)
+        r.final = 'FAIL'
+        r.checkDowngraded = true
+      }
+    }
   }
 
   // FAIL / STUCK は自動トリアージ（人手で切り分けない — 2026-06-12 ユーザー指示）
   if (r.final === 'FAIL' || r.final === 'STUCK_RETRY_EXCEEDED') {
     log(`${id}: ${r.final} → トリアージ開始`)
-    r.triage = await agent(triagePrompt(chain, id, r.exec, r.judge), {
+    const judgeForTriage = r.checkDowngraded
+      ? { ...(r.judge || {}), checkDowngraded: true, checkIssue: r.check && r.check.issue }
+      : r.judge
+    r.triage = await agent(triagePrompt(chain, id, r.exec, judgeForTriage), {
       label: `triage:${id}`, phase: 'Triage', model: 'sonnet', schema: TRIAGE_SCHEMA,
     })
   }
