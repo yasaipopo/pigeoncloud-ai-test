@@ -57,6 +57,7 @@
 - 実行〜レポートは保存版ワークフロー **`e2e-v2-spot-run`**（`.claude/workflows/e2e-v2-spot-run.js`）で全自動実行する。オーケストレーターの仕事は「環境準備 → ワークフロー起動 → 完成したレポートのユーザー提示」のみ
 - 🔴 **全シナリオ動画録画**（2026-06-13 ユーザー指示）。実行エージェントは録画付き context で操作（evidence.js の newRecordingContext / finalizeVideo）
 - 🔴 **成果物は月ごとのローカルアーカイブに保管**: `run-dir` は `~/pigeon-e2e-archive/YYYY-MM/{runId}/`（`node v2/lib/paths.js <runId>` で算出）。配下に report.md / evidence/{id}/（png+json）/ video/{id}/（webm+mp4）を集約。`E2E_ARCHIVE_ROOT` 環境変数で保管先変更可
+- 🔴 **結果ビューアー**（2026-06-22 ユーザー指示で再構築）: `node v2/lib/build-viewer.js` がアーカイブを走査して `~/pigeon-e2e-archive/index.html`（自己完結・サーバ不要）を生成。実行（月別）→シナリオ（status/triage）→観測値・スクショ・動画を1画面で閲覧。ワークフローが実行末尾で自動再生成する。旧 `e2e-viewer-next/`（spec/Google Sheets ベース・remote API 依存）は廃止
 
 - **役割分離（厳守）**: オーケストレーター（メイン）は環境準備・エージェント起動・集計のみ。**実行エージェント（Sonnet）**がブラウザ操作と証拠出力、**判定エージェント（Sonnet・別コンテキスト）**が証拠だけを根拠に判定。同一エージェントが実行と判定を兼ねない
 - 実行エージェント指示書 → `v2/prompts/executor-prompt.md` / 判定 → `v2/prompts/judge-prompt.md`

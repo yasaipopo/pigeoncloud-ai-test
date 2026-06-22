@@ -259,5 +259,17 @@ const reportResult = await agent([
   `最終メッセージは「report.md のフルパス」と「カタログ更新提案の件数」「プロダクトバグドラフトの件数」のみ返すこと。`,
 ].join('\n'), { label: 'reporter', phase: 'Report', model: 'sonnet' })
 
+// 結果ビューアー（アーカイブ root の index.html）を再生成して最新化
+let viewerOut = null
+try {
+  const { build } = require(`${projectRoot}/v2/lib/build-viewer`)
+  const path = require('path')
+  const archiveRoot = path.resolve(runDir, '..', '..') // .../YYYY-MM/{runId} → archiveRoot
+  viewerOut = build(archiveRoot).out
+  log(`ビューアー更新: ${viewerOut}`)
+} catch (e) {
+  log(`ビューアー更新失敗（致命的でない）: ${e && e.message}`)
+}
+
 log(`完了: ${JSON.stringify(tally)} / レポート: ${String(reportResult).slice(0, 200)}`)
-return { tally, results: slim, report: reportResult }
+return { tally, results: slim, report: reportResult, viewer: viewerOut }
