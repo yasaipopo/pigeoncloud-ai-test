@@ -22,8 +22,8 @@
   .summary{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:13px}
 </style></head><body><div class="wrap">
 <h1>🐦 PigeonCloud E2E ジャーニー型テストシート</h1>
-<p class="sub">1認証セッション=多観点 / 大=ジャーニー・中=フェーズ・小=観点(checkpoint) / 現行 約1,671ケース → 16ジャーニー・187観点 に集約</p>
-<div class="summary">ジャーニー <b>16</b> ・ 観点合計 <b>187</b> ・ 優先度 P1:7 / P2:8 / P3:1
+<p class="sub">1認証セッション=多観点 / 大=ジャーニー・中=フェーズ・小=観点(checkpoint) / 現行 約1,671ケース → 17ジャーニー・199観点 に集約</p>
+<div class="summary">ジャーニー <b>17</b> ・ 観点合計 <b>199</b> ・ 優先度 P1:8 / P2:8 / P3:1
 <span class="mut">準備: <span class="tag t-ok">mcp</span>=MCP前倒し <span class="tag t-warn">debug</span>=debug API <span class="tag t-mut">ui</span>=UI / 操作: <span class="tag t-okb">ui</span>=ブラウザ通常動線（検証の主役）</span></div>
 <div class="journey">
       <div class="jhead">
@@ -308,5 +308,23 @@
           <td class="obs">アクセス許可IP設定が未設定（空）の状態では、現在の送信元IPからログイン・操作が問題なくできる（=全IP許可）</td><td class="src">B-60-1, help#28520625069977</td></tr><tr><td class="ph" rowspan="1">0.0.0.0/0 全許可</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">アクセス許可IPに 0.0.0.0/0 を設定して保存すると、現在の送信元IPからアクセスでき、設定一覧に 0.0.0.0/0 が表示される（⚠️destructive: 検証後に元の設定へ復元）</td><td class="src">B-60-2, help#28520625069977</td></tr><tr><td class="ph" rowspan="1">自送信元IPを含むCIDR許可</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">自分の送信元IP（egress IP）を含むCIDRを許可に設定して保存すると、自分のアクセスが引き続き許可される（⚠️egress IP前提・B-60-3〜9のCIDR算術バリエーションは本観点に圧縮。検証後に元の設定へ復元）</td><td class="src">B-60-3, B-60-9, help#28520625069977</td></tr><tr><td class="ph" rowspan="1">自IPを除外した許可で締め出し</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
-          <td class="obs">許可CIDRから自分の送信元IPを除外した範囲のみを設定して保存し再アクセスすると、IP不一致でアクセスがブロックされる（⚠️destructive・自分が締め出される: 直前に別管理コンテキストか debug 経由で設定を戻せる手段を確保し、マスター復元を必ず実施。B-60-10〜14のバリエーションは本観点に圧縮）</td><td class="src">B-60-10, B-60-14, help#28520625069977</td></tr></tbody></table></div>
+          <td class="obs">許可CIDRから自分の送信元IPを除外した範囲のみを設定して保存し再アクセスすると、IP不一致でアクセスがブロックされる（⚠️destructive・自分が締め出される: 直前に別管理コンテキストか debug 経由で設定を戻せる手段を確保し、マスター復元を必ず実施。B-60-10〜14のバリエーションは本観点に圧縮）</td><td class="src">B-60-10, B-60-14, help#28520625069977</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J16</span>
+        <span class="jname">UI動的表示制御（表示条件・必須条件・計算・回帰）</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 12 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">restricted-user</span>  ・ fixture: fx-schema/fx-perm</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="2">表示条件の基本（値変更で表示/非表示）</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコード編集で条件元項目A（選択肢）を「対象外の値」に変えると条件項目Bがフォームから消えて非表示になり、Aを「条件一致の値」に戻すとページ再読込なしでBがリアルタイムに再表示される</td><td class="src">help#19666709590809, B-231</td></tr><tr>
+          <td class="obs">A=対象外でBが非表示の状態のまま保存すると一覧・詳細にBが出ず、A=一致で保存するとBの入力値が一覧・詳細に表示される</td><td class="src">help#19666709590809</td></tr><tr><td class="ph" rowspan="1">表示条件の複合（複数条件）</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">Bに表示条件を2件設定したテーブルで、両条件を満たすとBが表示され、片方の条件を満たさない値に変えるとBがリアルタイムに非表示になる（複数条件＝全条件成立で表示。AND/OR厳密仕様は要マニュアル確認）</td><td class="src">help#19666709590809, 要マニュアル確認</td></tr><tr><td class="ph" rowspan="1">自己言及型の表示条件（ID＝ID）</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">表示する条件を「ID」＝「ID」とした自己言及型の関連レコード一覧項目を持つテーブルで、レコード詳細を開くと当該項目がバグ表示・エラーにならず関連レコード一覧が描画される</td><td class="src">help#19707238540953, B-14-26</td></tr><tr><td class="ph" rowspan="2">必須条件（条件付き必須）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「他の項目を条件で利用する」で必須条件（例：金額Aが金額C以上のとき必須）を設定した項目は、条件不成立（金額A&lt;金額C）のとき当該項目を未入力のまま保存でき、必須エラーが表示されず一覧に登録される</td><td class="src">help#19666709590809, B-231</td></tr><tr>
+          <td class="obs">同じ必須条件で条件成立（金額A≧金額C）の状態にして当該項目を未入力で保存すると、必須項目エラーが表示され保存されない</td><td class="src">help#19666709590809, B-231</td></tr><tr><td class="ph" rowspan="2">計算項目のリアルタイム表示</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">計算式「{価格}*{数量}」を設定した計算項目で、価格と数量を入力すると保存前のフォーム上で積（例：価格100×数量3→300）がリアルタイムに表示される</td><td class="src">help#19685690616601, B-186</td></tr><tr>
+          <td class="obs">自動計算ON（リアルタイム更新有効）の計算項目で、参照元の数量を入力後に変更すると、計算結果がページ再読込なしで再計算されて表示される</td><td class="src">help#19685690616601, B-174</td></tr><tr><td class="ph" rowspan="1">表示条件で隠れた項目のデータ保持</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">条件項目Bに値を入力した後、条件元Aを対象外の値に変えてBを非表示にし、その状態で保存→詳細を再表示してからAを条件一致に戻すと、非表示中も消えずに保持されていたBの値が表示される</td><td class="src">help#19666709590809, pigeon_cloud#2885</td></tr><tr><td class="ph" rowspan="1">回帰ピン（#2885：自己言及表示条件×制限権限×下書き）</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">自己言及型表示条件と自動入力を持つテーブルを、制限権限ユーザー（ログイン名がマスターと異なる別人性）でレコード編集し「下書き保存」した後に再度開くと、入力済みデータが保持され、かつ条件成立中の条件項目が表示されたまま描画される（下書きはUI専用操作、制限ユーザーはMCP/debugで前倒し作成）</td><td class="src">pigeon_cloud#2885, B-14-26</td></tr><tr><td class="ph" rowspan="2">権限×表示条件の組合せ</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">制限ユーザー（別人性：ログイン名がマスターと異なる）で同テーブルのレコードを開き、条件元Aを条件一致の値にすると条件項目Bが表示され、対象外の値にするとBが非表示になり、表示条件が権限制限下でも条件どおりに効く</td><td class="src">help#19666709590809, help#27467012835481</td></tr><tr>
+          <td class="obs">制限ユーザーに項目非表示の項目権限が設定された条件項目は、表示条件が成立してもなお権限により制限ユーザーのフォーム・詳細に表示されない（権限非表示が表示条件より優先される。優先順位の厳密仕様は要マニュアル確認）</td><td class="src">help#29759923226393, 要マニュアル確認</td></tr></tbody></table></div>
 </div></body></html>
