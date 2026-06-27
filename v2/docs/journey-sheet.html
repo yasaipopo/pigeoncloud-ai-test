@@ -22,8 +22,8 @@
   .summary{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:13px}
 </style></head><body><div class="wrap">
 <h1>🐦 PigeonCloud E2E ジャーニー型テストシート</h1>
-<p class="sub">1認証セッション=多観点 / 大=ジャーニー・中=フェーズ・小=観点(checkpoint) / 現行 約1,671ケース → 17ジャーニー・199観点 に集約</p>
-<div class="summary">ジャーニー <b>17</b> ・ 観点合計 <b>199</b> ・ 優先度 P1:8 / P2:8 / P3:1
+<p class="sub">1認証セッション=多観点 / 大=ジャーニー・中=フェーズ・小=観点(checkpoint) / 現行 約1,671ケース → 30ジャーニー・338観点 に集約</p>
+<div class="summary">ジャーニー <b>30</b> ・ 観点合計 <b>338</b> ・ 優先度 P1:10 / P2:17 / P3:3
 <span class="mut">準備: <span class="tag t-ok">mcp</span>=MCP前倒し <span class="tag t-warn">debug</span>=debug API <span class="tag t-mut">ui</span>=UI / 操作: <span class="tag t-okb">ui</span>=ブラウザ通常動線（検証の主役）</span></div>
 <div class="journey">
       <div class="jhead">
@@ -120,6 +120,45 @@
           <td class="obs">一覧でレコードをダブルクリックすると、詳細画面が開く</td><td class="src">help#19736521405593</td></tr><tr>
           <td class="obs">レコードを削除すると（反映を待ってから）一覧から該当行が消える</td><td class="src">A-9-1</td></tr></tbody></table></div><div class="journey">
       <div class="jhead">
+        <span class="jid">J5b</span>
+        <span class="jname">レコード運用2（検索・絞り込み・ソート・ビュー・ページング）</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 12 ・ フェーズ 6 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="2">検索の正規化（かな・全半角の区別なし）</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">一覧上部の虫眼鏡アイコンから「ピジョン」で検索すると、表記の異なる「ぴじょん」「ピジョン」「ﾋﾟｼﾞｮﾝ」の3レコードが全て一致して一覧に表示される（ひらがな/全角カナ/半角カナを区別せず検索）</td><td class="src">help#19656092667417, A-9-8</td></tr><tr>
+          <td class="obs">半角「123」で検索すると全角「１２３」のレコードも一致して表示される（全角/半角数字を区別しない）</td><td class="src">help#19656092667417</td></tr><tr><td class="ph" rowspan="2">0件ヒット時の表示と全件復帰</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">どのレコードにも一致しないキーワード（例：J5b-ZZZNOHIT）で検索すると、一覧に1件も表示されず0件状態になる（曖昧語禁止のため「該当の行が表示されない＝表示件数0」を観測。0件メッセージ文言は要マニュアル確認）</td><td class="src">help#19656092667417, 要マニュアル確認</td></tr><tr>
+          <td class="obs">検索キーワードをクリアすると（反映を待ってから）一覧が検索前の全件表示に戻る</td><td class="src">help#19656092667417, A-9-8</td></tr><tr><td class="ph" rowspan="2">絞り込み（複数条件・詳細検索）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">虫眼鏡（フィルタ/集計）の絞り込みタブで「条件を追加」を使い2件の条件（例：金額が空でない＋金額が100以上）を設定し「表示」すると、両条件を満たすレコードのみ一覧に絞り込まれる（複数条件＝全条件成立で絞り込み。AND/OR厳密仕様は要マニュアル確認）</td><td class="src">help#19656092667417, 要マニュアル確認</td></tr><tr>
+          <td class="obs">日時項目で相対値（例：今日以降）の絞り込み条件を設定して表示すると、条件に合致する日時のレコードのみが一覧表示される</td><td class="src">151-1, help#19656092667417</td></tr><tr><td class="ph" rowspan="3">ビュー作成（列の表示/非表示・並び順・一覧反映）</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ビュー作成の項目タブで特定項目を非表示エリアへドラッグして保存し一覧へ反映すると、その列が一覧から消える（再度表示エリアに戻すと列が復帰する）</td><td class="src">help#27395046258969</td></tr><tr>
+          <td class="obs">ビュー作成の並び順タブで「金額：降順」を1件追加して一覧へ反映すると、一覧が金額の大きい順に並ぶ</td><td class="src">help#27395046258969</td></tr><tr>
+          <td class="obs">並び順タブで2件（例：金額：降順→ID：昇順）を登録して反映すると、金額が同値のレコード同士はID昇順で並ぶ（複数項目ソートの第2キーが効く）</td><td class="src">help#27395046258969</td></tr><tr><td class="ph" rowspan="1">デフォルトビューの適用</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ビューのデフォルト設定タブで「全てのユーザーのデフォルトにする」にチェックして保存すると、次回テーブルを開いた時に当該ビュー（列構成・並び順）が初期表示として適用される</td><td class="src">help#27395046258969, 200</td></tr><tr><td class="ph" rowspan="2">ページング</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">追加オプションで1ページあたりの表示データ数を5件に設定したテーブルに6件以上レコードを用意すると、一覧下部にページ送り（ページネーション）が表示され、現在ページには5件のみ表示される</td><td class="src">A-109-1, help#19707390652057</td></tr><tr>
+          <td class="obs">ページネーションで2ページ目に移動すると、1ページ目に出ていなかった残りのレコードが表示される</td><td class="src">A-109-1, help#19707390652057</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J5c</span>
+        <span class="jname">レコード運用3（編集ロック・ファイル添付・コメント/メンション）</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 15 ・ フェーズ 7 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">second-user</span>  ・ fixture: fx-perm</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">別ユーザーの準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">MCP/debugで「J5c-」プレフィックスの第2ユーザー1名（マスターと別人）とレコード素地が作成され、ユーザー一覧にマスターと異なる氏名の行が表示される</td><td class="src">help#19655994643609</td></tr><tr><td class="ph" rowspan="2">編集ロックの取得と他ユーザー視点（別人性）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">マスターがレコードの編集画面を開いて編集中にすると当該レコードがロックされ、一覧/詳細の左側にロックアイコンが表示される</td><td class="src">help#19655994643609</td></tr><tr>
+          <td class="obs">第2ユーザー（ログイン名がマスターと異なる別人性）で同じレコードを開くと、左側にロックアイコンが表示され、編集（保存）操作ができない（編集導線が無効化される）</td><td class="src">help#19655994643609, B-180-3</td></tr><tr><td class="ph" rowspan="2">ロックの解除（マスターのみ・別人性）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">第2ユーザー（別人）のロックレコード画面には、ロック解除アイコン/導線が表示されない（解除はマスターのみ可能の境界）</td><td class="src">help#19655994643609</td></tr><tr>
+          <td class="obs">マスターでログインしロックアイコンをクリック→確認ポップアップで「はい」を選ぶと（反映を待ってから）ロックが解除され、一覧/詳細からロックアイコンが消える</td><td class="src">help#19655994643609</td></tr><tr><td class="ph" rowspan="2">ファイル添付（複数・画像/PDF アップロード）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">複数ファイル可に設定したファイル項目に、画像1点とPDF1点をドラッグ&amp;ドロップ（またはクリックでファイル選択）でアップロードすると、プログレスバー進行後に2ファイルのファイル名が表示されて保存できる</td><td class="src">help#50000000000001, 108-1</td></tr><tr>
+          <td class="obs">保存後のレコード詳細・一覧で（サムネイル生成の反映を待ってから）、画像ファイルはサムネイル（縮小画像）が表示される</td><td class="src">help#50000000000002, 108-1</td></tr><tr><td class="ph" rowspan="3">ファイルのプレビュー・ダウンロード・ZIP取得</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">詳細画面で画像/PDFのファイル名リンクをクリックすると、新しいタブでブラウザ内プレビュー表示される</td><td class="src">help#50000000000002</td></tr><tr>
+          <td class="obs">複数ファイルを添付した項目の「ZIP」アイコンをクリックするとZIPファイルがダウンロードされ、解凍するとアップロードした全ファイルが含まれている</td><td class="src">108-1, help#50000000000002</td></tr><tr>
+          <td class="obs">マスターが添付済みファイル2点のうち1点を削除して保存すると（反映を待ってから）、詳細・一覧の該当項目から削除したファイルのみが消え、残り1点は表示されたまま残る</td><td class="src">257, help#50000000000001</td></tr><tr><td class="ph" rowspan="3">コメントとメンション通知（別人性）</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコード詳細の右上コメントアイコンからコメントを入力し「送信」すると、コメントが詳細画面に時系列で表示される</td><td class="src">help#19736072126489, A-143-01</td></tr><tr>
+          <td class="obs">コメント欄で「@」を入力して第2ユーザー（マスターと別人）を指定して送信すると、第2ユーザーでログインした際にメンション通知が届いている（別人性: 通知先=第2ユーザー、送信者=マスターで氏名が異なる。⚠️通知の反映待ちを考慮）</td><td class="src">69-1, help#19736072126489</td></tr><tr>
+          <td class="obs">実在しないユーザー名で「@」メンションして送信しても誰にも通知されず、コメント自体は通常どおり保存・表示される</td><td class="src">69-3, help#19736072126489</td></tr><tr><td class="ph" rowspan="2">コメント削除は送信者のみ（別人性の境界）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">マスターが投稿したコメントには、マスター本人の画面でごみ箱アイコンが表示されクリックで削除できる</td><td class="src">help#19736072126489</td></tr><tr>
+          <td class="obs">同じコメントを第2ユーザー（別人）で見ると、ごみ箱（削除）アイコンが表示されず削除できない（コメント削除は送信者のみ可能の境界を別人性で確認）</td><td class="src">help#19736072126489</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
         <span class="jid">J6</span>
         <span class="jname">一括編集・CSV入出力</span>
         <span class="jmeta"><span class="tag p-P2">P2</span> 観点 9 ・ フェーズ 4 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
@@ -134,6 +173,27 @@
           <td class="obs">子テーブル情報を含むCSVをアップロードすると、子テーブルの情報も反映される</td><td class="src">B-148-02</td></tr><tr><td class="ph" rowspan="2">CSVアップロードのエラー</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
           <td class="obs">ヘッダー行なしのCSVをアップロードすると、インポートエラーが表示される</td><td class="src">B-55-1</td></tr><tr>
           <td class="obs">CSV以外のファイルをアップロードすると、インポートエラーが表示される</td><td class="src">B-55-2</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J6b</span>
+        <span class="jname">一括操作2（編集モード・全選択一括編集・一括削除・CSVオプション）</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 15 ・ フェーズ 7 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-bad">destructive</span> ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">一括編集の準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">MCP/debugで「J6b-」プレフィックスのテーブルに複数件（例：5件）のレコードが用意され、一覧に5行表示される</td><td class="src">help#19656141292825</td></tr><tr><td class="ph" rowspan="1">全選択での一括編集（ヘッダーチェックボックス）</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">一覧左上の項目名横のチェックボックス（全選択）にチェックを入れるとテーブル内の全レコードにチェックが入り、一括編集を実行して項目値を更新すると（反映を待ってから）全件の該当項目が同一値に更新される</td><td class="src">help#19656141292825, B-180-1</td></tr><tr><td class="ph" rowspan="2">編集モード（一覧でのインライン複数編集）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">一覧画面左上の「編集モード」をクリックすると一覧上でセルを直接編集できる状態になり、複数レコードの値を編集して保存すると（反映を待ってから）一覧・詳細に編集後の値が表示される</td><td class="src">help#19656141292825</td></tr><tr>
+          <td class="obs">子テーブル（子レコード）のテーブルでは、一覧左上の三本線メニューに「一括編集」「編集モード」が表示されない（子テーブルは一括編集・編集モード非対応）</td><td class="src">help#19656141292825</td></tr><tr><td class="ph" rowspan="3">選択レコードの一括削除（件数表示・チェック解除）</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">一覧でレコード左端のチェックボックスを複数チェックすると、連動して「一括削除」ボタンと選択件数が表示される</td><td class="src">167-1</td></tr><tr>
+          <td class="obs">チェックを外すと選択件数が減り、全て外すと「一括削除」ボタンが消える（選択状態と削除導線が連動）</td><td class="src">167-1</td></tr><tr>
+          <td class="obs">2件を選択して一括削除を実行すると（反映を待ってから）選択した2件のみが一覧から消え、未選択のレコードは残る</td><td class="src">167-1, A-9-1</td></tr><tr><td class="ph" rowspan="4">CSVアップロードのオプション（必須項目空の許可）</td><td class="su" rowspan="4">—</td><td class="ac" rowspan="4"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル編集の「アップロード時、必須項目が空の状態でも許可」をONにして必須項目が空のCSVをアップロードすると、インポートエラーにならず取込完了し（反映を待ってから）CSV行数分のレコードが一覧に追加される（必須項目は空のまま保存される）</td><td class="src">193-1</td></tr><tr>
+          <td class="obs">同オプションをOFFにして必須項目が空のCSVをアップロードすると、インポートエラーが表示され取り込まれない（一覧の件数が増えない）</td><td class="src">193-2</td></tr><tr>
+          <td class="obs">CSVダウンロードで取得したヘッダー付き空CSVに値を記入し、文字コードを変えず（同じエンコーディングのまま）アップロードすると文字化けせずに取り込まれる（対応エンコーディングの詳細は要マニュアル確認）</td><td class="src">B-148-03, 要マニュアル確認</td></tr><tr>
+          <td class="obs">既存レコードのID列を含むCSVで一部項目の値を変更してアップロードすると、新規行が増えずに当該IDの既存レコードが更新される（キー一致での更新・反映を待ってから一覧で確認）</td><td class="src">113-22, help#19659104989721</td></tr><tr><td class="ph" rowspan="2">CSVダウンロードのオプション（現在のフィルタ・並び順反映）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">一覧を絞り込み（フィルタ適用）した状態で「CSVに現在のフィルタを反映する」をONにしてCSVダウンロードすると、絞り込み後のレコードのみがCSVに出力される</td><td class="src">164-1, B-161</td></tr><tr>
+          <td class="obs">数値・計算項目で桁区切り（カンマ区切り）をONに設定したテーブルをCSVダウンロードすると、該当データにカンマが付与された値で出力される</td><td class="src">231</td></tr><tr><td class="ph" rowspan="2">全データ一括削除（destructive・専用テーブル）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル管理→追加オプション設定で「メニューに『全てのデータを削除』を表示」を有効化して更新すると、対象テーブルの左上メニューに「全てのデータを削除」が表示される</td><td class="src">help#19659487514009</td></tr><tr>
+          <td class="obs">左上メニューの「全てのデータを削除」を実行すると（反映を待ってから）当該テーブルの全レコードが一覧から消え0件になる（⚠️destructive・復旧不可。J6b専用テーブルで実施しチェーン最後尾に置く）</td><td class="src">help#19659487514009</td></tr></tbody></table></div><div class="journey">
       <div class="jhead">
         <span class="jid">J7</span>
         <span class="jname">テーブル権限設定</span>
@@ -326,5 +386,162 @@
           <td class="obs">条件項目Bに値を入力した後、条件元Aを対象外の値に変えてBを非表示にし、その状態で保存→詳細を再表示してからAを条件一致に戻すと、非表示中も消えずに保持されていたBの値が表示される</td><td class="src">help#19666709590809, pigeon_cloud#2885</td></tr><tr><td class="ph" rowspan="1">回帰ピン（#2885：自己言及表示条件×制限権限×下書き）</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">自己言及型表示条件と自動入力を持つテーブルを、制限権限ユーザー（ログイン名がマスターと異なる別人性）でレコード編集し「下書き保存」した後に再度開くと、入力済みデータが保持され、かつ条件成立中の条件項目が表示されたまま描画される（下書きはUI専用操作、制限ユーザーはMCP/debugで前倒し作成）</td><td class="src">pigeon_cloud#2885, B-14-26</td></tr><tr><td class="ph" rowspan="2">権限×表示条件の組合せ</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
           <td class="obs">制限ユーザー（別人性：ログイン名がマスターと異なる）で同テーブルのレコードを開き、条件元Aを条件一致の値にすると条件項目Bが表示され、対象外の値にするとBが非表示になり、表示条件が権限制限下でも条件どおりに効く</td><td class="src">help#19666709590809, help#27467012835481</td></tr><tr>
-          <td class="obs">制限ユーザーに項目非表示の項目権限が設定された条件項目は、表示条件が成立してもなお権限により制限ユーザーのフォーム・詳細に表示されない（権限非表示が表示条件より優先される。優先順位の厳密仕様は要マニュアル確認）</td><td class="src">help#29759923226393, 要マニュアル確認</td></tr></tbody></table></div>
+          <td class="obs">制限ユーザーに項目非表示の項目権限が設定された条件項目は、表示条件が成立してもなお権限により制限ユーザーのフォーム・詳細に表示されない（権限非表示が表示条件より優先される。優先順位の厳密仕様は要マニュアル確認）</td><td class="src">help#29759923226393, 要マニュアル確認</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J17</span>
+        <span class="jname">項目型網羅2(書式・表示変種・採番/計算/参照の意味ある挙動)</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 24 ・ フェーズ 10 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-schema</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="3">文字列(一行)の書式オプション(メール/URL)</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">文字列(一行)項目「J17-メール」を種類「メールアドレス」で項目追加画面からUI作成し、レコードに不正値「abc」を入力して保存しようとすると、メール形式の入力エラーが表示され保存されない</td><td class="src">A-1-メール書式, help#19666709590809</td></tr><tr>
+          <td class="obs">「J17-メール」に正しい値「a@example.com」を入力すると保存でき、一覧・詳細に「a@example.com」が表示される</td><td class="src">help#19666709590809</td></tr><tr>
+          <td class="obs">文字列(一行)項目「J17-URL」を種類「URL」でUI作成し、値「https://example.com」を保存すると、詳細画面でクリック可能なリンク(aタグ)として表示される</td><td class="src">A-139-URL書式, help#19666709590809</td></tr><tr><td class="ph" rowspan="4">数値の表示変種(単位・マイナス)</td><td class="su" rowspan="4"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="4"><span class="tag t-okb">ui</span></td>
+          <td class="obs">数値項目「J17-率」に単位記号「%」を末尾表示で設定し「50」を入力すると、一覧で「50%」と表示される</td><td class="src">A-132-01, help#19666749123737</td></tr><tr>
+          <td class="obs">数値項目「J17-金額」に単位記号「$」を先頭表示で設定し「100」を入力すると、一覧で「$100」と表示される</td><td class="src">A-132-01, help#19666749123737</td></tr><tr>
+          <td class="obs">数値項目で「マイナス符号を▲で表示」を有効にし「-500」を入力すると、一覧で「▲500」と表示される</td><td class="src">help#19666749123737</td></tr><tr>
+          <td class="obs">数値項目で「マイナス値を赤字で表示」を有効にし負値を入力すると、一覧でその値が赤色(文字色)で表示される</td><td class="src">help#19666749123737</td></tr><tr><td class="ph" rowspan="3">日時の変種(年月・自動補完)</td><td class="su" rowspan="3"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">日時項目「J17-年月」を種類「年月」で設定し2026年6月を入力すると、一覧・詳細で「2026-06」形式で表示される</td><td class="src">A-年月(種類年月), help#19666789006745</td></tr><tr>
+          <td class="obs">種類「時刻のみ」の項目に「730」と入力してフォーカスアウトすると「7:30」に自動補完される</td><td class="src">help#19666789006745</td></tr><tr>
+          <td class="obs">種類「日時」の項目に「20251204 1705」と入力してフォーカスアウトすると「2025/12/04 17:05」に自動補完される</td><td class="src">help#19666789006745</td></tr><tr><td class="ph" rowspan="1">選択肢(単一選択)のプルダウン表示</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">選択肢(単一選択)項目を表示形式「プルダウン」で選択肢AA,BB,CCを設定すると、レコード登録画面でプルダウン(select)UIが表示され、選択したBBが保存・表示される</td><td class="src">help#19666791306649</td></tr><tr><td class="ph" rowspan="4">画像・ファイルの変種(複数値・ブラウザ表示)</td><td class="su" rowspan="4"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="4"><span class="tag t-okb">ui</span></td>
+          <td class="obs">画像項目で「複数の値の登録を許可する」を有効にし2枚の画像をアップロードすると、詳細画面に2つのサムネイルが表示される</td><td class="src">A-422-画像複数, help#19685978944025</td></tr><tr>
+          <td class="obs">画像項目で「画像の縦横サイズを表示」を有効にすると、詳細画面でアップロード画像に縦横サイズ(px)が併記表示される</td><td class="src">help#19685978944025</td></tr><tr>
+          <td class="obs">ファイル項目で「複数の値の登録を許可する」を有効にし2件のファイルをアップロードすると、詳細画面に2件のファイル名が表示される</td><td class="src">help#19685607757465</td></tr><tr>
+          <td class="obs">ファイル項目で「ブラウザで表示する(画像/PDF/動画)」を有効にしPDFを登録すると、詳細でファイルを開いた際にダウンロードではなくブラウザ内(別タブ/インライン)でPDFが表示される</td><td class="src">help#19685607757465</td></tr><tr><td class="ph" rowspan="3">計算項目の自動更新・ユニーク</td><td class="su" rowspan="3"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">計算項目で「計算値の自動更新」を有効にし、元の数値項目の値をレコード編集で変更して保存すると、計算結果がリアルタイム(保存時)に再計算された値へ更新される</td><td class="src">help#19685690616601</td></tr><tr>
+          <td class="obs">計算項目で「計算値の自動更新」を無効にすると、元項目の値を後から変更しても計算結果は初回計算値のまま保持される</td><td class="src">help#19685690616601</td></tr><tr>
+          <td class="obs">計算項目は「計算値の自動更新」が無効のときだけ「値の重複を禁止する(ユニーク)」を設定でき、同一計算結果のレコードを追加すると重複エラーで保存できない</td><td class="src">B-6307, B-6308, help#19685690616601</td></tr><tr><td class="ph" rowspan="2">自動採番のフォーマット・リセット</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">自動採番項目にフォーマット「ID-{YYYY}-{MM}-{ID:4}」を設定して2026年6月にレコードを追加すると、採番値が「ID-2026-06-0001」形式で付与される</td><td class="src">B-273, help#19666652317209</td></tr><tr>
+          <td class="obs">自動採番の設定で「カウンターをリセット」を実行した後に新規レコードを追加すると、採番が初期番号(0001相当)から再開される</td><td class="src">A-115-01, help#19666652317209</td></tr><tr><td class="ph" rowspan="2">ルックアップ(項目のコピー)の自動反映</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">他テーブル参照のルックアップ(項目のコピー)で「自動反映する」を有効に設定した項目は、参照元レコードの値を更新すると、参照しているレコード側のコピー値も更新後の値に変わる</td><td class="src">A-13x-ルックアップ, help#19686010433305</td></tr><tr>
+          <td class="obs">ルックアップで「自動反映する」を無効にした項目は、参照元レコードの値を後から更新してもコピー値は初回取得値のまま変わらない</td><td class="src">A-1368-ルックアップ自動反映なし, help#19686010433305</td></tr><tr><td class="ph" rowspan="1">子テーブル(入力フォームにする)</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">他テーブル参照項目で「入力フォームにする(子要素機能)」を有効にすると、親テーブルの詳細/編集画面に子テーブルのレコードを表形式で一覧表示でき、その場で子レコードを追加できる</td><td class="src">help#19686010433305</td></tr><tr><td class="ph" rowspan="1">ユニーク(一意)制約</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">文字列(一行)項目に「値の重複を禁止する」を設定し、既存レコードと同一の値で新規レコードを登録しようとすると「1件のエラーがあります。既存の項目のデータの1つがユニークでなければなりません。」のエラーが表示され保存されない</td><td class="src">B-1055, help#19666652317209</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J18</span>
+        <span class="jname">テーブル管理(グループ・複製コピー範囲・JSON入出力・レイアウト列数)</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 10 ・ フェーズ 4 ・ ロール: <span class="tag t-mut">master</span>  </span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="4">テーブルグループ管理</td><td class="su" rowspan="4"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="4"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル管理で新規グループ「J18-グループ」を作成すると、サイドメニュー/メニュー並び替え画面にグループ「J18-グループ」が表示される</td><td class="src">A-465-グループ作成, help#19662345752601</td></tr><tr>
+          <td class="obs">メニュー並び替えで対象テーブルを「J18-グループ」の「ここにドロップでグループに追加」へドラッグ&amp;ドロップすると、エラーなく当該テーブルがグループ配下に表示される</td><td class="src">A-465, help#19662345752601</td></tr><tr>
+          <td class="obs">グループ配下のテーブルをグループ外へドラッグ&amp;ドロップすると、エラーなく当該テーブルがグループから外れて表示される</td><td class="src">A-469, help#19662345752601</td></tr><tr>
+          <td class="obs">「全て展開」をクリックするとグループ配下のテーブルが全て展開表示され、「全て閉じる」でグループ配下が全て閉じる</td><td class="src">A-471, A-473, help#19662345752601</td></tr><tr><td class="ph" rowspan="2">テーブル複製のコピー範囲</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">権限・通知・フィルタを設定済みのテーブルを複製する際に「権限設定をコピー」「通知設定をコピー」「フィルタをコピー」を有効にすると、複製先テーブルに同じ権限設定・通知設定・フィルタが引き継がれて表示される</td><td class="src">A-113-20, help#19707614354969</td></tr><tr>
+          <td class="obs">テーブル複製ではテーブル定義(項目)はコピーされるが、元テーブルのレコードデータは複製先に含まれず、複製先テーブルのレコード一覧は0件で表示される</td><td class="src">help#19707614354969</td></tr><tr><td class="ph" rowspan="2">JSON入出力(エクスポート・インポート)</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル設定のエクスポートで「データを含める」「権限設定を含める」「フィルタ/ビューを含める」「通知設定を含める」を有効にしてJSONをダウンロードすると、JSON内に項目定義に加えレコードデータ・権限・フィルタ・通知が含まれる</td><td class="src">help#19663448575641</td></tr><tr>
+          <td class="obs">テーブル管理「JSONから追加」でエクスポートしたJSONファイルをアップロードすると、項目定義を引き継いだテーブルが新規にテーブル管理一覧へ追加される</td><td class="src">help#19663331553433</td></tr><tr><td class="ph" rowspan="2">レイアウト列数・配置(3-4列・詳細適用)</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">登録画面レイアウトを3列に設定して項目を各列へ配置し保存すると、レコード登録画面で項目が3列で配置表示される</td><td class="src">A-113-18, help#19663843714329</td></tr><tr>
+          <td class="obs">「レイアウトを詳細画面にも適用」を有効にすると、レコード詳細画面も登録画面と同じ列レイアウトで表示される</td><td class="src">help#19663843714329</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J19</span>
+        <span class="jname">ビュー（一覧表示カスタマイズ）</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 10 ・ フェーズ 6 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">user</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">ビュー準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J17-」プレフィックスのテーブル（文字列項目3つ・数値項目1つ）とレコード3件以上が作成され、一覧画面に表示される</td><td class="src">help#27395046258969</td></tr><tr><td class="ph" rowspan="2">項目の表示／非表示</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ビュー作成の「項目」タブで一部項目を非表示エリアへドラッグして保存し、そのビューを適用すると、一覧画面に非表示にした項目の列が表示されない（残りの項目列のみ表示）</td><td class="src">help#27395046258969</td></tr><tr>
+          <td class="obs">ビューの適用先を「一覧画面／詳細画面／編集画面」のいずれかに設定でき、設定した画面にのみ項目表示の調整が反映される</td><td class="src">help#27395046258969, 113-17</td></tr><tr><td class="ph" rowspan="2">並び順設定</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「並び順」タブで数値項目を「昇順」に設定して保存しビューを適用すると、一覧のレコードが数値項目の昇順（小→大）で並ぶ</td><td class="src">help#27395046258969</td></tr><tr>
+          <td class="obs">並び順に2項目（第1キー昇順・第2キー降順）を登録すると、第1キー優先・同値は第2キーで並んだ順序で一覧表示される</td><td class="src">help#27395046258969</td></tr><tr><td class="ph" rowspan="2">行に色を付ける（一覧）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「行に色を付ける」で「数値項目が100以上なら背景=赤」の条件・色を設定して保存・適用すると、条件に合致する行の背景のみ赤になり非合致行は無色のまま</td><td class="src">help#27395046258969, A-87-1</td></tr><tr>
+          <td class="obs">行色条件を2件（異なる条件・異なる色）登録すると、各行が合致した条件の色で塗り分けられ、下に追加した条件が上位条件として優先適用される</td><td class="src">help#27395046258969, A-87-2</td></tr><tr><td class="ph" rowspan="2">デフォルト設定と共有</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「デフォルト設定」タブで「全てのユーザーのデフォルトにする」をONにして保存すると、別ユーザー（J17-user）でテーブルを開いた際に最初からそのビューが適用された一覧が表示される</td><td class="src">help#27395046258969</td></tr><tr>
+          <td class="obs">別ユーザー（J17-user・作成者=master と表示名が異なる）でログインしても共有ビューが選択肢に表示され、適用すると master と同じ項目表示・並び順になる</td><td class="src">help#27395046258969</td></tr><tr><td class="ph" rowspan="1">ビューの解除</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ビュー適用中に「ビューを解除」を選ぶと、項目表示・並び順・行色がリセットされた通常のテーブル一覧（全項目・既定順）に戻る</td><td class="src">help#27395046258969</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J20</span>
+        <span class="jname">カレンダー表示</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 8 ・ フェーズ 6 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">カレンダー準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J18-」プレフィックスのテーブル（日時項目「開始」「終了」・文字列項目「件名」を含む）と、開始/終了日時を入れたレコード2件以上が作成される</td><td class="src">help#19764437975705</td></tr><tr><td class="ph" rowspan="2">カレンダー表示の有効化</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル設定→「一覧画面」で「カレンダー表示」をONにし、参照する日時フィールドに「開始」、表示フィールドに「{件名}」を指定して「更新」で保存すると、一覧メニューにカレンダー表示が追加される</td><td class="src">help#19764437975705</td></tr><tr>
+          <td class="obs">カレンダーを開くと、レコードの「開始」日時のマス目に「件名」の値が予定として表示される</td><td class="src">help#19764437975705</td></tr><tr><td class="ph" rowspan="1">from-to形式（期間表示）</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「参照する日時フィールドをfrom,toの形式にする」をONにし開始日時=「開始」・終了日時=「終了」を指定して保存すると、開始から終了まで複数日にまたがる予定としてカレンダー上に帯表示される</td><td class="src">help#19764437975705, 214</td></tr><tr><td class="ph" rowspan="2">表示ビュー切替</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">カレンダー右上のアイコンで「週」表示に切り替えると、エラーなく1週間分の日付列のカレンダーになる</td><td class="src">114-01</td></tr><tr>
+          <td class="obs">「日」表示に切り替えると、エラーなく当日1日分の時間軸カレンダーになり、「&gt;」で翌日へ移動できる</td><td class="src">114-02, help#19764437975705</td></tr><tr><td class="ph" rowspan="1">予定のドラッグ移動</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">カレンダー上の予定を別日へドラッグ&amp;ドロップで移動すると、完了メッセージが表示され、対象レコードの日時項目が移動先の日付に更新される</td><td class="src">215, help#19764437975705</td></tr><tr><td class="ph" rowspan="1">背景色設定</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">カレンダー設定で「+カレンダーの背景色を追加」で対象日=「sunday」・背景色を指定して保存すると、カレンダー上の日曜列の背景が設定色になる</td><td class="src">help#19764437975705</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J21</span>
+        <span class="jname">帳票・PDF出力</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 9 ・ フェーズ 6 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">帳票準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J19-」プレフィックスのテーブル（文字列項目「件名」「宛先」を含む）とレコード1件（件名/宛先に値あり）が作成される</td><td class="src">help#19656261965721</td></tr><tr><td class="ph" rowspan="2">帳票テンプレート登録</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">セルに ${J19-請求書.件名} ${J19-請求書.宛先} を記述したExcelテンプレートを帳票登録すると、エラーなく登録され帳票一覧にアイコン（歯車）付きで表示される</td><td class="src">help#19656261965721, 9-7, 216</td></tr><tr>
+          <td class="obs">Excel以外のファイル形式（txt や png 等）を帳票登録しようとすると、帳票登録エラーが表示され登録されない</td><td class="src">56-1</td></tr><tr><td class="ph" rowspan="2">帳票出力（Excel）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">帳票登録後にレコード詳細を開くと「帳票出力」ボタンが表示される</td><td class="src">9-7</td></tr><tr>
+          <td class="obs">「帳票出力」でExcelを選ぶとファイルがダウンロードされ、開くと ${…} 記述セルがレコードの「件名」「宛先」の実値に置換されている</td><td class="src">help#19656261965721, 206</td></tr><tr><td class="ph" rowspan="1">PDF変換出力</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">帳票出力でPDF形式を選ぶと、エラーなくPDFファイルがダウンロードされる（⚠ PDFバイナリ内の差し込み値の文字照合はブラウザで開けないため Excel 出力側で値検証する）</td><td class="src">206, 198</td></tr><tr><td class="ph" rowspan="2">出力ファイル名フォーマット</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">帳票の「出力ファイル名フォーマット」に %m-%d を設定してExcel出力すると、ダウンロードファイル名が「MM-DD.xlsx」（出力月日、例 03-15.xlsx）になる</td><td class="src">207</td></tr><tr>
+          <td class="obs">同フォーマットでPDF出力すると、ダウンロードファイル名が「MM-DD.pdf」になる</td><td class="src">208</td></tr><tr><td class="ph" rowspan="1">一括帳票出力</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">一覧で複数レコードを選択して一括帳票出力を実行すると、処理ジョブが走り（反映まで待つ）、各レコード分の帳票をまとめたzipがダウンロードされる（⚠ zip内ファイル個数の確認まで。中身PDFの値照合は単票Excel側で担保）</td><td class="src">help#19736760520345, 196</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J22</span>
+        <span class="jname">集計方法の網羅（数値表示仕様）</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 8 ・ フェーズ 5 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">集計用データ準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J20-」プレフィックスのテーブル（整数項目「金額」桁区切り表示ON・小数項目「率」・日時項目「日付」）とレコード4件（金額に 1000/2000/3000/4000 等）が作成される</td><td class="src">help#19659532678553, 14-5</td></tr><tr><td class="ph" rowspan="2">合計・件数集計</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">集計設定で集計項目=「金額」・集計方法=「合計」で表示すると、4件合計（例 10000）が桁区切り「10,000」で表示される</td><td class="src">help#19659532678553, 14-5</td></tr><tr>
+          <td class="obs">集計方法=「件数」で表示すると、対象レコード件数（例 4）が数値で表示される</td><td class="src">help#19659532678553</td></tr><tr><td class="ph" rowspan="3">平均・最大・最小集計</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">整数項目「金額」で集計方法=「平均」を表示すると、平均値が小数第一位まで（例 2500.0）表示される</td><td class="src">110-01</td></tr><tr>
+          <td class="obs">小数項目「率」で集計方法=「平均」を表示すると、設定した小数桁数＋1桁まで表示される</td><td class="src">110-02</td></tr><tr>
+          <td class="obs">集計方法=「最大」または「最小」を選ぶと日時項目（日付）も集計対象に選択でき、対象項目の最大値／最小値が表示される</td><td class="src">help#19659532678553</td></tr><tr><td class="ph" rowspan="1">0件時の0表示</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">絞り込みで合致レコードが0件になる条件を設定して合計集計を表示すると、集計値がブランクではなく「0」と表示される</td><td class="src">help#19659532678553, A-65-1</td></tr><tr><td class="ph" rowspan="1">計算項目を使った集計</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">集計項目1・集計項目2を指定し、集計項目3に計算式 {集計項目1}-{集計項目2} を入力して表示すると、2集計値の差分が計算されて表示される</td><td class="src">120-05, help#19659900435097</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J23</span>
+        <span class="jname">チャート種類の網羅</span>
+        <span class="jmeta"><span class="tag p-P3">P3</span> 観点 5 ・ フェーズ 5 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">チャート用データ準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J21-」プレフィックスのテーブル（カテゴリ項目「区分」・数値項目「数量」「金額」）とレコード複数件が作成され、集計の土台になる</td><td class="src">help#19660061709465</td></tr><tr><td class="ph" rowspan="1">線グラフ</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">チャート追加で集計項目のグラフ種類=「線グラフ」を選んで表示すると、集計値が折れ線で結ばれた線グラフで表示される</td><td class="src">help#19660061709465, 105-01</td></tr><tr><td class="ph" rowspan="1">円グラフ</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">グラフ種類で円グラフ系を選んで表示すると、区分ごとの構成比が円（扇形）で表示される</td><td class="src">help#19660061709465, 105-01</td></tr><tr><td class="ph" rowspan="1">複合グラフ（線＋棒同時）</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">集計項目「数量」のグラフ種類=「棒グラフ」、集計項目「金額」のグラフ種類=「線グラフ」を設定して表示すると、1つのチャート上に棒グラフと線グラフが同時に描画される</td><td class="src">help#19660129256089, 123-01</td></tr><tr><td class="ph" rowspan="1">Y軸設定</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">チャート設定でデータ項目（X軸）と集計項目（Y軸）を指定して表示すると、指定どおりの軸割り当てでチャート表示され、エラーが出ない</td><td class="src">123-01, help#19660061709465</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J24</span>
+        <span class="jname">通知トリガー・条件・置換の網羅</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 10 ・ フェーズ 6 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-notify</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">通知トリガー準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J22-」プレフィックスの対象テーブルと通知先ユーザー1名（master とは別の表示名）が作成される</td><td class="src">help#19710190002457, B-6-1</td></tr><tr><td class="ph" rowspan="3">アクション別トリガー（作成／更新／削除）</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知設定でアクション=「作成」のみを有効にし、対象テーブルにレコードを作成すると通知先に画面通知が届き、レコードを更新しても作成由来の追加通知は届かない</td><td class="src">6-1</td></tr><tr>
+          <td class="obs">アクション=「更新」を有効にした別設定で既存レコードを更新すると、更新を契機に通知が届く</td><td class="src">6-2</td></tr><tr>
+          <td class="obs">アクション=「削除」を有効にした設定で対象レコードを削除すると、削除を契機に通知が届く</td><td class="src">6-3</td></tr><tr><td class="ph" rowspan="1">ワークフローステータス変更トリガー</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">対象テーブルでワークフローをONにし、アクション=「ワークフローステータス変更時」を設定して申請を行うと、ステータス変化を契機に通知が届く</td><td class="src">6-4</td></tr><tr><td class="ph" rowspan="1">条件付き通知</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知設定の条件に「区分」が「重要」と一致を設定し、区分=「重要」のレコードを作成すると通知が届くが、区分=「通常」のレコードを作成しても通知が届かない</td><td class="src">80-1, help#19710190002457</td></tr><tr><td class="ph" rowspan="3">通知内容の表示項目（置換）</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知内容の表示項目で「テーブル名」をチェックして通知すると、通知本文に対象テーブル名が差し込まれて表示される</td><td class="src">81-1</td></tr><tr>
+          <td class="obs">表示項目で「URL」をチェックすると、通知本文に該当レコードへのURLが差し込まれて表示される</td><td class="src">81-2</td></tr><tr>
+          <td class="obs">表示項目で「作成(更新)データ」をチェックすると、通知本文に作成／更新したレコードの項目値が差し込まれて表示される</td><td class="src">81-3</td></tr><tr><td class="ph" rowspan="1">リマインダの条件・タイミング</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">リマインダ設定で条件=「作成者」が一致・タイミング=「作成日時」の1分後を設定し、対象レコードを追加すると、約1分後に通知先へリマインダ通知が届く</td><td class="src">80-1, help#19710190002457</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J25</span>
+        <span class="jname">メール配信の対象抽出・HTML・フォーム拡張</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 9 ・ フェーズ 7 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-mail</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">配信・フォーム準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J23-」プレフィックスの対象テーブル（メールアドレス項目・区分項目を含む）とレコード複数件（Mailosaur受信可能アドレスを含む）が作成される</td><td class="src">help#19801803381145</td></tr><tr><td class="ph" rowspan="1">配信リストの対象抽出（フィルタ）</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">配信リストにフィルタ条件「区分」が「会員」と一致を設定して配信すると、区分=「会員」のレコードのアドレスにのみメールが届き、区分=「非会員」には届かない（Mailosaurで受信突合）</td><td class="src">99-12, help#19801803381145</td></tr><tr><td class="ph" rowspan="1">HTMLメール配信</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テキストタイプ=HTMLのテンプレートで配信すると、受信メールがHTML本文（装飾/リンクが反映された見た目）で届く（Mailosaurの本文がHTMLパート含む）</td><td class="src">B-99-2, help#19801803381145</td></tr><tr><td class="ph" rowspan="1">差し込みタグ（ファイル項目）</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">メール本文に {ファイル項目名} の差し込みタグを入れCc/Bccも設定して配信すると、To/Cc/Bccすべてに届き、ファイル項目が添付として送られる</td><td class="src">201</td></tr><tr><td class="ph" rowspan="2">公開フォームのビュー設定と回答登録</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">公開フォーム有効化後にビューの「表示」エリアへドラッグした項目だけが公開フォーム画面に入力欄として現れ、非表示項目は出ない</td><td class="src">help#19796387440665</td></tr><tr>
+          <td class="obs">公開フォームURLを未ログインで開いて入力・送信すると、対象テーブルに回答内容のレコードが1件登録される（反映まで待って一覧で確認）</td><td class="src">129, help#19796387440665</td></tr><tr><td class="ph" rowspan="1">公開フォームURLの初期値反映</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">公開フォームURL末尾に ?姓=AAA&amp;名=BBB を付けて開くと、フォームの「姓」欄に AAA、「名」欄に BBB が初期表示される</td><td class="src">812, help#19796387440665</td></tr><tr><td class="ph" rowspan="2">埋め込みフォーム</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル設定の追加オプションで「埋め込みフォームをONにする」を有効化すると、メニューに「埋め込みフォームリンク」が追加され、リンク（埋め込み用URL）をコピーできる</td><td class="src">128, help#19764544542233</td></tr><tr>
+          <td class="obs">埋め込みフォームURLを直接ブラウザで開いて入力・送信すると、対象テーブルにレコードが登録される（外部サイト貼付は埋め込みURLを直接開いて代替）</td><td class="src">25-8, help#19764544542233</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J26</span>
+        <span class="jname">ダッシュボード編集権限</span>
+        <span class="jmeta"><span class="tag p-P3">P3</span> 観点 4 ・ フェーズ 3 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">user</span> <span class="tag t-warn">global</span> ・ fixture: fx-org</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">権限設定の準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J24-」プレフィックスの一般ユーザー1名（master とは別の表示名）が作成され、ユーザー一覧に表示される</td><td class="src">help#19710406238105</td></tr><tr><td class="ph" rowspan="1">編集権限の付与</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">管理者設定→権限設定でダッシュボード（掲示板）の編集権限を J24-user に付与して更新すると、権限設定一覧にそのユーザー行が表示される</td><td class="src">help#19710406238105</td></tr><tr><td class="ph" rowspan="2">権限の反映確認</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">権限を付与した J24-user（master と別人）でログインするとダッシュボード（掲示板）に編集アイコンが表示され編集できる</td><td class="src">help#19710406238105</td></tr><tr>
+          <td class="obs">編集権限を付与していない別ユーザーでログインすると、ダッシュボード（掲示板）の編集アイコンが表示されず編集できない</td><td class="src">help#19710406238105</td></tr></tbody></table></div>
 </div></body></html>
