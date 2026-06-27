@@ -11,7 +11,8 @@
 
 ## 0.5. 🔴 着手前提（独立レビュー C1/C2 反映・2026-06-27）
 
-- **C1 実機ツール確定（Step0・最優先）**: 一次資料が割れている。`UI-ACTION-MCP-COVERAGE.md`=**13ツール**（WF申請/ユーザー作成/CSV/ファイルは UI専用）だが `AI-REFERENCE.md`=**25ツール**（`pfc_workflow_apply`/`pfc_manage_record`/`pfc_csv_*`/`pfc_file_*`/grant更新/field_grants まで可）。**どちらが staging に deploy 済みかを `pfc_staging_ping`＋ツール列挙で実機確認**してから §2 の切り分け表を「deploy版」にピン留めする。本書の §2 は暫定で **13ツール基準**（保守的側）。25ツール版が live なら WF申請・ユーザー作成・CSV/ファイルも MCP に寄せられ、切り分けが変わる。
+- **C1 実機ツール確定 → ✅ 解消（2026-06-28）**: pfc-staging MCP を接続し `pfc_staging_ping` で確認した結果、**deploy版=25ツール**（tenant=ai-test/staging）。`pfc_workflow_apply`(WF申請)/`pfc_manage_record`(ユーザー/組織/役職作成)/`pfc_csv_export/import`/`pfc_file_upload/download`/grant更新/field_grants まで MCP 可。よって準備の前倒し範囲は **25ツール版**を正とする（§2 の「UI専用」だった WF申請・ユーザー作成・CSV・ファイルは MCP 準備に寄せられる）。
+  - 🔴 **ただし C2 は維持**: MCP でできても、被検証機能（テーブル作成/項目定義/WF設定/通知設定/帳票登録）は **UI生成動線を最低1本残す**（生成動線のUIバグを拾うため）。「準備の高速化に MCP、検証の主操作は UI」は不変。
 - **C2 UI生成動線を空洞化させない（規約）**: MCP は `DatasetStoreAction`(サーバ検証)は通るが **Angularフォーム/admin.php controller/クライアント検証/フォーム描画は通らない**（UI=admin.php と MCP=index.mjs は別経路）。準備を全部 MCP に寄せると**生成動線のUIバグが不可視**になり、regression-strategy が指摘する「壊れた種類を誰もテストしていない」穴を再生産する。
   - 🔴 **規約**: 「準備はMCP」は**反復準備の高速化に限定**する。**各主要機能につき最低1本は"UI生成動線"シナリオを必ず残す**（テーブル作成UI／項目追加UI／grant設定UI／WF定義UI／レコード作成UI 等）。これらは action=UI で生成自体を検証し、MCPで代替しない。
 
