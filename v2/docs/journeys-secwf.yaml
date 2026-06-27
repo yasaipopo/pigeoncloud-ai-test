@@ -1,0 +1,209 @@
+# /tmp/journeys-secwf.yaml
+# PigeonCloud E2E 追加ジャーニー定義（security/workflow 網羅変種）
+# 既存 journeys.yaml への「追加分」のみ（J14/J15/J9b/J8x/J13x）。既存 journeys.yaml は編集しない。
+# 生成: 2026-06-28 / 根拠: 区分A仕様書・区分B仕様書・公式ヘルプ(pigeon-help-2026)
+# source: 元ケースNo(区分-No 例 A-38-1 / B-60-3)・help記事ID(help#<articleId>)
+# fixtures: 既存と同一の命名(fx-perm/fx-workflow 等)
+# ✅=ブラウザ通常動線で検証可 / ⚠️=条件付き(専用環境・待機・復元・throwaway・destructive)。⚠の理由は obs か notes に明記
+# ❌(IP第三者block・全ユーザー一律IP制限・SSO/SAML・Cookie属性)は checkpoint にせず notes に「integration責務でE2E対象外」と記す
+
+- id: J14
+  name: "認証・アクセス制御"
+  priority: P1
+  roles: ["master", "restricted-user", "throwaway"]
+  fixtures: ["fx-perm"]
+  destructive: true
+  scope: global
+  # checkpoints合計: 12 / フェーズ数: 8
+  phases:
+    - phase: "誤パスワードログイン"
+      action: ui
+      checkpoints:
+        - obs: "ログイン画面で正しいIDと誤ったパスワードを入力して「ログイン」を押すと「ログインに失敗しました」等のエラーが表示され、URLが /admin/login のまま留まる"
+          source: ["A-38-1", "help#19655525782041"]
+    - phase: "未ログイン時の直リンクアクセス誘導"
+      setup: mcp
+      action: ui
+      checkpoints:
+        - obs: "ログアウト状態で /admin/dataset/edit/{既存テーブルID} を直接開くと、ログイン画面（/admin/login）にリダイレクトされる"
+          source: ["A-26-1", "help#19655525782041"]
+        - obs: "そのログイン画面でログインすると、最初に要求した /admin/dataset/edit/{既存テーブルID} のURLに着地する（元の遷移先が保持される）"
+          source: ["A-26-1"]
+    - phase: "二段階認証の有効化とメールコードログイン"
+      setup: mcp
+      action: ui
+      checkpoints:
+        - obs: "throwawayユーザー（メールIDアカウント）で二段階認証を有効化（A-8-1）すると、設定一覧に二段階認証ONが表示される（⚠️destructive: 検証後に無効化して復元）"
+          source: ["A-8-1", "help#19799097115033"]
+        - obs: "二段階認証ON状態で当該ユーザーがログインすると認証コード入力画面に進み、Mailosaur/mail-checkerで取得したメール記載のコードを入力するとログインが通過し /admin/dashboard に着地する（⚠️メール待機が必要）"
+          source: ["A-8-1", "help#19799097115033"]
+        - obs: "二段階認証を無効化（A-8-2）すると、設定一覧で二段階認証OFFに戻り、次回ログインでコード入力を求められない（復元）"
+          source: ["A-8-2", "help#19799097115033"]
+        - obs: "メールアドレス形式でないID（非メールID）のユーザーでは、二段階認証を設定しようとしても設定できない旨が表示され有効化できない"
+          source: ["B-267", "help#19799097115033"]
+    - phase: "アカウントロックと解除"
+      setup: mcp
+      action: ui
+      checkpoints:
+        - obs: "throwawayユーザーで規定回数連続して誤パスワードを入力すると、アカウントがロックされ正しいパスワードでもログインできなくなる旨が表示される（⚠️throwaway専用・本番マスターでは絶対に試行しない）"
+          source: ["help#27473035018777"]
+        - obs: "マスターがユーザー管理から当該throwawayユーザーのロックを解除（別人性: 操作者=マスター、対象=throwawayで表示名が異なる）すると、当該ユーザーが正しいパスワードで再ログインできる"
+          source: ["help#27473035018777"]
+    - phase: "初回パスワード強制リセット設定"
+      action: ui
+      checkpoints:
+        - obs: "ユーザー追加時に初回パスワード強制リセットをON（A-24-1）にしてthrowawayユーザーを作成すると、そのユーザーの初回ログイン直後にパスワード変更画面が強制表示される（⚠️throwaway使用）"
+          source: ["A-24-1", "help#19707933976601"]
+        - obs: "初回パスワード強制リセットをOFF（A-24-2）にして作成したthrowawayユーザーは、初回ログイン後そのまま /admin/dashboard に着地しパスワード変更を強制されない"
+          source: ["A-24-2"]
+    - phase: "パスワード変更・忘れ"
+      action: ui
+      checkpoints:
+        - obs: "throwawayユーザーが自分のパスワードを変更（A-3-9/A-3-10）して保存後ログアウトし、新パスワードで再ログインできる（⚠️throwaway専用・マスター認証情報は変更しない）"
+          source: ["A-3-9", "A-3-10"]
+        - obs: "ログイン画面の「パスワードをお忘れの方」からthrowawayユーザーのメールアドレスを送信するとリセットメールが届き（Mailosaur/mail-checkerで取得）、リンクから新パスワードを再設定して新パスワードでログインできる（⚠️メール待機が必要）"
+          source: ["help#23992144701593"]
+    - phase: "権限設定ユーザー/組織削除後の整合"
+      action: ui
+      checkpoints:
+        - obs: "テーブル権限に設定したユーザーを削除（B-31-1）しても、当該テーブルの権限設定画面や一覧でエラーが発生せず開ける"
+          source: ["B-31-1"]
+        - obs: "テーブル権限に設定した組織を削除（B-31-2）しても、当該テーブルの権限設定画面や一覧でエラーが発生せず開ける"
+          source: ["B-31-2"]
+    - phase: "全端末ログアウト"
+      action: ui
+      checkpoints:
+        - obs: "同一throwawayユーザーで2つのブラウザコンテキスト（端末）からログインした状態で、一方から「全端末からログアウト」を実行すると、両コンテキストともセッションが切断され次操作でログイン画面に落ちる"
+          source: ["B-212-4"]
+  notes: "destructive/global: 二段階認証ON/OFF・初回PW強制リセット等のグローバル/ユーザー設定に触れるためチェーン最後尾で実行。マスターadminの認証情報は絶対に変更しない。ロック試行・PW変更は専用throwawayユーザーで行い、検証後に設定（2FA/強制リセット）を元へ復元する。別人性必須: ロック解除は操作者=マスター・対象=throwawayで表示名が異なることを観測。メールコード/リセットメールはMailosaur/mail-checkerで取得し反映待ちを考慮する。リソースは「J14-」プレフィックス。"
+- id: J15
+  name: "アクセス許可IP"
+  priority: P2
+  roles: ["master", "throwaway"]
+  fixtures: ["fx-perm"]
+  destructive: true
+  scope: global
+  # checkpoints合計: 4 / フェーズ数: 4
+  phases:
+    - phase: "未設定は全IP許可"
+      action: ui
+      checkpoints:
+        - obs: "アクセス許可IP設定が未設定（空）の状態では、現在の送信元IPからログイン・操作が問題なくできる（=全IP許可）"
+          source: ["B-60-1", "help#28520625069977"]
+    - phase: "0.0.0.0/0 全許可"
+      action: ui
+      checkpoints:
+        - obs: "アクセス許可IPに 0.0.0.0/0 を設定して保存すると、現在の送信元IPからアクセスでき、設定一覧に 0.0.0.0/0 が表示される（⚠️destructive: 検証後に元の設定へ復元）"
+          source: ["B-60-2", "help#28520625069977"]
+    - phase: "自送信元IPを含むCIDR許可"
+      action: ui
+      checkpoints:
+        - obs: "自分の送信元IP（egress IP）を含むCIDRを許可に設定して保存すると、自分のアクセスが引き続き許可される（⚠️egress IP前提・B-60-3〜9のCIDR算術バリエーションは本観点に圧縮。検証後に元の設定へ復元）"
+          source: ["B-60-3", "B-60-9", "help#28520625069977"]
+    - phase: "自IPを除外した許可で締め出し"
+      action: ui
+      checkpoints:
+        - obs: "許可CIDRから自分の送信元IPを除外した範囲のみを設定して保存し再アクセスすると、IP不一致でアクセスがブロックされる（⚠️destructive・自分が締め出される: 直前に別管理コンテキストか debug 経由で設定を戻せる手段を確保し、マスター復元を必ず実施。B-60-10〜14のバリエーションは本観点に圧縮）"
+          source: ["B-60-10", "B-60-14", "help#28520625069977"]
+  notes: "destructive: アクセス許可IPはテナント全体に効くためチェーン最後尾で実行し、検証後に必ず元の設定（通常は未設定/全許可）へ復元する。自IP除外フェーズは自分自身が締め出されるため、設定を戻せる手段（別経路/debug）を事前確保すること。❌E2E対象外（integration責務）: 第三者の別IPからのblock実証（B-60-10〜14の他者視点）と、全ユーザーに一律でIP制限をかける挙動（help#28520625069977）は、ブラウザの通常動線（単一egress IP）では再現できないため checkpoint にしない。リソースは「J15-」プレフィックス。"
+- id: J9b
+  name: "WF応用2(引き上げ・一括・整合性)"
+  priority: P2
+  roles: ["master", "applicant", "approver1", "approver2"]
+  fixtures: ["fx-workflow"]
+  destructive: false
+  scope: local
+  # checkpoints合計: 9 / フェーズ数: 8
+  phases:
+    - phase: "複数ロールの準備"
+      setup: mcp
+      action: ui
+      checkpoints:
+        - obs: "「J9b-」プレフィックスの申請者1名・承認者2名（互いに別ユーザー）が作成され、ユーザー一覧に氏名の異なる3行が表示される"
+          source: ["B-106", "help#30339369151001"]
+    - phase: "引き上げ承認（対比）"
+      action: ui
+      checkpoints:
+        - obs: "承認者を「ユーザー指定」で設定した申請に対しては、上位者が承認を引き上げて承認できる「引き上げ承認」ボタンが表示され、引き上げ承認すると承認済みになる（B-106の15→3-4圧縮）"
+          source: ["B-106"]
+        - obs: "承認者を「組織指定」で設定した申請では、引き上げ承認ボタンが表示されない（ユーザー指定との対比が核）"
+          source: ["B-106"]
+    - phase: "一括承認・否認・取り下げ・削除"
+      action: ui
+      checkpoints:
+        - obs: "承認待ち一覧で複数の申請レコードを選択して一括承認すると、選択した全件のワークフロー状態が「承認済み」になる（B-111の16→3圧縮・別人性: 承認者は申請者と別ユーザー）"
+          source: ["B-111"]
+        - obs: "複数の申請レコードを選択して一括否認すると選択した全件が「否認」になり、申請者が複数の申請中レコードを選択して一括取り下げすると全件が未申請に戻る"
+          source: ["B-111"]
+    - phase: "役職指定の承認者解決"
+      action: ui
+      checkpoints:
+        - obs: "承認者を「組織＋役職」で指定すると、その組織でその役職を持つユーザーが承認待ち一覧に申請を持ち、当該役職者が承認すると承認済みになる（別人性: 申請者≠当該役職者）"
+          source: ["B-68"]
+    - phase: "WFフロー固定（テンプレート）"
+      action: ui
+      checkpoints:
+        - obs: "ワークフローのフロー固定テンプレート（fix_flow）を設定すると、申請者がレコードを申請する際に承認者を選択する画面が出ず、テンプレート定義の承認ルートで申請が進む"
+          source: ["B-21-3", "B-68-5", "B-68-8"]
+    - phase: "承認済み後の再申請"
+      action: ui
+      checkpoints:
+        - obs: "再申請可能設定をONにしたワークフローで、一度承認済みになったレコードを申請者が編集して再度申請すると、再び「申請中(要確認)」になる"
+          source: ["B-21-2"]
+    - phase: "承認者削除後の表示"
+      action: ui
+      checkpoints:
+        - obs: "承認者にユーザー指定したワークフローで当該ユーザーを削除すると、承認ルート表示に削除済みユーザーの氏名がそのまま残って表示される（B-28-1/B-28-3）"
+          source: ["B-28-1", "B-28-3"]
+        - obs: "承認者に組織指定したワークフローで当該組織を削除すると、承認ルート表示に「!削除された組織!(XX)」の形式で表示される（B-28-2/B-28-4）"
+          source: ["B-28-2", "B-28-4"]
+    - phase: "自分自身が承認者に含まれる"
+      action: ui
+      checkpoints:
+        - obs: "申請者自身が承認者（または承認組織）に含まれるワークフローで申請すると、自分の承認待ちには自分の申請が出る/出ない等の仕様通りに表示され、承認フローが破綻せず完了できる"
+          source: ["B-166"]
+  notes: "別人性必須: 申請者≠承認者・複数承認者は互いに別ユーザー。引き上げ承認はユーザー指定/組織指定の対比が核（B-106）。一括操作はB-111、役職指定はB-68を圧縮。承認者削除後の表示文言（削除済み氏名残り/「!削除された組織!(XX)」）を必ず観測。検証主操作はUI。リソースは「J9b-」プレフィックス。"
+- id: J8x
+  name: "WF(申請→承認) 追加観点"
+  priority: P1
+  roles: ["master", "applicant", "approver"]
+  fixtures: ["fx-workflow"]
+  destructive: false
+  scope: local
+  # 既存 J8 に足す想定の追加 phase/checkpoint（別id で定義）
+  # checkpoints合計: 3 / フェーズ数: 2
+  phases:
+    - phase: "取り下げ時の通知とコメント"
+      action: ui
+      checkpoints:
+        - obs: "申請者が申請中レコードを取り下げる際に取り下げコメントを入力すると、承認者へ取り下げの画面通知が表示され、レコード履歴/コメントに取り下げコメントが残る（⚠️通知反映待ちを考慮・別人性: 取り下げ操作者=申請者、通知先=承認者）"
+          source: ["B-64-1"]
+    - phase: "承認者の編集可否設定（追加対比）"
+      action: ui
+      checkpoints:
+        - obs: "「ワークフロー承認者はデータ編集可能」をON（B-11-6）にすると、承認者の承認画面でレコード項目が編集可能になる"
+          source: ["B-11-6", "B-21-1"]
+        - obs: "同設定をOFFにすると、承認者の承認画面でレコード項目が読み取り専用（編集不可）で表示される"
+          source: ["B-11-6", "B-21-1"]
+  notes: "既存 J8『WF(申請→承認)』に追加する想定の観点。取り下げ通知+コメント(B-64-1)は通知反映待ちが必要(⚠️)。編集可否設定はON/OFFの対比で観測。別人性必須: 申請者≠承認者を別アカウントで実行。リソースは「J8-」プレフィックス（J8 と同一環境を想定）。"
+- id: J13x
+  name: "全体設定の実動作観測（拡張）"
+  priority: P3
+  roles: ["master", "throwaway"]
+  fixtures: []
+  destructive: true
+  scope: global
+  # 既存 J13 に足す想定の phase（別id で定義）。設定値保存だけでなく実動作まで観測する
+  # checkpoints合計: 2 / フェーズ数: 2
+  phases:
+    - phase: "自動ログアウト時間の実動作"
+      action: ui
+      checkpoints:
+        - obs: "共通設定で自動ログアウト時間を小さい値（例: 最小分）に設定して保存後、throwawayユーザーでログインし操作せず設定時間以上放置すると、再操作時にセッションが切れてログイン画面（/admin/login）に落ちる（⚠️global・放置待機が必要・検証後に元の値へ復元）"
+          source: ["B-212-3", "help#19801318723993"]
+    - phase: "パスワード強制変更間隔の実動作"
+      action: ui
+      checkpoints:
+        - obs: "パスワード強制変更画面表示の間隔日数を実動作確認できる値に設定し、条件を満たすthrowawayユーザーでログインすると、パスワード変更画面が強制表示される（⚠️global・経過日条件が必要なため throwaway の最終変更日を debug 等で調整・検証後に元の値へ復元）"
+          source: ["B-89-1", "help#19800944860953"]
+  notes: "既存 J13『全体設定・運用監視』に追加する想定の拡張。『設定値が保存表示される』止まりでなく『小値設定→放置/条件成立→実際にログイン画面に落ちる/強制変更画面が出る』まで実動作を観測する点が核。destructive/global のためチェーン最後尾で実行し、テスト後に必ず元の設定値へ復元。放置待機・経過日条件が必要なため throwaway ユーザーで実施しマスター認証情報は変更しない。リソースは「J13-」プレフィックス（J13 と同一環境を想定）。"

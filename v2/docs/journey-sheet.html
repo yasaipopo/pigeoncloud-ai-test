@@ -22,8 +22,8 @@
   .summary{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:13px}
 </style></head><body><div class="wrap">
 <h1>🐦 PigeonCloud E2E ジャーニー型テストシート</h1>
-<p class="sub">1認証セッション=多観点 / 大=ジャーニー・中=フェーズ・小=観点(checkpoint) / 現行 約1,671ケース → 13ジャーニー・151観点 に集約</p>
-<div class="summary">ジャーニー <b>13</b> ・ 観点合計 <b>151</b> ・ 優先度 P1:6 / P2:6 / P3:1
+<p class="sub">1認証セッション=多観点 / 大=ジャーニー・中=フェーズ・小=観点(checkpoint) / 現行 約1,671ケース → 16ジャーニー・187観点 に集約</p>
+<div class="summary">ジャーニー <b>16</b> ・ 観点合計 <b>187</b> ・ 優先度 P1:7 / P2:8 / P3:1
 <span class="mut">準備: <span class="tag t-ok">mcp</span>=MCP前倒し <span class="tag t-warn">debug</span>=debug API <span class="tag t-mut">ui</span>=UI / 操作: <span class="tag t-okb">ui</span>=ブラウザ通常動線（検証の主役）</span></div>
 <div class="journey">
       <div class="jhead">
@@ -153,7 +153,7 @@
       <div class="jhead">
         <span class="jid">J8</span>
         <span class="jname">WF(申請→承認)</span>
-        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 14 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">applicant</span> <span class="tag t-warn">approver</span>  ・ fixture: fx-workflow</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 17 ・ フェーズ 10 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">applicant</span> <span class="tag t-warn">approver</span>  ・ fixture: fx-workflow</span>
       </div>
       <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">別ロールの準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">MCP/debugで「J8-」プレフィックスの申請者・承認者2名（互いに別ユーザー）が作成され、ユーザー一覧に氏名の異なる2行が表示される</td><td class="src">B-11-2, help#19710699416985</td></tr><tr><td class="ph" rowspan="1">ワークフロー設定</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
@@ -169,7 +169,10 @@
           <td class="obs">申請者のタスク・通知管理画面に、承認結果（承認/否認）が通知として記録される</td><td class="src">B-11-3, help#19875911533849</td></tr><tr><td class="ph" rowspan="2">承認者の編集可否設定</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
           <td class="obs">「ワークフロー承認者はデータ編集可能」をONにすると、承認者の承認画面でレコード項目が編集可能になる</td><td class="src">B-11-6</td></tr><tr>
           <td class="obs">同設定をOFFにすると、承認者の承認画面でレコード項目が読み取り専用になる</td><td class="src">B-11-6</td></tr><tr><td class="ph" rowspan="1">申請の取り下げ</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
-          <td class="obs">申請者が自分の申請中レコードを取り下げると状態が未申請に戻り、取り下げは申請者本人のみ可能で第三者は不可である（別人性の境界）</td><td class="src">pigeon_cloud#3696, B-11-2</td></tr></tbody></table></div><div class="journey">
+          <td class="obs">申請者が自分の申請中レコードを取り下げると状態が未申請に戻り、取り下げは申請者本人のみ可能で第三者は不可である（別人性の境界）</td><td class="src">pigeon_cloud#3696, B-11-2</td></tr><tr><td class="ph" rowspan="1">取り下げ時の通知とコメント</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">申請者が申請中レコードを取り下げる際に取り下げコメントを入力すると、承認者へ取り下げの画面通知が表示され、レコード履歴/コメントに取り下げコメントが残る（⚠️通知反映待ちを考慮・別人性: 取り下げ操作者=申請者、通知先=承認者）</td><td class="src">B-64-1</td></tr><tr><td class="ph" rowspan="2">承認者の編集可否設定（追加対比）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「ワークフロー承認者はデータ編集可能」をON（B-11-6）にすると、承認者の承認画面でレコード項目が編集可能になる</td><td class="src">B-11-6, B-21-1</td></tr><tr>
+          <td class="obs">同設定をOFFにすると、承認者の承認画面でレコード項目が読み取り専用（編集不可）で表示される</td><td class="src">B-11-6, B-21-1</td></tr></tbody></table></div><div class="journey">
       <div class="jhead">
         <span class="jid">J9</span>
         <span class="jname">WF応用</span>
@@ -187,6 +190,23 @@
           <td class="obs">承認者を組織で指定すると、その組織に属するいずれかのユーザーが承認すれば承認済みになる</td><td class="src">B-11-5, help#30339369151001</td></tr><tr><td class="ph" rowspan="1">CSVでワークフロー作成</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">CSVアップロードでワークフローを作成すると、設定画面に取り込んだ承認ルートが反映表示される</td><td class="src">help#30351561801369</td></tr><tr><td class="ph" rowspan="1">WF状態での集計絞り込み</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">集計の絞り込みで「ワークフローが申請中(要確認)と一致」を設定し保存すると、申請中レコードのみの集計結果が表示される</td><td class="src">A-85-1</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J9b</span>
+        <span class="jname">WF応用2(引き上げ・一括・整合性)</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 11 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">applicant</span> <span class="tag t-warn">approver1</span> <span class="tag t-warn">approver2</span>  ・ fixture: fx-workflow</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">複数ロールの準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J9b-」プレフィックスの申請者1名・承認者2名（互いに別ユーザー）が作成され、ユーザー一覧に氏名の異なる3行が表示される</td><td class="src">B-106, help#30339369151001</td></tr><tr><td class="ph" rowspan="2">引き上げ承認（対比）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">承認者を「ユーザー指定」で設定した申請に対しては、上位者が承認を引き上げて承認できる「引き上げ承認」ボタンが表示され、引き上げ承認すると承認済みになる（B-106の15→3-4圧縮）</td><td class="src">B-106</td></tr><tr>
+          <td class="obs">承認者を「組織指定」で設定した申請では、引き上げ承認ボタンが表示されない（ユーザー指定との対比が核）</td><td class="src">B-106</td></tr><tr><td class="ph" rowspan="2">一括承認・否認・取り下げ・削除</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">承認待ち一覧で複数の申請レコードを選択して一括承認すると、選択した全件のワークフロー状態が「承認済み」になる（B-111の16→3圧縮・別人性: 承認者は申請者と別ユーザー）</td><td class="src">B-111</td></tr><tr>
+          <td class="obs">複数の申請レコードを選択して一括否認すると選択した全件が「否認」になり、申請者が複数の申請中レコードを選択して一括取り下げすると全件が未申請に戻る</td><td class="src">B-111</td></tr><tr><td class="ph" rowspan="1">役職指定の承認者解決</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">承認者を「組織＋役職」で指定すると、その組織でその役職を持つユーザーが承認待ち一覧に申請を持ち、当該役職者が承認すると承認済みになる（別人性: 申請者≠当該役職者）</td><td class="src">B-68</td></tr><tr><td class="ph" rowspan="1">WFフロー固定（テンプレート）</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ワークフローのフロー固定テンプレート（fix_flow）を設定すると、申請者がレコードを申請する際に承認者を選択する画面が出ず、テンプレート定義の承認ルートで申請が進む</td><td class="src">B-21-3, B-68-5, B-68-8</td></tr><tr><td class="ph" rowspan="1">承認済み後の再申請</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">再申請可能設定をONにしたワークフローで、一度承認済みになったレコードを申請者が編集して再度申請すると、再び「申請中(要確認)」になる</td><td class="src">B-21-2</td></tr><tr><td class="ph" rowspan="2">承認者削除後の表示</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">承認者にユーザー指定したワークフローで当該ユーザーを削除すると、承認ルート表示に削除済みユーザーの氏名がそのまま残って表示される（B-28-1/B-28-3）</td><td class="src">B-28-1, B-28-3</td></tr><tr>
+          <td class="obs">承認者に組織指定したワークフローで当該組織を削除すると、承認ルート表示に「!削除された組織!(XX)」の形式で表示される（B-28-2/B-28-4）</td><td class="src">B-28-2, B-28-4</td></tr><tr><td class="ph" rowspan="1">自分自身が承認者に含まれる</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">申請者自身が承認者（または承認組織）に含まれるワークフローで申請すると、自分の承認待ちには自分の申請が出る/出ない等の仕様通りに表示され、承認フローが破綻せず完了できる</td><td class="src">B-166</td></tr></tbody></table></div><div class="journey">
       <div class="jhead">
         <span class="jid">J10</span>
         <span class="jname">通知設定</span>
@@ -244,7 +264,7 @@
       <div class="jhead">
         <span class="jid">J13</span>
         <span class="jname">全体設定・運用監視</span>
-        <span class="jmeta"><span class="tag p-P3">P3</span> 観点 8 ・ フェーズ 7 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-bad">destructive</span><span class="tag t-warn">global</span> </span>
+        <span class="jmeta"><span class="tag p-P3">P3</span> 観点 10 ・ フェーズ 9 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">throwaway</span> <span class="tag t-bad">destructive</span><span class="tag t-warn">global</span> </span>
       </div>
       <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">自動ログアウト時間</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">共通設定で自動ログアウト時間を変更して保存すると、設定値が保存表示される（テスト後に元の値へ復元）</td><td class="src">help#19801318723993</td></tr><tr><td class="ph" rowspan="2">パスワードポリシー</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
@@ -254,5 +274,39 @@
           <td class="obs">利用規約の表示設定を有効化すると、ログイン画面に利用規約リンクが表示される（復元前提）</td><td class="src">help#19799630859417</td></tr><tr><td class="ph" rowspan="1">ログ・CSV履歴の監視</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">ログ→CSV UP/DL履歴を開くと、CSVのアップロード/ダウンロード履歴（操作者・日時）が表示される</td><td class="src">A-13-2, help#19710092964377</td></tr><tr><td class="ph" rowspan="1">システム利用状況の監視</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
           <td class="obs">システム利用状況で、ユーザー数・テーブル数・メール通知数が現在の実数と一致して表示される</td><td class="src">A-7-1, help#19736501355801</td></tr><tr><td class="ph" rowspan="1">データバックアップ</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
-          <td class="obs">データのバックアップ画面でバックアップを実行/ダウンロードできる</td><td class="src">help#19655862590873</td></tr></tbody></table></div>
+          <td class="obs">データのバックアップ画面でバックアップを実行/ダウンロードできる</td><td class="src">help#19655862590873</td></tr><tr><td class="ph" rowspan="1">自動ログアウト時間の実動作</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">共通設定で自動ログアウト時間を小さい値（例: 最小分）に設定して保存後、throwawayユーザーでログインし操作せず設定時間以上放置すると、再操作時にセッションが切れてログイン画面（/admin/login）に落ちる（⚠️global・放置待機が必要・検証後に元の値へ復元）</td><td class="src">B-212-3, help#19801318723993</td></tr><tr><td class="ph" rowspan="1">パスワード強制変更間隔の実動作</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">パスワード強制変更画面表示の間隔日数を実動作確認できる値に設定し、条件を満たすthrowawayユーザーでログインすると、パスワード変更画面が強制表示される（⚠️global・経過日条件が必要なため throwaway の最終変更日を debug 等で調整・検証後に元の値へ復元）</td><td class="src">B-89-1, help#19800944860953</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J14</span>
+        <span class="jname">認証・アクセス制御</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 16 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">restricted-user</span> <span class="tag t-warn">throwaway</span> <span class="tag t-bad">destructive</span><span class="tag t-warn">global</span> ・ fixture: fx-perm</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">誤パスワードログイン</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ログイン画面で正しいIDと誤ったパスワードを入力して「ログイン」を押すと「ログインに失敗しました」等のエラーが表示され、URLが /admin/login のまま留まる</td><td class="src">A-38-1, help#19655525782041</td></tr><tr><td class="ph" rowspan="2">未ログイン時の直リンクアクセス誘導</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ログアウト状態で /admin/dataset/edit/{既存テーブルID} を直接開くと、ログイン画面（/admin/login）にリダイレクトされる</td><td class="src">A-26-1, help#19655525782041</td></tr><tr>
+          <td class="obs">そのログイン画面でログインすると、最初に要求した /admin/dataset/edit/{既存テーブルID} のURLに着地する（元の遷移先が保持される）</td><td class="src">A-26-1</td></tr><tr><td class="ph" rowspan="4">二段階認証の有効化とメールコードログイン</td><td class="su" rowspan="4"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="4"><span class="tag t-okb">ui</span></td>
+          <td class="obs">throwawayユーザー（メールIDアカウント）で二段階認証を有効化（A-8-1）すると、設定一覧に二段階認証ONが表示される（⚠️destructive: 検証後に無効化して復元）</td><td class="src">A-8-1, help#19799097115033</td></tr><tr>
+          <td class="obs">二段階認証ON状態で当該ユーザーがログインすると認証コード入力画面に進み、Mailosaur/mail-checkerで取得したメール記載のコードを入力するとログインが通過し /admin/dashboard に着地する（⚠️メール待機が必要）</td><td class="src">A-8-1, help#19799097115033</td></tr><tr>
+          <td class="obs">二段階認証を無効化（A-8-2）すると、設定一覧で二段階認証OFFに戻り、次回ログインでコード入力を求められない（復元）</td><td class="src">A-8-2, help#19799097115033</td></tr><tr>
+          <td class="obs">メールアドレス形式でないID（非メールID）のユーザーでは、二段階認証を設定しようとしても設定できない旨が表示され有効化できない</td><td class="src">B-267, help#19799097115033</td></tr><tr><td class="ph" rowspan="2">アカウントロックと解除</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">throwawayユーザーで規定回数連続して誤パスワードを入力すると、アカウントがロックされ正しいパスワードでもログインできなくなる旨が表示される（⚠️throwaway専用・本番マスターでは絶対に試行しない）</td><td class="src">help#27473035018777</td></tr><tr>
+          <td class="obs">マスターがユーザー管理から当該throwawayユーザーのロックを解除（別人性: 操作者=マスター、対象=throwawayで表示名が異なる）すると、当該ユーザーが正しいパスワードで再ログインできる</td><td class="src">help#27473035018777</td></tr><tr><td class="ph" rowspan="2">初回パスワード強制リセット設定</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ユーザー追加時に初回パスワード強制リセットをON（A-24-1）にしてthrowawayユーザーを作成すると、そのユーザーの初回ログイン直後にパスワード変更画面が強制表示される（⚠️throwaway使用）</td><td class="src">A-24-1, help#19707933976601</td></tr><tr>
+          <td class="obs">初回パスワード強制リセットをOFF（A-24-2）にして作成したthrowawayユーザーは、初回ログイン後そのまま /admin/dashboard に着地しパスワード変更を強制されない</td><td class="src">A-24-2</td></tr><tr><td class="ph" rowspan="2">パスワード変更・忘れ</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">throwawayユーザーが自分のパスワードを変更（A-3-9/A-3-10）して保存後ログアウトし、新パスワードで再ログインできる（⚠️throwaway専用・マスター認証情報は変更しない）</td><td class="src">A-3-9, A-3-10</td></tr><tr>
+          <td class="obs">ログイン画面の「パスワードをお忘れの方」からthrowawayユーザーのメールアドレスを送信するとリセットメールが届き（Mailosaur/mail-checkerで取得）、リンクから新パスワードを再設定して新パスワードでログインできる（⚠️メール待機が必要）</td><td class="src">help#23992144701593</td></tr><tr><td class="ph" rowspan="2">権限設定ユーザー/組織削除後の整合</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル権限に設定したユーザーを削除（B-31-1）しても、当該テーブルの権限設定画面や一覧でエラーが発生せず開ける</td><td class="src">B-31-1</td></tr><tr>
+          <td class="obs">テーブル権限に設定した組織を削除（B-31-2）しても、当該テーブルの権限設定画面や一覧でエラーが発生せず開ける</td><td class="src">B-31-2</td></tr><tr><td class="ph" rowspan="1">全端末ログアウト</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">同一throwawayユーザーで2つのブラウザコンテキスト（端末）からログインした状態で、一方から「全端末からログアウト」を実行すると、両コンテキストともセッションが切断され次操作でログイン画面に落ちる</td><td class="src">B-212-4</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J15</span>
+        <span class="jname">アクセス許可IP</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 4 ・ フェーズ 4 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">throwaway</span> <span class="tag t-bad">destructive</span><span class="tag t-warn">global</span> ・ fixture: fx-perm</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">未設定は全IP許可</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">アクセス許可IP設定が未設定（空）の状態では、現在の送信元IPからログイン・操作が問題なくできる（=全IP許可）</td><td class="src">B-60-1, help#28520625069977</td></tr><tr><td class="ph" rowspan="1">0.0.0.0/0 全許可</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">アクセス許可IPに 0.0.0.0/0 を設定して保存すると、現在の送信元IPからアクセスでき、設定一覧に 0.0.0.0/0 が表示される（⚠️destructive: 検証後に元の設定へ復元）</td><td class="src">B-60-2, help#28520625069977</td></tr><tr><td class="ph" rowspan="1">自送信元IPを含むCIDR許可</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">自分の送信元IP（egress IP）を含むCIDRを許可に設定して保存すると、自分のアクセスが引き続き許可される（⚠️egress IP前提・B-60-3〜9のCIDR算術バリエーションは本観点に圧縮。検証後に元の設定へ復元）</td><td class="src">B-60-3, B-60-9, help#28520625069977</td></tr><tr><td class="ph" rowspan="1">自IPを除外した許可で締め出し</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">許可CIDRから自分の送信元IPを除外した範囲のみを設定して保存し再アクセスすると、IP不一致でアクセスがブロックされる（⚠️destructive・自分が締め出される: 直前に別管理コンテキストか debug 経由で設定を戻せる手段を確保し、マスター復元を必ず実施。B-60-10〜14のバリエーションは本観点に圧縮）</td><td class="src">B-60-10, B-60-14, help#28520625069977</td></tr></tbody></table></div>
 </div></body></html>
