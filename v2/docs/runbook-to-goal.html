@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E2E v3 ゴールまでの詳細手順書</title>
+<style>
+  :root{--bg:#ffffff;--ink:#1d2733;--mut:#5b6b7c;--acc:#1565c0;--card:#f7f9fc;--line:#d7dee7;
+        --ok:#1b7f4b;--okbg:#e3f6ec;--warn:#9a6b00;--warnbg:#fff4d6;--bad:#b4232a;--badbg:#fde7e7}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 -apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:30px 22px 90px}
+  h1{font-size:25px;margin:0 0 6px}
+  h2{font-size:20px;margin:42px 0 12px;padding-bottom:6px;border-bottom:3px solid var(--acc)}
+  h3{font-size:16px;margin:22px 0 8px;color:var(--acc)}
+  .sub{color:var(--mut);margin:0 0 16px} .lead{color:var(--mut);font-size:13.5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+  .goal{background:var(--okbg);border:1px solid #a9dcc0;border-radius:10px;padding:14px 18px;margin:14px 0}
+  code{background:#eef2f7;padding:1px 6px;border-radius:4px;color:#0b3d6b;font-size:13px;font-family:"SF Mono",Menlo,Consolas,monospace}
+  pre{background:#0f1b2d;color:#dceaff;border-radius:8px;padding:12px 14px;overflow:auto;font-size:12.5px;font-family:"SF Mono",Menlo,Consolas,monospace;margin:8px 0}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13.3px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#eaf1fb} tr:nth-child(even) td{background:#fbfcfe}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:700}
+  .t-ok{background:var(--okbg);color:var(--ok)} .t-warn{background:var(--warnbg);color:var(--warn)}
+  .t-bad{background:var(--badbg);color:var(--bad)} .t-mut{background:#eceff3;color:var(--mut)}
+  .toc a{color:var(--acc);text-decoration:none;margin-right:14px;font-size:13px;white-space:nowrap}
+  .fig{margin:14px 0;text-align:center}
+  .fig svg{max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .figcap{color:var(--mut);font-size:12.5px;margin-top:6px}
+  ul.ck{list-style:none;padding-left:4px} ul.ck li{margin:4px 0;padding-left:24px;position:relative}
+  ul.ck li:before{content:"☐";position:absolute;left:0;color:var(--acc);font-weight:700}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>PigeonCloud E2E v3 — ゴールまでの詳細手順書</h1>
+<p class="sub">MCP併用・基本AI実行 / 2026-06-27 / 既存移行・チェック方法・新規対応・漏れ補完を網羅</p>
+
+<div class="card toc"><b>目次</b><br>
+<a href="#g">0. ゴール定義</a><a href="#road">1. 全体ロードマップ</a><a href="#mig">2. 既存テストの扱い・移行</a><a href="#gap">3. これまでの漏れ</a>
+<a href="#chk">4. チェック方法</a><a href="#new">5. 新規テストへの対応</a><a href="#task">6. フェーズ別タスク</a><a href="#ops">7. 運用</a></div>
+
+<h2 id="g">0. ゴール定義（完了の状態）</h2>
+<div class="goal">
+<b>ゴール:</b> 公式マニュアル準拠の<b>厳選 E2E カタログ</b>が、<b>MCP準備＋UI操作</b>で <b>100% 本物の検証で完走</b>する。
+偽装PASSは構造的に不可。過去デグレは<b>回帰ピン</b>で再発検知。結果は<b>ビューアーで一覧</b>。新規テストは<b>トリアージ→承認→カタログ化</b>の定常運用に乗る。<b>全工程 AI 実行</b>。
+</div>
+<table>
+<tr><th>完了条件</th><th>判定</th></tr>
+<tr><td>カタログが機能エリアを網羅（マニュアル準拠・少数精鋭）</td><td>主要エリアに P1 シナリオが存在</td></tr>
+<tr><td>各シナリオが準備プロファイル（MCP/debug/UI）で動く</td><td>validate-catalog 緑＋実走 PASS</td></tr>
+<tr><td>UI生成動線シナリオが各機能に最低1本（C2）</td><td>カバレッジ表で確認</td></tr>
+<tr><td>デグレ回帰ピン（#2885型 ほか）が存在</td><td>fx-regression に登録・実走 PASS</td></tr>
+<tr><td>結果がビューアーで月次閲覧できる</td><td>index.html 自動再生成</td></tr>
+</table>
+
+<h2 id="road">1. 全体ロードマップ</h2>
+<div class="fig">
+<svg viewBox="0 0 960 120" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11.5">
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1565c0"/></marker></defs>
+  <rect x="8" y="40" width="135" height="52" rx="8" fill="#fde7e7" stroke="#b4232a"/>
+  <text x="75" y="60" text-anchor="middle" font-weight="bold">P0 前提確定</text><text x="75" y="78" text-anchor="middle" font-size="10.5">MCP実機確認・方針決定</text>
+  <line x1="145" y1="66" x2="170" y2="66" stroke="#1565c0" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="173" y="40" width="135" height="52" rx="8" fill="#fff4d6" stroke="#9a6b00"/>
+  <text x="240" y="60" text-anchor="middle" font-weight="bold">P1 基盤</text><text x="240" y="78" text-anchor="middle" font-size="10.5">登録・seed・profile・validator</text>
+  <line x1="310" y1="66" x2="335" y2="66" stroke="#1565c0" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="338" y="40" width="135" height="52" rx="8" fill="#f7f9fc" stroke="#1565c0"/>
+  <text x="405" y="60" text-anchor="middle" font-weight="bold">P2 既存移行</text><text x="405" y="78" text-anchor="middle" font-size="10.5">21件→フィクスチャ化</text>
+  <line x1="475" y1="66" x2="500" y2="66" stroke="#1565c0" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="503" y="40" width="135" height="52" rx="8" fill="#f7f9fc" stroke="#1565c0"/>
+  <text x="570" y="60" text-anchor="middle" font-weight="bold">P3 漏れ補完</text><text x="570" y="78" text-anchor="middle" font-size="10.5">マニュアル準拠網羅</text>
+  <line x1="640" y1="66" x2="665" y2="66" stroke="#1565c0" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="668" y="40" width="135" height="52" rx="8" fill="#f7f9fc" stroke="#1565c0"/>
+  <text x="735" y="60" text-anchor="middle" font-weight="bold">P4 回帰ピン</text><text x="735" y="78" text-anchor="middle" font-size="10.5">#2885型 ほか</text>
+  <line x1="805" y1="66" x2="828" y2="66" stroke="#1565c0" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="828" y="40" width="125" height="52" rx="8" fill="#e3f6ec" stroke="#1b7f4b"/>
+  <text x="890" y="60" text-anchor="middle" font-weight="bold">P5 定常運用</text><text x="890" y="78" text-anchor="middle" font-size="10.5">スポット実行</text>
+</svg>
+<div class="figcap">図1: P0（MCP実機確認＝独立レビュー C1）が全ての前提。以後 基盤→既存移行→漏れ補完→回帰ピン→運用。</div>
+</div>
+
+<h2 id="mig">2. これまでのテストの扱い・移行</h2>
+<table>
+<tr><th>資産</th><th>現状</th><th>扱い</th></tr>
+<tr><td>旧 spec.js（約4,700／v1）</td><td>CI外・6.5h・77%偽装テスト</td><td><span class="tag t-bad">廃止</span> 1:1移行しない。厳選カタログが置換。<code>tests/</code> はアーカイブ参照のみ</td></tr>
+<tr><td>v2 カタログ 21件（auth8/records12/wf1）</td><td>使い捨て<code>{id}-</code>テーブル準備</td><td><span class="tag t-warn">移行</span> 準備をフィクスチャ＋MCPに置換（下記手順）</td></tr>
+<tr><td>結果ビューアー / アーカイブ</td><td>稼働中</td><td><span class="tag t-ok">継続</span></td></tr>
+</table>
+<h3>21件の移行手順（1件ずつ）</h3>
+<ul class="ck">
+<li>カタログの該当シナリオに <b>準備プロファイル</b>（fixture / setup / action / verify / cleanup）を付与</li>
+<li>precondition の「{id}-テーブル新規作成」を「fx-* を使う（行は {id}- プレフィックス）」に書き換え</li>
+<li>準備の主操作を MCP/debug に移す（<b>action=UI は維持</b>＝検証の主操作は触らない）</li>
+<li><b>UI生成動線シナリオ（C2）は移行対象外で残す</b>（rec-001 レコード作成UI 等は UI 準備のまま＝生成動線を検証）</li>
+<li>1件移行ごとに実走 → PASS（＋第三者チェック通過）を確認 → ビューアーで証跡確認</li>
+</ul>
+
+<h2 id="gap">3. これまでのテストの漏れ（gap分析）</h2>
+<p>現カタログは <b>auth / records / 承認WF1本</b> のみ。マニュアル棚卸し（177記事）＋デグレ戦略から、下記が未カバー。</p>
+<table>
+<tr><th>漏れの種類</th><th>具体</th><th>補完先フェーズ</th></tr>
+<tr><td>機能エリア未カバー <span class="tag t-bad">大</span></td><td>テーブル作成・項目バリデーション・CSV・集計/ビュー・チャート/ダッシュ・帳票・公開/埋込フォーム・通知・ファイル・テーブル削除/複製・ユーザー/組織/役職・権限・コメント・更新履歴・WF取下げ・ルックアップ・自動採番・計算項目</td><td>P3</td></tr>
+<tr><td>UI生成動線（C2）</td><td>テーブル作成UI / 項目追加UI / grant設定UI / WF定義UI 自体のバグを拾う動線が無い</td><td>P3（各機能1本）</td></tr>
+<tr><td>デグレ回帰 <span class="tag t-bad">実害</span></td><td>表示条件E2E=9件UIのみ2ヶ月放置・<b>下書き保存=ゼロ</b>・#2885型の組合せ未カバー</td><td>P4</td></tr>
+<tr><td>記載薄で保留</td><td>権限/グループの一部記事は期待結果が薄くE2E化不可 → 要マニュアル拡充待ち</td><td>—</td></tr>
+<tr><td>対象外（E2Eでやらない）</td><td>AIチャット/ビルダー（非決定）・未実装機能・二段階認証/SAML（外部IdP）・kintone移行・認可バイパス/攻撃（=integration test）</td><td>—</td></tr>
+</table>
+
+<h2 id="chk">4. チェック方法（どう検証するか）</h2>
+<p>各シナリオは下記パイプラインを通る。<b>実行と判定は別エージェント</b>（自己採点しない）。PASSでも<b>第三者チェック</b>を通す。</p>
+<div class="fig">
+<svg viewBox="0 0 960 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11.5">
+  <defs><marker id="b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1565c0"/></marker></defs>
+  <rect x="10" y="20" width="160" height="48" rx="8" fill="#eef5ff" stroke="#1565c0"/>
+  <text x="90" y="40" text-anchor="middle" font-weight="bold">実行 executor</text><text x="90" y="58" text-anchor="middle" font-size="10.5">MCP準備＋UI操作＋録画/スクショ</text>
+  <line x1="172" y1="44" x2="200" y2="44" stroke="#1565c0" stroke-width="2" marker-end="url(#b)"/>
+  <rect x="203" y="20" width="155" height="48" rx="8" fill="#f7f9fc" stroke="#1565c0"/>
+  <text x="280" y="40" text-anchor="middle" font-weight="bold">判定 judge</text><text x="280" y="58" text-anchor="middle" font-size="10.5">証拠のみ・三値判定</text>
+  <line x1="280" y1="70" x2="280" y2="100" stroke="#9a6b00" stroke-width="2" marker-end="url(#b)"/>
+  <text x="345" y="90" fill="#9a6b00" font-size="10.5">EVIDENCE_NG→1回再撮影</text>
+  <rect x="203" y="104" width="155" height="48" rx="8" fill="#fff4d6" stroke="#9a6b00"/>
+  <text x="280" y="124" text-anchor="middle" font-weight="bold">第三者チェック</text><text x="280" y="142" text-anchor="middle" font-size="10.5">要件すり替え/簡略化検出</text>
+  <line x1="203" y1="128" x2="172" y2="128" stroke="#b4232a" stroke-width="2" marker-end="url(#b)"/>
+  <rect x="10" y="104" width="160" height="48" rx="8" fill="#fde7e7" stroke="#b4232a"/>
+  <text x="90" y="124" text-anchor="middle" font-weight="bold">トリアージ</text><text x="90" y="142" text-anchor="middle" font-size="10.5">FAIL/STUCK 5分類</text>
+  <line x1="360" y1="128" x2="395" y2="128" stroke="#1565c0" stroke-width="2" marker-end="url(#b)"/>
+  <line x1="360" y1="44" x2="600" y2="44" stroke="#1565c0" stroke-width="2" marker-end="url(#b)"/>
+  <text x="470" y="36" fill="#5b6b7c" font-size="10.5">PASS</text>
+  <rect x="400" y="104" width="200" height="48" rx="8" fill="#f7f9fc" stroke="#1565c0"/>
+  <text x="500" y="124" text-anchor="middle" font-weight="bold">分類＋カタログ提案/バグドラフト</text>
+  <line x1="500" y1="104" x2="500" y2="70" stroke="#1565c0" stroke-width="2" marker-end="url(#b)"/>
+  <rect x="603" y="20" width="170" height="132" rx="10" fill="#e3f6ec" stroke="#1b7f4b"/>
+  <text x="688" y="44" text-anchor="middle" font-weight="bold" fill="#1b7f4b">レポート＋ビューアー</text>
+  <text x="688" y="68" text-anchor="middle" font-size="11">report.md</text>
+  <text x="688" y="88" text-anchor="middle" font-size="11">月次アーカイブ</text>
+  <text x="688" y="108" text-anchor="middle" font-size="11">index.html 自動再生成</text>
+  <text x="688" y="132" text-anchor="middle" font-size="11">動画/スクショ/観測値</text>
+  <rect x="790" y="20" width="160" height="132" rx="10" fill="#fbfcfe" stroke="#d7dee7"/>
+  <text x="870" y="44" text-anchor="middle" font-weight="bold" fill="#1565c0">整合性ガード</text>
+  <text x="800" y="66" font-size="10.5">①実行/判定の分離</text>
+  <text x="800" y="84" font-size="10.5">②証拠主義+IDバッジ</text>
+  <text x="800" y="102" font-size="10.5">③三値判定</text>
+  <text x="800" y="120" font-size="10.5">④第三者チェック</text>
+  <text x="800" y="138" font-size="10.5">⑤MCP裏取り(永続性)</text>
+</svg>
+<div class="figcap">図2: チェックパイプライン。観測ごとにスクショ＋DOM実値、可視性はUI、永続性はMCP record_list で裏取り。FAIL/STUCKは自動トリアージ。</div>
+</div>
+<h3>チェックの観点（何を確認するか）</h3>
+<table>
+<tr><th>観点</th><th>方法</th></tr>
+<tr><td>画面表示（動線が動くか）</td><td>UIスクショ＋DOM実値。判定エージェントが画像を実際に開いて位置・内容確認</td></tr>
+<tr><td>永続性（保存されたか）</td><td>MCP <code>record_list</code> / <code>get_table</code> で裏取り</td></tr>
+<tr><td>可視性（制限ユーザーに何が見えるか）</td><td><b>必ずUI（制限ユーザーのセッション）</b>。MCPはmasterで全部見えるので不可</td></tr>
+<tr><td>要件すり替えが無いか</td><td>第三者チェックが「シナリオ要件 vs 実操作手順」を突合（別人性・UI操作性・準備のすり替え）</td></tr>
+<tr><td>マニュアルと一致するか</td><td>observations の期待値はマニュアル記載が根拠。判定もそれに照らす</td></tr>
+</table>
+
+<h2 id="new">5. 新しいテストへの対応（定常運用）</h2>
+<p>バグ修正PR・本番障害・Slack報告・新機能が来たら、3分類トリアージ→カタログ更新（ユーザー承認制）。</p>
+<div class="fig">
+<svg viewBox="0 0 920 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1565c0"/></marker></defs>
+  <rect x="15" y="60" width="160" height="50" rx="8" fill="#eef5ff" stroke="#1565c0"/>
+  <text x="95" y="80" text-anchor="middle" font-weight="bold">入口</text><text x="95" y="98" text-anchor="middle" font-size="11">バグPR/障害/新機能</text>
+  <line x1="177" y1="85" x2="205" y2="85" stroke="#1565c0" stroke-width="2" marker-end="url(#c)"/>
+  <rect x="208" y="55" width="170" height="60" rx="8" fill="#fff4d6" stroke="#9a6b00"/>
+  <text x="293" y="78" text-anchor="middle" font-weight="bold">3分類トリアージ</text>
+  <text x="293" y="98" text-anchor="middle" font-size="10.5">a:ロジック b:動線 c:既存上</text>
+  <line x1="380" y1="70" x2="560" y2="40" stroke="#5b6b7c" stroke-width="1.5" marker-end="url(#c)"/>
+  <line x1="380" y1="85" x2="560" y2="85" stroke="#1565c0" stroke-width="2" marker-end="url(#c)"/>
+  <line x1="380" y1="100" x2="560" y2="130" stroke="#1565c0" stroke-width="2" marker-end="url(#c)"/>
+  <rect x="565" y="18" width="340" height="40" rx="8" fill="#eceff3" stroke="#5b6b7c"/>
+  <text x="582" y="42" font-size="11.5">(a) ロジック → E2E反映せず（プロダクトUnit/Integration）</text>
+  <rect x="565" y="65" width="340" height="40" rx="8" fill="#e3f6ec" stroke="#1b7f4b"/>
+  <text x="582" y="89" font-size="11.5">(b) 動線断絶 → 新シナリオ＋準備プロファイル新設</text>
+  <rect x="565" y="112" width="340" height="40" rx="8" fill="#e3f6ec" stroke="#1b7f4b"/>
+  <text x="582" y="136" font-size="11.5">(c) 既存動線上 → observations に観測点1行追記</text>
+</svg>
+<div class="figcap">図3: 新規対応フロー。(b)(c) は source: にPR/障害ID記録→ユーザー採否→カタログ化。デグレは fx-regression に回帰ピン追加。</div>
+</div>
+<ul class="ck">
+<li>新シナリオには <b>準備プロファイル</b>（fixture/setup/action/verify/cleanup）を必ず付ける</li>
+<li>複数ロール動線は observations に<b>別人性</b>を必ず入れる（wf-001 教訓）</li>
+<li>マニュアルに期待値が無い挙動は推測で書かず「要マニュアル確認」</li>
+<li>追加は少数精鋭・ユーザー承認制（カタログ膨張を防ぐ）</li>
+</ul>
+
+<h2 id="task">6. フェーズ別タスク（詳細チェックリスト）</h2>
+<h3>P0 前提確定 <span class="tag t-bad">最優先</span></h3>
+<ul class="ck">
+<li>pfc MCP を <code>.mcp.json</code> に登録（トークン/テナント）</li>
+<li><code>pfc_staging_ping</code>＋ツール列挙で <b>deploy版（13 or 25ツール）を実機確定</b>（C1）</li>
+<li>確定版で §UI↔MCP切り分け表をピン留め（WF申請/ユーザー作成/CSV/ファイルの可否）</li>
+<li>未決3点（録画 全/失敗時・フィクスチャ粒度・MCP登録方法）をユーザー決定</li>
+</ul>
+<h3>P1 基盤</h3>
+<ul class="ck">
+<li>フィクスチャ seed スクリプト（MCP）: fx-basic/workflow/perm/schema/regression を環境ごとに seed</li>
+<li>テナント allowlist 自動登録を provision-envs に組込（H2）</li>
+<li>カタログに準備プロファイル schema 追加＋ validate-catalog にルール（action=ui必須 等）</li>
+<li>executor 指示書に「準備=MCP/debug、操作=UI」を明記＋ MCP 呼び出し手順</li>
+<li>第三者チェックに「準備を操作にすり替えていないか」を追加</li>
+</ul>
+<h3>P2 既存移行 / P3 漏れ補完 / P4 回帰ピン</h3>
+<ul class="ck">
+<li>P2: 21件を1件ずつ移行→実走PASS（§2手順）</li>
+<li>P3: マニュアル準拠 P1 Top5（tbl/fld/csv-imp/agg/perm）→ P2エリアへバッチ展開。各機能に UI生成動線1本（C2）</li>
+<li>P4: #2885型回帰ピンのレシピ確定（自動入力構成・制限ユーザー認証・grant/条件）→ fx-regression に実装→実走</li>
+</ul>
+
+<h2 id="ops">7. 運用（P5 定常）</h2>
+<ul class="ck">
+<li>リリース前に <b>スポット実行</b>（<code>e2e-v2-spot-run</code>）。環境はレジストリ再利用＋フィクスチャ使い回し</li>
+<li>結果は <code>~/pigeon-e2e-archive/index.html</code> で月次閲覧（自動再生成）</li>
+<li>バグ/障害/新機能 → 3分類トリアージ → カタログ更新提案 → ユーザー採否</li>
+<li>デグレが出たら fx-regression に回帰ピン1本追加（恒久検知）</li>
+<li>フィクスチャは肥大時に月次リフレッシュ（再 seed）</li>
+</ul>
+
+<p class="lead" style="margin-top:24px">関連: 設計(html) v2/docs/mcp-assisted-test-design.html ／ 現行方式 v2/docs/test-methodology.html ／ 設計書(md) .claude/design-docs/2026-06-27-mcp-assisted-test-design.md ／ CLAUDE.md（§0-8）</p>
+
+</div></body></html>

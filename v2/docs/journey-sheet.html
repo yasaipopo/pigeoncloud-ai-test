@@ -1,0 +1,258 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PigeonCloud E2E ジャーニー型テストシート</title><style>
+  :root{--bg:#fff;--ink:#1d2733;--mut:#5b6b7c;--acc:#1565c0;--line:#d7dee7;--okbg:#e3f6ec;--warnbg:#fff4d6;--badbg:#fde7e7}
+  *{box-sizing:border-box} body{margin:0;background:#f4f6f9;color:var(--ink);font:14px/1.7 -apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  .wrap{max-width:1320px;margin:0 auto;padding:24px 18px 80px}
+  h1{font-size:22px;margin:0 0 4px} .sub{color:var(--mut);margin:0 0 18px;font-size:13px}
+  .journey{background:#fff;border:1px solid var(--line);border-radius:10px;margin:16px 0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .jhead{background:#1565c0;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .jid{font-weight:800;font-family:"SF Mono",Menlo,monospace;font-size:15px;background:rgba(255,255,255,.2);border-radius:6px;padding:1px 9px}
+  .jname{font-weight:700;font-size:16px} .jmeta{font-size:12px;opacity:.95;margin-left:auto}
+  table{border-collapse:collapse;width:100%;font-size:12.8px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#eaf1fb}
+  td.ph{font-weight:700;background:#f3f7fc;white-space:nowrap;min-width:110px}
+  td.su,td.ac{white-space:nowrap;text-align:center}
+  td.obs{min-width:420px} td.src{font-size:11px;color:var(--mut);white-space:nowrap}
+  .tag{display:inline-block;border-radius:10px;padding:0 8px;font-size:11px;font-weight:700}
+  .t-ok{background:var(--okbg);color:#1b7f4b} .t-okb{background:#dbeafe;color:#1565c0}
+  .t-warn{background:var(--warnbg);color:#9a6b00} .t-bad{background:var(--badbg);color:#b4232a} .t-mut{background:#eceff3;color:#5b6b7c}
+  .p-P1{background:var(--badbg);color:#b4232a} .p-P2{background:var(--warnbg);color:#9a6b00} .p-P3{background:#eceff3;color:#5b6b7c}
+  .mut{color:var(--mut)}
+  .summary{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:13px}
+</style></head><body><div class="wrap">
+<h1>🐦 PigeonCloud E2E ジャーニー型テストシート</h1>
+<p class="sub">1認証セッション=多観点 / 大=ジャーニー・中=フェーズ・小=観点(checkpoint) / 現行 約1,671ケース → 13ジャーニー・151観点 に集約</p>
+<div class="summary">ジャーニー <b>13</b> ・ 観点合計 <b>151</b> ・ 優先度 P1:6 / P2:6 / P3:1
+<span class="mut">準備: <span class="tag t-ok">mcp</span>=MCP前倒し <span class="tag t-warn">debug</span>=debug API <span class="tag t-mut">ui</span>=UI / 操作: <span class="tag t-okb">ui</span>=ブラウザ通常動線（検証の主役）</span></div>
+<div class="journey">
+      <div class="jhead">
+        <span class="jid">J1</span>
+        <span class="jname">管理者オンボーディング</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 12 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-org</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="2">ログイン</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ログイン画面（/admin/login）にID入力欄・パスワード入力欄・「ログイン」ボタン・「Ver.」を含むバージョン表記が表示される</td><td class="src">A-1-1, help#19655525782041</td></tr><tr>
+          <td class="obs">マスターでログイン後、URLが /admin/dashboard を含みナビゲーションバーとサイドメニューが表示される</td><td class="src">A-1-1, help#19655558353177</td></tr><tr><td class="ph" rowspan="1">システム利用状況の確認</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「システム利用状況」画面にユーザー数・テーブル数・メール通知数の現在値が数値で表示される</td><td class="src">A-7-1, help#19736501355801</td></tr><tr><td class="ph" rowspan="3">ユーザー追加</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ユーザー管理で「J1-」プレフィックスのユーザータイプ「ユーザー」を全項目入力で追加すると、ユーザー一覧に追加メールアドレスの行が表示される</td><td class="src">A-2-2, help#19708065383321</td></tr><tr>
+          <td class="obs">氏名・メール等の必須項目を未入力で「登録」を押すと必須項目エラーが表示され追加されない</td><td class="src">A-2-3</td></tr><tr>
+          <td class="obs">ユーザー追加後にシステム利用状況のユーザー数表示が1増える</td><td class="src">A-7-1, help#19736501355801</td></tr><tr><td class="ph" rowspan="2">組織追加</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">組織管理で「J1-org」を必須項目入力（親組織なし）で追加すると組織一覧に表示される</td><td class="src">A-5-1, help#19709331452697</td></tr><tr>
+          <td class="obs">親組織を選択して子組織を追加すると、組織ツリー上で親組織配下に表示される</td><td class="src">A-5-2, help#19709331452697</td></tr><tr><td class="ph" rowspan="1">役職追加</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">役職管理で「J1-役職」を新規登録すると役職一覧に追加した役職名が表示される</td><td class="src">A-67-1, help#19709489360025</td></tr><tr><td class="ph" rowspan="1">ユーザー情報編集</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">自分（マスター）の氏名を変更して保存すると、ナビゲーション右上の表示名が変更後の氏名になる</td><td class="src">A-3-3, help#19707933976601</td></tr><tr><td class="ph" rowspan="1">操作ログの確認</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ログ→ログ画面に、直前のユーザー追加・組織追加の操作ログ行（操作者・日時付き）が表示される</td><td class="src">A-13-1, help#19710092964377</td></tr><tr><td class="ph" rowspan="1">ログアウト</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">右上アバターから「ログアウト」を選ぶとURLが /admin/login を含みID入力欄が表示される</td><td class="src">A-1-1</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J2</span>
+        <span class="jname">テーブル設計(基本)</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 15 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span>  </span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="2">テーブル新規作成</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル管理「追加」から「J2-基本」テーブルを作成すると、サイドメニューとテーブル管理一覧に「J2-基本」が表示される</td><td class="src">A-4-1, help#19660902939417</td></tr><tr>
+          <td class="obs">テンプレートからテーブルを作成すると、テンプレート定義の項目が初期作成された状態でテーブルが追加される</td><td class="src">A-4-3, help#19661724437785</td></tr><tr><td class="ph" rowspan="3">基本項目の追加</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「項目を追加する」から文字列(一行)項目「J2-氏名」を追加すると、テーブル設定のフィールド一覧に表示される</td><td class="src">A-14-4, help#19666709590809</td></tr><tr>
+          <td class="obs">数値項目「J2-金額」を整数・桁区切りありで追加すると設定内容通り作成される</td><td class="src">A-14-5, help#19666749123737</td></tr><tr>
+          <td class="obs">項目名を未入力で「追加する」を押すと必須項目エラーが表示され追加されない</td><td class="src">A-47-1</td></tr><tr><td class="ph" rowspan="1">レイアウト設定（2列）</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">登録画面レイアウトを2列に設定して保存後、レコード登録画面で項目が2列で配置される</td><td class="src">A-113-01, help#19663843714329</td></tr><tr><td class="ph" rowspan="3">フィールド編集・順番変更・削除</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">フィールド一覧でフィールドをドラッグして順番変更し保存すると、レコード登録画面の項目順が変わる</td><td class="src">A-4-4, help#19707349888665</td></tr><tr>
+          <td class="obs">フィールドを編集して項目名を変更し保存すると、フィールド一覧の項目名が更新される</td><td class="src">A-4-5</td></tr><tr>
+          <td class="obs">フィールドを削除すると、フィールド一覧とレコード登録画面から該当項目が消える</td><td class="src">A-4-6</td></tr><tr><td class="ph" rowspan="2">追加オプション設定</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">追加オプションで一覧「1ページあたりの表示データ数」を5行に設定すると、テーブル一覧が5行単位で表示される</td><td class="src">A-109-1, help#19707390652057</td></tr><tr>
+          <td class="obs">追加オプションで「デフォルトのソート順」をID昇順に設定すると、一覧がID昇順で表示される</td><td class="src">A-109-2</td></tr><tr><td class="ph" rowspan="1">レコード追加で動作確認</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J2-基本」にレコードを1件追加すると、一覧に追加した値の行が表示される</td><td class="src">A-9-1, help#19657963779097</td></tr><tr><td class="ph" rowspan="2">テーブル複製・JSONエクスポート</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブルの複製を実行すると、「J2-基本」の定義を引き継いだ複製テーブルが一覧に追加される</td><td class="src">help#19707614354969</td></tr><tr>
+          <td class="obs">テーブル設定をJSONファイルでエクスポートすると、項目定義を含むJSONがダウンロードされる</td><td class="src">help#19663448575641</td></tr><tr><td class="ph" rowspan="1">テーブル削除</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">複製したテーブルを削除すると、サイドメニューとテーブル管理一覧から該当テーブルが消える</td><td class="src">help#19661069329433</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J3</span>
+        <span class="jname">項目型ぜんぶ盛り</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 18 ・ フェーズ 6 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-schema</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="4">テキスト系項目</td><td class="su" rowspan="4"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="4"><span class="tag t-okb">ui</span></td>
+          <td class="obs">文字列(一行)項目を追加しレコードに値を入力すると、一覧・詳細に入力文字列が表示される</td><td class="src">A-113-01, help#19666709590809</td></tr><tr>
+          <td class="obs">文章(複数行・通常テキスト)項目で改行を含む値を保存すると、詳細画面で改行が保持されて表示される</td><td class="src">help#19685752825241</td></tr><tr>
+          <td class="obs">文章(複数行・リッチテキスト)項目で太字・箇条書きを入れて保存すると、詳細画面で書式付きで表示される</td><td class="src">help#19685752825241</td></tr><tr>
+          <td class="obs">固定テキスト項目を設定すると、レコード登録画面に編集不可の固定文言が表示される</td><td class="src">help#19707292147737</td></tr><tr><td class="ph" rowspan="4">数値・日時系項目</td><td class="su" rowspan="4">—</td><td class="ac" rowspan="4"><span class="tag t-okb">ui</span></td>
+          <td class="obs">数値(整数)項目に桁区切りありを設定し1000以上を入力すると、一覧でカンマ区切り表示される</td><td class="src">A-14-5, help#19666749123737</td></tr><tr>
+          <td class="obs">数値(小数)項目に小数値を入力すると、設定した小数桁で表示される</td><td class="src">A-14-6, help#19666749123737</td></tr><tr>
+          <td class="obs">日時項目で「デフォルトで現在日時」を有効化しレコード追加すると、一覧に「YYYY-MM-DD HH:MM」形式の現在日時が表示される</td><td class="src">A-101-1, help#19666789006745</td></tr><tr>
+          <td class="obs">日付のみ項目は「YYYY-MM-DD」、時刻のみ項目は「HH:MM」形式で表示される</td><td class="src">A-101-2, A-101-3, help#19666789006745</td></tr><tr><td class="ph" rowspan="3">選択肢系項目</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ラジオボタン(単一選択)項目を選択肢AA,BB,CCで追加すると、レコード登録画面で単一選択UIが表示され選択値が保存される</td><td class="src">A-14-7, help#19666791306649</td></tr><tr>
+          <td class="obs">選択肢(複数選択)項目で複数値を選択して保存すると、詳細画面に選択した複数値が表示される</td><td class="src">help#19685923823641</td></tr><tr>
+          <td class="obs">Yes/No項目をレコードでONにすると、一覧でON状態が表示される</td><td class="src">help#19685853749145</td></tr><tr><td class="ph" rowspan="2">メディア・ファイル系項目</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">画像項目に画像ファイルをアップロードすると、詳細画面にサムネイルが表示される</td><td class="src">help#19685978944025</td></tr><tr>
+          <td class="obs">ファイル項目にPDFをアップロードすると、詳細画面にファイル名とダウンロードリンクが表示される</td><td class="src">help#19685607757465</td></tr><tr><td class="ph" rowspan="3">計算・自動採番項目</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">計算項目に数式（例: 金額×2）を設定すると、レコードに計算結果が自動表示される</td><td class="src">help#19685690616601</td></tr><tr>
+          <td class="obs">計算式を未入力で追加すると必須項目エラーが表示される</td><td class="src">A-51-2</td></tr><tr>
+          <td class="obs">自動採番項目を設定すると、レコード追加ごとに連番が自動付与される</td><td class="src">help#19666652317209</td></tr><tr><td class="ph" rowspan="2">リレーション系項目</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">他テーブル参照項目を設定すると、レコード登録時に参照先テーブルのレコードを選択でき、選択値が表示される</td><td class="src">B-22-1, help#19686010433305</td></tr><tr>
+          <td class="obs">関連レコード一覧項目を設定すると、詳細画面に関連する他テーブルのレコードが一覧表示される</td><td class="src">help#19707238540953</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J4</span>
+        <span class="jname">項目名・入力バリデーション</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 6 ・ フェーズ 3 ・ ロール: <span class="tag t-mut">master</span>  </span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="3">項目名のパディング除去</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">文字列(一行)項目名の前後に半角スペースを入れて保存後、再度設定を開くと半角スペースが除去された項目名で保存されている</td><td class="src">A-93-1</td></tr><tr>
+          <td class="obs">項目名の前後に全角スペースを入れて保存すると、全角スペースが除去されて保存される</td><td class="src">B-項目名パディング(全角)</td></tr><tr>
+          <td class="obs">項目名の前後にタブを入れて保存すると、タブが除去されて保存される</td><td class="src">B-項目名パディング(タブ)</td></tr><tr><td class="ph" rowspan="2">必須項目バリデーション</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">日時項目を項目名未入力で追加すると「必須項目未入力」エラーが表示される</td><td class="src">A-47-1</td></tr><tr>
+          <td class="obs">計算項目を計算式未入力で追加すると必須項目エラーが表示される</td><td class="src">A-51-1, A-51-2</td></tr><tr><td class="ph" rowspan="1">項目の種類変更</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">既存の日時項目の種類を「日付のみ」へ変更して保存すると、レコード表示が変更後の日付形式になる</td><td class="src">A-19-1, help#19707403137945</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J5</span>
+        <span class="jname">レコード運用CRUD</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 12 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">レコード作成</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコードを新規作成して保存すると、一覧と詳細画面に入力値が表示される</td><td class="src">A-9-1, help#19657963779097</td></tr><tr><td class="ph" rowspan="1">検索・絞り込み</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">検索キーワードを入力して検索すると一致レコードのみ一覧表示され、検索クリア後（反映を待ってから）全件に戻る</td><td class="src">A-9-8, help#19656092667417</td></tr><tr><td class="ph" rowspan="2">詳細・編集</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">一覧から詳細画面を開くと、登録した全項目の値が表示される</td><td class="src">help#19655938647833</td></tr><tr>
+          <td class="obs">レコードを編集して保存すると、一覧・詳細の値が更新される</td><td class="src">A-9-1</td></tr><tr><td class="ph" rowspan="1">ロック</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコードをロックすると、他ユーザーから編集ロック中である旨が表示される</td><td class="src">help#19655994643609</td></tr><tr><td class="ph" rowspan="1">コメント・メンション</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコードにコメントを登録すると詳細画面にコメントが時系列で表示され、一覧のコメントアイコンにマウスオーバーで件数と最新投稿時間が表示される</td><td class="src">A-143-01, help#19736072126489</td></tr><tr><td class="ph" rowspan="1">更新履歴</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコードの更新履歴を開くと、編集操作の履歴（操作者・日時・変更内容）が表示される</td><td class="src">help#19736138637465</td></tr><tr><td class="ph" rowspan="1">複製</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコードの複製ボタンで複製すると、値を引き継いだ新規レコードが作成される</td><td class="src">A-107-01</td></tr><tr><td class="ph" rowspan="4">一覧カスタマイズ・削除</td><td class="su" rowspan="4">—</td><td class="ac" rowspan="4"><span class="tag t-okb">ui</span></td>
+          <td class="obs">列幅を変更して保存すると、再表示後も列幅が保持される</td><td class="src">help#19657907427609</td></tr><tr>
+          <td class="obs">列を固定表示に設定すると、横スクロール時も該当列が固定される</td><td class="src">help#19656339654297</td></tr><tr>
+          <td class="obs">一覧でレコードをダブルクリックすると、詳細画面が開く</td><td class="src">help#19736521405593</td></tr><tr>
+          <td class="obs">レコードを削除すると（反映を待ってから）一覧から該当行が消える</td><td class="src">A-9-1</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J6</span>
+        <span class="jname">一括編集・CSV入出力</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 9 ・ フェーズ 4 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="2">一括編集</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">一覧で複数レコードを選択し一括編集で項目値を更新すると、選択した全レコードの該当項目が同一値に更新される</td><td class="src">B-180-1, help#19656141292825</td></tr><tr>
+          <td class="obs">フィルタで絞り込んだレコードを全選択して一括編集すると、絞り込み対象のレコードのみ更新される</td><td class="src">B-180-4</td></tr><tr><td class="ph" rowspan="3">CSVダウンロード</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコード一覧をCSVダウンロードすると、項目をヘッダーに含むCSVファイルがダウンロードされる</td><td class="src">B-148-01, help#19659104989721</td></tr><tr>
+          <td class="obs">並び替えをしてCSVダウンロードすると、その並び順が反映されたCSVになる</td><td class="src">B-161</td></tr><tr>
+          <td class="obs">子テーブルが設定されたテーブルのCSVダウンロードに、子テーブルの情報が含まれる</td><td class="src">B-148-01</td></tr><tr><td class="ph" rowspan="2">CSVアップロード</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「CSVダウンロード(空)」のヘッダー付き空CSVに値を記入してアップロードすると、レコードが一括登録される</td><td class="src">B-148-03, help#19659276546585</td></tr><tr>
+          <td class="obs">子テーブル情報を含むCSVをアップロードすると、子テーブルの情報も反映される</td><td class="src">B-148-02</td></tr><tr><td class="ph" rowspan="2">CSVアップロードのエラー</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ヘッダー行なしのCSVをアップロードすると、インポートエラーが表示される</td><td class="src">B-55-1</td></tr><tr>
+          <td class="obs">CSV以外のファイルをアップロードすると、インポートエラーが表示される</td><td class="src">B-55-2</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J7</span>
+        <span class="jname">テーブル権限設定</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 10 ・ フェーズ 6 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">restricted-user</span>  ・ fixture: fx-perm</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">権限設定の準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">MCP/debugで「J7-」プレフィックスの制限ユーザー1名と権限テスト用テーブルが作成され、ユーザー一覧・テーブル管理一覧に表示される</td><td class="src">help#19666629662489</td></tr><tr><td class="ph" rowspan="3">テーブル権限設定</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブル権限設定で制限ユーザーに「閲覧のみ」を付与して保存すると、権限一覧に該当ユーザーの閲覧権限が表示される</td><td class="src">B-11-? テーブル権限, help#46996533214617</td></tr><tr>
+          <td class="obs">制限ユーザーでログインすると（別人性: ログイン名がマスターと異なる）、権限のあるテーブルのみサイドメニューに表示され、未付与テーブルは表示されない</td><td class="src">help#19664446929177</td></tr><tr>
+          <td class="obs">閲覧のみ権限の制限ユーザーには、該当テーブルで「追加」「編集」ボタンが表示されない</td><td class="src">help#27467012835481</td></tr><tr><td class="ph" rowspan="2">項目権限設定</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">項目権限設定で特定項目を制限ユーザーに非表示に設定すると、制限ユーザーのレコード詳細で該当項目が表示されない</td><td class="src">help#29759923226393</td></tr><tr>
+          <td class="obs">項目を編集不可に設定すると、制限ユーザーのレコード編集画面で該当項目が読み取り専用表示になる</td><td class="src">help#29759923226393</td></tr><tr><td class="ph" rowspan="2">グループ権限設定</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">グループの権限設定で制限ユーザーにグループ閲覧権限を付与すると、制限ユーザーにグループ内テーブルが表示される</td><td class="src">B-155-2, help#19665959159833</td></tr><tr>
+          <td class="obs">グループ自体の閲覧権限をOFFにすると、制限ユーザーにグループが表示されない</td><td class="src">help#29756761517465</td></tr><tr><td class="ph" rowspan="1">ダッシュボード権限</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ダッシュボードの権限設定で制限ユーザーに特定チャートの非表示を設定すると、制限ユーザーのダッシュボードに該当チャートが出ない</td><td class="src">help#19710406238105</td></tr><tr><td class="ph" rowspan="1">権限の差分確認</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">マスターと制限ユーザーで同一テーブルを開くと、マスターは全項目・全ボタン、制限ユーザーは制限後の項目・ボタンのみ表示され、2アカウントの表示差が確認できる（別人性）</td><td class="src">help#19666629662489</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J8</span>
+        <span class="jname">WF(申請→承認)</span>
+        <span class="jmeta"><span class="tag p-P1">P1</span> 観点 14 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">applicant</span> <span class="tag t-warn">approver</span>  ・ fixture: fx-workflow</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">別ロールの準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">MCP/debugで「J8-」プレフィックスの申請者・承認者2名（互いに別ユーザー）が作成され、ユーザー一覧に氏名の異なる2行が表示される</td><td class="src">B-11-2, help#19710699416985</td></tr><tr><td class="ph" rowspan="1">ワークフロー設定</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">対象テーブルにワークフローを設定し承認者を指定して保存すると、テーブルでワークフロー（承認）が有効化される</td><td class="src">B-11-1, help#19710834753945</td></tr><tr><td class="ph" rowspan="2">申請（申請者）</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">申請者でログインしレコードを申請すると、ワークフロー状態が「申請中(要確認)」になる</td><td class="src">B-11-2, help#19710702198425</td></tr><tr>
+          <td class="obs">申請者の承認状況に、申請者と異なる表示名の承認者が次の承認者として表示される（別人性）</td><td class="src">B-11-2</td></tr><tr><td class="ph" rowspan="3">承認（承認者）</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">承認者でログインすると（ログイン名が申請者と異なる）、承認待ち一覧に申請レコードが表示される（別人性）</td><td class="src">B-11-2, help#19710702198425</td></tr><tr>
+          <td class="obs">承認者が「承認」するとワークフロー状態が「承認済み」になり、承認履歴に承認者の表示名と承認日時が記録される</td><td class="src">B-11-2</td></tr><tr>
+          <td class="obs">承認履歴上、申請者と承認者の表示名が異なることが確認できる（別人性の必須観点）</td><td class="src">B-11-2</td></tr><tr><td class="ph" rowspan="2">否認と再申請</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">別レコードを承認者が「否認」すると、ワークフロー状態が「否認」になり否認コメントが表示される</td><td class="src">B-11-4</td></tr><tr>
+          <td class="obs">否認されたレコードを申請者が編集して再申請すると、再び「申請中(要確認)」になる</td><td class="src">B-11-4, B-11-7</td></tr><tr><td class="ph" rowspan="2">通知の確認</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">申請時に承認者へ、承認時に申請者へ、画面上の通知（ベル/タスク通知）が表示される</td><td class="src">B-11-3, help#19875911533849</td></tr><tr>
+          <td class="obs">申請者のタスク・通知管理画面に、承認結果（承認/否認）が通知として記録される</td><td class="src">B-11-3, help#19875911533849</td></tr><tr><td class="ph" rowspan="2">承認者の編集可否設定</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「ワークフロー承認者はデータ編集可能」をONにすると、承認者の承認画面でレコード項目が編集可能になる</td><td class="src">B-11-6</td></tr><tr>
+          <td class="obs">同設定をOFFにすると、承認者の承認画面でレコード項目が読み取り専用になる</td><td class="src">B-11-6</td></tr><tr><td class="ph" rowspan="1">申請の取り下げ</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">申請者が自分の申請中レコードを取り下げると状態が未申請に戻り、取り下げは申請者本人のみ可能で第三者は不可である（別人性の境界）</td><td class="src">pigeon_cloud#3696, B-11-2</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J9</span>
+        <span class="jname">WF応用</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 11 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-warn">applicant</span> <span class="tag t-warn">approver1</span> <span class="tag t-warn">approver2</span>  ・ fixture: fx-workflow</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">複数承認者の準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J9-」プレフィックスの申請者1名・承認者2名（B,C・互いに別ユーザー）が作成され、ユーザー一覧に氏名の異なる3行が表示される</td><td class="src">B-11-3, help#30339369151001</td></tr><tr><td class="ph" rowspan="1">並行承認の設定</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ワークフローに並行承認（BとC両方の承認が必要）を設定して保存すると、設定画面に並行承認の承認者2名が表示される</td><td class="src">B-11-3, help#30339369151001</td></tr><tr><td class="ph" rowspan="3">並行承認の実行</td><td class="su" rowspan="3">—</td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">申請後、承認者B・C双方が承認するとワークフロー状態が「承認済み」になる（別人性: 申請者≠B≠C）</td><td class="src">B-11-3</td></tr><tr>
+          <td class="obs">承認者の一方が否認すると、ワークフロー状態が「否認」になる</td><td class="src">B-11-3</td></tr><tr>
+          <td class="obs">申請時はBへ、Bが承認するとCへ、C承認時は申請者へ、承認順に通知が遷移する</td><td class="src">B-11-3</td></tr><tr><td class="ph" rowspan="1">順次承認ルート</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">直列承認ルートでは、Bの承認が完了するまでCの承認待ち一覧に表示されない</td><td class="src">B-11-3, help#19710702198425</td></tr><tr><td class="ph" rowspan="2">ワークフローに入る条件</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「ワークフローに入る条件」を金額&gt;10000等で設定すると、条件を満たすレコードのみ申請対象になり、満たさないレコードは申請不要で登録される</td><td class="src">B-11-8, help#30340280858521</td></tr><tr>
+          <td class="obs">条件を満たさないレコードは、ワークフロー状態欄が空（対象外）で表示される</td><td class="src">help#30340280858521</td></tr><tr><td class="ph" rowspan="1">組織での承認者指定</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">承認者を組織で指定すると、その組織に属するいずれかのユーザーが承認すれば承認済みになる</td><td class="src">B-11-5, help#30339369151001</td></tr><tr><td class="ph" rowspan="1">CSVでワークフロー作成</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">CSVアップロードでワークフローを作成すると、設定画面に取り込んだ承認ルートが反映表示される</td><td class="src">help#30351561801369</td></tr><tr><td class="ph" rowspan="1">WF状態での集計絞り込み</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">集計の絞り込みで「ワークフローが申請中(要確認)と一致」を設定し保存すると、申請中レコードのみの集計結果が表示される</td><td class="src">A-85-1</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J10</span>
+        <span class="jname">通知設定</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 10 ・ フェーズ 8 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-notify</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">通知設定の準備</td><td class="su" rowspan="1"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「J10-」プレフィックスの通知先テーブルと通知先ユーザー1名が作成され、一覧に表示される</td><td class="src">B-6-1, help#19710190002457</td></tr><tr><td class="ph" rowspan="1">ユーザー宛通知</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知設定で通知先にユーザーを指定し、対象テーブルにレコードを作成すると、指定ユーザーへ画面通知が表示される</td><td class="src">B-6-1, help#19710190002457</td></tr><tr><td class="ph" rowspan="2">メールアドレス宛通知</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知先メールアドレスを設定しレコードを作成すると、設定したメールアドレスへ通知メールが届く</td><td class="src">B-6-1, help#19710190002457</td></tr><tr>
+          <td class="obs">メール通知をtext形式にする設定を有効にすると、通知メールがテキスト形式で届く</td><td class="src">help#26118050758937</td></tr><tr><td class="ph" rowspan="1">Webhook通知</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知先にWebhook URLを設定しレコードを作成すると、Webhook受信先にレコード情報を含むPOSTが届く</td><td class="src">B-6-2, help#42015967824409</td></tr><tr><td class="ph" rowspan="1">組織宛通知</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知先に組織を設定しレコードを作成すると、その組織所属ユーザーへ通知が行われる</td><td class="src">B-6-5</td></tr><tr><td class="ph" rowspan="1">リマインダ設定</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">リマインダ設定で日時項目を基準に通知日時を設定すると、設定内容が保存され通知設定一覧に表示される</td><td class="src">B-6-1, help#19710190002457</td></tr><tr><td class="ph" rowspan="1">通知の必須バリデーション</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知設定で「アクション」を未入力のまま「登録」を押すと、必須項目エラーが表示される</td><td class="src">--54-1</td></tr><tr><td class="ph" rowspan="2">通知先削除後の整合</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">通知先に設定したユーザーを削除して設定を保存しても、他機能にエラーが発生せず保存できる</td><td class="src">B-32-1</td></tr><tr>
+          <td class="obs">通知先に設定した組織を削除して設定を保存しても、エラーが発生しない</td><td class="src">B-32-2</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J11</span>
+        <span class="jname">メール配信・取込</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 12 ・ フェーズ 6 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-mail</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="3">メールテンプレート作成</td><td class="su" rowspan="3"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="3"><span class="tag t-okb">ui</span></td>
+          <td class="obs">メール配信→メールテンプレートでテキストタイプTEXTを選び全項目入力で新規作成すると、テンプレート一覧に表示される</td><td class="src">B-99-1, help#19801803381145</td></tr><tr>
+          <td class="obs">テキストタイプHTMLでメールテンプレートを新規作成できる</td><td class="src">B-99-2</td></tr><tr>
+          <td class="obs">テンプレート名・件名・本文を未入力で登録すると、それぞれ必須エラーになる</td><td class="src">B-99-4</td></tr><tr><td class="ph" rowspan="2">配信リスト作成</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">配信リストで対象テーブルとメールアドレス項目を指定して新規作成すると、配信リスト一覧に表示される</td><td class="src">B-99-5, help#19801803381145</td></tr><tr>
+          <td class="obs">リスト名・テーブル・メールアドレス項目を未入力で登録すると、必須エラーになる</td><td class="src">B-99-7</td></tr><tr><td class="ph" rowspan="2">差し込み配信</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">メール本文に差し込みタグ（項目名）を入れて配信すると、受信メールでレコード値に置換されて届く</td><td class="src">help#19801890111257</td></tr><tr>
+          <td class="obs">配信リストとテンプレートを指定して配信すると、配信リストのアドレスへメールが届く</td><td class="src">help#19801803381145</td></tr><tr><td class="ph" rowspan="2">メール取り込み</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">メール取り込み設定で取込先テーブルとIMAP接続条件を設定して保存すると、設定一覧に表示される</td><td class="src">B-188-1, help#19801973874073</td></tr><tr>
+          <td class="obs">臨時のメール取り込みを実行すると、取込メールの件名・本文が取込先テーブルのレコードとして登録される</td><td class="src">B-188-2, help#19801973874073</td></tr><tr><td class="ph" rowspan="2">公開フォームからの登録</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">公開フォームリンクを有効化すると、公開URLが発行される</td><td class="src">help#19796387440665</td></tr><tr>
+          <td class="obs">公開フォームURLを未ログイン状態で開いて入力・送信すると、対象テーブルにレコードが登録される</td><td class="src">B-135, help#19764544542233</td></tr><tr><td class="ph" rowspan="1">ステップメール</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ステップメール設定で配信間隔を設定すると、設定したスケジュールが配信予定一覧に表示される</td><td class="src">help#19801850743577</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J12</span>
+        <span class="jname">集計・可視化</span>
+        <span class="jmeta"><span class="tag p-P2">P2</span> 観点 14 ・ フェーズ 7 ・ ロール: <span class="tag t-mut">master</span>  ・ fixture: fx-basic</span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="2">集計の作成</td><td class="su" rowspan="2"><span class="tag t-ok">mcp</span></td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">テーブルの集計設定でタイトル・集計項目を設定し保存すると、集計結果がテーブル形式で表示される</td><td class="src">A-23-1, help#19659532678553</td></tr><tr>
+          <td class="obs">クロス集計（行・列）を設定すると、行項目×列項目のクロス表が表示される</td><td class="src">help#19659976375705</td></tr><tr><td class="ph" rowspan="2">集計の絞り込み・ソート</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">絞り込みタブで「空ではない」条件を設定して表示すると、条件に合致する集計結果のみ表示される</td><td class="src">A-65-1, help#19659734308633</td></tr><tr>
+          <td class="obs">ソート順を設定してカスタムフィルターに保存すると、保存した並び順で集計結果が表示される</td><td class="src">A-85-2</td></tr><tr><td class="ph" rowspan="2">集計の表示装飾</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">「行に色を付ける」で条件と色を設定すると、集計結果の該当行に設定色が付く</td><td class="src">A-87-1</td></tr><tr>
+          <td class="obs">複数色の条件を設定すると、条件ごとに異なる色が行に付く</td><td class="src">A-87-2</td></tr><tr><td class="ph" rowspan="2">集計の共有範囲</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">集計を「全員に表示」で保存すると、他ユーザーでも同じ集計結果が確認できる</td><td class="src">A-15-1, help#19659617278233</td></tr><tr>
+          <td class="obs">集計を「自分のみ表示」で保存すると、設定ユーザー以外には集計が表示されない</td><td class="src">A-15-2</td></tr><tr><td class="ph" rowspan="2">ダッシュボード表示</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">集計の「ダッシュボードに表示」を有効化すると、ダッシュボードに集計テーブルが表示される</td><td class="src">A-23-1, help#19736349477785</td></tr><tr>
+          <td class="obs">ダッシュボードのチャートをドラッグ&amp;ドロップで並び替えると、並び順が変更される</td><td class="src">A-78-1</td></tr><tr><td class="ph" rowspan="2">チャート作成</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">チャート追加で棒グラフを設定すると、集計値が棒グラフで表示される</td><td class="src">A-105-02, help#19660061709465</td></tr><tr>
+          <td class="obs">チャートの「過去分も全て加算」を有効化すると、過去分を含めた累積値で表示される</td><td class="src">A-105-02</td></tr><tr><td class="ph" rowspan="2">チャートの共有・絞り込み</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">チャートを「自分のみ表示」で保存すると、作成ユーザー以外には表示されない</td><td class="src">A-16-2, A-37-1</td></tr><tr>
+          <td class="obs">チャートの絞り込みで条件を設定すると、条件通りの集計結果でチャート表示される</td><td class="src">A-66-1</td></tr></tbody></table></div><div class="journey">
+      <div class="jhead">
+        <span class="jid">J13</span>
+        <span class="jname">全体設定・運用監視</span>
+        <span class="jmeta"><span class="tag p-P3">P3</span> 観点 8 ・ フェーズ 7 ・ ロール: <span class="tag t-mut">master</span> <span class="tag t-bad">destructive</span><span class="tag t-warn">global</span> </span>
+      </div>
+      <table><thead><tr><th>中: フェーズ</th><th>準備</th><th>操作</th><th>小: 観点（checkpoint・期待値）</th><th>元ケース/根拠</th></tr></thead><tbody><tr><td class="ph" rowspan="1">自動ログアウト時間</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">共通設定で自動ログアウト時間を変更して保存すると、設定値が保存表示される（テスト後に元の値へ復元）</td><td class="src">help#19801318723993</td></tr><tr><td class="ph" rowspan="2">パスワードポリシー</td><td class="su" rowspan="2">—</td><td class="ac" rowspan="2"><span class="tag t-okb">ui</span></td>
+          <td class="obs">パスワード強制変更画面表示の間隔日数を変更して保存すると、設定値が反映される（復元前提）</td><td class="src">help#19800944860953</td></tr><tr>
+          <td class="obs">二段階認証機能を有効にすると、設定一覧に二段階認証ONが表示される（復元前提）</td><td class="src">help#19799097115033</td></tr><tr><td class="ph" rowspan="1">ロック自動解除</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">レコード操作のロック自動解除時間を設定して保存すると、設定値が反映される（復元前提）</td><td class="src">help#19800790267673</td></tr><tr><td class="ph" rowspan="1">利用規約の表示</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">利用規約の表示設定を有効化すると、ログイン画面に利用規約リンクが表示される（復元前提）</td><td class="src">help#19799630859417</td></tr><tr><td class="ph" rowspan="1">ログ・CSV履歴の監視</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">ログ→CSV UP/DL履歴を開くと、CSVのアップロード/ダウンロード履歴（操作者・日時）が表示される</td><td class="src">A-13-2, help#19710092964377</td></tr><tr><td class="ph" rowspan="1">システム利用状況の監視</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">システム利用状況で、ユーザー数・テーブル数・メール通知数が現在の実数と一致して表示される</td><td class="src">A-7-1, help#19736501355801</td></tr><tr><td class="ph" rowspan="1">データバックアップ</td><td class="su" rowspan="1">—</td><td class="ac" rowspan="1"><span class="tag t-okb">ui</span></td>
+          <td class="obs">データのバックアップ画面でバックアップを実行/ダウンロードできる</td><td class="src">help#19655862590873</td></tr></tbody></table></div>
+</div></body></html>
