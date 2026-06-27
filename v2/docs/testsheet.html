@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PigeonCloud E2E テストシート</title><style>
+  :root{--bg:#fff;--ink:#1d2733;--mut:#5b6b7c;--acc:#1565c0;--line:#d7dee7;--okbg:#e3f6ec;--warnbg:#fff4d6;--badbg:#fde7e7}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.7 -apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  .wrap{max-width:1400px;margin:0 auto;padding:24px 18px 80px}
+  h1{font-size:22px;margin:0 0 4px} .sub{color:var(--mut);margin:0 0 16px;font-size:13px}
+  table{border-collapse:collapse;width:100%;font-size:12.8px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#eaf1fb;position:sticky;top:0;z-index:2}
+  tr.area td{background:#1565c0;color:#fff;font-weight:700;font-size:13.5px}
+  td.id{white-space:nowrap;font-weight:700;font-family:"SF Mono",Menlo,monospace}
+  td.title{font-weight:600;min-width:170px}
+  ol{margin:0;padding-left:18px} li{margin:2px 0}
+  .pri{display:inline-block;margin-top:4px;font-size:11px;font-weight:700;border-radius:10px;padding:0 7px}
+  .p-P1{background:var(--badbg);color:#b4232a} .p-P2{background:var(--warnbg);color:#9a6b00} .p-P3{background:#eceff3;color:#5b6b7c}
+  td.prof{font-size:11.5px;color:#0b3d6b;background:#f3f7fc;min-width:140px} td.src{font-size:11px;color:var(--mut);min-width:90px}
+  td.flags .tag{display:inline-block;border-radius:10px;padding:0 7px;font-size:10.5px;font-weight:700;margin:1px}
+  .tag.t-bad{background:var(--badbg);color:#b4232a} .tag.t-warn{background:var(--warnbg);color:#9a6b00}
+  .mut{color:var(--mut)} .summary{margin:0 0 14px;font-size:13px}
+  .legend{color:var(--mut);font-size:12px;margin-top:14px}
+</style></head><body><div class="wrap">
+<h1>🐦 PigeonCloud E2E テストシート</h1>
+<p class="sub">カタログ(catalog/*.yaml)から自動生成 — 手動維持なし・ドリフトしない / エリア 3 ・ シナリオ 21 件</p>
+<p class="summary">優先度: <b>P1</b> 9 ・ <b>P2</b> 12 ・ <b>P3</b> 0</p>
+<table>
+<thead><tr><th>ID / 優先度</th><th>観点（タイトル）</th><th>やり方（手順 steps）</th><th>確認観点（observations）</th><th>準備プロファイル</th><th>source</th><th>属性</th></tr></thead>
+<tbody><tr class="area"><td colspan="7">▼ 認証（8件）</td></tr><tr>
+        <td class="id">auth-001<div class="pri p-P1">P1</div></td>
+        <td class="title">マスターユーザーでログインしてダッシュボードに遷移し、ログアウトでログイン画面に戻れる</td>
+        <td><ol><li>ログイン画面（/admin/login）を開く</li><li>ID欄にマスターadminのID、パスワード欄にパスワードを入力して「ログイン」ボタンを押す</li><li>ダッシュボード表示後、右上のアバターアイコンから「ログアウト」を選ぶ</li></ol></td>
+        <td><ol><li>ログイン画面にID入力欄・パスワード入力欄・「ログイン」ボタン・バージョン表記（「Ver.」を含む文字列）が表示されている [スクショ]</li><li>ログイン後のURLが /admin/dashboard を含み、ナビゲーションバーとサイドメニューが表示されている [スクショ]</li><li>ログアウト後のURLが /admin/login を含み、ID入力欄が表示されている [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">auth-010, auth-020, auth-030</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">auth-002<div class="pri p-P1">P1</div></td>
+        <td class="title">誤ったパスワードでログインするとエラーメッセージが表示され遷移しない</td>
+        <td><ol><li>ログイン画面でIDにマスターadminの正しいID、パスワードに誤った値（"wrong_password_test"）を入力して「ログイン」ボタンを押す</li></ol></td>
+        <td><ol><li>URLが /admin/login のまま遷移しない [スクショ]</li><li>「IDまたはパスワードが正しくありません」を含むエラーメッセージまたはトーストが画面に表示される [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">auth-040</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">auth-003<div class="pri p-P2">P2</div></td>
+        <td class="title">作成した一般ユーザー（ユーザータイプ「ユーザー」）でログイン・ログアウトできる</td>
+        <td><ol><li>マスターadminでログインした状態で、debug API（POST /admin/debug/create-user）を使ってテスト用一般ユーザー（ユーザータイプ「ユーザー」）を1名作成する</li><li>マスターadminからログアウトする</li><li>作成したユーザーのID・パスワードでログインする</li><li>ログアウトする</li></ol></td>
+        <td><ol><li>作成したユーザーでのログイン後、URLが /admin/dashboard を含みナビゲーションバーが表示されている [スクショ]</li><li>ログアウト後のURLが /admin/login を含む [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">auth-030, auth-080</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">auth-004<div class="pri p-P2">P2</div></td>
+        <td class="title">パスワード未変更ユーザーの初回ログインでパスワード変更フォームが出て、変更後は新パスワードでログインできる</td>
+        <td><ol><li>マスターadminでログインし、管理設定でパスワード変更強制を有効にする</li><li>debug API（POST /admin/debug/create-user）でパスワード未変更状態のテストユーザーを1名作成する</li><li>マスターadminからログアウトし、作成したテストユーザーのIDとデフォルトパスワードでログインする</li><li>表示されたパスワード変更フォームに新しいパスワード（固有文字列 + 数字の8文字以上英数混在）を入力して「パスワード変更」ボタンを押す</li><li>ログアウト後、設定した新しいパスワードで再ログインする</li><li>テスト完了後、管理設定を元の値に戻す</li></ol></td>
+        <td><ol><li>テストユーザーのログイン直後に「新しいパスワード」「パスワード確認」入力欄と「パスワード変更」ボタンが表示される（ダッシュボードには未遷移）[スクショ]</li><li>パスワード変更後にURLが /admin/dashboard を含む [スクショ]</li><li>このシナリオで設定した新パスワードでログインに成功し /admin/dashboard に遷移する [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">auth-050, auth-060</td>
+        <td class="flags"><span class="tag t-bad">destructive</span><span class="tag t-warn">global</span></td>
+      </tr><tr>
+        <td class="id">auth-005<div class="pri p-P2">P2</div></td>
+        <td class="title">パスワード変更時に短すぎる値・単純な値がバリデーションエラーで拒否される</td>
+        <td><ol><li>debug API（POST /admin/debug/create-user）でテストユーザーを1名作成し、そのユーザーの編集画面を開く</li><li>パスワード欄に4文字のパスワード（例："abc1"）を入力して保存ボタンを押す</li><li>続けてパスワード欄に数字のみ8桁（例："12345678"）を入力して保存ボタンを押す</li></ol></td>
+        <td><ol><li>4文字入力時に「8文字以上」等の文字数不足を示すエラーメッセージが画面に表示され、保存リクエストが送信されないかエラーが返る [スクショ]</li><li>数字のみ8桁入力時に英数混在を要求するエラーメッセージが画面に表示され、保存されない [スクショ]</li><li>シナリオ終了時点でテストユーザーの元のパスワードでログインできる（パスワードが変わっていない）[スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">auth-210, auth-220</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">auth-006<div class="pri p-P2">P2</div></td>
+        <td class="title">一般ユーザーが管理設定URLに直接アクセスすると拒否される</td>
+        <td><ol><li>debug API（POST /admin/debug/create-user）でテスト用一般ユーザーを1名作成する</li><li>作成したユーザーのID・パスワードでログインする</li><li>URLバーを直接 /admin/admin_setting/edit/1 に書き換えてアクセスする</li></ol></td>
+        <td><ol><li>/admin/admin_setting/edit/1 アクセス後、管理設定の入力フォーム（二段階認証・会社名等の設定入力欄）が1つも描画されていない [スクショ]</li><li>権限エラーメッセージ・ダッシュボードへのリダイレクト・「DATA NOT FOUND」のいずれかが表示される [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">auth-180</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">auth-007<div class="pri p-P2">P2</div></td>
+        <td class="title">ログインセッションCookieにHttpOnly/Secure/SameSite属性が付与されている</td>
+        <td><ol><li>マスターadminでログインする</li><li>ブラウザコンテキストからセッションCookieの一覧を取得して属性値を確認する</li></ol></td>
+        <td><ol><li>セッションCookieが1件以上存在し、セッションIDを格納するCookieが特定できる [スクショ]</li><li>該当Cookieの httpOnly フラグが true である [スクショ]</li><li>該当Cookieの secure フラグが true である [スクショ]</li><li>該当Cookieの sameSite が "None" / "Lax" / "Strict" のいずれかに設定されている [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">auth-270</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">auth-008<div class="pri p-P2">P2</div></td>
+        <td class="title">テナントAのCookieではテナントBのAPI・画面にアクセスできない（マルチテナント分離）</td>
+        <td><ol><li>テナントAでマスターadminとしてログインし、Playwright の context.cookies() でセッションCookieを取得する</li><li>テナントBのドメインに対してテナントAのCookieと X-Requested-With XMLHttpRequest ヘッダを付けてAPIエンドポイント（例：/api/admin/user）にリクエストを送る</li><li>テナントAのCookieをセットした状態でテナントBのダッシュボードURL（/admin/dashboard）にアクセスする</li></ol></td>
+        <td><ol><li>テナントBへのAPIレスポンスにテナントBのユーザーデータ（メールアドレス等を含むJSON）が一切含まれない。401/403/400 や SPAシェルHTML・ログインリダイレクトは「拒否」として合格 [スクショ]</li><li>テナントBのダッシュボードに入れず、最終的に /admin/login を含むURLに遷移する（ログイン画面にリダイレクトされる）[スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">auth-260</td>
+        <td class="flags"></td>
+      </tr><tr class="area"><td colspan="7">▼ レコード操作（12件）</td></tr><tr>
+        <td class="id">rec-001<div class="pri p-P1">P1</div></td>
+        <td class="title">レコードを新規作成して保存すると、一覧と詳細画面に入力値が表示される</td>
+        <td><ol><li>作成した軽量テーブルの一覧画面を開く</li><li>一覧画面の「＋」または「新規作成」ボタンから新規作成画面を開く</li><li>テキスト欄にこのシナリオ固有の文字列（例："rec001-作成テスト-{タイムスタンプ}"）を入力して登録ボタンを押す</li></ol></td>
+        <td><ol><li>登録後に詳細画面または一覧画面に遷移し、このシナリオで入力した固有文字列がそのまま表示されている [スクショ]</li><li>一覧画面にこのシナリオで作成したレコードの行が表示されており、固有文字列を含む列が確認できる [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">SAVE-01, RC07, unc-1080</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-002<div class="pri p-P1">P1</div></td>
+        <td class="title">レコードのテキスト・数値フィールドを同時編集して保存すると、両方の値が詳細画面に永続化される</td>
+        <td><ol><li>このシナリオで作成したレコードの編集画面を開く</li><li>テキスト欄にこのシナリオ固有の文字列（例："rec002-更新テスト-{タイムスタンプ}"）を入力する</li><li>数値欄にこのシナリオ固有の数値（例：5432）を入力して更新ボタンを押す</li><li>詳細画面をリロードして表示を確認する</li></ol></td>
+        <td><ol><li>詳細画面のテキスト項目にこのシナリオで入力した固有文字列が表示されている [スクショ]</li><li>詳細画面の数値項目にこのシナリオで入力した固有数値（5432）が表示されている [スクショ]</li><li>片方のフィールドのみ変更され、もう片方が元の値のまま消えていないこと（race condition 未発生）[スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">SAVE-01, SAVE-03, SAVE-04, unc-150</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-003<div class="pri p-P1">P1</div></td>
+        <td class="title">レコードを個別削除すると確認ダイアログ後に一覧から消える</td>
+        <td><ol><li>固有文字列を持つレコードを1件作成し、一覧画面でそのレコードが表示されていることを確認する</li><li>そのレコードの削除操作（削除ボタン・アクションメニューの削除など）を実行する</li><li>確認ダイアログで削除を承認する</li><li>一覧画面をリロードして表示を確認する</li></ol></td>
+        <td><ol><li>削除前の一覧にこのシナリオで作成したレコードの固有文字列を含む行が表示されている [スクショ]</li><li>削除後にリロードした一覧から、そのレコードの固有文字列を含む行が消えている [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">rec-080, rec-210</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-004<div class="pri p-P1">P1</div></td>
+        <td class="title">簡易検索で一覧を絞り込むと、検索語に一致するレコードだけが表示される</td>
+        <td><ol><li>レコードAとレコードBを作成した軽量テーブルの一覧画面を開く</li><li>一覧画面の簡易検索バーにレコードAの固有文字列（"SearchTarget"を含む部分）を入力して検索を実行する</li><li>検索をクリア（リセット）する</li></ol></td>
+        <td><ol><li>検索前の一覧にレコードAとレコードBの両方の行が表示されている [スクショ]</li><li>検索後の一覧にレコードAの固有文字列を含む行が表示されている [スクショ]</li><li>検索後の一覧にレコードBの固有文字列を含む行が表示されていない [スクショ]</li><li>検索クリア後の一覧にレコードAとレコードBの両方が再び表示されている [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">unc-110, rec-070</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-005<div class="pri p-P1">P1</div></td>
+        <td class="title">レコードのコピーで元の値が事前入力された新規フォームが開き、登録すると複製が一覧に増える</td>
+        <td><ol><li>固有文字列を持つレコードを1件作成した一覧画面を開く</li><li>そのレコードのコピーボタン（アクションメニュー内「コピー」等）を押す</li><li>開いた新規作成フォーム（元の値が事前入力済み）で登録ボタンを押す</li></ol></td>
+        <td><ol><li>コピーボタン押下後、元レコードの固有文字列が事前入力された新規作成フォームが表示される [スクショ]</li><li>登録後、一覧にこのシナリオで作成した固有文字列を含む行が2行以上表示されている（反映されるまで一覧を再読み込みして待つ）[スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">rec-160, unc-630</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-006<div class="pri p-P2">P2</div></td>
+        <td class="title">チェックボックスで選択したレコードだけが一括削除され、処理後に選択状態が解除される</td>
+        <td><ol><li>作成した3件以上のレコードが表示されている一覧画面を開く</li><li>1件目（削除対象）のチェックボックスにチェックを入れる</li><li>表示された「一括削除」ボタンを押して確認モーダルで削除を実行する</li><li>一覧画面をリロードして表示を確認する</li></ol></td>
+        <td><ol><li>チェックを入れると「一括削除」ボタンが表示される [スクショ]</li><li>削除実行後の一覧に、チェックしたレコードの固有文字列（"rec006-削除対象-"を含む）の行が消えている [スクショ]</li><li>削除実行後の一覧に、チェックしなかった残存レコード（"rec006-残存A-"・"rec006-残存B-"を含む）の行が残っている [スクショ]</li><li>削除処理完了後に全選択チェックボックスのチェックが外れている（選択状態が解除されている）[スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">rec-020, rec-150, 280-1, 280-2</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-007<div class="pri p-P2">P2</div></td>
+        <td class="title">全選択して一括削除を開くとモーダルに対象件数と全データ削除の赤文字警告が表示される（実行はしない）</td>
+        <td><ol><li>作成した3件のレコードが表示されている一覧画面を開く</li><li>一覧ヘッダーの全選択チェックボックスにチェックを入れる</li><li>「一括削除」ボタンを押してモーダルを開き、内容を確認してキャンセルで閉じる</li><li>「一括編集」ボタンを押してモーダルを開き、内容を確認してキャンセルで閉じる</li></ol></td>
+        <td><ol><li>一括削除モーダルに数字「3」（このシナリオで作成した件数）を含む対象件数の表示がある [スクショ]</li><li>一括削除モーダルに赤文字で「全データが削除されます」相当の注意書きが表示されている [スクショ]</li><li>一括編集モーダルに「全データが更新されます」相当の対象範囲の表示がある [スクショ]</li><li>両モーダルをキャンセルした後、このシナリオで作成した3件のレコードが一覧にすべて残っている [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">rec-170, rec-180</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-008<div class="pri p-P2">P2</div></td>
+        <td class="title">フィルタ適用中に全選択一括削除すると、フィルタ該当レコードだけが削除され件数表示も一致する</td>
+        <td><ol><li>グループA（数値=100）3件とグループB（数値=200）2件が表示されている一覧画面を開く</li><li>グループAだけに一致するフィルタ（数値フィールド = 100）を適用する</li><li>全選択チェックボックスにチェックを入れ、「一括削除」モーダルを開いて件数を確認してから削除を実行する</li><li>フィルタを解除して一覧を確認する</li></ol></td>
+        <td><ol><li>フィルタ適用後の一覧にグループAの3件のみが表示されている [スクショ]</li><li>一括削除確認モーダルの件数表示が「3」と一致している [スクショ]</li><li>削除処理が「処理待ち」のまま停止せず完了し、完了メッセージまたは一覧への遷移が確認できる [スクショ]</li><li>フィルタ解除後、グループAの行が一覧から消えるまで再読み込みしながら待ち（最大60秒）、グループBの2件のみが残っている [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">rec-190, rec-220, rec-060, unc-910</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-009<div class="pri p-P2">P2</div></td>
+        <td class="title">一括編集でフィールド値を更新すると、選択した全レコードに新しい値が反映される</td>
+        <td><ol><li>作成した3件のレコードが表示されている一覧画面を開く</li><li>全選択チェックボックスにチェックを入れ、メニューから「一括編集」を開く</li><li>一括編集モーダルで「項目を追加」からテキストフィールドを選択し、固有文字列（例："rec009-一括更新-{タイムスタンプ}"）を入力して保存する</li><li>一覧画面で3件の表示を確認する</li></ol></td>
+        <td><ol><li>一括編集モーダルにタイトル「一括編集」と「項目を追加」ボタンが表示されている [スクショ]</li><li>一括編集モーダルに「編集中でロックされているデータは更新されません」相当の注意書きが表示されている [スクショ]</li><li>保存後の一覧で、このシナリオで作成した3件全てのテキスト項目にこのシナリオで入力した固有文字列が表示されている [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">rec-030, rec-060</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-010<div class="pri p-P2">P2</div></td>
+        <td class="title">レコードの編集開始でロックされ、キャンセル・保存のいずれでもロックが解除される</td>
+        <td><ol><li>作成したレコードの詳細画面を開く</li><li>「編集」ボタンを押して編集モードに入る</li><li>「キャンセル」ボタンを押して詳細表示に戻る</li><li>再度「編集」ボタンを押して編集モードに入る</li><li>テキストフィールドの値を変更（例："rec010-保存後-{タイムスタンプ}"）して保存ボタンを押す</li></ol></td>
+        <td><ol><li>「編集」ボタン押下後、URLが編集用パスになるか画面に保存・キャンセルボタンが表示される（編集モード）[スクショ]</li><li>キャンセル後に「編集」ボタンが再表示されている（ロック解除を示す）[スクショ]</li><li>保存後に「編集」ボタンが再表示されており（ロック解除）、詳細画面に変更後の固有文字列が表示されている [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">LOCK-01, LOCK-02, LOCK-03, rec-030</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-011<div class="pri p-P2">P2</div></td>
+        <td class="title">複数値フィールド（複数選択等）を持つレコードで他フィールドだけ編集保存しても複数値が消えない</td>
+        <td><ol><li>複数選択フィールドに2つ以上の値を設定したレコードの編集画面を開く</li><li>複数選択フィールドには一切触れず、テキストフィールドの値だけを変更（例："rec011-テキスト変更-{タイムスタンプ}"）して保存する</li><li>詳細画面で複数選択フィールドの表示を確認する</li></ol></td>
+        <td><ol><li>保存後の詳細画面でテキストフィールドにこのシナリオで変更した固有文字列が表示されている [スクショ]</li><li>保存後の詳細画面で複数選択フィールドに、作成時に設定した2つの選択肢（選択肢A・選択肢B）が変更前と同一の状態で表示されており、いずれも消えていない（データ消失バグ未発生）[スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">rec-200</td>
+        <td class="flags"></td>
+      </tr><tr>
+        <td class="id">rec-012<div class="pri p-P1">P1</div></td>
+        <td class="title">一覧のカラムヘッダクリックで昇順・降順ソートできる</td>
+        <td><ol><li>一覧画面を開き、投入した3件のレコード（数値 10・2・35）が全て表示されるまで待ってから次に進む（反映ラグによる非決定的failの防止）</li><li>数値カラムのヘッダをクリックして昇順ソートを適用する</li><li>もう一度同じヘッダをクリックして降順ソートを適用する</li></ol></td>
+        <td><ol><li>昇順クリック後、一覧の数値カラムがこのシナリオで投入したレコードの中で上から 2 / 10 / 35 の順に並んでいる [スクショ]</li><li>降順クリック後、上から 35 / 10 / 2 の順に並んでいる [スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">新規起案 2026-06-11</td>
+        <td class="flags"></td>
+      </tr><tr class="area"><td colspan="7">▼ ワークフロー（1件）</td></tr><tr>
+        <td class="id">wf-001<div class="pri p-P1">P1</div></td>
+        <td class="title">承認ワークフローで申請者が申請し承認者が承認するとレコードが承認済みになる</td>
+        <td><ol><li>申請者Aでログインし、wf-001-テーブルにレコードを1件作成して詳細画面から「申請」を実行する</li><li>申請者Aの画面でレコード詳細（/view/{id}）のワークフロー履歴を確認する（承認待ち）</li><li>ログアウトし、承認者B（Aとは別メールアドレスのアカウント）でログインして当該レコード詳細を開く</li><li>詳細画面の「承認」ボタンでモーダルを開き、モーダル内の確定「承認」ボタン（.modal-footer の ladda ボタン）を押して承認を確定する</li><li>承認後のワークフロー履歴を確認する（承認済み・承認者はB）</li></ol></td>
+        <td><ol><li>申請者Aが申請した直後、レコード詳細（/view/{id}）のワークフロー履歴に「申請」行があり、その実行者が申請者Aのメールアドレスで、状態が「申請」、次行に承認者Bのメールアドレスと「承認待ち」が表示される [スクショ]</li><li>承認者Bでログイン後、当該レコード詳細に「承認」ボタンが表示され押せる（ログイン中ユーザーのメールがB＝Aとは異なる）[スクショ]</li><li>🔴 モーダル確定後、ワークフロー履歴の「承認」行の承認者が B のメールアドレス（申請者Aのメールとは異なる別人）で表示され、レコード状態が「承認済み（done）」になっている。トースト「承認しました」または「承認」ボタン消失で確定を確認（反映まで再読み込みして待つ）[スクショ]</li></ol></td>
+        <td class="prof"><span class="mut">（準備プロファイル未設定＝移行対象）</span></td>
+        <td class="src">pigeon_cloud#3696, pigeon_cloud#3694</td>
+        <td class="flags"></td>
+      </tr></tbody>
+</table>
+<p class="legend">観点=何を確認するか / やり方=ブラウザ操作手順 / 確認観点=期待結果（マニュアル根拠）。準備プロファイル: fixture(使うﾌｨｸｽﾁｬ)/setup(mcp|debug|ui)/action(ui)/verify。source にヘルプ記事ID・PR番号。</p>
+</div></body></html>
